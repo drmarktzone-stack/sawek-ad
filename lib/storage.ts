@@ -51,16 +51,24 @@ export function savePackLang(locale: Locale) {
   if (canUse()) localStorage.setItem(K.packLang, locale);
 }
 
+export type WizardPhase = "wizard" | "interview" | "agents";
+
 export interface DraftState {
   intake: Intake;
   step: 1 | 2 | 3 | 4;
+  phase?: WizardPhase;
+  packId?: string;
 }
 
 export function loadDraft(): DraftState {
-  const d = read<DraftState>(K.draft, { intake: emptyIntake(), step: 1 });
+  const d = read<DraftState>(K.draft, { intake: emptyIntake(), step: 1, phase: "wizard" });
+  const phase: WizardPhase =
+    d.phase === "interview" || d.phase === "agents" ? d.phase : "wizard";
   return {
-    step: d.step || 1,
+    step: d.step === 2 || d.step === 3 || d.step === 4 ? d.step : 1,
     intake: { ...emptyIntake(), ...d.intake },
+    phase,
+    packId: typeof d.packId === "string" ? d.packId : undefined,
   };
 }
 
@@ -88,6 +96,10 @@ export function upsertCampaign(pack: CampaignPack): CampaignPack[] {
   else list.unshift(next);
   saveCampaigns(list);
   return list;
+}
+
+export function getCampaign(id: string): CampaignPack | undefined {
+  return loadCampaigns().find((c) => c.id === id);
 }
 
 export function deleteCampaign(id: string): CampaignPack[] {

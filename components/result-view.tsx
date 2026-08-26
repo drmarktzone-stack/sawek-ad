@@ -88,7 +88,7 @@ export function ResultView({
   }
 
   function edit() {
-    saveDraft({ intake: pack.intake, step: 4 });
+    saveDraft({ intake: pack.intake, step: 4, phase: "wizard", packId: pack.id });
     router.push(withLang("/", locale));
   }
 

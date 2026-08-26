@@ -8,7 +8,7 @@ import { demoIntake, DEMO_LABEL, consumePendingDemo, clearPendingDemo, applyPedi
 import { installDemoPack } from "@/lib/active-pack";
 import { cmoFieldsMissing, emptyIntake, wizardReady } from "@/lib/engine/validate";
 import { assemblePack, idleStatus, runIntakeAndDiagnosis, runMedia, runOptimizerStage, runStrategic } from "@/lib/engine/run";
-import { loadDraft, saveDraft, upsertCampaign } from "@/lib/storage";
+import { loadDraft, saveDraft, upsertCampaign, getCampaign } from "@/lib/storage";
 import { uid } from "@/lib/utils";
 import { MAX_COMPETITORS } from "@/lib/factory-formats";
 import { AREA_LABEL } from "@/lib/i18n";
@@ -80,7 +80,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
       const d = demoIntake(locale);
       clearPendingDemo();
       clearEmptyCampaign();
-      saveDraft({ intake: d, step: 2 });
+      saveDraft({ intake: d, step: 2, phase: "wizard" });
       setIntake(d);
       setStep(2);
       setCustom({
@@ -99,7 +99,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
         (emptyWanted && isPediatricDemo(d.intake));
       if (skipDemo) {
         const blank = emptyIntake();
-        saveDraft({ intake: blank, step: 1 });
+        saveDraft({ intake: blank, step: 1, phase: "wizard" });
         setIntake(blank);
         setStep(1);
         setCustom({ audience: false, problem: false, advantage: false, goal: false, offer: false });
@@ -115,6 +115,19 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
           goal: intake.goalCustom,
           offer: intake.offerCustom,
         });
+        const resume = d.phase === "agents" || d.phase === "interview" ? d.phase : "wizard";
+        if (resume === "agents" && d.packId) {
+          const existing = getCampaign(d.packId);
+          if (existing) {
+            setPack(existing);
+            setAgentStatus(existing.agentStatus);
+            setPhase("agents");
+          } else {
+            setPhase("wizard");
+          }
+        } else {
+          setPhase(resume);
+        }
       }
     }
     setHydrated(true);
@@ -129,11 +142,11 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
 
   useEffect(() => {
     if (!hydrated) return;
-    saveDraft({ intake, step });
+    saveDraft({ intake, step, phase, packId: pack?.id });
     if (intake.businessName.trim() && !isPediatricDemo(intake)) {
       clearEmptyCampaign();
     }
-  }, [intake, step, hydrated]);
+  }, [intake, step, phase, pack?.id, hydrated]);
 
   useEffect(() => {
     if (!hydrated) return;
@@ -141,6 +154,11 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
       setIntake((prev) => relocalizePediatricIntake(prev, locale));
     }
   }, [locale, hydrated]);
+
+  useEffect(() => {
+    if (phase !== "agents" && phase !== "interview") return;
+    document.getElementById("studio")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [phase]);
 
   const patch = (p: Partial<Intake>) => setIntake((s) => ({ ...s, ...p }));
 
@@ -303,6 +321,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
       setPack(saved);
       setAgentStatus(saved.agentStatus);
       setRunning(false);
+      saveDraft({ intake, step: 4, phase: "wizard", packId: saved.id });
       router.push(withLang(`/campaigns/${saved.id}`, locale));
       return;
     }
