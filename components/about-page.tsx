@@ -43,6 +43,10 @@ export function AboutPage() {
             p: "דיסקברי, אסטרטגיה, קריאייטיב, מדיה, לידים ומבצעים, אופס — מחלקות שהחמישה מייצרים. לא מחליפים אותם בחוקר/קופירייטר/מעצב. מדיה היא PLAN בלבד. לקוח הדגמה ממלא כל שולחן בלחיצה.",
           },
           {
+            h: "דלפק רפואי",
+            p: "מנוע אפס-הזיות: סימוני [יש להשלים], באנר אתיקה, פרופיל מרפאה, אשף התמחות, דפי נחיתה ציבוריים, לידים ותורים. OptiBrain דטרמיניסטי מקלטים. המקור ב-Lovable לא נגענו. פלטות קליניות רק בתבניות נחיתה.",
+          },
+          {
             h: "בלי APIs חיים",
             p: "תוכניות מטא / גוגל / טיקטוק / יוטיוב הן בלופרינט לקנייה ידנית. אין כרטיס אשראי, אין Lovable, אין מפתחות חובה.",
           },
@@ -67,6 +71,10 @@ export function AboutPage() {
               p: "الاستكشاف والاستراتيجية والإبداع والميديا والعملاء والعروض والتشغيل أقسام يُنتجها الوكلاء الخمسة. لا نستبدلهم بباحث/كاتب/مصمم. الميديا خطة فقط. عميل العرض يملأ كل مكتب بنقرة.",
             },
             {
+              h: "مكتب طبي",
+              p: "محرك صفر هلوسة: وسوم [يجب إكمال] وشريط أخلاقي وملف عيادة ومعالج تخصص وصفحات هبوط عامة. لم نلمس أصل Lovable. اللوحات السريرية على قوالب الهبوط فقط.",
+            },
+            {
               h: "بلا واجهات حية",
               p: "خطط ميتا/غوغل/تيك توك/يوتيوب للشراء اليدوي فقط. بلا بطاقة ولا مفاتيح إلزامية.",
             },
@@ -88,6 +96,10 @@ export function AboutPage() {
             {
               h: "Holding company, five agents",
               p: "Discovery, Strategy, Creative, Media, Leads & promo, and Ops are departments — outputs the same five agents produce. Never swapped for researcher/copywriter/designer. Media is PLAN only. Demo client one-click fills every desk.",
+            },
+            {
+              h: "Medical desk",
+              p: "Zero-hallucination engine: [TO COMPLETE] markers, ethics banner, clinic profile, specialty wizard, public landings, leads and appointments. OptiBrain is deterministic from your inputs. The Lovable original is untouched. Clinical palettes exist only inside landing templates.",
             },
             {
               h: "No live ad APIs",

@@ -12,6 +12,7 @@ import {
   Pencil,
   Search,
   SlidersHorizontal,
+  Stethoscope,
   Users,
   WandSparkles,
   X,
@@ -27,6 +28,7 @@ const NAV = [
   { href: "/studio", key: "nav.creative" as const, icon: Pencil },
   { href: "/media", key: "nav.media" as const, icon: Megaphone },
   { href: "/leads", key: "nav.leads" as const, icon: Users },
+  { href: "/medical", key: "nav.medical" as const, icon: Stethoscope },
   { href: "/campaigns", key: "nav.ops" as const, icon: Folder },
   { href: "/self", key: "nav.self" as const, icon: SlidersHorizontal },
   { href: "/about", key: "nav.about" as const, icon: HelpCircle },
@@ -64,6 +66,8 @@ export function Header() {
   const { t } = useI18n();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+
+  if (pathname.startsWith("/lp/")) return null;
 
   return (
     <header className="sticky top-0 z-40 border-b border-white/10 bg-black/80 backdrop-blur-md">
@@ -145,6 +149,8 @@ export function Header() {
 
 export function Footer() {
   const { t } = useI18n();
+  const pathname = usePathname();
+  if (pathname.startsWith("/lp/")) return null;
   return (
     <footer className="mt-auto border-t border-white/10 py-8 text-center text-xs text-zinc-500">
       {t("footer.line")}

@@ -4,7 +4,17 @@
 
 Inside: **OmniAd engine** (4-step RTL wizard, 6 ad variants, design studio, truth layer) and **AdBrain agents** (five-agent HITL pipeline). This is a **third app**. It does **not** replace or rename the original OmniAd or AdBrain products.
 
-The five agents stay the only agents. They produce **departments** of a marketing holding company: Discovery, Strategy, Creative, Media, Leads & promo, Ops — each with structured HE / AR / EN artifacts. Media is **PLAN only** (never live-publish to Meta/Google/TikTok/YouTube).
+The five agents stay the only agents. They produce **departments** of a marketing holding company: Discovery, Strategy, Creative, Media, Leads & promo, Ops — plus a **Medical desk** ported from MedCampaign AI / OptiBrain (Lovable original untouched). Media is **PLAN only**.
+
+## Demo — medical (pediatric, no keys)
+
+1. Open **רפואה** (`/medical`).
+2. Click **הדגמה: מרפאת ילדים**.
+3. Generate if needed. Empty price/tech/success rate become `[יש להשלים]` / `[يجب إكمال]` / `[TO COMPLETE]`. Ethics banner stays on copy and on `/lp/:slug`.
+4. Open the public landing, submit a demo lead, use WhatsApp script (wa.me plan).
+5. OptiBrain, credibility, appointments stay on the medical sub-nav.
+
+General 5-agent OmniAd flow is unchanged on `/`.
 
 Hebrew, Arabic, and English are equal first-class languages. Visual identity is dark **black + red + neon yellow**.
 
@@ -51,6 +61,12 @@ Copy `.env.example` if you want those. The app runs the same without them (local
 | Leads & promo (magnet, CRM, cadence) | `/leads` |
 | Ops (library, bible PDF, score, HITL gates) | `/campaigns` |
 | Result pack | `/campaigns/[id]` |
+| Medical desk (clinic, specialty, campaign, ethics) | `/medical` |
+| Public landing | `/lp/[slug]` |
+| Medical leads CRM | `/medical/leads` |
+| Appointments | `/medical/appointments` |
+| Claim credibility | `/medical/credibility` |
+| OptiBrain engines | `/medical/optibrain` |
 | What is Ilan | `/about` |
 | Self-marketing | `/self` |
 
@@ -60,4 +76,4 @@ No live ad-network APIs. No credit card. No invented lead gauges. KPI numbers ap
 
 Next.js (App Router) · TypeScript · Tailwind CSS · shadcn-style primitives
 
-Repo: this Origin project only. Originals (OmniAd Base44, AdBrain GitHub/Origin) are untouched.
+Repo: this Origin project only. Originals (OmniAd Base44, AdBrain GitHub/Origin, MedCampaign/OptiBrain Lovable) are untouched.

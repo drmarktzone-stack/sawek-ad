@@ -23,12 +23,12 @@ export async function POST(req: Request) {
       },
       body: JSON.stringify({
         model: "gpt-4o-mini",
-        temperature: 0.4,
+        temperature: body?.medical ? 0.2 : 0.4,
         messages: [
           {
             role: "system",
             content:
-              "You write advertising copy from provided facts only. Never invent numbers, testimonials, ratings, competitors, or discounts. If a field is missing, say it is missing. Reply in the requested language.",
+              "You write advertising copy from provided facts only. Never invent numbers, testimonials, ratings, competitors, discounts, prices, success rates, technology names, or medical facts. If a field is missing, mark it [TO COMPLETE: field] / [יש להשלים: …] / [يجب إكمال: …]. Reply in the requested language. For medical content, temperature is 0.2 — no clinical decoration.",
           },
           { role: "user", content: prompt },
         ],

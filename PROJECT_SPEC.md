@@ -4,7 +4,7 @@ Locked product name: **Ilan** (Hebrew **אילן** = tree; Arabic **إعلان**
 
 User-facing brand is **Ilan**, never OmniAd Studio. Internal engines stay credited as **OmniAd engine** and **AdBrain agents**.
 
-This repository is a **third app**: the union of OmniAd (Base44 app `6a7712d0685a826e3eab0819`) and AdBrain (GitHub `drmarktzone-stack/adbrain-ai`, Origin `tmp-90dd9f664feed126`). It must **not** modify, overwrite, or replace either original. Do not rename those GitHub/Origin products.
+This repository is a **third app**: the union of OmniAd (Base44 app `6a7712d0685a826e3eab0819`) and AdBrain (GitHub `drmarktzone-stack/adbrain-ai`, Origin `tmp-90dd9f664feed126`), plus a port of MedCampaign AI / OptiBrain (Lovable `1b75b82e-6b26-401e-aa7a-1ce137d0dfa8`) as an Ilan **Medical desk**. It must **not** modify, overwrite, or replace any of those originals.
 
 No paid SaaS, no credit card, no live Meta/Google/TikTok APIs, no Lovable.
 
@@ -31,6 +31,12 @@ No paid SaaS, no credit card, no live Meta/Google/TikTok APIs, no Lovable.
 | `/leads` | לידים ומבצעים | Magnet, form, CRM, booking CTA, promo codes, retargeting, cadence; self-marketing stays |
 | `/campaigns` | אופס | Campaign library, bible PDF, completeness score, KPI from user numbers, HITL gates |
 | `/campaigns/[id]` | — | Full result pack |
+| `/medical` | רפואה | Medical desk: clinic profile, specialty wizard, campaign + ethics banner |
+| `/medical/leads` | לידים רפואיים | CRM new/in-progress/closed, WhatsApp script, convert to appointment |
+| `/medical/appointments` | תורים | Hours, slot length, reminder as wa.me PLAN |
+| `/medical/credibility` | אמינות | Claims tagged doctor-fact / cited-source / marketing-copy |
+| `/medical/optibrain` | OptiBrain | Audit, buyer sim, fatigue, hijack framework, offer, ROAS from inputs, radar board |
+| `/lp/[slug]` | — | Public landing (clinical template palettes). Demo lead form in localStorage |
 | `/about` | מה זה אילן | Product explainer |
 | `/self` | ניהול שיווק עצמי | Self-marketing workspace |
 
