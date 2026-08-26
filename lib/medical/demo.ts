@@ -2,20 +2,20 @@ import { uid } from "../utils";
 import { DEFAULT_HOURS, type ClinicProfile, type OptiInputs, type Treatment } from "./types";
 import { generateMedicalCampaign } from "./generate";
 
-export const PEDS_DEMO_ID = "demo-peds-khalil";
+export const PEDS_DEMO_ID = "demo-samer-peds";
 
 export function demoPediatricClinic(): ClinicProfile {
   return {
     id: PEDS_DEMO_ID,
-    name: "מרפאת ילדים ד״ר לין ח׳ליל",
-    doctorName: "ד״ר לין ח׳ליל",
+    name: "מרפאת ילדים ד״ר סאמר אבו מוך",
+    doctorName: "ד״ר סאמר אבו מוך",
     specialty: "peds",
-    whatsapp: "972500000000",
-    address: "רחוב הגליל 12",
-    city: "נצרת",
+    whatsapp: "972528885800",
+    address: "מתחם אל-נור, קומה 1, ליד הכיכר המרכזית",
+    city: "באקה אל-גרביה",
     disclaimer:
-      "המידע באתר הוא כללי ואינו מחליף ייעוץ, אבחון או טיפול רפואי. במצב חירום פנו לחדר מיון. החיסונים ניתנים לפי הנחיות משרד הבריאות שתאושרנה בביקור — לא מפורטות כאן רשימות חיסון שלא הוזנו.",
-    hours: DEFAULT_HOURS.map((h) => ({ ...h })),
+      "המידע באתר הוא כללי ואינו מחליף ייעוץ, אבחון או טיפול רפואי. במצב חירום פנו לחדר מיון. שעות הקבלה ומחירים שלא הוזנו נשארים [יש להשלים] — אילן לא ממציא אותם. שפות: עברית, ערבית, אנגלית.",
+    hours: DEFAULT_HOURS.map((h) => ({ ...h, open: "", close: "", closed: true })),
     slotMinutes: 20,
   };
 }
@@ -24,9 +24,9 @@ export function demoPediatricTreatment(): Treatment {
   return {
     id: uid("tx"),
     serviceId: "growth",
-    name: "מעקב גדילה והתפתחות",
-    indication: "ביקורת שגרתית לילדים במעקב המרפאה — לא טיפול במחלה חדה אלא אם הרופאה תחליט בביקור.",
-    duration: "20 דקות",
+    name: "מעקב ילדים שגרתי",
+    indication: "ביקורת שגרתית לפי שיקול דעת הרופא בביקור — לא פירוט חיסונים או מחלות שלא הוזנו.",
+    duration: "",
     price: "",
     cost: "",
     technology: "",
@@ -40,14 +40,14 @@ export function demoPediatricTreatment(): Treatment {
 
 export function demoPediatricOpti(): OptiInputs {
   return {
-    monthlySpend: "2500",
+    monthlySpend: "",
     revenue: "",
-    noShowPercent: "18",
-    oldMethod: "פוסטים בפייסבוק עם «ייעוץ חינם לילדים» שמשכו סקרנים בלי תור.",
-    bottleneck: "הורים שואלים בוואטסאפ בלי להשאיר שם הילד / גיל.",
+    noShowPercent: "",
+    oldMethod: "",
+    bottleneck: "",
     competitorName: "",
     competitorNote: "",
-    localEvent: "פתיחת שנת לימודים — רק אם המרפאה מאשרת שזה רלוונטי אצלה, לא אירוע מדומה.",
+    localEvent: "",
   };
 }
 
@@ -55,7 +55,7 @@ export function buildPediatricDemoCampaign() {
   const clinic = demoPediatricClinic();
   const treatment = demoPediatricTreatment();
   const campaign = generateMedicalCampaign(clinic, treatment, "clinical-trust");
-  campaign.id = "demo-peds-campaign";
-  campaign.slug = "lin-khalil-peds";
+  campaign.id = "demo-samer-peds-campaign";
+  campaign.slug = "samer-abu-mokh-peds";
   return { clinic, campaign };
 }

@@ -11,8 +11,7 @@ import { ConquerHeadline } from "@/components/stepper";
 import { DepartmentRail } from "@/components/department-shell";
 import { MedicalNav } from "@/components/medical/medical-nav";
 import { EthicsBanner } from "@/components/medical/ethics-banner";
-import { buildPediatricDemoCampaign } from "@/lib/medical/demo";
-import { saveClinic, upsertMedCampaign } from "@/lib/medical/storage";
+import { startPediatricDemoFlow } from "@/lib/start-pediatric-demo";
 
 export function MedicalAppointments() {
   const { locale, t } = useI18n();
@@ -26,9 +25,7 @@ export function MedicalAppointments() {
   }
 
   function loadDemo() {
-    const { clinic, campaign } = buildPediatricDemoCampaign();
-    saveClinic(clinic);
-    upsertMedCampaign(campaign);
+    startPediatricDemoFlow();
   }
 
   const clinic = client ? loadClinic() : null;

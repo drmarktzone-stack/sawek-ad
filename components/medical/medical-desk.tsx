@@ -16,7 +16,7 @@ import { SPECIALTIES, SERVICE_LIBRARY, specialtyLabel } from "@/lib/medical/spec
 import { LANDING_SKINS, defaultTemplateFor } from "@/lib/medical/skins";
 import { DEFAULT_HOURS, EMPTY_TREATMENT, type ClinicProfile, type LandingTemplateId, type MedicalCampaign, type MedicalSpecialty, type Treatment } from "@/lib/medical/types";
 import { generateMedicalCampaign, blockFor, waLink, exportMedicalPack } from "@/lib/medical/generate";
-import { buildPediatricDemoCampaign } from "@/lib/medical/demo";
+import { startPediatricDemoFlow } from "@/lib/start-pediatric-demo";
 import {
   loadClinic,
   saveClinic,
@@ -53,15 +53,7 @@ export function MedicalDesk() {
   }
 
   function loadDemo() {
-    const { clinic: c, campaign } = buildPediatricDemoCampaign();
-    saveClinic(c);
-    upsertMedCampaign(campaign);
-    setClinic(c);
-    setTreatment(campaign.treatment);
-    setTemplate(campaign.template);
-    setCampaigns(loadMedCampaigns());
-    setPreview(campaign);
-    setStep(3);
+    startPediatricDemoFlow();
   }
 
   function pickSpecialty(id: MedicalSpecialty) {
@@ -131,7 +123,7 @@ export function MedicalDesk() {
       <MedicalNav />
 
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <Button type="button" onClick={loadDemo}>
+        <Button type="button" className="relative z-20" onClick={loadDemo}>
           {t("med.demo")}
         </Button>
         <div className="flex gap-2 text-xs font-semibold text-zinc-400">

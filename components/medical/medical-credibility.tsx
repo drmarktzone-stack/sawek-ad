@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import type { ClaimKind, MedicalCampaign } from "@/lib/medical/types";
-import { loadMedCampaigns, upsertMedCampaign, saveClinic } from "@/lib/medical/storage";
-import { buildPediatricDemoCampaign } from "@/lib/medical/demo";
+import { loadMedCampaigns, upsertMedCampaign } from "@/lib/medical/storage";
+import { startPediatricDemoFlow } from "@/lib/start-pediatric-demo";
 import { useI18n } from "@/components/i18n-provider";
 import { useIsClient } from "@/lib/use-is-client";
 import { Button } from "@/components/ui/button";
@@ -26,10 +26,7 @@ export function MedicalCredibility() {
   }
 
   function loadDemo() {
-    const { clinic, campaign } = buildPediatricDemoCampaign();
-    saveClinic(clinic);
-    upsertMedCampaign(campaign);
-    setList(loadMedCampaigns());
+    startPediatricDemoFlow();
   }
 
   const camp = list[0];

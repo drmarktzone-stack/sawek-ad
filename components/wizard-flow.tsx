@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Trash2, WandSparkles } from "lucide-react";
 import type { AgentId, AgentStatus, CampaignPack, Competitor, Intake, WizardStep } from "@/lib/types";
@@ -13,7 +13,7 @@ import {
   PROBLEM_CHIPS,
   TYPE_OPTIONS,
 } from "@/lib/chips";
-import { demoIntake, DEMO_LABEL } from "@/lib/demo";
+import { demoIntake, DEMO_LABEL, consumePendingDemo, clearPendingDemo, applyPediatricDemoDraft } from "@/lib/demo";
 import { cmoFieldsMissing, emptyIntake, wizardReady } from "@/lib/engine/validate";
 import { assemblePack, idleStatus, runIntakeAndDiagnosis, runMedia, runOptimizerStage, runStrategic } from "@/lib/engine/run";
 import { loadDraft, saveDraft, upsertCampaign } from "@/lib/storage";
@@ -64,20 +64,45 @@ export function WizardFlow() {
     goal: false,
     offer: false,
   });
+  const demoConsumed = useRef(false);
 
   if (client && !hydrated) {
-    const d = loadDraft();
-    setIntake(d.intake);
-    setStep(d.step);
-    setCustom({
-      audience: d.intake.audienceCustom,
-      problem: d.intake.problemCustom,
-      advantage: d.intake.advantageCustom,
-      goal: d.intake.goalCustom,
-      offer: d.intake.offerCustom,
-    });
+    if (!demoConsumed.current && consumePendingDemo()) {
+      demoConsumed.current = true;
+      const d = demoIntake();
+      clearPendingDemo();
+      saveDraft({ intake: d, step: 2 });
+      setIntake(d);
+      setStep(2);
+      setCustom({
+        audience: true,
+        problem: true,
+        advantage: true,
+        goal: true,
+        offer: false,
+      });
+      setPhase("wizard");
+    } else {
+      const d = loadDraft();
+      setIntake(d.intake);
+      setStep(d.step);
+      setCustom({
+        audience: d.intake.audienceCustom,
+        problem: d.intake.problemCustom,
+        advantage: d.intake.advantageCustom,
+        goal: d.intake.goalCustom,
+        offer: d.intake.offerCustom,
+      });
+    }
     setHydrated(true);
   }
+
+  useEffect(() => {
+    if (!hydrated || !client) return;
+    if (typeof window !== "undefined" && window.location.search.includes("demo=")) {
+      router.replace("/");
+    }
+  }, [hydrated, client, router]);
 
   useEffect(() => {
     if (!hydrated) return;
@@ -99,12 +124,14 @@ export function WizardFlow() {
       [t("details.goal"), intake.mainGoal],
       [t("details.offer"), intake.offer],
       [t("biz.location"), intake.location],
+      [t("biz.website"), intake.website],
     ],
     [intake, locale, t],
   );
 
-  function loadDemo() {
-    const d = demoIntake();
+  function applyDemo() {
+    const d = applyPediatricDemoDraft();
+    clearPendingDemo();
     setIntake(d);
     setCustom({
       audience: true,
@@ -113,10 +140,14 @@ export function WizardFlow() {
       goal: true,
       offer: false,
     });
-    setStep(4);
+    setStep(2);
     setPhase("wizard");
     setPack(null);
     setAgentStatus(idleStatus());
+  }
+
+  function loadDemo() {
+    applyDemo();
   }
 
   function newCampaign() {

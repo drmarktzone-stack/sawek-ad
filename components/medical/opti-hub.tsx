@@ -39,9 +39,9 @@ import {
   voiceCampaign,
   type OptiModuleId,
 } from "@/lib/medical/opti-engines";
-import { EMPTY_DESK, demoPediatricDesk, type OptiDeskState } from "@/lib/medical/opti-state";
-import { loadClinic, loadOptiDesk, saveClinic, saveOptiDesk, upsertMedCampaign } from "@/lib/medical/storage";
-import { buildPediatricDemoCampaign } from "@/lib/medical/demo";
+import { EMPTY_DESK, type OptiDeskState } from "@/lib/medical/opti-state";
+import { loadClinic, loadOptiDesk, saveOptiDesk } from "@/lib/medical/storage";
+import { startPediatricDemoFlow } from "@/lib/start-pediatric-demo";
 import { useI18n } from "@/components/i18n-provider";
 import { useIsClient } from "@/lib/use-is-client";
 import { Button } from "@/components/ui/button";
@@ -156,12 +156,7 @@ export function OptiHub() {
   }
 
   function loadDemo() {
-    const { clinic, campaign } = buildPediatricDemoCampaign();
-    saveClinic(clinic);
-    upsertMedCampaign(campaign);
-    const next = demoPediatricDesk();
-    saveOptiDesk(next);
-    setDesk(next);
+    startPediatricDemoFlow();
   }
 
   const loc = locale as Locale;
@@ -176,7 +171,7 @@ export function OptiHub() {
       <MedicalNav />
       <EthicsBanner locale={loc} />
       <div className="mt-4 flex flex-wrap items-center gap-3">
-        <Button type="button" onClick={loadDemo}>
+        <Button type="button" className="relative z-20" onClick={loadDemo}>
           {t("med.demo")}
         </Button>
         <SelectField

@@ -13,8 +13,7 @@ import { ConquerHeadline } from "@/components/stepper";
 import { DepartmentRail } from "@/components/department-shell";
 import { MedicalNav } from "@/components/medical/medical-nav";
 import { EthicsBanner } from "@/components/medical/ethics-banner";
-import { buildPediatricDemoCampaign } from "@/lib/medical/demo";
-import { saveClinic, upsertMedCampaign } from "@/lib/medical/storage";
+import { startPediatricDemoFlow } from "@/lib/start-pediatric-demo";
 
 const FILTER_KEY = {
   all: "med.filter.all",
@@ -36,22 +35,7 @@ export function MedicalLeads() {
   }
 
   function loadDemo() {
-    const { clinic, campaign } = buildPediatricDemoCampaign();
-    saveClinic(clinic);
-    upsertMedCampaign(campaign);
-    const sample: MedicalLead = {
-      id: uid("lead"),
-      campaignId: campaign.id,
-      slug: campaign.slug,
-      name: locale === "he" ? "הורה לדוגמה" : locale === "ar" ? "ولي أمر تجريبي" : "Demo parent",
-      phone: "0501234567",
-      message: "",
-      status: "new",
-      createdAt: new Date().toISOString(),
-    };
-    const next = [sample, ...loadLeads().filter((l) => l.id !== sample.id)];
-    saveLeads(next);
-    setLeads(next);
+    startPediatricDemoFlow();
   }
 
   const shown = leads.filter((l) => filter === "all" || l.status === filter);

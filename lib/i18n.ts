@@ -284,7 +284,11 @@ export const copy: Dict = {
     ar: "مكتب OptiBrain داخل إيلان: صفر هلوسة ووسوم إكمال وشريط أخلاقي وصفحة هبوط وعملاء ومواعيد. وكلاء OmniAd/AdBrain الخمسة يبقون منفصلين.",
     en: "OptiBrain desk inside Ilan: zero hallucination, TO COMPLETE markers, ethics banner, landing, leads and appointments. The five OmniAd/AdBrain agents stay separate.",
   },
-  "med.demo": { he: "הדגמה: מרפאת ילדים", ar: "عرض: عيادة أطفال", en: "Demo: pediatric clinic" },
+  "med.demo": {
+    he: "הדגמה: מרפאת ילדים ד״ר סאמר אבו מוך",
+    ar: "عرض: عيادة أطفال د. سامر أبو موخ",
+    en: "Demo: Dr. Samer Abu Mokh pediatrics",
+  },
   "med.step.specialty": { he: "התמחות", ar: "التخصص", en: "Specialty" },
   "med.step.clinic": { he: "פרופיל מרפאה", ar: "ملف العيادة", en: "Clinic profile" },
   "med.step.campaign": { he: "קמפיין רפואי", ar: "حملة طبية", en: "Medical campaign" },

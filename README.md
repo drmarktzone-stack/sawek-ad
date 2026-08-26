@@ -27,11 +27,9 @@ Features were therefore merged from a **read-only** listing of Lovable project `
 
 ## Demo — medical (pediatric, no keys)
 
-1. Open **OptiBrain** (`/medical`).
-2. Click **הדגמה: מרפאת ילדים**.
-3. Generate if needed. Empty price/tech/success rate become `[יש להשלים]` / `[يجب إكمال]` / `[TO COMPLETE]`. Ethics banner stays on copy and on `/lp/:slug`.
-4. Open the public landing, submit a demo lead, use WhatsApp script (wa.me plan).
-5. Open **OptiBrain** (`/medical/optibrain`) — 15 modules (audit, HMO clinic file, simulator, hijack with confirmed signal, radar, offers, trends, no-show, compliance, reviews, ROAS scenarios, voice, dual HE/AR/EN, studio, templates). Empty metrics stay `[TO COMPLETE]`.
+1. Open **OptiBrain** (`/medical` or `/medical/optibrain`).
+2. Click **הדגמה: מרפאת ילדים ד״ר סאמר אבו מוך**. That loads Dr. Samer Abu Mokh (Clalit pediatrics, Baqa al-Gharbiyye, Al-Nour 1st floor, WhatsApp 052-8885800, https://drsamerped.ai.studio) into the OmniAd wizard at step 2. Unknown numbers stay empty / `[יש להשלים]`. Offer is **אין מבצע**.
+3. Advance Type → Business → Details → Review, then **בנה לי קמפיין מלא**. Empty price/tech/success rate become markers. Ethics banner stays on copy and on `/lp/:slug`.
 
 General 5-agent OmniAd flow is unchanged on `/`.
 
