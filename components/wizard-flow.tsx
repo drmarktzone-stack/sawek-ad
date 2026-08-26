@@ -13,7 +13,7 @@ import {
   PROBLEM_CHIPS,
   TYPE_OPTIONS,
 } from "@/lib/chips";
-import { demoIntake, DEMO_LABEL, consumePendingDemo, clearPendingDemo, applyPediatricDemoDraft } from "@/lib/demo";
+import { demoIntake, DEMO_LABEL, consumePendingDemo, clearPendingDemo, applyPediatricDemoDraft, isPediatricDemo } from "@/lib/demo";
 import { cmoFieldsMissing, emptyIntake, wizardReady } from "@/lib/engine/validate";
 import { assemblePack, idleStatus, runIntakeAndDiagnosis, runMedia, runOptimizerStage, runStrategic } from "@/lib/engine/run";
 import { loadDraft, saveDraft, upsertCampaign } from "@/lib/storage";
@@ -66,8 +66,10 @@ export function WizardFlow() {
   });
   const demoConsumed = useRef(false);
 
-  if (client && !hydrated) {
-    if (!demoConsumed.current && consumePendingDemo()) {
+  useEffect(() => {
+    if (!client || hydrated) return;
+    const pending = !demoConsumed.current && consumePendingDemo();
+    if (pending) {
       demoConsumed.current = true;
       const d = demoIntake();
       clearPendingDemo();
@@ -95,7 +97,7 @@ export function WizardFlow() {
       });
     }
     setHydrated(true);
-  }
+  }, [client, hydrated]);
 
   useEffect(() => {
     if (!hydrated || !client) return;
@@ -125,6 +127,7 @@ export function WizardFlow() {
       [t("details.offer"), intake.offer],
       [t("biz.location"), intake.location],
       [t("biz.website"), intake.website],
+      [t("biz.whatsapp"), intake.whatsapp],
     ],
     [intake, locale, t],
   );
@@ -165,7 +168,8 @@ export function WizardFlow() {
 
   async function startBuild() {
     if (!wizardReady(intake)) return;
-    if (cmoFieldsMissing(intake)) {
+    // Pediatric demo has no published budget/CAC — skip the CMO interview; unknowns stay blank.
+    if (cmoFieldsMissing(intake) && !isPediatricDemo(intake)) {
       setPhase("interview");
       return;
     }
@@ -238,8 +242,14 @@ export function WizardFlow() {
     <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:py-12">
       <DepartmentRail />
       <div className="mb-6 flex flex-wrap items-center justify-center gap-2">
-        <Button type="button" variant="outline" size="sm" onClick={loadDemo}>
-          {t("cta.demo")} — {DEMO_LABEL[locale]}
+        <Button
+          type="button"
+          size="lg"
+          data-demo="pediatric"
+          className="h-auto max-w-full whitespace-normal py-2 text-start"
+          onClick={loadDemo}
+        >
+          {DEMO_LABEL[locale]}
         </Button>
         <Button type="button" variant="ghost" size="sm" onClick={newCampaign}>
           {t("cta.new")}
@@ -309,6 +319,14 @@ export function WizardFlow() {
                   value={intake.website}
                   placeholder="https://"
                   onChange={(e) => patch({ website: e.target.value })}
+                />
+              </Field>
+              <Field label={t("biz.whatsapp")}>
+                <Input
+                  value={intake.whatsapp ?? ""}
+                  placeholder={t("biz.whatsappPh")}
+                  onChange={(e) => patch({ whatsapp: e.target.value })}
+                  inputMode="tel"
                 />
               </Field>
             </section>

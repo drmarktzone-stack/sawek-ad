@@ -171,7 +171,16 @@ export function OptiHub() {
       <MedicalNav />
       <EthicsBanner locale={loc} />
       <div className="mt-4 flex flex-wrap items-center gap-3">
-        <Button type="button" className="relative z-20" onClick={loadDemo}>
+        <Button
+          type="button"
+          data-demo="pediatric"
+          className="relative z-20 h-auto max-w-full whitespace-normal py-2 text-start"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            loadDemo();
+          }}
+        >
           {t("med.demo")}
         </Button>
         <SelectField

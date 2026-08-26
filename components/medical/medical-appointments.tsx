@@ -38,7 +38,16 @@ export function MedicalAppointments() {
       <EthicsBanner locale={locale} />
       <p className="mt-4 text-sm text-zinc-400">{t("med.appts.lead")}</p>
       <div className="mt-3">
-        <Button type="button" onClick={loadDemo}>
+        <Button
+          type="button"
+          data-demo="pediatric"
+          className="h-auto max-w-full whitespace-normal py-2 text-start"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            loadDemo();
+          }}
+        >
           {t("med.demo")}
         </Button>
       </div>

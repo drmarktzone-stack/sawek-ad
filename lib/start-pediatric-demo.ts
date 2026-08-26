@@ -5,6 +5,7 @@ import { saveClinic, saveOpti, saveOptiDesk, upsertMedCampaign } from "./medical
 
 /** One-click pediatric demo: persist intake + medical pack, then hard-navigate to the OmniAd wizard. */
 export function startPediatricDemoFlow() {
+  if (typeof window === "undefined") return;
   applyPediatricDemoDraft();
   try {
     const { clinic, campaign } = buildPediatricDemoCampaign();

@@ -38,7 +38,16 @@ export function MedicalCredibility() {
       <MedicalNav />
       <EthicsBanner locale={locale} />
       <p className="mt-4 text-sm text-zinc-400">{t("med.cred.lead")}</p>
-      <Button type="button" className="mt-3" onClick={loadDemo}>
+      <Button
+        type="button"
+        data-demo="pediatric"
+        className="mt-3 h-auto max-w-full whitespace-normal py-2 text-start"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          loadDemo();
+        }}
+      >
         {t("med.demo")}
       </Button>
       {!camp && <p className="mt-8 text-center text-zinc-400">{t("med.cred.empty")}</p>}

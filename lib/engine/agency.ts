@@ -23,6 +23,7 @@ export function buildAgency(pack: Pick<CampaignPack, "intake" | "intakeReport" |
   const adv = i.uniqueAdvantage || "—";
   const goal = i.mainGoal || "—";
   const loc = i.location || "";
+  const wa = i.whatsapp?.trim() || "";
   const noOffer = isNoOffer(i.offer);
 
   const unknowns: string[] = [];
@@ -231,8 +232,8 @@ export function buildAgency(pack: Pick<CampaignPack, "intake" | "intakeReport" |
     { format: "youtube", title: (l) => (l === "he" ? "YouTube — הוק 8ש׳" : l === "ar" ? "يوتيوب — 8ث" : "YouTube — 8s hook"), body: (l) => l === "he" ? `הוק: ${pain}. גוף: ${adv}. קצה: ${ctaHe}. בלי Intro של 20 שניות.` : l === "ar" ? `خطاف: ${pain}.` : `Hook: ${pain}. Body: ${adv}. End: ${ctaEn}. No 20s intro.` },
     { format: "rsa", title: (_l) => "Google RSA", body: (l) => l === "he" ? `H1: ${name}\nH2: ${adv.slice(0, 30)}\nH3: ${loc || "מיקום חסר"}\nD1: ${pain}\nD2: ${ctaHe}` : l === "ar" ? `H1: ${name}\nH2: ${adv.slice(0, 30)}\nD1: ${pain}` : `H1: ${name}\nH2: ${adv.slice(0, 30)}\nH3: ${loc || "location missing"}\nD1: ${pain}\nD2: ${ctaEn}` },
     { format: "search", title: (l) => (l === "he" ? "מודעת חיפוש" : l === "ar" ? "إعلان بحث" : "Search ad"), body: (_l) => `${name} | ${i.category} | ${loc}`.trim() },
-    { format: "landing", title: (l) => (l === "he" ? "דף נחיתה — מבנה" : l === "ar" ? "صفحة هبوط" : "Landing structure"), body: (l) => l === "he" ? `H1: ${pain}\nפסקה: ${adv}\nטופס: שם + טלפון + שפה.\nבלי המלצות בדויות.` : l === "ar" ? `H1: ${pain}\n${adv}` : `H1: ${pain}\nParagraph: ${adv}\nForm: name + phone + language.\nNo fake testimonials.` },
-    { format: "whatsapp", title: (_l) => "WhatsApp", body: (l) => l === "he" ? `שלום, כאן ${name}. קיבלנו פנייה לגבי ${goal}. מתי נוח לתור?` : l === "ar" ? `مرحبا، هنا ${name}. متى يناسب الموعد؟` : `Hi, this is ${name}. We got an enquiry about ${goal}. When works for a booking?` },
+    { format: "landing", title: (l) => (l === "he" ? "דף נחיתה — מבנה" : l === "ar" ? "صفحة هبوط" : "Landing structure"), body: (l) => l === "he" ? `H1: ${pain}\nפסקה: ${adv}\n${loc}\n${i.website || ""}\nוואטסאפ: ${wa || "[יש להשלים]"}\nטופס: שם + טלפון + שפה.\nבלי המלצות בדויות.` : l === "ar" ? `H1: ${pain}\n${adv}\nواتساب: ${wa || "[יש להשלים]"}` : `H1: ${pain}\nParagraph: ${adv}\n${loc}\n${i.website || ""}\nWhatsApp: ${wa || "[TO COMPLETE]"}\nForm: name + phone + language.\nNo fake testimonials.` },
+    { format: "whatsapp", title: (_l) => "WhatsApp", body: (l) => l === "he" ? `שלום, כאן ${name}. וואטסאפ ${wa || "[יש להשלים]"}. קיבלנו פנייה לגבי ${goal}. מתי נוח לתור?` : l === "ar" ? `مرحبا، هنا ${name}. واتساب ${wa || "[יש להשלים]"}. متى يناسب الموعد؟` : `Hi, this is ${name}. WhatsApp ${wa || "[TO COMPLETE]"}. We got an enquiry about ${goal}. When works for a booking?` },
     { format: "sms", title: (_l) => "SMS", body: (l) => l === "he" ? `${name}: אפשר לקבוע תור. השבו להודעה. לא מבצע.` : l === "ar" ? `${name}: يمكن حجز موعد. ردّوا.` : `${name}: we can book you in. Reply to this. No promo.` },
     { format: "flyer", title: (l) => (l === "he" ? "פלאייר" : l === "ar" ? "منشور" : "Flyer"), body: (l) => l === "he" ? `${name}\n${adv}\n${loc}\n${ctaHe}\n${noOffer ? "אין מבצע על הנייר." : i.offer}` : l === "ar" ? `${name}\n${adv}\n${ctaAr}` : `${name}\n${adv}\n${loc}\n${ctaEn}\n${noOffer ? "No offer on the paper." : i.offer}` },
   ];

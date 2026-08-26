@@ -58,9 +58,9 @@ Copy `.env.example` if you want those. The app runs the same without them (local
 
 ## Demo walkthrough (no typing)
 
-1. On **בניית קמפיין** click **הדגמה בלי להקליד**.
-2. Review the clinic pack (offer is **אין מבצע**, not a free consult).
-3. Click **בנה לי קמפיין מלא**.
+1. On **בניית קמפיין** (`/`) or **OptiBrain** (`/medical/optibrain`) click the yellow **הדגמה: מרפאת ילדים ד״ר סאמר אבו מוך** (AR/EN labels work the same).
+2. The OmniAd wizard opens at **Business** (step 2) with the clinic filled — including WhatsApp **052-8885800**. Offer is **אין מבצע**. Unknown budget/CAC stay blank.
+3. Click **המשך** through Details → Review, then **בנה לי קמפיין מלא**. The five-agent HITL starts immediately (no CMO numbers invented).
 4. Approve HITL gates: diagnosis → strategy → media → optimizer.
 5. Open **דיסקברי / אסטרטגיה / קריאייטיב / מדיה / לידים / אופס** — the full agency pack in HE+AR+EN.
 6. Or from any department, click **טען פק הדגמה מלא** so no screen is empty.

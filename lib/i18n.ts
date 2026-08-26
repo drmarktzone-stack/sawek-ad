@@ -54,6 +54,8 @@ export const copy: Dict = {
   "biz.description": { he: "העסק בקצרה", ar: "النشاط باختصار", en: "The business in brief" },
   "biz.location": { he: "מיקום", ar: "الموقع", en: "Location" },
   "biz.website": { he: "אתר (אופציונלי)", ar: "موقع (اختياري)", en: "Website (optional)" },
+  "biz.whatsapp": { he: "וואטסאפ", ar: "واتساب", en: "WhatsApp" },
+  "biz.whatsappPh": { he: "052-8885800", ar: "052-8885800", en: "052-8885800" },
   "biz.namePh": { he: "למשל: סטודיו נועה", ar: "مثال: ستوديو نورة", en: "e.g. Noa Studio" },
   "biz.categoryPh": { he: "למשל: קליניקה, חנות, אפליקציה", ar: "مثال: عيادة، متجر، تطبيق", en: "e.g. clinic, shop, app" },
   "biz.descPh": {

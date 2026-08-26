@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import type { MedicalCampaign } from "@/lib/medical/types";
-import { campaignBySlug, saveClinic, upsertMedCampaign } from "@/lib/medical/storage";
-import { buildPediatricDemoCampaign } from "@/lib/medical/demo";
+import { campaignBySlug } from "@/lib/medical/storage";
+import { startPediatricDemoFlow } from "@/lib/start-pediatric-demo";
 import { LandingView } from "@/components/medical/landing-view";
 import { LanguageToggle } from "@/components/header";
 import { useI18n } from "@/components/i18n-provider";
@@ -14,7 +14,6 @@ import { Button } from "@/components/ui/button";
 
 export default function PublicLandingPage() {
   const params = useParams<{ slug: string }>();
-  const router = useRouter();
   const { locale, t } = useI18n();
   const client = useIsClient();
   const [camp, setCamp] = useState<MedicalCampaign | null | undefined>(undefined);
@@ -31,13 +30,9 @@ export default function PublicLandingPage() {
         <p className="text-zinc-300">{t("med.cred.empty")}</p>
         <Button
           type="button"
-          className="mt-4"
-          onClick={() => {
-            const { clinic, campaign } = buildPediatricDemoCampaign();
-            saveClinic(clinic);
-            upsertMedCampaign(campaign);
-            router.push(`/lp/${campaign.slug}`);
-          }}
+          data-demo="pediatric"
+          className="mt-4 h-auto max-w-full whitespace-normal py-2"
+          onClick={() => startPediatricDemoFlow()}
         >
           {t("med.demo")}
         </Button>

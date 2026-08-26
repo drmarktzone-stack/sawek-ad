@@ -107,6 +107,7 @@ export function emptyIntake(): Intake {
     description: "",
     location: "",
     website: "",
+    whatsapp: "",
     audience: "",
     audienceCustom: false,
     biggestProblem: "",

@@ -57,7 +57,11 @@ export interface DraftState {
 }
 
 export function loadDraft(): DraftState {
-  return read<DraftState>(K.draft, { intake: emptyIntake(), step: 1 });
+  const d = read<DraftState>(K.draft, { intake: emptyIntake(), step: 1 });
+  return {
+    step: d.step || 1,
+    intake: { ...emptyIntake(), ...d.intake },
+  };
 }
 
 export function saveDraft(draft: DraftState) {

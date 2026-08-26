@@ -80,7 +80,16 @@ export function MedicalLeads() {
       <MedicalNav />
       <EthicsBanner locale={locale} />
       <div className="mt-4 flex flex-wrap gap-2">
-        <Button type="button" onClick={loadDemo}>
+        <Button
+          type="button"
+          data-demo="pediatric"
+          className="h-auto max-w-full whitespace-normal py-2 text-start"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            loadDemo();
+          }}
+        >
           {t("med.demo")}
         </Button>
         {(["all", "new", "in-progress", "closed"] as const).map((f) => (

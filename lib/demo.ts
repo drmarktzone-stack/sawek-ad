@@ -16,6 +16,7 @@ export function demoIntake(): Intake {
       "מרפאת ילדים של קופת חולים כללית בבאקה אל-גרביה. מתחם אל-נור, קומה 1, ליד הכיכר המרכזית. שירות בעברית, ערבית ואנגלית. וואטסאפ 052-8885800. אתר: https://drsamerped.ai.studio. בלי הבטחת ריפוי ובלי מספרי מטופלים שלא פורסמו.",
     location: "באקה אל-גרביה — מתחם אל-נור, קומה 1, ליד הכיכר המרכזית",
     website: "https://drsamerped.ai.studio",
+    whatsapp: "052-8885800",
     audience: "הורים בבאקה אל-גרביה והסביבה שמחפשים רופא ילדים קבוע בכללית, בעברית / ערבית / אנגלית",
     audienceCustom: true,
     biggestProblem:
@@ -75,4 +76,12 @@ export function clearPendingDemo() {
   } catch {
     /* ignore */
   }
+}
+
+export function isPediatricDemo(intake: Intake): boolean {
+  return (
+    intake.website.includes("drsamerped.ai.studio") ||
+    intake.businessName.includes("סאמר אבו מוך") ||
+    intake.businessName.includes("Samer Abu Mokh")
+  );
 }

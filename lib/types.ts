@@ -50,6 +50,7 @@ export interface Intake {
   description: string;
   location: string;
   website: string;
+  whatsapp: string;
   audience: string;
   audienceCustom: boolean;
   biggestProblem: string;
