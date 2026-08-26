@@ -269,10 +269,10 @@ export function buildAgency(pack: Pick<CampaignPack, "intake" | "intakeReport" |
     })),
     pieces,
     brandKit: {
-      ilan: { black: "#050505", red: "#ff1a1a", yellow: "#ffe500" },
+      sawek: { black: "#050505", red: "#ff1a1a", yellow: "#ffe500" },
       clientPrimary: "",
       clientSecondary: "",
-      note: L("ערכת אילן (שחור/אדום/צהוב). צבעי לקוח לא סופקו — לא יומצא טורקיז.", "طقم إيلان. ألوان العميل غير معطاة.", "Ilan kit (black/red/yellow). Client colors not supplied — no invented teal."),
+      note: L("ערכת SAWEK AD (שחור/אדום/צהוב). צבעי לקוח לא סופקו — לא יומצא טורקיז.", "طقم SAWEK AD. ألوان العميل غير معطاة.", "SAWEK AD kit (black/red/yellow). Client colors not supplied — no invented teal."),
     },
   };
 
@@ -284,7 +284,7 @@ export function buildAgency(pack: Pick<CampaignPack, "intake" | "intakeReport" |
       { name: L("A/B CTA", "A/B CTA", "A/B CTA"), a: L(ctaHe, ctaAr, ctaEn), b: L("לפרטים", "للتفاصيل", "Learn more"), metric: L("אם «לפרטים» מביא סקרנים — כבו.", "إذا «للتفاصيل» يجلب فضوليين — أوقفوا.", "If “learn more” brings tyre-kickers — kill it.") },
     ],
     weekly: pack.optimizer.ifThen.map((x) => L(`IF ${x.if.he} THEN ${x.then.he}`, `IF ${x.if.ar} THEN ${x.then.ar}`, `IF ${x.if.en} THEN ${x.then.en}`)),
-    planOnly: L("PLAN בלבד. אילן לא מפרסם למטא/גוגל/טיקטוק/יוטיוב.", "خطة فقط. إيلان لا ينشر على الشبكات.", "PLAN only. Ilan does not publish to Meta/Google/TikTok/YouTube."),
+    planOnly: L("PLAN בלבד. SAWEK AD לא מפרסם למטא/גוגל/טיקטוק/יוטיוב.", "خطة فقط. SAWEK AD لا ينشر على الشبكات.", "PLAN only. SAWEK AD does not publish to Meta/Google/TikTok/YouTube."),
     audiences: L(
       loc
         ? `גיאו: ${loc}. ליבה: ${aud || "לא צוין — לא נרחיב תחומי עניין"}. בלי lookalike לפני 50 המרות.`

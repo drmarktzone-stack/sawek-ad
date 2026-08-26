@@ -282,7 +282,7 @@ export interface CreativeDept {
   angleMatrix: { angle: Tri; proof: Tri; cta: Tri }[];
   pieces: FactoryPiece[];
   brandKit: {
-    ilan: { black: string; red: string; yellow: string };
+    sawek: { black: string; red: string; yellow: string };
     clientPrimary: string;
     clientSecondary: string;
     note: Tri;

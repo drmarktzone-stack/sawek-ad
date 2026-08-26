@@ -1,10 +1,10 @@
-# Ilan (אילן / إعلان)
+# SAWEK AD (סאווק / ساويك)
 
-**Ilan** is the product. Hebrew first name *Ilan* (tree) and Arabic *i‘lān* (إعلان, advertisement) — same pronunciation for Jewish and Arab users.
+**SAWEK AD** is the product. Optional wordmarks: Hebrew **סאווק**, Arabic **ساويك**. The brand stays **SAWEK AD** — not OmniAd Studio, not Ilan.
 
-Inside: **OmniAd engine** (4-step RTL wizard, 6 ad variants, design studio, truth layer) and **AdBrain agents** (five-agent HITL pipeline). This is a **third app**. It does **not** replace or rename the original OmniAd or AdBrain products.
+Inside: **OmniAd engine** (4-step RTL wizard, 6 ad variants, design studio, truth layer) and **five Gemini agents** (HITL pipeline). This is a **third app**. It does **not** replace or rename the original OmniAd, AdBrain, or OptiBrain products.
 
-The five agents stay the only agents. They produce **departments** of a marketing holding company: Discovery, Strategy, Creative, Media, Leads & promo, Ops — plus an **OptiBrain medical desk** inside Ilan. Media is **PLAN only**. Originals (OmniAd, AdBrain, OptiBrain Lovable) are not overwritten.
+The five Gemini agents stay the only agents. They produce **departments** of a marketing holding company: Discovery, Strategy, Creative, Media, Leads & promo, Ops — plus an **OptiBrain medical desk** inside SAWEK AD. Media is **PLAN only**. Originals (OmniAd, AdBrain, OptiBrain Lovable) are not overwritten.
 
 ## GitHub: no public OptiBrain repo was visible
 
@@ -46,7 +46,7 @@ npm run dev
 
 Open [http://127.0.0.1:43147](http://127.0.0.1:43147).
 
-**Origin does not host a public website for this repo.** `origin repo view` returns the git remote only. This environment has no `VERCEL_TOKEN`, and the Origin CLI has no deploy/pages command. To open Ilan in a browser, run the command above locally, or use a tunnel to this machine while the agent is running.
+**Origin does not host a public website for this repo.** `origin repo view` returns the git remote only. This environment has no `VERCEL_TOKEN`, and the Origin CLI has no deploy/pages command. To open SAWEK AD in a browser, run the command above locally, or use a tunnel to this machine while the agent is running.
 
 Zero API keys required. Copy is generated from intake with templates. Optional:
 
@@ -86,7 +86,7 @@ Copy `.env.example` if you want those. The app runs the same without them (local
 | Appointments | `/medical/appointments` |
 | Claim credibility | `/medical/credibility` |
 | OptiBrain desk (15 modules) | `/medical/optibrain` |
-| What is Ilan | `/about` |
+| What is SAWEK AD | `/about` |
 | Self-marketing | `/self` |
 
 No live ad-network APIs. No credit card. No invented lead gauges. KPI numbers appear only from budget/CAC you typed.

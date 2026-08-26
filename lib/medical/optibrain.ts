@@ -193,9 +193,9 @@ export function runOptiBrain(
     id: "templates",
     title: L("תבניות נחיתה", "قوالب الهبوط", "Landing templates"),
     body: L(
-      "שש תבניות כפלט: אמון קליני, המרה נועזת, עורכי, אסתטיקה יוקרתית, וטרינרי חם, שיניים בהיר. הפלטות הקליניות חיות רק בדף הנחיתה — לא בכל אילן.",
-      "ستة قوالب كمخرجات. اللوحات السريرية على صفحة الهبوط فقط لا في إيلان كله.",
-      "Six templates as outputs: Clinical Trust, Bold Conversion, Editorial, Luxury Aesthetic, Vet Warm, Dental Bright. Clinical palettes live only on the landing — not across Ilan chrome.",
+      "שש תבניות כפלט: אמון קליני, המרה נועזת, עורכי, אסתטיקה יוקרתית, וטרינרי חם, שיניים בהיר. הפלטות הקליניות חיות רק בדף הנחיתה — לא בכל SAWEK AD.",
+      "ستة قوالب كمخرجات. اللوحات السريرية على صفحة الهبوط فقط لا في SAWEK AD كله.",
+      "Six templates as outputs: Clinical Trust, Bold Conversion, Editorial, Luxury Aesthetic, Vet Warm, Dental Bright. Clinical palettes live only on the landing — not across SAWEK AD chrome.",
     ),
   });
 

@@ -74,7 +74,7 @@ export function Header() {
       <div className="h-1 w-full bg-gradient-to-l from-omni-yellow via-omni-red to-omni-yellow" />
       <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3">
         <Link href="/" className="flex shrink-0 flex-col leading-tight">
-          <span className="bg-gradient-to-l from-omni-yellow to-omni-red bg-clip-text text-2xl font-black tracking-tight text-transparent">
+          <span className="bg-gradient-to-l from-omni-yellow to-omni-red bg-clip-text text-xl font-black tracking-tight text-transparent sm:text-2xl">
             {t("brand.name")}
           </span>
           <span className="text-[10px] font-semibold text-omni-yellow">{t("brand.scripts")}</span>

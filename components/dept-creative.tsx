@@ -48,9 +48,9 @@ export function CreativeDeptView({
             <span key={k} className="flex items-center gap-2 text-xs text-zinc-300">
               <i
                 className="size-6 rounded-full border border-white/20"
-                style={{ background: c.brandKit.ilan[k] }}
+                style={{ background: c.brandKit.sawek[k] }}
               />
-              Ilan {k}
+              SAWEK {k}
             </span>
           ))}
         </div>

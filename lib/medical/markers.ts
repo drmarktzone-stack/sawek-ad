@@ -26,9 +26,9 @@ export function collectMarkers(text: string): string[] {
 }
 
 export const ETHICS: Record<Locale, string> = {
-  he: "תוכן זה נוצר באמצעות בינה מלאכותית. מחובת המרפאה לבדוק ולאשר את נכונות המידע והאתיקה הרפואית לפני הפרסום. אילן לא ממציא מחירים, שיעורי הצלחה, שמות טכנולוגיה או עובדות רפואיות.",
-  ar: "أُنشئ هذا المحتوى بالذكاء الاصطناعي. على العيادة التحقق واعتماد دقة المعلومات والأخلاقيات الطبية قبل النشر. إيلان لا يخترع أسعاراً أو نسب نجاح أو أسماء تقنيات أو حقائق طبية.",
-  en: "This content was created with AI. The clinic must check and approve accuracy and medical ethics before publishing. Ilan does not invent prices, success rates, technology names, or medical facts.",
+  he: "תוכן זה נוצר באמצעות בינה מלאכותית. מחובת המרפאה לבדוק ולאשר את נכונות המידע והאתיקה הרפואית לפני הפרסום. SAWEK AD לא ממציא מחירים, שיעורי הצלחה, שמות טכנולוגיה או עובדות רפואיות.",
+  ar: "أُنشئ هذا المحتوى بالذكاء الاصطناعي. على العيادة التحقق واعتماد دقة المعلومات والأخلاقيات الطبية قبل النشر. SAWEK AD لا يخترع أسعاراً أو نسب نجاح أو أسماء تقنيات أو حقائق طبية.",
+  en: "This content was created with AI. The clinic must check and approve accuracy and medical ethics before publishing. SAWEK AD does not invent prices, success rates, technology names, or medical facts.",
 };
 
 export const MEDICAL_TEMPERATURE = 0.2;

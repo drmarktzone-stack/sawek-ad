@@ -103,18 +103,18 @@ const GAP_LIBRARY: Record<string, { title: Tri; body: Tri; source: string }> = {
   boosting: {
     title: L("Boost אינו אסטרטגיה", "زر Boost ليس استراتيجية", "Boost is not a strategy"),
     body: L(
-      "צריך קהל מותאם + דומה + ריטרגט. Ilan לא מפרסם בפייסבוק — זה PLAN בלבד.",
-      "يلزم جمهور مخصص + مشابه + إعادة استهداف. إيلان لا ينشر على فيسبوك — خطة فقط.",
-      "You need a custom audience + lookalike + retarget. Ilan does not publish to Facebook — PLAN only.",
+      "צריך קהל מותאם + דומה + ריטרגט. SAWEK AD לא מפרסם בפייסבוק — זה PLAN בלבד.",
+      "يلزم جمهور مخصص + مشابه + إعادة استهداف. SAWEK AD لا ينشر على فيسبوك — خطة فقط.",
+      "You need a custom audience + lookalike + retarget. SAWEK AD does not publish to Facebook — PLAN only.",
     ),
     source: "Omar Al-Jandali — Media Buying",
   },
   no_data: {
     title: L("בלי מדידה = החלטות לפי מצב רוח", "بلا قياس = قرارات بالمزاج", "No measurement = mood decisions"),
     body: L(
-      "בלי מעקב המרה לא תדעו איזו זווית הביאה פנייה. Ilan לא ממציא CTR.",
-      "بلا تتبع تحويل لن تعرفوا أي زاوية جلبت الاستفسار. إيلان لا يخترع CTR.",
-      "Without conversion tracking you will not know which angle produced an enquiry. Ilan will not invent CTR.",
+      "בלי מעקב המרה לא תדעו איזו זווית הביאה פנייה. SAWEK AD לא ממציא CTR.",
+      "بلا تتبع تحويل لن تعرفوا أي زاوية جلبت الاستفسار. SAWEK AD لا يخترع CTR.",
+      "Without conversion tracking you will not know which angle produced an enquiry. SAWEK AD will not invent CTR.",
     ),
     source: "Dafsh Data — Attribution",
   },

@@ -599,9 +599,9 @@ function HijackPanel({ desk, patch, loc }: Panel) {
         <p className="mb-3 text-xs text-zinc-500">
           {pick(
             {
-              he: "סמנו רק מה שראיתם בפועל. Ilan לא סורק מתחרים.",
-              ar: "علّموا فقط ما رأيتموه فعلاً. إيلان لا يمسح المنافسين.",
-              en: "Tick only what you actually saw. Ilan does not scrape competitors.",
+              he: "סמנו רק מה שראיתם בפועל. SAWEK AD לא סורק מתחרים.",
+              ar: "علّموا فقط ما رأيتموه فعلاً. SAWEK AD لا يمسح المنافسين.",
+              en: "Tick only what you actually saw. SAWEK AD does not scrape competitors.",
             },
             loc,
           )}

@@ -17,9 +17,9 @@ const cairo = Cairo({
 });
 
 export const metadata: Metadata = {
-  title: "Ilan — אילן / إعلان",
+  title: "SAWEK AD — ساويك / סאווק",
   description:
-    "Ilan (אילן / إعلان): RTL campaign builder with a 4-step wizard, five-agent HITL pipeline, and HE/AR/EN copy — OmniAd engine, AdBrain agents. No invented leads or testimonials.",
+    "SAWEK AD: RTL campaign studio with a 4-step wizard, five Gemini agents, and HE/AR/EN copy — OmniAd engine, OptiBrain medical desk. No invented leads or testimonials.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

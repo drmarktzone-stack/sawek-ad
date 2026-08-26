@@ -9,17 +9,17 @@ export function AboutPage() {
   const nameBlock =
     locale === "he"
       ? {
-          h: "אילן / إعلان — אותו צליל",
-          p: "Ilan הוא שם פרטי בעברית (עץ) ו־إعلان בערבית (מודעה / פרסום). אותה הגייה ליהודים ולערבים. זה שם המוצר — לא OmniAd Studio.",
+          h: "SAWEK AD — סאווק / ساويك",
+          p: "SAWEK AD הוא שם המוצר. בסאווק ו־ساويك אפשר לראות את המילה באותיות עבריות וערביות — המותג נשאר SAWEK AD, לא OmniAd Studio.",
         }
       : locale === "ar"
         ? {
-            h: "إعلان / אילן — الصوت نفسه",
-            p: "Ilan اسم عبري (شجرة) وإعلان بالعربية (إعلان تجاري). النطق واحد لليهود والعرب. هذا اسم المنتج — ليس OmniAd Studio.",
+            h: "SAWEK AD — ساويك / סאווק",
+            p: "SAWEK AD هو اسم المنتج. ساويك وסאווק يظهران الاسم بالحرف العربي والعبري — العلامة تبقى SAWEK AD وليست OmniAd Studio.",
           }
         : {
-            h: "Ilan / אילן / إعلان — same sound",
-            p: "Ilan is a Hebrew first name (tree) and i‘lān (إعلان) is Arabic for advertisement. Same pronunciation for Jewish and Arab users. That is the product name — not OmniAd Studio.",
+            h: "SAWEK AD — ساويك / סאווק",
+            p: "SAWEK AD is the product name. ساويك and סאווק are optional Arabic and Hebrew wordmarks — the brand stays SAWEK AD, not OmniAd Studio.",
           };
 
   const blocks =
@@ -28,7 +28,7 @@ export function AboutPage() {
           nameBlock,
           {
             h: "מנוע בפנים, לא שם בחזית",
-            p: "Ilan הוא אפליקציה שלישית. בפנים: אשף OmniAd (4 שלבים, 6 מודעות, סטודיו עיצוב) וחמשת סוכני AdBrain (קליטה, אבחון HITL, אסטרטגיה, מדיה, אופטימיזציה). המקורות ב-GitHub/Origin/Base44 לא שונו ולא הוחלפו.",
+            p: "SAWEK AD הוא אפליקציה שלישית. בפנים: אשף OmniAd (4 שלבים, 6 מודעות, סטודיו עיצוב) וחמישה סוכני Gemini (קליטה, אבחון HITL, אסטרטגיה, מדיה, אופטימיזציה). המקורות OmniAd / AdBrain / OptiBrain לא שונו ולא הוחלפו.",
           },
           {
             h: "שכבת אמת",
@@ -40,11 +40,11 @@ export function AboutPage() {
           },
           {
             h: "חברת החזקות, חמישה סוכנים",
-            p: "דיסקברי, אסטרטגיה, קריאייטיב, מדיה, לידים ומבצעים, אופס — מחלקות שהחמישה מייצרים. לא מחליפים אותם בחוקר/קופירייטר/מעצב. מדיה היא PLAN בלבד. לקוח הדגמה ממלא כל שולחן בלחיצה.",
+            p: "דיסקברי, אסטרטגיה, קריאייטיב, מדיה, לידים ומבצעים, אופס — מחלקות שחמשת סוכני Gemini מייצרים. לא מחליפים אותם בחוקר/קופירייטר/מעצב. מדיה היא PLAN בלבד. לקוח הדגמה ממלא כל שולחן בלחיצה.",
           },
           {
             h: "דלפק OptiBrain",
-            p: "15 מודולים בתוך אילן: אבחון 360, קופת חולים, סימולטור, חטיפה רק מאות שאושר, מכ״ם רוויה, הצעות, טרנדים, אי-הגעה, ציות, ביקורות, תרחיש תשואה, קול, עברית/ערבית/אנגלית, סטודיו, תבניות. אין פיד מתחרים חי. מקור Lovable לא נגענו. ב-GitHub הציבורי של drmarktzone-stack לא הופיע ריפו בשם opti-brain.",
+            p: "15 מודולים בתוך SAWEK AD: אבחון 360, קופת חולים, סימולטור, חטיפה רק מאות שאושר, מכ״ם רוויה, הצעות, טרנדים, אי-הגעה, ציות, ביקורות, תרחיש תשואה, קול, עברית/ערבית/אנגלית, סטודיו, תבניות. אין פיד מתחרים חי. מקור Lovable לא נגענו.",
           },
           {
             h: "בלי APIs חיים",
@@ -56,7 +56,7 @@ export function AboutPage() {
             nameBlock,
             {
               h: "المحرك في الداخل، لا الاسم في الواجهة",
-              p: "Ilan تطبيق ثالث. في الداخل: معالج OmniAd ووكلاء AdBrain الخمسة. لم نلمس الأصلين على GitHub/Origin/Base44.",
+              p: "SAWEK AD تطبيق ثالث. في الداخل: معالج OmniAd ووكلاء Gemini الخمسة. لم نلمس أصول OmniAd / AdBrain / OptiBrain.",
             },
             {
               h: "طبقة الحقيقة",
@@ -68,22 +68,22 @@ export function AboutPage() {
             },
             {
               h: "شركة قابضة، خمسة وكلاء",
-              p: "الاستكشاف والاستراتيجية والإبداع والميديا والعملاء والعروض والتشغيل أقسام يُنتجها الوكلاء الخمسة. لا نستبدلهم بباحث/كاتب/مصمم. الميديا خطة فقط. عميل العرض يملأ كل مكتب بنقرة.",
+              p: "الاستكشاف والاستراتيجية والإبداع والميديا والعملاء والعروض والتشغيل أقسام يُنتجها وكلاء Gemini الخمسة. الميديا خطة فقط.",
             },
             {
               h: "مكتب OptiBrain",
-              p: "15 وحدة داخل إعلان: تشخيص 360، صندوق مرضى، محاكٍ، اقتناص من إشارة مؤكَّدة فقط، رادار تشبع، عروض، ترندات، تغيب، امتثال، مراجعات، سيناريو عائد، صوت، عبري/عربي/إنجليزي، استوديو، قوالب. لا بث منافسين حي. لم نلمس Lovable. في GitHub العام لـ drmarktzone-stack لم يظهر مستودع باسم opti-brain.",
+              p: "15 وحدة داخل SAWEK AD. لا بث منافسين حي. لم نلمس Lovable.",
             },
             {
               h: "بلا واجهات حية",
-              p: "خطط ميتا/غوغل/تيك توك/يوتيوب للشراء اليدوي فقط. بلا بطاقة ولا مفاتيح إلزامية.",
+              p: "خطط ميتا/غوغل/تيك توك/يوتيوب للشراء اليدوي فقط.",
             },
           ]
         : [
             nameBlock,
             {
               h: "Engines inside, not on the door",
-              p: "Ilan is a third app. Inside: OmniAd’s 4-step wizard, 6 ads and design studio plus AdBrain’s five agents (intake, HITL diagnosis, strategy, media, optimizer). The original GitHub / Origin / Base44 products are untouched.",
+              p: "SAWEK AD is a third app. Inside: OmniAd’s 4-step wizard, 6 ads and design studio plus five Gemini agents (intake, HITL diagnosis, strategy, media, optimizer). The original OmniAd, AdBrain, and OptiBrain products are untouched.",
             },
             {
               h: "Truth layer",
@@ -95,11 +95,11 @@ export function AboutPage() {
             },
             {
               h: "Holding company, five agents",
-              p: "Discovery, Strategy, Creative, Media, Leads & promo, and Ops are departments — outputs the same five agents produce. Never swapped for researcher/copywriter/designer. Media is PLAN only. Demo client one-click fills every desk.",
+              p: "Discovery, Strategy, Creative, Media, Leads & promo, and Ops are departments — outputs the same five Gemini agents produce. Media is PLAN only. Demo client one-click fills every desk.",
             },
             {
               h: "OptiBrain desk",
-              p: "Fifteen modules inside Ilan: 360 audit, HMO clinic file, simulator, hijack from a confirmed signal only, saturation radar, offers, trends, no-shows, compliance, reviews, return scenarios, voice, HE/AR/EN ads, studio, templates. No live competitor feed. The Lovable original is untouched. The public GitHub list for drmarktzone-stack had no repo named opti-brain.",
+              p: "Fifteen modules inside SAWEK AD: 360 audit, HMO clinic file, simulator, hijack from a confirmed signal only, saturation radar, offers, trends, no-shows, compliance, reviews, return scenarios, voice, HE/AR/EN ads, studio, templates. No live competitor feed. The Lovable original is untouched.",
             },
             {
               h: "No live ad APIs",
@@ -112,7 +112,7 @@ export function AboutPage() {
       <ConquerHeadline subtitle={t("about.title")} />
       <DepartmentRail />
       <p className="mb-8 text-center text-sm text-zinc-400">
-        Ilan · אילן · إعلان
+        SAWEK AD · סאווק · ساويك
         <span className="mt-1 block text-xs text-zinc-600">{t("brand.tagline")}</span>
       </p>
       <div className="space-y-4">

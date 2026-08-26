@@ -216,10 +216,10 @@ export function LandingView({
           {booked && (
             <p className="mt-3 text-sm">
               {locale === "he"
-                ? "המשבצת נבחרה בדף. להמרה לתור אמיתי — דלפק התורים באילן (תוכנית, לא יומן חי)."
+                ? "המשבצת נבחרה בדף. להמרה לתור אמיתי — דלפק התורים ב-SAWEK AD (תוכנית, לא יומן חי)."
                 : locale === "ar"
-                  ? "اختير الموعد في الصفحة. التحويل لموعد يتم في إيلان."
-                  : "Slot selected on the page. Convert to an appointment on Ilan’s desk (plan, not a live calendar)."}
+                  ? "اختير الموعد في الصفحة. التحويل لموعد يتم في SAWEK AD."
+                  : "Slot selected on the page. Convert to an appointment on SAWEK AD’s desk (plan, not a live calendar)."}
             </p>
           )}
         </section>

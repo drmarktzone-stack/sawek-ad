@@ -280,7 +280,7 @@ export function blockFor(campaign: MedicalCampaign, locale: Locale): MedicalCopy
 export function exportMedicalPack(campaign: MedicalCampaign, locale: Locale): string {
   const c = blockFor(campaign, locale);
   return [
-    `Ilan medical pack — ${campaign.clinic.name}`,
+    `SAWEK AD medical pack — ${campaign.clinic.name}`,
     `slug: ${campaign.slug}`,
     `markers: ${campaign.markerCount}`,
     "",

@@ -7,7 +7,7 @@ export function packToText(pack: CampaignPack, locale: Locale): string {
   const p = ensureAgency(pack);
   const a = p.agency!;
   const lines: string[] = [];
-  lines.push(`Ilan — ${p.name}`);
+  lines.push(`SAWEK AD — ${p.name}`);
   lines.push(p.createdAt);
   lines.push("");
   lines.push("=== INTAKE ===");
@@ -116,7 +116,7 @@ export function printPdf(pack: CampaignPack, locale: Locale) {
 <html lang="${locale}" dir="${dir}">
 <head>
 <meta charset="utf-8"/>
-<title>${escapeHtml(pack.name)} — Ilan</title>
+<title>${escapeHtml(pack.name)} — SAWEK AD</title>
 <style>
   body { font-family: Heebo, Cairo, Arial, sans-serif; background:#111; color:#f4f4f4; padding:32px; max-width:800px; margin:0 auto; }
   h1 { color:#f5c518; }
@@ -127,7 +127,7 @@ export function printPdf(pack: CampaignPack, locale: Locale) {
 </style>
 </head>
 <body>
-  <p>Ilan · אילן · إعلان</p>
+  <p>SAWEK AD · סאווק · ساويك</p>
   <h1>${escapeHtml(pack.name)}</h1>
   <p>${escapeHtml(pack.media.worstCase[locale])}</p>
   <p>${escapeHtml(pack.media.realistic[locale])}</p>
@@ -161,7 +161,7 @@ export function printBible(pack: CampaignPack, locale: Locale) {
 <html lang="${locale}" dir="${dir}">
 <head>
 <meta charset="utf-8"/>
-<title>${escapeHtml(p.name)} — Ilan bible</title>
+<title>${escapeHtml(p.name)} — SAWEK AD bible</title>
 <style>
   body { font-family: Heebo, Cairo, Arial, sans-serif; background:#111; color:#f4f4f4; padding:32px; max-width:860px; margin:0 auto; }
   h1 { color:#ffe500; }
@@ -173,7 +173,7 @@ export function printBible(pack: CampaignPack, locale: Locale) {
 </style>
 </head>
 <body>
-  <p>Ilan · אילן · إعلان — campaign bible (PLAN only)</p>
+  <p>SAWEK AD · סאווק · ساويك — campaign bible (PLAN only)</p>
   <h1>${escapeHtml(p.name)}</h1>
   <p>${escapeHtml(t(locale, "result.score"))}: ${p.intakeReport.completeness}/100</p>
   ${section(t(locale, "nav.discovery"), [

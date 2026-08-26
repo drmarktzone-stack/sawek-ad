@@ -1,10 +1,10 @@
-# Ilan — Product Spec (source of truth)
+# SAWEK AD — Product Spec (source of truth)
 
-Locked product name: **Ilan** (Hebrew **אילן** = tree; Arabic **إعلان** = advertisement). Same pronunciation for Jewish and Arab users.
+Locked product name: **SAWEK AD**. Optional wordmarks: Hebrew **סאווק**, Arabic **ساويك**. The Latin brand is always **SAWEK AD**.
 
-User-facing brand is **Ilan**, never OmniAd Studio. Internal engines stay credited as **OmniAd engine** and **AdBrain agents**.
+User-facing brand is **SAWEK AD**, never OmniAd Studio and never Ilan. Internal engines stay credited as **OmniAd engine** and **five Gemini agents**.
 
-This repository is a **third app**: the union of OmniAd (Base44 app `6a7712d0685a826e3eab0819`) and AdBrain (GitHub `drmarktzone-stack/adbrain-ai`, Origin `tmp-90dd9f664feed126`), plus an **OptiBrain medical desk** inside Ilan. It must **not** modify, overwrite, or replace any of those originals — including Lovable project `1b75b82e-6b26-401e-aa7a-1ce137d0dfa8` (https://opti-brain.lovable.app).
+This repository is a **third app**: the union of OmniAd (Base44 app `6a7712d0685a826e3eab0819`) and AdBrain (GitHub `drmarktzone-stack/adbrain-ai`, Origin `tmp-90dd9f664feed126`), plus an **OptiBrain medical desk** inside SAWEK AD. It must **not** modify, overwrite, or replace any of those originals — including Lovable project `1b75b82e-6b26-401e-aa7a-1ce137d0dfa8` (https://opti-brain.lovable.app).
 
 **GitHub source-of-truth check (drmarktzone-stack, public API, 2026-08-26):** no repository named `opti-brain` / `OptiBrain` / `optibrain` was visible. Public repos that *were* listed: `AestheticAI`, `https-med-campaign-creator.lovable.app` (size 0 — ignore), `medscan-ai`, `medscan-connect`. GitHub MCP in this environment was in error (private repos could not be listed). Features were merged from a **read-only** inspection of the Lovable OptiBrain project. **Do not invent a GitHub URL.**
 
@@ -39,7 +39,7 @@ No paid SaaS, no credit card, no live Meta/Google/TikTok APIs, no Lovable.
 | `/medical/credibility` | אמינות | Claims tagged doctor-fact / cited-source / marketing-copy |
 | `/medical/optibrain` | OptiBrain | 15 OptiBrain modules (audit, clinic/HMO, simulator, hijack, radar, offers, trends, no-show, compliance, reviews, ROAS scenarios, voice, dual HE/AR/EN, studio, templates) — empty defaults, no live competitor feed |
 | `/lp/[slug]` | — | Public landing (clinical template palettes). Demo lead form in localStorage |
-| `/about` | מה זה אילן | Product explainer |
+| `/about` | מה זה SAWEK AD | Product explainer |
 | `/self` | ניהול שיווק עצמי | Self-marketing workspace |
 
 Departments are **outputs of the same five agents**, never extra agents. Empty department screens load the demo client pack so no path is a dead button.
@@ -128,7 +128,7 @@ Structured JSON is the source; UI renders readable cards.
 - Media blueprints never call ad-network APIs.
 - Performance optimizer without entered results only shows **conditional** if/then rules.
 
-## OptiBrain desk (inside Ilan)
+## OptiBrain desk (inside SAWEK AD)
 
 Route `/medical/optibrain` hosts **15 modules** ported from OptiBrain (Lovable `opti-brain`, live https://opti-brain.lovable.app — **read-only**, never overwritten):
 
@@ -148,7 +148,7 @@ Route `/medical/optibrain` hosts **15 modules** ported from OptiBrain (Lovable `
 14. Visual studio (HMO badge preview + image prompts)
 15. Creative template warehouse
 
-Chrome stays Ilan **black / red / yellow**. Clinical palettes stay on `/lp/[slug]` only. Empty numbers render `[יש להשלים]` / `[يجب إكمال]` / `[TO COMPLETE]`. The five AdBrain agents are unchanged.
+Chrome stays SAWEK AD **black / red / yellow**. Clinical palettes stay on `/lp/[slug]` only. Empty numbers render `[יש להשלים]` / `[يجب إكمال]` / `[TO COMPLETE]`. The five Gemini agents are unchanged.
 
 ## Out of scope
 
