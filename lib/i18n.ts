@@ -25,7 +25,7 @@ export const copy: Dict = {
   "nav.campaigns": { he: "הקמפיינים שלי", ar: "حملاتي", en: "My campaigns" },
   "nav.about": { he: "מה זה אילן", ar: "ما هو إعلان", en: "What is Ilan" },
   "nav.self": { he: "ניהול שיווק עצמי", ar: "إدارة التسويق الذاتي", en: "Self-marketing" },
-  "nav.medical": { he: "רפואה", ar: "طب", en: "Medical" },
+  "nav.medical": { he: "OptiBrain", ar: "OptiBrain", en: "OptiBrain" },
   "footer.line": {
     he: "אילן · Ilan · إعلان",
     ar: "إعلان · Ilan · אילן",
@@ -280,9 +280,9 @@ export const copy: Dict = {
   "stack.upsell": { he: "אפסל", ar: "البيع الإضافي", en: "Upsell" },
   "stack.continuity": { he: "המשכיות", ar: "الاستمرار", en: "Continuity" },
   "med.lead": {
-    he: "דלפק רפואי: אפס הזיות, סימוני השלמה, באנר אתיקה, דף נחיתה, לידים ותורים. הקמפיין הכללי של חמשת הסוכנים נשאר בנפרד.",
-    ar: "مكتب طبي: صفر هلوسة ووسوم إكمال وشريط أخلاقي وصفحة هبوط وعملاء ومواعيد. حملة الوكلاء الخمسة تبقى منفصلة.",
-    en: "Medical desk: zero hallucination, TO COMPLETE markers, ethics banner, landing, leads and appointments. The five-agent general campaign stays separate.",
+    he: "דלפק OptiBrain בתוך אילן: אפס הזיות, סימוני השלמה, באנר אתיקה, דף נחיתה, לידים ותורים. חמשת סוכני OmniAd/AdBrain נשארים בנפרד.",
+    ar: "مكتب OptiBrain داخل إيلان: صفر هلوسة ووسوم إكمال وشريط أخلاقي وصفحة هبوط وعملاء ومواعيد. وكلاء OmniAd/AdBrain الخمسة يبقون منفصلين.",
+    en: "OptiBrain desk inside Ilan: zero hallucination, TO COMPLETE markers, ethics banner, landing, leads and appointments. The five OmniAd/AdBrain agents stay separate.",
   },
   "med.demo": { he: "הדגמה: מרפאת ילדים", ar: "عرض: عيادة أطفال", en: "Demo: pediatric clinic" },
   "med.step.specialty": { he: "התמחות", ar: "التخصص", en: "Specialty" },
@@ -348,6 +348,11 @@ export const copy: Dict = {
   "med.opti.bottleneck": { he: "צוואר בקבוק", ar: "عنق الزجاجة", en: "Bottleneck" },
   "med.opti.comp": { he: "שם מתחרה (רק אם תיעדתם)", ar: "اسم منافس (إن وثّقتموه)", en: "Competitor name (only if documented)" },
   "med.opti.compNote": { he: "מה ראיתם אצלם", ar: "ماذا رأيتم لديهم", en: "What you observed" },
+  "med.opti.sourceNote": {
+    he: "15 מודולי OptiBrain בתוך אילן. אין פיד מתחרים חי. מספרים ריקים = [יש להשלים]. המקור ב-GitHub לא נמצא ברשימה הציבורית — ראו README.",
+    ar: "15 وحدة OptiBrain داخل إعلان. لا بث منافسين حي. الأرقام الفارغة = [يجب إكمال]. مستودع GitHub لم يظهر في القائمة العامة — انظر README.",
+    en: "15 OptiBrain modules inside Ilan. No live competitor feed. Empty numbers = [TO COMPLETE]. No public GitHub repo named opti-brain was listed — see README.",
+  },
 };
 
 export function t(locale: Locale, key: keyof typeof copy): string {

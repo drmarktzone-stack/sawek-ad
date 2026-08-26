@@ -6,6 +6,7 @@ import type {
   OptiInputs,
 } from "./types";
 import { EMPTY_OPTI } from "./types";
+import { EMPTY_DESK, type OptiDeskState } from "./opti-state";
 
 const K = {
   clinic: "ilan-medical-clinic",
@@ -13,6 +14,7 @@ const K = {
   leads: "ilan-medical-leads",
   appointments: "ilan-medical-appointments",
   opti: "ilan-medical-opti",
+  desk: "ilan-optibrain-desk",
 };
 
 function canUse(): boolean {
@@ -93,4 +95,12 @@ export function loadOpti(): OptiInputs {
 
 export function saveOpti(o: OptiInputs) {
   write(K.opti, o);
+}
+
+export function loadOptiDesk(): OptiDeskState {
+  return { ...EMPTY_DESK, ...read<Partial<OptiDeskState>>(K.desk, {}) };
+}
+
+export function saveOptiDesk(state: OptiDeskState) {
+  write(K.desk, state);
 }

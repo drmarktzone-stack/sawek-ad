@@ -43,8 +43,8 @@ export function AboutPage() {
             p: "דיסקברי, אסטרטגיה, קריאייטיב, מדיה, לידים ומבצעים, אופס — מחלקות שהחמישה מייצרים. לא מחליפים אותם בחוקר/קופירייטר/מעצב. מדיה היא PLAN בלבד. לקוח הדגמה ממלא כל שולחן בלחיצה.",
           },
           {
-            h: "דלפק רפואי",
-            p: "מנוע אפס-הזיות: סימוני [יש להשלים], באנר אתיקה, פרופיל מרפאה, אשף התמחות, דפי נחיתה ציבוריים, לידים ותורים. OptiBrain דטרמיניסטי מקלטים. המקור ב-Lovable לא נגענו. פלטות קליניות רק בתבניות נחיתה.",
+            h: "דלפק OptiBrain",
+            p: "15 מודולים בתוך אילן: אבחון 360, קופת חולים, סימולטור, חטיפה רק מאות שאושר, מכ״ם רוויה, הצעות, טרנדים, אי-הגעה, ציות, ביקורות, תרחיש תשואה, קול, עברית/ערבית/אנגלית, סטודיו, תבניות. אין פיד מתחרים חי. מקור Lovable לא נגענו. ב-GitHub הציבורי של drmarktzone-stack לא הופיע ריפו בשם opti-brain.",
           },
           {
             h: "בלי APIs חיים",
@@ -71,8 +71,8 @@ export function AboutPage() {
               p: "الاستكشاف والاستراتيجية والإبداع والميديا والعملاء والعروض والتشغيل أقسام يُنتجها الوكلاء الخمسة. لا نستبدلهم بباحث/كاتب/مصمم. الميديا خطة فقط. عميل العرض يملأ كل مكتب بنقرة.",
             },
             {
-              h: "مكتب طبي",
-              p: "محرك صفر هلوسة: وسوم [يجب إكمال] وشريط أخلاقي وملف عيادة ومعالج تخصص وصفحات هبوط عامة. لم نلمس أصل Lovable. اللوحات السريرية على قوالب الهبوط فقط.",
+              h: "مكتب OptiBrain",
+              p: "15 وحدة داخل إعلان: تشخيص 360، صندوق مرضى، محاكٍ، اقتناص من إشارة مؤكَّدة فقط، رادار تشبع، عروض، ترندات، تغيب، امتثال، مراجعات، سيناريو عائد، صوت، عبري/عربي/إنجليزي، استوديو، قوالب. لا بث منافسين حي. لم نلمس Lovable. في GitHub العام لـ drmarktzone-stack لم يظهر مستودع باسم opti-brain.",
             },
             {
               h: "بلا واجهات حية",
@@ -98,8 +98,8 @@ export function AboutPage() {
               p: "Discovery, Strategy, Creative, Media, Leads & promo, and Ops are departments — outputs the same five agents produce. Never swapped for researcher/copywriter/designer. Media is PLAN only. Demo client one-click fills every desk.",
             },
             {
-              h: "Medical desk",
-              p: "Zero-hallucination engine: [TO COMPLETE] markers, ethics banner, clinic profile, specialty wizard, public landings, leads and appointments. OptiBrain is deterministic from your inputs. The Lovable original is untouched. Clinical palettes exist only inside landing templates.",
+              h: "OptiBrain desk",
+              p: "Fifteen modules inside Ilan: 360 audit, HMO clinic file, simulator, hijack from a confirmed signal only, saturation radar, offers, trends, no-shows, compliance, reviews, return scenarios, voice, HE/AR/EN ads, studio, templates. No live competitor feed. The Lovable original is untouched. The public GitHub list for drmarktzone-stack had no repo named opti-brain.",
             },
             {
               h: "No live ad APIs",

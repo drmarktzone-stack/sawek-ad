@@ -4,7 +4,9 @@ Locked product name: **Ilan** (Hebrew **אילן** = tree; Arabic **إعلان**
 
 User-facing brand is **Ilan**, never OmniAd Studio. Internal engines stay credited as **OmniAd engine** and **AdBrain agents**.
 
-This repository is a **third app**: the union of OmniAd (Base44 app `6a7712d0685a826e3eab0819`) and AdBrain (GitHub `drmarktzone-stack/adbrain-ai`, Origin `tmp-90dd9f664feed126`), plus a port of MedCampaign AI / OptiBrain (Lovable `1b75b82e-6b26-401e-aa7a-1ce137d0dfa8`) as an Ilan **Medical desk**. It must **not** modify, overwrite, or replace any of those originals.
+This repository is a **third app**: the union of OmniAd (Base44 app `6a7712d0685a826e3eab0819`) and AdBrain (GitHub `drmarktzone-stack/adbrain-ai`, Origin `tmp-90dd9f664feed126`), plus an **OptiBrain medical desk** inside Ilan. It must **not** modify, overwrite, or replace any of those originals — including Lovable project `1b75b82e-6b26-401e-aa7a-1ce137d0dfa8` (https://opti-brain.lovable.app).
+
+**GitHub source-of-truth check (drmarktzone-stack, public API, 2026-08-26):** no repository named `opti-brain` / `OptiBrain` / `optibrain` was visible. Public repos that *were* listed: `AestheticAI`, `https-med-campaign-creator.lovable.app` (size 0 — ignore), `medscan-ai`, `medscan-connect`. GitHub MCP in this environment was in error (private repos could not be listed). Features were merged from a **read-only** inspection of the Lovable OptiBrain project. **Do not invent a GitHub URL.**
 
 No paid SaaS, no credit card, no live Meta/Google/TikTok APIs, no Lovable.
 
@@ -31,11 +33,11 @@ No paid SaaS, no credit card, no live Meta/Google/TikTok APIs, no Lovable.
 | `/leads` | לידים ומבצעים | Magnet, form, CRM, booking CTA, promo codes, retargeting, cadence; self-marketing stays |
 | `/campaigns` | אופס | Campaign library, bible PDF, completeness score, KPI from user numbers, HITL gates |
 | `/campaigns/[id]` | — | Full result pack |
-| `/medical` | רפואה | Medical desk: clinic profile, specialty wizard, campaign + ethics banner |
+| `/medical` | OptiBrain | OptiBrain medical desk: clinic, specialty wizard, campaign + ethics banner |
 | `/medical/leads` | לידים רפואיים | CRM new/in-progress/closed, WhatsApp script, convert to appointment |
 | `/medical/appointments` | תורים | Hours, slot length, reminder as wa.me PLAN |
 | `/medical/credibility` | אמינות | Claims tagged doctor-fact / cited-source / marketing-copy |
-| `/medical/optibrain` | OptiBrain | Audit, buyer sim, fatigue, hijack framework, offer, ROAS from inputs, radar board |
+| `/medical/optibrain` | OptiBrain | 15 OptiBrain modules (audit, clinic/HMO, simulator, hijack, radar, offers, trends, no-show, compliance, reviews, ROAS scenarios, voice, dual HE/AR/EN, studio, templates) — empty defaults, no live competitor feed |
 | `/lp/[slug]` | — | Public landing (clinical template palettes). Demo lead form in localStorage |
 | `/about` | מה זה אילן | Product explainer |
 | `/self` | ניהול שיווק עצמי | Self-marketing workspace |
@@ -114,7 +116,7 @@ Structured JSON is the source; UI renders readable cards.
 
 ## Storage
 
-- Default: `localStorage` (`omniad-locale`, `omniad-draft`, `omniad-campaigns`, `omniad-studio-library`, `omniad-self`).
+- Default: `localStorage` (`omniad-locale`, `omniad-draft`, `omniad-campaigns`, `omniad-studio-library`, `omniad-self`, `ilan-medical-*`, `ilan-optibrain-desk`).
 - Optional Supabase if `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_ANON_KEY` are set. App **must run with zero keys**.
 - Optional `OPENAI_API_KEY` may enrich copy via `/api/generate`. Fallback templates always work and must be intake-driven, not lorem.
 
@@ -125,6 +127,28 @@ Structured JSON is the source; UI renders readable cards.
 - Diagnostic confidence is `low` when past-ad evidence is missing.
 - Media blueprints never call ad-network APIs.
 - Performance optimizer without entered results only shows **conditional** if/then rules.
+
+## OptiBrain desk (inside Ilan)
+
+Route `/medical/optibrain` hosts **15 modules** ported from OptiBrain (Lovable `opti-brain`, live https://opti-brain.lovable.app — **read-only**, never overwritten):
+
+1. 360° audit (old-method penalties, bottleneck rescue, 6-month scenario from **entered** budget)
+2. Clinic file + HMO + acquisition math from entered patients / close% / CPL
+3. Buyer simulator (4 personas, HE/AR/EN keyword checks)
+4. Competitor-gap hijack (**user-confirmed signal only** — no live scrape, no fake feed)
+5. Saturation radar (CTR/CPC/days you typed)
+6. Offer lab (blocked in HMO mode; conversion multipliers labeled as planning, not measured ROAS)
+7. Local trends (hooks only after the clinic confirms the event)
+8. No-show recovery (rate from entered bookings)
+9. Medical ad-policy shield (HE/AR/EN risk terms)
+10. Review engine (measured rating only; no invented stars)
+11. Return scenarios from CPM/CTR/LP%/close%/value you typed
+12. Voice → campaign outline (browser speech or typed note)
+13. Dual HE / AR / EN ads (cultural adaptation, not literal translation)
+14. Visual studio (HMO badge preview + image prompts)
+15. Creative template warehouse
+
+Chrome stays Ilan **black / red / yellow**. Clinical palettes stay on `/lp/[slug]` only. Empty numbers render `[יש להשלים]` / `[يجب إكمال]` / `[TO COMPLETE]`. The five AdBrain agents are unchanged.
 
 ## Out of scope
 
