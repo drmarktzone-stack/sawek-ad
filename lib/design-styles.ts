@@ -17,7 +17,7 @@ export const DESIGN_STYLES: DesignStyle[] = [
       ar: "حياة حقيقية، ضوء نهار، ناس في مكان طبيعي.",
       en: "Lived-in daylight scenes with real people in context.",
     },
-    palette: ["#1b1b1b", "#f5c518", "#d9cbb8"],
+    palette: ["#050505", "#ffe500", "#ff1a1a"],
     mood: "warm photo",
   },
   {
@@ -28,7 +28,7 @@ export const DESIGN_STYLES: DesignStyle[] = [
       ar: "أشكال ناعمة وألوان ترابية وشعور علاجي.",
       en: "Soft shapes, muted greens, a care-taking feel.",
     },
-    palette: ["#1e2a24", "#c5d5c0", "#f4efe6"],
+    palette: ["#1a0a0a", "#ffe500", "#7a1010"],
     mood: "calm organic",
   },
   {
@@ -39,7 +39,7 @@ export const DESIGN_STYLES: DesignStyle[] = [
       ar: "إطار لاقتباس عميل حقيقي فقط — بلا تقييمات مختلقة.",
       en: "Frame for a real customer quote only — never invented ratings.",
     },
-    palette: ["#141414", "#ff2a2a", "#f5c518"],
+    palette: ["#050505", "#ff1a1a", "#ffe500"],
     mood: "quote card",
   },
   {
@@ -50,7 +50,7 @@ export const DESIGN_STYLES: DesignStyle[] = [
       ar: "خلفية فاتحة ناعمة وخط هادئ يناسب العائلات.",
       en: "Soft light ground and gentle type — family-friendly.",
     },
-    palette: ["#f7e8ee", "#7a4e63", "#f5c518"],
+    palette: ["#1a1208", "#ffe500", "#ff1a1a"],
     mood: "pastel family",
   },
   {
@@ -61,7 +61,7 @@ export const DESIGN_STYLES: DesignStyle[] = [
       ar: "خط يدوي وأسود-أصفر وإحساس ستوديو.",
       en: "Hand-drawn line, black and yellow, studio energy.",
     },
-    palette: ["#0a0a0a", "#f5c518", "#ffffff"],
+    palette: ["#000000", "#ffe500", "#ffffff"],
     mood: "ink sketch",
   },
   {
@@ -72,7 +72,7 @@ export const DESIGN_STYLES: DesignStyle[] = [
       ar: "كتل هندسية وتباين قوي ورسالة واحدة.",
       en: "Geometric blocks, hard contrast, one message.",
     },
-    palette: ["#111111", "#f5c518", "#ff2a2a"],
+    palette: ["#111111", "#ffe500", "#ff1a1a"],
     mood: "flat geometric",
   },
   {
@@ -83,7 +83,7 @@ export const DESIGN_STYLES: DesignStyle[] = [
       ar: "مجلة ليلية وعنوان كبير ونص قليل.",
       en: "Night-magazine headline, little body copy.",
     },
-    palette: ["#0b0b0f", "#f2f2f2", "#ff2a2a"],
+    palette: ["#0b0b0b", "#ffe500", "#ff1a1a"],
     mood: "editorial",
   },
   {
@@ -94,7 +94,7 @@ export const DESIGN_STYLES: DesignStyle[] = [
       ar: "الكلمات هي التصميم. أصفر على أسود.",
       en: "The words are the design. Yellow on black.",
     },
-    palette: ["#000000", "#f5c518", "#ff2a2a"],
+    palette: ["#000000", "#ffe500", "#ff1a1a"],
     mood: "type poster",
   },
   {
@@ -105,7 +105,7 @@ export const DESIGN_STYLES: DesignStyle[] = [
       ar: "عرض سينمائي وتدرّج داكن وعنوان سفلي.",
       en: "Widescreen gradient, lower-third headline.",
     },
-    palette: ["#1a1010", "#f5c518", "#6b1c1c"],
+    palette: ["#1a0505", "#ffe500", "#8a1010"],
     mood: "cinematic still",
   },
   {
@@ -116,7 +116,7 @@ export const DESIGN_STYLES: DesignStyle[] = [
       ar: "أبيض مكسور وسطر واحد وكثير من الفراغ.",
       en: "Off-white, one line, lots of air.",
     },
-    palette: ["#f4f1ea", "#111111", "#ff2a2a"],
+    palette: ["#141414", "#ffe500", "#ff1a1a"],
     mood: "minimal",
   },
   {
@@ -127,7 +127,7 @@ export const DESIGN_STYLES: DesignStyle[] = [
       ar: "غرافيتي هادئ وإطار أحمر وطاقة محلية.",
       en: "Quiet graffiti energy, red frame, local pulse.",
     },
-    palette: ["#1c1c1c", "#ff2a2a", "#f5c518"],
+    palette: ["#0a0a0a", "#ff1a1a", "#ffe500"],
     mood: "urban",
   },
   {
@@ -138,7 +138,7 @@ export const DESIGN_STYLES: DesignStyle[] = [
       ar: "ألوان فيلم قديم وبورتريه ومصداقية.",
       en: "Aged-film tones, portrait, credibility.",
     },
-    palette: ["#2a2018", "#e8d3b0", "#c4492a"],
+    palette: ["#140c08", "#ffe500", "#c41212"],
     mood: "docu portrait",
   },
 ];

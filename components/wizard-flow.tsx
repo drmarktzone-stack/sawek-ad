@@ -15,7 +15,7 @@ import {
 } from "@/lib/chips";
 import { demoIntake, DEMO_LABEL } from "@/lib/demo";
 import { cmoFieldsMissing, emptyIntake, wizardReady } from "@/lib/engine/validate";
-import { assemblePack, idleStatus, runAfterApproval, runIntakeAndDiagnosis } from "@/lib/engine/run";
+import { assemblePack, idleStatus, runIntakeAndDiagnosis, runMedia, runOptimizerStage, runStrategic } from "@/lib/engine/run";
 import { loadDraft, saveDraft, upsertCampaign } from "@/lib/storage";
 import { uid } from "@/lib/utils";
 import { AREA_LABEL } from "@/lib/i18n";
@@ -89,6 +89,7 @@ export function WizardFlow() {
       [t("biz.name"), intake.businessName],
       [t("step.1"), TYPE_OPTIONS.find((o) => o.id === intake.type)?.label[locale] ?? intake.type],
       [t("details.depth"), DEPTH_OPTIONS.find((o) => o.id === intake.depth)?.label[locale] ?? intake.depth],
+      [t("biz.category"), intake.category],
       [t("biz.description"), intake.description],
       [t("details.audience"), intake.audience],
       [t("details.problem"), intake.biggestProblem],
@@ -164,26 +165,40 @@ export function WizardFlow() {
     setRunning(false);
   }
 
-  async function approve() {
+  async function advanceHitl() {
     if (!pack) return;
     setRunning(true);
-    const built = await runAfterApproval(intake, pack.diagnosis, onStatus);
-    const next: CampaignPack = {
-      ...pack,
-      ...built,
-      diagnosis: { ...pack.diagnosis, approved: true, approvedAt: new Date().toISOString() },
-      agentStatus: {
-        intake: "complete",
-        diagnostic: "approved",
-        strategic: "complete",
-        media: "complete",
-        optimizer: "complete",
-      },
-    };
-    upsertCampaign(next);
-    setPack(next);
+    if (agentStatus.diagnostic === "needs_approval") {
+      const built = await runStrategic(intake, pack.diagnosis, onStatus);
+      setPack({
+        ...pack,
+        ...built,
+        diagnosis: { ...pack.diagnosis, approved: true, approvedAt: new Date().toISOString() },
+      });
+    } else if (agentStatus.strategic === "needs_approval") {
+      const built = await runMedia(intake, onStatus);
+      setPack({ ...pack, ...built });
+    } else if (agentStatus.media === "needs_approval") {
+      const built = await runOptimizerStage(intake, pack.media, onStatus);
+      const next: CampaignPack = {
+        ...pack,
+        ...built,
+        agentStatus: {
+          intake: "complete",
+          diagnostic: "approved",
+          strategic: "approved",
+          media: "approved",
+          optimizer: "complete",
+        },
+        planActivated: false,
+      };
+      upsertCampaign(next);
+      setPack(next);
+      setRunning(false);
+      router.push(`/campaigns/${next.id}`);
+      return;
+    }
     setRunning(false);
-    router.push(`/campaigns/${next.id}`);
   }
 
   return (
@@ -387,7 +402,7 @@ export function WizardFlow() {
                 </dl>
                 <div className="px-5 py-5">
                   <h3 className="mb-2 font-bold text-white">{t("review.competitors")}</h3>
-                  <p className="mb-3 text-sm text-zinc-400">{t("review.competitorsEmpty")}</p>
+                  <p className="mb-3 text-sm text-zinc-400">{t("review.competitorsHint")}</p>
                   <ul className="mb-3 space-y-2">
                     {intake.competitors.map((c) => (
                       <li
@@ -415,6 +430,7 @@ export function WizardFlow() {
                     type="button"
                     variant="outline"
                     size="sm"
+                    disabled={intake.competitors.length >= 2}
                     onClick={() => {
                       setCompDraft({ id: uid("comp"), name: "", url: "", notes: "" });
                       setCompOpen(true);
@@ -429,7 +445,7 @@ export function WizardFlow() {
               <Button
                 type="button"
                 size="lg"
-                className="mt-6 w-full text-base font-black"
+                className="mt-6 w-full text-base font-black shadow-[0_12px_40px_rgba(255,26,26,0.55)]"
                 disabled={!wizardReady(intake) || running}
                 onClick={startBuild}
               >
@@ -512,7 +528,7 @@ export function WizardFlow() {
           pack={pack}
           agentStatus={agentStatus}
           running={running}
-          onApprove={approve}
+          onApprove={advanceHitl}
           onBack={() => {
             setPhase("wizard");
             setStep(4);
@@ -545,7 +561,7 @@ export function WizardFlow() {
             <Button
               type="button"
               className="w-full"
-              disabled={!compDraft.name.trim()}
+              disabled={!compDraft.name.trim() || intake.competitors.length >= 2}
               onClick={() => {
                 patch({ competitors: [...intake.competitors, compDraft] });
                 setCompOpen(false);
@@ -619,7 +635,7 @@ function AgentsPanel({
             ))}
           </div>
           {pack.intakeReport.missing.length > 0 && (
-            <div className="mt-4 rounded-xl border border-sky-500/30 bg-sky-500/10 p-3 text-sm text-sky-100">
+            <div className="mt-4 rounded-xl border border-omni-yellow/30 bg-omni-yellow/5 p-3 text-sm text-zinc-200">
               {pack.intakeReport.missing.map((m) => (
                 <p key={m.field}>
                   <strong>{m.label[locale]}:</strong> {m.reason[locale]}
@@ -637,7 +653,7 @@ function AgentsPanel({
             </div>
           )}
           <Button type="button" size="lg" className="mt-6 w-full" disabled={running} onClick={onApprove}>
-            {t("cta.approve")}
+            {agentStatus.diagnostic === "needs_approval" ? t("cta.approve") : t("cta.continueStage")}
           </Button>
           <button type="button" className="mt-3 w-full text-sm text-zinc-400" onClick={onBack}>
             {t("cta.reject")}

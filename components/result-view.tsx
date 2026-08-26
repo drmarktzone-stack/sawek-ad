@@ -2,14 +2,16 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Copy, Download, FileText, Lightbulb, Save, WandSparkles } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Copy, Download, FileText, Lightbulb, Link2, Pencil, Save, Shield, WandSparkles } from "lucide-react";
 import type { CampaignPack, Locale, OptimizerResultInput } from "@/lib/types";
 import { LOCALES, STRATEGY_META, VARIANT_META, t } from "@/lib/i18n";
 import { DESIGN_STYLES } from "@/lib/design-styles";
 import { copyAllAds, downloadTxt, printPdf } from "@/lib/export";
 import { produceAd } from "@/lib/engine/produce-ad";
 import { adviseFromResults } from "@/lib/engine/optimizer";
-import { upsertCampaign } from "@/lib/storage";
+import { highlightsOf, missionOf, pillarsOf } from "@/lib/engine/brief";
+import { saveDraft, upsertCampaign } from "@/lib/storage";
 import { Button } from "@/components/ui/button";
 import { Input, Label, Textarea } from "@/components/ui/input";
 import {
@@ -30,6 +32,7 @@ export function ResultView({
   onChange: (p: CampaignPack) => void;
 }) {
   const { locale, t: tr } = useI18n();
+  const router = useRouter();
   const [packLang, setPackLang] = useState<Locale>(locale);
   const [copied, setCopied] = useState<string | null>(null);
   const [idea, setIdea] = useState("");
@@ -65,6 +68,21 @@ export function ResultView({
     const next = { ...pack, producedAds: [ad, ...pack.producedAds] };
     upsertCampaign(next);
     onChange(next);
+  }
+
+  function activatePlan() {
+    const next = { ...pack, planActivated: true, saved: true };
+    upsertCampaign(next);
+    onChange(next);
+  }
+
+  function copyLink() {
+    void copyText("link", window.location.href);
+  }
+
+  function edit() {
+    saveDraft({ intake: pack.intake, step: 4 });
+    router.push("/");
   }
 
   function runOpt() {
@@ -110,6 +128,18 @@ export function ResultView({
           <Copy className="size-4" />
           {copied === "all" ? tr("cta.copied") : tr("cta.copyAll")}
         </Button>
+        <Button type="button" variant="dark" onClick={copyLink}>
+          <Link2 className="size-4" />
+          {copied === "link" ? tr("cta.copied") : tr("cta.copyLink")}
+        </Button>
+        <Button type="button" variant="dark" onClick={edit}>
+          <Pencil className="size-4" />
+          {tr("cta.edit")}
+        </Button>
+        <Button type="button" variant={pack.planActivated ? "dark" : "default"} onClick={activatePlan}>
+          <Shield className="size-4" />
+          {pack.planActivated ? tr("cta.activated") : tr("cta.activatePlan")}
+        </Button>
         <div className="ms-auto flex items-center gap-2">
           <span className="text-xs text-zinc-500">{tr("result.packLang")}</span>
           <div className="flex rounded-full border border-white/10 p-0.5">
@@ -133,7 +163,7 @@ export function ResultView({
       <div className="mb-8 grid gap-4 md:grid-cols-2">
         <div className="rounded-2xl border border-white/10 bg-omni-card p-5">
           <p className="text-xs font-bold uppercase tracking-wide text-zinc-500">
-            {tr("result.completeness")}
+            {tr("result.score")}
           </p>
           <p className="mt-1 text-3xl font-black text-omni-yellow">
             {pack.intakeReport.completeness}/100
@@ -167,8 +197,35 @@ export function ResultView({
         </div>
       </div>
 
+      <div className="mb-8 grid gap-4 lg:grid-cols-2">
+        <div className="rounded-2xl border border-omni-yellow/25 bg-omni-card p-5">
+          <p className="text-xs font-bold uppercase tracking-wide text-omni-yellow">{tr("result.mission")}</p>
+          <p className="mt-2 text-sm leading-relaxed text-zinc-200">{missionOf(pack.intake)[locale]}</p>
+        </div>
+        <div className="rounded-2xl border border-white/10 bg-omni-card p-5">
+          <p className="text-xs font-bold uppercase tracking-wide text-omni-yellow">{tr("result.highlights")}</p>
+          <ul className="mt-2 list-disc space-y-1 pe-5 text-sm text-zinc-300">
+            {highlightsOf(pack).map((h, i) => (
+              <li key={i}>{h[locale]}</li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      <div className="mb-8">
+        <h2 className="mb-3 text-lg font-black">{tr("result.pillars")}</h2>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {pillarsOf(pack.intake).map((p) => (
+            <div key={p.name} className="rounded-2xl border border-white/10 bg-omni-card p-4">
+              <p className="text-sm font-black text-omni-yellow">{p.name}</p>
+              <p className="mt-2 text-xs leading-relaxed text-zinc-400">{p.body[locale]}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {pack.intakeReport.missing.length > 0 && (
-        <div className="mb-4 rounded-2xl border border-sky-500/30 bg-sky-950/40 p-4 text-sm text-sky-100">
+        <div className="mb-4 rounded-2xl border border-omni-yellow/30 bg-omni-yellow/5 p-4 text-sm text-zinc-200">
           {pack.intakeReport.missing.slice(0, 6).map((m) => (
             <p key={m.field}>
               <strong>{m.label[locale]}:</strong> {m.reason[locale]} — {m.impact[locale]}
@@ -269,7 +326,7 @@ export function ResultView({
       </div>
 
       <div className="mt-10">
-        <h2 className="mb-2 text-xl font-black">{tr("design.title")}</h2>
+        <h2 className="mb-2 text-xl font-black">{tr("result.mockups")}</h2>
         <Label>{tr("design.idea")}</Label>
         <Textarea
           className="mb-4"
@@ -278,34 +335,50 @@ export function ResultView({
           placeholder={pack.intake.uniqueAdvantage}
         />
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {DESIGN_STYLES.map((s) => (
-            <article
-              key={s.id}
-              className="overflow-hidden rounded-2xl border border-white/10 bg-omni-card"
-            >
-              <div
-                className="flex h-28 items-end p-3"
-                style={{
-                  background: `linear-gradient(135deg, ${s.palette[0]}, ${s.palette[1]} 55%, ${s.palette[2]})`,
-                }}
+          {DESIGN_STYLES.map((s, idx) => {
+            const v = ads[idx % Math.max(ads.length, 1)];
+            const dark = true;
+            return (
+              <article
+                key={s.id}
+                className="overflow-hidden rounded-2xl border border-white/10 bg-black shadow-[0_0_24px_rgba(255,26,26,0.12)]"
               >
-                <span className="rounded bg-black/50 px-2 py-0.5 text-xs font-bold text-white">
-                  {s.name[locale]}
-                </span>
-              </div>
-              <div className="p-4">
-                <p className="text-sm text-zinc-400">{s.description[locale]}</p>
-                <Button
-                  type="button"
-                  size="sm"
-                  className="mt-3 w-full"
-                  onClick={() => makeAd(s.id)}
+                <div
+                  className="flex h-36 flex-col justify-end p-3"
+                  style={{
+                    background: `linear-gradient(160deg, ${s.palette[0]}, ${s.palette[1]} 70%, ${s.palette[2]})`,
+                  }}
                 >
-                  {tr("design.make")}
-                </Button>
-              </div>
-            </article>
-          ))}
+                  <p className={`text-lg font-black leading-tight ${dark ? "text-white" : "text-black"}`}>
+                    {v?.headline ?? pack.intake.businessName}
+                  </p>
+                </div>
+                <div className="space-y-3 bg-omni-card p-4">
+                  <p className="line-clamp-3 text-xs text-zinc-400">
+                    {v?.primaryText ?? pack.intake.uniqueAdvantage}
+                  </p>
+                  <span className="inline-block rounded-full bg-omni-yellow px-3 py-1 text-[11px] font-black text-black">
+                    {v?.cta ?? tr("design.produce")}
+                  </span>
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-[11px] font-bold text-zinc-500">{s.name[locale]}</p>
+                    <div className="flex gap-1">
+                      {s.palette.map((c) => (
+                        <span
+                          key={c}
+                          className="size-3 rounded-full border border-white/20"
+                          style={{ background: c }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  <Button type="button" size="sm" className="w-full" onClick={() => makeAd(s.id)}>
+                    {tr("design.make")}
+                  </Button>
+                </div>
+              </article>
+            );
+          })}
         </div>
         {pack.producedAds.length > 0 && (
           <div className="mt-6 grid gap-4 md:grid-cols-2">

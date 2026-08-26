@@ -28,10 +28,9 @@ export function Stepper({ step }: { step: WizardStep }) {
               )}
               <div
                 className={cn(
-                  "flex size-9 shrink-0 items-center justify-center rounded-full text-sm font-bold",
-                  done || active
-                    ? "bg-omni-yellow text-black"
-                    : "bg-white/10 text-zinc-400",
+                  "flex shrink-0 items-center justify-center rounded-full text-sm font-black transition-all",
+                  active ? "size-12 bg-omni-yellow text-black shadow-[0_0_24px_rgba(255,229,0,0.55)]" : "size-9",
+                  !active && (done ? "bg-omni-yellow text-black" : "bg-white/10 text-zinc-400"),
                 )}
               >
                 {done ? <Check className="size-4" strokeWidth={3} /> : n}

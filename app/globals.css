@@ -1,20 +1,20 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0a0a0a;
+  --background: #050505;
   --foreground: #f4f4f4;
-  --omni-yellow: #f5c518;
-  --omni-red: #ff2a2a;
+  --omni-yellow: #ffe500;
+  --omni-red: #ff1a1a;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-omni-yellow: #f5c518;
-  --color-omni-red: #ff2a2a;
-  --color-omni-black: #0a0a0a;
-  --color-omni-surface: #141414;
-  --color-omni-card: #1a1a1a;
+  --color-omni-yellow: #ffe500;
+  --color-omni-red: #ff1a1a;
+  --color-omni-black: #050505;
+  --color-omni-surface: #121212;
+  --color-omni-card: #171717;
   --font-sans: var(--font-heebo), var(--font-cairo), ui-sans-serif, system-ui, sans-serif;
 }
 
@@ -23,8 +23,9 @@ html {
 }
 
 body {
-  background: radial-gradient(1200px 600px at 80% -10%, #2a1200 0%, transparent 50%),
-    radial-gradient(900px 500px at 0% 100%, #3a0000 0%, transparent 45%),
+  background:
+    radial-gradient(720px 380px at 50% -60px, rgba(255, 26, 26, 0.42) 0%, transparent 62%),
+    radial-gradient(900px 500px at 100% 110%, rgba(255, 26, 26, 0.12) 0%, transparent 50%),
     var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);

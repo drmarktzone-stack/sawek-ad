@@ -39,7 +39,7 @@ No paid SaaS, no credit card, no live Meta/Google/TikTok APIs, no Lovable.
    4. **בנייה (Review & build)** — summary table, optional competitor add, generate CTA.
 2. **AdBrain CMO interview** — extra questions when numbers are missing (business model, margin, target CAC, audience proof, past ads, budget). **Refuse to guess missing numbers.**
 3. **Intake & Data Validator** runs consistency checks (e.g. CAC vs contribution margin).
-4. **Diagnostic Agent** produces why-ads-fail cards (offer / hook / price / audience / creative / targeting). **HITL: user must Approve before the pack is built.**
+4. **Diagnostic Agent** produces why-ads-fail cards (offer / hook / price / audience / creative / targeting). **HITL between stages:** user approves diagnosis, then strategy, then media, before the optimizer finishes the pack.
 5. After approval, generate in HE+AR+EN:
    - Full OmniAd marketing pack (6 copy variants + 12 strategy accordions + design studio).
    - AdBrain media/budget **blueprints** (Meta / Google / TikTok plans only).

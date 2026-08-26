@@ -263,6 +263,42 @@ export function generateStrategy(intake: Intake, diagnosis: Diagnosis): Strategy
         )),
       ],
     },
+    {
+      id: "keywords",
+      items: [
+        item(L("מילות כוונה", "كلمات النية", "Intent keywords"), L(
+          [intake.category, intake.location, intake.mainGoal].filter(Boolean).join(" · ") || "לא סופקו מילים — לא נרחיב ממתחרים שלא הוזנו.",
+          [intake.category, intake.location, intake.mainGoal].filter(Boolean).join(" · ") || "لا كلمات — لن نوسّع من منافسين غير مُدخلين.",
+          [intake.category, intake.location, intake.mainGoal].filter(Boolean).join(" · ") || "None given — will not expand from competitors you did not enter.",
+        )),
+      ],
+    },
+    {
+      id: "platforms",
+      items: [
+        item(L("מטא / גוגל / טיקטוק", "ميتا / جوجل / تيك توك", "Meta / Google / TikTok"), L(
+          "תוכנית בלבד. אין פרסום חי לרשת. הפעלה = PLAN.",
+          "خطة فقط. لا نشر حي. التفعيل = PLAN.",
+          "Plan only. No live network publish. Activate = PLAN.",
+        )),
+      ],
+    },
+    {
+      id: "budget",
+      items: [
+        item(L("תקציב", "الميزانية", "Budget"), L(
+          intake.monthlyBudget
+            ? `תקציב שסיפקת: ${intake.monthlyBudget} ₪ לחודש. פיצול בכרטיס המדיה.`
+            : "תקציב לא סופק — אין פיצול מספרי ולא מד לידים.",
+          intake.monthlyBudget
+            ? `الميزانية التي أعطيتها: ${intake.monthlyBudget} ₪ شهرياً.`
+            : "الميزانية غير معطاة — لا تقسيم رقمي.",
+          intake.monthlyBudget
+            ? `Budget you supplied: ${intake.monthlyBudget} ₪ / month. Split is on the media card.`
+            : "Budget not supplied — no numeric split and no lead gauge.",
+        )),
+      ],
+    },
     { id: "missing_questions", items: missingQs },
   ];
 }

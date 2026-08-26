@@ -200,6 +200,7 @@ export interface CampaignPack {
   producedAds: ProducedAd[];
   agentStatus: Record<AgentId, AgentStatus>;
   saved: boolean;
+  planActivated: boolean;
 }
 
 export interface StudioPiece {

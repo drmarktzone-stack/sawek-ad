@@ -40,31 +40,48 @@ export async function runIntakeAndDiagnosis(
   return { report, diagnosis };
 }
 
-export async function runAfterApproval(
+export async function runStrategic(
   intake: Intake,
   diagnosis: Diagnosis,
   onStatus: (id: AgentId, status: AgentStatus) => void,
-): Promise<Pick<CampaignPack, "variants" | "strategy" | "media" | "optimizer">> {
+) {
   const approved: Diagnosis = {
     ...diagnosis,
     approved: true,
-    approvedAt: new Date().toISOString(),
+    approvedAt: diagnosis.approvedAt ?? new Date().toISOString(),
   };
   onStatus("diagnostic", "approved");
   onStatus("strategic", "running");
-  await sleep(550);
+  await sleep(500);
   const variants = generateVariants(intake);
   const strategy = generateStrategy(intake, approved);
-  onStatus("strategic", "complete");
+  onStatus("strategic", "needs_approval");
+  return { variants, strategy };
+}
+
+export async function runMedia(
+  intake: Intake,
+  onStatus: (id: AgentId, status: AgentStatus) => void,
+) {
+  onStatus("strategic", "approved");
   onStatus("media", "running");
-  await sleep(450);
+  await sleep(400);
   const media = generateMedia(intake);
-  onStatus("media", "complete");
+  onStatus("media", "needs_approval");
+  return { media };
+}
+
+export async function runOptimizerStage(
+  intake: Intake,
+  media: ReturnType<typeof generateMedia>,
+  onStatus: (id: AgentId, status: AgentStatus) => void,
+) {
+  onStatus("media", "approved");
   onStatus("optimizer", "running");
   await sleep(350);
   const optimizer = generateOptimizer(intake, media);
   onStatus("optimizer", "complete");
-  return { variants, strategy, media, optimizer };
+  return { optimizer };
 }
 
 export function assemblePack(
@@ -97,5 +114,6 @@ export function assemblePack(
     producedAds: [],
     agentStatus: partial.agentStatus,
     saved: false,
+    planActivated: false,
   };
 }
