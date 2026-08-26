@@ -46,6 +46,8 @@ npm run dev
 
 Open [http://127.0.0.1:43147](http://127.0.0.1:43147).
 
+**Origin does not host a public website for this repo.** `origin repo view` returns the git remote only. This environment has no `VERCEL_TOKEN`, and the Origin CLI has no deploy/pages command. To open Ilan in a browser, run the command above locally, or use a tunnel to this machine while the agent is running.
+
 Zero API keys required. Copy is generated from intake with templates. Optional:
 
 ```

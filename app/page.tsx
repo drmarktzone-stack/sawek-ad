@@ -1,7 +1,7 @@
 "use client";
 
-import { WizardFlow } from "@/components/wizard-flow";
+import { HomeStudio } from "@/components/home-studio";
 
 export default function HomePage() {
-  return <WizardFlow />;
+  return <HomeStudio />;
 }

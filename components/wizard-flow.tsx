@@ -44,7 +44,7 @@ function Field({
   );
 }
 
-export function WizardFlow() {
+export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
   const { t, locale } = useI18n();
   const router = useRouter();
   const client = useIsClient();
@@ -239,14 +239,14 @@ export function WizardFlow() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:py-12">
-      <DepartmentRail />
+    <div className={embedded ? "mx-auto w-full max-w-3xl px-4 py-6 sm:py-8" : "mx-auto w-full max-w-3xl px-4 py-8 sm:py-12"}>
+      {!embedded && <DepartmentRail />}
       <div className="mb-6 flex flex-wrap items-center justify-center gap-2">
         <Button
           type="button"
           size="lg"
           data-demo="pediatric"
-          className="h-auto max-w-full whitespace-normal py-2 text-start"
+          className="h-auto max-w-full whitespace-normal py-2 text-start font-black"
           onClick={loadDemo}
         >
           {DEMO_LABEL[locale]}
@@ -259,7 +259,10 @@ export function WizardFlow() {
       {phase === "wizard" && (
         <>
           <Stepper step={step} />
-          <ConquerHeadline subtitle={step === 4 ? t("hero.review") : undefined} />
+          {!embedded && <ConquerHeadline subtitle={step === 4 ? t("hero.review") : undefined} />}
+          {embedded && step === 4 && (
+            <p className="mb-6 text-center text-sm font-medium text-zinc-400">{t("hero.review")}</p>
+          )}
 
           {step === 1 && (
             <section>
@@ -271,10 +274,10 @@ export function WizardFlow() {
                     key={opt.id}
                     type="button"
                     onClick={() => patch({ type: opt.id as Intake["type"] })}
-                    className={`rounded-2xl border p-5 text-start text-lg font-bold transition-colors ${
+                    className={`rounded-2xl border p-6 text-start text-xl font-black transition-all ${
                       intake.type === opt.id
-                        ? "border-omni-yellow bg-omni-yellow text-black"
-                        : "border-white/10 bg-omni-card text-white hover:border-omni-yellow/40"
+                        ? "border-omni-yellow bg-omni-yellow text-black shadow-[0_12px_40px_rgba(255,26,26,0.45)]"
+                        : "border-white/10 bg-omni-card text-white hover:border-omni-yellow/50 hover:shadow-[0_0_24px_rgba(255,229,0,0.12)]"
                     }`}
                   >
                     {opt.label[locale]}

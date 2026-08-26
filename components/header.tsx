@@ -70,13 +70,14 @@ export function Header() {
   if (pathname.startsWith("/lp/")) return null;
 
   return (
-    <header className="sticky top-0 z-40 border-b border-white/10 bg-black/80 backdrop-blur-md">
+    <header className="sticky top-0 z-40 border-b border-omni-yellow/20 bg-black/85 backdrop-blur-md">
+      <div className="h-1 w-full bg-gradient-to-l from-omni-yellow via-omni-red to-omni-yellow" />
       <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3">
         <Link href="/" className="flex shrink-0 flex-col leading-tight">
-          <span className="bg-gradient-to-l from-omni-yellow to-omni-red bg-clip-text text-xl font-black tracking-tight text-transparent">
+          <span className="bg-gradient-to-l from-omni-yellow to-omni-red bg-clip-text text-2xl font-black tracking-tight text-transparent">
             {t("brand.name")}
           </span>
-          <span className="text-[10px] font-semibold text-zinc-300">{t("brand.scripts")}</span>
+          <span className="text-[10px] font-semibold text-omni-yellow">{t("brand.scripts")}</span>
           <span className="text-[9px] text-zinc-500">{t("brand.tagline")}</span>
         </Link>
 
@@ -152,7 +153,8 @@ export function Footer() {
   const pathname = usePathname();
   if (pathname.startsWith("/lp/")) return null;
   return (
-    <footer className="mt-auto border-t border-white/10 py-8 text-center text-xs text-zinc-500">
+    <footer className="mt-auto border-t border-omni-red/30 bg-black py-8 text-center text-xs text-zinc-500">
+      <p className="mb-1 font-black text-omni-yellow">{t("brand.name")} · {t("brand.scripts")}</p>
       {t("footer.line")}
     </footer>
   );
