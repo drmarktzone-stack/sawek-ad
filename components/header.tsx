@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import {
+  Brain,
   Compass,
   Folder,
   HelpCircle,
@@ -11,7 +12,6 @@ import {
   Pencil,
   Search,
   SlidersHorizontal,
-  Stethoscope,
   Users,
   WandSparkles,
   X,
@@ -21,19 +21,18 @@ import { useI18n } from "./i18n-provider";
 import { LangLink } from "./lang-link";
 import { cn } from "@/lib/utils";
 
+/** Captured OmniAd chrome + user list — one link per route, no Creative/Studio or Ops/Campaigns duplicates. */
 const NAV = [
   { href: "/", key: "nav.build" as const, icon: WandSparkles },
   { href: "/discovery", key: "nav.discovery" as const, icon: Search },
   { href: "/strategy", key: "nav.strategy" as const, icon: Compass },
-  { href: "/studio", key: "nav.creative" as const, icon: Pencil },
   { href: "/studio", key: "nav.studio" as const, icon: Pencil },
   { href: "/media", key: "nav.media" as const, icon: Megaphone },
   { href: "/leads", key: "nav.leads" as const, icon: Users },
-  { href: "/medical/optibrain", key: "nav.medical" as const, icon: Stethoscope },
-  { href: "/campaigns", key: "nav.ops" as const, icon: Folder },
+  { href: "/medical/optibrain", key: "nav.medical" as const, icon: Brain },
   { href: "/campaigns", key: "nav.campaigns" as const, icon: Folder },
-  { href: "/self", key: "nav.self" as const, icon: SlidersHorizontal },
   { href: "/about", key: "nav.about" as const, icon: HelpCircle },
+  { href: "/self", key: "nav.self" as const, icon: SlidersHorizontal },
 ];
 
 export function LanguageToggle({ compact = false }: { compact?: boolean }) {
@@ -95,7 +94,7 @@ export function Header() {
                 key={item.key}
                 href={item.href}
                 className={cn(
-                  "flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1.5 text-[11px] font-semibold transition-colors",
+                  "flex shrink-0 items-center gap-1 rounded-full px-2 py-1.5 text-[11px] font-semibold transition-colors",
                   active
                     ? "bg-omni-yellow text-black"
                     : "text-zinc-300 hover:bg-white/5 hover:text-white",

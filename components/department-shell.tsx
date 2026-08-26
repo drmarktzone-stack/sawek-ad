@@ -25,11 +25,11 @@ const DEPT_RAIL = [
   { href: "/", key: "nav.build" as const },
   { href: "/discovery", key: "nav.discovery" as const },
   { href: "/strategy", key: "nav.strategy" as const },
-  { href: "/studio", key: "nav.creative" as const },
+  { href: "/studio", key: "nav.studio" as const },
   { href: "/media", key: "nav.media" as const },
   { href: "/leads", key: "nav.leads" as const },
   { href: "/medical/optibrain", key: "nav.medical" as const },
-  { href: "/campaigns", key: "nav.ops" as const },
+  { href: "/campaigns", key: "nav.campaigns" as const },
   { href: "/self", key: "nav.self" as const },
 ];
 

@@ -4,7 +4,7 @@ import { useMemo, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Copy, Download, FileText, Lightbulb, Link2, Pencil, Save, Shield, WandSparkles } from "lucide-react";
 import type { CampaignPack, Locale, OptimizerResultInput } from "@/lib/types";
-import { LOCALES, STRATEGY_META, VARIANT_META, t } from "@/lib/i18n";
+import { LOCALES, STRATEGY_META, VARIANT_META, orderedStrategy, t } from "@/lib/i18n";
 import { DESIGN_STYLES } from "@/lib/design-styles";
 import { copyAllAds, downloadTxt, printBible, printPdf } from "@/lib/export";
 import { DepartmentRail } from "@/components/department-shell";
@@ -254,10 +254,10 @@ export function ResultView({
         {[
           { href: "/discovery", key: "nav.discovery" as const, body: pack.agency?.discovery.icp[locale] },
           { href: "/strategy", key: "nav.strategy" as const, body: pack.agency?.strategy.positioning[locale] },
-          { href: "/studio", key: "nav.creative" as const, body: pack.agency?.creative.hooks[0]?.hook[locale] },
+          { href: "/studio", key: "nav.studio" as const, body: pack.agency?.creative.hooks[0]?.hook[locale] },
           { href: "/media", key: "nav.media" as const, body: pack.agency?.mediaExtra.planOnly[locale] },
           { href: "/leads", key: "nav.leads" as const, body: pack.agency?.leads.magnet[locale] },
-          { href: "/campaigns", key: "nav.ops" as const, body: tr("dept.opsLead") },
+          { href: "/campaigns", key: "nav.campaigns" as const, body: tr("dept.opsLead") },
         ].map((card) => (
           <LangLink
             key={card.href}
@@ -397,7 +397,7 @@ export function ResultView({
 
       <div className="mt-10">
         <Accordion type="multiple" className="rounded-2xl border border-white/10 bg-omni-card px-4">
-          {pack.strategy.map((block) => {
+          {orderedStrategy(pack.strategy).map((block) => {
             const meta = STRATEGY_META.find((s) => s.id === block.id);
             return (
               <AccordionItem key={block.id} value={block.id}>

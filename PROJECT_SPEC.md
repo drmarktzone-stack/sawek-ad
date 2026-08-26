@@ -28,10 +28,10 @@ No paid SaaS, no credit card, no live Meta/Google/TikTok APIs, no Lovable.
 | `/` | בניית קמפיין | 4-step wizard + CMO interview + HITL diagnosis |
 | `/discovery` | דיסקברי | CMO audit, ICP/personas/JTBD, competitor battlecards/SWOT |
 | `/strategy` | אסטרטגיה | Positioning, Hormozi, AIDA/PAS/HSO, offer stack, TOF-MOF-BOF, 90-day calendar |
-| `/studio` | קריאייטיב | Hook bank, angle matrix, copy factory (feed/story/reels/YouTube/RSA/search/landing/email/WA/SMS/flyer), 12 mockups, brand kit |
+| `/studio` | סטודיו תוכן | Hook bank, angle matrix, copy factory, 12 mockups, brand kit |
 | `/media` | מדיה | Meta/Google/TikTok/YouTube PLAN only — split, audiences, keywords, A/B, kill rules |
 | `/leads` | לידים ומבצעים | Magnet, form, CRM, booking CTA, promo codes, retargeting, cadence; self-marketing stays |
-| `/campaigns` | אופס | Campaign library, bible PDF, completeness score, KPI from user numbers, HITL gates |
+| `/campaigns` | הקמפיינים שלי | Campaign library, bible PDF, completeness score, KPI from user numbers, HITL gates |
 | `/campaigns/[id]` | — | Full result pack |
 | `/medical` | OptiBrain | OptiBrain medical desk: clinic, specialty wizard, campaign + ethics banner |
 | `/medical/leads` | לידים רפואיים | CRM new/in-progress/closed, WhatsApp script, convert to appointment |
@@ -39,7 +39,7 @@ No paid SaaS, no credit card, no live Meta/Google/TikTok APIs, no Lovable.
 | `/medical/credibility` | אמינות | Claims tagged doctor-fact / cited-source / marketing-copy |
 | `/medical/optibrain` | OptiBrain | 15 OptiBrain modules (audit, clinic/HMO, simulator, hijack, radar, offers, trends, no-show, compliance, reviews, ROAS scenarios, voice, dual HE/AR/EN, studio, templates) — empty defaults, no live competitor feed |
 | `/lp/[slug]` | — | Public landing (clinical template palettes). Demo lead form in localStorage |
-| `/about` | מה זה SAWEK AD | Product explainer |
+| `/about` | אודות | Product explainer |
 | `/self` | ניהול שיווק עצמי | Self-marketing workspace |
 
 Departments are **outputs of the same five agents**, never extra agents. Empty department screens load the demo client pack so no path is a dead button.

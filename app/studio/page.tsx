@@ -6,7 +6,7 @@ import { ContentStudio } from "@/components/content-studio";
 
 export default function StudioPage() {
   return (
-    <DepartmentShell titleKey="nav.creative" leadKey="dept.creativeLead">
+    <DepartmentShell titleKey="nav.studio" leadKey="dept.creativeLead">
       {({ pack, packLang, onPack }) => (
         <>
           <CreativeDeptView pack={pack} packLang={packLang} onPack={onPack} />

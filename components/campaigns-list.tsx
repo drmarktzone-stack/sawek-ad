@@ -55,7 +55,7 @@ export function CampaignsList() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10">
-      <ConquerHeadline subtitle={`${t("nav.ops")} · ${t("nav.campaigns")}`} />
+      <ConquerHeadline subtitle={t("nav.campaigns")} />
       <p className="mx-auto mb-6 max-w-2xl text-center text-sm text-zinc-400">{t("dept.opsLead")}</p>
       <DepartmentRail />
 

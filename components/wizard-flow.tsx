@@ -32,6 +32,7 @@ import { ConquerHeadline, Stepper } from "@/components/stepper";
 import { DepartmentRail } from "@/components/department-shell";
 import { useI18n } from "@/components/i18n-provider";
 import { useIsClient } from "@/lib/use-is-client";
+import { cn } from "@/lib/utils";
 
 function Field({
   label,
@@ -311,20 +312,52 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
   return (
     <div className={embedded ? "mx-auto w-full max-w-3xl px-4 py-6 sm:py-8" : "mx-auto w-full max-w-3xl px-4 py-8 sm:py-12"}>
       {!embedded && <DepartmentRail />}
-      <div className="mb-6 flex flex-wrap items-center justify-center gap-2">
-        <Button
-          type="button"
-          size="lg"
-          data-demo="pediatric"
-          className="h-auto max-w-full whitespace-normal py-2 text-start font-black"
-          onClick={loadDemo}
-        >
-          {DEMO_LABEL[locale]}
-        </Button>
-        <Button type="button" variant="ghost" size="sm" onClick={newCampaign}>
-          {t("cta.new")}
-        </Button>
-      </div>
+      {embedded ? (
+        <div className="mb-6 flex items-center justify-center">
+          <div className="flex items-center rounded-full border border-white/10 bg-black/50 p-0.5">
+            <button
+              type="button"
+              data-demo="pediatric"
+              onClick={loadDemo}
+              className={cn(
+                "rounded-full px-4 py-1.5 text-xs font-black transition-colors",
+                isPediatricDemo(intake)
+                  ? "bg-omni-yellow text-black"
+                  : "text-zinc-300 hover:text-white",
+              )}
+            >
+              {t("cta.demoShort")}
+            </button>
+            <button
+              type="button"
+              onClick={newCampaign}
+              className={cn(
+                "rounded-full px-4 py-1.5 text-xs font-semibold transition-colors",
+                !isPediatricDemo(intake)
+                  ? "bg-omni-yellow text-black"
+                  : "text-zinc-300 hover:text-white",
+              )}
+            >
+              {t("cta.new")}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="mb-6 flex flex-wrap items-center justify-center gap-2">
+          <Button
+            type="button"
+            size="lg"
+            data-demo="pediatric"
+            className="h-auto max-w-full whitespace-normal py-2 text-start font-black"
+            onClick={loadDemo}
+          >
+            {DEMO_LABEL[locale]}
+          </Button>
+          <Button type="button" variant="ghost" size="sm" onClick={newCampaign}>
+            {t("cta.new")}
+          </Button>
+        </div>
+      )}
 
       {phase === "wizard" && (
         <>

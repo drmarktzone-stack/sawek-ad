@@ -23,7 +23,7 @@ export const copy: Dict = {
   "nav.leads": { he: "לידים ומבצעים", ar: "العملاء والعروض", en: "Leads & promo" },
   "nav.ops": { he: "אופס", ar: "التشغيل", en: "Ops" },
   "nav.campaigns": { he: "הקמפיינים שלי", ar: "حملاتي", en: "My campaigns" },
-  "nav.about": { he: "מה זה SAWEK AD", ar: "ما هو SAWEK AD", en: "What is SAWEK AD" },
+  "nav.about": { he: "אודות", ar: "حول", en: "About" },
   "nav.self": { he: "ניהול שיווק עצמי", ar: "إدارة التسويق الذاتي", en: "Self-marketing" },
   "nav.medical": { he: "OptiBrain", ar: "OptiBrain", en: "OptiBrain" },
   "footer.line": {
@@ -137,6 +137,7 @@ export const copy: Dict = {
   "cta.back": { he: "חזרה", ar: "رجوع", en: "Back" },
   "cta.next": { he: "המשך", ar: "متابعة", en: "Continue" },
   "cta.demo": { he: "הדגמה בלי להקליד", ar: "تجربة بدون كتابة", en: "Demo — no typing" },
+  "cta.demoShort": { he: "דמו", ar: "تجربة", en: "Demo" },
   "cta.new": { he: "קמפיין חדש", ar: "حملة جديدة", en: "New campaign" },
   "cta.save": { he: "שמור קמפיין", ar: "حفظ الحملة", en: "Save campaign" },
   "cta.saved": { he: "נשמר", ar: "تم الحفظ", en: "Saved" },
@@ -198,9 +199,9 @@ export const copy: Dict = {
   "cta.edit": { he: "עריכה", ar: "تعديل", en: "Edit" },
   "cta.continueStage": { he: "אשר שלב והמשך", ar: "اعتماد المرحلة والمتابعة", en: "Approve stage and continue" },
   "review.competitorsHint": {
-    he: "הוסיפו מתחרים שראיתם בפועל (עד 8). באטלקארד רק משמות שתזינו — בלי המצאות.",
-    ar: "أضيفوا منافسين رأيتموهم فعلاً (حتى 8). بطاقات فقط من الأسماء التي تدخلونها.",
-    en: "Add competitors you actually observed (up to 8). Battlecards only from names you enter.",
+    he: "הוסיפו מתחרים שראיתם בפועל (1–2). באטלקארד רק משמות שתזינו — בלי המצאות.",
+    ar: "أضيفوا منافسين رأيتموهم فعلاً (1–2). بطاقات فقط من الأسماء التي تدخلونها.",
+    en: "Add competitors you actually observed (1–2). Battlecards only from names you enter.",
   },
   "result.scenario": { he: "תרחיש מהמספרים שלך", ar: "سيناريو من أرقامك", en: "Scenario from your numbers" },
   "result.noScenario": {
@@ -464,22 +465,31 @@ export const VARIANT_META: Record<
 };
 
 export const STRATEGY_META: { id: string; label: Record<Locale, string> }[] = [
+  { id: "business_audience", label: { he: "ניתוח העסק והקהל", ar: "تحليل النشاط والجمهور", en: "Business & audience" } },
+  { id: "keywords", label: { he: "מילות מפתח", ar: "كلمات مفتاحية", en: "Keywords" } },
+  { id: "platforms", label: { he: "פלטפורמות", ar: "المنصات", en: "Platforms" } },
+  { id: "budget", label: { he: "תקציב", ar: "الميزانية", en: "Budget" } },
+  { id: "creative_ideas", label: { he: "רעיונות קריאייטיב", ar: "أفكار إبداعية", en: "Creative ideas" } },
   { id: "selling_angles", label: { he: "זוויות מכירה", ar: "زوايا البيع", en: "Selling angles" } },
   { id: "video_scripts", label: { he: "סקריפטים לסרטונים", ar: "سكربتات الفيديو", en: "Video scripts" } },
   { id: "campaign_sequence", label: { he: "רצף הקמפיין המלא", ar: "تسلسل الحملة الكامل", en: "Full campaign sequence" } },
   { id: "app_marketing", label: { he: "שיווק האפליקציה", ar: "تسويق التطبيق", en: "App marketing" } },
   { id: "marketing_diagnosis", label: { he: "אבחון שיווקי", ar: "التشخيص التسويقي", en: "Marketing diagnosis" } },
-  { id: "business_audience", label: { he: "ניתוח העסק והקהל", ar: "تحليل النشاط والجمهور", en: "Business & audience" } },
   { id: "buying_psychology", label: { he: "פסיכולוגיית הקנייה", ar: "سيكولوجيا الشراء", en: "Buying psychology" } },
   { id: "objections", label: { he: "ניהול התנגדויות", ar: "إدارة الاعتراضات", en: "Objection handling" } },
   { id: "targeting", label: { he: "הצעות טירגוט", ar: "اقتراحات الاستهداف", en: "Targeting suggestions" } },
-  { id: "creative_ideas", label: { he: "רעיונות קריאייטיב", ar: "أفكار إبداعية", en: "Creative ideas" } },
   { id: "campaign_structure", label: { he: "מבנה הקמפיין", ar: "هيكل الحملة", en: "Campaign structure" } },
-  { id: "keywords", label: { he: "מילות מפתח", ar: "كلمات مفتاحية", en: "Keywords" } },
-  { id: "platforms", label: { he: "פלטפורמות", ar: "المنصات", en: "Platforms" } },
-  { id: "budget", label: { he: "תקציב", ar: "الميزانية", en: "Budget" } },
   { id: "missing_questions", label: { he: "שאלות להשלמת התמונה", ar: "أسئلة لاستكمال الصورة", en: "Questions to complete the picture" } },
 ];
+
+export function orderedStrategy<T extends { id: string }>(blocks: T[]): T[] {
+  const order = STRATEGY_META.map((s) => s.id);
+  return [...blocks].sort((a, b) => {
+    const ia = order.indexOf(a.id);
+    const ib = order.indexOf(b.id);
+    return (ia < 0 ? 999 : ia) - (ib < 0 ? 999 : ib);
+  });
+}
 
 export const AREA_LABEL: Record<string, Record<Locale, string>> = {
   offer: { he: "הצעה", ar: "العرض", en: "Offer" },
