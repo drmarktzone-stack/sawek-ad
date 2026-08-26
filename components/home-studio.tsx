@@ -71,6 +71,27 @@ export function HomeStudio() {
             </li>
           ))}
         </ul>
+        <ol className="mx-auto mt-10 grid max-w-4xl gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {(
+            [
+              ["home.how.1", "home.how.1b"],
+              ["home.how.2", "home.how.2b"],
+              ["home.how.3", "home.how.3b"],
+              ["home.how.4", "home.how.4b"],
+            ] as const
+          ).map(([title, body], i) => (
+            <li
+              key={title}
+              className="rounded-2xl border border-omni-yellow/25 bg-black/60 p-4 text-start"
+            >
+              <p className="text-[11px] font-black uppercase tracking-[0.2em] text-omni-red">
+                {t("home.how.title")} · 0{i + 1}
+              </p>
+              <p className="mt-2 text-lg font-black text-omni-yellow">{t(title)}</p>
+              <p className="mt-1 text-sm text-zinc-400">{t(body)}</p>
+            </li>
+          ))}
+        </ol>
       </section>
 
       <div id="studio" className="relative mx-auto max-w-4xl px-3 pb-16 sm:px-4">

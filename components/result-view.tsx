@@ -169,6 +169,9 @@ export function ResultView({
           <Pencil className="size-4" />
           {tr("cta.edit")}
         </Button>
+        <Button asChild variant="dark">
+          <Link href={`/plan/${pack.id}`}>{tr("cta.plan")}</Link>
+        </Button>
         <Button type="button" variant={pack.planActivated ? "dark" : "default"} onClick={activatePlan}>
           <Shield className="size-4" />
           {pack.planActivated ? tr("cta.activated") : tr("cta.activatePlan")}

@@ -279,6 +279,9 @@ export function OptiHub() {
         {moduleId === "dual" && <DualPanel desk={desk} patch={patch} loc={loc} />}
         {moduleId === "studio" && <StudioPanel desk={desk} patch={patch} loc={loc} isHmo={isHmo} clinicName={clinic?.name} />}
         {moduleId === "templates" && <TemplatesPanel desk={desk} patch={patch} loc={loc} />}
+        {moduleId === "iceberg" && <IcebergPanel desk={desk} patch={patch} loc={loc} />}
+        {moduleId === "vector" && <VectorPanel desk={desk} patch={patch} loc={loc} />}
+        {moduleId === "recovery" && <RecoveryPanel desk={desk} patch={patch} loc={loc} />}
       </div>
     </div>
   );
@@ -1262,6 +1265,132 @@ function TemplatesPanel({ desk, patch, loc }: Panel) {
           </Card>
         ))}
       </div>
+    </div>
+  );
+}
+
+function IcebergPanel({ desk, patch, loc }: Panel) {
+  return (
+    <div className="grid gap-4 lg:grid-cols-2">
+      <Card className="space-y-3">
+        <p className="text-sm font-black text-omni-yellow">
+          {pick({ he: "מה מעל המים (רק מה שכתבתם)", ar: "فوق الماء (ما كتبتموه فقط)", en: "Above water (only what you typed)" }, loc)}
+        </p>
+        <Label>{pick({ he: "הבעיה הגלויה", ar: "المشكلة الظاهرة", en: "Visible problem" }, loc)}</Label>
+        <Textarea value={desk.bottleneck} onChange={(e) => patch({ bottleneck: e.target.value })} />
+        <Label>{pick({ he: "מה משפחות לוחשות ולא כותבות במודעה", ar: "ما تهمس به العائلات ولا يُكتب في الإعلان", en: "What families whisper and ads omit" }, loc)}</Label>
+        <Textarea value={desk.adCopy} onChange={(e) => patch({ adCopy: e.target.value })} />
+      </Card>
+      <Card>
+        <p className="text-sm text-zinc-400">
+          {pick(
+            {
+              he: "קרחון ביקוש בלי TAM מומצא. אם אין רשימת המתנה / עונתיות / התנגדות — השדה נשאר [יש להשלים].",
+              ar: "جبل الجليد بلا حجم سوق مخترع. إن لم توجد قائمة انتظار أو موسمية أو اعتراض — يبقى [يجب إكمال].",
+              en: "Demand iceberg with no invented TAM. Waitlist / season / objection stay [TO COMPLETE] until you type them.",
+            },
+            loc,
+          )}
+        </p>
+        <ul className="mt-4 space-y-2 text-sm text-zinc-300">
+          <li>
+            {pick({ he: "גלוי", ar: "ظاهر", en: "Visible" }, loc)}:{" "}
+            {filled(desk.bottleneck) ? desk.bottleneck : toComplete(loc, loc === "he" ? "צוואר בקבוק" : loc === "ar" ? "عنق زجاجة" : "bottleneck")}
+          </li>
+          <li>
+            {pick({ he: "סמוי", ar: "خفي", en: "Hidden" }, loc)}:{" "}
+            {filled(desk.adCopy) ? desk.adCopy : toComplete(loc, loc === "he" ? "לחישה" : loc === "ar" ? "همس" : "whisper")}
+          </li>
+          <li>
+            {pick({ he: "ביקוש מספרי", ar: "طلب رقمي", en: "Numeric demand" }, loc)}:{" "}
+            {toComplete(loc, loc === "he" ? "אין אומדן שוק בלי מקור" : loc === "ar" ? "لا تقدير سوق بلا مصدر" : "no market estimate without a source")}
+          </li>
+        </ul>
+      </Card>
+    </div>
+  );
+}
+
+function VectorPanel({ desk, patch, loc }: Panel) {
+  const axes = [
+    {
+      a: pick({ he: "כאב", ar: "ألم", en: "Pain" }, loc),
+      b: pick({ he: "אמון", ar: "ثقة", en: "Trust" }, loc),
+    },
+    {
+      a: pick({ he: "זמינות", ar: "توفّر", en: "Availability" }, loc),
+      b: pick({ he: "מומחיות", ar: "خبرة", en: "Expertise" }, loc),
+    },
+  ];
+  return (
+    <div className="grid gap-4 lg:grid-cols-2">
+      <Card className="space-y-3">
+        <Label>{pick({ he: "מסר ליבה (במילים שלכם)", ar: "الرسالة الجوهر (بكلامكم)", en: "Core message (your words)" }, loc)}</Label>
+        <Textarea value={desk.coreMessage} onChange={(e) => patch({ coreMessage: e.target.value })} />
+        <Label>{pick({ he: "הוק", ar: "الخطاف", en: "Hook" }, loc)}</Label>
+        <Input value={desk.hook} onChange={(e) => patch({ hook: e.target.value })} />
+      </Card>
+      <Card>
+        <p className="text-sm text-zinc-400">
+          {pick(
+            {
+              he: "וקטור מסר — כיוון, לא ציון. בלי דירוג 1–10 מומצא.",
+              ar: "متجه رسالة — اتجاه لا درجة. بلا تقييم 1–10 مخترع.",
+              en: "Message vector — direction, not a score. No invented 1–10 ratings.",
+            },
+            loc,
+          )}
+        </p>
+        <p className="mt-4 text-lg font-black text-white">
+          {filled(desk.coreMessage) ? desk.coreMessage : toComplete(loc, loc === "he" ? "מסר" : loc === "ar" ? "رسالة" : "message")}
+        </p>
+        <ul className="mt-4 space-y-2 text-sm text-omni-yellow">
+          {axes.map((ax) => (
+            <li key={ax.a}>
+              {ax.a} → {ax.b}
+            </li>
+          ))}
+        </ul>
+      </Card>
+    </div>
+  );
+}
+
+function RecoveryPanel({ desk, patch, loc }: Panel) {
+  return (
+    <div className="grid gap-4 lg:grid-cols-2">
+      <Card className="space-y-3">
+        <Label>{pick({ he: "לידים קרים (מספר שמדדתם)", ar: "عملاء باردون (رقم قستموه)", en: "Cold leads (a number you measured)" }, loc)}</Label>
+        <Input value={desk.coldLeads} onChange={(e) => patch({ coldLeads: e.target.value })} />
+        <Label>{pick({ he: "אי-הגעות (מספר שמדדתם)", ar: "تغيب (رقم قستموه)", en: "No-shows (a number you measured)" }, loc)}</Label>
+        <Input value={desk.noShows} onChange={(e) => patch({ noShows: e.target.value })} />
+        <Label>{pick({ he: "ערוץ קיים", ar: "قناة موجودة", en: "Channel you actually have" }, loc)}</Label>
+        <Input value={desk.channel} onChange={(e) => patch({ channel: e.target.value })} />
+      </Card>
+      <Card>
+        <p className="text-sm text-zinc-400">
+          {pick(
+            {
+              he: "השבת לידים היא תוכנית וואטסאפ/שיחה — לא אחוז המרה מומצא. מדיה PLAN בלבד.",
+              ar: "الاسترداد خطة واتساب/اتصال — بلا نسبة تحويل مخترعة. ميديا PLAN فقط.",
+              en: "Recovery is a WhatsApp/call plan — no invented conversion rate. Media PLAN only.",
+            },
+            loc,
+          )}
+        </p>
+        <ol className="mt-4 list-decimal space-y-2 pe-5 text-sm text-zinc-300">
+          <li>{pick({ he: "יום 0: אישור שקיבלנו פנייה.", ar: "يوم 0: تأكيد الاستلام.", en: "Day 0: confirm we got the enquiry." }, loc)}</li>
+          <li>{pick({ he: "יום 1: שאלה אחת. בלי מבצע.", ar: "يوم 1: سؤال واحد. بلا عرض.", en: "Day 1: one question. No offer." }, loc)}</li>
+          <li>{pick({ he: "יום 3: סגירה או סגירת ליד.", ar: "يوم 3: إغلاق أو إقفال.", en: "Day 3: book or close-out." }, loc)}</li>
+        </ol>
+        <p className="mt-4 text-sm text-zinc-500">
+          {filled(desk.coldLeads)
+            ? desk.coldLeads
+            : toComplete(loc, loc === "he" ? "לידים קרים" : loc === "ar" ? "عملاء باردون" : "cold leads")}
+          {" · "}
+          {filled(desk.channel) ? desk.channel : "WhatsApp"}
+        </p>
+      </Card>
     </div>
   );
 }

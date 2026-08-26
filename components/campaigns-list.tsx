@@ -89,6 +89,9 @@ export function CampaignsList() {
                 <Button asChild size="sm">
                   <Link href={`/campaigns/${c.id}`}>{t("campaigns.open")}</Link>
                 </Button>
+                <Button asChild size="sm" variant="dark">
+                  <Link href={`/plan/${c.id}`}>{t("cta.plan")}</Link>
+                </Button>
                 <Button type="button" size="sm" variant="dark" onClick={() => printBible(c, locale)}>
                   {t("cta.bible")}
                 </Button>

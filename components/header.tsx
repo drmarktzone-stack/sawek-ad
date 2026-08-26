@@ -30,6 +30,7 @@ const NAV = [
   { href: "/leads", key: "nav.leads" as const, icon: Users },
   { href: "/medical/optibrain", key: "nav.medical" as const, icon: Stethoscope },
   { href: "/campaigns", key: "nav.ops" as const, icon: Folder },
+  { href: "/campaigns", key: "nav.campaigns" as const, icon: Folder },
   { href: "/self", key: "nav.self" as const, icon: SlidersHorizontal },
   { href: "/about", key: "nav.about" as const, icon: HelpCircle },
 ];
@@ -90,7 +91,7 @@ export function Header() {
                 : pathname.startsWith(item.href);
             return (
               <Link
-                key={item.href}
+                key={item.key}
                 href={item.href}
                 className={cn(
                   "flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1.5 text-[11px] font-semibold transition-colors",
@@ -131,7 +132,7 @@ export function Header() {
               const Icon = item.icon;
               return (
                 <Link
-                  key={item.href}
+                  key={item.key}
                   href={item.href}
                   onClick={() => setOpen(false)}
                   className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-zinc-200 hover:bg-white/5"

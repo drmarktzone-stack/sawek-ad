@@ -1079,6 +1079,9 @@ export const OPTI_MODULES = [
   { id: "dual", label: L("עברית / ערבית / אנגלית", "عبري / عربي / إنجليزي", "HE / AR / EN ads") },
   { id: "studio", label: L("סטודיו ויזואלי", "استوديو بصري", "Visual studio") },
   { id: "templates", label: L("מחסן תבניות", "مستودع القوالب", "Template warehouse") },
+  { id: "iceberg", label: L("קרחון ביקוש", "جبل الجليد", "Demand iceberg") },
+  { id: "vector", label: L("וקטור מסר", "متجه الرسالة", "Message vector") },
+  { id: "recovery", label: L("השבת לידים", "استرداد العملاء", "Lead recovery") },
 ] as const;
 
 export type OptiModuleId = (typeof OPTI_MODULES)[number]["id"];

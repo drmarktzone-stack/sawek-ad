@@ -139,6 +139,7 @@ export function MedicalDesk() {
           <span className={step >= 1 ? "text-omni-yellow" : ""}>1. {t("med.step.specialty")}</span>
           <span className={step >= 2 ? "text-omni-yellow" : ""}>2. {t("med.step.clinic")}</span>
           <span className={step >= 3 ? "text-omni-yellow" : ""}>3. {t("med.step.campaign")}</span>
+          <span className={preview ? "text-omni-yellow" : ""}>4. {t("med.step.landing")}</span>
         </div>
       </div>
 
