@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+:root {
+  --background: #0a0a0a;
+  --foreground: #f4f4f4;
+  --omni-yellow: #f5c518;
+  --omni-red: #ff2a2a;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-omni-yellow: #f5c518;
+  --color-omni-red: #ff2a2a;
+  --color-omni-black: #0a0a0a;
+  --color-omni-surface: #141414;
+  --color-omni-card: #1a1a1a;
+  --font-sans: var(--font-heebo), var(--font-cairo), ui-sans-serif, system-ui, sans-serif;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background: radial-gradient(1200px 600px at 80% -10%, #2a1200 0%, transparent 50%),
+    radial-gradient(900px 500px at 0% 100%, #3a0000 0%, transparent 45%),
+    var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  min-height: 100%;
+}
+
+::selection {
+  background: #f5c518;
+  color: #000;
+}
+
+@keyframes accordion-down {
+  from { height: 0; }
+  to { height: var(--radix-accordion-content-height); }
+}
+@keyframes accordion-up {
+  from { height: var(--radix-accordion-content-height); }
+  to { height: 0; }
+}
+.animate-accordion-down { animation: accordion-down 0.2s ease-out; }
+.animate-accordion-up { animation: accordion-up 0.2s ease-out; }

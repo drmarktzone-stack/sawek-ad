@@ -1,0 +1,196 @@
+import type { Diagnosis, DiagnosisHypothesis, Intake, IntakeReport, Locale } from "../types";
+import { filled } from "../utils";
+import { isNoOffer } from "../no-offer";
+
+const L = (he: string, ar: string, en: string): Record<Locale, string> => ({ he, ar, en });
+
+export function diagnose(intake: Intake, report: IntakeReport): Diagnosis {
+  const hypotheses: DiagnosisHypothesis[] = [];
+  const past = `${intake.pastAds} ${intake.whatFailed} ${intake.pastResults}`.toLowerCase();
+  const hasPast = filled(intake.pastAds) || filled(intake.whatFailed);
+
+  const freeConsult =
+    /ייעוץ חינם|استشارة مجان|free consult|free consultation/.test(past) ||
+    /ייעוץ חינם|استشارة مجان|free consult/.test(intake.offer.toLowerCase());
+
+  if (freeConsult) {
+    hypotheses.push({
+      area: "offer",
+      confidence: "high",
+      finding: L(
+        "הצעת «ייעוץ חינם» מושכת סקרנים במקום לקוחות שמוכנים להתחייב.",
+        "عرض «استشارة مجانية» يجذب الفضوليين لا الملتزمين.",
+        "A “free consult” offer pulls curiosity, not commitment.",
+      ),
+      evidence: L(
+        hasPast
+          ? "זה מה שתואר במודעות הקודמות / בתוצאות."
+          : "ההצעה הנוכחית כוללת ייעוץ חינם.",
+        hasPast ? "هذا ما وُصف في الإعلانات السابقة." : "العرض الحالي يتضمن استشارة مجانية.",
+        hasPast ? "This is what the past ads / results described." : "The current offer includes a free consult.",
+      ),
+      recommendation: L(
+        "הסר את החינם כהוק ראשי. דבר על הבעיה והיתרון, עם CTA לתור / שיחה — בלי הבטחת מתנה.",
+        "أزل المجاني كخطاف رئيسي. تحدّث عن المشكلة والميزة مع CTA لموعد.",
+        "Drop free as the main hook. Speak to the problem and advantage, CTA to a booking — no gift promise.",
+      ),
+    });
+  } else if (isNoOffer(intake.offer)) {
+    hypotheses.push({
+      area: "offer",
+      confidence: hasPast ? "medium" : "low",
+      finding: L(
+        "אין מבצע — זה תקין. הערך חייב לבוא מהשירות ומהיתרון, לא מהנחה מומצאת.",
+        "لا يوجد عرض — وهذا سليم. القيمة يجب أن تأتي من الخدمة والميزة.",
+        "No promo — that’s valid. Value must come from the service and the advantage, not a fake discount.",
+      ),
+      evidence: L(
+        "שדה המבצע הוא «אין מבצע» או ריק.",
+        "حقل العرض «لا يوجد عرض» أو فارغ.",
+        "The offer field is “No offer” or empty.",
+      ),
+      recommendation: L(
+        "אל תמציאו קופון. חזקו את ההוּק סביב הבעיה והיתרון הייחודי.",
+        "لا تخترعوا كوبوناً. قوّوا الخطاف حول المشكلة والميزة.",
+        "Do not invent a coupon. Strengthen the hook around the problem and unique advantage.",
+      ),
+    });
+  }
+
+  if (filled(intake.biggestProblem) && filled(intake.audience)) {
+    hypotheses.push({
+      area: "hook",
+      confidence: hasPast ? "medium" : "low",
+      finding: L(
+        "ההוק צריך לפתוח בבעיה של הקהל, לא בשם העסק.",
+        "يجب أن يبدأ الخطاف بمشكلة الجمهور لا باسم النشاط.",
+        "The hook should open on the audience’s problem, not the business name.",
+      ),
+      evidence: L(
+        `קהל: ${intake.audience}. בעיה: ${intake.biggestProblem}.`,
+        `الجمهور: ${intake.audience}. المشكلة: ${intake.biggestProblem}.`,
+        `Audience: ${intake.audience}. Problem: ${intake.biggestProblem}.`,
+      ),
+      recommendation: L(
+        "משפט ראשון = כאב ספציפי. שם העסק בשורה השנייה או ב-CTA.",
+        "الجملة الأولى = ألم محدد. اسم النشاط في الثانية أو في CTA.",
+        "First line = specific pain. Business name on line two or in the CTA.",
+      ),
+    });
+  }
+
+  if (!filled(intake.location) && intake.type !== "app") {
+    hypotheses.push({
+      area: "targeting",
+      confidence: "high",
+      finding: L(
+        "חסר מיקום — טירגוט מקומי בלי אזור הוא ניחוש, ולכן לא ייקבע רדיוס.",
+        "الموقع ناقص — استهداف محلي بلا منطقة تخمين، لذلك لن يُحدد نطاق.",
+        "Location is missing — local targeting without an area is a guess, so no radius will be set.",
+      ),
+      evidence: L("שדה מיקום ריק.", "حقل الموقع فارغ.", "Location field is empty."),
+      recommendation: L(
+        "הוסיפו עיר / אשכול יישובים לפני קניית מדיה.",
+        "أضيفوا مدينة / مجموعة بلدات قبل شراء الميديا.",
+        "Add a city / cluster of towns before any media buy.",
+      ),
+    });
+  }
+
+  if (!hasPast) {
+    hypotheses.push({
+      area: "creative",
+      confidence: "low",
+      finding: L(
+        "אין היסטוריית מודעות — אי אפשר לדעת מה נכשל. האבחון הוא כיוון עבודה, לא פסק דין.",
+        "لا تاريخ إعلانات — لا يمكن معرفة ما فشل. التشخيص اتجاه عمل لا حكم.",
+        "No ad history — we cannot know what failed. This diagnosis is a working direction, not a verdict.",
+      ),
+      evidence: L("מודעות קודמות לא מולאו.", "الإعلانات السابقة غير مملوءة.", "Past ads were not filled in."),
+      recommendation: L(
+        "שמרו צילומי מודעות הבאים (טקסט, קהל, הוצאה, תוצאה) כדי שהאבחון הבא יהיה מבוסס.",
+        "احفظوا لقطات الإعلانات القادمة (نص، جمهور، إنفاق، نتيجة).",
+        "Keep screenshots of the next ads (copy, audience, spend, result) so the next diagnosis is grounded.",
+      ),
+    });
+  } else if (/לא נמדד|not measured|لم يُقس|אין מספר/.test(past)) {
+    hypotheses.push({
+      area: "funnel",
+      confidence: "medium",
+      finding: L(
+        "המדידה חסרה — בלי ליד מוגדר אי אפשר לדבר על כישלון קריאייטיב מול כישלון מעקב.",
+        "القياس ناقص — بلا تعريف للعميل المحتمل لا نفرّق فشل الإبداع عن فشل التتبع.",
+        "Measurement is missing — without a defined lead we cannot separate creative failure from tracking failure.",
+      ),
+      evidence: L(intake.pastResults || intake.whatFailed, intake.pastResults || intake.whatFailed, intake.pastResults || intake.whatFailed),
+      recommendation: L(
+        "הגדירו המרה אחת (תור / וואטסאפ עם שם) לפני הסקייל.",
+        "عرّفوا تحويلاً واحداً (موعد / واتساب باسم) قبل التوسيع.",
+        "Define one conversion (booking / WhatsApp with a name) before any scale.",
+      ),
+    });
+  }
+
+  const aovRelated = report.inconsistencies.some((i) => i.issue.en.includes("CAC"));
+  if (aovRelated) {
+    hypotheses.push({
+      area: "price",
+      confidence: "high",
+      finding: L(
+        "היחידה הכלכלית שבורה: CAC היעד גבוה מהתרומה לביקור/הזמנה.",
+        "وحدة الاقتصاد مكسورة: CAC أعلى من المساهمة.",
+        "Unit economics are broken: target CAC is above contribution per order.",
+      ),
+      evidence: report.inconsistencies[0]?.detail ?? L("", "", ""),
+      recommendation: L(
+        "או מעלים ערך ביקור (חבילה), או מורידים CAC יעד, או לא מריצים מדיה בתקציב הזה.",
+        "إمّا رفع قيمة الزيارة أو خفض CAC أو عدم تشغيل الميديا بهذه الميزانية.",
+        "Raise visit value (a package), lower target CAC, or do not run media at this budget.",
+      ),
+    });
+  }
+
+  if (filled(intake.audience) && /כולם|everyone|الجميع|all people/.test(intake.audience.toLowerCase())) {
+    hypotheses.push({
+      area: "audience",
+      confidence: "medium",
+      finding: L(
+        "«כולם» הוא לא קהל. מודעה לכולם נשמעת לאף אחד.",
+        "«الجميع» ليس جمهوراً. إعلان للجميع لا يسمعه أحد.",
+        "“Everyone” is not an audience. An ad to everyone sounds like an ad to no one.",
+      ),
+      evidence: L(intake.audience, intake.audience, intake.audience),
+      recommendation: L(
+        "צמצמו לקבוצה עם בעיה משותפת ומקום משותף.",
+        "ضيّقوا إلى مجموعة بمشكلة ومكان مشتركين.",
+        "Narrow to a group with a shared problem and a shared place.",
+      ),
+    });
+  }
+
+  if (hypotheses.length === 0) {
+    hypotheses.push({
+      area: "funnel",
+      confidence: "low",
+      finding: L(
+        "אין מספיק ראיות לכישלון ספציפי. נבנה קמפיין מהנתונים שכן ניתנו, ונסמן חוסרים.",
+        "لا أدلة كافية على فشل محدد. سنبني من المعطيات المتوفرة ونؤشر النواقص.",
+        "Not enough evidence of a specific failure. We will build from what was given and flag gaps.",
+      ),
+      evidence: L("שדות היסטוריה דלים.", "حقول التاريخ ضعيفة.", "History fields are thin."),
+      recommendation: L(
+        "אשרו את האבחון הזה כבסיס עבודה, לא כעובדה.",
+        "اعتمدوا هذا التشخيص كأساس عمل لا كحقيقة.",
+        "Approve this diagnosis as a working base, not as fact.",
+      ),
+    });
+  }
+
+  const summary = L(
+    "אבחון מבוסס רק על מה שמולא. אין ניחוש של מתחרים או תוצאות. נדרש אישור אנושי לפני הבנייה.",
+    "التشخيص مبني فقط على ما مُلئ. لا تخمين لمنافسين أو نتائج. يلزم اعتماد بشري قبل البناء.",
+    "Diagnosis uses only what you filled in. No guessed competitors or results. Human approval is required before build.",
+  );
+
+  return { summary, hypotheses, approved: false };
+}

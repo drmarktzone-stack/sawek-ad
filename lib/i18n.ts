@@ -1,0 +1,235 @@
+import type { Locale } from "./types";
+
+type Dict = Record<string, Record<Locale, string>>;
+
+export const copy: Dict = {
+  "brand.tagline": {
+    he: "The Future of Advertising",
+    ar: "The Future of Advertising",
+    en: "The Future of Advertising",
+  },
+  "nav.build": { he: "בניית קמפיין", ar: "بناء حملة", en: "Build campaign" },
+  "nav.studio": { he: "סטודיו תוכן", ar: "ستوديو المحتوى", en: "Content studio" },
+  "nav.campaigns": { he: "הקמפיינים שלי", ar: "حملاتي", en: "My campaigns" },
+  "nav.about": { he: "מה זה OmniAd", ar: "ما هو OmniAd", en: "What is OmniAd" },
+  "nav.self": { he: "ניהול שיווק עצמי", ar: "إدارة التسويق الذاتي", en: "Self-marketing" },
+  "footer.line": {
+    he: "OmniAd – The Future of Advertising",
+    ar: "OmniAd – The Future of Advertising",
+    en: "OmniAd – The Future of Advertising",
+  },
+  "hero.titlePrefix": { he: "מה בא לך", ar: "ماذا تريد أن", en: "What do you feel like" },
+  "hero.conquer": { he: "לכבוש", ar: "تغزو", en: "conquering" },
+  "hero.titleSuffix": { he: "היום?", ar: "اليوم؟", en: "today?" },
+  "hero.review": { he: "סקירה ובנייה", ar: "مراجعة وبناء", en: "Review and build" },
+  "step.1": { he: "סוג", ar: "النوع", en: "Type" },
+  "step.2": { he: "העסק", ar: "النشاط", en: "Business" },
+  "step.3": { he: "פרטים", ar: "التفاصيل", en: "Details" },
+  "step.4": { he: "בנייה", ar: "البناء", en: "Build" },
+  "type.prompt": {
+    he: "מה אתה מפרסם?",
+    ar: "ماذا تعلن؟",
+    en: "What are you advertising?",
+  },
+  "type.hint": {
+    he: "בחירה אחת. אפשר לשנות אחר כך.",
+    ar: "اختيار واحد. يمكن تغييره لاحقاً.",
+    en: "Pick one. You can change it later.",
+  },
+  "biz.name": { he: "שם העסק", ar: "اسم النشاط", en: "Business name" },
+  "biz.category": { he: "תחום", ar: "المجال", en: "Category" },
+  "biz.description": { he: "העסק בקצרה", ar: "النشاط باختصار", en: "The business in brief" },
+  "biz.location": { he: "מיקום", ar: "الموقع", en: "Location" },
+  "biz.website": { he: "אתר (אופציונלי)", ar: "موقع (اختياري)", en: "Website (optional)" },
+  "biz.namePh": { he: "למשל: סטודיו נועה", ar: "مثال: ستوديو نورة", en: "e.g. Noa Studio" },
+  "biz.categoryPh": { he: "למשל: קליניקה, חנות, אפליקציה", ar: "مثال: عيادة، متجر، تطبيق", en: "e.g. clinic, shop, app" },
+  "biz.descPh": {
+    he: "מה אתם עושים, למי, ובמה זה שונה. בלי סיסמאות ריקות.",
+    ar: "ماذا تفعلون، لمن، وبماذا تختلفون. بلا شعارات فارغة.",
+    en: "What you do, for whom, and how you differ. No empty slogans.",
+  },
+  "biz.locationPh": { he: "עיר / אזור", ar: "مدينة / منطقة", en: "City / region" },
+  "details.audience": { he: "קהל יעד", ar: "الجمهور المستهدف", en: "Target audience" },
+  "details.problem": { he: "הבעיה הכי גדולה", ar: "أكبر مشكلة", en: "Biggest problem" },
+  "details.advantage": { he: "יתרון ייחודי", ar: "الميزة الفريدة", en: "Unique advantage" },
+  "details.goal": { he: "מטרה עיקרית", ar: "الهدف الرئيسي", en: "Main goal" },
+  "details.offer": { he: "מבצע מיוחד", ar: "عرض خاص", en: "Special offer" },
+  "details.depth": { he: "עומק", ar: "العمق", en: "Depth" },
+  "details.writeOwn": { he: "כתוב בעצמך", ar: "اكتب بنفسك", en: "Write your own" },
+  "details.offerHint": {
+    he: "ברירת המחדל היא «אין מבצע». אל תמציא הנחה או ייעוץ חינם אם אין.",
+    ar: "الافتراضي «لا يوجد عرض». لا تخترع خصماً أو استشارة مجانية.",
+    en: "Default is “No offer”. Don’t invent a discount or free consult.",
+  },
+  "review.heading": { he: "זה מה שייכנס לקמפיין", ar: "هذا ما سيدخل الحملة", en: "This is what goes into the campaign" },
+  "review.competitors": { he: "ניתוח מתחרים", ar: "تحليل المنافسين", en: "Competitor analysis" },
+  "review.competitorsEmpty": {
+    he: "לא הוזנו מתחרים. המערכת לא תמציא שמות, מחירים או ביקורות.",
+    ar: "لم تُدخل منافسين. النظام لن يخترع أسماء أو أسعاراً أو تقييمات.",
+    en: "No competitors added. The system will not invent names, prices, or reviews.",
+  },
+  "review.addCompetitor": { he: "+ הוסף מתחרה", ar: "+ أضف منافساً", en: "+ Add competitor" },
+  "review.compName": { he: "שם", ar: "الاسم", en: "Name" },
+  "review.compUrl": { he: "קישור (אופציונלי)", ar: "رابط (اختياري)", en: "URL (optional)" },
+  "review.compNotes": { he: "מה ראית בפועל", ar: "ماذا رأيت فعلاً", en: "What you actually observed" },
+  "review.saveComp": { he: "שמור מתחרה", ar: "حفظ المنافس", en: "Save competitor" },
+  "review.cancel": { he: "ביטול", ar: "إلغاء", en: "Cancel" },
+  "review.remove": { he: "הסר", ar: "حذف", en: "Remove" },
+  "cta.build": { he: "בנה לי קמפיין מלא", ar: "ابنِ لي حملة كاملة", en: "Build me a full campaign" },
+  "cta.back": { he: "חזרה", ar: "رجوع", en: "Back" },
+  "cta.next": { he: "המשך", ar: "متابعة", en: "Continue" },
+  "cta.demo": { he: "הדגמה בלי להקליד", ar: "تجربة بدون كتابة", en: "Demo — no typing" },
+  "cta.new": { he: "קמפיין חדש", ar: "حملة جديدة", en: "New campaign" },
+  "cta.save": { he: "שמור קמפיין", ar: "حفظ الحملة", en: "Save campaign" },
+  "cta.saved": { he: "נשמר", ar: "تم الحفظ", en: "Saved" },
+  "cta.pdf": { he: "הורדה כ-PDF", ar: "تنزيل PDF", en: "Download PDF" },
+  "cta.txt": { he: "הורדה כטקסט", ar: "تنزيل نص", en: "Download text" },
+  "cta.copyAll": { he: "העתק הכל", ar: "نسخ الكل", en: "Copy all" },
+  "cta.copy": { he: "העתק", ar: "نسخ", en: "Copy" },
+  "cta.copied": { he: "הועתק", ar: "تم النسخ", en: "Copied" },
+  "cta.approve": { he: "אשר אבחון והמשך לבנייה", ar: "اعتماد التشخيص والمتابعة", en: "Approve diagnosis and build" },
+  "cta.reject": { he: "חזור לערוך נתונים", ar: "العودة لتعديل البيانات", en: "Go back and edit data" },
+  "empty.dash": { he: "— לא סופק —", ar: "— غير متوفر —", en: "— not provided —" },
+  "interview.title": { he: "ראיון CMO — לפני שמייצרים", ar: "مقابلة CMO — قبل التوليد", en: "CMO interview — before generating" },
+  "interview.lead": {
+    he: "חסרים מספרים או הקשר. הסוכן לא ינחש. מלא מה שיש — השאר ריק אם אין.",
+    ar: "تنقص أرقام أو سياق. الوكيل لن يخمن. املأ ما تعرفه واترك الباقي فارغاً.",
+    en: "Numbers or context are missing. The agent will not guess. Fill what you have — leave blank if you don’t.",
+  },
+  "interview.model": { he: "מודל עסקי (איך מרוויחים, מה נחשב ליד)", ar: "نموذج العمل", en: "Business model (how you earn, what a lead is)" },
+  "interview.aov": { he: "ערך הזמנה / ביקור ממוצע (₪)", ar: "متوسط قيمة الطلب (₪)", en: "Average order / visit value (₪)" },
+  "interview.margin": { he: "שולי רווח %", ar: "هامش الربح %", en: "Margin %" },
+  "interview.cac": { he: "CAC יעד (₪)", ar: "تكلفة اكتساب مستهدفة (₪)", en: "Target CAC (₪)" },
+  "interview.budget": { he: "תקציב חודשי לפרסום (₪)", ar: "ميزانية إعلانات شهرية (₪)", en: "Monthly ad budget (₪)" },
+  "interview.past": { he: "מודעות קודמות (מה רץ בפועל)", ar: "إعلانات سابقة", en: "Past ads (what actually ran)" },
+  "interview.results": { he: "תוצאות שנמדדו", ar: "نتائج مقيسة", en: "Measured results" },
+  "interview.failed": { he: "מה נכשל לדעתך", ar: "ما الذي فشل برأيك", en: "What failed, in your view" },
+  "interview.skip": {
+    he: "המשך בלי המספרים — נסמן חוסרים ולא נמציא תחזית",
+    ar: "متابعة بدون الأرقام — سنؤشر النواقص ولن نخترع توقعاً",
+    en: "Continue without the numbers — we will flag gaps, not invent a forecast",
+  },
+  "agents.title": { he: "חמשת הסוכנים", ar: "الوكلاء الخمسة", en: "Five agents" },
+  "agents.intake": { he: "קליטה ואימות נתונים", ar: "الاستقبال والتحقق", en: "Intake & data validator" },
+  "agents.diagnostic": { he: "אבחון שיווקי", ar: "التشخيص التسويقي", en: "Diagnostic agent" },
+  "agents.strategic": { he: "אסטרטגיה שיווקית", ar: "الاستراتيجية التسويقية", en: "Strategic marketing" },
+  "agents.media": { he: "מדיה באיר — תוכניות בלבד", ar: "مخطط الميديا — خطط فقط", en: "Media buyer strategist" },
+  "agents.optimizer": { he: "אופטימיזציית ביצועים", ar: "تحسين الأداء", en: "Performance optimizer" },
+  "agents.hitl": {
+    he: "נדרש אישור אנושי לאבחון לפני בניית הקמפיין.",
+    ar: "يلزم اعتماد بشري للتشخيص قبل بناء الحملة.",
+    en: "Human approval of the diagnosis is required before the campaign is built.",
+  },
+  "status.idle": { he: "ממתין", ar: "بالانتظار", en: "Idle" },
+  "status.running": { he: "רץ", ar: "يعمل", en: "Running" },
+  "status.blocked": { he: "חסום", ar: "محظور", en: "Blocked" },
+  "status.needs_approval": { he: "ממתין לאישור", ar: "بانتظار الاعتماد", en: "Needs approval" },
+  "status.approved": { he: "אושר", ar: "مُعتمد", en: "Approved" },
+  "status.complete": { he: "הושלם", ar: "مكتمل", en: "Complete" },
+  "status.refused": { he: "סרב לנחש", ar: "رفض التخمين", en: "Refused to guess" },
+  "result.ready": { he: "הקמפיין שלך מוכן", ar: "حملتك جاهزة", en: "Your campaign is ready" },
+  "result.adsReady": { he: "המודעות שלך מוכנות", ar: "إعلاناتك جاهزة", en: "Your ads are ready" },
+  "result.completeness": { he: "שלמות הקליטה", ar: "اكتمال البيانات", en: "Intake completeness" },
+  "result.scenario": { he: "תרחיש מהמספרים שלך", ar: "سيناريو من أرقامك", en: "Scenario from your numbers" },
+  "result.noScenario": {
+    he: "אין מד תוצאות. חסר תקציב או CAC — לא ממציאים טווח לידים.",
+    ar: "لا يوجد مقياس نتائج. تنقص الميزانية أو CAC — لن نخترع نطاقاً.",
+    en: "No results gauge. Budget or CAC is missing — we will not invent a lead range.",
+  },
+  "result.packLang": { he: "שפת המודעות", ar: "لغة الإعلانات", en: "Ad pack language" },
+  "truth.quality": { he: "בקרת איכות", ar: "ضبط الجودة", en: "Quality control" },
+  "truth.layer": { he: "שכבת אמת ואמינות", ar: "طبقة الحقيقة والموثوقية", en: "Truth layer" },
+  "design.title": { he: "בחירת סגנון עיצוב", ar: "اختيار أسلوب التصميم", en: "Select design style" },
+  "design.produce": { he: "בחירה והמשך", ar: "اختيار ومتابعة", en: "Select and continue" },
+  "design.idea": { he: "רעיון למודעה", ar: "فكرة الإعلان", en: "Ad idea" },
+  "design.make": { he: "הפק מודעה בסגנון", ar: "أنتج إعلاناً بهذا الأسلوب", en: "Produce ad in this style" },
+  "media.title": { he: "תוכנית מדיה (בלופרינט בלבד)", ar: "خطة الميديا (مخطط فقط)", en: "Media plan (blueprint only)" },
+  "opt.title": { he: "אופטימיזציה לפי תוצאות אמיתיות", ar: "تحسين حسب نتائج حقيقية", en: "Optimize from real results" },
+  "opt.run": { he: "קבל המלצות", ar: "احصل على توصيات", en: "Get recommendations" },
+  "campaigns.empty": {
+    he: "אין קמפיינים שמורים עדיין. בנה אחד, או הרץ את ההדגמה.",
+    ar: "لا توجد حملات محفوظة بعد. ابنِ واحدة أو شغّل العرض.",
+    en: "No saved campaigns yet. Build one, or run the demo.",
+  },
+  "campaigns.open": { he: "פתח", ar: "فتح", en: "Open" },
+  "campaigns.delete": { he: "מחק", ar: "حذف", en: "Delete" },
+  "studio.title": { he: "סטודיו תוכן", ar: "ستوديو المحتوى", en: "Content studio" },
+  "studio.lead": {
+    he: "בריף קצר → גרסאות תוכן → הפקת מודעה בסגנון. בלי המצאת המלצות.",
+    ar: "موجز قصير → نسخ محتوى → إنتاج إعلان بأسلوب. بلا اختراع توصيات.",
+    en: "Short brief → copy versions → produce an ad in a style. No invented endorsements.",
+  },
+  "self.title": { he: "ניהול שיווק עצמי", ar: "إدارة التسويق الذاتي", en: "Self-marketing" },
+  "self.lead": {
+    he: "תוכנית לשבוע, צ'קליסט, ותיעוד מה באמת פורסם.",
+    ar: "خطة لأسبوع وقائمة تحقق وتوثيق ما نُشر فعلاً.",
+    en: "A week plan, a checklist, and a log of what you actually posted.",
+  },
+  "about.title": { he: "מה זה OmniAd", ar: "ما هو OmniAd", en: "What is OmniAd" },
+  "menu": { he: "תפריט", ar: "القائمة", en: "Menu" },
+  "close": { he: "סגור", ar: "إغلاق", en: "Close" },
+};
+
+export function t(locale: Locale, key: keyof typeof copy): string {
+  return copy[key][locale];
+}
+
+export function dirFor(locale: Locale): "rtl" | "ltr" {
+  return locale === "en" ? "ltr" : "rtl";
+}
+
+export const LOCALES: { id: Locale; label: string }[] = [
+  { id: "en", label: "English" },
+  { id: "ar", label: "العربية" },
+  { id: "he", label: "עברית" },
+];
+
+export const VARIANT_META: Record<
+  string,
+  { label: Record<Locale, string>; featured?: boolean }
+> = {
+  strong_offer: {
+    featured: true,
+    label: { he: "ההצעה החזקה", ar: "العرض الأقوى", en: "The strong offer" },
+  },
+  very_short: {
+    label: { he: "גרסה קצרה מאוד", ar: "نسخة قصيرة جداً", en: "Very short version" },
+  },
+  emotional: {
+    label: { he: "גרסה רגשית", ar: "نسخة عاطفية", en: "Emotional version" },
+  },
+  narrative: {
+    label: { he: "גרסה סיפורית", ar: "نسخة سردية", en: "Narrative version" },
+  },
+  direct_sales: {
+    label: { he: "גרסה ישירה ומכירתית", ar: "نسخة مباشرة بيعيّة", en: "Direct / sales version" },
+  },
+  unique_advantage: {
+    label: { he: "גרסה שמתמקדת ביתרון ייחודי", ar: "نسخة تركز على الميزة", en: "Unique-advantage version" },
+  },
+};
+
+export const STRATEGY_META: { id: string; label: Record<Locale, string> }[] = [
+  { id: "selling_angles", label: { he: "זוויות מכירה", ar: "زوايا البيع", en: "Selling angles" } },
+  { id: "video_scripts", label: { he: "סקריפטים לסרטונים", ar: "سكربتات الفيديو", en: "Video scripts" } },
+  { id: "campaign_sequence", label: { he: "רצף הקמפיין המלא", ar: "تسلسل الحملة الكامل", en: "Full campaign sequence" } },
+  { id: "app_marketing", label: { he: "שיווק האפליקציה", ar: "تسويق التطبيق", en: "App marketing" } },
+  { id: "marketing_diagnosis", label: { he: "אבחון שיווקי", ar: "التشخيص التسويقي", en: "Marketing diagnosis" } },
+  { id: "business_audience", label: { he: "ניתוח העסק והקהל", ar: "تحليل النشاط والجمهور", en: "Business & audience" } },
+  { id: "buying_psychology", label: { he: "פסיכולוגיית הקנייה", ar: "سيكولوجيا الشراء", en: "Buying psychology" } },
+  { id: "objections", label: { he: "ניהול התנגדויות", ar: "إدارة الاعتراضات", en: "Objection handling" } },
+  { id: "targeting", label: { he: "הצעות טירגוט", ar: "اقتراحات الاستهداف", en: "Targeting suggestions" } },
+  { id: "creative_ideas", label: { he: "רעיונות קריאייטיב", ar: "أفكار إبداعية", en: "Creative ideas" } },
+  { id: "campaign_structure", label: { he: "מבנה הקמפיין", ar: "هيكل الحملة", en: "Campaign structure" } },
+  { id: "missing_questions", label: { he: "שאלות להשלמת התמונה", ar: "أسئلة لاستكمال الصورة", en: "Questions to complete the picture" } },
+];
+
+export const AREA_LABEL: Record<string, Record<Locale, string>> = {
+  offer: { he: "הצעה", ar: "العرض", en: "Offer" },
+  hook: { he: "הוק", ar: "الخطاف", en: "Hook" },
+  price: { he: "מחיר", ar: "السعر", en: "Price" },
+  audience: { he: "קהל", ar: "الجمهور", en: "Audience" },
+  creative: { he: "קריאייטיב", ar: "الإبداع", en: "Creative" },
+  targeting: { he: "טירגוט", ar: "الاستهداف", en: "Targeting" },
+  funnel: { he: "משפך", ar: "القمع", en: "Funnel" },
+};
