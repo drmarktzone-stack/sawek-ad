@@ -9,12 +9,12 @@ import { EMPTY_OPTI } from "./types";
 import { EMPTY_DESK, type OptiDeskState } from "./opti-state";
 
 const K = {
-  clinic: "ilan-medical-clinic",
-  campaigns: "ilan-medical-campaigns",
-  leads: "ilan-medical-leads",
-  appointments: "ilan-medical-appointments",
-  opti: "ilan-medical-opti",
-  desk: "ilan-optibrain-desk",
+  clinic: "sawek-medical-clinic",
+  campaigns: "sawek-medical-campaigns",
+  leads: "sawek-medical-leads",
+  appointments: "sawek-medical-appointments",
+  opti: "sawek-medical-opti",
+  desk: "sawek-optibrain-desk",
 };
 
 function canUse(): boolean {

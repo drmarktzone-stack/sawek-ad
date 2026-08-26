@@ -4,7 +4,7 @@ import { useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { Locale } from "@/lib/types";
 import { filled, parseNumber } from "@/lib/utils";
-import { toComplete } from "@/lib/medical/markers";
+import { countMarkers, toComplete } from "@/lib/medical/markers";
 import {
   AD_TEMPLATES,
   BOTTLENECKS,
@@ -41,7 +41,7 @@ import {
 } from "@/lib/medical/opti-engines";
 import { EMPTY_DESK, type OptiDeskState } from "@/lib/medical/opti-state";
 import { loadClinic, loadOptiDesk, saveOptiDesk } from "@/lib/medical/storage";
-import { startPediatricDemoFlow } from "@/lib/start-pediatric-demo";
+import { seedPediatricDemo } from "@/lib/start-pediatric-demo";
 import { useI18n } from "@/components/i18n-provider";
 import { useIsClient } from "@/lib/use-is-client";
 import { Button } from "@/components/ui/button";
@@ -49,7 +49,7 @@ import { Input, Label, Textarea } from "@/components/ui/input";
 import { ConquerHeadline } from "@/components/stepper";
 import { DepartmentRail } from "@/components/department-shell";
 import { MedicalNav } from "@/components/medical/medical-nav";
-import { EthicsBanner } from "@/components/medical/ethics-banner";
+import { EthicsBanner, MarkerCount } from "@/components/medical/ethics-banner";
 import { cn } from "@/lib/utils";
 
 function Card({ children, className }: { children: React.ReactNode; className?: string }) {
@@ -156,12 +156,25 @@ export function OptiHub() {
   }
 
   function loadDemo() {
-    startPediatricDemoFlow();
+    seedPediatricDemo();
+    const next = { ...loadOptiDesk(), module: "compliance" as const };
+    setDesk(next);
+    saveOptiDesk(next);
+    router.replace(`${pathname}?m=compliance`);
   }
 
   const loc = locale as Locale;
   const clinic = client ? loadClinic() : null;
   const isHmo = desk.sector === "medical" && desk.clinicType === "hmo";
+  const openMarkers = countMarkers(
+    [
+      !filled(desk.budget) ? toComplete(loc, loc === "he" ? "תקציב" : loc === "ar" ? "ميزانية" : "budget") : "",
+      !filled(desk.currentPatients) ? toComplete(loc, loc === "he" ? "מטופלים" : loc === "ar" ? "مرضى" : "patients") : "",
+      !filled(desk.monthlyBookings) ? toComplete(loc, loc === "he" ? "תורים" : loc === "ar" ? "حجوزات" : "bookings") : "",
+      !filled(desk.rating) ? toComplete(loc, loc === "he" ? "דירוג" : loc === "ar" ? "تقييم" : "rating") : "",
+      !filled(desk.hook) ? toComplete(loc, loc === "he" ? "הוק" : loc === "ar" ? "خطاف" : "hook") : "",
+    ].join(" "),
+  );
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
@@ -170,6 +183,9 @@ export function OptiHub() {
       <DepartmentRail />
       <MedicalNav />
       <EthicsBanner locale={loc} />
+      <div className="mt-3">
+        <MarkerCount n={openMarkers} locale={loc} />
+      </div>
       <div className="mt-4 flex flex-wrap items-center gap-3">
         <Button
           type="button"

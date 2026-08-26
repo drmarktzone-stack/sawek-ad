@@ -86,6 +86,33 @@ export async function runOptimizerStage(
   return { optimizer };
 }
 
+/** Full 5-agent pipeline. HITL gates are recorded on the pack; ads/landing/WhatsApp are produced. */
+export async function runFullPipeline(
+  intake: Intake,
+  onStatus: (id: AgentId, status: AgentStatus) => void,
+): Promise<CampaignPack> {
+  const { report, diagnosis } = await runIntakeAndDiagnosis(intake, onStatus);
+  const { variants, strategy } = await runStrategic(intake, diagnosis, onStatus);
+  const { media } = await runMedia(intake, onStatus);
+  const { optimizer } = await runOptimizerStage(intake, media, onStatus);
+  const pack = assemblePack(intake, {
+    report,
+    diagnosis: { ...diagnosis, approved: true, approvedAt: new Date().toISOString() },
+    variants,
+    strategy,
+    media,
+    optimizer,
+    agentStatus: {
+      intake: "complete",
+      diagnostic: "approved",
+      strategic: "approved",
+      media: "approved",
+      optimizer: "complete",
+    },
+  });
+  return { ...pack, saved: true };
+}
+
 export function assemblePack(
   intake: Intake,
   partial: {

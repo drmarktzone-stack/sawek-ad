@@ -109,6 +109,33 @@ export function ResultView({
         </Button>
       </div>
 
+      <div className="mb-6 rounded-2xl border border-omni-yellow/20 bg-omni-card p-4">
+        <p className="mb-3 text-xs font-black uppercase tracking-[0.18em] text-omni-yellow">
+          {tr("agents.title")}
+        </p>
+        <ul className="grid gap-2 sm:grid-cols-5">
+          {(
+            [
+              ["intake", "agents.intake"],
+              ["diagnostic", "agents.diagnostic"],
+              ["strategic", "agents.strategic"],
+              ["media", "agents.media"],
+              ["optimizer", "agents.optimizer"],
+            ] as const
+          ).map(([id, key]) => (
+            <li key={id} className="rounded-xl border border-white/10 px-3 py-2">
+              <p className="text-[11px] font-semibold text-white">{tr(key)}</p>
+              <p className="mt-1 text-[10px] font-bold uppercase tracking-wide text-omni-yellow">
+                {pack.agentStatus[id] === "approved" || pack.agentStatus[id] === "complete"
+                  ? tr("status.complete")
+                  : tr("status.needs_approval")}
+              </p>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-3 text-xs text-zinc-500">{tr("agents.hitl")}</p>
+      </div>
+
       <div className="mb-6 flex flex-wrap items-center gap-2">
         <Button type="button" onClick={save} variant={pack.saved ? "dark" : "default"}>
           <Save className="size-4" />
@@ -297,6 +324,48 @@ export function ResultView({
             onCopy={() => copyText(v.kind, `${v.headline}\n${v.primaryText}\n${v.cta}`)}
           />
         ))}
+      </div>
+
+      <div className="mt-10 grid gap-4 md:grid-cols-2">
+        {(pack.agency?.creative.pieces ?? [])
+          .filter(
+            (p) =>
+              (p.format === "landing" || p.format === "whatsapp") && p.locale === packLang,
+          )
+          .map((p) => (
+            <article
+              key={`${p.format}-${p.locale}`}
+              className="rounded-2xl border border-omni-yellow/25 bg-omni-card p-5"
+            >
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-omni-yellow">
+                {p.format === "landing"
+                  ? locale === "he"
+                    ? "דף נחיתה"
+                    : locale === "ar"
+                      ? "صفحة هبوط"
+                      : "Landing"
+                  : "WhatsApp"}
+              </p>
+              <h3 className="mt-1 font-black text-white">{p.title}</h3>
+              <pre className="mt-3 whitespace-pre-wrap font-sans text-sm leading-6 text-zinc-300">
+                {p.body}
+              </pre>
+              {p.format === "landing" && pack.intake.website ? (
+                <a
+                  href={
+                    pack.intake.website.startsWith("http")
+                      ? pack.intake.website
+                      : `https://${pack.intake.website}`
+                  }
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-3 inline-block text-xs font-bold text-omni-yellow"
+                >
+                  {pack.intake.website}
+                </a>
+              ) : null}
+            </article>
+          ))}
       </div>
 
       <div className="mt-10 rounded-2xl border border-white/10 bg-omni-card p-5">

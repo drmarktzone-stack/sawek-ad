@@ -14,6 +14,7 @@ import {
   TYPE_OPTIONS,
 } from "@/lib/chips";
 import { demoIntake, DEMO_LABEL, consumePendingDemo, clearPendingDemo, applyPediatricDemoDraft, isPediatricDemo } from "@/lib/demo";
+import { installDemoPack } from "@/lib/active-pack";
 import { cmoFieldsMissing, emptyIntake, wizardReady } from "@/lib/engine/validate";
 import { assemblePack, idleStatus, runIntakeAndDiagnosis, runMedia, runOptimizerStage, runStrategic } from "@/lib/engine/run";
 import { loadDraft, saveDraft, upsertCampaign } from "@/lib/storage";
@@ -134,6 +135,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
 
   function applyDemo() {
     const d = applyPediatricDemoDraft();
+    installDemoPack();
     clearPendingDemo();
     setIntake(d);
     setCustom({
@@ -198,7 +200,9 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
         optimizer: "blocked",
       },
     });
+    upsertCampaign(p);
     setPack(p);
+    setAgentStatus(p.agentStatus);
     setRunning(false);
   }
 
@@ -207,19 +211,53 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
     setRunning(true);
     if (agentStatus.diagnostic === "needs_approval") {
       const built = await runStrategic(intake, pack.diagnosis, onStatus);
-      setPack({
-        ...pack,
-        ...built,
+      const next = assemblePack(intake, {
+        report: pack.intakeReport,
         diagnosis: { ...pack.diagnosis, approved: true, approvedAt: new Date().toISOString() },
+        variants: built.variants,
+        strategy: built.strategy,
+        id: pack.id,
+        agentStatus: {
+          intake: "complete",
+          diagnostic: "approved",
+          strategic: "needs_approval",
+          media: "blocked",
+          optimizer: "blocked",
+        },
       });
+      upsertCampaign(next);
+      setPack(next);
+      setAgentStatus(next.agentStatus);
     } else if (agentStatus.strategic === "needs_approval") {
       const built = await runMedia(intake, onStatus);
-      setPack({ ...pack, ...built });
+      const next = assemblePack(intake, {
+        report: pack.intakeReport,
+        diagnosis: pack.diagnosis,
+        variants: pack.variants,
+        strategy: pack.strategy,
+        media: built.media,
+        id: pack.id,
+        agentStatus: {
+          intake: "complete",
+          diagnostic: "approved",
+          strategic: "approved",
+          media: "needs_approval",
+          optimizer: "blocked",
+        },
+      });
+      upsertCampaign(next);
+      setPack(next);
+      setAgentStatus(next.agentStatus);
     } else if (agentStatus.media === "needs_approval") {
       const built = await runOptimizerStage(intake, pack.media, onStatus);
-      const next: CampaignPack = {
-        ...pack,
-        ...built,
+      const next = assemblePack(intake, {
+        report: pack.intakeReport,
+        diagnosis: pack.diagnosis,
+        variants: pack.variants,
+        strategy: pack.strategy,
+        media: pack.media,
+        optimizer: built.optimizer,
+        id: pack.id,
         agentStatus: {
           intake: "complete",
           diagnostic: "approved",
@@ -227,12 +265,13 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
           media: "approved",
           optimizer: "complete",
         },
-        planActivated: false,
-      };
-      upsertCampaign(next);
-      setPack(next);
+      });
+      const saved = { ...next, saved: true };
+      upsertCampaign(saved);
+      setPack(saved);
+      setAgentStatus(saved.agentStatus);
       setRunning(false);
-      router.push(`/campaigns/${next.id}`);
+      router.push(`/campaigns/${saved.id}`);
       return;
     }
     setRunning(false);

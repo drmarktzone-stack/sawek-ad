@@ -35,6 +35,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     document.documentElement.lang = locale;
     document.documentElement.dir = dirFor(locale);
     document.documentElement.classList.add("dark");
+    document.title = "SAWEK AD — ساويك / סאווק";
   }, [locale, ready]);
 
   const value = useMemo<I18nValue>(

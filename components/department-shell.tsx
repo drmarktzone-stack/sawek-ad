@@ -27,7 +27,7 @@ const DEPT_RAIL = [
   { href: "/studio", key: "nav.creative" as const },
   { href: "/media", key: "nav.media" as const },
   { href: "/leads", key: "nav.leads" as const },
-  { href: "/medical", key: "nav.medical" as const },
+  { href: "/medical/optibrain", key: "nav.medical" as const },
   { href: "/campaigns", key: "nav.ops" as const },
   { href: "/self", key: "nav.self" as const },
 ];
@@ -117,9 +117,9 @@ export function DepartmentShell({
   const [packLang, setPackLang] = useState<Locale>("he");
 
   if (client && !booted) {
-    const latest = latestPack();
+    const latest = latestPack() ?? installDemoPack();
     setPack(latest);
-    setPackLang(latest ? "he" : "he");
+    setPackLang("he");
     setBooted(true);
   }
 

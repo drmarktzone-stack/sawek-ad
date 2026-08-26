@@ -37,7 +37,12 @@ export function CampaignsList() {
   const [booted, setBooted] = useState(false);
 
   if (client && !booted) {
-    setList(loadCampaigns().map(ensureAgency));
+    let rows = loadCampaigns().map(ensureAgency);
+    if (rows.length === 0) {
+      installDemoPack();
+      rows = loadCampaigns().map(ensureAgency);
+    }
+    setList(rows);
     setBooted(true);
   }
 
@@ -48,7 +53,7 @@ export function CampaignsList() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10">
-      <ConquerHeadline subtitle={t("nav.ops")} />
+      <ConquerHeadline subtitle={`${t("nav.ops")} · ${t("nav.campaigns")}`} />
       <p className="mx-auto mb-6 max-w-2xl text-center text-sm text-zinc-400">{t("dept.opsLead")}</p>
       <DepartmentRail />
 

@@ -150,7 +150,7 @@ export function demoPediatricDesk(): OptiDeskState {
     noShows: "",
     channel: "WhatsApp",
     noshowNotes: "",
-    complianceCopy: "",
+    complianceCopy: "טקסט לבדיקת מגן מדיניות (דוגמה לסריקה בלבד, לא טענת המרפאה): ריפוי, 100%, הרופא הטוב ביותר.",
     coreMessage: "מרפאת ילדים כללית במתחם אל-נור, באקה אל-גרביה — בלי הבטחת ריפוי.",
     region: "באקה אל-גרביה",
     hook: "",

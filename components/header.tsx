@@ -28,7 +28,7 @@ const NAV = [
   { href: "/studio", key: "nav.creative" as const, icon: Pencil },
   { href: "/media", key: "nav.media" as const, icon: Megaphone },
   { href: "/leads", key: "nav.leads" as const, icon: Users },
-  { href: "/medical", key: "nav.medical" as const, icon: Stethoscope },
+  { href: "/medical/optibrain", key: "nav.medical" as const, icon: Stethoscope },
   { href: "/campaigns", key: "nav.ops" as const, icon: Folder },
   { href: "/self", key: "nav.self" as const, icon: SlidersHorizontal },
   { href: "/about", key: "nav.about" as const, icon: HelpCircle },

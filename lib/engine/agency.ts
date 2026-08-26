@@ -319,7 +319,7 @@ export function buildAgency(pack: Pick<CampaignPack, "intake" | "intakeReport" |
     ],
     bookingCta: L(ctaHe, ctaAr, ctaEn),
     promoCodes: noOffer
-      ? L("אין קודי מבצע. Intake סירב להמציא ILAN10.", "لا أكواد. رفض اختراع ILAN10.", "No promo codes. Intake refused to invent ILAN10.")
+      ? L("אין קודי מבצע. Intake סירב להמציא קוד הנחה.", "لا أكواد. رفض اختراع رمز خصم.", "No promo codes. Intake refused to invent a discount code.")
       : L(`קוד רק אם הוא חלק מ: ${i.offer}`, `رمز فقط إن كان جزءاً من ${i.offer}`, `A code only if it is part of: ${i.offer}`),
     retargeting: L(
       "רימרקטינג רק אחרי פיקסל/הודעה אמיתית. בלי קהל «דומה» לפני 50 המרות.",

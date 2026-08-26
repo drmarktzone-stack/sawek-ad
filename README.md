@@ -1,6 +1,6 @@
 # SAWEK AD (סאווק / ساويك)
 
-**SAWEK AD** is the product. Optional wordmarks: Hebrew **סאווק**, Arabic **ساويك**. The brand stays **SAWEK AD** — not OmniAd Studio, not Ilan.
+**SAWEK AD** is the product. Optional wordmarks: Hebrew **סאווק**, Arabic **ساويك**. The brand stays **SAWEK AD** — not OmniAd Studio.
 
 Inside: **OmniAd engine** (4-step RTL wizard, 6 ad variants, design studio, truth layer) and **five Gemini agents** (HITL pipeline). This is a **third app**. It does **not** replace or rename the original OmniAd, AdBrain, or OptiBrain products.
 
@@ -27,9 +27,9 @@ Features were therefore merged from a **read-only** listing of Lovable project `
 
 ## Demo — medical (pediatric, no keys)
 
-1. Open **OptiBrain** (`/medical` or `/medical/optibrain`).
-2. Click **הדגמה: מרפאת ילדים ד״ר סאמר אבו מוך**. That loads Dr. Samer Abu Mokh (Clalit pediatrics, Baqa al-Gharbiyye, Al-Nour 1st floor, WhatsApp 052-8885800, https://drsamerped.ai.studio) into the OmniAd wizard at step 2. Unknown numbers stay empty / `[יש להשלים]`. Offer is **אין מבצע**.
-3. Advance Type → Business → Details → Review, then **בנה לי קמפיין מלא**. Empty price/tech/success rate become markers. Ethics banner stays on copy and on `/lp/:slug`.
+1. Open **OptiBrain** (`/medical/optibrain`) for the 15-module desk, or `/medical` for the clinic landing builder.
+2. On the homepage, click **הדגמה: מרפאת ילדים ד״ר סאמר אבו מוך**. That loads Dr. Samer Abu Mokh (Clalit pediatrics, Baqa al-Gharbiyye, Al-Nour 1st floor, WhatsApp 052-8885800, https://drsamerped.ai.studio) into the OmniAd wizard at step 2. Unknown numbers stay empty / `[יש להשלים]`. Offer is **אין מבצע**. The same demo on OptiBrain fills the desk and opens Policy shield.
+3. Advance Type → Business → Details → Review, then **בנה לי קמפיין מלא**. Approve the three HITL gates (diagnosis, strategy, media). Empty price/tech/success rate become markers. Ethics banner stays on copy and on `/lp/:slug`.
 
 General 5-agent OmniAd flow is unchanged on `/`.
 

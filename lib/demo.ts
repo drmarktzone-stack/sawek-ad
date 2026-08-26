@@ -3,7 +3,7 @@ import { DEFAULT_OFFER_HE } from "./chips";
 import { saveDraft } from "./storage";
 
 export const DEMO_ID = "demo-samer-clinic";
-export const PENDING_DEMO_KEY = "ilan-pending-demo";
+export const PENDING_DEMO_KEY = "sawek-pending-demo";
 
 /** Public facts only. No invented CAC, budget, patient counts, or ROAS. */
 export function demoIntake(): Intake {

@@ -2,7 +2,7 @@
 
 Locked product name: **SAWEK AD**. Optional wordmarks: Hebrew **סאווק**, Arabic **ساويك**. The Latin brand is always **SAWEK AD**.
 
-User-facing brand is **SAWEK AD**, never OmniAd Studio and never Ilan. Internal engines stay credited as **OmniAd engine** and **five Gemini agents**.
+User-facing brand is **SAWEK AD**, never OmniAd Studio. Internal engines stay credited as **OmniAd engine** and **five Gemini agents**.
 
 This repository is a **third app**: the union of OmniAd (Base44 app `6a7712d0685a826e3eab0819`) and AdBrain (GitHub `drmarktzone-stack/adbrain-ai`, Origin `tmp-90dd9f664feed126`), plus an **OptiBrain medical desk** inside SAWEK AD. It must **not** modify, overwrite, or replace any of those originals — including Lovable project `1b75b82e-6b26-401e-aa7a-1ce137d0dfa8` (https://opti-brain.lovable.app).
 
@@ -116,7 +116,7 @@ Structured JSON is the source; UI renders readable cards.
 
 ## Storage
 
-- Default: `localStorage` (`omniad-locale`, `omniad-draft`, `omniad-campaigns`, `omniad-studio-library`, `omniad-self`, `ilan-medical-*`, `ilan-optibrain-desk`).
+- Default: `localStorage` (`omniad-locale`, `omniad-draft`, `omniad-campaigns`, `omniad-studio-library`, `omniad-self`, `sawek-medical-*`, `sawek-optibrain-desk`).
 - Optional Supabase if `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_ANON_KEY` are set. App **must run with zero keys**.
 - Optional `OPENAI_API_KEY` may enrich copy via `/api/generate`. Fallback templates always work and must be intake-driven, not lorem.
 

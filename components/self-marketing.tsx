@@ -26,7 +26,21 @@ export function SelfMarketing() {
   const [hydrated, setHydrated] = useState(false);
 
   if (client && !hydrated) {
-    setProfile(loadSelfProfile());
+    const stored = loadSelfProfile();
+    if (!stored.name.trim()) {
+      const seeded: SelfProfile = {
+        name: "ד״ר סאמר אבו מוך",
+        craft: "מרפאת ילדים — כללית, באקה אל-גרביה",
+        audience: "הורים בבאקה אל-גרביה והסביבה",
+        cadence: "תוכנית שבועית — PLAN בלבד",
+        channels: "WhatsApp 052-8885800 · https://drsamerped.ai.studio",
+        offer: "אין מבצע",
+      };
+      saveSelfProfile(seeded);
+      setProfile(seeded);
+    } else {
+      setProfile(stored);
+    }
     setPlans(loadSelfPlans());
     setHydrated(true);
   }

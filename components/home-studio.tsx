@@ -4,15 +4,14 @@ import { ShieldAlert, Sparkles, Languages, Workflow } from "lucide-react";
 import { WizardFlow } from "@/components/wizard-flow";
 import { useI18n } from "@/components/i18n-provider";
 import { DEMO_LABEL } from "@/lib/demo";
-import { applyPediatricDemoDraft } from "@/lib/demo";
+import { startPediatricDemoFlow } from "@/lib/start-pediatric-demo";
 import { Button } from "@/components/ui/button";
 
 export function HomeStudio() {
   const { t, locale } = useI18n();
 
   function runDemo() {
-    applyPediatricDemoDraft();
-    window.location.assign("/?demo=samer");
+    startPediatricDemoFlow();
   }
 
   const stats = [
