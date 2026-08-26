@@ -47,7 +47,7 @@ export const copy: Dict = {
   },
   "home.truth": {
     he: "ברירת המחדל: אין מבצע. מספרים שלא פורסמו נשארים ריקים או [יש להשלים].",
-    ar: "الافتراضي: لا يوجد عرض. الأرقام غير المنشورة تبقى فارغة أو [יש להשלים].",
+    ar: "الافتراضي: لا يوجد عرض. الأرقام غير المنشورة تبقى فارغة أو [يجب الاستكمال].",
     en: "Default: no offer. Unpublished numbers stay empty or [TO COMPLETE].",
   },
   "home.startEmpty": { he: "התחל קמפיין ריק", ar: "ابدأ حملة فارغة", en: "Start an empty campaign" },
@@ -414,7 +414,7 @@ export const copy: Dict = {
 };
 
 export function t(locale: Locale, key: keyof typeof copy): string {
-  return copy[key][locale];
+  return copy[key]?.[locale] ?? String(key);
 }
 
 export function dirFor(locale: Locale): "rtl" | "ltr" {

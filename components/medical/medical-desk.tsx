@@ -247,7 +247,7 @@ export function MedicalDesk() {
                     setClinic({ ...clinic, hours });
                   }}
                 />
-                <span className="w-8 font-bold">{hourLabels[h.day][locale]}</span>
+                <span className="w-8 font-bold">{hourLabels[h.day]?.[locale] ?? h.day}</span>
                 <Input
                   className="h-8"
                   value={h.open}
