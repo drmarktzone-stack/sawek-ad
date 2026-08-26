@@ -1,17 +1,28 @@
 "use client";
 
+import { useState } from "react";
 import { ShieldAlert, Sparkles, Languages, Workflow } from "lucide-react";
 import { WizardFlow } from "@/components/wizard-flow";
 import { useI18n } from "@/components/i18n-provider";
 import { DEMO_LABEL } from "@/lib/demo";
 import { startPediatricDemoFlow } from "@/lib/start-pediatric-demo";
+import { markEmptyCampaign } from "@/lib/empty-campaign";
 import { Button } from "@/components/ui/button";
 
 export function HomeStudio() {
   const { t, locale } = useI18n();
+  const [wizardKey, setWizardKey] = useState(0);
 
   function runDemo() {
     startPediatricDemoFlow();
+  }
+
+  function startEmpty() {
+    markEmptyCampaign();
+    setWizardKey((k) => k + 1);
+    requestAnimationFrame(() => {
+      document.getElementById("studio")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
   }
 
   const stats = [
@@ -52,12 +63,13 @@ export function HomeStudio() {
           >
             {DEMO_LABEL[locale]}
           </Button>
-          <a
-            href="#studio"
+          <button
+            type="button"
+            onClick={startEmpty}
             className="rounded-xl border border-omni-yellow/50 px-5 py-3 text-sm font-semibold text-omni-yellow hover:bg-omni-yellow/10"
           >
             {t("home.startEmpty")}
-          </a>
+          </button>
         </div>
         <p className="mx-auto mt-4 max-w-xl text-center text-xs text-zinc-500">{t("home.truth")}</p>
         <ul className="mx-auto mt-8 grid max-w-3xl grid-cols-2 gap-2 sm:grid-cols-4">
@@ -97,7 +109,7 @@ export function HomeStudio() {
       <div id="studio" className="relative mx-auto max-w-4xl px-3 pb-16 sm:px-4">
         <div className="rounded-[28px] border border-omni-yellow/35 bg-black/70 p-[1px] shadow-[0_0_80px_rgba(255,26,26,0.22)]">
           <div className="rounded-[26px] border border-omni-red/25 bg-omni-surface/90">
-            <WizardFlow embedded />
+            <WizardFlow key={wizardKey} embedded />
           </div>
         </div>
       </div>

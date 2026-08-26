@@ -8,6 +8,15 @@ import type {
 } from "../types";
 import { isNoOffer } from "../no-offer";
 import { filled } from "../utils";
+import {
+  ADVANTAGE_CHIPS,
+  AUDIENCE_CHIPS,
+  GOAL_CHIPS,
+  OFFER_CHIPS,
+  PROBLEM_CHIPS,
+  defaultOfferLabel,
+  resolveChipLabel,
+} from "../chips";
 
 const L = (he: string, ar: string, en: string): Tri => ({ he, ar, en });
 
@@ -18,10 +27,25 @@ function n(i: Intake) {
 export function buildAgency(pack: Pick<CampaignPack, "intake" | "intakeReport" | "diagnosis" | "media" | "optimizer" | "variants">): AgencyPack {
   const i = pack.intake;
   const name = n(i);
-  const aud = i.audience || "—";
-  const pain = i.biggestProblem || "—";
-  const adv = i.uniqueAdvantage || "—";
-  const goal = i.mainGoal || "—";
+  const audHe = resolveChipLabel(i.audience, AUDIENCE_CHIPS, "he") || "—";
+  const audAr = resolveChipLabel(i.audience, AUDIENCE_CHIPS, "ar") || "—";
+  const audEn = resolveChipLabel(i.audience, AUDIENCE_CHIPS, "en") || "—";
+  const painHe = resolveChipLabel(i.biggestProblem, PROBLEM_CHIPS, "he") || "—";
+  const painAr = resolveChipLabel(i.biggestProblem, PROBLEM_CHIPS, "ar") || "—";
+  const painEn = resolveChipLabel(i.biggestProblem, PROBLEM_CHIPS, "en") || "—";
+  const advHe = resolveChipLabel(i.uniqueAdvantage, ADVANTAGE_CHIPS, "he") || "—";
+  const advAr = resolveChipLabel(i.uniqueAdvantage, ADVANTAGE_CHIPS, "ar") || "—";
+  const advEn = resolveChipLabel(i.uniqueAdvantage, ADVANTAGE_CHIPS, "en") || "—";
+  const goalHe = resolveChipLabel(i.mainGoal, GOAL_CHIPS, "he") || "—";
+  const goalAr = resolveChipLabel(i.mainGoal, GOAL_CHIPS, "ar") || "—";
+  const goalEn = resolveChipLabel(i.mainGoal, GOAL_CHIPS, "en") || "—";
+  const offerHe = isNoOffer(i.offer) ? defaultOfferLabel("he") : resolveChipLabel(i.offer, OFFER_CHIPS, "he");
+  const offerAr = isNoOffer(i.offer) ? defaultOfferLabel("ar") : resolveChipLabel(i.offer, OFFER_CHIPS, "ar");
+  const offerEn = isNoOffer(i.offer) ? defaultOfferLabel("en") : resolveChipLabel(i.offer, OFFER_CHIPS, "en");
+  const aud = audHe;
+  const pain = painHe;
+  const adv = advHe;
+  const goal = goalHe;
   const loc = i.location || "";
   const wa = i.whatsapp?.trim() || "";
   const noOffer = isNoOffer(i.offer);
@@ -37,10 +61,10 @@ export function buildAgency(pack: Pick<CampaignPack, "intake" | "intakeReport" |
       name: L("פרסונה א׳ — ליבה", "شخصية أ — النواة", "Persona A — core"),
       jtbd: L(
         `כש${aud} נתקלים ב: ${pain} — הם רוצים ${goal} בלי להרגיש מטופלים כמספר.`,
-        `عندما يواجه ${aud}: ${pain} — يريدون ${goal} دون الشعور برقم.`,
-        `When ${aud} hit: ${pain} — they want ${goal} without feeling like a number.`,
+        `عندما يواجه ${audAr}: ${painAr} — يريدون ${goalAr} دون الشعور برقم.`,
+        `When ${audEn} hit: ${painEn} — they want ${goalEn} without feeling like a number.`,
       ),
-      given: L(`מתוך הקליטה: ${aud}. ${loc || "מיקום לא סופק."}`, `من البيانات: ${aud}. ${loc || "الموقع غير مذكور."}`, `From intake: ${aud}. ${loc || "Location not given."}`),
+      given: L(`מתוך הקליטה: ${audHe}. ${loc || "מיקום לא סופק."}`, `من البيانات: ${audAr}. ${loc || "الموقع غير مذكور."}`, `From intake: ${audEn}. ${loc || "Location not given."}`),
       unknown: L(
         unknowns.length ? `חסר: ${unknowns.join(", ")} — לא הומצא.` : "אין דמוגרפיה שהומצאה מעבר לקליטה.",
         unknowns.length ? `ناقص: ${unknowns.join(", ")}.` : "لا ديموغرافيا مختلقة.",
@@ -54,17 +78,17 @@ export function buildAgency(pack: Pick<CampaignPack, "intake" | "intakeReport" |
         "يريد أماناً قبل الموعد. JTBD: تقليل الخطر.",
         "Wants safety before booking. JTBD: reduce risk, not “consume content”.",
       ),
-      given: L(`בעיה שסופקה: ${pain}`, `المشكلة المعطاة: ${pain}`, `Stated problem: ${pain}`),
+      given: L(`בעיה שסופקה: ${painHe}`, `المشكلة المعطاة: ${painAr}`, `Stated problem: ${painEn}`),
       unknown: L("גיל מדויק לא סופק — לא נקבע 25–45 כברירת מחדל.", "العمر الدقيق غير مذكور — لن نفترض 25–45.", "Exact age not given — will not default to 25–45."),
     },
     {
       name: L("פרסונה ג׳ — ממליץ / קובע לאחר", "شخصية ج — يوصي / يحجز لغيره", "Persona C — booker for someone else"),
       jtbd: L(
         `כשמישהו מהמעגל של ${aud} צריך ${goal} — הפרסונה הזו קובעת בשמם.`,
-        `عندما يحتاج أحد دائرة ${aud} إلى ${goal} — هذه الشخصية تحجز باسمهم.`,
-        `When someone in ${aud}’s circle needs ${goal} — this person books on their behalf.`,
+        `عندما يحتاج أحد دائرة ${audAr} إلى ${goalAr} — هذه الشخصية تحجز باسمهم.`,
+        `When someone in ${audEn}’s circle needs ${goalEn} — this person books on their behalf.`,
       ),
-      given: L(`קהל שסופק: ${aud}. מטרה: ${goal}.`, `الجمهور المعطى: ${aud}. الهدف: ${goal}.`, `Stated audience: ${aud}. Goal: ${goal}.`),
+      given: L(`קהל שסופק: ${audHe}. מטרה: ${goalHe}.`, `الجمهور المعطى: ${audAr}. الهدف: ${goalAr}.`, `Stated audience: ${audEn}. Goal: ${goalEn}.`),
       unknown: L("אין רשימת מפנים בקליטה — לא יומצא «שגריר מותג».", "لا قائمة محيلين — لن يُخترع سفير علامة.", "No referrer list in intake — no invented brand ambassador."),
     },
   ];
@@ -80,10 +104,10 @@ export function buildAgency(pack: Pick<CampaignPack, "intake" | "intakeReport" |
     ),
     weakness: L(
       `מול ${name}: היתרון שלכם שסופק הוא ${adv}. חולשתם לא נמדדה — אין ניחוש.`,
-      `مقابل ${name}: ميزتكم المعطاة ${adv}. ضعفهم غير مقيس.`,
-      `Vs ${name}: your stated edge is ${adv}. Their weakness was not measured — no guess.`,
+      `مقابل ${name}: ميزتكم المعطاة ${advAr}. ضعفهم غير مقيس.`,
+      `Vs ${name}: your stated edge is ${advEn}. Their weakness was not measured — no guess.`,
     ),
-    opportunity: L(`קהל ${aud}${loc ? " ב" + loc : ""} — אם הם לא מכסים את ${adv}.`, `جمهور ${aud}${loc ? " في " + loc : ""}.`, `Audience ${aud}${loc ? " in " + loc : ""} — if they don’t cover ${adv}.`),
+    opportunity: L(`קהל ${audHe}${loc ? " ב" + loc : ""} — אם הם לא מכסים את ${advHe}.`, `جمهور ${audAr}${loc ? " في " + loc : ""}.`, `Audience ${audEn}${loc ? " in " + loc : ""} — if they don’t cover ${advEn}.`),
     threat: L("אל תעתיקו מבצע שלהם אם לא תיעדתם אותו.", "لا تنسخوا عرضهم إن لم توثّقوه.", "Don’t copy their offer unless you documented it."),
   }));
 
@@ -102,12 +126,12 @@ export function buildAgency(pack: Pick<CampaignPack, "intake" | "intakeReport" |
     icp: L(
       `ICP = ${aud}${loc ? " · " + loc : ""}. לא «כולם באזור».`,
       `ICP = ${aud}${loc ? " · " + loc : ""}.`,
-      `ICP = ${aud}${loc ? " · " + loc : ""}. Not “everyone nearby”.`,
+      `ICP = ${audEn}${loc ? " · " + loc : ""}. Not “everyone nearby”.`,
     ),
     personas,
     battlecards,
     swot: {
-      strength: L(`חוזק שסופק: ${adv}`, `قوة معطاة: ${adv}`, `Stated strength: ${adv}`),
+      strength: L(`חוזק שסופק: ${advHe}`, `قوة معطاة: ${advAr}`, `Stated strength: ${advEn}`),
       weakness: L(
         i.whatFailed || "חולשה תפעולית לא סופקה — לא נכתוב «אין נוכחות דיגיטלית» סתם.",
         i.whatFailed || "ضعف تشغيلي غير مذكور.",
@@ -115,8 +139,8 @@ export function buildAgency(pack: Pick<CampaignPack, "intake" | "intakeReport" |
       ),
       opportunity: L(
         `קהל ${aud}${loc ? " ב" + loc : ""}. מטרה: ${goal}.`,
-        `جمهور ${aud}${loc ? " في " + loc : ""}. الهدف: ${goal}.`,
-        `Audience ${aud}${loc ? " in " + loc : ""}. Goal: ${goal}.`,
+        `جمهور ${audAr}${loc ? " في " + loc : ""}. الهدف: ${goalAr}.`,
+        `Audience ${audEn}${loc ? " in " + loc : ""}. Goal: ${goalEn}.`,
       ),
       threat: i.competitors.length
         ? L(
@@ -137,42 +161,42 @@ export function buildAgency(pack: Pick<CampaignPack, "intake" | "intakeReport" |
         "مغناطيس مقترح للإنشاء (غير موجود بعد): صفحة تحضير للزيارة. لا استشارة مجانية — لا عرض.",
         "Recommended magnet to create (does not exist yet): a first-visit prep sheet. No free consult, no discount — no offer.",
       )
-    : L(`מגנט קשור להצעה שסיפקתם: ${i.offer}. לא נרחיב מעבר לזה.`, `المغناطيس مرتبط بعرضكم: ${i.offer}.`, `Magnet tied to the offer you supplied: ${i.offer}. We will not expand it.`);
+    : L(`מגנט קשור להצעה שסיפקתם: ${offerHe}. לא נרחיב מעבר לזה.`, `المغناطيس مرتبط بعرضكم: ${offerAr}.`, `Magnet tied to the offer you supplied: ${offerEn}. We will not expand it.`);
 
   const strategy = {
     producedBy: ["strategic"] as AgencyPack["strategy"]["producedBy"],
     positioning: L(
       `${name} ל${aud}: ${adv}. לא «הכי טוב בשוק».`,
-      `${name} لـ ${aud}: ${adv}.`,
-      `${name} for ${aud}: ${adv}. Not “best in market”.`,
+      `${name} لـ ${audAr}: ${advAr}.`,
+      `${name} for ${audEn}: ${advEn}. Not “best in market”.`,
     ),
     uniqueMechanism: L(
       `המנגנון הייחודי הוא מה שסופק: ${adv}. בלי פטנט מדומה.`,
-      `الآلية الفريدة كما أُعطيت: ${adv}. بلا براءة وهمية.`,
+      `الآلية الفريدة كما أُعطيت: ${advAr}. بلا براءة وهمية.`,
       `The unique mechanism is what you gave: ${adv}. No fake proprietary method.`,
     ),
     hormozi: L(
-      `Dream = ${goal}. Likelihood = ${adv}. Time delay / effort = לא סופקו — לא ננחש.`,
-      `الحلم = ${goal}. الاحتمال = ${adv}. الوقت/الجهد غير مذكورين.`,
-      `Dream = ${goal}. Likelihood = ${adv}. Time delay / effort not given — will not guess.`,
+      `Dream = ${goalEn}. Likelihood = ${advEn}. Time delay / effort = לא סופקו — לא ננחש.`,
+      `الحلم = ${goalAr}. الاحتمال = ${advAr}. الوقت/الجهد غير مذكورين.`,
+      `Dream = ${goalEn}. Likelihood = ${advEn}. Time delay / effort not given — will not guess.`,
     ),
     aida: {
-      attention: L(pain, pain, pain),
-      interest: L(aud, aud, aud),
-      desire: L(adv, adv, adv),
-      action: L(goal, goal, goal),
+      attention: L(painHe, painAr, painEn),
+      interest: L(audHe, audAr, audEn),
+      desire: L(advHe, advAr, advEn),
+      action: L(goalHe, goalAr, goalEn),
     },
     pas: {
-      problem: L(pain, pain, pain),
+      problem: L(painHe, painAr, painEn),
       agitate: L(
         "מה קורה אם ממשיכים לדחות: הבעיה נשארת, והפרסום הכללי נשמע כמו כולם.",
         "إن استمر التأجيل تبقى المشكلة ويبدو الإعلان كالجميع.",
         "If they keep delaying: the problem stays, and generic ads still sound like everyone else.",
       ),
-      solution: L(`${name} — ${adv}`, `${name} — ${adv}`, `${name} — ${adv}`),
+      solution: L(`${name} — ${advHe}`, `${name} — ${advAr}`, `${name} — ${advEn}`),
     },
     hso: {
-      hook: L(pain, pain, pain),
+      hook: L(painHe, painAr, painEn),
       story: L(
         `${name}: ${i.description || "תיאור חסר — לא יומצא סיפור מטופל."}`,
         `${name}: ${i.description || "الوصف ناقص — لن يُختلق قصص مرضى."}`,
@@ -184,15 +208,15 @@ export function buildAgency(pack: Pick<CampaignPack, "intake" | "intakeReport" |
       leadMagnet: magnet,
       tripwire: noOffer
         ? L("Tripwire: אין. אל תמציאו ₪99 «רק החודש».", "لا tripwire. لا تخترعوا ₪99.", "Tripwire: none. Do not invent a ₪99 “this month only”.")
-        : L(`Tripwire רק אם זה חלק מ: ${i.offer}`, `Tripwire فقط إن كان جزءاً من ${i.offer}`, `Tripwire only if it is part of: ${i.offer}`),
+        : L(`Tripwire רק אם זה חלק מ: ${offerHe}`, `Tripwire فقط إن كان جزءاً من ${offerAr}`, `Tripwire only if it is part of: ${offerEn}`),
       core: L(`הליבה: ${i.category || "השירות שתואר"} — ${i.description || "תיאור חסר"}.`, `النواة: ${i.category || "الخدمة"}.`, `Core: ${i.category || "the service described"} — ${i.description || "description missing"}.`),
       upsell: L("Upsell רק אם סיפקתם חבילה. לא סופק — ריק.", "لا upsell إن لم تُعط حزمة.", "Upsell only if you supplied a package. None given — empty."),
       continuity: L("רצף/מנוי: לא צוין. לא נמציא «תוכנית חודשית».", "استمرار غير مذكور.", "Continuity/membership: not stated. Will not invent a monthly plan."),
     },
     funnel: {
-      tof: L(`TOF: הוק על ${pain}. מטא/טיקטוק לפי תוכנית המדיה. בלי לידים מזויפים.`, `TOF: خطاف على ${pain}.`, `TOF: hook on ${pain}. Meta/TikTok per the media plan. No fake leads.`),
-      mof: L(`MOF: הוכחה = ${adv} בלבד. רימרקטינג אחרי אירוע אמיתי.`, `MOF: إثبات = ${adv} فقط.`, `MOF: proof = ${adv} only. Remarketing after a real event.`),
-      bof: L(`BOF: CTA ל${goal}. וואטסאפ/תור — לא טופס של 12 שדות.`, `BOF: CTA لـ ${goal}.`, `BOF: CTA to ${goal}. WhatsApp/booking — not a 12-field form.`),
+      tof: L(`TOF: הוק על ${painHe}. מטא/טיקטוק לפי תוכנית המדיה. בלי לידים מזויפים.`, `TOF: خطاف على ${painAr}.`, `TOF: hook on ${painEn}. Meta/TikTok per the media plan. No fake leads.`),
+      mof: L(`MOF: הוכחה = ${advHe} בלבד. רימרקטינג אחרי אירוע אמיתי.`, `MOF: إثبات = ${advAr} فقط.`, `MOF: proof = ${advEn} only. Remarketing after a real event.`),
+      bof: L(`BOF: CTA ל${goalHe}. וואטסאפ/תור — לא טופס של 12 שדות.`, `BOF: CTA لـ ${goalAr}.`, `BOF: CTA to ${goalEn}. WhatsApp/booking — not a 12-field form.`),
     },
     calendar: Array.from({ length: 13 }, (_, w) => ({
       week: w + 1,
@@ -205,19 +229,19 @@ export function buildAgency(pack: Pick<CampaignPack, "intake" | "intakeReport" |
             : L("סיכום מספרים שמדדתם בפועל", "تلخيص أرقام قستمها", "Recap numbers you actually measured"),
       action: L(
         `שבוע ${w + 1}: ${name} · ${goal}. בלי «חודש ויראלי» כתחזית.`,
-        `أسبوع ${w + 1}: ${name} · ${goal}.`,
-        `Week ${w + 1}: ${name} · ${goal}. No “viral month” forecast.`,
+        `أسبوع ${w + 1}: ${name} · ${goalAr}.`,
+        `Week ${w + 1}: ${name} · ${goalEn}. No “viral month” forecast.`,
       ),
     })),
   };
 
-  const ctaHe = /תור|מועד/.test(goal) ? "קבעו תור" : "דברו איתנו";
-  const ctaAr = /موعد|تور/.test(goal) ? "احجزوا موعداً" : "تواصلوا معنا";
-  const ctaEn = /book|appointment|תור/.test(goal.toLowerCase()) ? "Book an appointment" : "Talk to us";
+  const ctaHe = /תור|מועד|موعد|book/.test(goalHe + goalAr + goalEn) ? "קבעו תור" : "דברו איתנו";
+  const ctaAr = /موعد|تور|תור|book/.test(goalHe + goalAr + goalEn) ? "احجزوا موعداً" : "تواصلوا معنا";
+  const ctaEn = /book|appointment|תור/.test((goalHe + ' ' + goalAr + ' ' + goalEn).toLowerCase()) ? "Book an appointment" : "Talk to us";
 
   const hooks = [
-    { id: "pain", angle: L("בעיה", "مشكلة", "Problem"), hook: L(pain, pain, pain) },
-    { id: "edge", angle: L("יתרון", "ميزة", "Advantage"), hook: L(adv, adv, adv) },
+    { id: "pain", angle: L("בעיה", "مشكلة", "Problem"), hook: L(painHe, painAr, painEn) },
+    { id: "edge", angle: L("יתרון", "ميزة", "Advantage"), hook: L(advHe, advAr, advEn) },
     { id: "place", angle: L("מקום", "مكان", "Place"), hook: L(loc || "מיקום חסר — לא «לידכם».", loc || "الموقع ناقص.", loc || "Location missing — not “near you”.") },
     { id: "no-fake", angle: L("יושרה", "صدق", "Integrity"), hook: L(noOffer ? "בלי קופון מלאכותי." : i.offer, noOffer ? "بلا كوبون." : i.offer, noOffer ? "No manufactured coupon." : i.offer) },
     { id: "lang", angle: L("שפה", "لغة", "Language"), hook: L("עברית וערבית כשפות שוות.", "العبرية والعربية متساويتان.", "Hebrew and Arabic as equal languages.") },
@@ -226,16 +250,16 @@ export function buildAgency(pack: Pick<CampaignPack, "intake" | "intakeReport" |
 
   const pieces: FactoryPiece[] = [];
   const formats: { format: string; title: (loc: Locale) => string; body: (loc: Locale) => string }[] = [
-    { format: "feed", title: (_l) => name, body: (l) => l === "he" ? `${pain}\n${adv}\n${ctaHe}` : l === "ar" ? `${pain}\n${adv}\n${ctaAr}` : `${pain}\n${adv}\n${ctaEn}` },
-    { format: "story", title: (l) => (l === "he" ? "פריים 1" : l === "ar" ? "إطار 1" : "Frame 1"), body: (l) => l === "he" ? `${pain}\nהבא: ${ctaHe}` : l === "ar" ? `${pain}\nالتالي: ${ctaAr}` : `${pain}\nNext: ${ctaEn}` },
-    { format: "reels", title: (l) => (l === "he" ? "סקריפט 15ש׳" : l === "ar" ? "سكربت 15ث" : "15s script"), body: (l) => l === "he" ? `0–3: ${pain}. 3–12: ${adv}. 12–15: ${ctaHe}.` : l === "ar" ? `0–3: ${pain}. 3–12: ${adv}. 12–15: ${ctaAr}.` : `0–3: ${pain}. 3–12: ${adv}. 12–15: ${ctaEn}.` },
-    { format: "youtube", title: (l) => (l === "he" ? "YouTube — הוק 8ש׳" : l === "ar" ? "يوتيوب — 8ث" : "YouTube — 8s hook"), body: (l) => l === "he" ? `הוק: ${pain}. גוף: ${adv}. קצה: ${ctaHe}. בלי Intro של 20 שניות.` : l === "ar" ? `خطاف: ${pain}.` : `Hook: ${pain}. Body: ${adv}. End: ${ctaEn}. No 20s intro.` },
-    { format: "rsa", title: (_l) => "Google RSA", body: (l) => l === "he" ? `H1: ${name}\nH2: ${adv.slice(0, 30)}\nH3: ${loc || "מיקום חסר"}\nD1: ${pain}\nD2: ${ctaHe}` : l === "ar" ? `H1: ${name}\nH2: ${adv.slice(0, 30)}\nD1: ${pain}` : `H1: ${name}\nH2: ${adv.slice(0, 30)}\nH3: ${loc || "location missing"}\nD1: ${pain}\nD2: ${ctaEn}` },
+    { format: "feed", title: (_l) => name, body: (l) => l === "he" ? `${pain}\n${adv}\n${ctaHe}` : l === "ar" ? `${painAr}\n${advAr}\n${ctaAr}` : `${painEn}\n${advEn}\n${ctaEn}` },
+    { format: "story", title: (l) => (l === "he" ? "פריים 1" : l === "ar" ? "إطار 1" : "Frame 1"), body: (l) => l === "he" ? `${painAr}\nהבא: ${ctaHe}` : l === "ar" ? `${painAr}\nالتالي: ${ctaAr}` : `${painAr}\nNext: ${ctaEn}` },
+    { format: "reels", title: (l) => (l === "he" ? "סקריפט 15ש׳" : l === "ar" ? "سكربت 15ث" : "15s script"), body: (l) => l === "he" ? `0–3: ${painAr}. 3–12: ${advAr}. 12–15: ${ctaHe}.` : l === "ar" ? `0–3: ${painAr}. 3–12: ${advAr}. 12–15: ${ctaAr}.` : `0–3: ${painAr}. 3–12: ${advAr}. 12–15: ${ctaEn}.` },
+    { format: "youtube", title: (l) => (l === "he" ? "YouTube — הוק 8ש׳" : l === "ar" ? "يوتيوب — 8ث" : "YouTube — 8s hook"), body: (l) => l === "he" ? `הוק: ${painAr}. גוף: ${advAr}. קצה: ${ctaHe}. בלי Intro של 20 שניות.` : l === "ar" ? `خطاف: ${painAr}.` : `Hook: ${painAr}. Body: ${advAr}. End: ${ctaEn}. No 20s intro.` },
+    { format: "rsa", title: (_l) => "Google RSA", body: (l) => l === "he" ? `H1: ${name}\nH2: ${adv.slice(0, 30)}\nH3: ${loc || "מיקום חסר"}\nD1: ${pain}\nD2: ${ctaHe}` : l === "ar" ? `H1: ${name}\nH2: ${advAr.slice(0, 30)}\nD1: ${painAr}` : `H1: ${name}\nH2: ${advEn.slice(0, 30)}\nH3: ${loc || "location missing"}\nD1: ${painEn}\nD2: ${ctaEn}` },
     { format: "search", title: (l) => (l === "he" ? "מודעת חיפוש" : l === "ar" ? "إعلان بحث" : "Search ad"), body: (_l) => `${name} | ${i.category} | ${loc}`.trim() },
-    { format: "landing", title: (l) => (l === "he" ? "דף נחיתה — מבנה" : l === "ar" ? "صفحة هبوط" : "Landing structure"), body: (l) => l === "he" ? `H1: ${pain}\nפסקה: ${adv}\n${loc}\n${i.website || ""}\nוואטסאפ: ${wa || "[יש להשלים]"}\nטופס: שם + טלפון + שפה.\nבלי המלצות בדויות.` : l === "ar" ? `H1: ${pain}\n${adv}\nواتساب: ${wa || "[יש להשלים]"}` : `H1: ${pain}\nParagraph: ${adv}\n${loc}\n${i.website || ""}\nWhatsApp: ${wa || "[TO COMPLETE]"}\nForm: name + phone + language.\nNo fake testimonials.` },
-    { format: "whatsapp", title: (_l) => "WhatsApp", body: (l) => l === "he" ? `שלום, כאן ${name}. וואטסאפ ${wa || "[יש להשלים]"}. קיבלנו פנייה לגבי ${goal}. מתי נוח לתור?` : l === "ar" ? `مرحبا، هنا ${name}. واتساب ${wa || "[יש להשלים]"}. متى يناسب الموعد؟` : `Hi, this is ${name}. WhatsApp ${wa || "[TO COMPLETE]"}. We got an enquiry about ${goal}. When works for a booking?` },
+    { format: "landing", title: (l) => (l === "he" ? "דף נחיתה — מבנה" : l === "ar" ? "صفحة هبوط" : "Landing structure"), body: (l) => l === "he" ? `H1: ${painAr}\nפסקה: ${advAr}\n${loc}\n${i.website || ""}\nוואטסאפ: ${wa || "[יש להשלים]"}\nטופס: שם + טלפון + שפה.\nבלי המלצות בדויות.` : l === "ar" ? `H1: ${painAr}\n${advAr}\nواتساب: ${wa || "[يجب الاستكمال]"}` : `H1: ${painAr}\nParagraph: ${advAr}\n${loc}\n${i.website || ""}\nWhatsApp: ${wa || "[TO COMPLETE]"}\nForm: name + phone + language.\nNo fake testimonials.` },
+    { format: "whatsapp", title: (_l) => "WhatsApp", body: (l) => l === "he" ? `שלום, כאן ${name}. וואטסאפ ${wa || "[יש להשלים]"}. קיבלנו פנייה לגבי ${goalAr}. מתי נוח לתור?` : l === "ar" ? `مرحبا، هنا ${name}. واتساب ${wa || "[يجب الاستكمال]"}. متى يناسب الموعد؟` : `Hi, this is ${name}. WhatsApp ${wa || "[TO COMPLETE]"}. We got an enquiry about ${goalAr}. When works for a booking?` },
     { format: "sms", title: (_l) => "SMS", body: (l) => l === "he" ? `${name}: אפשר לקבוע תור. השבו להודעה. לא מבצע.` : l === "ar" ? `${name}: يمكن حجز موعد. ردّوا.` : `${name}: we can book you in. Reply to this. No promo.` },
-    { format: "flyer", title: (l) => (l === "he" ? "פלאייר" : l === "ar" ? "منشور" : "Flyer"), body: (l) => l === "he" ? `${name}\n${adv}\n${loc}\n${ctaHe}\n${noOffer ? "אין מבצע על הנייר." : i.offer}` : l === "ar" ? `${name}\n${adv}\n${ctaAr}` : `${name}\n${adv}\n${loc}\n${ctaEn}\n${noOffer ? "No offer on the paper." : i.offer}` },
+    { format: "flyer", title: (l) => (l === "he" ? "פלאייר" : l === "ar" ? "منشور" : "Flyer"), body: (l) => l === "he" ? `${name}\n${advAr}\n${loc}\n${ctaHe}\n${noOffer ? "אין מבצע על הנייר." : i.offer}` : l === "ar" ? `${name}\n${advAr}\n${ctaAr}` : `${name}\n${advAr}\n${loc}\n${ctaEn}\n${noOffer ? "No offer on the paper." : i.offer}` },
   ];
   for (const lang of ["he", "ar", "en"] as Locale[]) {
     for (const f of formats) {
@@ -244,8 +268,8 @@ export function buildAgency(pack: Pick<CampaignPack, "intake" | "intakeReport" |
     for (let e = 1; e <= 5; e++) {
       const bodies: Record<Locale, string> = {
         he: [`1/5 היכרות: ${name} — ${adv}`, `2/5 הבעיה: ${pain}`, `3/5 איך זה עובד בפועל (בלי הבטחות חסרות).`, `4/5 התנגדות: יקר/אין זמן — תשובה בלי הנחה אוטומטית.`, `5/5 CTA: ${ctaHe}`][e - 1],
-        ar: [`1/5 تعارف: ${name}`, `2/5 المشكلة: ${pain}`, `3/5 كيف يعمل.`, `4/5 اعتراض السعر/الوقت.`, `5/5 CTA: ${ctaAr}`][e - 1],
-        en: [`1/5 Intro: ${name} — ${adv}`, `2/5 Problem: ${pain}`, `3/5 How it actually works (no missing promises).`, `4/5 Objection: expensive/no time — answer without an auto-discount.`, `5/5 CTA: ${ctaEn}`][e - 1],
+        ar: [`1/5 تعارف: ${name}`, `2/5 المشكلة: ${painAr}`, `3/5 كيف يعمل.`, `4/5 اعتراض السعر/الوقت.`, `5/5 CTA: ${ctaAr}`][e - 1],
+        en: [`1/5 Intro: ${name} — ${advEn}`, `2/5 Problem: ${painEn}`, `3/5 How it actually works (no missing promises).`, `4/5 Objection: expensive/no time — answer without an auto-discount.`, `5/5 CTA: ${ctaEn}`][e - 1],
       };
       pieces.push({ format: `email-${e}`, locale: lang, title: lang === "he" ? `אימייל ${e}` : lang === "ar" ? `بريد ${e}` : `Email ${e}`, body: bodies[lang] });
     }
@@ -264,7 +288,7 @@ export function buildAgency(pack: Pick<CampaignPack, "intake" | "intakeReport" |
     hooks,
     angleMatrix: hooks.slice(0, 4).map((h) => ({
       angle: h.angle,
-      proof: L(adv, adv, adv),
+      proof: L(advHe, advAr, advEn),
       cta: L(ctaHe, ctaAr, ctaEn),
     })),
     pieces,
@@ -280,7 +304,7 @@ export function buildAgency(pack: Pick<CampaignPack, "intake" | "intakeReport" |
     producedBy: ["media"] as AgencyPack["mediaExtra"]["producedBy"],
     frequency: L("תקרת תדירות 2/יום עד שיש אירוע המרה אמיתי. לא ננחש reach.", "سقف تكرار 2/يوم حتى حدث تحويل حقيقي.", "Frequency cap 2/day until a real conversion event exists. Reach will not be guessed."),
     tests: [
-      { name: L("A/B הוק", "A/B الخطاف", "A/B hook"), a: L(`הוק בעיה: ${pain}`, `خطاف المشكلة`, `Problem hook: ${pain}`), b: L(`הוק יתרון: ${adv}`, `خطاف الميزة`, `Advantage hook: ${adv}`), metric: L("פניות אמיתיות עם שם, לא CTR לבד.", "طلبات باسم حقيقي لا CTR فقط.", "Real named enquiries, not CTR alone.") },
+      { name: L("A/B הוק", "A/B الخطاف", "A/B hook"), a: L(`הוק בעיה: ${painHe}`, `خطاف المشكلة`, `Problem hook: ${painEn}`), b: L(`הוק יתרון: ${advHe}`, `خطاف الميزة`, `Advantage hook: ${advEn}`), metric: L("פניות אמיתיות עם שם, לא CTR לבד.", "طلبات باسم حقيقي لا CTR فقط.", "Real named enquiries, not CTR alone.") },
       { name: L("A/B CTA", "A/B CTA", "A/B CTA"), a: L(ctaHe, ctaAr, ctaEn), b: L("לפרטים", "للتفاصيل", "Learn more"), metric: L("אם «לפרטים» מביא סקרנים — כבו.", "إذا «للتفاصيل» يجلب فضوليين — أوقفوا.", "If “learn more” brings tyre-kickers — kill it.") },
     ],
     weekly: pack.optimizer.ifThen.map((x) => L(`IF ${x.if.he} THEN ${x.then.he}`, `IF ${x.if.ar} THEN ${x.then.ar}`, `IF ${x.if.en} THEN ${x.then.en}`)),
@@ -314,13 +338,13 @@ export function buildAgency(pack: Pick<CampaignPack, "intake" | "intakeReport" |
     crm: [
       { stage: L("חדש", "جديد", "New"), meaning: L("הודעה נכנסה. אין ליד בלי שם.", "رسالة واردة. لا عميل بلا اسم.", "Inbound message. No lead without a name.") },
       { stage: L("שיחה", "حديث", "Talk"), meaning: L("נקבע מגע אנושי.", "تواصل بشري.", "Human contact booked.") },
-      { stage: L("תור", "موعد", "Booked"), meaning: L(goal, goal, goal) },
+      { stage: L("תור", "موعد", "Booked"), meaning: L(goalHe, goalAr, goalEn) },
       { stage: L("לא רלוונטי", "غير مناسب", "Unqualified"), meaning: L("סקרן / אין כוונה. אל תסקיילו את ההצעה שהביאה אותם.", "فضولي. لا توسّعوا العرض الذي جلبهم.", "Curious / no intent. Don’t scale the offer that brought them.") },
     ],
     bookingCta: L(ctaHe, ctaAr, ctaEn),
     promoCodes: noOffer
       ? L("אין קודי מבצע. Intake סירב להמציא קוד הנחה.", "لا أكواد. رفض اختراع رمز خصم.", "No promo codes. Intake refused to invent a discount code.")
-      : L(`קוד רק אם הוא חלק מ: ${i.offer}`, `رمز فقط إن كان جزءاً من ${i.offer}`, `A code only if it is part of: ${i.offer}`),
+      : L(`קוד רק אם הוא חלק מ: ${offerHe}`, `رمز فقط إن كان جزءاً من ${offerAr}`, `A code only if it is part of: ${offerEn}`),
     retargeting: L(
       "רימרקטינג רק אחרי פיקסל/הודעה אמיתית. בלי קהל «דומה» לפני 50 המרות.",
       "إعادة استهداف بعد حدث حقيقي. بلا lookalike قبل 50 تحويلاً.",

@@ -1,8 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import type { AgentId, CampaignPack, Locale } from "@/lib/types";
 import { installDemoPack, latestPack } from "@/lib/active-pack";
 import { LOCALES } from "@/lib/i18n";
@@ -11,6 +10,8 @@ import { useIsClient } from "@/lib/use-is-client";
 import { Button } from "@/components/ui/button";
 import { ConquerHeadline } from "@/components/stepper";
 import { cn } from "@/lib/utils";
+import { LangLink } from "@/components/lang-link";
+import { wantsEmptyCampaign } from "@/lib/empty-campaign";
 
 const AGENT_LABEL: Record<AgentId, Record<Locale, string>> = {
   intake: { he: "קליטה", ar: "الاستقبال", en: "Intake" },
@@ -43,7 +44,7 @@ export function DepartmentRail() {
             ? pathname === "/"
             : pathname === item.href || pathname.startsWith(`${item.href}/`);
         return (
-          <Link
+          <LangLink
             key={item.href}
             href={item.href}
             className={cn(
@@ -54,7 +55,7 @@ export function DepartmentRail() {
             )}
           >
             {t(item.key)}
-          </Link>
+          </LangLink>
         );
       })}
     </nav>
@@ -110,18 +111,25 @@ export function DepartmentShell({
   leadKey: Parameters<ReturnType<typeof useI18n>["t"]>[0];
   children: (ctx: { pack: CampaignPack; packLang: Locale; onPack: (p: CampaignPack) => void }) => ReactNode;
 }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const client = useIsClient();
   const [pack, setPack] = useState<CampaignPack | null>(null);
   const [booted, setBooted] = useState(false);
-  const [packLang, setPackLang] = useState<Locale>("he");
+  const [packLang, setPackLang] = useState<Locale>(locale);
 
   if (client && !booted) {
-    const latest = latestPack() ?? installDemoPack();
-    setPack(latest);
-    setPackLang("he");
+    const latest = latestPack();
+    if (latest) setPack(latest);
+    else if (!wantsEmptyCampaign() && locale !== "ar") {
+      setPack(installDemoPack());
+    }
+    setPackLang(locale);
     setBooted(true);
   }
+
+  useEffect(() => {
+    setPackLang(locale);
+  }, [locale]);
 
   function loadDemo() {
     const next = installDemoPack();
@@ -144,7 +152,7 @@ export function DepartmentShell({
               {t("dept.loadDemo")}
             </Button>
             <Button asChild variant="dark">
-              <Link href="/">{t("nav.build")}</Link>
+              <LangLink href="/">{t("nav.build")}</LangLink>
             </Button>
           </div>
         </div>
@@ -165,7 +173,7 @@ export function DepartmentShell({
                 {t("dept.loadDemo")}
               </Button>
               <Button asChild size="sm" variant="outline">
-                <Link href={`/campaigns/${pack.id}`}>{t("campaigns.open")}</Link>
+                <LangLink href={`/campaigns/${pack.id}`}>{t("campaigns.open")}</LangLink>
               </Button>
             </div>
           </div>

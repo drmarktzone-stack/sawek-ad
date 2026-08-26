@@ -1,6 +1,27 @@
 import type { AdVariant, Intake, Locale, VariantKind } from "../types";
 import { isNoOffer } from "../no-offer";
 import { filled } from "../utils";
+import {
+  ADVANTAGE_CHIPS,
+  AUDIENCE_CHIPS,
+  GOAL_CHIPS,
+  OFFER_CHIPS,
+  PROBLEM_CHIPS,
+  resolveChipLabel,
+} from "../chips";
+
+function localized(i: Intake, locale: Locale): Intake {
+  return {
+    ...i,
+    audience: resolveChipLabel(i.audience, AUDIENCE_CHIPS, locale),
+    biggestProblem: resolveChipLabel(i.biggestProblem, PROBLEM_CHIPS, locale),
+    uniqueAdvantage: resolveChipLabel(i.uniqueAdvantage, ADVANTAGE_CHIPS, locale),
+    mainGoal: resolveChipLabel(i.mainGoal, GOAL_CHIPS, locale),
+    offer: isNoOffer(i.offer)
+      ? OFFER_CHIPS.find((o) => o.id === "no_offer")!.label[locale]
+      : resolveChipLabel(i.offer, OFFER_CHIPS, locale),
+  };
+}
 
 const KINDS: VariantKind[] = [
   "strong_offer",
@@ -217,8 +238,9 @@ function buildOne(i: Intake, kind: VariantKind, locale: Locale): AdVariant {
 export function generateVariants(intake: Intake): AdVariant[] {
   const out: AdVariant[] = [];
   for (const locale of ["he", "ar", "en"] as Locale[]) {
+    const i = localized(intake, locale);
     for (const kind of KINDS) {
-      out.push(buildOne(intake, kind, locale));
+      out.push(buildOne(i, kind, locale));
     }
   }
   return out;

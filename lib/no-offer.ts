@@ -1,4 +1,5 @@
 const NO_OFFER_VALUES = [
+  "no_offer",
   "אין מבצע",
   "אין מבצע מיוחד",
   "بدون عرض",

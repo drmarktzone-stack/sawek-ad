@@ -1,10 +1,12 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
 import type { AgentId, AgentStatus, CampaignPack } from "@/lib/types";
 import { deleteCampaign, loadCampaigns } from "@/lib/storage";
 import { installDemoPack } from "@/lib/active-pack";
+import { wantsEmptyCampaign } from "@/lib/empty-campaign";
+import { markEmptyCampaign } from "@/lib/empty-campaign";
+import { LangLink } from "@/components/lang-link";
 import { ensureAgency } from "@/lib/engine/agency";
 import { printBible, printPdf } from "@/lib/export";
 import { Button } from "@/components/ui/button";
@@ -38,7 +40,7 @@ export function CampaignsList() {
 
   if (client && !booted) {
     let rows = loadCampaigns().map(ensureAgency);
-    if (rows.length === 0) {
+    if (rows.length === 0 && !wantsEmptyCampaign() && locale !== "ar") {
       installDemoPack();
       rows = loadCampaigns().map(ensureAgency);
     }
@@ -62,7 +64,7 @@ export function CampaignsList() {
           {t("dept.loadDemo")}
         </Button>
         <Button asChild variant="dark">
-          <Link href="/">{t("cta.new")}</Link>
+          <LangLink href="/" onClick={() => markEmptyCampaign()}>{t("cta.new")}</LangLink>
         </Button>
       </div>
 
@@ -87,10 +89,10 @@ export function CampaignsList() {
               </div>
               <div className="flex flex-wrap gap-2">
                 <Button asChild size="sm">
-                  <Link href={`/campaigns/${c.id}`}>{t("campaigns.open")}</Link>
+                  <LangLink href={`/campaigns/${c.id}`}>{t("campaigns.open")}</LangLink>
                 </Button>
                 <Button asChild size="sm" variant="dark">
-                  <Link href={`/plan/${c.id}`}>{t("cta.plan")}</Link>
+                  <LangLink href={`/plan/${c.id}`}>{t("cta.plan")}</LangLink>
                 </Button>
                 <Button type="button" size="sm" variant="dark" onClick={() => printBible(c, locale)}>
                   {t("cta.bible")}

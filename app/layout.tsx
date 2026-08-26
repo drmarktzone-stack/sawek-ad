@@ -30,6 +30,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       suppressHydrationWarning
       className={`${heebo.variable} ${cairo.variable} h-full dark antialiased`}
     >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var q=new URLSearchParams(location.search).get("lang");var s=localStorage.getItem("omniad-locale");var l=(q==="ar"||q==="he"||q==="en")?q:(s==="ar"||s==="he"||s==="en")?s:"he";document.documentElement.lang=l;document.documentElement.dir=l==="en"?"ltr":"rtl";if(!q){var u=new URL(location.href);u.searchParams.set("lang",l);history.replaceState(history.state,"",u.pathname+u.search+u.hash);}localStorage.setItem("omniad-locale",l);}catch(e){}})();`,
+          }}
+        />
+      </head>
       <body className="flex min-h-full flex-col font-sans">
         <I18nProvider>
           <Header />

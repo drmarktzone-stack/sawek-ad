@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import {
@@ -19,6 +18,7 @@ import {
 } from "lucide-react";
 import { LOCALES } from "@/lib/i18n";
 import { useI18n } from "./i18n-provider";
+import { LangLink } from "./lang-link";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -75,13 +75,13 @@ export function Header() {
     <header className="sticky top-0 z-40 border-b border-omni-yellow/20 bg-black/85 backdrop-blur-md">
       <div className="h-1 w-full bg-gradient-to-l from-omni-yellow via-omni-red to-omni-yellow" />
       <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3">
-        <Link href="/" className="flex shrink-0 flex-col leading-tight">
+        <LangLink href="/" className="flex shrink-0 flex-col leading-tight">
           <span className="bg-gradient-to-l from-omni-yellow to-omni-red bg-clip-text text-xl font-black tracking-tight text-transparent sm:text-2xl">
             {t("brand.name")}
           </span>
           <span className="text-[10px] font-semibold text-omni-yellow">{t("brand.scripts")}</span>
           <span className="text-[9px] text-zinc-500">{t("brand.tagline")}</span>
-        </Link>
+        </LangLink>
 
         <nav className="ms-2 hidden min-w-0 flex-1 items-center gap-1 overflow-x-auto lg:flex">
           {NAV.map((item) => {
@@ -91,7 +91,7 @@ export function Header() {
                 ? pathname === "/"
                 : pathname.startsWith(item.href);
             return (
-              <Link
+              <LangLink
                 key={item.key}
                 href={item.href}
                 className={cn(
@@ -103,7 +103,7 @@ export function Header() {
               >
                 <Icon className="size-3.5" />
                 {t(item.key)}
-              </Link>
+              </LangLink>
             );
           })}
         </nav>
@@ -132,7 +132,7 @@ export function Header() {
             {NAV.map((item) => {
               const Icon = item.icon;
               return (
-                <Link
+                <LangLink
                   key={item.key}
                   href={item.href}
                   onClick={() => setOpen(false)}
@@ -140,7 +140,7 @@ export function Header() {
                 >
                   <Icon className="size-4 text-omni-yellow" />
                   {t(item.key)}
-                </Link>
+                </LangLink>
               );
             })}
           </div>

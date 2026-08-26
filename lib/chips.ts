@@ -56,7 +56,7 @@ export const GOAL_CHIPS: ChipOption[] = [
   { id: "custom", custom: true, label: { he: "כתוב בעצמך", ar: "اكتب بنفسك", en: "Write your own" } },
 ];
 
-/** Default selected offer is "אין מבצע". Free consult / discount are optional, never default. */
+/** Default selected offer is "אין מבצע" / "لا يوجد عرض". Free consult / discount are optional, never default. */
 export const OFFER_CHIPS: ChipOption[] = [
   { id: "no_offer", label: { he: "אין מבצע", ar: "لا يوجد عرض", en: "No offer" } },
   { id: "intro", label: { he: "פגישת היכרות", ar: "جلسة تعارف", en: "Intro meeting" } },
@@ -66,3 +66,18 @@ export const OFFER_CHIPS: ChipOption[] = [
 ];
 
 export const DEFAULT_OFFER_HE = "אין מבצע";
+
+export function resolveChipLabel(value: string, options: ChipOption[], locale: Locale): string {
+  if (!value) return "";
+  const hit = options.find((o) => o.id === value || Object.values(o.label).includes(value));
+  if (hit && !hit.custom) return hit.label[locale];
+  return value;
+}
+
+export function defaultOfferLabel(locale: Locale): string {
+  return OFFER_CHIPS.find((o) => o.id === "no_offer")!.label[locale];
+}
+
+export function defaultOfferId(): string {
+  return "no_offer";
+}

@@ -152,7 +152,9 @@ export function OptiHub() {
 
   function go(id: OptiModuleId) {
     patch({ module: id });
-    router.replace(`${pathname}?m=${id}`);
+    const u = new URL(window.location.href);
+    u.searchParams.set("m", id);
+    router.replace(u.pathname + u.search);
   }
 
   function loadDemo() {
@@ -160,7 +162,9 @@ export function OptiHub() {
     const next = { ...loadOptiDesk(), module: "compliance" as const };
     setDesk(next);
     saveOptiDesk(next);
-    router.replace(`${pathname}?m=compliance`);
+    const u = new URL(window.location.href);
+    u.searchParams.set("m", "compliance");
+    router.replace(u.pathname + u.search);
   }
 
   const loc = locale as Locale;

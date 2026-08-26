@@ -8,6 +8,7 @@ import { generateMedia } from "./media";
 import { generateOptimizer } from "./optimizer";
 import { buildAgency } from "./agency";
 import { demoIntake, DEMO_ID } from "../demo";
+import { loadLocale } from "../storage";
 
 export const AGENT_ORDER: AgentId[] = [
   "intake",
@@ -149,7 +150,7 @@ export function assemblePack(
 }
 
 export function buildDemoPack(): CampaignPack {
-  const intake = demoIntake();
+  const intake = demoIntake(typeof window !== "undefined" ? loadLocale() : "he");
   const report = validateIntake(intake);
   const diagnosis: Diagnosis = {
     ...diagnose(intake, report),

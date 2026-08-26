@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useI18n } from "@/components/i18n-provider";
+import { LangLink } from "@/components/lang-link";
 import { cn } from "@/lib/utils";
 
 const ITEMS = [
@@ -21,7 +21,7 @@ export function MedicalNav() {
       {ITEMS.map((item) => {
         const active = item.href === "/medical" ? pathname === "/medical" : pathname.startsWith(item.href);
         return (
-          <Link
+          <LangLink
             key={item.href}
             href={item.href}
             className={cn(
@@ -30,7 +30,7 @@ export function MedicalNav() {
             )}
           >
             {t(item.key)}
-          </Link>
+          </LangLink>
         );
       })}
     </nav>

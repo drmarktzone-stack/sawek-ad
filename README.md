@@ -28,7 +28,7 @@ Features were therefore merged from a **read-only** listing of Lovable project `
 ## Demo — medical (pediatric, no keys)
 
 1. Open **OptiBrain** (`/medical/optibrain`) for the 15-module desk, or `/medical` for the clinic landing builder.
-2. On the homepage, click **הדגמה: מרפאת ילדים ד״ר סאמר אבו מוך**. That loads Dr. Samer Abu Mokh (Clalit pediatrics, Baqa al-Gharbiyye, Al-Nour 1st floor, WhatsApp 052-8885800, https://drsamerped.ai.studio) into the OmniAd wizard at step 2. Unknown numbers stay empty / `[יש להשלים]`. Offer is **אין מבצע**. The same demo on OptiBrain fills the desk and opens Policy shield.
+2. On the homepage, click **הדגמה: מרפאת ילדים ד״ר סאמר אבו מוך** only when you want the demo. It is a button — it is **not** restored on reload if you chose **התחל קמפיין ריק** / **ابدأ حملة فارغة** or if the UI locale is Arabic. Unknown numbers stay empty / `[יש להשלים]` / `[يجب الاستكمال]`. Offer is **אין מבצע** / **لا يوجد عرض**.
 3. Advance Type → Business → Details → Review, then **בנה לי קמפיין מלא**. Approve the three HITL gates (diagnosis, strategy, media). Empty price/tech/success rate become markers. Ethics banner stays on copy and on `/lp/:slug`.
 
 General 5-agent OmniAd flow is unchanged on `/`.
@@ -66,7 +66,7 @@ Copy `.env.example` if you want those. The app runs the same without them (local
 4. Approve HITL gates: diagnosis → strategy → media → optimizer.
 5. Open **דיסקברי / אסטרטגיה / קריאייטיב / מדיה / לידים / אופס** — the full agency pack in HE+AR+EN.
 6. Or from any department, click **טען פק הדגמה מלא** so no screen is empty.
-7. Download the campaign bible PDF from Ops. Save. Build a second campaign with **קמפיין חדש**.
+7. Download the campaign bible PDF from Ops. Save. **קמפיין חדש** / **ابدأ حملة فارغة** clears the draft, keeps the current language, and returns to wizard step 1. The stepper jumps to completed steps. Locale is stored in `localStorage`, `?lang=`, and React state so العربية survives every nav/hash change.
 
 ## What you get
 

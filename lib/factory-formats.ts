@@ -18,4 +18,4 @@ export const FACTORY_FORMATS: { id: string; label: Record<Locale, string> }[] = 
   { id: "flyer", label: { he: "פלאייר", ar: "منشور مطبوع", en: "Flyer" } },
 ];
 
-export const MAX_COMPETITORS = 8;
+export const MAX_COMPETITORS = 2;

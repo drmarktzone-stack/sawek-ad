@@ -4,6 +4,16 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Trash2, WandSparkles } from "lucide-react";
 import type { AgentId, AgentStatus, CampaignPack, Competitor, Intake, WizardStep } from "@/lib/types";
+import { demoIntake, DEMO_LABEL, consumePendingDemo, clearPendingDemo, applyPediatricDemoDraft, isPediatricDemo, relocalizePediatricIntake } from "@/lib/demo";
+import { installDemoPack } from "@/lib/active-pack";
+import { cmoFieldsMissing, emptyIntake, wizardReady } from "@/lib/engine/validate";
+import { assemblePack, idleStatus, runIntakeAndDiagnosis, runMedia, runOptimizerStage, runStrategic } from "@/lib/engine/run";
+import { loadDraft, saveDraft, upsertCampaign } from "@/lib/storage";
+import { uid } from "@/lib/utils";
+import { MAX_COMPETITORS } from "@/lib/factory-formats";
+import { AREA_LABEL } from "@/lib/i18n";
+import { markEmptyCampaign, wantsEmptyCampaign, clearEmptyCampaign, explicitDemoInUrl } from "@/lib/empty-campaign";
+import { stripDemoParamsPreserveLang, withLang } from "@/lib/locale-url";
 import {
   ADVANTAGE_CHIPS,
   AUDIENCE_CHIPS,
@@ -12,15 +22,8 @@ import {
   OFFER_CHIPS,
   PROBLEM_CHIPS,
   TYPE_OPTIONS,
+  resolveChipLabel,
 } from "@/lib/chips";
-import { demoIntake, DEMO_LABEL, consumePendingDemo, clearPendingDemo, applyPediatricDemoDraft, isPediatricDemo } from "@/lib/demo";
-import { installDemoPack } from "@/lib/active-pack";
-import { cmoFieldsMissing, emptyIntake, wizardReady } from "@/lib/engine/validate";
-import { assemblePack, idleStatus, runIntakeAndDiagnosis, runMedia, runOptimizerStage, runStrategic } from "@/lib/engine/run";
-import { loadDraft, saveDraft, upsertCampaign } from "@/lib/storage";
-import { uid } from "@/lib/utils";
-import { MAX_COMPETITORS } from "@/lib/factory-formats";
-import { AREA_LABEL } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Input, Label, Textarea } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -69,11 +72,13 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
 
   useEffect(() => {
     if (!client || hydrated) return;
-    const pending = !demoConsumed.current && consumePendingDemo();
-    if (pending) {
+    const urlDemo = explicitDemoInUrl() || consumePendingDemo();
+    const emptyWanted = wantsEmptyCampaign();
+    if (urlDemo && !emptyWanted) {
       demoConsumed.current = true;
-      const d = demoIntake();
+      const d = demoIntake(locale);
       clearPendingDemo();
+      clearEmptyCampaign();
       saveDraft({ intake: d, step: 2 });
       setIntake(d);
       setStep(2);
@@ -87,30 +92,54 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
       setPhase("wizard");
     } else {
       const d = loadDraft();
-      setIntake(d.intake);
-      setStep(d.step);
-      setCustom({
-        audience: d.intake.audienceCustom,
-        problem: d.intake.problemCustom,
-        advantage: d.intake.advantageCustom,
-        goal: d.intake.goalCustom,
-        offer: d.intake.offerCustom,
-      });
+      const skipDemo =
+        emptyWanted ||
+        (locale === "ar" && isPediatricDemo(d.intake)) ||
+        (emptyWanted && isPediatricDemo(d.intake));
+      if (skipDemo) {
+        const blank = emptyIntake();
+        saveDraft({ intake: blank, step: 1 });
+        setIntake(blank);
+        setStep(1);
+        setCustom({ audience: false, problem: false, advantage: false, goal: false, offer: false });
+        setPhase("wizard");
+      } else {
+        const intake = isPediatricDemo(d.intake) ? relocalizePediatricIntake(d.intake, locale) : d.intake;
+        setIntake(intake);
+        setStep(d.step);
+        setCustom({
+          audience: intake.audienceCustom,
+          problem: intake.problemCustom,
+          advantage: intake.advantageCustom,
+          goal: intake.goalCustom,
+          offer: intake.offerCustom,
+        });
+      }
     }
     setHydrated(true);
-  }, [client, hydrated]);
+  }, [client, hydrated, locale]);
 
   useEffect(() => {
     if (!hydrated || !client) return;
     if (typeof window !== "undefined" && window.location.search.includes("demo=")) {
-      router.replace("/");
+      router.replace(stripDemoParamsPreserveLang(locale));
     }
-  }, [hydrated, client, router]);
+  }, [hydrated, client, router, locale]);
 
   useEffect(() => {
     if (!hydrated) return;
     saveDraft({ intake, step });
+    if (intake.businessName.trim() && !isPediatricDemo(intake)) {
+      clearEmptyCampaign();
+    }
   }, [intake, step, hydrated]);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    if (isPediatricDemo(intake)) {
+      setIntake((prev) => relocalizePediatricIntake(prev, locale));
+    }
+  }, [locale, hydrated]);
 
   const patch = (p: Partial<Intake>) => setIntake((s) => ({ ...s, ...p }));
 
@@ -121,11 +150,11 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
       [t("details.depth"), DEPTH_OPTIONS.find((o) => o.id === intake.depth)?.label[locale] ?? intake.depth],
       [t("biz.category"), intake.category],
       [t("biz.description"), intake.description],
-      [t("details.audience"), intake.audience],
-      [t("details.problem"), intake.biggestProblem],
-      [t("details.advantage"), intake.uniqueAdvantage],
-      [t("details.goal"), intake.mainGoal],
-      [t("details.offer"), intake.offer],
+      [t("details.audience"), resolveChipLabel(intake.audience, AUDIENCE_CHIPS, locale)],
+      [t("details.problem"), resolveChipLabel(intake.biggestProblem, PROBLEM_CHIPS, locale)],
+      [t("details.advantage"), resolveChipLabel(intake.uniqueAdvantage, ADVANTAGE_CHIPS, locale)],
+      [t("details.goal"), resolveChipLabel(intake.mainGoal, GOAL_CHIPS, locale)],
+      [t("details.offer"), resolveChipLabel(intake.offer, OFFER_CHIPS, locale)],
       [t("biz.location"), intake.location],
       [t("biz.website"), intake.website],
       [t("biz.whatsapp"), intake.whatsapp],
@@ -134,7 +163,8 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
   );
 
   function applyDemo() {
-    const d = applyPediatricDemoDraft();
+    clearEmptyCampaign();
+    const d = applyPediatricDemoDraft(locale);
     installDemoPack();
     clearPendingDemo();
     setIntake(d);
@@ -156,6 +186,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
   }
 
   function newCampaign() {
+    markEmptyCampaign();
     setIntake(emptyIntake());
     setStep(1);
     setPhase("wizard");
@@ -271,7 +302,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
       setPack(saved);
       setAgentStatus(saved.agentStatus);
       setRunning(false);
-      router.push(`/campaigns/${saved.id}`);
+      router.push(withLang(`/campaigns/${saved.id}`, locale));
       return;
     }
     setRunning(false);
@@ -297,7 +328,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
 
       {phase === "wizard" && (
         <>
-          <Stepper step={step} />
+          <Stepper step={step} onStep={(n) => setStep(n)} />
           {!embedded && <ConquerHeadline subtitle={step === 4 ? t("hero.review") : undefined} />}
           {embedded && step === 4 && (
             <p className="mb-6 text-center text-sm font-medium text-zinc-400">{t("hero.review")}</p>
@@ -390,13 +421,13 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
                   options={AUDIENCE_CHIPS}
                   value={intake.audience}
                   showCustomField={custom.audience}
-                  onChange={(label, opt) => {
+                  onChange={(_, opt) => {
                     if (opt.custom) {
                       setCustom((c) => ({ ...c, audience: true }));
                       patch({ audienceCustom: true });
                     } else {
                       setCustom((c) => ({ ...c, audience: false }));
-                      patch({ audience: label, audienceCustom: false });
+                      patch({ audience: opt.id, audienceCustom: false });
                     }
                   }}
                   customValue={intake.audience}
@@ -409,11 +440,11 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
                   options={PROBLEM_CHIPS}
                   value={intake.biggestProblem}
                   showCustomField={custom.problem}
-                  onChange={(label, opt) => {
+                  onChange={(_, opt) => {
                     if (opt.custom) setCustom((c) => ({ ...c, problem: true }));
                     else {
                       setCustom((c) => ({ ...c, problem: false }));
-                      patch({ biggestProblem: label, problemCustom: false });
+                      patch({ biggestProblem: opt.id, problemCustom: false });
                     }
                   }}
                   customValue={intake.biggestProblem}
@@ -426,11 +457,11 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
                   options={ADVANTAGE_CHIPS}
                   value={intake.uniqueAdvantage}
                   showCustomField={custom.advantage}
-                  onChange={(label, opt) => {
+                  onChange={(_, opt) => {
                     if (opt.custom) setCustom((c) => ({ ...c, advantage: true }));
                     else {
                       setCustom((c) => ({ ...c, advantage: false }));
-                      patch({ uniqueAdvantage: label, advantageCustom: false });
+                      patch({ uniqueAdvantage: opt.id, advantageCustom: false });
                     }
                   }}
                   customValue={intake.uniqueAdvantage}
@@ -443,11 +474,11 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
                   options={GOAL_CHIPS}
                   value={intake.mainGoal}
                   showCustomField={custom.goal}
-                  onChange={(label, opt) => {
+                  onChange={(_, opt) => {
                     if (opt.custom) setCustom((c) => ({ ...c, goal: true }));
                     else {
                       setCustom((c) => ({ ...c, goal: false }));
-                      patch({ mainGoal: label, goalCustom: false });
+                      patch({ mainGoal: opt.id, goalCustom: false });
                     }
                   }}
                   customValue={intake.mainGoal}
@@ -461,11 +492,11 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
                   options={OFFER_CHIPS}
                   value={intake.offer}
                   showCustomField={custom.offer}
-                  onChange={(label, opt) => {
+                  onChange={(_, opt) => {
                     if (opt.custom) setCustom((c) => ({ ...c, offer: true }));
                     else {
                       setCustom((c) => ({ ...c, offer: false }));
-                      patch({ offer: label, offerCustom: false });
+                      patch({ offer: opt.id, offerCustom: false });
                     }
                   }}
                   customValue={intake.offer}
@@ -548,11 +579,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
               </Button>
               {!wizardReady(intake) && (
                 <p className="mt-2 text-center text-xs text-omni-red">
-                  {locale === "he"
-                    ? "חסרים שם, תיאור, קהל, בעיה, יתרון או מטרה."
-                    : locale === "ar"
-                      ? "ينقص الاسم أو الوصف أو الجمهور أو المشكلة أو الميزة أو الهدف."
-                      : "Name, description, audience, problem, advantage, or goal is missing."}
+                  {t("wizard.missing")}
                 </p>
               )}
             </section>

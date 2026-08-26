@@ -7,7 +7,13 @@ import type { WizardStep } from "@/lib/types";
 
 const KEYS = ["step.1", "step.2", "step.3", "step.4"] as const;
 
-export function Stepper({ step }: { step: WizardStep }) {
+export function Stepper({
+  step,
+  onStep,
+}: {
+  step: WizardStep;
+  onStep?: (n: WizardStep) => void;
+}) {
   const { t } = useI18n();
   return (
     <ol className="mx-auto flex max-w-xl items-start justify-between gap-1 px-2">
@@ -15,6 +21,7 @@ export function Stepper({ step }: { step: WizardStep }) {
         const n = (i + 1) as WizardStep;
         const done = step > n;
         const active = step === n;
+        const canJump = Boolean(onStep) && n <= step;
         return (
           <li key={key} className="flex flex-1 flex-col items-center gap-2">
             <div className="flex w-full items-center">
@@ -26,15 +33,21 @@ export function Stepper({ step }: { step: WizardStep }) {
                   )}
                 />
               )}
-              <div
+              <button
+                type="button"
+                disabled={!canJump}
+                onClick={() => canJump && onStep?.(n)}
+                aria-current={active ? "step" : undefined}
                 className={cn(
                   "flex shrink-0 items-center justify-center rounded-full text-sm font-black transition-all",
+                  canJump && "cursor-pointer hover:scale-105",
+                  !canJump && "cursor-default",
                   active ? "size-12 bg-omni-yellow text-black shadow-[0_0_24px_rgba(255,229,0,0.55)]" : "size-9",
                   !active && (done ? "bg-omni-yellow text-black" : "bg-white/10 text-zinc-400"),
                 )}
               >
                 {done ? <Check className="size-4" strokeWidth={3} /> : n}
-              </div>
+              </button>
               {i < 3 && (
                 <div
                   className={cn(

@@ -1,7 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import Link from "next/link";
+import { useMemo, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Copy, Download, FileText, Lightbulb, Link2, Pencil, Save, Shield, WandSparkles } from "lucide-react";
 import type { CampaignPack, Locale, OptimizerResultInput } from "@/lib/types";
@@ -13,6 +12,9 @@ import { produceAd } from "@/lib/engine/produce-ad";
 import { adviseFromResults } from "@/lib/engine/optimizer";
 import { highlightsOf, missionOf, pillarsOf } from "@/lib/engine/brief";
 import { saveDraft, upsertCampaign } from "@/lib/storage";
+import { markEmptyCampaign } from "@/lib/empty-campaign";
+import { LangLink } from "@/components/lang-link";
+import { withLang } from "@/lib/locale-url";
 import { Button } from "@/components/ui/button";
 import { Input, Label, Textarea } from "@/components/ui/input";
 import {
@@ -35,6 +37,10 @@ export function ResultView({
   const { locale, t: tr } = useI18n();
   const router = useRouter();
   const [packLang, setPackLang] = useState<Locale>(locale);
+
+  useEffect(() => {
+    setPackLang(locale);
+  }, [locale]);
   const [copied, setCopied] = useState<string | null>(null);
   const [idea, setIdea] = useState("");
   const [optIn, setOptIn] = useState<OptimizerResultInput>({
@@ -83,7 +89,7 @@ export function ResultView({
 
   function edit() {
     saveDraft({ intake: pack.intake, step: 4 });
-    router.push("/");
+    router.push(withLang("/", locale));
   }
 
   function runOpt() {
@@ -102,10 +108,10 @@ export function ResultView({
           <p className="mt-1 text-zinc-400">{pack.name}</p>
         </div>
         <Button asChild>
-          <Link href="/">
+          <LangLink href="/" onClick={() => markEmptyCampaign()}>
             <WandSparkles className="size-4" />
             {tr("cta.new")}
-          </Link>
+          </LangLink>
         </Button>
       </div>
 
@@ -170,7 +176,7 @@ export function ResultView({
           {tr("cta.edit")}
         </Button>
         <Button asChild variant="dark">
-          <Link href={`/plan/${pack.id}`}>{tr("cta.plan")}</Link>
+          <LangLink href={`/plan/${pack.id}`}>{tr("cta.plan")}</LangLink>
         </Button>
         <Button type="button" variant={pack.planActivated ? "dark" : "default"} onClick={activatePlan}>
           <Shield className="size-4" />
@@ -211,11 +217,7 @@ export function ResultView({
             />
           </div>
           <p className="mt-2 text-xs text-zinc-500">
-            {locale === "he"
-              ? "כמה מהשדות מולאו — לא ציון ביצועים."
-              : locale === "ar"
-                ? "كم من الحقول مُلئت — ليس درجة أداء."
-                : "How many fields were filled — not a performance score."}
+            {tr("result.scoreHint")}
           </p>
         </div>
         <div className="rounded-2xl border border-white/10 bg-omni-card p-5">
@@ -257,14 +259,14 @@ export function ResultView({
           { href: "/leads", key: "nav.leads" as const, body: pack.agency?.leads.magnet[locale] },
           { href: "/campaigns", key: "nav.ops" as const, body: tr("dept.opsLead") },
         ].map((card) => (
-          <Link
+          <LangLink
             key={card.href}
             href={card.href}
             className="rounded-2xl border border-white/10 bg-omni-card p-4 transition hover:border-omni-yellow/50"
           >
             <p className="text-xs font-black uppercase tracking-wide text-omni-yellow">{tr(card.key)}</p>
             <p className="mt-2 line-clamp-3 text-sm text-zinc-300">{card.body}</p>
-          </Link>
+          </LangLink>
         ))}
       </div>
 

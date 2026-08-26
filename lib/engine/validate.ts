@@ -116,7 +116,7 @@ export function emptyIntake(): Intake {
     advantageCustom: false,
     mainGoal: "",
     goalCustom: false,
-    offer: "אין מבצע",
+    offer: "no_offer",
     offerCustom: false,
     competitors: [],
     businessModel: "",

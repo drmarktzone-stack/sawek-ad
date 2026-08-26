@@ -1,35 +1,59 @@
 import type { CampaignPack, Intake, Locale } from "../types";
 import { isNoOffer } from "../no-offer";
+import {
+  ADVANTAGE_CHIPS,
+  AUDIENCE_CHIPS,
+  GOAL_CHIPS,
+  OFFER_CHIPS,
+  PROBLEM_CHIPS,
+  resolveChipLabel,
+} from "../chips";
+
+function text(intake: Intake, locale: Locale) {
+  return {
+    name: intake.businessName || "—",
+    audience: resolveChipLabel(intake.audience, AUDIENCE_CHIPS, locale) || "—",
+    problem: resolveChipLabel(intake.biggestProblem, PROBLEM_CHIPS, locale) || "—",
+    advantage: resolveChipLabel(intake.uniqueAdvantage, ADVANTAGE_CHIPS, locale) || "—",
+    goal: resolveChipLabel(intake.mainGoal, GOAL_CHIPS, locale) || "—",
+    offer: isNoOffer(intake.offer)
+      ? OFFER_CHIPS.find((o) => o.id === "no_offer")!.label[locale]
+      : resolveChipLabel(intake.offer, OFFER_CHIPS, locale),
+    location: intake.location || "",
+  };
+}
 
 const L = (he: string, ar: string, en: string): Record<Locale, string> => ({ he, ar, en });
 
 export function missionOf(intake: Intake): Record<Locale, string> {
-  const n = intake.businessName || "—";
-  const aud = intake.audience || "—";
-  const goal = intake.mainGoal || "—";
+  const he = text(intake, "he");
+  const ar = text(intake, "ar");
+  const en = text(intake, "en");
   return L(
-    `המשימה: להביא ${goal} מתוך ${aud} אל ${n} — בלי להמציא מבצע או הוכחות.`,
-    `المهمة: جلب ${goal} من ${aud} إلى ${n} — بلا اختراع عرض أو إثبات.`,
-    `Mission: bring ${goal} from ${aud} to ${n} — without inventing an offer or proof.`,
+    `המשימה: להביא ${he.goal} מתוך ${he.audience} אל ${he.name} — בלי להמציא מבצע או הוכחות.`,
+    `المهمة: جلب ${ar.goal} من ${ar.audience} إلى ${ar.name} — بلا اختراع عرض أو إثبات.`,
+    `Mission: bring ${en.goal} from ${en.audience} to ${en.name} — without inventing an offer or proof.`,
   );
 }
 
 export function highlightsOf(pack: CampaignPack): Record<Locale, string>[] {
-  const i = pack.intake;
+  const he = text(pack.intake, "he");
+  const ar = text(pack.intake, "ar");
+  const en = text(pack.intake, "en");
   const items: Record<Locale, string>[] = [
     L(
-      `יתרון שעליו נבנה: ${i.uniqueAdvantage || "לא סופק"}`,
-      `الميزة التي نبني عليها: ${i.uniqueAdvantage || "غير متوفر"}`,
-      `Advantage we build on: ${i.uniqueAdvantage || "not provided"}`,
+      `יתרון שעליו נבנה: ${he.advantage === "—" ? "לא סופק" : he.advantage}`,
+      `الميزة التي نبني عليها: ${ar.advantage === "—" ? "غير متوفر" : ar.advantage}`,
+      `Advantage we build on: ${en.advantage === "—" ? "not provided" : en.advantage}`,
     ),
     L(
-      `בעיה שפותחים בה: ${i.biggestProblem || "לא סופקה"}`,
-      `المشكلة التي نفتح بها: ${i.biggestProblem || "غير متوفرة"}`,
-      `Problem we open on: ${i.biggestProblem || "not provided"}`,
+      `בעיה שפותחים בה: ${he.problem === "—" ? "לא סופקה" : he.problem}`,
+      `المشكلة التي نفتح بها: ${ar.problem === "—" ? "غير متوفرة" : ar.problem}`,
+      `Problem we open on: ${en.problem === "—" ? "not provided" : en.problem}`,
     ),
-    isNoOffer(i.offer)
+    isNoOffer(pack.intake.offer)
       ? L("מבצע: אין מבצע — לא הודבקה הנחה.", "العرض: لا يوجد — لم يُلصق خصم.", "Offer: none — no discount was pasted on.")
-      : L(`מבצע שסופק: ${i.offer}`, `عرض مُعطى: ${i.offer}`, `Offer as given: ${i.offer}`),
+      : L(`מבצע שסופק: ${he.offer}`, `عرض مُعطى: ${ar.offer}`, `Offer as given: ${en.offer}`),
   ];
   if (pack.diagnosis.hypotheses[0]) {
     items.push(pack.diagnosis.hypotheses[0].finding);
@@ -38,13 +62,16 @@ export function highlightsOf(pack: CampaignPack): Record<Locale, string>[] {
 }
 
 export function pillarsOf(intake: Intake): { name: string; body: Record<Locale, string> }[] {
+  const he = text(intake, "he");
+  const ar = text(intake, "ar");
+  const en = text(intake, "en");
   return [
     {
       name: "AIDA",
       body: L(
-        `קשב: ${intake.biggestProblem || "—"}. עניין: ${intake.audience || "—"}. רצון: ${intake.uniqueAdvantage || "—"}. פעולה: ${intake.mainGoal || "—"}.`,
-        `انتباه: ${intake.biggestProblem || "—"}. اهتمام: ${intake.audience || "—"}. رغبة: ${intake.uniqueAdvantage || "—"}. فعل: ${intake.mainGoal || "—"}.`,
-        `Attention: ${intake.biggestProblem || "—"}. Interest: ${intake.audience || "—"}. Desire: ${intake.uniqueAdvantage || "—"}. Action: ${intake.mainGoal || "—"}.`,
+        `קשב: ${he.problem}. עניין: ${he.audience}. רצון: ${he.advantage}. פעולה: ${he.goal}.`,
+        `انتباه: ${ar.problem}. اهتمام: ${ar.audience}. رغبة: ${ar.advantage}. فعل: ${ar.goal}.`,
+        `Attention: ${en.problem}. Interest: ${en.audience}. Desire: ${en.advantage}. Action: ${en.goal}.`,
       ),
     },
     {
@@ -58,25 +85,25 @@ export function pillarsOf(intake: Intake): { name: string; body: Record<Locale, 
     {
       name: "Hook–Story–Offer",
       body: L(
-        `הוק = הבעיה. סיפור = איך ${intake.businessName || "—"} עובד. הצעה = ${isNoOffer(intake.offer) ? "השירות עצמו" : intake.offer}.`,
-        `الخطاف = المشكلة. القصة = كيف يعمل ${intake.businessName || "—"}. العرض = ${isNoOffer(intake.offer) ? "الخدمة نفسها" : intake.offer}.`,
-        `Hook = the problem. Story = how ${intake.businessName || "—"} works. Offer = ${isNoOffer(intake.offer) ? "the service itself" : intake.offer}.`,
+        `הוק = הבעיה. סיפור = איך ${he.name} עובד. הצעה = ${isNoOffer(intake.offer) ? "השירות עצמו" : he.offer}.`,
+        `الخطاف = المشكلة. القصة = كيف يعمل ${ar.name}. العرض = ${isNoOffer(intake.offer) ? "الخدمة نفسها" : ar.offer}.`,
+        `Hook = the problem. Story = how ${en.name} works. Offer = ${isNoOffer(intake.offer) ? "the service itself" : en.offer}.`,
       ),
     },
     {
       name: "Hormozi",
       body: L(
-        `תוצאה: ${intake.mainGoal || "—"}. סבירות: ${intake.uniqueAdvantage || "—"}. זמן/מאמץ: לא סופקו — לא ננחש.`,
-        `النتيجة: ${intake.mainGoal || "—"}. الاحتمال: ${intake.uniqueAdvantage || "—"}. الوقت/الجهد: غير مذكورين — لن نخمن.`,
-        `Outcome: ${intake.mainGoal || "—"}. Likelihood: ${intake.uniqueAdvantage || "—"}. Time/effort: not given — will not guess.`,
+        `תוצאה: ${he.goal}. סבירות: ${he.advantage}. זמן/מאמץ: לא סופקו — לא ננחש.`,
+        `النتيجة: ${ar.goal}. الاحتمال: ${ar.advantage}. الوقت/الجهد: غير مذكورين — لن نخمن.`,
+        `Outcome: ${en.goal}. Likelihood: ${en.advantage}. Time/effort: not given — will not guess.`,
       ),
     },
     {
       name: "ICP",
       body: L(
-        `קהל: ${intake.audience || "[יש להשלים: קהל]"}. מיקום: ${intake.location || "[יש להשלים: מיקום]"}.`,
-        `الجمهور: ${intake.audience || "[يجب الاستكمال: جمهور]"}. الموقع: ${intake.location || "[يجب الاستكمال: موقع]"}.`,
-        `Audience: ${intake.audience || "[TO COMPLETE: audience]"}. Place: ${intake.location || "[TO COMPLETE: location]"}.`,
+        `קהל: ${he.audience === "—" ? "[יש להשלים: קהל]" : he.audience}. מיקום: ${he.location || "[יש להשלים: מיקום]"}.`,
+        `الجمهور: ${ar.audience === "—" ? "[يجب الاستكمال: جمهور]" : ar.audience}. الموقع: ${ar.location || "[يجب الاستكمال: موقع]"}.`,
+        `Audience: ${en.audience === "—" ? "[TO COMPLETE: audience]" : en.audience}. Place: ${en.location || "[TO COMPLETE: location]"}.`,
       ),
     },
     {

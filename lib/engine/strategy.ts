@@ -1,20 +1,32 @@
 import type { Diagnosis, Intake, Locale, StrategyBlock, StrategyItem } from "../types";
 import { filled } from "../utils";
 import { isNoOffer } from "../no-offer";
+import {
+  ADVANTAGE_CHIPS,
+  AUDIENCE_CHIPS,
+  GOAL_CHIPS,
+  OFFER_CHIPS,
+  PROBLEM_CHIPS,
+  resolveChipLabel,
+} from "../chips";
 
 const L = (he: string, ar: string, en: string): Record<Locale, string> => ({ he, ar, en });
 const item = (title: Record<Locale, string>, body: Record<Locale, string>): StrategyItem => ({ title, body });
 
 export function generateStrategy(intake: Intake, diagnosis: Diagnosis): StrategyBlock[] {
   const n = intake.businessName || "—";
-  const aud = intake.audience || "—";
-  const pain = intake.biggestProblem || "—";
-  const adv = intake.uniqueAdvantage || "—";
-  const goal = intake.mainGoal || "—";
+  const aud = resolveChipLabel(intake.audience, AUDIENCE_CHIPS, "he") || "—";
+  const pain = resolveChipLabel(intake.biggestProblem, PROBLEM_CHIPS, "he") || "—";
+  const adv = resolveChipLabel(intake.uniqueAdvantage, ADVANTAGE_CHIPS, "he") || "—";
+  const goal = resolveChipLabel(intake.mainGoal, GOAL_CHIPS, "he") || "—";
   const loc = intake.location || "";
   const offer = isNoOffer(intake.offer)
     ? L("אין מבצע — לא ממציאים הנחה", "لا يوجد عرض — لا نخترع خصماً", "No offer — we will not invent a discount")
-    : L(intake.offer, intake.offer, intake.offer);
+    : L(
+        resolveChipLabel(intake.offer, OFFER_CHIPS, "he"),
+        resolveChipLabel(intake.offer, OFFER_CHIPS, "ar"),
+        resolveChipLabel(intake.offer, OFFER_CHIPS, "en"),
+      );
 
   const missingQs: StrategyItem[] = [];
   if (!filled(intake.location) && intake.type !== "app") {

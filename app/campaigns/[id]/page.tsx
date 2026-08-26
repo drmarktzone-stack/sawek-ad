@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 import { useParams } from "next/navigation";
-import Link from "next/link";
 import type { CampaignPack } from "@/lib/types";
 import { loadCampaigns } from "@/lib/storage";
 import { ensureAgency } from "@/lib/engine/agency";
 import { ResultView } from "@/components/result-view";
 import { useI18n } from "@/components/i18n-provider";
 import { useIsClient } from "@/lib/use-is-client";
+import { LangLink } from "@/components/lang-link";
+import { markEmptyCampaign } from "@/lib/empty-campaign";
 
 export default function CampaignDetailPage() {
   const params = useParams<{ id: string }>();
@@ -28,9 +29,9 @@ export default function CampaignDetailPage() {
     return (
       <div className="p-10 text-center">
         <p className="text-zinc-400">{t("campaigns.empty")}</p>
-        <Link href="/" className="mt-4 inline-block text-omni-yellow">
+        <LangLink href="/" onClick={() => markEmptyCampaign()} className="mt-4 inline-block text-omni-yellow">
           {t("cta.new")}
-        </Link>
+        </LangLink>
       </div>
     );
   }
