@@ -1,8 +1,8 @@
-# OmniAd Studio
+# Ilan (אילן / إعلان)
 
-**OmniAd — The Future of Advertising**
+**Ilan** is the product. Hebrew first name *Ilan* (tree) and Arabic *i‘lān* (إعلان, advertisement) — same pronunciation for Jewish and Arab users.
 
-A third app: the union of OmniAd (4-step RTL wizard, 6 ad variants, design studio, truth layer) and AdBrain (five-agent HITL pipeline, media blueprints, performance optimizer). It does **not** replace or modify the original OmniAd or AdBrain products.
+Inside: **OmniAd engine** (4-step RTL wizard, 6 ad variants, design studio, truth layer) and **AdBrain agents** (five-agent HITL pipeline, media blueprints, performance optimizer). This is a **third app**. It does **not** replace or rename the original OmniAd or AdBrain products.
 
 Hebrew, Arabic, and English are equal first-class languages. Visual identity is dark **black + red + yellow**.
 
@@ -44,7 +44,7 @@ Copy `.env.example` if you want those. The app runs the same without them (local
 | Content Studio | `/studio` |
 | My campaigns | `/campaigns` |
 | Result pack | `/campaigns/[id]` |
-| What is OmniAd | `/about` |
+| What is Ilan | `/about` |
 | Self-marketing | `/self` |
 
 No live Meta/Google/TikTok APIs. No credit card. No invented lead gauges.

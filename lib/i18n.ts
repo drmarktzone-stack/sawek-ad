@@ -3,20 +3,26 @@ import type { Locale } from "./types";
 type Dict = Record<string, Record<Locale, string>>;
 
 export const copy: Dict = {
+  "brand.name": { he: "אילן", ar: "إعلان", en: "Ilan" },
+  "brand.scripts": {
+    he: "Ilan · إعلان",
+    ar: "Ilan · אילן",
+    en: "אילן · إعلان",
+  },
   "brand.tagline": {
-    he: "The Future of Advertising",
-    ar: "The Future of Advertising",
-    en: "The Future of Advertising",
+    he: "מנוע OmniAd · סוכני AdBrain",
+    ar: "محرك OmniAd · وكلاء AdBrain",
+    en: "OmniAd engine · AdBrain agents",
   },
   "nav.build": { he: "בניית קמפיין", ar: "بناء حملة", en: "Build campaign" },
   "nav.studio": { he: "סטודיו תוכן", ar: "ستوديو المحتوى", en: "Content studio" },
   "nav.campaigns": { he: "הקמפיינים שלי", ar: "حملاتي", en: "My campaigns" },
-  "nav.about": { he: "מה זה OmniAd", ar: "ما هو OmniAd", en: "What is OmniAd" },
+  "nav.about": { he: "מה זה אילן", ar: "ما هو إعلان", en: "What is Ilan" },
   "nav.self": { he: "ניהול שיווק עצמי", ar: "إدارة التسويق الذاتي", en: "Self-marketing" },
   "footer.line": {
-    he: "OmniAd – The Future of Advertising",
-    ar: "OmniAd – The Future of Advertising",
-    en: "OmniAd – The Future of Advertising",
+    he: "אילן · Ilan · إعلان",
+    ar: "إعلان · Ilan · אילן",
+    en: "Ilan · אילן · إعلان",
   },
   "hero.titlePrefix": { he: "מה בא לך", ar: "ماذا تريد أن", en: "What do you feel like" },
   "hero.conquer": { he: "לכבוש", ar: "تغزو", en: "conquering" },
@@ -165,7 +171,7 @@ export const copy: Dict = {
     ar: "خطة لأسبوع وقائمة تحقق وتوثيق ما نُشر فعلاً.",
     en: "A week plan, a checklist, and a log of what you actually posted.",
   },
-  "about.title": { he: "מה זה OmniAd", ar: "ما هو OmniAd", en: "What is OmniAd" },
+  "about.title": { he: "מה זה אילן", ar: "ما هو إعلان", en: "What is Ilan" },
   "menu": { he: "תפריט", ar: "القائمة", en: "Menu" },
   "close": { he: "סגור", ar: "إغلاق", en: "Close" },
 };

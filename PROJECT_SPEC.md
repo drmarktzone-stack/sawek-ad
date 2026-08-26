@@ -1,9 +1,10 @@
-# OmniAd Studio — Product Spec (source of truth)
+# Ilan — Product Spec (source of truth)
 
-Working title: **OmniAd Studio**. Product name in the UI: **OmniAd**.  
-Tagline: **The Future of Advertising**.
+Locked product name: **Ilan** (Hebrew **אילן** = tree; Arabic **إعلان** = advertisement). Same pronunciation for Jewish and Arab users.
 
-This repository is a **third app**: the union of OmniAd (Base44 app `6a7712d0685a826e3eab0819`) and AdBrain (GitHub `drmarktzone-stack/adbrain-ai`, Origin `tmp-90dd9f664feed126`). It must **not** modify, overwrite, or replace either original.
+User-facing brand is **Ilan**, never OmniAd Studio. Internal engines stay credited as **OmniAd engine** and **AdBrain agents**.
+
+This repository is a **third app**: the union of OmniAd (Base44 app `6a7712d0685a826e3eab0819`) and AdBrain (GitHub `drmarktzone-stack/adbrain-ai`, Origin `tmp-90dd9f664feed126`). It must **not** modify, overwrite, or replace either original. Do not rename those GitHub/Origin products.
 
 No paid SaaS, no credit card, no live Meta/Google/TikTok APIs, no Lovable.
 
@@ -26,7 +27,7 @@ No paid SaaS, no credit card, no live Meta/Google/TikTok APIs, no Lovable.
 | `/studio` | סטודיו תוכן | Content Studio (briefs, variants, produce-ad) |
 | `/campaigns` | הקמפיינים שלי | Saved campaigns (localStorage; optional Supabase) |
 | `/campaigns/[id]` | — | Full result pack |
-| `/about` | מה זה OmniAd | Product explainer |
+| `/about` | מה זה אילן | Product explainer |
 | `/self` | ניהול שיווק עצמי | Self-marketing workspace |
 
 ## Combined flow (do not drop either product)

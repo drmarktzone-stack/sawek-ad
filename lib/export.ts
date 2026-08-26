@@ -4,7 +4,7 @@ import { dirFor } from "./i18n";
 
 export function packToText(pack: CampaignPack, locale: Locale): string {
   const lines: string[] = [];
-  lines.push(`OmniAd — ${pack.name}`);
+  lines.push(`Ilan — ${pack.name}`);
   lines.push(pack.createdAt);
   lines.push("");
   lines.push("=== INTAKE ===");
@@ -71,7 +71,7 @@ export function printPdf(pack: CampaignPack, locale: Locale) {
 <html lang="${locale}" dir="${dir}">
 <head>
 <meta charset="utf-8"/>
-<title>${escapeHtml(pack.name)} — OmniAd</title>
+<title>${escapeHtml(pack.name)} — Ilan</title>
 <style>
   body { font-family: Heebo, Cairo, Arial, sans-serif; background:#111; color:#f4f4f4; padding:32px; max-width:800px; margin:0 auto; }
   h1 { color:#f5c518; }
@@ -82,7 +82,7 @@ export function printPdf(pack: CampaignPack, locale: Locale) {
 </style>
 </head>
 <body>
-  <p>OmniAd — The Future of Advertising</p>
+  <p>Ilan · אילן · إعلان</p>
   <h1>${escapeHtml(pack.name)}</h1>
   <p>${escapeHtml(pack.media.worstCase[locale])}</p>
   <p>${escapeHtml(pack.media.realistic[locale])}</p>

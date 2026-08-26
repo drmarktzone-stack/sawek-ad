@@ -5,12 +5,29 @@ import { ConquerHeadline } from "@/components/stepper";
 
 export function AboutPage() {
   const { locale, t } = useI18n();
+  const nameBlock =
+    locale === "he"
+      ? {
+          h: "אילן / إعلان — אותו צליל",
+          p: "Ilan הוא שם פרטי בעברית (עץ) ו־إعلان בערבית (מודעה / פרסום). אותה הגייה ליהודים ולערבים. זה שם המוצר — לא OmniAd Studio.",
+        }
+      : locale === "ar"
+        ? {
+            h: "إعلان / אילן — الصوت نفسه",
+            p: "Ilan اسم عبري (شجرة) وإعلان بالعربية (إعلان تجاري). النطق واحد لليهود والعرب. هذا اسم المنتج — ليس OmniAd Studio.",
+          }
+        : {
+            h: "Ilan / אילן / إعلان — same sound",
+            p: "Ilan is a Hebrew first name (tree) and i‘lān (إعلان) is Arabic for advertisement. Same pronunciation for Jewish and Arab users. That is the product name — not OmniAd Studio.",
+          };
+
   const blocks =
     locale === "he"
       ? [
+          nameBlock,
           {
-            h: "איחוד, לא החלפה",
-            p: "OmniAd Studio הוא אפליקציה שלישית: אשף OmniAd (4 שלבים, 6 מודעות, סטודיו עיצוב) יחד עם חמשת סוכני AdBrain (קליטה, אבחון HITL, אסטרטגיה, מדיה, אופטימיזציה). המקורות המקוריים לא נגענו בהם.",
+            h: "מנוע בפנים, לא שם בחזית",
+            p: "Ilan הוא אפליקציה שלישית. בפנים: אשף OmniAd (4 שלבים, 6 מודעות, סטודיו עיצוב) וחמשת סוכני AdBrain (קליטה, אבחון HITL, אסטרטגיה, מדיה, אופטימיזציה). המקורות ב-GitHub/Origin/Base44 לא שונו ולא הוחלפו.",
           },
           {
             h: "שכבת אמת",
@@ -27,9 +44,10 @@ export function AboutPage() {
         ]
       : locale === "ar"
         ? [
+            nameBlock,
             {
-              h: "اتحاد لا استبدال",
-              p: "OmniAd Studio تطبيق ثالث: معالج OmniAd مع وكلاء AdBrain الخمسة. لم نلمس الأصلين.",
+              h: "المحرك في الداخل، لا الاسم في الواجهة",
+              p: "Ilan تطبيق ثالث. في الداخل: معالج OmniAd ووكلاء AdBrain الخمسة. لم نلمس الأصلين على GitHub/Origin/Base44.",
             },
             {
               h: "طبقة الحقيقة",
@@ -45,9 +63,10 @@ export function AboutPage() {
             },
           ]
         : [
+            nameBlock,
             {
-              h: "A union, not a replacement",
-              p: "OmniAd Studio is a third app: OmniAd’s 4-step wizard, 6 ads and design studio plus AdBrain’s five agents (intake, HITL diagnosis, strategy, media, optimizer). The original products are untouched.",
+              h: "Engines inside, not on the door",
+              p: "Ilan is a third app. Inside: OmniAd’s 4-step wizard, 6 ads and design studio plus AdBrain’s five agents (intake, HITL diagnosis, strategy, media, optimizer). The original GitHub / Origin / Base44 products are untouched.",
             },
             {
               h: "Truth layer",
@@ -66,6 +85,10 @@ export function AboutPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-10">
       <ConquerHeadline subtitle={t("about.title")} />
+      <p className="mb-8 text-center text-sm text-zinc-400">
+        Ilan · אילן · إعلان
+        <span className="mt-1 block text-xs text-zinc-600">{t("brand.tagline")}</span>
+      </p>
       <div className="space-y-4">
         {blocks.map((b) => (
           <article key={b.h} className="rounded-2xl border border-white/10 bg-omni-card p-5">

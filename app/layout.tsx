@@ -17,9 +17,9 @@ const cairo = Cairo({
 });
 
 export const metadata: Metadata = {
-  title: "OmniAd — The Future of Advertising",
+  title: "Ilan — אילן / إعلان",
   description:
-    "OmniAd Studio: RTL campaign builder with a 4-step wizard, five-agent HITL pipeline, and HE/AR/EN copy — no invented leads or testimonials.",
+    "Ilan (אילן / إعلان): RTL campaign builder with a 4-step wizard, five-agent HITL pipeline, and HE/AR/EN copy — OmniAd engine, AdBrain agents. No invented leads or testimonials.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

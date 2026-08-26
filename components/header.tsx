@@ -62,9 +62,10 @@ export function Header() {
       <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3">
         <Link href="/" className="flex shrink-0 flex-col leading-tight">
           <span className="bg-gradient-to-l from-omni-yellow to-omni-red bg-clip-text text-xl font-black tracking-tight text-transparent">
-            OmniAd
+            {t("brand.name")}
           </span>
-          <span className="text-[10px] text-zinc-400">{t("brand.tagline")}</span>
+          <span className="text-[10px] font-semibold text-zinc-300">{t("brand.scripts")}</span>
+          <span className="text-[9px] text-zinc-500">{t("brand.tagline")}</span>
         </Link>
 
         <nav className="ms-2 hidden min-w-0 flex-1 items-center gap-1 lg:flex">
