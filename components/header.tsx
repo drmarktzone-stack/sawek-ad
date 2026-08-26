@@ -73,7 +73,7 @@ export function Header() {
   return (
     <header className="sticky top-0 z-40 border-b border-omni-yellow/20 bg-black/85 backdrop-blur-md">
       <div className="h-1 w-full bg-gradient-to-l from-omni-yellow via-omni-red to-omni-yellow" />
-      <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3">
+      <div className="mx-auto flex max-w-[92rem] items-center gap-2 px-3 py-3">
         <LangLink href="/" className="flex shrink-0 flex-col leading-tight">
           <span className="bg-gradient-to-l from-omni-yellow to-omni-red bg-clip-text text-xl font-black tracking-tight text-transparent sm:text-2xl">
             {t("brand.name")}

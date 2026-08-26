@@ -24,7 +24,7 @@ export const copy: Dict = {
   "nav.ops": { he: "אופס", ar: "التشغيل", en: "Ops" },
   "nav.campaigns": { he: "הקמפיינים שלי", ar: "حملاتي", en: "My campaigns" },
   "nav.about": { he: "אודות", ar: "حول", en: "About" },
-  "nav.self": { he: "ניהול שיווק עצמי", ar: "إدارة التسويق الذاتي", en: "Self-marketing" },
+  "nav.self": { he: "שיווק עצמי", ar: "تسويق ذاتي", en: "Self-marketing" },
   "nav.medical": { he: "OptiBrain", ar: "OptiBrain", en: "OptiBrain" },
   "footer.line": {
     he: "SAWEK AD · סאווק · ساويك",
