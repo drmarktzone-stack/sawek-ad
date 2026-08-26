@@ -2,9 +2,11 @@
 
 **Ilan** is the product. Hebrew first name *Ilan* (tree) and Arabic *i‘lān* (إعلان, advertisement) — same pronunciation for Jewish and Arab users.
 
-Inside: **OmniAd engine** (4-step RTL wizard, 6 ad variants, design studio, truth layer) and **AdBrain agents** (five-agent HITL pipeline, media blueprints, performance optimizer). This is a **third app**. It does **not** replace or rename the original OmniAd or AdBrain products.
+Inside: **OmniAd engine** (4-step RTL wizard, 6 ad variants, design studio, truth layer) and **AdBrain agents** (five-agent HITL pipeline). This is a **third app**. It does **not** replace or rename the original OmniAd or AdBrain products.
 
-Hebrew, Arabic, and English are equal first-class languages. Visual identity is dark **black + red + yellow**.
+The five agents stay the only agents. They produce **departments** of a marketing holding company: Discovery, Strategy, Creative, Media, Leads & promo, Ops — each with structured HE / AR / EN artifacts. Media is **PLAN only** (never live-publish to Meta/Google/TikTok/YouTube).
+
+Hebrew, Arabic, and English are equal first-class languages. Visual identity is dark **black + red + neon yellow**.
 
 Read [PROJECT_SPEC.md](./PROJECT_SPEC.md) for the full contract.
 
@@ -32,23 +34,30 @@ Copy `.env.example` if you want those. The app runs the same without them (local
 1. On **בניית קמפיין** click **הדגמה בלי להקליד**.
 2. Review the clinic pack (offer is **אין מבצע**, not a free consult).
 3. Click **בנה לי קמפיין מלא**.
-4. Read the diagnostic cards and **אשר אבחון והמשך לבנייה**.
-5. Watch the five agents complete, then the full HE/AR/EN pack: 6 ads, accordions, media blueprint, 12 design styles, truth layer.
-6. Save. Build a second campaign with **קמפיין חדש**.
+4. Approve HITL gates: diagnosis → strategy → media → optimizer.
+5. Open **דיסקברי / אסטרטגיה / קריאייטיב / מדיה / לידים / אופס** — the full agency pack in HE+AR+EN.
+6. Or from any department, click **טען פק הדגמה מלא** so no screen is empty.
+7. Download the campaign bible PDF from Ops. Save. Build a second campaign with **קמפיין חדש**.
 
 ## What you get
 
 | Surface | Route |
 |---|---|
-| 4-step wizard + CMO interview + HITL diagnosis | `/` |
-| Content Studio | `/studio` |
-| My campaigns | `/campaigns` |
+| 4-step wizard + CMO interview + HITL | `/` |
+| Discovery (audit, ICP, personas, battlecards) | `/discovery` |
+| Strategy (positioning, offer stack, 90-day calendar) | `/strategy` |
+| Creative factory (hooks, 12 mockups, all copy formats) | `/studio` |
+| Media plans (Meta/Google/TikTok/YouTube, PLAN only) | `/media` |
+| Leads & promo (magnet, CRM, cadence) | `/leads` |
+| Ops (library, bible PDF, score, HITL gates) | `/campaigns` |
 | Result pack | `/campaigns/[id]` |
 | What is Ilan | `/about` |
 | Self-marketing | `/self` |
 
-No live Meta/Google/TikTok APIs. No credit card. No invented lead gauges.
+No live ad-network APIs. No credit card. No invented lead gauges. KPI numbers appear only from budget/CAC you typed.
 
 ## Stack
 
 Next.js (App Router) · TypeScript · Tailwind CSS · shadcn-style primitives
+
+Repo: this Origin project only. Originals (OmniAd Base44, AdBrain GitHub/Origin) are untouched.

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input, Label, Textarea } from "@/components/ui/input";
 import { useI18n } from "@/components/i18n-provider";
 import { ConquerHeadline } from "@/components/stepper";
+import { DepartmentRail } from "@/components/department-shell";
 import { useIsClient } from "@/lib/use-is-client";
 
 export function SelfMarketing() {
@@ -80,7 +81,8 @@ export function SelfMarketing() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-10">
       <ConquerHeadline subtitle={t("self.title")} />
-      <p className="mb-8 text-center text-sm text-zinc-400">{t("self.lead")}</p>
+      <p className="mb-6 text-center text-sm text-zinc-400">{t("self.lead")}</p>
+      <DepartmentRail />
 
       <section className="rounded-2xl border border-white/10 bg-omni-card p-5 sm:p-8">
         {fields.map((f) => (

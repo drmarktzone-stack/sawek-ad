@@ -4,11 +4,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import {
+  Compass,
   Folder,
   HelpCircle,
   Menu,
+  Megaphone,
   Pencil,
+  Search,
   SlidersHorizontal,
+  Users,
   WandSparkles,
   X,
 } from "lucide-react";
@@ -18,10 +22,14 @@ import { cn } from "@/lib/utils";
 
 const NAV = [
   { href: "/", key: "nav.build" as const, icon: WandSparkles },
-  { href: "/studio", key: "nav.studio" as const, icon: Pencil },
-  { href: "/campaigns", key: "nav.campaigns" as const, icon: Folder },
-  { href: "/about", key: "nav.about" as const, icon: HelpCircle },
+  { href: "/discovery", key: "nav.discovery" as const, icon: Search },
+  { href: "/strategy", key: "nav.strategy" as const, icon: Compass },
+  { href: "/studio", key: "nav.creative" as const, icon: Pencil },
+  { href: "/media", key: "nav.media" as const, icon: Megaphone },
+  { href: "/leads", key: "nav.leads" as const, icon: Users },
+  { href: "/campaigns", key: "nav.ops" as const, icon: Folder },
   { href: "/self", key: "nav.self" as const, icon: SlidersHorizontal },
+  { href: "/about", key: "nav.about" as const, icon: HelpCircle },
 ];
 
 export function LanguageToggle({ compact = false }: { compact?: boolean }) {
@@ -68,7 +76,7 @@ export function Header() {
           <span className="text-[9px] text-zinc-500">{t("brand.tagline")}</span>
         </Link>
 
-        <nav className="ms-2 hidden min-w-0 flex-1 items-center gap-1 lg:flex">
+        <nav className="ms-2 hidden min-w-0 flex-1 items-center gap-1 overflow-x-auto lg:flex">
           {NAV.map((item) => {
             const Icon = item.icon;
             const active =
@@ -80,7 +88,7 @@ export function Header() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors",
+                  "flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1.5 text-[11px] font-semibold transition-colors",
                   active
                     ? "bg-omni-yellow text-black"
                     : "text-zinc-300 hover:bg-white/5 hover:text-white",

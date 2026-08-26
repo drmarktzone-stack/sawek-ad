@@ -123,8 +123,10 @@ export interface StrategyBlock {
   items: StrategyItem[];
 }
 
+export type ChannelName = "meta" | "google" | "tiktok" | "youtube";
+
 export interface ChannelBlueprint {
-  channel: "meta" | "google" | "tiktok";
+  channel: ChannelName;
   role: Record<Locale, string>;
   budgetSharePercent: number;
   dailyBudget?: number;
@@ -201,6 +203,126 @@ export interface CampaignPack {
   agentStatus: Record<AgentId, AgentStatus>;
   saved: boolean;
   planActivated: boolean;
+  agency?: AgencyPack;
+}
+
+export type Tri = Record<Locale, string>;
+
+export interface Persona {
+  name: Tri;
+  jtbd: Tri;
+  given: Tri;
+  unknown: Tri;
+}
+
+export interface Battlecard {
+  competitorId: string;
+  name: string;
+  notes: string;
+  strength: Tri;
+  weakness: Tri;
+  opportunity: Tri;
+  threat: Tri;
+}
+
+export interface DiscoveryDept {
+  producedBy: AgentId[];
+  audit: { title: Tri; body: Tri }[];
+  icp: Tri;
+  personas: Persona[];
+  battlecards: Battlecard[];
+  swot: { strength: Tri; weakness: Tri; opportunity: Tri; threat: Tri };
+  competitorsMissing: Tri;
+}
+
+export interface OfferStack {
+  leadMagnet: Tri;
+  tripwire: Tri;
+  core: Tri;
+  upsell: Tri;
+  continuity: Tri;
+}
+
+export interface CalendarWeek {
+  week: number;
+  theme: Tri;
+  action: Tri;
+}
+
+export interface StrategyDept {
+  producedBy: AgentId[];
+  positioning: Tri;
+  uniqueMechanism: Tri;
+  hormozi: Tri;
+  aida: { attention: Tri; interest: Tri; desire: Tri; action: Tri };
+  pas: { problem: Tri; agitate: Tri; solution: Tri };
+  hso: { hook: Tri; story: Tri; offer: Tri };
+  offerStack: OfferStack;
+  funnel: { tof: Tri; mof: Tri; bof: Tri };
+  calendar: CalendarWeek[];
+}
+
+export interface HookItem {
+  id: string;
+  angle: Tri;
+  hook: Tri;
+}
+
+export interface FactoryPiece {
+  format: string;
+  locale: Locale;
+  title: string;
+  body: string;
+}
+
+export interface CreativeDept {
+  producedBy: AgentId[];
+  hooks: HookItem[];
+  angleMatrix: { angle: Tri; proof: Tri; cta: Tri }[];
+  pieces: FactoryPiece[];
+  brandKit: {
+    ilan: { black: string; red: string; yellow: string };
+    clientPrimary: string;
+    clientSecondary: string;
+    note: Tri;
+  };
+}
+
+export interface AbTest {
+  name: Tri;
+  a: Tri;
+  b: Tri;
+  metric: Tri;
+}
+
+export interface MediaDept {
+  producedBy: AgentId[];
+  frequency: Tri;
+  tests: AbTest[];
+  weekly: Tri[];
+  planOnly: Tri;
+  audiences: Tri;
+  keywords: string[];
+  placements: Tri;
+}
+
+export interface LeadsDept {
+  producedBy: AgentId[];
+  magnet: Tri;
+  formFields: { field: Tri; required: boolean }[];
+  crm: { stage: Tri; meaning: Tri }[];
+  bookingCta: Tri;
+  promoCodes: Tri;
+  retargeting: Tri;
+  cadence: { day: string; channel: Tri; action: Tri }[];
+}
+
+export interface AgencyPack {
+  discovery: DiscoveryDept;
+  strategy: StrategyDept;
+  creative: CreativeDept;
+  mediaExtra: MediaDept;
+  leads: LeadsDept;
 }
 
 export interface StudioPiece {

@@ -7,7 +7,8 @@ import { Copy, Download, FileText, Lightbulb, Link2, Pencil, Save, Shield, WandS
 import type { CampaignPack, Locale, OptimizerResultInput } from "@/lib/types";
 import { LOCALES, STRATEGY_META, VARIANT_META, t } from "@/lib/i18n";
 import { DESIGN_STYLES } from "@/lib/design-styles";
-import { copyAllAds, downloadTxt, printPdf } from "@/lib/export";
+import { copyAllAds, downloadTxt, printBible, printPdf } from "@/lib/export";
+import { DepartmentRail } from "@/components/department-shell";
 import { produceAd } from "@/lib/engine/produce-ad";
 import { adviseFromResults } from "@/lib/engine/optimizer";
 import { highlightsOf, missionOf, pillarsOf } from "@/lib/engine/brief";
@@ -94,6 +95,7 @@ export function ResultView({
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
+      <DepartmentRail />
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-black text-white">{tr("result.ready")}</h1>
@@ -111,6 +113,10 @@ export function ResultView({
         <Button type="button" onClick={save} variant={pack.saved ? "dark" : "default"}>
           <Save className="size-4" />
           {pack.saved ? tr("cta.saved") : tr("cta.save")}
+        </Button>
+        <Button type="button" variant="dark" onClick={() => printBible(pack, packLang)}>
+          <Download className="size-4" />
+          {tr("cta.bible")}
         </Button>
         <Button type="button" variant="dark" onClick={() => printPdf(pack, packLang)}>
           <Download className="size-4" />
@@ -210,6 +216,26 @@ export function ResultView({
             ))}
           </ul>
         </div>
+      </div>
+
+      <div className="mb-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {[
+          { href: "/discovery", key: "nav.discovery" as const, body: pack.agency?.discovery.icp[locale] },
+          { href: "/strategy", key: "nav.strategy" as const, body: pack.agency?.strategy.positioning[locale] },
+          { href: "/studio", key: "nav.creative" as const, body: pack.agency?.creative.hooks[0]?.hook[locale] },
+          { href: "/media", key: "nav.media" as const, body: pack.agency?.mediaExtra.planOnly[locale] },
+          { href: "/leads", key: "nav.leads" as const, body: pack.agency?.leads.magnet[locale] },
+          { href: "/campaigns", key: "nav.ops" as const, body: tr("dept.opsLead") },
+        ].map((card) => (
+          <Link
+            key={card.href}
+            href={card.href}
+            className="rounded-2xl border border-white/10 bg-omni-card p-4 transition hover:border-omni-yellow/50"
+          >
+            <p className="text-xs font-black uppercase tracking-wide text-omni-yellow">{tr(card.key)}</p>
+            <p className="mt-2 line-clamp-3 text-sm text-zinc-300">{card.body}</p>
+          </Link>
+        ))}
       </div>
 
       <div className="mb-8">

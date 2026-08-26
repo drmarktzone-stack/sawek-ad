@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import type { CampaignPack } from "@/lib/types";
 import { loadCampaigns } from "@/lib/storage";
+import { ensureAgency } from "@/lib/engine/agency";
 import { ResultView } from "@/components/result-view";
 import { useI18n } from "@/components/i18n-provider";
 import { useIsClient } from "@/lib/use-is-client";
@@ -16,7 +17,8 @@ export default function CampaignDetailPage() {
   const [pack, setPack] = useState<CampaignPack | null | undefined>(undefined);
 
   if (client && pack === undefined) {
-    setPack(loadCampaigns().find((c) => c.id === params.id) ?? null);
+    const found = loadCampaigns().find((c) => c.id === params.id);
+    setPack(found ? ensureAgency(found) : null);
   }
 
   if (pack === undefined) {

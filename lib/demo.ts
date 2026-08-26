@@ -24,7 +24,26 @@ export function demoIntake(): Intake {
     goalCustom: true,
     offer: DEFAULT_OFFER_HE,
     offerCustom: false,
-    competitors: [],
+    competitors: [
+      {
+        id: "demo-comp-kupah",
+        name: "מרפאות קופה באזור אום אל-פחם",
+        url: "",
+        notes: "תורים ארוכים, שירות בעברית בעיקר, פרסום כללי של «רופא משפחה» בלי בידול אישי",
+      },
+      {
+        id: "demo-comp-private",
+        name: "רופאים פרטיים במשולש",
+        url: "",
+        notes: "מחיר גבוה יותר, פחות זמינות בערבית בערב, מודעות «ייעוץ חינם» שמושכות סקרנים",
+      },
+      {
+        id: "demo-comp-urgent",
+        name: "מוקדים / רפואה דחופה ברשת",
+        url: "",
+        notes: "זמינות מיידית אבל בלי רופא קבוע שמכיר את המשפחה",
+      },
+    ],
     businessModel: "מרפאה פרטית: ביקור פרטי + שילוב עם קופות לפי ביקור. ליד = תור ראשון במרפאה.",
     avgOrderValue: "280",
     marginPercent: "38",

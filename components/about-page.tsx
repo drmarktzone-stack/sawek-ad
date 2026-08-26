@@ -2,6 +2,7 @@
 
 import { useI18n } from "@/components/i18n-provider";
 import { ConquerHeadline } from "@/components/stepper";
+import { DepartmentRail } from "@/components/department-shell";
 
 export function AboutPage() {
   const { locale, t } = useI18n();
@@ -38,8 +39,12 @@ export function AboutPage() {
             p: "עברית, ערבית ואנגלית הן שפות ראשונות. התפריט, האשף והמודעות מתחלפים. RTL כברירת מחדל.",
           },
           {
+            h: "חברת החזקות, חמישה סוכנים",
+            p: "דיסקברי, אסטרטגיה, קריאייטיב, מדיה, לידים ומבצעים, אופס — מחלקות שהחמישה מייצרים. לא מחליפים אותם בחוקר/קופירייטר/מעצב. מדיה היא PLAN בלבד. לקוח הדגמה ממלא כל שולחן בלחיצה.",
+          },
+          {
             h: "בלי APIs חיים",
-            p: "תוכניות מטא / גוגל / טיקטוק הן בלופרינט לקנייה ידנית. אין כרטיס אשראי, אין Lovable, אין מפתחות חובה.",
+            p: "תוכניות מטא / גוגל / טיקטוק / יוטיוב הן בלופרינט לקנייה ידנית. אין כרטיס אשראי, אין Lovable, אין מפתחות חובה.",
           },
         ]
       : locale === "ar"
@@ -58,8 +63,12 @@ export function AboutPage() {
               p: "العبرية والعربية والإنجليزية لغات أولى. RTL افتراضي.",
             },
             {
+              h: "شركة قابضة، خمسة وكلاء",
+              p: "الاستكشاف والاستراتيجية والإبداع والميديا والعملاء والعروض والتشغيل أقسام يُنتجها الوكلاء الخمسة. لا نستبدلهم بباحث/كاتب/مصمم. الميديا خطة فقط. عميل العرض يملأ كل مكتب بنقرة.",
+            },
+            {
               h: "بلا واجهات حية",
-              p: "خطط ميتا/جوجل/تيك توك للشراء اليدوي فقط. بلا بطاقة ولا مفاتيح إلزامية.",
+              p: "خطط ميتا/غوغل/تيك توك/يوتيوب للشراء اليدوي فقط. بلا بطاقة ولا مفاتيح إلزامية.",
             },
           ]
         : [
@@ -77,14 +86,19 @@ export function AboutPage() {
               p: "Hebrew, Arabic, and English are first-class. Chrome, wizard, and ad pack all switch. RTL is the default.",
             },
             {
+              h: "Holding company, five agents",
+              p: "Discovery, Strategy, Creative, Media, Leads & promo, and Ops are departments — outputs the same five agents produce. Never swapped for researcher/copywriter/designer. Media is PLAN only. Demo client one-click fills every desk.",
+            },
+            {
               h: "No live ad APIs",
-              p: "Meta / Google / TikTok output is a manual-buy blueprint. No credit card, no Lovable, no required keys.",
+              p: "Meta / Google / TikTok / YouTube output is a manual-buy blueprint. No credit card, no Lovable, no required keys.",
             },
           ];
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10">
       <ConquerHeadline subtitle={t("about.title")} />
+      <DepartmentRail />
       <p className="mb-8 text-center text-sm text-zinc-400">
         Ilan · אילן · إعلان
         <span className="mt-1 block text-xs text-zinc-600">{t("brand.tagline")}</span>

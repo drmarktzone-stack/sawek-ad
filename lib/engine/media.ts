@@ -3,12 +3,16 @@ import { parseNumber } from "../utils";
 
 const L = (he: string, ar: string, en: string): Record<Locale, string> => ({ he, ar, en });
 
-function shares(intake: Intake): { meta: number; google: number; tiktok: number } {
-  if (intake.type === "app") return { meta: 40, google: 20, tiktok: 40 };
+function painKeyword(intake: Intake): string {
+  return intake.biggestProblem.trim().slice(0, 48);
+}
+
+function shares(intake: Intake): { meta: number; google: number; tiktok: number; youtube: number } {
+  if (intake.type === "app") return { meta: 35, google: 15, tiktok: 30, youtube: 20 };
   const young = /18–34|18-34|צעיר|شباب|young/.test(intake.audience);
-  if (young) return { meta: 35, google: 25, tiktok: 40 };
-  if (intake.type === "personal") return { meta: 55, google: 20, tiktok: 25 };
-  return { meta: 50, google: 40, tiktok: 10 };
+  if (young) return { meta: 30, google: 20, tiktok: 30, youtube: 20 };
+  if (intake.type === "personal") return { meta: 40, google: 15, tiktok: 15, youtube: 30 };
+  return { meta: 40, google: 25, tiktok: 10, youtube: 25 };
 }
 
 export function generateMedia(intake: Intake): MediaPlan {
@@ -107,10 +111,24 @@ export function generateMedia(intake: Intake): MediaPlan {
       ),
       { placements: "In-feed only. Spark Ads only if you have real organic posts — do not fake them." },
     ),
+    channel(
+      "youtube",
+      s.youtube,
+      L("הוכחה בוידאו — שיקול דעת, לא ליד זול", "إثبات بالفيديو — اعتبار لا عميل رخيص", "Video proof — consideration, not a cheap lead"),
+      L(
+        "אין מספר צפיות מובטח. בלי נכס 6–15 שניות אמיתי — השאירו 0% עד שיש צילום.",
+        "لا مشاهدات مضمونة. بلا أصل 6–15 ثانية حقيقي اتركوا 0% حتى يتوفر تصوير.",
+        "No guaranteed views. Without a real 6–15s asset, leave 0% until you have footage.",
+      ),
+      {
+        keywords: [intake.category, loc ? `${intake.category} ${loc}` : "", painKeyword(intake)].filter(Boolean),
+        placements: "In-stream skippable + in-feed. No bumper until a real 6s cut exists. No invented view counts.",
+      },
+    ),
   ];
 
   const assumptions = [
-    L("אין APIs חיים למטא/גוגל/טיקטוק — זה בלופרינט לקנייה ידנית.", "لا واجهات حية — هذا مخطط للشراء اليدوي.", "No live Meta/Google/TikTok APIs — this is a blueprint for a manual buy."),
+    L("אין APIs חיים למטא/גוגל/טיקטוק/יוטיוב — זה בלופרינט לקנייה ידנית.", "لا واجهات حية — هذا مخطط للشراء اليدوي.", "No live Meta/Google/TikTok/YouTube APIs — this is a blueprint for a manual buy."),
     L("תרחישי לידים מופיעים רק אם סיפקתם תקציב ו-CAC.", "سيناريوهات العملاء تظهر فقط إذا أعطيتم ميزانية وCAC.", "Lead scenarios appear only if you supplied budget and CAC."),
   ];
 

@@ -24,11 +24,17 @@ No paid SaaS, no credit card, no live Meta/Google/TikTok APIs, no Lovable.
 | Route | Nav label (HE) | Purpose |
 |---|---|---|
 | `/` | בניית קמפיין | 4-step wizard + CMO interview + HITL diagnosis |
-| `/studio` | סטודיו תוכן | Content Studio (briefs, variants, produce-ad) |
-| `/campaigns` | הקמפיינים שלי | Saved campaigns (localStorage; optional Supabase) |
+| `/discovery` | דיסקברי | CMO audit, ICP/personas/JTBD, competitor battlecards/SWOT |
+| `/strategy` | אסטרטגיה | Positioning, Hormozi, AIDA/PAS/HSO, offer stack, TOF-MOF-BOF, 90-day calendar |
+| `/studio` | קריאייטיב | Hook bank, angle matrix, copy factory (feed/story/reels/YouTube/RSA/search/landing/email/WA/SMS/flyer), 12 mockups, brand kit |
+| `/media` | מדיה | Meta/Google/TikTok/YouTube PLAN only — split, audiences, keywords, A/B, kill rules |
+| `/leads` | לידים ומבצעים | Magnet, form, CRM, booking CTA, promo codes, retargeting, cadence; self-marketing stays |
+| `/campaigns` | אופס | Campaign library, bible PDF, completeness score, KPI from user numbers, HITL gates |
 | `/campaigns/[id]` | — | Full result pack |
 | `/about` | מה זה אילן | Product explainer |
 | `/self` | ניהול שיווק עצמי | Self-marketing workspace |
+
+Departments are **outputs of the same five agents**, never extra agents. Empty department screens load the demo client pack so no path is a dead button.
 
 ## Combined flow (do not drop either product)
 
@@ -42,7 +48,7 @@ No paid SaaS, no credit card, no live Meta/Google/TikTok APIs, no Lovable.
 4. **Diagnostic Agent** produces why-ads-fail cards (offer / hook / price / audience / creative / targeting). **HITL between stages:** user approves diagnosis, then strategy, then media, before the optimizer finishes the pack.
 5. After approval, generate in HE+AR+EN:
    - Full OmniAd marketing pack (6 copy variants + 12 strategy accordions + design studio).
-   - AdBrain media/budget **blueprints** (Meta / Google / TikTok plans only).
+   - AdBrain media/budget **blueprints** (Meta / Google / TikTok / YouTube plans only).
    - Performance Optimizer playbook + a form to enter real results and get tweaks.
 6. Save to My Campaigns. A second campaign must be possible (new campaign clears draft).
 
@@ -86,7 +92,7 @@ Visible dashboard/status on the run screen and result header.
 | 1 | Intake & Data Validator | CMO interview before generating. Refuse to guess missing numbers. Consistency checks. |
 | 2 | Diagnostic Agent | Why past ads failed (offer/hook/price/audience/creative/targeting). HITL approve required. |
 | 3 | Strategic Marketing Agent | AIDA, PAS, Hook–Story–Offer, Hormozi value equation → angles. |
-| 4 | Media Buyer Strategist | Budget split + targeting **blueprints** for Meta / Google / TikTok. Plans only. |
+| 4 | Media Buyer Strategist | Budget split + targeting **blueprints** for Meta / Google / TikTok / YouTube. Plans only. |
 | 5 | Performance Optimizer | Given results, recommend tweaks. Kill/scale rules. Worst-case vs realistic scenarios. |
 
 Structured JSON is the source; UI renders readable cards.

@@ -18,12 +18,14 @@ import { cmoFieldsMissing, emptyIntake, wizardReady } from "@/lib/engine/validat
 import { assemblePack, idleStatus, runIntakeAndDiagnosis, runMedia, runOptimizerStage, runStrategic } from "@/lib/engine/run";
 import { loadDraft, saveDraft, upsertCampaign } from "@/lib/storage";
 import { uid } from "@/lib/utils";
+import { MAX_COMPETITORS } from "@/lib/factory-formats";
 import { AREA_LABEL } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Input, Label, Textarea } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { ChipGroup } from "@/components/chip-group";
 import { ConquerHeadline, Stepper } from "@/components/stepper";
+import { DepartmentRail } from "@/components/department-shell";
 import { useI18n } from "@/components/i18n-provider";
 import { useIsClient } from "@/lib/use-is-client";
 
@@ -203,6 +205,7 @@ export function WizardFlow() {
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:py-12">
+      <DepartmentRail />
       <div className="mb-6 flex flex-wrap items-center justify-center gap-2">
         <Button type="button" variant="outline" size="sm" onClick={loadDemo}>
           {t("cta.demo")} — {DEMO_LABEL[locale]}
@@ -430,7 +433,7 @@ export function WizardFlow() {
                     type="button"
                     variant="outline"
                     size="sm"
-                    disabled={intake.competitors.length >= 2}
+                    disabled={intake.competitors.length >= MAX_COMPETITORS}
                     onClick={() => {
                       setCompDraft({ id: uid("comp"), name: "", url: "", notes: "" });
                       setCompOpen(true);
@@ -561,7 +564,7 @@ export function WizardFlow() {
             <Button
               type="button"
               className="w-full"
-              disabled={!compDraft.name.trim() || intake.competitors.length >= 2}
+              disabled={!compDraft.name.trim() || intake.competitors.length >= MAX_COMPETITORS}
               onClick={() => {
                 patch({ competitors: [...intake.competitors, compDraft] });
                 setCompOpen(false);

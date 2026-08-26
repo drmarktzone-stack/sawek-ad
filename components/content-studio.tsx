@@ -16,7 +16,7 @@ import { useIsClient } from "@/lib/use-is-client";
 
 const KINDS: StudioPiece["kind"][] = ["post", "reel", "story", "email", "headline"];
 
-export function ContentStudio() {
+export function ContentStudio({ embedded = false }: { embedded?: boolean }) {
   const { locale, t } = useI18n();
   const [kind, setKind] = useState<StudioPiece["kind"]>("post");
   const [idea, setIdea] = useState("");
@@ -63,9 +63,16 @@ export function ContentStudio() {
   };
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-10">
-      <ConquerHeadline subtitle={t("studio.title")} />
-      <p className="mx-auto mb-8 max-w-xl text-center text-sm text-zinc-400">{t("studio.lead")}</p>
+    <div className={embedded ? "" : "mx-auto max-w-5xl px-4 py-10"}>
+      {!embedded && (
+        <>
+          <ConquerHeadline subtitle={t("studio.title")} />
+          <p className="mx-auto mb-8 max-w-xl text-center text-sm text-zinc-400">{t("studio.lead")}</p>
+        </>
+      )}
+      {embedded && (
+        <h2 className="mb-4 mt-8 text-lg font-black text-omni-yellow">{t("studio.title")}</h2>
+      )}
 
       <div className="rounded-2xl border border-white/10 bg-omni-card p-5 sm:p-8">
         <div className="mb-4 flex flex-wrap gap-2">

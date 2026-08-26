@@ -6,6 +6,8 @@ import { generateVariants } from "./copy";
 import { generateStrategy } from "./strategy";
 import { generateMedia } from "./media";
 import { generateOptimizer } from "./optimizer";
+import { buildAgency } from "./agency";
+import { demoIntake, DEMO_ID } from "../demo";
 
 export const AGENT_ORDER: AgentId[] = [
   "intake",
@@ -98,7 +100,7 @@ export function assemblePack(
   },
 ): CampaignPack {
   const now = new Date().toISOString();
-  return {
+  const base: CampaignPack = {
     id: partial.id ?? uid("camp"),
     createdAt: now,
     updatedAt: now,
@@ -116,4 +118,36 @@ export function assemblePack(
     saved: false,
     planActivated: false,
   };
+  return { ...base, agency: buildAgency(base) };
+}
+
+export function buildDemoPack(): CampaignPack {
+  const intake = demoIntake();
+  const report = validateIntake(intake);
+  const diagnosis: Diagnosis = {
+    ...diagnose(intake, report),
+    approved: true,
+    approvedAt: new Date().toISOString(),
+  };
+  const variants = generateVariants(intake);
+  const strategy = generateStrategy(intake, diagnosis);
+  const media = generateMedia(intake);
+  const optimizer = generateOptimizer(intake, media);
+  const pack = assemblePack(intake, {
+    report,
+    diagnosis,
+    variants,
+    strategy,
+    media,
+    optimizer,
+    agentStatus: {
+      intake: "complete",
+      diagnostic: "approved",
+      strategic: "approved",
+      media: "approved",
+      optimizer: "complete",
+    },
+    id: DEMO_ID,
+  });
+  return { ...pack, saved: true, planActivated: true, name: intake.businessName };
 }
