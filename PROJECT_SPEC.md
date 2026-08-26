@@ -148,7 +148,7 @@ Route `/medical/optibrain` hosts **15 modules** ported from OptiBrain (Lovable `
 14. Visual studio (HMO badge preview + image prompts)
 15. Creative template warehouse
 
-Chrome stays SAWEK AD **black / red / yellow**. Clinical palettes stay on `/lp/[slug]` only. Empty numbers render `[יש להשלים]` / `[يجب إكمال]` / `[TO COMPLETE]`. The five Gemini agents are unchanged.
+Chrome stays SAWEK AD **black / red / yellow**. Clinical palettes stay on `/lp/[slug]` only. Empty numbers render `[יש להשלים]` / `[يجب الاستكمال]` / `[TO COMPLETE]`. The five Gemini agents are unchanged.
 
 ## Out of scope
 

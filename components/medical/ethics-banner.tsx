@@ -26,7 +26,7 @@ export function MarkerCount({ n, locale }: { n: number; locale: Locale }) {
         : "אין סימוני השלמה פתוחים"
       : locale === "ar"
         ? n
-          ? `${n} وسوم [يجب إكمال] مفتوحة`
+          ? `${n} وسوم [يجب الاستكمال] مفتوحة`
           : "لا وسوم إكمال مفتوحة"
         : n
           ? `${n} open [TO COMPLETE] markers`

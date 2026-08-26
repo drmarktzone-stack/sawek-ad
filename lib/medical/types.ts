@@ -104,6 +104,8 @@ export interface MedicalLead {
   appointmentId?: string;
 }
 
+export type AppointmentStatus = "pending" | "confirmed" | "cancelled";
+
 export interface MedicalAppointment {
   id: string;
   leadId?: string;
@@ -114,6 +116,7 @@ export interface MedicalAppointment {
   durationMin: number;
   notes: string;
   reminderPlan: string;
+  status?: AppointmentStatus;
 }
 
 export interface OptiInputs {

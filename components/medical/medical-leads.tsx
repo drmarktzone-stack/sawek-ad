@@ -66,6 +66,7 @@ export function MedicalLeads() {
           : locale === "ar"
             ? "تذكير واتساب قبل 24 ساعة — رابط لا إرسال حي."
             : "WhatsApp reminder 24h prior — wa.me link, no live send.",
+      status: "pending" as const,
     };
     saveAppointments([appt, ...loadAppointments()]);
     const next = leads.map((l) => (l.id === lead.id ? { ...l, appointmentId: appt.id, status: "in-progress" as const } : l));

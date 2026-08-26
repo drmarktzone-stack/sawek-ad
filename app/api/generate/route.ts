@@ -28,7 +28,7 @@ export async function POST(req: Request) {
           {
             role: "system",
             content:
-              "You write advertising copy from provided facts only. Never invent numbers, testimonials, ratings, competitors, discounts, prices, success rates, technology names, or medical facts. If a field is missing, mark it [TO COMPLETE: field] / [יש להשלים: …] / [يجب إكمال: …]. Reply in the requested language. For medical content, temperature is 0.2 — no clinical decoration.",
+              "You write advertising copy from provided facts only. Never invent numbers, testimonials, ratings, competitors, discounts, prices, success rates, technology names, or medical facts. If a field is missing, mark it [TO COMPLETE: field] / [יש להשלים: …] / [يجب الاستكمال: …]. Reply in the requested language. For medical content, temperature is 0.2 — no clinical decoration.",
           },
           { role: "user", content: prompt },
         ],

@@ -2,7 +2,7 @@ import type { Locale } from "../types";
 
 const PREFIX: Record<Locale, string> = {
   he: "יש להשלים",
-  ar: "يجب إكمال",
+  ar: "يجب الاستكمال",
   en: "TO COMPLETE",
 };
 
@@ -10,7 +10,7 @@ export function toComplete(locale: Locale, field: string): string {
   return `[${PREFIX[locale]}: ${field}]`;
 }
 
-const RE = /\[(?:יש להשלים|يجب إكمال|TO COMPLETE):[^\]]*\]/g;
+const RE = /\[(?:יש להשלים|يجب الاستكمال|يجب إكمال|TO COMPLETE):[^\]]*\]/g;
 
 export function countMarkers(...chunks: string[]): number {
   let n = 0;

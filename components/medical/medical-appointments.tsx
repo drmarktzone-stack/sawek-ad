@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { MedicalAppointment } from "@/lib/medical/types";
+import type { AppointmentStatus, MedicalAppointment } from "@/lib/medical/types";
 import { loadAppointments, loadClinic, saveAppointments } from "@/lib/medical/storage";
 import { waLink } from "@/lib/medical/generate";
 import { useI18n } from "@/components/i18n-provider";
@@ -29,6 +29,22 @@ export function MedicalAppointments() {
   }
 
   const clinic = client ? loadClinic() : null;
+  const now = Date.now();
+  const upcoming = list.filter((a) => new Date(a.startsAt).getTime() >= now - 36e5 && a.status !== "cancelled");
+  const pendingN = upcoming.filter((a) => (a.status ?? "pending") === "pending").length;
+  const pastN = list.filter((a) => new Date(a.startsAt).getTime() < now - 36e5).length;
+
+  function setStatus(id: string, status: AppointmentStatus) {
+    const next = list.map((a) => (a.id === id ? { ...a, status } : a));
+    saveAppointments(next);
+    setList(next);
+  }
+
+  const statusLabel: Record<AppointmentStatus, string> = {
+    pending: t("med.appts.status.pending"),
+    confirmed: t("med.appts.status.confirmed"),
+    cancelled: t("med.appts.status.cancelled"),
+  };
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
@@ -37,6 +53,18 @@ export function MedicalAppointments() {
       <MedicalNav />
       <EthicsBanner locale={locale} />
       <p className="mt-4 text-sm text-zinc-400">{t("med.appts.lead")}</p>
+      <div className="mt-4 grid gap-3 sm:grid-cols-3">
+        {[
+          { label: t("med.appts.upcoming"), value: upcoming.length },
+          { label: t("med.appts.pending"), value: pendingN },
+          { label: t("med.appts.past"), value: pastN },
+        ].map((s) => (
+          <div key={s.label} className="rounded-2xl border border-white/10 bg-omni-card p-4 text-center">
+            <p className="text-xs text-zinc-500">{s.label}</p>
+            <p className="mt-1 text-3xl font-black text-omni-yellow">{s.value}</p>
+          </div>
+        ))}
+      </div>
       <div className="mt-3">
         <Button
           type="button"
@@ -74,13 +102,24 @@ export function MedicalAppointments() {
               <p className="font-black text-white">{a.name}</p>
               <p className="text-sm text-zinc-400">{a.phone}</p>
               <p className="mt-1 text-sm text-omni-yellow">{new Date(a.startsAt).toLocaleString()}</p>
+              <p className="mt-1 text-xs font-bold text-omni-red">{statusLabel[a.status ?? "pending"]}</p>
               <p className="mt-2 text-xs text-zinc-500">{a.reminderPlan}</p>
-              <div className="mt-3 flex gap-2">
+              <div className="mt-3 flex flex-wrap gap-2">
                 {wa && (
                   <Button asChild size="sm" variant="outline">
                     <a href={wa} target="_blank" rel="noreferrer">
                       {t("med.waRemind")}
                     </a>
+                  </Button>
+                )}
+                {(a.status ?? "pending") !== "confirmed" && (
+                  <Button type="button" size="sm" onClick={() => setStatus(a.id, "confirmed")}>
+                    {t("med.appts.confirm")}
+                  </Button>
+                )}
+                {(a.status ?? "pending") !== "cancelled" && (
+                  <Button type="button" size="sm" variant="ghost" onClick={() => setStatus(a.id, "cancelled")}>
+                    {t("med.appts.cancel")}
                   </Button>
                 )}
                 <Button

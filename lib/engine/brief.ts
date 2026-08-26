@@ -71,5 +71,21 @@ export function pillarsOf(intake: Intake): { name: string; body: Record<Locale, 
         `Outcome: ${intake.mainGoal || "—"}. Likelihood: ${intake.uniqueAdvantage || "—"}. Time/effort: not given — will not guess.`,
       ),
     },
+    {
+      name: "ICP",
+      body: L(
+        `קהל: ${intake.audience || "[יש להשלים: קהל]"}. מיקום: ${intake.location || "[יש להשלים: מיקום]"}.`,
+        `الجمهور: ${intake.audience || "[يجب الاستكمال: جمهور]"}. الموقع: ${intake.location || "[يجب الاستكمال: موقع]"}.`,
+        `Audience: ${intake.audience || "[TO COMPLETE: audience]"}. Place: ${intake.location || "[TO COMPLETE: location]"}.`,
+      ),
+    },
+    {
+      name: "Proof",
+      body: L(
+        `הוכחה רק ממה שסופק. בלי המלצות או דירוגים מומצאים.`,
+        `الإثبات فقط مما أُعطي. بلا شهادات أو تقييمات مخترعة.`,
+        `Proof only from what was supplied. No invented testimonials or ratings.`,
+      ),
+    },
   ];
 }

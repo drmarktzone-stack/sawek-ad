@@ -146,6 +146,39 @@ export function MedicalDesk() {
       <EthicsBanner locale={locale} />
 
       <section className="mt-6">
+        <h2 className="mb-3 text-sm font-black uppercase tracking-wide text-omni-yellow">{t("med.how.title")}</h2>
+        <ul className="mb-6 grid gap-3 sm:grid-cols-3">
+          {(
+            [
+              ["med.zero.title", "med.zero.body"],
+              ["med.click.title", "med.click.body"],
+              ["med.leadsCtrl.title", "med.leadsCtrl.body"],
+            ] as const
+          ).map(([h, b]) => (
+            <li key={h} className="rounded-2xl border border-white/10 bg-omni-card p-4">
+              <p className="font-black text-omni-yellow">{t(h)}</p>
+              <p className="mt-2 text-sm text-zinc-400">{t(b)}</p>
+            </li>
+          ))}
+        </ul>
+        <ol className="mb-8 grid gap-3 sm:grid-cols-4">
+          {(
+            [
+              "med.how.1",
+              "med.how.2",
+              "med.how.3",
+              "med.how.4",
+            ] as const
+          ).map((k, i) => (
+            <li key={k} className="rounded-2xl border border-omni-yellow/20 bg-black/40 p-4">
+              <p className="text-xs font-black text-omni-red">0{i + 1}</p>
+              <p className="mt-1 text-sm font-semibold text-white">{t(k)}</p>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <section className="mt-6">
         <h2 className="mb-3 text-sm font-black uppercase tracking-wide text-omni-yellow">{t("med.step.specialty")}</h2>
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
           {SPECIALTIES.map((s) => (

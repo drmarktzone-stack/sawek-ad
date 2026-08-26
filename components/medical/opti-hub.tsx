@@ -1286,7 +1286,7 @@ function IcebergPanel({ desk, patch, loc }: Panel) {
           {pick(
             {
               he: "קרחון ביקוש בלי TAM מומצא. אם אין רשימת המתנה / עונתיות / התנגדות — השדה נשאר [יש להשלים].",
-              ar: "جبل الجليد بلا حجم سوق مخترع. إن لم توجد قائمة انتظار أو موسمية أو اعتراض — يبقى [يجب إكمال].",
+              ar: "جبل الجليد بلا حجم سوق مخترع. إن لم توجد قائمة انتظار أو موسمية أو اعتراض — يبقى [يجب الاستكمال].",
               en: "Demand iceberg with no invented TAM. Waitlist / season / objection stay [TO COMPLETE] until you type them.",
             },
             loc,
