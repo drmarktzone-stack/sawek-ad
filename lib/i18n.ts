@@ -100,9 +100,9 @@ export const copy: Dict = {
     ar: "إذا جت أولاً — اكتبوا هيك. لا تخترعوا ساعات ساعة ما نشرتوها.",
     en: "If arrival is walk-in, say so. Don’t invent clock hours you haven’t published.",
   },
-  "details.kupaFile": { he: "הגשת מעבר קופה עד", ar: "تقديم نقل الكوبوت حتى", en: "Kupa-switch filing deadline" },
+  "details.kupaFile": { he: "הגשת מעבר קופה עד", ar: "تقديم نقل الصندوق حتى", en: "Kupa-switch filing deadline" },
   "details.kupaFilePh": { he: "15 בספטמבר 2026", ar: "15 أيلول 2026", en: "15 Sep 2026" },
-  "details.kupaMember": { he: "תחילת חברות בקופה", ar: "بداية العضوية بالكوبوت", en: "Kupa membership start" },
+  "details.kupaMember": { he: "תחילת חברות בקופה", ar: "بداية العضوية بالصندوق", en: "Kupa membership start" },
   "details.kupaMemberPh": { he: "1 בנובמבר 2026", ar: "1 تشرين الثاني 2026", en: "1 Nov 2026" },
   "details.kupaHint": {
     he: "רק תאריכי מעבר שפרסמתם. ריק = לא יופיעו בקופי.",

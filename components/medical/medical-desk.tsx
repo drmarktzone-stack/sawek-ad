@@ -53,7 +53,7 @@ export function MedicalDesk() {
   }
 
   function loadDemo() {
-    startPediatricDemoFlow();
+    startPediatricDemoFlow(locale);
   }
 
   function pickSpecialty(id: MedicalSpecialty) {

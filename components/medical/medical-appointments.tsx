@@ -25,7 +25,7 @@ export function MedicalAppointments() {
   }
 
   function loadDemo() {
-    startPediatricDemoFlow();
+    startPediatricDemoFlow(locale);
   }
 
   const clinic = client ? loadClinic() : null;

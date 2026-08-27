@@ -9,6 +9,7 @@ export const PENDING_DEMO_KEY = "sawek-pending-demo";
 const DEMO_FACTS = {
   businessName: {
     he: "מרפאת ילדים ד״ר סאמר אבו מוך",
+    // Abu Mokh = أبو موخ (waw). Never أبو مخ.
     ar: "عيادة أطفال د. سامر أبو موخ",
     en: "Dr. Samer Abu Mokh Pediatrics",
   },
@@ -145,11 +146,17 @@ export function clearPendingDemo() {
   }
 }
 
+/** Family name is أبو موخ (Abu Mokh). «أبو مخ» is a leftover misspelling. */
+export function correctAbuMokhSpelling(name: string): string {
+  return name.replaceAll("أبو مخ", "أبو موخ");
+}
+
 export function isPediatricDemo(intake: Intake): boolean {
   return (
     intake.website.includes("drsamerped.ai.studio") ||
     intake.businessName.includes("סאמר אבו מוך") ||
     intake.businessName.includes("سامر أبو موخ") ||
+    intake.businessName.includes("أبو مخ") ||
     intake.businessName.includes("Samer Abu Mokh")
   );
 }
@@ -158,15 +165,19 @@ const FACT_FIELDS = Object.keys(DEMO_FACTS) as FactKey[];
 
 /** If the draft is still the stock pediatric demo, swap copy to the active locale. */
 export function relocalizePediatricIntake(intake: Intake, locale: Locale): Intake {
-  if (!isPediatricDemo(intake)) return intake;
+  if (!isPediatricDemo(intake)) {
+    return { ...intake, businessName: correctAbuMokhSpelling(intake.businessName) };
+  }
   const out: Intake = { ...intake };
   for (const key of FACT_FIELDS) {
     const stock = [DEMO_FACTS[key].he, DEMO_FACTS[key].ar, DEMO_FACTS[key].en] as string[];
     const current = String(intake[key] ?? "");
-    if (!current || stock.includes(current)) {
+    const currentFixed = key === "businessName" ? correctAbuMokhSpelling(current) : current;
+    if (!current || stock.includes(current) || stock.includes(currentFixed) || (key === "businessName" && current.includes("أبو مخ"))) {
       (out as unknown as Record<string, string>)[key] = DEMO_FACTS[key][locale];
     }
   }
+  out.businessName = correctAbuMokhSpelling(out.businessName);
   if (
     !intake.offer ||
     intake.offer === DEFAULT_OFFER_HE ||

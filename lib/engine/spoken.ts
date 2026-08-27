@@ -6,8 +6,10 @@ import {
   GOAL_CHIPS,
   OFFER_CHIPS,
   PROBLEM_CHIPS,
+  detectKupaAudience,
   resolveChipLabel,
 } from "../chips";
+import { correctAbuMokhSpelling } from "../demo";
 
 /** Cut on a word boundary. Never slice mid-word (Arabic «وساعات م»). */
 export function clipAtWord(text: string, max: number): string {
@@ -28,6 +30,8 @@ const INTERNAL_AR = [
   "مبني حول",
   "يؤجّلون",
   "يؤجلون",
+  "كوبوت",
+  "أبو مخ",
 ];
 
 export function isPediatrics(intake: Intake): boolean {
@@ -61,7 +65,7 @@ export function shortCity(intake: Intake, locale: Locale): string {
 }
 
 export function shortName(intake: Intake, locale: Locale): string {
-  const n = intake.businessName.trim();
+  const n = correctAbuMokhSpelling(intake.businessName.trim());
   if (!n) return locale === "ar" ? "العيادة" : locale === "he" ? "המרפאה" : "the clinic";
   return clipAtWord(n, 36);
 }
@@ -78,6 +82,46 @@ export function shortCrowd(intake: Intake, locale: Locale): string {
   return city ? `parents in ${city}` : "parents";
 }
 
+/** Strong-offer who-line: other-kupa / switch-to-Clalit must not keep Clalit-members leftover. */
+export function audienceWhoLine(intake: Intake, locale: Locale): string {
+  const city = shortCity(intake, locale);
+  const kupa = detectKupaAudience(intake.audience);
+  const crowd = shortCrowd(intake, locale);
+
+  if (locale === "ar") {
+    const c = city || "المنطقة";
+    if (kupa === "maccabi") return `لأهل ${c} اللي بصندوق مكابي وبدهم ينقلوا لكلاليت.`;
+    if (kupa === "meuhedet") return `لأهل ${c} اللي بصندوق مئوحيدت وبدهم ينقلوا لكلاليت.`;
+    if (kupa === "leumit") return `لأهل ${c} اللي بصندوق لئوميت وبدهم ينقلوا لكلاليت.`;
+    if (kupa === "switch_clalit") return `لأهل ${c} اللي بدهم ينقلوا لكلاليت من صندوق ثاني.`;
+    if (isPediatrics(intake)) return `لأهل ${c} اللي بدهم طبيب أطفال كلاليت قريب.`;
+    return `ل${crowd}.`;
+  }
+  if (locale === "he") {
+    const c = city || "האזור";
+    if (kupa === "maccabi") return `למשפחות ${c} במכבי שרוצים לעבור לכללית.`;
+    if (kupa === "meuhedet") return `למשפחות ${c} במאוחדת שרוצים לעבור לכללית.`;
+    if (kupa === "leumit") return `למשפחות ${c} בלאומית שרוצים לעבור לכללית.`;
+    if (kupa === "switch_clalit") return `למשפחות ${c} שרוצים לעבור לכללית מקופה אחרת.`;
+    return `ל${crowd}.`;
+  }
+  const c = city || "the area";
+  if (kupa === "maccabi") return `For families in ${c} on Maccabi who want to switch to Clalit.`;
+  if (kupa === "meuhedet") return `For families in ${c} on Meuhedet who want to switch to Clalit.`;
+  if (kupa === "leumit") return `For families in ${c} on Leumit who want to switch to Clalit.`;
+  if (kupa === "switch_clalit") return `For families in ${c} switching to Clalit from another fund.`;
+  return `For ${crowd}.`;
+}
+
+function arWalkInH1(intake: Intake): string {
+  const n = shortName(intake, "ar");
+  const city = shortCity(intake, "ar");
+  const walk = isWalkIn(intake);
+  if (walk && isPediatrics(intake) && city) return `دكتور أطفال ب${city} — جت أولاً`;
+  if (walk) return `${n} — جت أولاً`;
+  return n;
+}
+
 export function hoursLine(intake: Intake, locale: Locale): string {
   const h = intake.clinicHours?.trim() ?? "";
   if (!h) return "";
@@ -91,7 +135,7 @@ export function kupaLine(intake: Intake, locale: Locale): string {
   const from = intake.kupaMemberFrom?.trim() ?? "";
   if (!fileBy && !from) return "";
   if (locale === "ar") {
-    const a = fileBy ? `قدّموا نقل الكوبوت حتى ${fileBy}` : "";
+    const a = fileBy ? `قدّموا نقل الصندوق حتى ${fileBy}` : "";
     const b = from ? `العضوية بتبلّش ${from}` : "";
     return [a, b].filter(Boolean).join(". ") + ".";
   }
@@ -148,14 +192,7 @@ export function landingH1(intake: Intake, locale: Locale): string {
   const n = shortName(intake, locale);
   const place = placeBit(intake, locale);
   if (locale === "ar") {
-    const city = shortCity(intake, "ar");
-    const h = walk && isPediatrics(intake) && city
-      ? `دكتور أطفال ب${city} — جت أولاً`
-      : walk
-        ? `${n} — جت أولاً`
-        : place
-          ? `${n} — ${place}`
-          : n;
+    const h = walk ? arWalkInH1(intake) : place ? `${n} — ${place}` : n;
     return forbiddenHeadline(h) ? (walk ? `${n} — جت أولاً` : n) : h;
   }
   if (locale === "he") {
@@ -249,7 +286,6 @@ function painShort(intake: Intake, locale: Locale): string {
 
 export function spokenHeadline(kind: VariantKind, intake: Intake, locale: Locale): string {
   const n = shortName(intake, locale);
-  const city = shortCity(intake, locale);
   const place = placeBit(intake, locale);
   const wa = waBit(intake);
   const walk = isWalkIn(intake);
@@ -259,11 +295,7 @@ export function spokenHeadline(kind: VariantKind, intake: Intake, locale: Locale
   if (locale === "ar") {
     switch (kind) {
       case "strong_offer":
-        h = walk && isPediatrics(intake) && city
-          ? `دكتور أطفال ب${city} — جت أولاً`
-          : walk
-            ? `${n} — جت أولاً`
-            : n;
+        h = arWalkInH1(intake);
         break;
       case "very_short":
         h = place || n;
@@ -272,7 +304,7 @@ export function spokenHeadline(kind: VariantKind, intake: Intake, locale: Locale
         h = walk ? "الولد مرضان؟ جتوا على العيادة" : painShort(intake, locale);
         break;
       case "narrative":
-        h = isPediatrics(intake) && place ? `كلاليت أطفال، ${place}` : place || n;
+        h = arWalkInH1(intake);
         break;
       case "direct_sales":
         h = wa ? `واتساب العيادة: ${wa}` : cta;
@@ -336,7 +368,7 @@ export function spokenHeadline(kind: VariantKind, intake: Intake, locale: Locale
 
 export function spokenBody(kind: VariantKind, intake: Intake, locale: Locale): string {
   const n = shortName(intake, locale);
-  const crowd = shortCrowd(intake, locale);
+  const who = audienceWhoLine(intake, locale);
   const cta = spokenCta(intake, locale);
   const hours = hoursLine(intake, locale);
   const kupa = kupaLine(intake, locale);
@@ -352,12 +384,9 @@ export function spokenBody(kind: VariantKind, intake: Intake, locale: Locale): s
       : `${n}${place ? " — " + place : ""}.`;
     const waLine = wa ? `واتساب ${wa} (مش للطوارئ).` : "";
     const facts = [hours, kupa, waLine, site, offer].filter(Boolean).join("\n");
-    const whoLine = isPediatrics(intake)
-      ? `لأهل ${shortCity(intake, locale) || "المنطقة"} اللي بدهم طبيب أطفال كلاليت قريب.`
-      : `ل${crowd}.`;
     switch (kind) {
       case "strong_offer":
-        return [open, whoLine, facts, cta].filter(Boolean).join("\n\n");
+        return [open, who, facts, cta].filter(Boolean).join("\n\n");
       case "very_short":
         return [open, hours, waLine, cta].filter(Boolean).join(" ");
       case "emotional":
@@ -388,7 +417,7 @@ export function spokenBody(kind: VariantKind, intake: Intake, locale: Locale): s
     const facts = [hours, kupa, waLine, site, offer].filter(Boolean).join("\n");
     switch (kind) {
       case "strong_offer":
-        return [open, `ל${crowd}.`, facts, cta].filter(Boolean).join("\n\n");
+        return [open, who, facts, cta].filter(Boolean).join("\n\n");
       case "very_short":
         return [open, hours, waLine, cta].filter(Boolean).join(" ");
       case "emotional":
@@ -409,7 +438,7 @@ export function spokenBody(kind: VariantKind, intake: Intake, locale: Locale): s
   const facts = [hours, kupa, waLine, site, offer].filter(Boolean).join("\n");
   switch (kind) {
     case "strong_offer":
-      return [open, `For ${crowd}.`, facts, cta].filter(Boolean).join("\n\n");
+      return [open, who, facts, cta].filter(Boolean).join("\n\n");
     case "very_short":
       return [open, hours, waLine, cta].filter(Boolean).join(" ");
     case "emotional":

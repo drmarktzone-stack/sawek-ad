@@ -22,12 +22,36 @@ export const DEPTH_OPTIONS: ChipOption[] = [
 export const AUDIENCE_CHIPS: ChipOption[] = [
   { id: "local_families", label: { he: "משפחות מקומיות", ar: "عائلات محلية", en: "Local families" } },
   { id: "parents", label: { he: "הורים", ar: "أهل", en: "Parents" } },
+  { id: "clalit", label: { he: "כללית", ar: "كلاليت", en: "Clalit" } },
+  { id: "maccabi", label: { he: "מכבי", ar: "مكابي", en: "Maccabi" } },
+  { id: "meuhedet", label: { he: "מאוחדת", ar: "مئوحيدت", en: "Meuhedet" } },
+  { id: "leumit", label: { he: "לאומית", ar: "لئوميت", en: "Leumit" } },
+  { id: "switch_clalit", label: { he: "רוצים לעבור לכללית", ar: "بدهم ينقلوا لكلاليت", en: "Switching to Clalit" } },
   { id: "owners", label: { he: "בעלי עסקים", ar: "أصحاب أعمال", en: "Business owners" } },
   { id: "young", label: { he: "צעירים 18–34", ar: "شباب 18–34", en: "Young adults 18–34" } },
   { id: "women", label: { he: "נשים 25–45", ar: "نساء 25–45", en: "Women 25–45" } },
   { id: "men", label: { he: "גברים 30–55", ar: "رجال 30–55", en: "Men 30–55" } },
   { id: "custom", custom: true, label: { he: "כתוב בעצמך", ar: "اكتب بنفسك", en: "Write your own" } },
 ];
+
+export type KupaAudienceId = "clalit" | "maccabi" | "meuhedet" | "leumit" | "switch_clalit";
+
+/** Other-kupa / switch-to-Clalit from chip id or typed labels (مكابي / مئوحيدت / لئوميت). */
+export function detectKupaAudience(audience: string): KupaAudienceId | null {
+  const v = audience.trim();
+  if (!v) return null;
+  if (v === "maccabi" || /مكابي|מכבי/i.test(v) || /^maccabi$/i.test(v)) return "maccabi";
+  if (v === "meuhedet" || /مئوحيدت|مئوحيديت|מאוחדת/i.test(v) || /^meuhedet$/i.test(v)) return "meuhedet";
+  if (v === "leumit" || /لئوميت|לאומית/i.test(v) || /^leumit$/i.test(v)) return "leumit";
+  if (
+    v === "switch_clalit" ||
+    /ينقلوا لكلاليت|לעבור לכללית|switch(?:ing)? to clalit/i.test(v)
+  ) {
+    return "switch_clalit";
+  }
+  if (v === "clalit" || /^(كلاليت|כללית|clalit)$/i.test(v)) return "clalit";
+  return null;
+}
 
 export const PROBLEM_CHIPS: ChipOption[] = [
   { id: "unknown", label: { he: "לא מכירים את העסק", ar: "الناس مش عارفين العيادة", en: "People don't know we exist" } },

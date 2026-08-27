@@ -5,10 +5,11 @@ import { demoPediatricDesk } from "./medical/opti-state";
 import { saveClinic, saveOpti, saveOptiDesk, upsertMedCampaign } from "./medical/storage";
 import { loadLocale } from "./storage";
 import { withLang } from "./locale-url";
+import type { Locale } from "./types";
 
 /** Persist Dr. Samer pediatric facts into wizard + OptiBrain. No invented metrics. */
-export function seedPediatricDemo() {
-  applyPediatricDemoDraft(loadLocale());
+export function seedPediatricDemo(locale?: Locale) {
+  applyPediatricDemoDraft(locale ?? loadLocale());
   installDemoPack();
   const { clinic, campaign } = buildPediatricDemoCampaign();
   saveClinic(clinic);
@@ -18,14 +19,14 @@ export function seedPediatricDemo() {
 }
 
 /** One-click pediatric demo: persist intake + medical pack, then open the 4-step wizard. */
-export function startPediatricDemoFlow() {
+export function startPediatricDemoFlow(locale?: Locale) {
   if (typeof window === "undefined") return;
-  const locale = loadLocale();
+  const loc = locale ?? loadLocale();
   try {
-    seedPediatricDemo();
+    seedPediatricDemo(loc);
   } catch (err) {
     console.error("pediatric medical pack failed; wizard will still start", err);
-    applyPediatricDemoDraft(locale);
+    applyPediatricDemoDraft(loc);
   }
-  window.location.assign(withLang("/?demo=samer", locale));
+  window.location.assign(withLang("/?demo=samer", loc));
 }

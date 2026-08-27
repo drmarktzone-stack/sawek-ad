@@ -32,7 +32,7 @@ export default function PublicLandingPage() {
           type="button"
           data-demo="pediatric"
           className="mt-4 h-auto max-w-full whitespace-normal py-2"
-          onClick={() => startPediatricDemoFlow()}
+          onClick={() => startPediatricDemoFlow(locale)}
         >
           {t("med.demo")}
         </Button>

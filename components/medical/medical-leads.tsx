@@ -35,7 +35,7 @@ export function MedicalLeads() {
   }
 
   function loadDemo() {
-    startPediatricDemoFlow();
+    startPediatricDemoFlow(locale);
   }
 
   const shown = leads.filter((l) => filter === "all" || l.status === filter);

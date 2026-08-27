@@ -26,7 +26,7 @@ export function MedicalCredibility() {
   }
 
   function loadDemo() {
-    startPediatricDemoFlow();
+    startPediatricDemoFlow(locale);
   }
 
   const camp = list[0];

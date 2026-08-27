@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Trash2, WandSparkles } from "lucide-react";
 import type { AgentId, AgentStatus, CampaignPack, Competitor, Intake, WizardStep } from "@/lib/types";
-import { demoIntake, DEMO_LABEL, consumePendingDemo, clearPendingDemo, applyPediatricDemoDraft, isPediatricDemo, relocalizePediatricIntake } from "@/lib/demo";
+import { demoIntake, DEMO_LABEL, consumePendingDemo, clearPendingDemo, applyPediatricDemoDraft, isPediatricDemo, relocalizePediatricIntake, correctAbuMokhSpelling } from "@/lib/demo";
 import { installDemoPack } from "@/lib/active-pack";
 import { cmoFieldsMissing, emptyIntake, wizardReady } from "@/lib/engine/validate";
 import { assemblePack, idleStatus, runIntakeAndDiagnosis, runMedia, runOptimizerStage, runStrategic } from "@/lib/engine/run";
@@ -105,7 +105,9 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
         setCustom({ audience: false, problem: false, advantage: false, goal: false, offer: false });
         setPhase("wizard");
       } else {
-        const intake = isPediatricDemo(d.intake) ? relocalizePediatricIntake(d.intake, locale) : d.intake;
+        const intake = isPediatricDemo(d.intake)
+          ? relocalizePediatricIntake(d.intake, locale)
+          : { ...d.intake, businessName: correctAbuMokhSpelling(d.intake.businessName) };
         setIntake(intake);
         setStep(d.step);
         setCustom({

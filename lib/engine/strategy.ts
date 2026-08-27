@@ -1,6 +1,7 @@
 import type { Diagnosis, Intake, Locale, StrategyBlock, StrategyItem } from "../types";
 import { filled } from "../utils";
 import { isNoOffer } from "../no-offer";
+import { correctAbuMokhSpelling } from "../demo";
 import {
   ADVANTAGE_CHIPS,
   AUDIENCE_CHIPS,
@@ -14,7 +15,7 @@ const L = (he: string, ar: string, en: string): Record<Locale, string> => ({ he,
 const item = (title: Record<Locale, string>, body: Record<Locale, string>): StrategyItem => ({ title, body });
 
 export function generateStrategy(intake: Intake, diagnosis: Diagnosis): StrategyBlock[] {
-  const n = intake.businessName || "—";
+  const n = correctAbuMokhSpelling(intake.businessName) || "—";
   const aud = resolveChipLabel(intake.audience, AUDIENCE_CHIPS, "he") || "—";
   const pain = resolveChipLabel(intake.biggestProblem, PROBLEM_CHIPS, "he") || "—";
   const adv = resolveChipLabel(intake.uniqueAdvantage, ADVANTAGE_CHIPS, "he") || "—";
@@ -175,7 +176,7 @@ export function generateStrategy(intake: Intake, diagnosis: Diagnosis): Strategy
           intake.clinicHours || "مش مكتوب — مش منخترع ساعة.",
           intake.clinicHours || "Not provided — clock hours will not be guessed.",
         )),
-        item(L("מעבר קופה", "نقل الكوبوت", "Kupa switch"), L(
+        item(L("מעבר קופה", "نقل الصندوق", "Kupa switch"), L(
           [intake.kupaFileBy && `הגשה עד ${intake.kupaFileBy}`, intake.kupaMemberFrom && `חברות מ-${intake.kupaMemberFrom}`].filter(Boolean).join(" · ") || "לא סופקו תאריכי מעבר.",
           [intake.kupaFileBy && `تقديم حتى ${intake.kupaFileBy}`, intake.kupaMemberFrom && `عضوية من ${intake.kupaMemberFrom}`].filter(Boolean).join(" · ") || "ما في تواريخ نقل.",
           [intake.kupaFileBy && `File by ${intake.kupaFileBy}`, intake.kupaMemberFrom && `Membership from ${intake.kupaMemberFrom}`].filter(Boolean).join(" · ") || "No switch dates supplied.",

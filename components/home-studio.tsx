@@ -14,7 +14,7 @@ export function HomeStudio() {
   const [wizardKey, setWizardKey] = useState(0);
 
   function runDemo() {
-    startPediatricDemoFlow();
+    startPediatricDemoFlow(locale);
   }
 
   function startEmpty() {
