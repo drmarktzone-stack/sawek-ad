@@ -17,6 +17,9 @@ export function packToText(pack: CampaignPack, locale: Locale): string {
   lines.push(`${t(locale, "details.advantage")}: ${p.intake.uniqueAdvantage}`);
   lines.push(`${t(locale, "details.goal")}: ${p.intake.mainGoal}`);
   lines.push(`${t(locale, "details.offer")}: ${p.intake.offer}`);
+  lines.push(`${t(locale, "biz.hours")}: ${p.intake.clinicHours || "—"}`);
+  lines.push(`${t(locale, "details.kupaFile")}: ${p.intake.kupaFileBy || "—"}`);
+  lines.push(`${t(locale, "details.kupaMember")}: ${p.intake.kupaMemberFrom || "—"}`);
   lines.push("");
   lines.push("=== MISSING (not invented) ===");
   for (const m of p.intakeReport.missing) {

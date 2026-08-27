@@ -170,6 +170,16 @@ export function generateStrategy(intake: Intake, diagnosis: Diagnosis): Strategy
           `${n}. ${intake.category || "category not given"}. ${intake.description || "Description missing."}`,
         )),
         item(L("הקהל", "الجمهور", "The audience"), L(aud, aud, aud)),
+        item(L("שעות קבלה", "ساعات الدوام", "Clinic hours"), L(
+          intake.clinicHours || "לא סופק — לא ננחש שעון.",
+          intake.clinicHours || "مش مكتوب — مش منخترع ساعة.",
+          intake.clinicHours || "Not provided — clock hours will not be guessed.",
+        )),
+        item(L("מעבר קופה", "نقل الكوبوت", "Kupa switch"), L(
+          [intake.kupaFileBy && `הגשה עד ${intake.kupaFileBy}`, intake.kupaMemberFrom && `חברות מ-${intake.kupaMemberFrom}`].filter(Boolean).join(" · ") || "לא סופקו תאריכי מעבר.",
+          [intake.kupaFileBy && `تقديم حتى ${intake.kupaFileBy}`, intake.kupaMemberFrom && `عضوية من ${intake.kupaMemberFrom}`].filter(Boolean).join(" · ") || "ما في تواريخ نقل.",
+          [intake.kupaFileBy && `File by ${intake.kupaFileBy}`, intake.kupaMemberFrom && `Membership from ${intake.kupaMemberFrom}`].filter(Boolean).join(" · ") || "No switch dates supplied.",
+        )),
         item(L("מודל", "النموذج", "Model"), L(
           intake.businessModel || "לא סופק — לא ננחש איך נסגר הכסף.",
           intake.businessModel || "غير متوفر — لن نخمن كيف يُغلق المال.",

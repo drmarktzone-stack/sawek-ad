@@ -17,6 +17,7 @@ import {
   defaultOfferLabel,
   resolveChipLabel,
 } from "../chips";
+import { isWalkIn, landingBody, rsaLines, spokenCta, whatsappScript, hoursLine, kupaLine, landingH1 } from "./spoken";
 
 const L = (he: string, ar: string, en: string): Tri => ({ he, ar, en });
 
@@ -47,8 +48,10 @@ export function buildAgency(pack: Pick<CampaignPack, "intake" | "intakeReport" |
   const adv = advHe;
   const goal = goalHe;
   const loc = i.location || "";
-  const wa = i.whatsapp?.trim() || "";
   const noOffer = isNoOffer(i.offer);
+  const ctaHe = spokenCta(i, "he");
+  const ctaAr = spokenCta(i, "ar");
+  const ctaEn = spokenCta(i, "en");
 
   const unknowns: string[] = [];
   if (!filled(i.location) && i.type !== "app") unknowns.push("location");
@@ -216,7 +219,13 @@ export function buildAgency(pack: Pick<CampaignPack, "intake" | "intakeReport" |
     funnel: {
       tof: L(`TOF: הוק על ${painHe}. מטא/טיקטוק לפי תוכנית המדיה. בלי לידים מזויפים.`, `TOF: خطاف على ${painAr}.`, `TOF: hook on ${painEn}. Meta/TikTok per the media plan. No fake leads.`),
       mof: L(`MOF: הוכחה = ${advHe} בלבד. רימרקטינג אחרי אירוע אמיתי.`, `MOF: إثبات = ${advAr} فقط.`, `MOF: proof = ${advEn} only. Remarketing after a real event.`),
-      bof: L(`BOF: CTA ל${goalHe}. וואטסאפ/תור — לא טופס של 12 שדות.`, `BOF: CTA لـ ${goalAr}.`, `BOF: CTA to ${goalEn}. WhatsApp/booking — not a 12-field form.`),
+      bof: isWalkIn(i)
+        ? L(
+            `BOF: ${ctaHe}. קבלה לפי סדר הגעה. וואטסאפ לא לחירום.`,
+            `BOF: ${ctaAr}. جت أولاً. واتساب مش للطوارئ.`,
+            `BOF: ${ctaEn}. Walk-in. WhatsApp is not the ER.`,
+          )
+        : L(`BOF: CTA ל${goalHe}. וואטסאפ/תור — לא טופס של 12 שדות.`, `BOF: CTA لـ ${goalAr}.`, `BOF: CTA to ${goalEn}. WhatsApp/booking — not a 12-field form.`),
     },
     calendar: Array.from({ length: 13 }, (_, w) => ({
       week: w + 1,
@@ -235,12 +244,8 @@ export function buildAgency(pack: Pick<CampaignPack, "intake" | "intakeReport" |
     })),
   };
 
-  const ctaHe = /תור|מועד|موعد|book/.test(goalHe + goalAr + goalEn) ? "קבעו תור" : "דברו איתנו";
-  const ctaAr = /موعد|تور|תור|book/.test(goalHe + goalAr + goalEn) ? "احجزوا موعداً" : "تواصلوا معنا";
-  const ctaEn = /book|appointment|תור/.test((goalHe + ' ' + goalAr + ' ' + goalEn).toLowerCase()) ? "Book an appointment" : "Talk to us";
-
   const hooks = [
-    { id: "pain", angle: L("בעיה", "مشكلة", "Problem"), hook: L(painHe, painAr, painEn) },
+    { id: "pain", angle: L("בעיה", "مشكلة", "Problem"), hook: L(landingH1(i, "he"), landingH1(i, "ar"), landingH1(i, "en")) },
     { id: "edge", angle: L("יתרון", "ميزة", "Advantage"), hook: L(advHe, advAr, advEn) },
     { id: "place", angle: L("מקום", "مكان", "Place"), hook: L(loc || "מיקום חסר — לא «לידכם».", loc || "الموقع ناقص.", loc || "Location missing — not “near you”.") },
     { id: "no-fake", angle: L("יושרה", "صدق", "Integrity"), hook: L(noOffer ? "בלי קופון מלאכותי." : i.offer, noOffer ? "بلا كوبون." : i.offer, noOffer ? "No manufactured coupon." : i.offer) },
@@ -250,16 +255,16 @@ export function buildAgency(pack: Pick<CampaignPack, "intake" | "intakeReport" |
 
   const pieces: FactoryPiece[] = [];
   const formats: { format: string; title: (loc: Locale) => string; body: (loc: Locale) => string }[] = [
-    { format: "feed", title: (_l) => name, body: (l) => l === "he" ? `${pain}\n${adv}\n${ctaHe}` : l === "ar" ? `${painAr}\n${advAr}\n${ctaAr}` : `${painEn}\n${advEn}\n${ctaEn}` },
-    { format: "story", title: (l) => (l === "he" ? "פריים 1" : l === "ar" ? "إطار 1" : "Frame 1"), body: (l) => l === "he" ? `${painAr}\nהבא: ${ctaHe}` : l === "ar" ? `${painAr}\nالتالي: ${ctaAr}` : `${painAr}\nNext: ${ctaEn}` },
-    { format: "reels", title: (l) => (l === "he" ? "סקריפט 15ש׳" : l === "ar" ? "سكربت 15ث" : "15s script"), body: (l) => l === "he" ? `0–3: ${painAr}. 3–12: ${advAr}. 12–15: ${ctaHe}.` : l === "ar" ? `0–3: ${painAr}. 3–12: ${advAr}. 12–15: ${ctaAr}.` : `0–3: ${painAr}. 3–12: ${advAr}. 12–15: ${ctaEn}.` },
-    { format: "youtube", title: (l) => (l === "he" ? "YouTube — הוק 8ש׳" : l === "ar" ? "يوتيوب — 8ث" : "YouTube — 8s hook"), body: (l) => l === "he" ? `הוק: ${painAr}. גוף: ${advAr}. קצה: ${ctaHe}. בלי Intro של 20 שניות.` : l === "ar" ? `خطاف: ${painAr}.` : `Hook: ${painAr}. Body: ${advAr}. End: ${ctaEn}. No 20s intro.` },
-    { format: "rsa", title: (_l) => "Google RSA", body: (l) => l === "he" ? `H1: ${name}\nH2: ${adv.slice(0, 30)}\nH3: ${loc || "מיקום חסר"}\nD1: ${pain}\nD2: ${ctaHe}` : l === "ar" ? `H1: ${name}\nH2: ${advAr.slice(0, 30)}\nD1: ${painAr}` : `H1: ${name}\nH2: ${advEn.slice(0, 30)}\nH3: ${loc || "location missing"}\nD1: ${painEn}\nD2: ${ctaEn}` },
+    { format: "feed", title: (_l) => name, body: (l) => l === "he" ? `${landingH1(i, "he")}\n${ctaHe}` : l === "ar" ? `${landingH1(i, "ar")}\n${ctaAr}` : `${landingH1(i, "en")}\n${ctaEn}` },
+    { format: "story", title: (l) => (l === "he" ? "פריים 1" : l === "ar" ? "إطار 1" : "Frame 1"), body: (l) => `${landingH1(i, l)}\n${l === "he" ? ctaHe : l === "ar" ? ctaAr : ctaEn}` },
+    { format: "reels", title: (l) => (l === "he" ? "סקריפט 15ש׳" : l === "ar" ? "سكربت 15ث" : "15s script"), body: (l) => l === "he" ? `0–3: ${landingH1(i, "he")}. 3–12: ${hoursLine(i, "he") || loc}. 12–15: ${ctaHe}.` : l === "ar" ? `0–3: ${landingH1(i, "ar")}. 3–12: ${hoursLine(i, "ar") || loc}. 12–15: ${ctaAr}.` : `0–3: ${landingH1(i, "en")}. 3–12: ${hoursLine(i, "en") || loc}. 12–15: ${ctaEn}.` },
+    { format: "youtube", title: (l) => (l === "he" ? "YouTube — הוק 8ש׳" : l === "ar" ? "يوتيوب — 8ث" : "YouTube — 8s hook"), body: (l) => `${landingH1(i, l)}\n${l === "he" ? ctaHe : l === "ar" ? ctaAr : ctaEn}` },
+    { format: "rsa", title: (_l) => "Google RSA", body: (l) => rsaLines(i, l) },
     { format: "search", title: (l) => (l === "he" ? "מודעת חיפוש" : l === "ar" ? "إعلان بحث" : "Search ad"), body: (_l) => `${name} | ${i.category} | ${loc}`.trim() },
-    { format: "landing", title: (l) => (l === "he" ? "דף נחיתה — מבנה" : l === "ar" ? "صفحة هبوط" : "Landing structure"), body: (l) => l === "he" ? `H1: ${painAr}\nפסקה: ${advAr}\n${loc}\n${i.website || ""}\nוואטסאפ: ${wa || "[יש להשלים]"}\nטופס: שם + טלפון + שפה.\nבלי המלצות בדויות.` : l === "ar" ? `H1: ${painAr}\n${advAr}\nواتساب: ${wa || "[يجب الاستكمال]"}` : `H1: ${painAr}\nParagraph: ${advAr}\n${loc}\n${i.website || ""}\nWhatsApp: ${wa || "[TO COMPLETE]"}\nForm: name + phone + language.\nNo fake testimonials.` },
-    { format: "whatsapp", title: (_l) => "WhatsApp", body: (l) => l === "he" ? `שלום, כאן ${name}. וואטסאפ ${wa || "[יש להשלים]"}. קיבלנו פנייה לגבי ${goalAr}. מתי נוח לתור?` : l === "ar" ? `مرحبا، هنا ${name}. واتساب ${wa || "[يجب الاستكمال]"}. متى يناسب الموعد؟` : `Hi, this is ${name}. WhatsApp ${wa || "[TO COMPLETE]"}. We got an enquiry about ${goalAr}. When works for a booking?` },
-    { format: "sms", title: (_l) => "SMS", body: (l) => l === "he" ? `${name}: אפשר לקבוע תור. השבו להודעה. לא מבצע.` : l === "ar" ? `${name}: يمكن حجز موعد. ردّوا.` : `${name}: we can book you in. Reply to this. No promo.` },
-    { format: "flyer", title: (l) => (l === "he" ? "פלאייר" : l === "ar" ? "منشور" : "Flyer"), body: (l) => l === "he" ? `${name}\n${advAr}\n${loc}\n${ctaHe}\n${noOffer ? "אין מבצע על הנייר." : i.offer}` : l === "ar" ? `${name}\n${advAr}\n${ctaAr}` : `${name}\n${advAr}\n${loc}\n${ctaEn}\n${noOffer ? "No offer on the paper." : i.offer}` },
+    { format: "landing", title: (l) => (l === "he" ? "דף נחיתה — מבנה" : l === "ar" ? "صفحة هبوط" : "Landing structure"), body: (l) => landingBody(i, l) },
+    { format: "whatsapp", title: (_l) => "WhatsApp", body: (l) => whatsappScript(i, l) },
+    { format: "sms", title: (_l) => "SMS", body: (l) => l === "he" ? `${name}: ${isWalkIn(i) ? "קבלה לפי סדר הגעה. וואטסאפ לא לחירום." : "אפשר לקבוע תור. השבו."}` : l === "ar" ? `${name}: ${isWalkIn(i) ? "جت أولاً بدون مواعيد. واتساب مش للطوارئ." : "احكوا معنا عالواتساب."}` : `${name}: ${isWalkIn(i) ? "Walk-in, no appointment. WhatsApp is not ER." : "Reply to book."}` },
+    { format: "flyer", title: (l) => (l === "he" ? "פלאייר" : l === "ar" ? "منشور" : "Flyer"), body: (l) => [name, landingH1(i, l), hoursLine(i, l), kupaLine(i, l), l === "he" ? ctaHe : l === "ar" ? ctaAr : ctaEn, noOffer ? (l === "he" ? "אין מבצע על הנייר." : l === "ar" ? "ما في عرض عالورقة." : "No offer on the paper.") : i.offer].filter(Boolean).join("\n") },
   ];
   for (const lang of ["he", "ar", "en"] as Locale[]) {
     for (const f of formats) {
@@ -338,7 +343,7 @@ export function buildAgency(pack: Pick<CampaignPack, "intake" | "intakeReport" |
     crm: [
       { stage: L("חדש", "جديد", "New"), meaning: L("הודעה נכנסה. אין ליד בלי שם.", "رسالة واردة. لا عميل بلا اسم.", "Inbound message. No lead without a name.") },
       { stage: L("שיחה", "حديث", "Talk"), meaning: L("נקבע מגע אנושי.", "تواصل بشري.", "Human contact booked.") },
-      { stage: L("תור", "موعد", "Booked"), meaning: L(goalHe, goalAr, goalEn) },
+      { stage: L("תור / ביקור", "موعد / زيارة", "Booked / visit"), meaning: L(isWalkIn(i) ? "הגיעו לפי סדר הגעה." : goalHe, isWalkIn(i) ? "إجو حسب الدور." : goalAr, isWalkIn(i) ? "They walked in." : goalEn) },
       { stage: L("לא רלוונטי", "غير مناسب", "Unqualified"), meaning: L("סקרן / אין כוונה. אל תסקיילו את ההצעה שהביאה אותם.", "فضولي. لا توسّعوا العرض الذي جلبهم.", "Curious / no intent. Don’t scale the offer that brought them.") },
     ],
     bookingCta: L(ctaHe, ctaAr, ctaEn),

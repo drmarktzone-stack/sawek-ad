@@ -18,9 +18,9 @@ const DEMO_FACTS = {
     en: "Pediatrics — Clalit",
   },
   description: {
-    he: "מרפאת ילדים של קופת חולים כללית בבאקה אל-גרביה. מתחם אל-נור, קומה 1, ליד הכיכר המרכזית. שירות בעברית, ערבית ואנגלית. וואטסאפ 052-8885800. אתר: https://drsamerped.ai.studio. בלי הבטחת ריפוי ובלי מספרי מטופלים שלא פורסמו.",
-    ar: "عيادة أطفال في صندوق المرضى كلاليت في باقة الغربية. مجمع النور، الطابق 1، قرب الساحة المركزية. خدمة بالعبرية والعربية والإنجليزية. واتساب 052-8885800. الموقع: https://drsamerped.ai.studio. بلا وعد بالشفاء وبلا أعداد مرضى غير منشورة.",
-    en: "Clalit pediatrics clinic in Baqa al-Gharbiyye. Al-Nour complex, floor 1, near the central square. Hebrew, Arabic, and English. WhatsApp 052-8885800. Site: https://drsamerped.ai.studio. No cure claims and no unpublished patient counts.",
+    he: "מרפאת ילדים של קופת חולים כללית בבאקה אל-גרביה. מתחם אל-נור, קומה 1, ליד הכיכר המרכזית. קבלה לפי סדר הגעה (جت أولاً), בלי לקבוע תור. שירות בעברית, ערבית ואנגלית. וואטסאפ 052-8885800. אתר: https://drsamerped.ai.studio. בלי הבטחת ריפוי ובלי מספרי מטופלים שלא פורסמו.",
+    ar: "عيادة أطفال كلاليت بباقة الغربية. مجمع النور، الطابق 1، جنب الساحة. جت أولاً بدون مواعيد. عبري وعربي وإنجليزي. واتساب 052-8885800. الموقع: https://drsamerped.ai.studio. بلا وعد شفاء وبلا أعداد مرضى.",
+    en: "Clalit pediatrics clinic in Baqa al-Gharbiyye. Al-Nour complex, floor 1, near the central square. Walk-in, first come first served, no appointment. Hebrew, Arabic, and English. WhatsApp 052-8885800. Site: https://drsamerped.ai.studio. No cure claims and no unpublished patient counts.",
   },
   location: {
     he: "באקה אל-גרביה — מתחם אל-נור, קומה 1, ליד הכיכר המרכזית",
@@ -33,24 +33,39 @@ const DEMO_FACTS = {
     en: "Parents in Baqa al-Gharbiyye and nearby looking for a regular Clalit pediatrician in Hebrew / Arabic / English",
   },
   biggestProblem: {
-    he: "משפחות דוחות תור כי לא ברור איך לקבוע אצל רופא ילדים קבוע באזור — הפרסום הכללי נשמע כמו עוד מרפאה.",
-    ar: "العائلات تؤجّل الموعد لأن طريقة الحجز عند طبيب أطفال ثابت في المنطقة غير واضحة — الإعلان العام يبدو كأي عيادة أخرى.",
-    en: "Families delay booking because it is unclear how to see a regular pediatrician locally — generic ads sound like every other clinic.",
+    he: "משפחות בבאקה לא יודעות לאן ללכת היום כשהילד חולה — הפרסום הכללי נשמע כמו עוד מרפאה.",
+    ar: "الأهل بباقة مش عارفين وين يروحوا اليوم لما الولد بيمرض — الإعلان العام بيبين كأي عيادة.",
+    en: "Families in Baqa don’t know where to go today when a child is sick — generic ads sound like every other clinic.",
   },
   uniqueAdvantage: {
-    he: "מרפאת ילדים כללית במתחם אל-נור (קומה 1, ליד הכיכר), עם שירות HE/AR/EN ווואטסאפ ישיר 052-8885800",
-    ar: "عيادة أطفال كلاليت في مجمع النور (الطابق 1، قرب الساحة)، بخدمة HE/AR/EN وواتساب مباشر 052-8885800",
-    en: "Clalit pediatrics in Al-Nour (floor 1, by the square), HE/AR/EN service and direct WhatsApp 052-8885800",
+    he: "מרפאת ילדים כללית במתחם אל-נור קומה 1, קבלה לפי סדר הגעה, וואטסאפ 052-8885800, עברית/ערבית/אנגלית",
+    ar: "كلاليت أطفال بمجمع النور طابق 1، جت أولاً، واتساب 052-8885800، عبري/عربي/إنجليزي",
+    en: "Clalit pediatrics in Al-Nour floor 1, walk-in, WhatsApp 052-8885800, HE/AR/EN",
   },
   mainGoal: {
-    he: "לידים לתור ראשון",
-    ar: "عملاء محتملون لموعد أول",
-    en: "Leads for a first appointment",
+    he: "ביקור לפי סדר הגעה (בלי תור)",
+    ar: "جت أولاً بدون مواعيد",
+    en: "Walk-in (no appointment)",
   },
   businessModel: {
-    he: "מרפאת ילדים כללית. ליד = תור ראשון במרפאה. שפות קבלה: עברית, ערבית, אנגלית.",
-    ar: "عيادة أطفال كلاليت. العميل المحتمل = موعد أول في العيادة. لغات الاستقبال: العبرية والعربية والإنجليزية.",
-    en: "Clalit pediatrics clinic. A lead = a first appointment. Reception languages: Hebrew, Arabic, English.",
+    he: "מרפאת ילדים כללית. ליד = ביקור לפי סדר הגעה, לא תור קבוע מראש. שפות: עברית, ערבית, אנגלית.",
+    ar: "عيادة أطفال كلاليت. العميل = زيارة حسب الدور، مش موعد محجوز. لغات: عبري عربي إنجليزي.",
+    en: "Clalit pediatrics clinic. A lead = a walk-in visit, not a pre-booked slot. Reception languages: Hebrew, Arabic, English.",
+  },
+  clinicHours: {
+    he: "קבלה לפי סדר הגעה (جت أولاً), בלי לקבוע תור. מתחם אל-נור קומה 1.",
+    ar: "جت أولاً بدون مواعيد. مجمع النور، الطابق 1، جنب الساحة.",
+    en: "Walk-in, first come first served — no appointment. Al-Nour, 1st floor.",
+  },
+  kupaFileBy: {
+    he: "15 בספטמבר 2026",
+    ar: "15 أيلول 2026",
+    en: "15 Sep 2026",
+  },
+  kupaMemberFrom: {
+    he: "1 בנובמבר 2026",
+    ar: "1 تشرين الثاني 2026",
+    en: "1 Nov 2026",
   },
 } as const;
 
@@ -68,14 +83,17 @@ export function demoIntake(locale: Locale = "he"): Intake {
     location: f.location[locale],
     website: "https://drsamerped.ai.studio",
     whatsapp: "052-8885800",
+    clinicHours: f.clinicHours[locale],
+    kupaFileBy: f.kupaFileBy[locale],
+    kupaMemberFrom: f.kupaMemberFrom[locale],
     audience: f.audience[locale],
     audienceCustom: true,
     biggestProblem: f.biggestProblem[locale],
     problemCustom: true,
     uniqueAdvantage: f.uniqueAdvantage[locale],
     advantageCustom: true,
-    mainGoal: f.mainGoal[locale],
-    goalCustom: true,
+    mainGoal: "walk_in",
+    goalCustom: false,
     offer: defaultOfferLabel(locale),
     offerCustom: false,
     competitors: [],
@@ -141,11 +159,11 @@ const FACT_FIELDS = Object.keys(DEMO_FACTS) as FactKey[];
 /** If the draft is still the stock pediatric demo, swap copy to the active locale. */
 export function relocalizePediatricIntake(intake: Intake, locale: Locale): Intake {
   if (!isPediatricDemo(intake)) return intake;
-  const next = demoIntake(locale);
   const out: Intake = { ...intake };
   for (const key of FACT_FIELDS) {
     const stock = [DEMO_FACTS[key].he, DEMO_FACTS[key].ar, DEMO_FACTS[key].en] as string[];
-    if (stock.includes(String(intake[key] ?? ""))) {
+    const current = String(intake[key] ?? "");
+    if (!current || stock.includes(current)) {
       (out as unknown as Record<string, string>)[key] = DEMO_FACTS[key][locale];
     }
   }
@@ -158,5 +176,10 @@ export function relocalizePediatricIntake(intake: Intake, locale: Locale): Intak
   ) {
     out.offer = defaultOfferLabel(locale);
   }
+  out.mainGoal = "walk_in";
+  out.goalCustom = false;
+  if (!out.clinicHours) out.clinicHours = DEMO_FACTS.clinicHours[locale];
+  if (!out.kupaFileBy) out.kupaFileBy = DEMO_FACTS.kupaFileBy[locale];
+  if (!out.kupaMemberFrom) out.kupaMemberFrom = DEMO_FACTS.kupaMemberFrom[locale];
   return out;
 }

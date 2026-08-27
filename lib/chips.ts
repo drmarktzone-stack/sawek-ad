@@ -30,11 +30,11 @@ export const AUDIENCE_CHIPS: ChipOption[] = [
 ];
 
 export const PROBLEM_CHIPS: ChipOption[] = [
-  { id: "unknown", label: { he: "לא מכירים את העסק", ar: "لا يعرفون النشاط", en: "People don't know we exist" } },
+  { id: "unknown", label: { he: "לא מכירים את העסק", ar: "الناس مش عارفين العيادة", en: "People don't know we exist" } },
   { id: "trust", label: { he: "אין אמון במפרסמים", ar: "ضعف الثقة بالمعلنين", en: "Low trust in ads" } },
   { id: "price", label: { he: "מחיר נתפס כיקר", ar: "السعر يبدو مرتفعاً", en: "Price feels high" } },
   { id: "competition", label: { he: "תחרות חזקה באזור", ar: "منافسة قوية في المنطقة", en: "Strong local competition" } },
-  { id: "delay", label: { he: "דוחים החלטה / תור", ar: "يؤجّلون القرار", en: "They delay the decision" } },
+  { id: "delay", label: { he: "דוחים החלטה / תור", ar: "بستَنّوا وما بيسجّلوا", en: "They delay the decision" } },
   { id: "custom", custom: true, label: { he: "כתוב בעצמך", ar: "اكتب بنفسك", en: "Write your own" } },
 ];
 
@@ -49,6 +49,7 @@ export const ADVANTAGE_CHIPS: ChipOption[] = [
 
 export const GOAL_CHIPS: ChipOption[] = [
   { id: "leads", label: { he: "לידים", ar: "عملاء محتملون", en: "Leads" } },
+  { id: "walk_in", label: { he: "ביקור לפי סדר הגעה (בלי תור)", ar: "جت أولاً بدون مواعيد", en: "Walk-in (no appointment)" } },
   { id: "bookings", label: { he: "תורים / הזמנות", ar: "مواعيد / حجوزات", en: "Bookings" } },
   { id: "sales", label: { he: "מכירות", ar: "مبيعات", en: "Sales" } },
   { id: "awareness", label: { he: "מודעות למותג", ar: "وعي بالعلامة", en: "Awareness" } },

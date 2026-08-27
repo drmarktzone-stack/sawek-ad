@@ -2,19 +2,25 @@ import type { Intake, Locale, ProducedAd } from "../types";
 import { DESIGN_STYLES } from "../design-styles";
 import { uid } from "../utils";
 import { isNoOffer } from "../no-offer";
+import { hoursLine, kupaLine, landingH1, spokenCta, isWalkIn } from "./spoken";
 
 export function produceAd(intake: Intake, styleId: string, idea: string, locale: Locale): ProducedAd {
   const style = DESIGN_STYLES.find((s) => s.id === styleId);
-  const headline =
-    idea.trim() ||
-    intake.uniqueAdvantage ||
-    intake.businessName ||
-    (locale === "he" ? "בלי כותרת מומצאת" : locale === "ar" ? "بلا عنوان مختلق" : "No invented headline");
+  const headline = idea.trim() || landingH1(intake, locale);
   const bodyParts = [
     intake.businessName,
     idea.trim(),
-    intake.audience ? (locale === "he" ? `ל${intake.audience}` : locale === "ar" ? `لـ ${intake.audience}` : `For ${intake.audience}`) : "",
+    isWalkIn(intake)
+      ? locale === "he"
+        ? "לפי סדר הגעה"
+        : locale === "ar"
+          ? "جت أولاً"
+          : "walk-in"
+      : "",
+    hoursLine(intake, locale),
+    kupaLine(intake, locale),
     isNoOffer(intake.offer) ? "" : intake.offer,
+    spokenCta(intake, locale),
   ].filter(Boolean);
 
   return {

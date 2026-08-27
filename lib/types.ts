@@ -51,6 +51,9 @@ export interface Intake {
   location: string;
   website: string;
   whatsapp: string;
+  clinicHours: string;
+  kupaFileBy: string;
+  kupaMemberFrom: string;
   audience: string;
   audienceCustom: boolean;
   biggestProblem: string;

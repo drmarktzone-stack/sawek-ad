@@ -87,7 +87,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
         audience: true,
         problem: true,
         advantage: true,
-        goal: true,
+        goal: false,
         offer: false,
       });
       setPhase("wizard");
@@ -175,6 +175,9 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
       [t("details.goal"), resolveChipLabel(intake.mainGoal, GOAL_CHIPS, locale)],
       [t("details.offer"), resolveChipLabel(intake.offer, OFFER_CHIPS, locale)],
       [t("biz.location"), intake.location],
+      [t("biz.hours"), intake.clinicHours],
+      [t("details.kupaFile"), intake.kupaFileBy],
+      [t("details.kupaMember"), intake.kupaMemberFrom],
       [t("biz.website"), intake.website],
       [t("biz.whatsapp"), intake.whatsapp],
     ],
@@ -191,7 +194,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
       audience: true,
       problem: true,
       advantage: true,
-      goal: true,
+      goal: false,
       offer: false,
     });
     setStep(2);
@@ -454,6 +457,14 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
                   inputMode="tel"
                 />
               </Field>
+              <Field label={t("biz.hours")}>
+                <p className="mb-2 text-xs text-zinc-500">{t("biz.hoursHint")}</p>
+                <Textarea
+                  value={intake.clinicHours ?? ""}
+                  placeholder={t("biz.hoursPh")}
+                  onChange={(e) => patch({ clinicHours: e.target.value })}
+                />
+              </Field>
             </section>
           )}
 
@@ -553,6 +564,23 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
                   }}
                   customValue={intake.offer}
                   onCustom={(v) => patch({ offer: v, offerCustom: true })}
+                />
+              </div>
+              <div>
+                <Label>{t("details.kupaFile")}</Label>
+                <p className="mb-2 text-xs text-zinc-500">{t("details.kupaHint")}</p>
+                <Input
+                  value={intake.kupaFileBy ?? ""}
+                  placeholder={t("details.kupaFilePh")}
+                  onChange={(e) => patch({ kupaFileBy: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label>{t("details.kupaMember")}</Label>
+                <Input
+                  value={intake.kupaMemberFrom ?? ""}
+                  placeholder={t("details.kupaMemberPh")}
+                  onChange={(e) => patch({ kupaMemberFrom: e.target.value })}
                 />
               </div>
             </section>

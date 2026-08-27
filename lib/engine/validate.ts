@@ -108,6 +108,9 @@ export function emptyIntake(): Intake {
     location: "",
     website: "",
     whatsapp: "",
+    clinicHours: "",
+    kupaFileBy: "",
+    kupaMemberFrom: "",
     audience: "",
     audienceCustom: false,
     biggestProblem: "",
@@ -165,6 +168,9 @@ export function validateIntake(intake: Intake): IntakeReport {
   if (!filled(intake.offer) || isNoOffer(intake.offer)) {
     // not missing — explicit no-offer is valid
   }
+  if (filled(intake.clinicHours)) earned += 4;
+  if (filled(intake.kupaFileBy)) earned += 3;
+  if (filled(intake.kupaMemberFrom)) earned += 3;
 
   const inconsistencies: IntakeReport["inconsistencies"] = [];
   const aov = parseNumber(intake.avgOrderValue);
@@ -228,7 +234,7 @@ export function validateIntake(intake: Intake): IntakeReport {
     );
   }
 
-  const completeness = total === 0 ? 0 : Math.round((earned / total) * 100);
+  const completeness = total === 0 ? 0 : Math.min(100, Math.round((earned / total) * 100));
 
   return { completeness, missing, inconsistencies, refusedGuesses };
 }

@@ -6,7 +6,7 @@ export const copy: Dict = {
   "brand.name": { he: "SAWEK AD", ar: "SAWEK AD", en: "SAWEK AD" },
   "brand.scripts": {
     he: "סאווק · ساويك",
-    ar: "ساويك · סאווק",
+    ar: "ساويك",
     en: "ساويك · סאווק",
   },
   "brand.tagline": {
@@ -28,11 +28,11 @@ export const copy: Dict = {
   "nav.medical": { he: "OptiBrain", ar: "OptiBrain", en: "OptiBrain" },
   "footer.line": {
     he: "SAWEK AD · סאווק · ساويك",
-    ar: "SAWEK AD · ساويك · סאווק",
+    ar: "SAWEK AD · ساويك",
     en: "SAWEK AD · ساويك · סאווק",
   },
-  "hero.titlePrefix": { he: "מה בא לך", ar: "ماذا تريد أن", en: "What do you feel like" },
-  "hero.conquer": { he: "לכבוש", ar: "تغزو", en: "conquering" },
+  "hero.titlePrefix": { he: "מה בא לך", ar: "شو بدك", en: "What do you feel like" },
+  "hero.conquer": { he: "לכבוש", ar: "تِكسب", en: "conquering" },
   "hero.titleSuffix": { he: "היום?", ar: "اليوم؟", en: "today?" },
   "hero.review": { he: "סקירה ובנייה", ar: "مراجعة وبناء", en: "Review and build" },
   "home.kicker": {
@@ -89,6 +89,26 @@ export const copy: Dict = {
   "biz.website": { he: "אתר (אופציונלי)", ar: "موقع (اختياري)", en: "Website (optional)" },
   "biz.whatsapp": { he: "וואטסאפ", ar: "واتساب", en: "WhatsApp" },
   "biz.whatsappPh": { he: "052-8885800", ar: "052-8885800", en: "052-8885800" },
+  "biz.hours": { he: "שעות קבלה / אופן הגעה", ar: "ساعات الدوام / كيف تجوا", en: "Clinic hours / how to arrive" },
+  "biz.hoursPh": {
+    he: "למשל: לפי סדר הגעה, בלי תור מראש",
+    ar: "مثال: جت أولاً بدون مواعيد، مجمع النور طابق 1",
+    en: "e.g. walk-in, first come first served, no appointment",
+  },
+  "biz.hoursHint": {
+    he: "אם הקבלה לפי סדר הגעה — כתבו במפורש. אל תמציאו שעות שעון שלא פרסמתם.",
+    ar: "إذا جت أولاً — اكتبوا هيك. لا تخترعوا ساعات ساعة ما نشرتوها.",
+    en: "If arrival is walk-in, say so. Don’t invent clock hours you haven’t published.",
+  },
+  "details.kupaFile": { he: "הגשת מעבר קופה עד", ar: "تقديم نقل الكوبوت حتى", en: "Kupa-switch filing deadline" },
+  "details.kupaFilePh": { he: "15 בספטמבר 2026", ar: "15 أيلول 2026", en: "15 Sep 2026" },
+  "details.kupaMember": { he: "תחילת חברות בקופה", ar: "بداية العضوية بالكوبوت", en: "Kupa membership start" },
+  "details.kupaMemberPh": { he: "1 בנובמבר 2026", ar: "1 تشرين الثاني 2026", en: "1 Nov 2026" },
+  "details.kupaHint": {
+    he: "רק תאריכי מעבר שפרסמתם. ריק = לא יופיעו בקופי.",
+    ar: "بس تواريخ النقل اللي نشرتوها. فاضي = ما بظهروا بالإعلان.",
+    en: "Only published switch dates. Empty = they will not appear in copy.",
+  },
   "biz.namePh": { he: "למשל: סטודיו נועה", ar: "مثال: ستوديو نورة", en: "e.g. Noa Studio" },
   "biz.categoryPh": { he: "למשל: קליניקה, חנות, אפליקציה", ar: "مثال: عيادة، متجر، تطبيق", en: "e.g. clinic, shop, app" },
   "biz.descPh": {

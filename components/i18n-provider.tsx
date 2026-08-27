@@ -26,7 +26,8 @@ function applyDocumentLocale(locale: Locale) {
   document.documentElement.lang = locale;
   document.documentElement.dir = dirFor(locale);
   document.documentElement.classList.add("dark");
-  document.title = "SAWEK AD — ساويك / סאווק";
+  document.title =
+    locale === "ar" ? "SAWEK AD — ساويك" : locale === "he" ? "SAWEK AD — סאווק / ساويك" : "SAWEK AD — ساويك / סאווק";
 }
 
 export function I18nProvider({ children }: { children: React.ReactNode }) {
