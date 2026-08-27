@@ -352,7 +352,7 @@ export const copy: Dict = {
   },
   "med.demo": {
     he: "הדגמה: מרפאת ילדים ד״ר סאמר אבו מוך",
-    ar: "عرض: عيادة أطفال د. سامر أبو موخ",
+    ar: "عرض: عيادة أطفال د. سامر أبو مخ",
     en: "Demo: Dr. Samer Abu Mokh pediatrics",
   },
   "med.step.specialty": { he: "התמחות", ar: "التخصص", en: "Specialty" },

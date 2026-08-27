@@ -18,12 +18,12 @@ import {
   resolveChipLabel,
 } from "../chips";
 import { isWalkIn, landingBody, rsaLines, spokenCta, whatsappScript, hoursLine, kupaLine, landingH1 } from "./spoken";
-import { correctAbuMokhSpelling } from "../demo";
+import { canonicalDoctorName } from "../demo";
 
 const L = (he: string, ar: string, en: string): Tri => ({ he, ar, en });
 
 function n(i: Intake) {
-  return correctAbuMokhSpelling(i.businessName.trim()) || "—";
+  return canonicalDoctorName(i.businessName.trim()) || "—";
 }
 
 export function buildAgency(pack: Pick<CampaignPack, "intake" | "intakeReport" | "diagnosis" | "media" | "optimizer" | "variants">): AgencyPack {

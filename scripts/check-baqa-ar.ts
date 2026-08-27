@@ -6,12 +6,12 @@ import { generateMedia } from "../lib/engine/media";
 import { generateOptimizer } from "../lib/engine/optimizer";
 import { generateStrategy } from "../lib/engine/strategy";
 import { buildAgency } from "../lib/engine/agency";
-import { assertPublishableArabic } from "../lib/engine/spoken";
+import { assertPublishableArabic, LOCKED_AR_H1 } from "../lib/engine/spoken";
 import { copy } from "../lib/i18n";
 import type { Intake } from "../lib/types";
 
 const CLALIT_MEMBERS = "طبيب أطفال كلاليت قريب";
-const SPOKEN_H1 = "دكتور أطفال بباقة — جت أولاً";
+const LOCKED_NAME = "عيادة أطفال د. سامر أبو مخ";
 
 const intake = demoIntake("ar");
 const variants = generateVariants(intake);
@@ -37,6 +37,7 @@ const blob = [
   landing.body,
   wa.body,
   rsa.body,
+  JSON.stringify(agency),
 ].join("\n");
 
 const failures: string[] = [];
@@ -49,52 +50,60 @@ for (const ad of arAds) {
   if (ad.headline.includes("كلاليت أطفال،")) {
     failures.push(`headline leaked Clalit+address: ${ad.kind}: ${ad.headline}`);
   }
-  failures.push(...assertPublishableArabic(`${ad.headline}\n${ad.primaryText}`).map((x) => `${ad.kind}: ${x}`));
+  failures.push(...assertPublishableArabic(`${ad.headline}\n${ad.primaryText}\n${ad.cta}`).map((x) => `${ad.kind}: ${x}`));
 }
 if (landing.body.includes("لا يعرفون النشاط")) failures.push("landing H1 leaked internal label");
 if (!/^H1: /.test(landing.body)) failures.push("landing missing H1");
 if (landing.body.split("\n")[0].includes(intake.audience)) failures.push("landing H1 stuffed audience");
-if (landing.body.split("\n")[0] !== `H1: ${SPOKEN_H1}`) {
-  failures.push(`landing H1 should stay «${SPOKEN_H1}», got ${landing.body.split("\n")[0]}`);
+if (landing.body.split("\n")[0] !== `H1: ${LOCKED_AR_H1}`) {
+  failures.push(`landing H1 should be «${LOCKED_AR_H1}», got ${landing.body.split("\n")[0]}`);
 }
 if (wa.body.includes("متى يناسب الموعد")) failures.push("WhatsApp asked for an appointment");
 if (!/جت أولاً/.test(wa.body)) failures.push("WhatsApp missing walk-in");
+if (!wa.body.includes(LOCKED_AR_H1)) failures.push("WhatsApp missing locked H1");
+if (!rsa.body.includes(`H1: ${LOCKED_AR_H1}`)) failures.push("RSA missing locked H1");
 if (!/15 أيلول 2026/.test(blob)) failures.push("kupa file-by date missing from Arabic output");
 if (!/1 تشرين الثاني 2026/.test(blob)) failures.push("kupa membership date missing from Arabic output");
 if (!/طوارئ|الطوارئ/.test(wa.body)) failures.push("WhatsApp missing ER disclaimer");
 if (copy["brand.scripts"].ar.includes("סאווק")) failures.push("Arabic chrome still has Hebrew סאווק");
 if (copy["footer.line"].ar.includes("סאווק")) failures.push("Arabic footer still has Hebrew סאווק");
-if (intake.offer !== "لا يوجد عرض" && intake.offer !== "no_offer") {
-  /* demoOffer is no_offer id, resolved later */
-}
 
-if (!intake.businessName.includes("أبو موخ")) failures.push(`demo name missing أبو موخ: ${intake.businessName}`);
-if (intake.businessName.includes("أبو مخ")) failures.push(`demo name still has أبو مخ: ${intake.businessName}`);
-if (!DEMO_LABEL.ar.includes("أبو موخ")) failures.push("DEMO_LABEL missing أبو موخ");
-if (DEMO_LABEL.ar.includes("أبو مخ")) failures.push("DEMO_LABEL has أبو مخ");
+if (intake.businessName !== LOCKED_NAME) failures.push(`demo name should be ${LOCKED_NAME}, got ${intake.businessName}`);
+if (intake.businessName.includes("أبو موخ")) failures.push(`demo name still has أبو موخ: ${intake.businessName}`);
+if (!intake.businessName.includes("أبو مخ")) failures.push(`demo name missing أبو مخ: ${intake.businessName}`);
+if (!DEMO_LABEL.ar.includes("أبو مخ")) failures.push("DEMO_LABEL missing أبو مخ");
+if (DEMO_LABEL.ar.includes("أبو موخ")) failures.push("DEMO_LABEL still has أبو موخ");
+if (copy["med.demo"].ar.includes("أبو موخ")) failures.push("i18n med.demo still has أبو موخ");
 
-const typo: Intake = { ...intake, businessName: "عيادة أطفال د. سامر أبو مخ" };
-const rewritten = relocalizePediatricIntake(typo, "ar");
-if (!rewritten.businessName.includes("أبو موخ")) failures.push(`typo not rewritten: ${rewritten.businessName}`);
-if (rewritten.businessName.includes("أبو مخ")) failures.push(`typo survived relocalize: ${rewritten.businessName}`);
-const typoAds = generateVariants(typo).filter((v) => v.locale === "ar");
-for (const ad of typoAds) {
-  if (`${ad.headline}\n${ad.primaryText}`.includes("أبو مخ")) {
-    failures.push(`generated copy still has أبو مخ in ${ad.kind}`);
+const oldSpelling: Intake = { ...intake, businessName: "عيادة أطفال د. سامر أبو موخ" };
+const rewritten = relocalizePediatricIntake(oldSpelling, "ar");
+if (!rewritten.businessName.includes("أبو مخ")) failures.push(`موخ not rewritten to مخ: ${rewritten.businessName}`);
+if (rewritten.businessName.includes("أبو موخ")) failures.push(`موخ survived relocalize: ${rewritten.businessName}`);
+const rewrittenAds = generateVariants(oldSpelling).filter((v) => v.locale === "ar");
+for (const ad of rewrittenAds) {
+  if (`${ad.headline}\n${ad.primaryText}`.includes("أبو موخ")) {
+    failures.push(`generated copy still has أبو موخ in ${ad.kind}`);
   }
 }
 
+const emotional = arAds.find((a) => a.kind === "emotional")!;
+if (emotional.headline !== LOCKED_AR_H1) {
+  failures.push(`emotional H1 should be «${LOCKED_AR_H1}», got ${emotional.headline}`);
+}
 const narrative = arAds.find((a) => a.kind === "narrative")!;
-if (narrative.headline !== SPOKEN_H1) {
-  failures.push(`narrative H1 should be «${SPOKEN_H1}», got ${narrative.headline}`);
+if (narrative.headline !== LOCKED_AR_H1) {
+  failures.push(`narrative H1 should be «${LOCKED_AR_H1}», got ${narrative.headline}`);
 }
 const strong = arAds.find((a) => a.kind === "strong_offer")!;
-if (strong.headline !== SPOKEN_H1) {
-  failures.push(`strong_offer H1 should be «${SPOKEN_H1}», got ${strong.headline}`);
+if (strong.headline !== LOCKED_AR_H1) {
+  failures.push(`strong_offer H1 should be «${LOCKED_AR_H1}», got ${strong.headline}`);
 }
 if (!strong.primaryText.includes(CLALIT_MEMBERS)) {
   failures.push("default Clalit-members strong-offer who-line missing");
 }
+if (blob.includes("مرضان")) failures.push("Arabic output still contains مرضان");
+if (blob.includes("جتوا على")) failures.push("Arabic output still contains جتوا على");
+if (!blob.includes(LOCKED_AR_H1)) failures.push("locked H1 missing from Arabic output");
 
 const leftover = "لأهل باقة اللي بدهم طبيب أطفال كلاليت قريب";
 for (const [id, needle] of [

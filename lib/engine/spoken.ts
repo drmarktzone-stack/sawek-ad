@@ -9,7 +9,7 @@ import {
   detectKupaAudience,
   resolveChipLabel,
 } from "../chips";
-import { correctAbuMokhSpelling } from "../demo";
+import { canonicalDoctorName } from "../demo";
 
 /** Cut on a word boundary. Never slice mid-word (Arabic «وساعات م»). */
 export function clipAtWord(text: string, max: number): string {
@@ -31,8 +31,13 @@ const INTERNAL_AR = [
   "يؤجّلون",
   "يؤجلون",
   "كوبوت",
-  "أبو مخ",
+  "مرضان",
+  "جتوا على",
+  "أبو موخ",
 ];
+
+/** Locked preferred Arabic H1 and emotional variant. */
+export const LOCKED_AR_H1 = "الولد مريض، جيبوه عالعيادة";
 
 export function isPediatrics(intake: Intake): boolean {
   const blob = `${intake.businessName} ${intake.category} ${intake.description}`;
@@ -65,7 +70,7 @@ export function shortCity(intake: Intake, locale: Locale): string {
 }
 
 export function shortName(intake: Intake, locale: Locale): string {
-  const n = correctAbuMokhSpelling(intake.businessName.trim());
+  const n = canonicalDoctorName(intake.businessName.trim());
   if (!n) return locale === "ar" ? "العيادة" : locale === "he" ? "המרפאה" : "the clinic";
   return clipAtWord(n, 36);
 }
@@ -115,9 +120,8 @@ export function audienceWhoLine(intake: Intake, locale: Locale): string {
 
 function arWalkInH1(intake: Intake): string {
   const n = shortName(intake, "ar");
-  const city = shortCity(intake, "ar");
   const walk = isWalkIn(intake);
-  if (walk && isPediatrics(intake) && city) return `دكتور أطفال ب${city} — جت أولاً`;
+  if (walk && isPediatrics(intake)) return LOCKED_AR_H1;
   if (walk) return `${n} — جت أولاً`;
   return n;
 }
@@ -151,7 +155,7 @@ export function kupaLine(intake: Intake, locale: Locale): string {
 
 export function spokenCta(intake: Intake, locale: Locale): string {
   if (isWalkIn(intake)) {
-    return locale === "he" ? "הגיעו לפי סדר הגעה" : locale === "ar" ? "جتوا على العيادة" : "Walk in — no appointment";
+    return locale === "he" ? "הגיעו לפי סדר הגעה" : locale === "ar" ? "جيبوه عالعيادة" : "Walk in — no appointment";
   }
   const g = (resolveChipLabel(intake.mainGoal, GOAL_CHIPS, locale) || intake.mainGoal).toLowerCase();
   if (/תור|מועד|book|موعد|حجز/.test(g)) {
@@ -193,7 +197,7 @@ export function landingH1(intake: Intake, locale: Locale): string {
   const place = placeBit(intake, locale);
   if (locale === "ar") {
     const h = walk ? arWalkInH1(intake) : place ? `${n} — ${place}` : n;
-    return forbiddenHeadline(h) ? (walk ? `${n} — جت أولاً` : n) : h;
+    return forbiddenHeadline(h) ? (walk && isPediatrics(intake) ? LOCKED_AR_H1 : walk ? `${n} — جت أولاً` : n) : h;
   }
   if (locale === "he") {
     return walk ? `${n} — לפי סדר הגעה` : n;
@@ -211,7 +215,9 @@ export function whatsappScript(intake: Intake, locale: Locale): string {
     const walk = isWalkIn(intake)
       ? "جت أولاً بدون مواعيد — مش منحجز دور من الواتساب."
       : "";
+    const h1 = isWalkIn(intake) && isPediatrics(intake) ? `${LOCKED_AR_H1}.` : "";
     return [
+      h1,
       `أهلا، هون ${n}.`,
       place ? place + "." : "",
       `واتساب ${wa}.`,
@@ -301,7 +307,7 @@ export function spokenHeadline(kind: VariantKind, intake: Intake, locale: Locale
         h = place || n;
         break;
       case "emotional":
-        h = walk ? "الولد مرضان؟ جتوا على العيادة" : painShort(intake, locale);
+        h = walk ? LOCKED_AR_H1 : painShort(intake, locale);
         break;
       case "narrative":
         h = arWalkInH1(intake);
@@ -361,7 +367,7 @@ export function spokenHeadline(kind: VariantKind, intake: Intake, locale: Locale
     forbiddenHeadline(h) ||
     (intake.audience.length > 24 && h.includes(intake.audience))
   ) {
-    h = locale === "ar" ? (walk ? `${n} — جت أولاً` : n) : n;
+    h = locale === "ar" ? (walk && isPediatrics(intake) ? LOCKED_AR_H1 : walk ? `${n} — جت أولاً` : n) : n;
   }
   return clipAtWord(h, 42);
 }

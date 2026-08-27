@@ -9,8 +9,8 @@ export const PENDING_DEMO_KEY = "sawek-pending-demo";
 const DEMO_FACTS = {
   businessName: {
     he: "מרפאת ילדים ד״ר סאמר אבו מוך",
-    // Abu Mokh = أبو موخ (waw). Never أبو مخ.
-    ar: "عيادة أطفال د. سامر أبو موخ",
+    // Locked Arabic family name is أبو مخ — never أبو موخ.
+    ar: "عيادة أطفال د. سامر أبو مخ",
     en: "Dr. Samer Abu Mokh Pediatrics",
   },
   category: {
@@ -111,7 +111,7 @@ export function demoIntake(locale: Locale = "he"): Intake {
 
 export const DEMO_LABEL = {
   he: "הדגמה: מרפאת ילדים ד״ר סאמר אבו מוך",
-  ar: "عرض: عيادة أطفال د. سامر أبو موخ",
+  ar: "عرض: عيادة أطفال د. سامر أبو مخ",
   en: "Demo: Dr. Samer Abu Mokh pediatrics",
 } as const;
 
@@ -146,9 +146,9 @@ export function clearPendingDemo() {
   }
 }
 
-/** Family name is أبو موخ (Abu Mokh). «أبو مخ» is a leftover misspelling. */
-export function correctAbuMokhSpelling(name: string): string {
-  return name.replaceAll("أبو مخ", "أبو موخ");
+/** Locked Arabic family name is أبو مخ. Do not rewrite مخ → موخ. */
+export function canonicalDoctorName(name: string): string {
+  return name.replaceAll("أبو موخ", "أبو مخ");
 }
 
 export function isPediatricDemo(intake: Intake): boolean {
@@ -156,6 +156,7 @@ export function isPediatricDemo(intake: Intake): boolean {
     intake.website.includes("drsamerped.ai.studio") ||
     intake.businessName.includes("סאמר אבו מוך") ||
     intake.businessName.includes("سامر أبو موخ") ||
+    intake.businessName.includes("سامر أبو مخ") ||
     intake.businessName.includes("أبو مخ") ||
     intake.businessName.includes("Samer Abu Mokh")
   );
@@ -166,18 +167,19 @@ const FACT_FIELDS = Object.keys(DEMO_FACTS) as FactKey[];
 /** If the draft is still the stock pediatric demo, swap copy to the active locale. */
 export function relocalizePediatricIntake(intake: Intake, locale: Locale): Intake {
   if (!isPediatricDemo(intake)) {
-    return { ...intake, businessName: correctAbuMokhSpelling(intake.businessName) };
+    return { ...intake, businessName: canonicalDoctorName(intake.businessName) };
   }
   const out: Intake = { ...intake };
+  const oldArName = "عيادة أطفال د. سامر أبو موخ";
   for (const key of FACT_FIELDS) {
     const stock = [DEMO_FACTS[key].he, DEMO_FACTS[key].ar, DEMO_FACTS[key].en] as string[];
+    if (key === "businessName") stock.push(oldArName);
     const current = String(intake[key] ?? "");
-    const currentFixed = key === "businessName" ? correctAbuMokhSpelling(current) : current;
-    if (!current || stock.includes(current) || stock.includes(currentFixed) || (key === "businessName" && current.includes("أبو مخ"))) {
+    if (!current || stock.includes(current) || stock.includes(canonicalDoctorName(current))) {
       (out as unknown as Record<string, string>)[key] = DEMO_FACTS[key][locale];
     }
   }
-  out.businessName = correctAbuMokhSpelling(out.businessName);
+  out.businessName = canonicalDoctorName(out.businessName);
   if (
     !intake.offer ||
     intake.offer === DEFAULT_OFFER_HE ||

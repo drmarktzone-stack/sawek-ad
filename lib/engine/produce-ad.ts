@@ -3,13 +3,13 @@ import { DESIGN_STYLES } from "../design-styles";
 import { uid } from "../utils";
 import { isNoOffer } from "../no-offer";
 import { hoursLine, kupaLine, landingH1, spokenCta, isWalkIn } from "./spoken";
-import { correctAbuMokhSpelling } from "../demo";
+import { canonicalDoctorName } from "../demo";
 
 export function produceAd(intake: Intake, styleId: string, idea: string, locale: Locale): ProducedAd {
   const style = DESIGN_STYLES.find((s) => s.id === styleId);
   const headline = idea.trim() || landingH1(intake, locale);
   const bodyParts = [
-    correctAbuMokhSpelling(intake.businessName),
+    canonicalDoctorName(intake.businessName),
     idea.trim(),
     isWalkIn(intake)
       ? locale === "he"

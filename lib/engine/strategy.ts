@@ -1,7 +1,7 @@
 import type { Diagnosis, Intake, Locale, StrategyBlock, StrategyItem } from "../types";
 import { filled } from "../utils";
 import { isNoOffer } from "../no-offer";
-import { correctAbuMokhSpelling } from "../demo";
+import { canonicalDoctorName } from "../demo";
 import {
   ADVANTAGE_CHIPS,
   AUDIENCE_CHIPS,
@@ -15,7 +15,7 @@ const L = (he: string, ar: string, en: string): Record<Locale, string> => ({ he,
 const item = (title: Record<Locale, string>, body: Record<Locale, string>): StrategyItem => ({ title, body });
 
 export function generateStrategy(intake: Intake, diagnosis: Diagnosis): StrategyBlock[] {
-  const n = correctAbuMokhSpelling(intake.businessName) || "—";
+  const n = canonicalDoctorName(intake.businessName) || "—";
   const aud = resolveChipLabel(intake.audience, AUDIENCE_CHIPS, "he") || "—";
   const pain = resolveChipLabel(intake.biggestProblem, PROBLEM_CHIPS, "he") || "—";
   const adv = resolveChipLabel(intake.uniqueAdvantage, ADVANTAGE_CHIPS, "he") || "—";
