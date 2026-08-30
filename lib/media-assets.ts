@@ -143,3 +143,11 @@ export function pickAsset(metas: MediaAssetMeta[] | undefined, index: number): M
   const pool = images.length ? images : list;
   return pool[index % pool.length];
 }
+
+export function pickLogo(metas: MediaAssetMeta[] | undefined): MediaAssetMeta | undefined {
+  const list = metas ?? [];
+  return (
+    list.find((m) => m.label === "logo" && m.kind === "image") ??
+    list.find((m) => m.kind === "image" && /logo|לוגו|شعار/i.test(m.name))
+  );
+}

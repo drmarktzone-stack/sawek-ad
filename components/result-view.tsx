@@ -32,6 +32,7 @@ import { cn } from "@/lib/utils";
 import { isFreeService } from "@/lib/operating-model";
 import { CampaignAdVisual } from "@/components/ad-mockup";
 import { ChannelPack } from "@/components/channel-pack";
+import { LivePreviewStrip } from "@/components/live-preview-cards";
 import { AnglesStrip } from "@/components/angles-strip";
 import { CoachImprovedStrip } from "@/components/coach-panel";
 import { PublishToSocial } from "@/components/publish-to-social";
@@ -51,6 +52,7 @@ export function ResultView({
     setPackLang(locale);
   }, [locale]);
   const [copied, setCopied] = useState<string | null>(null);
+  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [idea, setIdea] = useState("");
   const [optIn, setOptIn] = useState<OptimizerResultInput>({
     spend: "",
@@ -127,7 +129,20 @@ export function ResultView({
         <NewCampaignCta other hint className="items-end text-end" />
       </div>
 
-      <ChannelPack pack={pack} packLang={packLang} />
+      <LivePreviewStrip
+        pack={pack}
+        packLang={packLang}
+        generatedImage={generatedImage}
+        onGeneratedImage={setGeneratedImage}
+      />
+
+      <ChannelPack
+        pack={pack}
+        packLang={packLang}
+        generatedImage={generatedImage}
+        onGeneratedImage={setGeneratedImage}
+        skipLivePreview
+      />
 
       <AnglesStrip angles={pack.angles} locale={packLang} />
 
@@ -366,13 +381,7 @@ export function ResultView({
               className="rounded-2xl border border-omni-yellow/25 bg-omni-card p-5"
             >
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-omni-yellow">
-                {p.format === "landing"
-                  ? locale === "he"
-                    ? "דף נחיתה"
-                    : locale === "ar"
-                      ? "صفحة هبوط"
-                      : "Landing"
-                  : "WhatsApp"}
+                {p.format === "landing" ? tr("end.landing") : tr("end.whatsapp")}
               </p>
               <h3 className="mt-1 font-black text-white">{p.title}</h3>
               <pre className="mt-3 whitespace-pre-wrap font-sans text-sm leading-6 text-zinc-300">
@@ -583,27 +592,9 @@ export function ResultView({
         <div className="rounded-2xl border border-white/10 bg-omni-card p-5">
           <h3 className="mb-3 font-black">{tr("truth.quality")}</h3>
           <ul className="list-disc space-y-1 pe-5 text-sm text-zinc-400">
-            <li>
-              {locale === "he"
-                ? "מספרים לא הומצאו. תרחישים רק מתוך תקציב/CAC שסיפקת."
-                : locale === "ar"
-                  ? "لم تُخترع أرقام. السيناريوهات فقط من ميزانية/CAC التي أعطيتها."
-                  : "Numbers were not invented. Scenarios only from budget/CAC you supplied."}
-            </li>
-            <li>
-              {locale === "he"
-                ? "אין דירוגים, המלצות או אחוזי הצלחה בדויים."
-                : locale === "ar"
-                  ? "لا تقييمات أو توصيات أو نسب نجاح مختلقة."
-                  : "No invented ratings, testimonials, or success rates."}
-            </li>
-            <li>
-              {locale === "he"
-                ? "תרחיש גרוע מוצג ליד תרחיש ריאלי — לא הבטחה ורודה."
-                : locale === "ar"
-                  ? "السيناريو السيئ بجانب الواقعي — لا وعد وردي."
-                  : "Worst-case sits next to realistic — no rosy promise."}
-            </li>
+            <li>{tr("truth.numbers")}</li>
+            <li>{tr("truth.noFake")}</li>
+            <li>{tr("truth.worst")}</li>
           </ul>
         </div>
         <div className="rounded-2xl border border-white/10 bg-omni-card p-5">

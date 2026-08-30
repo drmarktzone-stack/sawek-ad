@@ -42,6 +42,8 @@ export interface ChannelFields {
   primaryText: string;
   caption: string;
   pageName: string;
+  tiktokCaption: string;
+  tiktokCta: string;
 }
 
 /** Copy only from pack.variants / agency landing+whatsapp / intake. Never invent claims. */
@@ -62,6 +64,13 @@ export function channelFields(pack: CampaignPack, locale: Locale): ChannelFields
   const primaryText = [v?.headline, v?.primaryText, v?.cta].filter((x) => (x ?? "").trim()).join("\n\n");
   const caption = primaryText.trim() ? primaryText : incompleteLabel(locale);
   const pageName = fieldOrIncomplete(pack.intake.businessName, locale);
+  const reelsPiece = agencyPiece(pack, "reels", locale);
+  const tiktokPiece = agencyPiece(pack, "tiktok", locale);
+  const reelBody = (tiktokPiece?.body || reelsPiece?.body || "").trim();
+  const tiktokCaption = reelBody
+    ? clipAtWord(reelBody.replace(/\s+/g, " "), 180)
+    : shortBody;
+  const tiktokCta = fieldOrIncomplete(v?.cta, locale);
   return {
     headline,
     body,
@@ -73,6 +82,8 @@ export function channelFields(pack: CampaignPack, locale: Locale): ChannelFields
     primaryText: primaryText.trim() ? primaryText : incompleteLabel(locale),
     caption,
     pageName,
+    tiktokCaption,
+    tiktokCta,
   };
 }
 
