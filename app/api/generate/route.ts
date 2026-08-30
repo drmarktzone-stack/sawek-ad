@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
-import { runGeminiGenerate, type GenerateBody } from "@/lib/engine/gemini-generate";
+import { geminiFailFromEnv, runGeminiGenerate, type GenerateBody } from "@/lib/engine/gemini-generate";
 
-const TEMPLATES = { ok: false, useTemplates: true } as const;
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 /**
  * Optional Gemini enrichment. The client never depends on this.
  * Without GEMINI_API_KEY the app uses intake-driven templates.
+ * With a key, Gemini errors do not fall back to templates.
  * Never logs the API key.
  */
 export async function POST(req: Request) {
@@ -14,6 +16,6 @@ export async function POST(req: Request) {
     const result = await runGeminiGenerate(body);
     return NextResponse.json(result, { status: 200 });
   } catch {
-    return NextResponse.json(TEMPLATES, { status: 200 });
+    return NextResponse.json(geminiFailFromEnv(), { status: 200 });
   }
 }

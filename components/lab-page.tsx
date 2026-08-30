@@ -28,11 +28,19 @@ type Tab = "angles" | "vision" | "score";
 type GenerateAnglesRes = {
   ok?: boolean;
   useTemplates?: boolean;
+  reason?: string;
   angles?: CampaignAngles;
 };
 
-type VisionApi = { ok?: boolean; useTemplates?: boolean } & Partial<VisionResult>;
-type ScoreApi = { ok?: boolean; useTemplates?: boolean } & Partial<ScoreResult>;
+type VisionApi = { ok?: boolean; useTemplates?: boolean; reason?: string } & Partial<VisionResult>;
+type ScoreApi = { ok?: boolean; useTemplates?: boolean; reason?: string } & Partial<ScoreResult>;
+
+type FailKind = "none" | "templates" | "gemini";
+
+function failKindFrom(data: { ok?: boolean; useTemplates?: boolean; reason?: string } | null | undefined): FailKind {
+  if (data?.reason === "no_key" || data?.useTemplates) return "templates";
+  return "gemini";
+}
 
 function factsFromIntake(intake: Intake): string {
   return [
@@ -57,7 +65,7 @@ export function LabPage() {
   const [tab, setTab] = useState<Tab>("angles");
   const [facts, setFacts] = useState("");
   const [busy, setBusy] = useState(false);
-  const [fallback, setFallback] = useState(false);
+  const [failKind, setFailKind] = useState<FailKind>("none");
   const [copied, setCopied] = useState<string | null>(null);
 
   const [angles, setAngles] = useState<CampaignAngles | undefined>();
@@ -119,7 +127,7 @@ export function LabPage() {
 
   async function runAngles() {
     setBusy(true);
-    setFallback(false);
+    setFailKind("none");
     try {
       const res = await fetch("/api/generate", {
         method: "POST",
@@ -133,14 +141,14 @@ export function LabPage() {
       });
       const data = (await res.json()) as GenerateAnglesRes;
       if (!data?.ok || data.useTemplates || !data.angles) {
-        setFallback(true);
+        setFailKind(failKindFrom(data));
         setAngles(undefined);
         return;
       }
       setAngles(data.angles);
       await persist("angles", { facts: intakeFacts, language: locale }, { angles: data.angles });
     } catch {
-      setFallback(true);
+      setFailKind("gemini");
     } finally {
       setBusy(false);
     }
@@ -175,7 +183,7 @@ export function LabPage() {
   async function runVision() {
     if (!imageB64) return;
     setBusy(true);
-    setFallback(false);
+    setFailKind("none");
     try {
       const res = await fetch("/api/vision", {
         method: "POST",
@@ -190,7 +198,7 @@ export function LabPage() {
       });
       const data = (await res.json()) as VisionApi;
       if (!data?.ok || data.useTemplates) {
-        setFallback(true);
+        setFailKind(failKindFrom(data));
         setVision(undefined);
         return;
       }
@@ -202,7 +210,7 @@ export function LabPage() {
       setVision(out);
       await persist("vision", { mime, facts: intakeFacts, language: locale }, out);
     } catch {
-      setFallback(true);
+      setFailKind("gemini");
     } finally {
       setBusy(false);
     }
@@ -211,7 +219,7 @@ export function LabPage() {
   async function runScore() {
     if (!adText.trim()) return;
     setBusy(true);
-    setFallback(false);
+    setFailKind("none");
     setApplied(false);
     try {
       const res = await fetch("/api/score", {
@@ -225,7 +233,7 @@ export function LabPage() {
       });
       const data = (await res.json()) as ScoreApi;
       if (!data?.ok || data.useTemplates || typeof data.score !== "number") {
-        setFallback(true);
+        setFailKind(failKindFrom(data));
         setScore(undefined);
         return;
       }
@@ -237,7 +245,7 @@ export function LabPage() {
       setScore(out);
       await persist("score", { text: adText, facts: intakeFacts, language: locale }, out);
     } catch {
-      setFallback(true);
+      setFailKind("gemini");
     } finally {
       setBusy(false);
     }
@@ -282,7 +290,12 @@ export function LabPage() {
         <Textarea value={facts} onChange={(e) => setFacts(e.target.value)} rows={5} />
       </div>
 
-      {fallback && <p className="mb-4 text-center text-sm text-omni-yellow">{t("lab.fallback")}</p>}
+      {failKind === "templates" && (
+        <p className="mb-4 text-center text-sm text-omni-yellow">{t("lab.fallback")}</p>
+      )}
+      {failKind === "gemini" && (
+        <p className="mb-4 text-center text-sm text-omni-yellow">{t("lab.geminiError")}</p>
+      )}
 
       {tab === "angles" && (
         <section>

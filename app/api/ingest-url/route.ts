@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { ingestUrl, inspectUrl, type UrlIngestErrorCode, type UrlIngestFields, type UrlIngestOk } from "@/lib/url-ingest";
+import { runtimeEnv } from "@/lib/runtime-env";
 import { runGeminiGenerate, type GenerateBrand } from "@/lib/engine/gemini-generate";
 import { inventsForbidden } from "@/lib/engine/coach";
 import { emptyIntake } from "@/lib/engine/validate";
@@ -104,7 +105,7 @@ async function withTimeout<T>(work: Promise<T>, ms: number): Promise<T | null> {
 }
 
 async function enrichScanWithGemini(result: UrlIngestOk): Promise<UrlIngestOk> {
-  if (!process.env.GEMINI_API_KEY?.trim()) return result;
+  if (!runtimeEnv("GEMINI_API_KEY")) return result;
   const facts = labeledFields(result.fields);
   const excerpt = (result.text || "").slice(0, PAGE_TEXT_SLICE);
   const generated = await withTimeout(

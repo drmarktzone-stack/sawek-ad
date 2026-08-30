@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import type { AngleCopy, CampaignAngles, Intake } from "../types";
+import { runtimeEnv } from "../runtime-env";
 import { inventsForbidden } from "./coach";
 import { emptyIntake } from "./validate";
 import { parseCampaignAngles, sanitizeAngles } from "./angles";
@@ -63,7 +64,7 @@ export type GenerateOk = {
 
 export type GenerateFail = {
   ok: false;
-  useTemplates: true;
+  useTemplates?: true;
   reason?: string;
 };
 
@@ -380,28 +381,23 @@ function compatFrom(
   };
 }
 
+const GEMINI_TIMEOUT_MS = 20_000;
+
 /**
  * Shared Gemini generate. Used by POST /api/generate and ingest-url (no HTTP self-loop).
  * Never logs the API key.
  */
 export async function runGeminiGenerate(body: GenerateBody): Promise<GenerateResult> {
-  const key = process.env.GEMINI_API_KEY?.trim();
+  const key = runtimeEnv("GEMINI_API_KEY");
   if (!key) {
-    return { ok: false, reason: "no_key", useTemplates: true };
+    return noKey();
   }
   try {
     const mode = asMode(body.mode);
     const language = asLang(body.language);
     const userMessage = buildUserMessage(body);
-    const genAI = new GoogleGenerativeAI(key);
-    const model = genAI.getGenerativeModel({
-      model: "gemini-3.6-flash",
-      systemInstruction: SYSTEM_INSTRUCTION,
-      generationConfig: {
-        temperature: body.medical === true ? 0.2 : 0.4,
-      },
-    });
-    const result = await model.generateContent(userMessage);
+    const model = geminiModel(key, body.medical === true);
+    const result = await model.generateContent(userMessage, { timeout: GEMINI_TIMEOUT_MS });
     const text = result.response.text() ?? "";
     const parsed = parseStructured(text);
     const compat = compatFrom(parsed, language);
@@ -421,7 +417,7 @@ export async function runGeminiGenerate(body: GenerateBody): Promise<GenerateRes
     }
     return out;
   } catch {
-    return { ok: false, useTemplates: true };
+    return geminiError();
   }
 }
 
@@ -451,8 +447,12 @@ function noKey(): GenerateFail {
   return { ok: false, reason: "no_key", useTemplates: true };
 }
 
-function failTemplates(): GenerateFail {
-  return { ok: false, useTemplates: true };
+function geminiError(): GenerateFail {
+  return { ok: false, reason: "gemini_error" };
+}
+
+export function geminiFailFromEnv(): GenerateFail {
+  return runtimeEnv("GEMINI_API_KEY") ? geminiError() : noKey();
 }
 
 export function factsToIntake(body: { description?: unknown; audience?: unknown; facts?: unknown }): Intake {
@@ -618,7 +618,7 @@ export function decodeVisionImage(body: VisionBody): { mime: string; data: strin
 }
 
 export async function runGeminiVision(body: VisionBody, image: { mime: string; data: string }): Promise<VisionResult> {
-  const key = process.env.GEMINI_API_KEY?.trim();
+  const key = runtimeEnv("GEMINI_API_KEY");
   if (!key) return noKey();
   try {
     const language = asLang(body.language);
@@ -649,16 +649,19 @@ export async function runGeminiVision(body: VisionBody, image: { mime: string; d
       .join("\n\n")
       .slice(0, 4000);
     const model = geminiModel(key, body.medical === true);
-    const result = await model.generateContent([
-      { inlineData: { mimeType: image.mime, data: image.data } },
-      { text: prompt },
-    ]);
+    const result = await model.generateContent(
+      [
+        { inlineData: { mimeType: image.mime, data: image.data } },
+        { text: prompt },
+      ],
+      { timeout: GEMINI_TIMEOUT_MS },
+    );
     const text = result.response.text() ?? "";
     const parsed = parseVision(text);
-    if (!parsed) return failTemplates();
+    if (!parsed) return geminiError();
     return { ok: true, ...parsed };
   } catch {
-    return failTemplates();
+    return geminiError();
   }
 }
 
@@ -725,10 +728,10 @@ function sanitizeRewrite(
 }
 
 export async function runGeminiScore(body: ScoreBody): Promise<ScoreResult> {
-  const key = process.env.GEMINI_API_KEY?.trim();
+  const key = runtimeEnv("GEMINI_API_KEY");
   if (!key) return noKey();
   const adText = typeof body.text === "string" ? body.text.trim() : "";
-  if (!adText) return failTemplates();
+  if (!adText) return geminiError();
   try {
     const language = asLang(body.language);
     const intake = factsToIntake(body);
@@ -755,13 +758,13 @@ export async function runGeminiScore(body: ScoreBody): Promise<ScoreResult> {
       .join("\n\n")
       .slice(0, 5000);
     const model = geminiModel(key, body.medical === true);
-    const result = await model.generateContent(prompt);
+    const result = await model.generateContent(prompt, { timeout: GEMINI_TIMEOUT_MS });
     const text = result.response.text() ?? "";
     const parsed = parseScore(text);
-    if (!parsed) return failTemplates();
+    if (!parsed) return geminiError();
     const rewrite = sanitizeRewrite(parsed.rewrite, hasFacts ? intake : null);
     return { ok: true, score: parsed.score, weaknesses: parsed.weaknesses, rewrite };
   } catch {
-    return failTemplates();
+    return geminiError();
   }
 }

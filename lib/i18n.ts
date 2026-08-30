@@ -331,6 +331,11 @@ export const copy: Dict = {
     ar: "ما في مفتاح Gemini — بقينا عالقوالب. ما اختُلق شيء.",
     en: "No Gemini key — templates only. Nothing was invented.",
   },
+  "lab.geminiError": {
+    he: "Gemini נכשל — נסו שוב. לא נפלו לתבניות.",
+    ar: "Gemini فشل — جرّبوا مرة ثانية. ما رجعنا للقوالب.",
+    en: "Gemini failed — retry. Did not fall back to templates.",
+  },
   "lab.copy": { he: "העתק", ar: "نسخ", en: "Copy" },
   "lab.copied": { he: "הועתק", ar: "تم النسخ", en: "Copied" },
   "lab.apply": { he: "החל שכתוב", ar: "طبّق إعادة الكتابة", en: "Apply rewrite" },

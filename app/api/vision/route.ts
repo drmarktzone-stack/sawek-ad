@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { inspectUrl, isBlockedIp } from "@/lib/url-ingest";
 import {
   decodeVisionImage,
+  geminiFailFromEnv,
   runGeminiVision,
   VISION_MAX_BYTES,
   type VisionBody,
@@ -10,8 +11,6 @@ import {
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-const TEMPLATES = { ok: false, useTemplates: true } as const;
 
 const ALLOWED_MIME = new Set(["image/jpeg", "image/jpg", "image/png", "image/webp"]);
 
@@ -56,11 +55,11 @@ export async function POST(req: Request) {
       image = await fetchImageUrl(body.imageUrl.trim());
     }
     if (!image) {
-      return NextResponse.json(TEMPLATES, { status: 200 });
+      return NextResponse.json(geminiFailFromEnv(), { status: 200 });
     }
     const result = await runGeminiVision(body, image);
     return NextResponse.json(result, { status: 200 });
   } catch {
-    return NextResponse.json(TEMPLATES, { status: 200 });
+    return NextResponse.json(geminiFailFromEnv(), { status: 200 });
   }
 }
