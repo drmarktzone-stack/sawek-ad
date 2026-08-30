@@ -3,8 +3,8 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   turbopack: {},
   experimental: {
-    serverActions: { bodySizeLimit: "5mb" },
-    proxyClientMaxBodySize: "5mb",
+    serverActions: { bodySizeLimit: "8mb" },
+    proxyClientMaxBodySize: "8mb",
   },
 };
 

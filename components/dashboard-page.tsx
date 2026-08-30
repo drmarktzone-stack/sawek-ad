@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { CampaignPack, LabFeatureType, LabRun } from "@/lib/types";
-import { loadCampaigns, loadLabRuns, upsertCampaign, upsertLabRunLocal } from "@/lib/storage";
+import { getCampaign, loadCampaigns, loadLabRuns, upsertCampaign, upsertLabRunLocal } from "@/lib/storage";
 import {
   fetchRemoteCampaigns,
   payloadFeatureType,
@@ -13,6 +13,7 @@ import { LangLink } from "@/components/lang-link";
 import { Button } from "@/components/ui/button";
 import { ConquerHeadline } from "@/components/stepper";
 import { cn } from "@/lib/utils";
+import { PublishToSocial } from "@/components/publish-to-social";
 
 type Filter = "all" | LabFeatureType;
 
@@ -153,11 +154,14 @@ export function DashboardPage() {
                   {item.updatedAt.slice(0, 16).replace("T", " ")} · {item.featureType}
                 </p>
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap items-start gap-2">
                 {item.kind === "campaign" ? (
-                  <Button asChild size="sm">
-                    <LangLink href={`/campaigns/${item.id}`}>{t("campaigns.open")}</LangLink>
-                  </Button>
+                  <>
+                    <Button asChild size="sm">
+                      <LangLink href={`/campaigns/${item.id}`}>{t("campaigns.open")}</LangLink>
+                    </Button>
+                    <PublishToSocial campaignId={item.id} pack={getCampaign(item.id)} locale={locale} compact />
+                  </>
                 ) : (
                   <Button asChild size="sm">
                     <LangLink href={`/lab?tab=${item.featureType}&run=${item.id}`}>{t("dash.openLab")}</LangLink>

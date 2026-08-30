@@ -34,6 +34,7 @@ import { CampaignAdVisual } from "@/components/ad-mockup";
 import { ChannelPack } from "@/components/channel-pack";
 import { AnglesStrip } from "@/components/angles-strip";
 import { CoachImprovedStrip } from "@/components/coach-panel";
+import { PublishToSocial } from "@/components/publish-to-social";
 
 export function ResultView({
   pack,
@@ -201,6 +202,7 @@ export function ResultView({
           <Shield className="size-4" />
           {pack.planActivated ? tr("cta.activated") : tr("cta.activatePlan")}
         </Button>
+        <PublishToSocial campaignId={pack.id} pack={pack} locale={packLang} compact />
         <div className="ms-auto flex items-center gap-2">
           <span className="text-xs text-zinc-500">{tr("result.packLang")}</span>
           <div className="flex rounded-full border border-white/10 p-0.5">

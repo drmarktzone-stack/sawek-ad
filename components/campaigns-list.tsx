@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { useI18n } from "@/components/i18n-provider";
 import { ConquerHeadline } from "@/components/stepper";
 import { DepartmentRail } from "@/components/department-shell";
+import { PublishToSocial, SocialConnectStrip } from "@/components/publish-to-social";
 
 const STATUS_KEY: Record<AgentStatus, "status.idle" | "status.running" | "status.blocked" | "status.needs_approval" | "status.approved" | "status.complete" | "status.refused"> = {
   idle: "status.idle",
@@ -40,8 +41,17 @@ export function CampaignsList() {
   const { t, locale } = useI18n();
   const [list, setList] = useState<CampaignPack[]>([]);
   const [booted, setBooted] = useState(false);
+  const [socialFlash, setSocialFlash] = useState<string | null>(null);
 
   useEffect(() => {
+    try {
+      const q = new URLSearchParams(window.location.search);
+      const social = q.get("social");
+      if (social === "connected") setSocialFlash(t("social.banner.connected"));
+      else if (social === "error") setSocialFlash(t("social.banner.error"));
+    } catch {
+      /* ignore */
+    }
     let cancelled = false;
     (async () => {
       const published = await fetchPublishedPacks();
@@ -74,6 +84,11 @@ export function CampaignsList() {
       <ConquerHeadline subtitle={t("nav.campaigns")} />
       <p className="mx-auto mb-6 max-w-2xl text-center text-sm text-zinc-400">{t("dept.opsLead")}</p>
       <DepartmentRail />
+
+      {socialFlash && (
+        <p className="mb-4 text-center text-sm text-omni-yellow">{socialFlash}</p>
+      )}
+      <SocialConnectStrip className="mb-6" />
 
       <div className="mb-6 flex flex-wrap justify-center gap-2">
         <Button type="button" onClick={loadDemo}>
@@ -116,6 +131,7 @@ export function CampaignsList() {
                 <Button type="button" size="sm" variant="dark" onClick={() => printPdf(c, locale)}>
                   {t("cta.pdf")}
                 </Button>
+                <PublishToSocial campaignId={c.id} pack={c} locale={locale} compact />
                 <Button
                   type="button"
                   size="sm"
