@@ -1,4 +1,4 @@
-import type { AgentId, AgentStatus, CampaignPack, Diagnosis, Intake } from "../types";
+import type { AgentId, AgentStatus, CampaignAngles, CampaignPack, Diagnosis, Intake } from "../types";
 import { uid, sleep } from "../utils";
 import { validateIntake } from "./validate";
 import { diagnose } from "./diagnose";
@@ -58,11 +58,11 @@ export async function runStrategic(
   onStatus("diagnostic", "approved");
   onStatus("strategic", "running");
   await sleep(500);
-  let variants = generateVariants(intake);
-  variants = await enrichVariantsWithGemini(intake, variants);
+  const generated = generateVariants(intake);
+  const enriched = await enrichVariantsWithGemini(intake, generated);
   const strategy = generateStrategy(intake, approved);
   onStatus("strategic", "needs_approval");
-  return { variants, strategy };
+  return { variants: enriched.variants, strategy, angles: enriched.angles };
 }
 
 export async function runMedia(
@@ -96,7 +96,7 @@ export async function runFullPipeline(
   onStatus: (id: AgentId, status: AgentStatus) => void,
 ): Promise<CampaignPack> {
   const { report, diagnosis } = await runIntakeAndDiagnosis(intake, onStatus);
-  const { variants, strategy } = await runStrategic(intake, diagnosis, onStatus);
+  const { variants, strategy, angles } = await runStrategic(intake, diagnosis, onStatus);
   const { media } = await runMedia(intake, onStatus);
   const { optimizer } = await runOptimizerStage(intake, media, onStatus);
   const pack = assemblePack(intake, {
@@ -106,6 +106,7 @@ export async function runFullPipeline(
     strategy,
     media,
     optimizer,
+    angles,
     agentStatus: {
       intake: "complete",
       diagnostic: "approved",
@@ -144,6 +145,7 @@ export function assemblePack(
     agentStatus: Record<AgentId, AgentStatus>;
     id?: string;
     coach?: CampaignPack["coach"];
+    angles?: CampaignAngles;
   },
 ): CampaignPack {
   const now = new Date().toISOString();
@@ -165,6 +167,8 @@ export function assemblePack(
     saved: false,
     planActivated: false,
     coach: partial.coach ?? coachIntake(intake),
+    ...(partial.angles ? { angles: partial.angles } : {}),
+    featureType: "campaign",
   };
   return { ...base, agency: buildAgency(base) };
 }

@@ -1,6 +1,12 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import type { AngleCopy, CampaignAngles, Intake } from "../types";
+import { inventsForbidden } from "./coach";
+import { emptyIntake } from "./validate";
+import { parseCampaignAngles, sanitizeAngles } from "./angles";
+import { VISION_MAX_BYTES } from "./gemini-client-caps";
+export { VISION_MAX_BYTES };
 
-export type GenerateMode = "ads" | "scan" | "channels";
+export type GenerateMode = "ads" | "scan" | "channels" | "angles";
 export type GenerateLang = "he" | "ar" | "en";
 
 export type LocaleCopyBlock = {
@@ -52,6 +58,7 @@ export type GenerateOk = {
   locales?: GenerateLocales;
   channels?: GenerateChannels;
   brand?: GenerateBrand;
+  angles?: CampaignAngles;
 };
 
 export type GenerateFail = {
@@ -69,10 +76,20 @@ export type GenerateBody = {
   prompt?: unknown;
   medical?: unknown;
   mode?: unknown;
+  facts?: unknown;
 };
 
 const SYSTEM_INSTRUCTION =
-  "You are SAWEK AD / سوِّق إعلانك بنفسك, a converting marketing agency. Produce converting copy in Hebrew, Arabic, and English, plus per-channel packs (Facebook feed, Instagram story, Reels 15s, TikTok, WhatsApp, landing). Use ONLY facts in the user message. Never invent prices, discounts, ratings, testimonials, VIP, ROAS, CAC, medical claims, or competitors. If a fact is missing, write [יש להשלים] / [يجب الاستكمال] / [TO COMPLETE]. Medical: no clinical decoration. Reply with JSON only. Do not overwrite labeled extracted phone, address, hours, offer, name, or website.";
+  "You are SAWEK AD / سوِّق إعلانك بنفسك, a converting marketing agency. Produce converting copy in Hebrew, Arabic, and English, plus per-channel packs (Facebook feed, Instagram story, Reels 15s, TikTok, WhatsApp, landing). Use ONLY facts in the user message. Never invent prices, discounts, ratings, testimonials, VIP, ROAS, CAC, medical claims, or competitors. If a fact is missing, write [יש להשלים] / [يجب الاستكمال] / [TO COMPLETE]. Medical: no clinical decoration. Reply with JSON only. Do not overwrite labeled extracted phone, address, hours, offer, name, or website. Recreate for each language — never translate literally. Hebrew: direct, action-driving. Arabic: rich marketing, regional (Levant/Gulf-aware), RTL. English: modern SaaS / global. Each locale must be original prose in that language, not a calque of another.";
+
+const JSON_SHAPE_ANGLES = `{
+  "angles": {
+    "pain": {"he":{"headline":"","copy":"","cta":""},"ar":{"headline":"","copy":"","cta":""},"en":{"headline":"","copy":"","cta":""}},
+    "benefit": {"he":{"headline":"","copy":"","cta":""},"ar":{"headline":"","copy":"","cta":""},"en":{"headline":"","copy":"","cta":""}},
+    "social_proof": {"he":{"headline":"","copy":"","cta":""},"ar":{"headline":"","copy":"","cta":""},"en":{"headline":"","copy":"","cta":""}},
+    "story": {"he":{"headline":"","copy":"","cta":""},"ar":{"headline":"","copy":"","cta":""},"en":{"headline":"","copy":"","cta":""}}
+  }
+}`;
 
 const JSON_SHAPE_ADS = `{
   "he": {"headlines":["...","...","...","...","...","..."],"copy":"","cta":""},
@@ -85,6 +102,12 @@ const JSON_SHAPE_ADS = `{
     "tiktok": {"he":{"script":"15s 0-3/3-12/12-15"},"ar":{"script":""},"en":{"script":""}},
     "whatsapp": {"he":{"script":""},"ar":{"script":""},"en":{"script":""}},
     "landing": {"he":{"title":"","body":""},"ar":{"title":"","body":""},"en":{"title":"","body":""}}
+  },
+  "angles": {
+    "pain": {"he":{"headline":"","copy":"","cta":""},"ar":{"headline":"","copy":"","cta":""},"en":{"headline":"","copy":"","cta":""}},
+    "benefit": {"he":{"headline":"","copy":"","cta":""},"ar":{"headline":"","copy":"","cta":""},"en":{"headline":"","copy":"","cta":""}},
+    "social_proof": {"he":{"headline":"","copy":"","cta":""},"ar":{"headline":"","copy":"","cta":""},"en":{"headline":"","copy":"","cta":""}},
+    "story": {"he":{"headline":"","copy":"","cta":""},"ar":{"headline":"","copy":"","cta":""},"en":{"headline":"","copy":"","cta":""}}
   }
 }`;
 
@@ -270,12 +293,14 @@ function parseStructured(text: string): {
   locales?: GenerateLocales;
   channels?: GenerateChannels;
   brand?: GenerateBrand;
+  angles?: CampaignAngles;
 } {
   const obj = parseLooseJson(text);
   if (!obj) return {};
   const locales = parseLocales(obj);
   const channels = parseChannels(obj.channels);
   const brand = parseBrand(obj.brand);
+  const angles = parseCampaignAngles(obj.angles);
   const headlines = asHeadlines(obj.headlines ?? obj.headline);
   const copy = asString(obj.copy ?? obj.body ?? obj.adCopy);
   const cta = asString(obj.cta ?? obj.CTA);
@@ -286,11 +311,12 @@ function parseStructured(text: string): {
     ...(locales ? { locales } : {}),
     ...(channels ? { channels } : {}),
     ...(brand ? { brand } : {}),
+    ...(angles ? { angles } : {}),
   };
 }
 
 function asMode(v: unknown): GenerateMode {
-  if (v === "scan" || v === "channels" || v === "ads") return v;
+  if (v === "scan" || v === "channels" || v === "ads" || v === "angles") return v;
   return "ads";
 }
 
@@ -301,6 +327,7 @@ function asLang(v: unknown): GenerateLang | "" {
 
 function jsonShapeFor(mode: GenerateMode): string {
   if (mode === "scan") return JSON_SHAPE_SCAN;
+  if (mode === "angles") return JSON_SHAPE_ANGLES;
   return JSON_SHAPE_ADS;
 }
 
@@ -309,9 +336,12 @@ function modeHint(mode: GenerateMode): string {
     return "mode=scan. Include brand {tone,positioning,problem,advantage,audience} filled ONLY from the provided page text. Empty string if that fact is not in the text. Do not put prices, discounts, phone, address, hours, offer, name, or website into brand. Interpret extracted text only — never overwrite labeled phone/address/hours/offer/name/website.";
   }
   if (mode === "channels") {
-    return "mode=channels. Fill the channels pack in HE+AR+EN. Use only facts above. Missing fact → [יש להשלים] / [يجب الاستكمال] / [TO COMPLETE].";
+    return "mode=channels. Fill the channels pack in HE+AR+EN. Use only facts above. Missing fact → [יש להשלים] / [يجب الاستكمال] / [TO COMPLETE]. Recreate per language, do not literal-translate.";
   }
-  return "mode=ads. Fill HE+AR+EN locale packs (6 headlines each) and the channels pack. Use only facts above.";
+  if (mode === "angles") {
+    return "mode=angles. Fill angles {pain,benefit,social_proof,story} each with he/ar/en {headline,copy,cta}. Recreate per language — do not translate literally. Social proof: only ratings/reviews/customer counts present in facts; otherwise [יש להשלים] / [يجب الاستكمال] / [TO COMPLETE].";
+  }
+  return "mode=ads. Fill HE+AR+EN locale packs (6 headlines each), the channels pack, AND angles {pain,benefit,social_proof,story} each with he/ar/en {headline,copy,cta}. Recreate per language — do not translate literally. Social proof: only ratings/reviews/customer counts present in facts; otherwise incomplete markers.";
 }
 
 export function buildUserMessage(body: GenerateBody): string {
@@ -375,12 +405,16 @@ export async function runGeminiGenerate(body: GenerateBody): Promise<GenerateRes
     const text = result.response.text() ?? "";
     const parsed = parseStructured(text);
     const compat = compatFrom(parsed, language);
+    const angles = parsed.angles
+      ? sanitizeAngles(parsed.angles, factsToIntake(body))
+      : undefined;
     const out: GenerateOk = {
       ok: true,
       text,
       ...compat,
       ...(parsed.locales ? { locales: parsed.locales } : {}),
       ...(parsed.channels ? { channels: parsed.channels } : {}),
+      ...(angles ? { angles } : {}),
     };
     if (mode === "scan" && parsed.brand) {
       out.brand = parsed.brand;
@@ -388,5 +422,346 @@ export async function runGeminiGenerate(body: GenerateBody): Promise<GenerateRes
     return out;
   } catch {
     return { ok: false, useTemplates: true };
+  }
+}
+
+export const GEMINI_MODEL = "gemini-3.6-flash";
+
+const JSON_SHAPE_VISION = `{
+  "elements":["..."],
+  "visualFixes":["...","...","..."],
+  "reels":[
+    {"channel":"reels","shots":[{"t":"0-3","scene":"","onScreen":"","vo":""},{"t":"3-12","scene":"","onScreen":"","vo":""},{"t":"12-15","scene":"","onScreen":"","vo":""}],"he":{"headline":"","copy":"","cta":""},"ar":{"headline":"","copy":"","cta":""},"en":{"headline":"","copy":"","cta":""}},
+    {"channel":"tiktok","shots":[{"t":"0-3","scene":"","onScreen":"","vo":""},{"t":"3-12","scene":"","onScreen":"","vo":""},{"t":"12-15","scene":"","onScreen":"","vo":""}],"he":{"headline":"","copy":"","cta":""},"ar":{"headline":"","copy":"","cta":""},"en":{"headline":"","copy":"","cta":""}},
+    {"channel":"shorts","shots":[{"t":"0-3","scene":"","onScreen":"","vo":""},{"t":"3-12","scene":"","onScreen":"","vo":""},{"t":"12-15","scene":"","onScreen":"","vo":""}],"he":{"headline":"","copy":"","cta":""},"ar":{"headline":"","copy":"","cta":""},"en":{"headline":"","copy":"","cta":""}}
+  ]
+}`;
+
+const JSON_SHAPE_SCORE = `{
+  "score": 1,
+  "weaknesses":["...","...","..."],
+  "rewrite": {
+    "he":{"headline":"","copy":"","cta":""},
+    "ar":{"headline":"","copy":"","cta":""},
+    "en":{"headline":"","copy":"","cta":""}
+  }
+}`;
+
+function noKey(): GenerateFail {
+  return { ok: false, reason: "no_key", useTemplates: true };
+}
+
+function failTemplates(): GenerateFail {
+  return { ok: false, useTemplates: true };
+}
+
+export function factsToIntake(body: { description?: unknown; audience?: unknown; facts?: unknown }): Intake {
+  const intake = emptyIntake();
+  const facts = body.facts;
+  if (typeof facts === "string" && facts.trim()) {
+    intake.description = facts.trim();
+  } else if (facts && typeof facts === "object" && !Array.isArray(facts)) {
+    const o = facts as Record<string, unknown>;
+    const str = (k: string) => (typeof o[k] === "string" ? (o[k] as string) : "");
+    intake.businessName = str("businessName");
+    intake.category = str("category");
+    intake.description = str("description") || str("facts") || intake.description;
+    intake.location = str("location");
+    intake.audience = str("audience");
+    intake.biggestProblem = str("biggestProblem");
+    intake.uniqueAdvantage = str("uniqueAdvantage");
+    intake.mainGoal = str("mainGoal");
+    intake.offer = str("offer") || intake.offer;
+    intake.pastAds = str("pastAds");
+    intake.pastResults = str("pastResults");
+    intake.website = str("website");
+    intake.whatsapp = str("whatsapp");
+    intake.brandTone = str("brandTone");
+    intake.brandPositioning = str("brandPositioning");
+  }
+  if (typeof body.description === "string" && body.description.trim()) {
+    intake.description = [intake.description, body.description.trim()].filter(Boolean).join("\n");
+  }
+  if (typeof body.audience === "string" && body.audience.trim()) {
+    intake.audience = body.audience.trim();
+  }
+  return intake;
+}
+
+function geminiModel(key: string, medical: boolean) {
+  const genAI = new GoogleGenerativeAI(key);
+  return genAI.getGenerativeModel({
+    model: GEMINI_MODEL,
+    systemInstruction: SYSTEM_INSTRUCTION,
+    generationConfig: { temperature: medical ? 0.2 : 0.4 },
+  });
+}
+
+function padThree(list: string[], fallback: string): string[] {
+  const cleaned = list.map((s) => s.trim()).filter(Boolean).slice(0, 3);
+  while (cleaned.length < 3) cleaned.push(fallback);
+  return cleaned;
+}
+
+export type VisionBody = {
+  imageBase64?: unknown;
+  imageUrl?: unknown;
+  mime?: unknown;
+  description?: unknown;
+  audience?: unknown;
+  language?: unknown;
+  medical?: unknown;
+  facts?: unknown;
+};
+
+export type VisionShot = { t: string; scene: string; onScreen: string; vo: string };
+export type VisionReel = {
+  channel: "reels" | "tiktok" | "shorts";
+  shots: VisionShot[];
+  he?: AngleCopy;
+  ar?: AngleCopy;
+  en?: AngleCopy;
+};
+
+export type VisionOk = {
+  ok: true;
+  elements: string[];
+  visualFixes: [string, string, string] | string[];
+  reels: VisionReel[];
+};
+
+export type VisionResult = VisionOk | GenerateFail;
+
+function parseAngleCopyLoose(v: unknown): AngleCopy | undefined {
+  const o = asObj(v);
+  if (!o) return undefined;
+  const headline = asStringOrEmpty(o.headline);
+  const copy = asStringOrEmpty(o.copy ?? o.body);
+  const cta = asStringOrEmpty(o.cta ?? o.CTA);
+  if (!headline && !copy && !cta) return undefined;
+  return { headline, copy, cta };
+}
+
+function parseShot(v: unknown): VisionShot | undefined {
+  const o = asObj(v);
+  if (!o) return undefined;
+  return {
+    t: asStringOrEmpty(o.t ?? o.time),
+    scene: asStringOrEmpty(o.scene),
+    onScreen: asStringOrEmpty(o.onScreen ?? o.on_screen ?? o.text),
+    vo: asStringOrEmpty(o.vo ?? o.voiceover ?? o.voice),
+  };
+}
+
+function parseReel(v: unknown): VisionReel | undefined {
+  const o = asObj(v);
+  if (!o) return undefined;
+  const ch = asStringOrEmpty(o.channel).toLowerCase();
+  const channel: VisionReel["channel"] =
+    ch === "tiktok" ? "tiktok" : ch === "shorts" || ch === "youtube" ? "shorts" : "reels";
+  const shotsRaw = Array.isArray(o.shots) ? o.shots : [];
+  const shots = shotsRaw.map(parseShot).filter((s): s is VisionShot => Boolean(s));
+  const locales = asObj(o.he) || asObj(o.ar) || asObj(o.en) || asObj(o.locales)
+    ? {
+        he: parseAngleCopyLoose(o.he ?? asObj(o.locales)?.he),
+        ar: parseAngleCopyLoose(o.ar ?? asObj(o.locales)?.ar),
+        en: parseAngleCopyLoose(o.en ?? asObj(o.locales)?.en),
+      }
+    : {};
+  return {
+    channel,
+    shots,
+    ...(locales.he ? { he: locales.he } : {}),
+    ...(locales.ar ? { ar: locales.ar } : {}),
+    ...(locales.en ? { en: locales.en } : {}),
+  };
+}
+
+function parseVision(text: string): Omit<VisionOk, "ok"> | null {
+  const obj = parseLooseJson(text);
+  if (!obj) return null;
+  const elements = Array.isArray(obj.elements)
+    ? obj.elements.filter((x): x is string => typeof x === "string").map((s) => s.trim()).filter(Boolean)
+    : [];
+  const visualFixesRaw = Array.isArray(obj.visualFixes)
+    ? obj.visualFixes.filter((x): x is string => typeof x === "string").map((s) => s.trim()).filter(Boolean)
+    : [];
+  const visualFixes = padThree(visualFixesRaw, "[TO COMPLETE]");
+  const reelsRaw = Array.isArray(obj.reels) ? obj.reels : [];
+  const reels = reelsRaw.map(parseReel).filter((r): r is VisionReel => Boolean(r)).slice(0, 3);
+  if (!elements.length && !reels.length) return null;
+  return { elements, visualFixes, reels };
+}
+
+function stripDataUrl(raw: string): { mime: string; data: string } | null {
+  const s = raw.trim();
+  const m = s.match(/^data:([^;]+);base64,(.+)$/i);
+  if (m) return { mime: m[1]!.toLowerCase(), data: m[2]!.replace(/\s/g, "") };
+  if (/^[A-Za-z0-9+/=\s]+$/.test(s) && s.replace(/\s/g, "").length > 80) {
+    return { mime: "", data: s.replace(/\s/g, "") };
+  }
+  return null;
+}
+
+export function decodeVisionImage(body: VisionBody): { mime: string; data: string } | null {
+  const mimeHint = typeof body.mime === "string" ? body.mime.trim().toLowerCase() : "";
+  if (typeof body.imageBase64 === "string" && body.imageBase64.trim()) {
+    const parsed = stripDataUrl(body.imageBase64);
+    if (!parsed) return null;
+    const mime = parsed.mime || mimeHint || "image/jpeg";
+    if (!/^image\/(jpeg|jpg|png|webp)$/.test(mime)) return null;
+    const bytes = Math.floor((parsed.data.length * 3) / 4);
+    if (bytes > VISION_MAX_BYTES) return null;
+    return { mime: mime === "image/jpg" ? "image/jpeg" : mime, data: parsed.data };
+  }
+  return null;
+}
+
+export async function runGeminiVision(body: VisionBody, image: { mime: string; data: string }): Promise<VisionResult> {
+  const key = process.env.GEMINI_API_KEY?.trim();
+  if (!key) return noKey();
+  try {
+    const language = asLang(body.language);
+    const intake = factsToIntake(body);
+    const factsBlob = [
+      intake.businessName && `businessName: ${intake.businessName}`,
+      intake.description && `description: ${intake.description}`,
+      intake.audience && `audience: ${intake.audience}`,
+      intake.uniqueAdvantage && `uniqueAdvantage: ${intake.uniqueAdvantage}`,
+      intake.biggestProblem && `biggestProblem: ${intake.biggestProblem}`,
+      intake.offer && `offer: ${intake.offer}`,
+      intake.pastResults && `pastResults: ${intake.pastResults}`,
+    ]
+      .filter(Boolean)
+      .join("\n");
+    const prompt = [
+      "Analyze this image for an ad campaign. Do not invent prices, discounts, ratings, testimonials, VIP, ROAS, CAC, or medical claims.",
+      "Recreate HE/AR/EN packs — never translate literally. Hebrew: direct, action-driving. Arabic: rich marketing, regional, RTL. English: modern SaaS/global.",
+      "elements: visible objects, text, brand cues actually in the image.",
+      "visualFixes: exactly 3 concrete production fixes.",
+      "reels: 3 scripts (reels, tiktok, shorts), each 15s with shots {t, scene, onScreen, vo} plus he/ar/en {headline,copy,cta}.",
+      language ? `Primary language: ${language} (still return HE+AR+EN).` : "",
+      body.medical === true ? "Medical: true. No clinical decoration." : "",
+      factsBlob ? `Intake facts (use only these for claims):\n${factsBlob}` : "No extra intake facts.",
+      `Reply with JSON only:\n${JSON_SHAPE_VISION}`,
+    ]
+      .filter(Boolean)
+      .join("\n\n")
+      .slice(0, 4000);
+    const model = geminiModel(key, body.medical === true);
+    const result = await model.generateContent([
+      { inlineData: { mimeType: image.mime, data: image.data } },
+      { text: prompt },
+    ]);
+    const text = result.response.text() ?? "";
+    const parsed = parseVision(text);
+    if (!parsed) return failTemplates();
+    return { ok: true, ...parsed };
+  } catch {
+    return failTemplates();
+  }
+}
+
+export type ScoreBody = {
+  text?: unknown;
+  language?: unknown;
+  facts?: unknown;
+  medical?: unknown;
+  description?: unknown;
+  audience?: unknown;
+};
+
+export type ScoreOk = {
+  ok: true;
+  score: number;
+  weaknesses: string[];
+  rewrite: Partial<Record<GenerateLang, AngleCopy>>;
+};
+
+export type ScoreResult = ScoreOk | GenerateFail;
+
+function parseScore(text: string): Omit<ScoreOk, "ok"> | null {
+  const obj = parseLooseJson(text);
+  if (!obj) return null;
+  const n = Number(obj.score);
+  const score = Number.isFinite(n) ? Math.max(1, Math.min(100, Math.round(n))) : 0;
+  const weaknessesRaw = Array.isArray(obj.weaknesses)
+    ? obj.weaknesses.filter((x): x is string => typeof x === "string").map((s) => s.trim()).filter(Boolean)
+    : [];
+  const rewriteObj = asObj(obj.rewrite) ?? obj;
+  const he = parseAngleCopyLoose(rewriteObj.he);
+  const ar = parseAngleCopyLoose(rewriteObj.ar);
+  const en = parseAngleCopyLoose(rewriteObj.en);
+  if (!score && !weaknessesRaw.length && !he && !ar && !en) return null;
+  return {
+    score: score || 1,
+    weaknesses: padThree(weaknessesRaw, "[TO COMPLETE]"),
+    rewrite: {
+      ...(he ? { he } : {}),
+      ...(ar ? { ar } : {}),
+      ...(en ? { en } : {}),
+    },
+  };
+}
+
+function sanitizeRewrite(
+  rewrite: Partial<Record<GenerateLang, AngleCopy>>,
+  intake: Intake | null,
+): Partial<Record<GenerateLang, AngleCopy>> {
+  if (!intake) return rewrite;
+  const out: Partial<Record<GenerateLang, AngleCopy>> = {};
+  for (const loc of ["he", "ar", "en"] as GenerateLang[]) {
+    const pack = rewrite[loc];
+    if (!pack) continue;
+    const joined = `${pack.headline}\n${pack.copy}\n${pack.cta}`;
+    if (inventsForbidden(joined, intake)) {
+      const m = loc === "he" ? "[יש להשלים]" : loc === "ar" ? "[يجب الاستكمال]" : "[TO COMPLETE]";
+      out[loc] = { headline: m, copy: m, cta: m };
+    } else {
+      out[loc] = pack;
+    }
+  }
+  return out;
+}
+
+export async function runGeminiScore(body: ScoreBody): Promise<ScoreResult> {
+  const key = process.env.GEMINI_API_KEY?.trim();
+  if (!key) return noKey();
+  const adText = typeof body.text === "string" ? body.text.trim() : "";
+  if (!adText) return failTemplates();
+  try {
+    const language = asLang(body.language);
+    const intake = factsToIntake(body);
+    const hasFacts = Boolean(
+      intake.description.trim() ||
+        intake.businessName.trim() ||
+        intake.audience.trim() ||
+        (typeof body.facts === "string" && body.facts.trim()),
+    );
+    const prompt = [
+      "Score this ad copy for conversion from 1-100. Be honest. Do not invent prices, discounts, ratings, testimonials, VIP, ROAS, CAC, or medical claims in the rewrite.",
+      "Recreate rewrite packs — never translate literally. Hebrew: direct, action-driving. Arabic: rich marketing, regional, RTL. English: modern SaaS/global.",
+      "weaknesses: exactly 3 concrete, actionable problems.",
+      "rewrite: HE+AR+EN {headline,copy,cta} that fixes those weaknesses using ONLY provided facts. Missing fact → [יש להשלים] / [يجب الاستكمال] / [TO COMPLETE].",
+      language ? `Primary language: ${language} (still return HE+AR+EN rewrite).` : "",
+      body.medical === true ? "Medical: true. No clinical decoration." : "",
+      hasFacts
+        ? `Facts (claims must come from here):\n${intake.businessName}\n${intake.description}\n${intake.audience}\n${intake.uniqueAdvantage}\n${intake.biggestProblem}\n${intake.offer}\n${intake.pastResults}`
+        : "No extra facts. Do not invent social proof, prices, or ratings.",
+      `Ad copy to score:\n${adText.slice(0, 2500)}`,
+      `Reply with JSON only:\n${JSON_SHAPE_SCORE}`,
+    ]
+      .filter(Boolean)
+      .join("\n\n")
+      .slice(0, 5000);
+    const model = geminiModel(key, body.medical === true);
+    const result = await model.generateContent(prompt);
+    const text = result.response.text() ?? "";
+    const parsed = parseScore(text);
+    if (!parsed) return failTemplates();
+    const rewrite = sanitizeRewrite(parsed.rewrite, hasFacts ? intake : null);
+    return { ok: true, score: parsed.score, weaknesses: parsed.weaknesses, rewrite };
+  } catch {
+    return failTemplates();
   }
 }

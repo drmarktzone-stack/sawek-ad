@@ -219,6 +219,60 @@ export interface AdVariant {
   cta: string;
 }
 
+export type AngleId = "pain" | "benefit" | "social_proof" | "story";
+export type LabFeatureType = "angles" | "vision" | "score" | "campaign";
+
+export interface AngleCopy {
+  headline: string;
+  copy: string;
+  cta: string;
+}
+
+export type AngleLocales = Partial<Record<Locale, AngleCopy>>;
+export type CampaignAngles = Partial<Record<AngleId, AngleLocales>>;
+
+export interface LabRun {
+  id: string;
+  featureType: LabFeatureType;
+  input: unknown;
+  output: unknown;
+  createdAt: string;
+  clientId?: string;
+}
+
+export interface VisionShot {
+  t: string;
+  scene: string;
+  onScreen: string;
+  vo: string;
+}
+
+export interface VisionReel {
+  channel: "reels" | "tiktok" | "shorts";
+  shots: VisionShot[];
+  he?: AngleCopy;
+  ar?: AngleCopy;
+  en?: AngleCopy;
+}
+
+export interface VisionResult {
+  elements: string[];
+  visualFixes: string[];
+  reels: VisionReel[];
+}
+
+export interface ScoreRewritePack {
+  headline: string;
+  copy: string;
+  cta: string;
+}
+
+export interface ScoreResult {
+  score: number;
+  weaknesses: string[];
+  rewrite: Partial<Record<Locale, ScoreRewritePack>>;
+}
+
 export interface StrategyItem {
   title: Record<Locale, string>;
   body: Record<Locale, string>;
@@ -312,6 +366,10 @@ export interface CampaignPack {
   planActivated: boolean;
   agency?: AgencyPack;
   coach?: CoachReport;
+  angles?: CampaignAngles;
+  featureType?: LabFeatureType;
+  lab?: LabRun[];
+  clientId?: string;
 }
 
 export type Tri = Record<Locale, string>;

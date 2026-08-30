@@ -1,6 +1,6 @@
 "use client";
 
-import { Clapperboard, Compass, FolderKanban, Megaphone, Palette, Store } from "lucide-react";
+import { Clapperboard, Compass, FlaskConical, FolderKanban, LayoutDashboard, Megaphone, Palette, Store } from "lucide-react";
 import { useI18n } from "@/components/i18n-provider";
 import { LangLink } from "@/components/lang-link";
 import { cn } from "@/lib/utils";
@@ -52,6 +52,24 @@ export const PRODUCT_FUNCTIONS = [
     hint: "fn.campaignsHint" as const,
     icon: FolderKanban,
   },
+  {
+    id: "lab",
+    href: "/lab",
+    extraHref: undefined,
+    extraKey: undefined,
+    key: "fn.lab" as const,
+    hint: "fn.labHint" as const,
+    icon: FlaskConical,
+  },
+  {
+    id: "dashboard",
+    href: "/dashboard",
+    extraHref: undefined,
+    extraKey: undefined,
+    key: "fn.dashboard" as const,
+    hint: "fn.dashboardHint" as const,
+    icon: LayoutDashboard,
+  },
 ] as const;
 
 export function FunctionRail({ compact = false }: { compact?: boolean }) {
@@ -80,7 +98,7 @@ export function FunctionRail({ compact = false }: { compact?: boolean }) {
       <p className="mb-2 text-center text-[11px] font-bold uppercase tracking-[0.22em] text-omni-red">
         {t("fn.title")} · {t("fn.engines")}
       </p>
-      <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+      <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-7">
         {PRODUCT_FUNCTIONS.map((fn) => {
           const Icon = fn.icon;
           return (

@@ -5,8 +5,10 @@ import { useState } from "react";
 import {
   Brain,
   Compass,
+  FlaskConical,
   Folder,
   HelpCircle,
+  LayoutDashboard,
   Menu,
   Megaphone,
   Pencil,
@@ -35,6 +37,8 @@ const NAV = [
   { href: "/leads", key: "nav.leads" as const, icon: Users },
   { href: "/medical/optibrain", key: "nav.medical" as const, icon: Brain },
   { href: "/campaigns", key: "nav.campaigns" as const, icon: Folder },
+  { href: "/dashboard", key: "nav.dashboard" as const, icon: LayoutDashboard },
+  { href: "/lab", key: "nav.lab" as const, icon: FlaskConical },
   { href: "/about", key: "nav.about" as const, icon: HelpCircle },
   { href: "/self", key: "nav.self" as const, icon: SlidersHorizontal },
 ];

@@ -13,7 +13,8 @@ import { produceAd } from "@/lib/engine/produce-ad";
 import { geminiAdCopy } from "@/lib/engine/gemini-enrich";
 import { adviseFromResults } from "@/lib/engine/optimizer";
 import { highlightsOf, missionOf, pillarsOf } from "@/lib/engine/brief";
-import { saveDraft, upsertCampaign } from "@/lib/storage";
+import { saveDraft } from "@/lib/storage";
+import { syncCampaign } from "@/lib/supabase";
 import { NewCampaignCta } from "@/components/new-campaign-cta";
 import { LangLink } from "@/components/lang-link";
 import { withLang } from "@/lib/locale-url";
@@ -31,6 +32,7 @@ import { cn } from "@/lib/utils";
 import { isFreeService } from "@/lib/operating-model";
 import { CampaignAdVisual } from "@/components/ad-mockup";
 import { ChannelPack } from "@/components/channel-pack";
+import { AnglesStrip } from "@/components/angles-strip";
 import { CoachImprovedStrip } from "@/components/coach-panel";
 
 export function ResultView({
@@ -72,7 +74,7 @@ export function ResultView({
 
   function save() {
     const next = { ...pack, saved: true };
-    upsertCampaign(next);
+    void syncCampaign(next);
     onChange(next);
   }
 
@@ -87,13 +89,13 @@ export function ResultView({
         }
       : ad;
     const next = { ...pack, producedAds: [finalAd, ...pack.producedAds] };
-    upsertCampaign(next);
+    void syncCampaign(next);
     onChange(next);
   }
 
   function activatePlan() {
     const next = { ...pack, planActivated: true, saved: true };
-    upsertCampaign(next);
+    void syncCampaign(next);
     onChange(next);
   }
 
@@ -109,7 +111,7 @@ export function ResultView({
   function runOpt() {
     const advice = adviseFromResults(pack.intake, pack.media, optIn);
     const next = { ...pack, optimizerRuns: [advice, ...pack.optimizerRuns] };
-    upsertCampaign(next);
+    void syncCampaign(next);
     onChange(next);
   }
 
@@ -125,6 +127,8 @@ export function ResultView({
       </div>
 
       <ChannelPack pack={pack} packLang={packLang} />
+
+      <AnglesStrip angles={pack.angles} locale={packLang} />
 
       <div className="my-6 flex justify-center">
         <NewCampaignCta other hint className="items-center text-center" />

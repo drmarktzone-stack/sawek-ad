@@ -1,4 +1,4 @@
-import type { CampaignPack, CoachReport, Intake, Locale, SelfPlan, SelfProfile, StudioPiece } from "./types";
+import type { CampaignPack, CoachReport, Intake, LabRun, Locale, SelfPlan, SelfProfile, StudioPiece } from "./types";
 import { emptyIntake } from "./engine/validate";
 import { coachIntake } from "./engine/coach";
 
@@ -10,6 +10,8 @@ const K = {
   selfProfile: "omniad-self-profile",
   selfPlans: "omniad-self-plans",
   packLang: "omniad-pack-lang",
+  labRuns: "omniad-lab-runs",
+  clientId: "omniad-client-id",
 };
 
 function canUse(): boolean {
@@ -176,4 +178,40 @@ export function supabaseEnabled(): boolean {
   return Boolean(
     process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   );
+}
+
+export function getClientId(): string {
+  if (!canUse()) return "";
+  try {
+    const existing = localStorage.getItem(K.clientId);
+    if (existing && existing.trim()) return existing.trim();
+    const id =
+      typeof crypto !== "undefined" && crypto.randomUUID
+        ? crypto.randomUUID()
+        : `anon_${Math.random().toString(36).slice(2, 12)}`;
+    localStorage.setItem(K.clientId, id);
+    return id;
+  } catch {
+    return "";
+  }
+}
+
+export function loadLabRuns(): LabRun[] {
+  const list = read<LabRun[]>(K.labRuns, []);
+  return Array.isArray(list) ? list : [];
+}
+
+export function saveLabRuns(list: LabRun[]) {
+  write(K.labRuns, list.slice(0, 80));
+}
+
+export function upsertLabRunLocal(run: LabRun): LabRun[] {
+  const list = loadLabRuns().filter((r) => r.id !== run.id);
+  list.unshift(run);
+  saveLabRuns(list);
+  return list;
+}
+
+export function getLabRun(id: string): LabRun | undefined {
+  return loadLabRuns().find((r) => r.id === id);
 }

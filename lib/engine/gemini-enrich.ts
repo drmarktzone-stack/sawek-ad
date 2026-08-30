@@ -1,7 +1,8 @@
-import type { AdVariant, FactoryPiece, Intake, Locale } from "../types";
+import type { AdVariant, CampaignAngles, FactoryPiece, Intake, Locale } from "../types";
 import { filled } from "../utils";
 import { inventsForbidden } from "./coach";
 import { isClinicLike } from "../vertical";
+import { overlayAnglesOnVariants, parseCampaignAngles, sanitizeAngles } from "./angles";
 
 const ABORT_MS = 14_000;
 const OVERLAY_ABORT_MS = 18_000;
@@ -62,6 +63,7 @@ type GeminiResponse = {
   text?: unknown;
   locales?: unknown;
   channels?: unknown;
+  angles?: unknown;
   he?: unknown;
   ar?: unknown;
   en?: unknown;
@@ -136,7 +138,7 @@ function cachedChannelsFor(intake: Intake): GeminiChannels | null {
 
 function promptAllLocales(): string {
   const kinds = VARIANT_KINDS.join(", ");
-  return `Produce JSON with ALL three locales (he, ar, en) and channel packs. Exactly 6 headlines per locale in this order: ${kinds}. Language packs must be real Hebrew / Arabic / English — do not copy one language into another. Use ONLY facts in description and audience. Never invent prices, discounts, ratings, testimonials, VIP, ROAS, CAC, medical claims, or competitors. Missing fact → [יש להשלים] / [يجب الاستكمال] / [TO COMPLETE].`;
+  return `Produce JSON with ALL three locales (he, ar, en), channel packs, AND angles {pain,benefit,social_proof,story} each with he/ar/en {headline,copy,cta}. Exactly 6 headlines per locale in this order: ${kinds}. Recreate per language — do not translate literally. Hebrew: direct, action-driving. Arabic: rich marketing, regional, RTL. English: modern SaaS/global. Use ONLY facts in description and audience. Never invent prices, discounts, ratings, testimonials, VIP, ROAS, CAC, medical claims, or competitors. Social proof: only ratings/reviews/customer counts present in facts; otherwise [יש להשלים] / [يجب الاستكمال] / [TO COMPLETE].`;
 }
 
 function promptFor(locale: Locale, sixHeadlines: boolean): string {
@@ -342,12 +344,14 @@ function overlayFromResponse(data: GeminiResponse, intake: Intake): GeminiAdCopy
 export async function enrichVariantsWithGemini(
   intake: Intake,
   variants: AdVariant[],
-): Promise<AdVariant[]> {
+): Promise<{ variants: AdVariant[]; angles?: CampaignAngles }> {
   const data = await postGenerate(payloadFromIntake(intake, "he", true, "ads"));
-  if (!data) return variants;
+  if (!data) return { variants };
 
   const channels = parseGeminiChannels(data.channels);
   rememberChannels(intake, channels);
+
+  const angles = sanitizeAngles(parseCampaignAngles(data.angles), intake);
 
   const packs = parseLocales(data);
   const hasAny = (["he", "ar", "en"] as Locale[]).some((loc) => {
@@ -355,20 +359,23 @@ export async function enrichVariantsWithGemini(
     if (!p) return false;
     return p.headlines.some((h) => safeText(h, intake)) || safeText(p.copy, intake) || safeText(p.cta, intake);
   });
-  if (!hasAny) return variants;
-
-  return variants.map((v) => {
-    const pack = packs[v.locale];
-    if (!pack) return v;
-    const kindIndex = VARIANT_KINDS.indexOf(v.kind);
-    const headline = (kindIndex >= 0 ? safeText(pack.headlines[kindIndex], intake) : undefined) || v.headline;
-    return {
-      ...v,
-      headline,
-      primaryText: safeText(pack.copy, intake) ?? v.primaryText,
-      cta: safeText(pack.cta, intake) ?? v.cta,
-    };
-  });
+  let next = variants;
+  if (hasAny) {
+    next = variants.map((v) => {
+      const pack = packs[v.locale];
+      if (!pack) return v;
+      const kindIndex = VARIANT_KINDS.indexOf(v.kind);
+      const headline = (kindIndex >= 0 ? safeText(pack.headlines[kindIndex], intake) : undefined) || v.headline;
+      return {
+        ...v,
+        headline,
+        primaryText: safeText(pack.copy, intake) ?? v.primaryText,
+        cta: safeText(pack.cta, intake) ?? v.cta,
+      };
+    });
+  }
+  next = overlayAnglesOnVariants(next, angles);
+  return { variants: next, ...(angles ? { angles } : {}) };
 }
 
 function textSafe(parts: (string | undefined)[], intake: Intake): boolean {

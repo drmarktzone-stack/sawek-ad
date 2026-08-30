@@ -8,7 +8,8 @@ import { demoIntake, DEMO_LABEL, consumePendingDemo, clearPendingDemo, applyPedi
 import { installDemoPack } from "@/lib/active-pack";
 import { cmoFieldsMissing, emptyIntake, wizardMissingFields, wizardReady } from "@/lib/engine/validate";
 import { assemblePack, idleStatus, overlayPackAgency, runIntakeAndDiagnosis, runMedia, runOptimizerStage, runStrategic } from "@/lib/engine/run";
-import { loadDraft, saveDraft, upsertCampaign, getCampaign, INGEST_APPLIED_EVENT } from "@/lib/storage";
+import { loadDraft, saveDraft, getCampaign, INGEST_APPLIED_EVENT } from "@/lib/storage";
+import { syncCampaign } from "@/lib/supabase";
 import { uid } from "@/lib/utils";
 import { MAX_COMPETITORS } from "@/lib/factory-formats";
 import { AREA_LABEL } from "@/lib/i18n";
@@ -367,7 +368,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
         optimizer: "blocked",
       },
     });
-    upsertCampaign(p);
+    void syncCampaign(p);
     setPack(p);
     setAgentStatus(p.agentStatus);
     setRunning(false);
@@ -383,6 +384,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
         diagnosis: { ...pack.diagnosis, approved: true, approvedAt: new Date().toISOString() },
         variants: built.variants,
         strategy: built.strategy,
+        angles: built.angles,
         id: pack.id,
         agentStatus: {
           intake: "complete",
@@ -392,7 +394,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
           optimizer: "blocked",
         },
       }));
-      upsertCampaign(next);
+      void syncCampaign(next);
       setPack(next);
       setAgentStatus(next.agentStatus);
     } else if (agentStatus.strategic === "needs_approval") {
@@ -403,6 +405,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
         variants: pack.variants,
         strategy: pack.strategy,
         media: built.media,
+        angles: pack.angles,
         id: pack.id,
         agentStatus: {
           intake: "complete",
@@ -412,7 +415,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
           optimizer: "blocked",
         },
       }));
-      upsertCampaign(next);
+      void syncCampaign(next);
       setPack(next);
       setAgentStatus(next.agentStatus);
     } else if (agentStatus.media === "needs_approval") {
@@ -424,6 +427,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
         strategy: pack.strategy,
         media: pack.media,
         optimizer: built.optimizer,
+        angles: pack.angles,
         id: pack.id,
         agentStatus: {
           intake: "complete",
@@ -434,7 +438,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
         },
       }));
       const saved = { ...next, saved: true };
-      upsertCampaign(saved);
+      void syncCampaign(saved);
       setPack(saved);
       setAgentStatus(saved.agentStatus);
       setRunning(false);

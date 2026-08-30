@@ -34,6 +34,8 @@ export function factBlob(intake: Intake): string {
     intake.whatsapp,
     intake.website,
     intake.channelNotes,
+    intake.pastAds,
+    intake.pastResults,
   ]
     .filter(Boolean)
     .join(" ");
