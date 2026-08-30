@@ -10,6 +10,7 @@
     "check:url-ingest": "npx --yes tsx scripts/check-url-ingest.ts"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@radix-ui/react-accordion": "^1.2.20",
     "@radix-ui/react-dialog": "^1.1.23",
     "@radix-ui/react-slot": "^1.3.3",

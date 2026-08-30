@@ -10,6 +10,7 @@ import { detectVertical } from "@/lib/vertical";
 import { copyAllAds, downloadTxt, printBible, printPdf } from "@/lib/export";
 import { DepartmentRail } from "@/components/department-shell";
 import { produceAd } from "@/lib/engine/produce-ad";
+import { geminiAdCopy } from "@/lib/engine/gemini-enrich";
 import { adviseFromResults } from "@/lib/engine/optimizer";
 import { highlightsOf, missionOf, pillarsOf } from "@/lib/engine/brief";
 import { saveDraft, upsertCampaign } from "@/lib/storage";
@@ -75,9 +76,17 @@ export function ResultView({
     onChange(next);
   }
 
-  function makeAd(styleId: string) {
+  async function makeAd(styleId: string) {
     const ad = produceAd(pack.intake, styleId, idea, packLang);
-    const next = { ...pack, producedAds: [ad, ...pack.producedAds] };
+    const overlay = await geminiAdCopy(pack.intake, packLang);
+    const finalAd = overlay
+      ? {
+          ...ad,
+          ...(overlay.headline ? { headline: overlay.headline } : {}),
+          ...(overlay.copy ? { body: overlay.copy } : {}),
+        }
+      : ad;
+    const next = { ...pack, producedAds: [finalAd, ...pack.producedAds] };
     upsertCampaign(next);
     onChange(next);
   }

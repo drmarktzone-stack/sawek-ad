@@ -118,7 +118,7 @@ Structured JSON is the source; UI renders readable cards.
 
 - Default: `localStorage` (`omniad-locale`, `omniad-draft`, `omniad-campaigns`, `omniad-studio-library`, `omniad-self`, `sawek-medical-*`, `sawek-optibrain-desk`).
 - Optional Supabase if `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_ANON_KEY` are set. App **must run with zero keys**.
-- Optional `OPENAI_API_KEY` may enrich copy via `/api/generate`. Fallback templates always work and must be intake-driven, not lorem.
+- Optional `GEMINI_API_KEY` may enrich copy via `/api/generate`. Fallback templates always work and must be intake-driven, not lorem.
 
 ## Engine rules
 

@@ -51,7 +51,7 @@ Open [http://127.0.0.1:43147](http://127.0.0.1:43147).
 Zero API keys required. Copy is generated from intake with templates. Optional:
 
 ```
-OPENAI_API_KEY=                 # enrich /api/generate only
+GEMINI_API_KEY=                 # enrich /api/generate only
 NEXT_PUBLIC_SUPABASE_URL=       # optional campaign sync
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 ```

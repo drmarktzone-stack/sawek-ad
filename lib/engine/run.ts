@@ -3,6 +3,7 @@ import { uid, sleep } from "../utils";
 import { validateIntake } from "./validate";
 import { diagnose } from "./diagnose";
 import { generateVariants } from "./copy";
+import { enrichVariantsWithGemini } from "./gemini-enrich";
 import { generateStrategy } from "./strategy";
 import { generateMedia } from "./media";
 import { generateOptimizer } from "./optimizer";
@@ -57,7 +58,8 @@ export async function runStrategic(
   onStatus("diagnostic", "approved");
   onStatus("strategic", "running");
   await sleep(500);
-  const variants = generateVariants(intake);
+  let variants = generateVariants(intake);
+  variants = await enrichVariantsWithGemini(intake, variants);
   const strategy = generateStrategy(intake, approved);
   onStatus("strategic", "needs_approval");
   return { variants, strategy };
