@@ -108,7 +108,7 @@ export async function POST(req: Request) {
     const userMessage = buildUserMessage(body);
     const genAI = new GoogleGenerativeAI(key);
     const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
+      model: "gemini-3.6-flash",
       systemInstruction: SYSTEM_INSTRUCTION,
       generationConfig: {
         temperature: body.medical === true ? 0.2 : 0.4,
