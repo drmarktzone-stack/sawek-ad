@@ -1,4 +1,5 @@
-import type { Locale } from "./types";
+import type { Intake, Locale } from "./types";
+import { detectVertical, isProductLike, showsHmoAudience, unknownProblemLabel } from "./vertical";
 
 export interface ChipOption {
   id: string;
@@ -22,6 +23,7 @@ export const DEPTH_OPTIONS: ChipOption[] = [
 export const AUDIENCE_CHIPS: ChipOption[] = [
   { id: "local_families", label: { he: "משפחות מקומיות", ar: "عائلات محلية", en: "Local families" } },
   { id: "parents", label: { he: "הורים", ar: "أهل", en: "Parents" } },
+  { id: "app_users", label: { he: "משתמשי האפליקציה", ar: "مستخدمو التطبيق", en: "App users" } },
   { id: "clalit", label: { he: "כללית", ar: "كلاليت", en: "Clalit" } },
   { id: "maccabi", label: { he: "מכבי", ar: "مكابي", en: "Maccabi" } },
   { id: "meuhedet", label: { he: "מאוחדת", ar: "مئوحيدت", en: "Meuhedet" } },
@@ -37,24 +39,44 @@ export const AUDIENCE_CHIPS: ChipOption[] = [
 export type KupaAudienceId = "clalit" | "maccabi" | "meuhedet" | "leumit" | "switch_clalit";
 
 /** Other-kupa / switch-to-Clalit from chip id or typed labels (مكابي / مئوحيدت / لئوميت). */
-export function detectKupaAudience(audience: string): KupaAudienceId | null {
-  const v = audience.trim();
-  if (!v) return null;
-  if (v === "maccabi" || /مكابي|מכבי/i.test(v) || /^maccabi$/i.test(v)) return "maccabi";
-  if (v === "meuhedet" || /مئوحيدت|مئوحيديت|מאוחדת/i.test(v) || /^meuhedet$/i.test(v)) return "meuhedet";
-  if (v === "leumit" || /لئوميت|לאומית/i.test(v) || /^leumit$/i.test(v)) return "leumit";
+function detectOneKupa(v: string): KupaAudienceId | null {
+  const t = v.trim();
+  if (!t) return null;
+  if (t === "maccabi" || /مكابي|מכבי/i.test(t) || /^maccabi$/i.test(t)) return "maccabi";
+  if (t === "meuhedet" || /مئوحيدت|مئوحيديت|מאוחדת/i.test(t) || /^meuhedet$/i.test(t)) return "meuhedet";
+  if (t === "leumit" || /لئوميت|לאומית/i.test(t) || /^leumit$/i.test(t)) return "leumit";
   if (
-    v === "switch_clalit" ||
-    /ينقلوا لكلاليت|לעבור לכללית|switch(?:ing)? to clalit/i.test(v)
+    t === "switch_clalit" ||
+    /ينقلوا لكلاليت|לעבור לכללית|switch(?:ing)? to clalit/i.test(t)
   ) {
     return "switch_clalit";
   }
-  if (v === "clalit" || /^(كلاليت|כללית|clalit)$/i.test(v)) return "clalit";
+  if (t === "clalit" || /^(كلاليت|כללית|clalit)$/i.test(t)) return "clalit";
   return null;
 }
 
+export function detectKupaAudience(audience: string): KupaAudienceId | null {
+  const v = audience.trim();
+  if (!v) return null;
+  const one = detectOneKupa(v);
+  if (one) return one;
+  for (const part of splitChipTokens(v)) {
+    const hit = detectOneKupa(part);
+    if (hit) return hit;
+  }
+  return null;
+}
+
+export const CHANNEL_CHIPS: ChipOption[] = [
+  { id: "facebook", label: { he: "פייסבוק", ar: "فيسبوك", en: "Facebook" } },
+  { id: "instagram", label: { he: "אינסטגרם", ar: "إنستغرام", en: "Instagram" } },
+  { id: "tiktok", label: { he: "טיקטוק", ar: "تيك توك", en: "TikTok" } },
+  { id: "youtube", label: { he: "יוטיוב", ar: "يوتيوب", en: "YouTube" } },
+  { id: "whatsapp", label: { he: "וואטסאפ", ar: "واتساب", en: "WhatsApp" } },
+];
+
 export const PROBLEM_CHIPS: ChipOption[] = [
-  { id: "unknown", label: { he: "לא מכירים את העסק", ar: "الناس مش عارفين العيادة", en: "People don't know we exist" } },
+  { id: "unknown", label: { he: "לא מכירים את העסק", ar: "الناس مش عارفين المحل", en: "People don't know we exist" } },
   { id: "trust", label: { he: "אין אמון במפרסמים", ar: "ضعف الثقة بالمعلنين", en: "Low trust in ads" } },
   { id: "price", label: { he: "מחיר נתפס כיקר", ar: "السعر يبدو مرتفعاً", en: "Price feels high" } },
   { id: "competition", label: { he: "תחרות חזקה באזור", ar: "منافسة قوية في المنطقة", en: "Strong local competition" } },
@@ -92,11 +114,100 @@ export const OFFER_CHIPS: ChipOption[] = [
 
 export const DEFAULT_OFFER_HE = "אין מבצע";
 
-export function resolveChipLabel(value: string, options: ChipOption[], locale: Locale): string {
+const LEGACY_CLINIC_UNKNOWN = new Set([
+  "الناس مش عارفين العيادة",
+  "לא מכירים את המרפאה",
+  "People don't know the clinic",
+]);
+
+export function splitChipTokens(value: string): string[] {
+  return String(value ?? "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+export function findChipOption(token: string, options: ChipOption[]): ChipOption | undefined {
+  const normalized = LEGACY_CLINIC_UNKNOWN.has(token) ? "unknown" : token;
+  return options.find(
+    (o) =>
+      !o.custom &&
+      (o.id === normalized || Object.values(o.label).includes(normalized) || Object.values(o.label).includes(token)),
+  );
+}
+
+export function parseChipField(value: string, options: ChipOption[]): { ids: string[]; customText: string } {
+  const ids: string[] = [];
+  const customParts: string[] = [];
+  for (const tok of splitChipTokens(value)) {
+    const hit = findChipOption(tok, options);
+    if (hit) {
+      if (!ids.includes(hit.id)) ids.push(hit.id);
+    } else {
+      customParts.push(tok);
+    }
+  }
+  return { ids, customText: customParts.join(", ") };
+}
+
+export function formatChipField(ids: string[], customText: string): string {
+  const parts = [...ids.filter(Boolean)];
+  const c = customText.trim();
+  if (c) parts.push(c);
+  return parts.join(",");
+}
+
+export function hasChipId(value: string, id: string): boolean {
+  return splitChipTokens(value).includes(id);
+}
+
+export function chipIsSelected(value: string, opt: ChipOption, options: ChipOption[], showCustom?: boolean): boolean {
+  if (opt.custom) return Boolean(showCustom);
+  return parseChipField(value, options).ids.includes(opt.id);
+}
+
+/** Toggle a chip. Multi adds/removes; single replaces. Clicking a selected multi chip turns it off. */
+export function toggleChipValue(value: string, opt: ChipOption, options: ChipOption[], multi: boolean): string {
+  if (opt.custom) return value;
+  const { ids, customText } = parseChipField(value, options);
+  if (!multi) return opt.id;
+  if (opt.id === "no_offer") {
+    return ids.includes("no_offer") ? formatChipField([], customText) : "no_offer";
+  }
+  let next = ids.filter((id) => id !== "no_offer");
+  if (next.includes(opt.id)) next = next.filter((id) => id !== opt.id);
+  else next = [...next, opt.id];
+  return formatChipField(next, customText);
+}
+
+export function joinSpokenList(parts: string[], locale: Locale): string {
+  const clean = parts.map((s) => s.trim()).filter(Boolean);
+  if (!clean.length) return "";
+  if (clean.length === 1) return clean[0];
+  if (locale === "he") return clean.join(" ו- ");
+  if (locale === "ar") return clean.join(" و ");
+  if (clean.length === 2) return `${clean[0]} and ${clean[1]}`;
+  return `${clean.slice(0, -1).join(", ")}, and ${clean[clean.length - 1]}`;
+}
+
+function resolveOneChip(value: string, options: ChipOption[], locale: Locale): string {
   if (!value) return "";
-  const hit = options.find((o) => o.id === value || Object.values(o.label).includes(value));
+  const normalized = LEGACY_CLINIC_UNKNOWN.has(value) ? "unknown" : value;
+  const hit = options.find(
+    (o) => o.id === normalized || Object.values(o.label).includes(normalized) || Object.values(o.label).includes(value),
+  );
   if (hit && !hit.custom) return hit.label[locale];
   return value;
+}
+
+export function resolveChipLabel(value: string, options: ChipOption[], locale: Locale): string {
+  if (!value) return "";
+  if (!value.includes(",")) return resolveOneChip(value, options, locale);
+  const { ids, customText } = parseChipField(value, options);
+  const labels = ids.map((id) => resolveOneChip(id, options, locale));
+  if (customText) labels.push(customText);
+  if (!labels.length) return value;
+  return joinSpokenList(labels, locale);
 }
 
 export function defaultOfferLabel(locale: Locale): string {
@@ -105,4 +216,22 @@ export function defaultOfferLabel(locale: Locale): string {
 
 export function defaultOfferId(): string {
   return "no_offer";
+}
+
+const HMO_AUDIENCE_IDS = new Set(["clalit", "maccabi", "meuhedet", "leumit", "switch_clalit"]);
+
+const PRODUCT_AUDIENCE_IDS = new Set(["parents", "local_families", "app_users", "custom"]);
+
+/** HMO chips only for clinic / hydro pool. Product sites: parents / families / app users — never כללית. */
+export function audienceChipsFor(intake: Pick<Intake, "businessName" | "category" | "description">): ChipOption[] {
+  if (isProductLike(intake)) {
+    return AUDIENCE_CHIPS.filter((c) => PRODUCT_AUDIENCE_IDS.has(c.id));
+  }
+  if (showsHmoAudience(intake)) return AUDIENCE_CHIPS.filter((c) => c.id !== "app_users");
+  return AUDIENCE_CHIPS.filter((c) => !HMO_AUDIENCE_IDS.has(c.id) && c.id !== "app_users");
+}
+
+export function problemLabelFor(intake: Pick<Intake, "businessName" | "category" | "description">, options: ChipOption[]): ChipOption[] {
+  const v = detectVertical(intake);
+  return options.map((c) => (c.id === "unknown" ? { ...c, label: unknownProblemLabel(v) } : c));
 }

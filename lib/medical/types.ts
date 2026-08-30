@@ -1,4 +1,4 @@
-import type { Locale } from "../types";
+import type { Locale, OperatingModel } from "../types";
 
 export type MedicalSpecialty =
   | "family"
@@ -41,6 +41,7 @@ export interface ClinicProfile {
   disclaimer: string;
   hours: ClinicHours[];
   slotMinutes: number;
+  operatingModel?: OperatingModel;
 }
 
 export interface Treatment {

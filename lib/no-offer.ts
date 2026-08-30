@@ -11,7 +11,7 @@ const NO_OFFER_VALUES = [
 
 export function isNoOffer(value: string | undefined | null): boolean {
   if (!value) return true;
-  const v = value.trim().toLowerCase();
-  if (!v) return true;
-  return NO_OFFER_VALUES.some((x) => x.toLowerCase() === v);
+  const parts = value.split(",").map((s) => s.trim().toLowerCase()).filter(Boolean);
+  if (!parts.length) return true;
+  return parts.every((v) => NO_OFFER_VALUES.some((x) => x.toLowerCase() === v));
 }

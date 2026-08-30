@@ -75,6 +75,7 @@ function copyFor(
 
   const he = locale === "he";
   const ar = locale === "ar";
+  const free = clinic.operatingModel === "free_service";
 
   const landingHeadline = he
     ? `${clinic.name} — ${treatName}`
@@ -82,11 +83,22 @@ function copyFor(
       ? `${clinic.name} — ${treatName}`
       : `${clinic.name} — ${treatName}`;
 
-  const landingSub = he
-    ? `${spec}. ${indication}. משך משוער: ${duration}. מחיר: ${price}. אין הבטחת תוצאה שלא נכתבה על ידי הרופא.`
+  const coverage = he
+    ? "כיסוי לפי הקופה למבוטחים — עובדה, לא מבצע ולא קופון."
     : ar
-      ? `${spec}. ${indication}. المدة: ${duration}. السعر: ${price}. لا وعد بنتيجة لم يكتبها الطبيب.`
-      : `${spec}. ${indication}. Typical duration: ${duration}. Price: ${price}. No outcome promise the doctor did not write.`;
+      ? "التغطية حسب الصندوق للأعضاء — واقعة، مش عرض ومش كوبون."
+      : "Coverage per the fund for members — a fact, not a promo and not a coupon.";
+  const landingSub = free
+    ? (he
+        ? `${spec}. ${indication}. משך משוער: ${duration}. ${coverage} אין הבטחת תוצאה שלא נכתבה על ידי הרופא.`
+        : ar
+          ? `${spec}. ${indication}. المدة: ${duration}. ${coverage} لا وعد بنتيجة لم يكتبها الطبيب.`
+          : `${spec}. ${indication}. Typical duration: ${duration}. ${coverage} No outcome promise the doctor did not write.`)
+    : (he
+        ? `${spec}. ${indication}. משך משוער: ${duration}. מחיר: ${price}. אין הבטחת תוצאה שלא נכתבה על ידי הרופא.`
+        : ar
+          ? `${spec}. ${indication}. المدة: ${duration}. السعر: ${price}. لا وعد بنتيجة لم يكتبها الطبيب.`
+          : `${spec}. ${indication}. Typical duration: ${duration}. Price: ${price}. No outcome promise the doctor did not write.`);
 
   const servicesBlurb = he
     ? `השירות שתואר: ${treatName}. טכנולוגיה: ${tech}. שיעור הצלחה: ${rate}. כל מספר אחר לא יומצא.`
@@ -97,7 +109,9 @@ function copyFor(
   const faq = [
     {
       q: he ? "כמה זה עולה?" : ar ? "كم السعر؟" : "What does it cost?",
-      a: he ? `המחיר בקליטה: ${price}.` : ar ? `السعر في البيانات: ${price}.` : `Price on file: ${price}.`,
+      a: free
+        ? (he ? coverage : ar ? coverage : coverage)
+        : (he ? `המחיר בקליטה: ${price}.` : ar ? `السعر في البيانات: ${price}.` : `Price on file: ${price}.`),
     },
     {
       q: he ? "כמה זמן הביקור?" : ar ? "كم تدوم الزيارة؟" : "How long is the visit?",
@@ -121,10 +135,10 @@ function copyFor(
     {
       platform: "feed",
       body: he
-        ? `${clinic.name}\n${treatName}\n${indication}\nמחיר: ${price}\nלתיאום: וואטסאפ ${wa}`
+        ? `${clinic.name}\n${treatName}\n${indication}\n${free ? coverage : "מחיר: " + price}\n${free ? "הגיעו למרפאה / וואטסאפ" : "לתיאום: וואטסאפ"} ${wa}`
         : ar
-          ? `${clinic.name}\n${treatName}\n${indication}\nالسعر: ${price}\nواتساب ${wa}`
-          : `${clinic.name}\n${treatName}\n${indication}\nPrice: ${price}\nWhatsApp ${wa}`,
+          ? `${clinic.name}\n${treatName}\n${indication}\n${free ? coverage : "السعر: " + price}\n${free ? "جيبوه عالعيادة / واتساب" : "واتساب"} ${wa}`
+          : `${clinic.name}\n${treatName}\n${indication}\n${free ? coverage : "Price: " + price}\n${free ? "Come to the clinic / WhatsApp" : "WhatsApp"} ${wa}`,
     },
     {
       platform: "story",
@@ -136,11 +150,17 @@ function copyFor(
     },
   ];
 
-  const whatsappScript = he
-    ? `שלום, כאן ${clinic.name}. קיבלנו פנייה לגבי ${treatName}. אפשר לקבוע תור ב־${duration !== toComplete("he", "משך הביקור") ? duration : "השעות שפורסמו"}. מחיר: ${price}. זו הודעת תיאום, לא ייעוץ רפואי.`
-    : ar
-      ? `مرحبا، هنا ${clinic.name}. وصلنا طلب بخصوص ${treatName}. يمكن حجز موعد. السعر: ${price}. هذه رسالة تنسيق لا استشارة طبية.`
-      : `Hi, this is ${clinic.name}. We got an enquiry about ${treatName}. We can book a visit. Price: ${price}. This is scheduling, not medical advice.`;
+  const whatsappScript = free
+    ? (he
+        ? `שלום, כאן ${clinic.name}. קיבלנו פנייה לגבי ${treatName}. הגיעו למרפאה / וואטסאפ ${wa}. ${coverage} וואטסאפ לא לחירום. זו הודעת תיאום, לא ייעוץ רפואי.`
+        : ar
+          ? `مرحبا، هنا ${clinic.name}. وصلنا طلب بخصوص ${treatName}. جيبوه عالعيادة / واتساب ${wa}. ${coverage} واتساب مش للطوارئ. هذه رسالة تنسيق لا استشارة طبية.`
+          : `Hi, this is ${clinic.name}. We got an enquiry about ${treatName}. Come to the clinic / WhatsApp ${wa}. ${coverage} WhatsApp is not for emergencies. This is scheduling, not medical advice.`)
+    : (he
+        ? `שלום, כאן ${clinic.name}. קיבלנו פנייה לגבי ${treatName}. אפשר לקבוע תור ב־${duration !== toComplete("he", "משך הביקור") ? duration : "השעות שפורסמו"}. מחיר: ${price}. זו הודעת תיאום, לא ייעוץ רפואי.`
+        : ar
+          ? `مرحبا، هنا ${clinic.name}. وصلنا طلب بخصوص ${treatName}. يمكن حجز موعد. السعر: ${price}. هذه رسالة تنسيق لا استشارة طبية.`
+          : `Hi, this is ${clinic.name}. We got an enquiry about ${treatName}. We can book a visit. Price: ${price}. This is scheduling, not medical advice.`);
 
   const voiceScript = he
     ? `הוק: ${treatName} ב${clinic.name}. גוף: ${indication}. סגירה: וואטסאפ. בלי מוזיקה שמסתירה דיסקליימר. טמפרטורה 0.2 — בלי קישוט קליני.`
@@ -230,9 +250,15 @@ function claimsFor(clinic: ClinicProfile, t: Treatment): Claim[] {
   claims.push({
     id: uid("cl"),
     text: {
-      he: "קריאה לפעולה לקביעת תור — ניסוח שיווקי, לא אבחנה.",
-      ar: "نداء لحجز موعد — صياغة تسويقية لا تشخيص.",
-      en: "Call to book an appointment — marketing copy, not a diagnosis.",
+      he: clinic.operatingModel === "free_service"
+        ? "קריאה להגיע למרפאה / וואטסאפ — ניסוח שיווקי, לא אבחנה ולא רכישה."
+        : "קריאה לפעולה לקביעת תור — ניסוח שיווקי, לא אבחנה.",
+      ar: clinic.operatingModel === "free_service"
+        ? "نداء للعيادة / واتساب — صياغة تسويقية لا تشخيص ولا شراء."
+        : "نداء لحجز موعد — صياغة تسويقية لا تشخيص.",
+      en: clinic.operatingModel === "free_service"
+        ? "Call to visit the clinic / WhatsApp — marketing copy, not a diagnosis and not a purchase."
+        : "Call to book an appointment — marketing copy, not a diagnosis.",
     },
     kind: "marketing-copy",
     source: "cta",

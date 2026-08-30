@@ -16,6 +16,7 @@ export const FACTORY_FORMATS: { id: string; label: Record<Locale, string> }[] = 
   { id: "whatsapp", label: { he: "וואטסאפ", ar: "واتساب", en: "WhatsApp" } },
   { id: "sms", label: { he: "SMS", ar: "SMS", en: "SMS" } },
   { id: "flyer", label: { he: "פלאייר", ar: "منشور مطبوع", en: "Flyer" } },
+  { id: "past_creative", label: { he: "מודעה ישנה (ייחוס)", ar: "إعلان سابق (مرجع)", en: "Past ad (reference)" } },
 ];
 
 export const MAX_COMPETITORS = 2;

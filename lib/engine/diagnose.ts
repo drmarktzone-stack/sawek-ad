@@ -1,13 +1,19 @@
 import type { Diagnosis, DiagnosisHypothesis, Intake, IntakeReport, Locale } from "../types";
 import { filled } from "../utils";
 import { isNoOffer } from "../no-offer";
+import { isFreeService } from "../operating-model";
+import { diagnoseFreeCta } from "../vertical";
+import { coachIntake, stageToDiagnosisArea } from "./coach";
 
 const L = (he: string, ar: string, en: string): Record<Locale, string> => ({ he, ar, en });
 
 export function diagnose(intake: Intake, report: IntakeReport): Diagnosis {
   const hypotheses: DiagnosisHypothesis[] = [];
-  const past = `${intake.pastAds} ${intake.whatFailed} ${intake.pastResults}`.toLowerCase();
-  const hasPast = filled(intake.pastAds) || filled(intake.whatFailed);
+  const pastCreativeBlob = (intake.pastCreatives ?? [])
+    .map((c) => `${c.headline} ${c.body} ${c.cta}`)
+    .join(" ");
+  const past = `${intake.pastAds} ${pastCreativeBlob} ${intake.whatFailed} ${intake.pastResults}`.toLowerCase();
+  const hasPast = filled(intake.pastAds) || filled(intake.whatFailed) || Boolean((intake.pastCreatives ?? []).length);
 
   const freeConsult =
     /ייעוץ חינם|استشارة مجان|free consult|free consultation/.test(past) ||
@@ -131,7 +137,21 @@ export function diagnose(intake: Intake, report: IntakeReport): Diagnosis {
     });
   }
 
-  const aovRelated = report.inconsistencies.some((i) => i.issue.en.includes("CAC"));
+  if (isFreeService(intake)) {
+    hypotheses.push({
+      area: "offer",
+      confidence: "high",
+      finding: L(
+        "מוסד ללא תשלום מהלקוח — הקמפיין הוא חשיפה/הרשמה/ביקור, לא רכישה.",
+        "مؤسسة بلا دفع من الزبون — الحملة تعرّض/تسجيل/زيارة، مش شراء.",
+        "Institution with no charge to the client — the campaign is exposure/enrollment/visit, not a purchase.",
+      ),
+      evidence: L("מודל הפעלה: שירות חינם.", "نموذج التشغيل: خدمة مجانية.", "Operating model: free service."),
+      recommendation: diagnoseFreeCta(intake),
+    });
+  }
+
+  const aovRelated = !isFreeService(intake) && report.inconsistencies.some((i) => i.issue.en.includes("CAC"));
   if (aovRelated) {
     hypotheses.push({
       area: "price",
@@ -165,6 +185,17 @@ export function diagnose(intake: Intake, report: IntakeReport): Diagnosis {
         "ضيّقوا إلى مجموعة بمشكلة ومكان مشتركين.",
         "Narrow to a group with a shared problem and a shared place.",
       ),
+    });
+  }
+
+  const coach = coachIntake(intake);
+  for (const c of coach.critiques) {
+    hypotheses.push({
+      area: stageToDiagnosisArea(c.stage),
+      confidence: "medium",
+      finding: c.finding,
+      evidence: c.evidence,
+      recommendation: c.why,
     });
   }
 

@@ -7,11 +7,13 @@ import type {
   OptimizerResultInput,
 } from "../types";
 import { parseNumber } from "../utils";
+import { isFreeService } from "../operating-model";
 
 const L = (he: string, ar: string, en: string): Record<Locale, string> => ({ he, ar, en });
 
 export function generateOptimizer(intake: Intake, media: MediaPlan): OptimizerPlaybook {
   const cac = parseNumber(intake.targetCac);
+  const free = isFreeService(intake);
   return {
     ifThen: [
       {
@@ -20,29 +22,39 @@ export function generateOptimizer(intake: Intake, media: MediaPlan): OptimizerPl
       },
       {
         if: L("פניות רבות בלי שם אמיתי / סקרנים", "طلبات كثيرة بلا اسم حقيقي / فضوليون", "Many enquiries with no real name / tyre-kickers"),
-        then: L("ההצעה רחבה מדי (למשל חינם). החמירו את ה-CTA: תור, לא «לפרטים».", "العرض واسع جداً (مثل مجاني). شدّدوا CTA: موعد لا «للتفاصيل».", "The offer is too wide (e.g. free). Tighten the CTA: a booking, not “learn more”."),
+        then: free
+          ? L("החמירו CTA להרשמה / ביקור / וואטסאפ — לא «לפרטים» ולא רכישה.", "شدّدوا CTA للتسجيل / الزيارة / واتساب — مش «للتفاصيل» ومش شراء.", "Tighten CTA to register / visit / WhatsApp — not “learn more” and not a purchase.")
+          : L("ההצעה רחבה מדי (למשל חינם). החמירו את ה-CTA: תור, לא «לפרטים».", "العرض واسع جداً (مثل مجاني). شدّدوا CTA: موعد لا «للتفاصيل».", "The offer is too wide (e.g. free). Tighten the CTA: a booking, not “learn more”."),
       },
       {
-        if: L("CPA מעל 1.8× יעד אחרי 50+ קליקים", "CPA فوق 1.8× الهدف بعد 50+ نقرة", "CPA above 1.8× target after 50+ clicks"),
-        then: L(
-          cac
-            ? `כבו את האדסט. יעד ${cac} ₪, קו אדום ≈ ${Math.round(cac * 1.8)} ₪.`
-            : "כבו ושמרו צילום. אין CAC יעד — אל תמציאו קו אדום מספרי.",
-          cac
-            ? `أوقفوا المجموعة. الهدف ${cac} ₪، الخط الأحمر ≈ ${Math.round(cac * 1.8)} ₪.`
-            : "أوقفوا واحفظوا لقطة. لا CAC — لا تخترعوا خطاً أحمر رقمياً.",
-          cac
-            ? `Kill the ad set. Target ${cac} ₪, red line ≈ ${Math.round(cac * 1.8)} ₪.`
-            : "Kill it and keep a screenshot. No target CAC — don’t invent a numeric red line.",
-        ),
+        if: free
+          ? L("יש חשיפה בלי ביקורים / הרשמות אחרי שבוע", "في وصول بلا زيارات / تسجيل بعد أسبوع", "Reach without visits / enrollments after a week")
+          : L("CPA מעל 1.8× יעד אחרי 50+ קליקים", "CPA فوق 1.8× الهدف بعد 50+ نقرة", "CPA above 1.8× target after 50+ clicks"),
+        then: free
+          ? L("אל תמטבו ל-Purchase/ROAS — אין תשלום מהלקוח. בדקו מסר, גיאו, ו-CTA לביקור.", "لا تحسّنوا على Purchase/ROAS — الزبون ما بدفع. افحصوا الرسالة والجغرافيا وCTA للزيارة.", "Do not optimize for Purchase/ROAS — the client does not pay. Check message, geo, and visit CTA.")
+          : L(
+              cac
+                ? `כבו את האדסט. יעד ${cac} ₪, קו אדום ≈ ${Math.round(cac * 1.8)} ₪.`
+                : "כבו ושמרו צילום. אין CAC יעד — אל תמציאו קו אדום מספרי.",
+              cac
+                ? `أوقفوا المجموعة. الهدف ${cac} ₪، الخط الأحمر ≈ ${Math.round(cac * 1.8)} ₪.`
+                : "أوقفوا واحفظوا لقطة. لا CAC — لا تخترعوا خطاً أحمر رقمياً.",
+              cac
+                ? `Kill the ad set. Target ${cac} ₪, red line ≈ ${Math.round(cac * 1.8)} ₪.`
+                : "Kill it and keep a screenshot. No target CAC — don’t invent a numeric red line.",
+            ),
       },
       {
-        if: L("יש 3+ המרות אמיתיות מתחת ליעד", "3+ تحويلات حقيقية تحت الهدف", "3+ real conversions under target"),
+        if: free
+          ? L("יש 3+ ביקורים / הרשמות אמיתיות", "3+ زيارات / تسجيلات حقيقية", "3+ real visits / enrollments")
+          : L("יש 3+ המרות אמיתיות מתחת ליעד", "3+ تحويلات حقيقية تحت الهدف", "3+ real conversions under target"),
         then: L("העלו תקציב ב-20% כל 3 ימים, לא פי 3 ביום אחד.", "ارفعوا الميزانية 20% كل 3 أيام لا ×3 في يوم.", "Raise budget 20% every 3 days, not 3× in one day."),
       },
     ],
     killRules: [
-      L("אין המרה מוגדרת → אל תריצו יותר מ-3 ימים «לבדוק».", "لا تحويل معرّف → لا تشغّلوا أكثر من 3 أيام «للتجربة».", "No defined conversion → do not run more than 3 days “to see”."),
+      free
+        ? L("אין תשלום מהלקוח → אל תהרגו לפי ROAS/Purchase. המרה = ביקור / הרשמה / הודעה.", "الزبون ما بدفع → لا توقفوا حسب ROAS/Purchase. التحويل = زيارة / تسجيل / رسالة.", "Client does not pay → do not kill on ROAS/Purchase. Conversion = visit / enrollment / message.")
+        : L("אין המרה מוגדרת → אל תריצו יותר מ-3 ימים «לבדוק».", "لا تحويل معرّف → لا تشغّلوا أكثر من 3 أيام «للتجربة».", "No defined conversion → do not run more than 3 days “to see”."),
       L("קריאייטיב עם הבטחה שלא בקליטה (הנחה, דירוג, «אלפים») → כבו.", "إبداع بوعد ليس في البيانات (خصم، تقييم، «آلاف») → أوقفوا.", "Creative promising something not in intake (discount, rating, “thousands”) → kill."),
     ],
     scaleRules: [
@@ -75,12 +87,14 @@ export function adviseFromResults(
       ),
     );
   } else {
-    const conversions = purchases ?? leads ?? 0;
+    const conversions = isFreeService(intake) ? (leads ?? 0) : (purchases ?? leads ?? 0);
     const cpa = conversions > 0 ? spend / conversions : undefined;
     if (conversions === 0) {
       advice.push(
         L(
-          `הוצאתם ${spend} ₪ בלי המרה. זה לא «עוד יומיים». עצרו, בדקו אירוע המרה ו-CTA, ואז רענן קריאייטיב מהיתרון: ${intake.uniqueAdvantage || "—"}.`,
+          isFreeService(intake)
+            ? `הוצאתם ${spend} ₪ בלי ביקור/הרשמה/הודעה. אל תחכו ל-ROAS. עצרו, בדקו CTA לחשיפה, ורעננו קריאייטיב מהיתרון: ${intake.uniqueAdvantage || "—"}.`
+            : `הוצאתם ${spend} ₪ בלי המרה. זה לא «עוד יומיים». עצרו, בדקו אירוע המרה ו-CTA, ואז רענן קריאייטיב מהיתרון: ${intake.uniqueAdvantage || "—"}.`,
           `أنفقتم ${spend} ₪ بلا تحويل. هذا ليس «يومين إضافيين». أوقفوا.`,
           `You spent ${spend} ₪ with zero conversions. This is not “two more days”. Stop, check the conversion event and CTA, then refresh creative from the advantage: ${intake.uniqueAdvantage || "—"}.`,
         ),

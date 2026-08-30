@@ -8,6 +8,7 @@ import { DEMO_LABEL } from "@/lib/demo";
 import { startPediatricDemoFlow } from "@/lib/start-pediatric-demo";
 import { markEmptyCampaign } from "@/lib/empty-campaign";
 import { Button } from "@/components/ui/button";
+import { FunctionRail } from "@/components/function-rail";
 
 export function HomeStudio() {
   const { t, locale } = useI18n();
@@ -63,16 +64,16 @@ export function HomeStudio() {
           >
             {DEMO_LABEL[locale]}
           </Button>
-          <button
-            type="button"
-            onClick={startEmpty}
-            className="rounded-xl border border-omni-yellow/50 px-5 py-3 text-sm font-semibold text-omni-yellow hover:bg-omni-yellow/10"
-          >
-            {t("home.startEmpty")}
-          </button>
+          <Button type="button" size="lg" onClick={startEmpty}>
+            {t("cta.new")}
+          </Button>
         </div>
+        <p className="mx-auto mt-2 max-w-md text-center text-xs text-zinc-500">{t("cta.newHint")}</p>
         <p className="mx-auto mt-4 max-w-xl text-center text-xs text-zinc-500">{t("home.truth")}</p>
-        <ul className="mx-auto mt-8 grid max-w-3xl grid-cols-2 gap-2 sm:grid-cols-4">
+      </section>
+      <FunctionRail />
+      <section className="relative mx-auto max-w-5xl px-4">
+        <ul className="mx-auto mt-4 grid max-w-3xl grid-cols-2 gap-2 sm:grid-cols-4">
           {stats.map((s) => (
             <li
               key={s.label}

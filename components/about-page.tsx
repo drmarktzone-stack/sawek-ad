@@ -9,17 +9,17 @@ export function AboutPage() {
   const nameBlock =
     locale === "he"
       ? {
-          h: "SAWEK AD — סאווק / ساويك",
-          p: "SAWEK AD הוא שם המוצר. בסאווק ו־ساويك אפשר לראות את המילה באותיות עבריות וערביות — המותג נשאר SAWEK AD, לא OmniAd Studio.",
+          h: "SAWEK AD — סאווק / سوِّق إعلانك بنفسك",
+          p: "SAWEK AD הוא שם המוצר. בסאווק ו־سوِّق إعلانك بنفسك אפשר לראות את המילה באותיות עבריות וערביות — המותג נשאר SAWEK AD, לא OmniAd Studio.",
         }
       : locale === "ar"
         ? {
-            h: "SAWEK AD — ساويك / סאווק",
-            p: "SAWEK AD هو اسم المنتج. ساويك وסאווק يظهران الاسم بالحرف العربي والعبري — العلامة تبقى SAWEK AD وليست OmniAd Studio.",
+            h: "سوِّق إعلانك بنفسك",
+            p: "سوِّق إعلانك بنفسك هو الاسم العربي للمنتج — مش سوِّق إعلانك بنفسك. بالعبرية סאווק، وباللاتيني SAWEK AD. العلامة ليست OmniAd Studio.",
           }
         : {
-            h: "SAWEK AD — ساويك / סאווק",
-            p: "SAWEK AD is the product name. ساويك and סאווק are optional Arabic and Hebrew wordmarks — the brand stays SAWEK AD, not OmniAd Studio.",
+            h: "SAWEK AD — سوِّق إعلانك بنفسك / סאווק",
+            p: "SAWEK AD is the product name. سوِّق إعلانك بنفسك and סאווק are optional Arabic and Hebrew wordmarks — the brand stays SAWEK AD, not OmniAd Studio.",
           };
 
   const blocks =
@@ -112,7 +112,7 @@ export function AboutPage() {
       <ConquerHeadline subtitle={t("about.title")} />
       <DepartmentRail />
       <p className="mb-8 text-center text-sm text-zinc-400">
-        SAWEK AD · סאווק · ساويك
+        {locale === "ar" ? t("brand.name") : "SAWEK AD · סאווק · سوِّق إعلانك بنفسك"}
         <span className="mt-1 block text-xs text-zinc-600">{t("brand.tagline")}</span>
       </p>
       <div className="space-y-4">

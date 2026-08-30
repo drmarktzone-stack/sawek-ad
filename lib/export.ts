@@ -12,6 +12,8 @@ export function packToText(pack: CampaignPack, locale: Locale): string {
   lines.push("");
   lines.push("=== INTAKE ===");
   lines.push(`${t(locale, "biz.name")}: ${p.intake.businessName}`);
+  lines.push(`${t(locale, "review.model")}: ${p.intake.operatingModel === "free_service" ? t(locale, "model.free") : t(locale, "model.paid")}`);
+  lines.push(`${t(locale, "review.assets")}: ${(p.intake.mediaAssets ?? []).length}`);
   lines.push(`${t(locale, "details.audience")}: ${p.intake.audience}`);
   lines.push(`${t(locale, "details.problem")}: ${p.intake.biggestProblem}`);
   lines.push(`${t(locale, "details.advantage")}: ${p.intake.uniqueAdvantage}`);
@@ -130,7 +132,7 @@ export function printPdf(pack: CampaignPack, locale: Locale) {
 </style>
 </head>
 <body>
-  <p>SAWEK AD · סאווק · ساويك</p>
+  <p>${locale === "ar" ? "سوِّق إعلانك بنفسك" : "SAWEK AD · סאווק · سوِّق إعلانك بنفسك"}</p>
   <h1>${escapeHtml(pack.name)}</h1>
   <p>${escapeHtml(pack.media.worstCase[locale])}</p>
   <p>${escapeHtml(pack.media.realistic[locale])}</p>
@@ -176,7 +178,7 @@ export function printBible(pack: CampaignPack, locale: Locale) {
 </style>
 </head>
 <body>
-  <p>SAWEK AD · סאווק · ساويك — campaign bible (PLAN only)</p>
+  <p>${locale === "ar" ? "سوِّق إعلانك بنفسك" : "SAWEK AD · סאווק · سوِّق إعلانك بنفسك"} — campaign bible (PLAN only)</p>
   <h1>${escapeHtml(p.name)}</h1>
   <p>${escapeHtml(t(locale, "result.score"))}: ${p.intakeReport.completeness}/100</p>
   ${section(t(locale, "nav.discovery"), [

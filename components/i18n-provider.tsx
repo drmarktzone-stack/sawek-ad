@@ -27,7 +27,7 @@ function applyDocumentLocale(locale: Locale) {
   document.documentElement.dir = dirFor(locale);
   document.documentElement.classList.add("dark");
   document.title =
-    locale === "ar" ? "SAWEK AD — ساويك" : locale === "he" ? "SAWEK AD — סאווק / ساويك" : "SAWEK AD — ساويك / סאווק";
+    locale === "ar" ? "سوِّق إعلانك بنفسك" : locale === "he" ? "SAWEK AD — סאווק / سوِّق إعلانك بنفسك" : "SAWEK AD — سوِّق إعلانك بنفسك / סאווק";
 }
 
 export function I18nProvider({ children }: { children: React.ReactNode }) {

@@ -17,7 +17,7 @@ const cairo = Cairo({
 });
 
 export const metadata: Metadata = {
-  title: "SAWEK AD — ساويك / סאווק",
+  title: "SAWEK AD — سوِّق إعلانك بنفسك / סאווק",
   description:
     "SAWEK AD: RTL campaign studio with a 4-step wizard, five Gemini agents, and HE/AR/EN copy — OmniAd engine, OptiBrain medical desk. No invented leads or testimonials.",
 };

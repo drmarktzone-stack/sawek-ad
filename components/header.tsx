@@ -19,7 +19,11 @@ import {
 import { LOCALES } from "@/lib/i18n";
 import { useI18n } from "./i18n-provider";
 import { LangLink } from "./lang-link";
+import { FunctionMenuLinks, FunctionRail } from "./function-rail";
+import { UrlIngest } from "./url-ingest";
 import { cn } from "@/lib/utils";
+import { markEmptyCampaign } from "@/lib/empty-campaign";
+import { Button } from "@/components/ui/button";
 
 /** Captured OmniAd chrome + user list — one link per route, no Creative/Studio or Ops/Campaigns duplicates. */
 const NAV = [
@@ -72,6 +76,7 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-omni-yellow/20 bg-black/85 backdrop-blur-md">
+      <UrlIngest />
       <div className="h-1 w-full bg-gradient-to-l from-omni-yellow via-omni-red to-omni-yellow" />
       <div className="mx-auto flex max-w-[92rem] items-center gap-2 px-3 py-3">
         <LangLink href="/" className="flex shrink-0 flex-col leading-tight">
@@ -108,6 +113,11 @@ export function Header() {
         </nav>
 
         <div className="ms-auto flex items-center gap-2">
+          <Button asChild size="sm" className="shrink-0">
+            <LangLink href="/" onClick={() => markEmptyCampaign()}>
+              {t("cta.new")}
+            </LangLink>
+          </Button>
           <div className="hidden sm:block">
             <LanguageToggle />
           </div>
@@ -121,6 +131,13 @@ export function Header() {
           </button>
         </div>
       </div>
+      <div className="hidden border-t border-white/5 md:block">
+        <div className="mx-auto flex max-w-[92rem] items-center gap-2 overflow-x-auto px-3 py-1.5">
+          <span className="shrink-0 text-[10px] font-bold uppercase tracking-[0.18em] text-omni-red">{t("fn.title")}</span>
+          <FunctionRail compact />
+          <span className="ms-auto shrink-0 text-[10px] text-zinc-600">{t("fn.engines")}</span>
+        </div>
+      </div>
 
       {open && (
         <div className="border-t border-white/10 bg-black px-4 py-3 lg:hidden">
@@ -128,6 +145,11 @@ export function Header() {
             <LanguageToggle />
           </div>
           <div className="flex flex-col gap-1">
+            <Button asChild className="mb-2">
+              <LangLink href="/" onClick={() => { markEmptyCampaign(); setOpen(false); }}>
+                {t("cta.new")}
+              </LangLink>
+            </Button>
             {NAV.map((item) => {
               const Icon = item.icon;
               return (
@@ -142,6 +164,7 @@ export function Header() {
                 </LangLink>
               );
             })}
+            <FunctionMenuLinks onPick={() => setOpen(false)} />
           </div>
         </div>
       )}

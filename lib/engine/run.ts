@@ -7,6 +7,7 @@ import { generateStrategy } from "./strategy";
 import { generateMedia } from "./media";
 import { generateOptimizer } from "./optimizer";
 import { buildAgency } from "./agency";
+import { coachIntake } from "./coach";
 import { demoIntake, DEMO_ID } from "../demo";
 import { loadLocale } from "../storage";
 
@@ -125,6 +126,7 @@ export function assemblePack(
     optimizer?: CampaignPack["optimizer"];
     agentStatus: Record<AgentId, AgentStatus>;
     id?: string;
+    coach?: CampaignPack["coach"];
   },
 ): CampaignPack {
   const now = new Date().toISOString();
@@ -145,6 +147,7 @@ export function assemblePack(
     agentStatus: partial.agentStatus,
     saved: false,
     planActivated: false,
+    coach: partial.coach ?? coachIntake(intake),
   };
   return { ...base, agency: buildAgency(base) };
 }

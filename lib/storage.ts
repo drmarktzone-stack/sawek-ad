@@ -1,5 +1,6 @@
-import type { CampaignPack, Intake, Locale, SelfPlan, SelfProfile, StudioPiece } from "./types";
+import type { CampaignPack, CoachReport, Intake, Locale, SelfPlan, SelfProfile, StudioPiece } from "./types";
 import { emptyIntake } from "./engine/validate";
+import { coachIntake } from "./engine/coach";
 
 const K = {
   locale: "omniad-locale",
@@ -58,6 +59,7 @@ export interface DraftState {
   step: 1 | 2 | 3 | 4;
   phase?: WizardPhase;
   packId?: string;
+  coach?: CoachReport;
 }
 
 export function loadDraft(): DraftState {
@@ -66,14 +68,45 @@ export function loadDraft(): DraftState {
     d.phase === "interview" || d.phase === "agents" ? d.phase : "wizard";
   return {
     step: d.step === 2 || d.step === 3 || d.step === 4 ? d.step : 1,
-    intake: { ...emptyIntake(), ...d.intake },
+    intake: {
+      ...emptyIntake(),
+      ...d.intake,
+      operatingModel: d.intake?.operatingModel === "free_service" ? "free_service" : (d.intake?.operatingModel === "paid" ? "paid" : emptyIntake().operatingModel),
+      mediaAssets: Array.isArray(d.intake?.mediaAssets) ? d.intake.mediaAssets : [],
+      ingestedDocs: Array.isArray(d.intake?.ingestedDocs) ? d.intake.ingestedDocs : [],
+      pastCreatives: Array.isArray(d.intake?.pastCreatives) ? d.intake.pastCreatives : [],
+      brandTone: typeof d.intake?.brandTone === "string" ? d.intake.brandTone : "",
+      brandPositioning: typeof d.intake?.brandPositioning === "string" ? d.intake.brandPositioning : "",
+      channelNotes: typeof d.intake?.channelNotes === "string" ? d.intake.channelNotes : "",
+      whatsappTemplates: typeof d.intake?.whatsappTemplates === "string" ? d.intake.whatsappTemplates : "",
+      landingLines: typeof d.intake?.landingLines === "string" ? d.intake.landingLines : "",
+    },
     phase,
     packId: typeof d.packId === "string" ? d.packId : undefined,
+    coach: d.coach && typeof d.coach === "object" ? d.coach : undefined,
   };
 }
 
 export function saveDraft(draft: DraftState) {
   write(K.draft, draft);
+}
+
+export const INGEST_APPLIED_EVENT = "sawek-ingest-applied";
+
+/** Merge intake into the current draft and notify the wizard (same window).
+ * resetWizard: URL ingest replaces the previous business — leave demo/agents pack, reload steps.
+ */
+export function applyIntakeToDraft(intake: Intake, opts?: { resetWizard?: boolean }): DraftState {
+  const d = loadDraft();
+  const coach = coachIntake(intake);
+  const next: DraftState = opts?.resetWizard
+    ? { intake, step: 2, phase: "wizard", coach }
+    : { ...d, intake, coach };
+  saveDraft(next);
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event(INGEST_APPLIED_EVENT));
+  }
+  return next;
 }
 
 export function clearDraft() {

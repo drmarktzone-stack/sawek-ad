@@ -10,6 +10,11 @@ import { addLead } from "@/lib/medical/storage";
 import { upcomingSlots } from "@/lib/medical/slots";
 import { uid } from "@/lib/utils";
 import { dirFor } from "@/lib/i18n";
+import { loadDraft } from "@/lib/storage";
+import { assetLabelText } from "@/lib/media-assets";
+import { useResolvedAssets } from "@/lib/use-resolved-assets";
+import { isFreeService, sampleLabel } from "@/lib/operating-model";
+import { useIsClient } from "@/lib/use-is-client";
 
 export function LandingView({
   campaign,
@@ -33,12 +38,18 @@ export function LandingView({
   const [sent, setSent] = useState(false);
   const [booked, setBooked] = useState("");
   const slots = useMemo(() => upcomingSlots(clinic, 8), [clinic]);
+  const client = useIsClient();
+  const draftAssets = client ? (loadDraft().intake.mediaAssets ?? []) : [];
+  const urls = useResolvedAssets(draftAssets);
+  const free = isFreeService(clinic) || (client && isFreeService(loadDraft().intake));
 
   const labels = {
     services: locale === "he" ? "השירות" : locale === "ar" ? "الخدمة" : "The service",
     faq: locale === "he" ? "שאלות" : locale === "ar" ? "أسئلة" : "FAQ",
     form: locale === "he" ? "השאירו פנייה" : locale === "ar" ? "اتركوا طلباً" : "Leave an enquiry",
-    book: locale === "he" ? "קביעת תור" : locale === "ar" ? "حجز موعد" : "Book a visit",
+    book: free
+      ? (locale === "he" ? "הגיעו למרפאה" : locale === "ar" ? "جيبوه عالعيادة" : "Come to the clinic")
+      : (locale === "he" ? "קביעת תור" : locale === "ar" ? "حجز موعد" : "Book a visit"),
     submit: locale === "he" ? "שליחה" : locale === "ar" ? "إرسال" : "Send",
     thanks: locale === "he" ? "הפנייה נשמרה במערכת ההדגמה (localStorage)." : locale === "ar" ? "حُفظ الطلب محلياً." : "Enquiry saved in the demo system (localStorage).",
     name: locale === "he" ? "שם מלא" : locale === "ar" ? "الاسم الكامل" : "Full name",
@@ -106,6 +117,36 @@ export function LandingView({
             </a>
           )}
         </header>
+
+        <section className="mt-6 grid gap-3 sm:grid-cols-2">
+          {draftAssets.length === 0 ? (
+            <div
+              className="flex h-40 items-center justify-center rounded-2xl text-xs font-black uppercase tracking-[0.18em]"
+              style={{ background: skin.card, color: skin.muted }}
+            >
+              {sampleLabel(locale)}
+            </div>
+          ) : (
+            draftAssets.map((a) => (
+              <figure key={a.id} className="overflow-hidden rounded-2xl" style={{ background: skin.card }}>
+                {urls[a.id] && a.kind === "image" ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={urls[a.id]} alt={assetLabelText(a.label, locale)} className="h-40 w-full object-cover" />
+                ) : urls[a.id] && a.kind === "video" ? (
+                  <video src={urls[a.id]} className="h-40 w-full object-cover" muted playsInline controls />
+                ) : (
+                  <div className="flex h-40 items-center justify-center text-[10px] font-black uppercase tracking-widest" style={{ color: skin.muted }}>
+                    {sampleLabel(locale)}
+                  </div>
+                )}
+                <figcaption className="px-3 py-2 text-xs" style={{ color: skin.muted }}>
+                  {assetLabelText(a.label, locale)}
+                  {a.note ? ` — ${a.note}` : ""}
+                </figcaption>
+              </figure>
+            ))
+          )}
+        </section>
 
         <div
           className="mt-6 rounded-xl px-4 py-3 text-sm"

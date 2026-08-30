@@ -1,6 +1,8 @@
-import { clearDraft } from "./storage";
+import { clearDraft, saveDraft, type DraftState } from "./storage";
+import { emptyIntake } from "./engine/validate";
 
 export const EMPTY_CAMPAIGN_KEY = "sawek-empty-campaign";
+export const EMPTY_CAMPAIGN_EVENT = "sawek-empty-campaign";
 
 export function markEmptyCampaign() {
   try {
@@ -13,6 +15,9 @@ export function markEmptyCampaign() {
     localStorage.setItem(EMPTY_CAMPAIGN_KEY, "1");
   } catch {
     /* private mode */
+  }
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event(EMPTY_CAMPAIGN_EVENT));
   }
 }
 
@@ -32,6 +37,14 @@ export function clearEmptyCampaign() {
   } catch {
     /* ignore */
   }
+}
+
+/** Persist a blank draft and drop the empty flag so later edits survive refresh. */
+export function applyEmptyCampaignHydrate(): DraftState {
+  const draft: DraftState = { intake: emptyIntake(), step: 1, phase: "wizard" };
+  saveDraft(draft);
+  clearEmptyCampaign();
+  return draft;
 }
 
 /** Explicit demo click: `?demo=samer` in the URL. Session leftovers do not count. */

@@ -1,6 +1,66 @@
 export type Locale = "he" | "ar" | "en";
 export type CampaignType = "business" | "product" | "service" | "app" | "personal";
 export type Depth = "quick" | "deep";
+/** Upstream of offer: commercial sale vs exposure-only institution. Not the no-offer chip. */
+export type OperatingModel = "paid" | "free_service";
+
+export type MediaAssetKind = "image" | "video";
+export type MediaAssetLabel =
+  | "logo"
+  | "exterior"
+  | "interior"
+  | "doctor"
+  | "waiting_room"
+  | "before_after"
+  | "other";
+
+/** Metadata only — blobs live in IndexedDB, never a paid CDN. publicSrc is a static /public path (no IndexedDB). */
+export interface MediaAssetMeta {
+  id: string;
+  kind: MediaAssetKind;
+  mime: string;
+  name: string;
+  size: number;
+  label: MediaAssetLabel;
+  note: string;
+  createdAt: string;
+  /** Optional static URL (e.g. /rinan/pool1.jpg) used as <img src> without IndexedDB. */
+  publicSrc?: string;
+}
+
+export type IngestDocKind = "pdf" | "txt" | "docx" | "image" | "url";
+export type IngestTag = "past_creative" | "identity" | "branding" | "media_plan" | "leads" | "other";
+export type IngestTargetStage =
+  | "wizard_business"
+  | "wizard_details"
+  | "discovery_strategy"
+  | "creative"
+  | "media_plan"
+  | "leads";
+
+/** Confirmed old ad — reference structure only, never invented new claims. */
+export interface PastCreative {
+  id: string;
+  sourceDocId: string;
+  sourceName: string;
+  headline: string;
+  body: string;
+  cta: string;
+  tag: "past_creative";
+  confirmedReal: boolean;
+}
+
+export interface IngestedDocument {
+  id: string;
+  name: string;
+  mime: string;
+  size: number;
+  kind: IngestDocKind;
+  tags: IngestTag[];
+  excerpt: string;
+  createdAt: string;
+  assetId?: string;
+}
 
 export type AgentId =
   | "intake"
@@ -45,6 +105,7 @@ export interface Competitor {
 export interface Intake {
   type: CampaignType;
   depth: Depth;
+  operatingModel: OperatingModel;
   businessName: string;
   category: string;
   description: string;
@@ -73,6 +134,14 @@ export interface Intake {
   pastAds: string;
   pastResults: string;
   whatFailed: string;
+  mediaAssets: MediaAssetMeta[];
+  ingestedDocs: IngestedDocument[];
+  pastCreatives: PastCreative[];
+  brandTone: string;
+  brandPositioning: string;
+  channelNotes: string;
+  whatsappTemplates: string;
+  landingLines: string;
 }
 
 export interface MissingFlag {
@@ -92,6 +161,39 @@ export interface IntakeReport {
   missing: MissingFlag[];
   inconsistencies: Inconsistency[];
   refusedGuesses: Record<Locale, string>[];
+}
+
+export type CoachStage = "wizard_business" | "wizard_details" | "offer" | "channels" | "creative";
+
+export interface CoachCritique {
+  stage: CoachStage;
+  finding: Record<Locale, string>;
+  why: Record<Locale, string>;
+  evidence: Record<Locale, string>;
+}
+
+export interface CoachSuggestion {
+  field: string;
+  current: string;
+  proposed: Record<Locale, string>;
+  reason: Record<Locale, string>;
+  applySafe: boolean;
+}
+
+export interface CoachStrategy {
+  id: string;
+  title: Record<Locale, string>;
+  body: Record<Locale, string>;
+  plan7: Record<Locale, string>;
+}
+
+export interface CoachReport {
+  score: number;
+  vertical: string;
+  critiques: CoachCritique[];
+  suggestions: CoachSuggestion[];
+  strategies: CoachStrategy[];
+  anglesUsed: Record<Locale, string>[];
 }
 
 export interface DiagnosisHypothesis {
@@ -188,6 +290,7 @@ export interface ProducedAd {
   body: string;
   visualNotes: Record<Locale, string>;
   createdAt: string;
+  assetId?: string;
 }
 
 export interface CampaignPack {
@@ -208,6 +311,7 @@ export interface CampaignPack {
   saved: boolean;
   planActivated: boolean;
   agency?: AgencyPack;
+  coach?: CoachReport;
 }
 
 export type Tri = Record<Locale, string>;

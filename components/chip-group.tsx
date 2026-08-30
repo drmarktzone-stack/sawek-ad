@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import type { ChipOption } from "@/lib/chips";
+import { chipIsSelected } from "@/lib/chips";
 import { useI18n } from "./i18n-provider";
 
 export function ChipGroup({
@@ -11,6 +12,7 @@ export function ChipGroup({
   customValue,
   onCustom,
   showCustomField,
+  multi = true,
 }: {
   options: ChipOption[];
   value: string;
@@ -18,16 +20,21 @@ export function ChipGroup({
   customValue?: string;
   onCustom?: (v: string) => void;
   showCustomField?: boolean;
+  /** Default true for audience/problem/advantage/goal/offer/channels. Pass false for depth. */
+  multi?: boolean;
 }) {
   const { locale, t } = useI18n();
   return (
     <div>
+      {multi && <p className="mb-2 text-xs text-zinc-500">{t("details.multiHint")}</p>}
       <div className="flex flex-wrap gap-2">
         {options.map((opt) => {
           const label = opt.label[locale];
           const selected = opt.custom
             ? showCustomField
-            : value === label || value === opt.id || Object.values(opt.label).includes(value);
+            : multi
+              ? chipIsSelected(value, opt, options, showCustomField)
+              : value === label || value === opt.id || Object.values(opt.label).includes(value);
           return (
             <button
               key={opt.id}

@@ -17,6 +17,7 @@ export function demoPediatricClinic(): ClinicProfile {
       "המידע באתר הוא כללי ואינו מחליף ייעוץ, אבחון או טיפול רפואי. במצב חירום פנו לחדר מיון. שעות הקבלה ומחירים שלא הוזנו נשארים [יש להשלים] — SAWEK AD לא ממציא אותם. שפות: עברית, ערבית, אנגלית.",
     hours: DEFAULT_HOURS.map((h) => ({ ...h, open: "", close: "", closed: true })),
     slotMinutes: 20,
+    operatingModel: "free_service",
   };
 }
 

@@ -1,5 +1,6 @@
 import type { ChannelBlueprint, Intake, Locale, MediaPlan } from "../types";
 import { parseNumber } from "../utils";
+import { isFreeService } from "../operating-model";
 
 const L = (he: string, ar: string, en: string): Record<Locale, string> => ({ he, ar, en });
 
@@ -8,6 +9,7 @@ function painKeyword(intake: Intake): string {
 }
 
 function shares(intake: Intake): { meta: number; google: number; tiktok: number; youtube: number } {
+  if (isFreeService(intake)) return { meta: 50, google: 25, tiktok: 10, youtube: 15 };
   if (intake.type === "app") return { meta: 35, google: 15, tiktok: 30, youtube: 20 };
   const young = /18–34|18-34|צעיר|شباب|young/.test(intake.audience);
   if (young) return { meta: 30, google: 20, tiktok: 30, youtube: 20 };
@@ -58,7 +60,9 @@ export function generateMedia(intake: Intake): MediaPlan {
     channel(
       "meta",
       s.meta,
-      L("מודעות המרה / הודעות — תודעה + פנייה", "إعلانات تحويل / رسائل", "Conversion / messages — awareness + enquiry"),
+      isFreeService(intake)
+        ? L("חשיפה / תנועה — לא המרת רכישה", "تعرّض / زيارات — مش تحويل شراء", "Reach / traffic — not purchase conversion")
+        : L("מודעות המרה / הודעות — תודעה + פנייה", "إعلانات تحويل / رسائل", "Conversion / messages — awareness + enquiry"),
       L(
         loc
           ? `גיאו: ${loc}. קהל ליבה: ${aud || "לא צוין — לא נרחיב תחומי עניין"}. בלי Lookalike לפני 50 המרות.`
@@ -79,7 +83,9 @@ export function generateMedia(intake: Intake): MediaPlan {
     channel(
       "google",
       s.google,
-      L("חיפוש כוונה — מי כבר מחפש", "بحث النية — من يبحث أصلاً", "Intent search — people already looking"),
+      isFreeService(intake)
+        ? L("חיפוש מודעות — מי מחפש את המוסד", "بحث وعي — مين بيدوّر على المؤسسة", "Awareness search — people looking up the institution")
+        : L("חיפוש כוונה — מי כבר מחפש", "بحث النية — من يبحث أصلاً", "Intent search — people already looking"),
       L(
         "רק מילות כוונה מהקליטה. לא נרחיב למילות מתחרים שלא הוזנו.",
         "كلمات نية من البيانات فقط. لن نوسّع إلى كلمات منافسين غير مُدخلة.",
@@ -129,8 +135,19 @@ export function generateMedia(intake: Intake): MediaPlan {
 
   const assumptions = [
     L("אין APIs חיים למטא/גוגל/טיקטוק/יוטיוב — זה בלופרינט לקנייה ידנית.", "لا واجهات حية — هذا مخطط للشراء اليدوي.", "No live Meta/Google/TikTok/YouTube APIs — this is a blueprint for a manual buy."),
-    L("תרחישי לידים מופיעים רק אם סיפקתם תקציב ו-CAC.", "سيناريوهات العملاء تظهر فقط إذا أعطيتم ميزانية وCAC.", "Lead scenarios appear only if you supplied budget and CAC."),
+    isFreeService(intake)
+      ? L("מודל חינם: המדיה היא PLAN לחשיפה. אין אופטימיזציית Purchase/ROAS.", "نموذج مجاني: الميديا PLAN للتعرّض. بلا تحسين Purchase/ROAS.", "Free-service: media is an exposure PLAN. No Purchase/ROAS optimization.")
+      : L("תרחישי לידים מופיעים רק אם סיפקתם תקציב ו-CAC.", "سيناريوهات العملاء تظهر فقط إذا أعطيتم ميزانية وCAC.", "Lead scenarios appear only if you supplied budget and CAC."),
   ];
+  if (intake.channelNotes?.trim()) {
+    assumptions.push(
+      L(
+        `ערוצים שאושרו מהמסמך: ${intake.channelNotes}. PLAN בלבד — אין פרסום חי.`,
+        `قنوات اعتُمدت من المستند: ${intake.channelNotes}. خطة فقط — بلا نشر حي.`,
+        `Channels confirmed from the document: ${intake.channelNotes}. PLAN only — no live publish.`,
+      ),
+    );
+  }
 
   const missingForLiveBuy = [];
   if (!loc && intake.type !== "app") {
@@ -149,7 +166,7 @@ export function generateMedia(intake: Intake): MediaPlan {
   );
   let realistic = worstCase;
 
-  if (budget != null && cac != null && cac > 0) {
+  if (!isFreeService(intake) && budget != null && cac != null && cac > 0) {
     scenarioFromUserNumbers = true;
     scenarioLeadsWorst = Math.floor(budget / (cac * 1.8));
     scenarioLeadsRealistic = Math.floor(budget / cac);

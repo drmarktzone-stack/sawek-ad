@@ -1,6 +1,7 @@
 import type { Intake, IntakeReport, Locale, MissingFlag } from "../types";
 import { filled, parseNumber } from "../utils";
 import { isNoOffer } from "../no-offer";
+import { isFreeService } from "../operating-model";
 
 const L = (he: string, ar: string, en: string): Record<Locale, string> => ({ he, ar, en });
 
@@ -102,6 +103,7 @@ export function emptyIntake(): Intake {
   return {
     type: "business",
     depth: "quick",
+    operatingModel: "paid",
     businessName: "",
     category: "",
     description: "",
@@ -130,29 +132,50 @@ export function emptyIntake(): Intake {
     pastAds: "",
     pastResults: "",
     whatFailed: "",
+    mediaAssets: [],
+    ingestedDocs: [],
+    pastCreatives: [],
+    brandTone: "",
+    brandPositioning: "",
+    channelNotes: "",
+    whatsappTemplates: "",
+    landingLines: "",
   };
 }
 
 export function cmoFieldsMissing(intake: Intake): boolean {
+  if (isFreeService(intake)) {
+    return !filled(intake.businessModel) || !filled(intake.pastAds);
+  }
   return !filled(intake.businessModel) || !filled(intake.monthlyBudget) || !filled(intake.targetCac) || !filled(intake.pastAds);
 }
 
+const WIZARD_REQUIRED: { field: keyof Intake; label: Record<Locale, string> }[] = [
+  { field: "businessName", label: L("שם העסק", "اسم العمل", "Business name") },
+  { field: "description", label: L("תיאור העסק", "وصف النشاط", "Description") },
+  { field: "audience", label: L("קהל", "الجمهور", "Audience") },
+  { field: "biggestProblem", label: L("בעיה / כאב", "المشكلة", "Problem") },
+  { field: "uniqueAdvantage", label: L("יתרון", "الميزة", "Advantage") },
+  { field: "mainGoal", label: L("מטרה", "الهدف", "Goal") },
+];
+
+export function wizardMissingFields(intake: Intake): { field: keyof Intake; label: Record<Locale, string> }[] {
+  return WIZARD_REQUIRED.filter((c) => !filled(String(intake[c.field] ?? "")));
+}
+
 export function wizardReady(intake: Intake): boolean {
-  return (
-    filled(intake.businessName) &&
-    filled(intake.description) &&
-    filled(intake.audience) &&
-    filled(intake.biggestProblem) &&
-    filled(intake.uniqueAdvantage) &&
-    filled(intake.mainGoal)
-  );
+  return wizardMissingFields(intake).length === 0;
 }
 
 export function validateIntake(intake: Intake): IntakeReport {
   const missing: MissingFlag[] = [];
   let earned = 0;
   let total = 0;
+  const skipPaidUnit = isFreeService(intake)
+    ? new Set(["avgOrderValue", "marginPercent", "targetCac"])
+    : new Set<string>();
   for (const c of CHECKS) {
+    if (skipPaidUnit.has(c.field)) continue;
     total += c.weight;
     if (filled(String(intake[c.field] ?? ""))) earned += c.weight;
     else {
@@ -178,7 +201,7 @@ export function validateIntake(intake: Intake): IntakeReport {
   const cac = parseNumber(intake.targetCac);
   const budget = parseNumber(intake.monthlyBudget);
 
-  if (aov != null && margin != null && cac != null) {
+  if (!isFreeService(intake) && aov != null && margin != null && cac != null) {
     const contribution = aov * (margin / 100);
     if (contribution > 0 && cac > contribution) {
       inconsistencies.push({
@@ -196,7 +219,7 @@ export function validateIntake(intake: Intake): IntakeReport {
     }
   }
 
-  if (budget != null && cac != null && budget < cac) {
+  if (!isFreeService(intake) && budget != null && cac != null && budget < cac) {
     inconsistencies.push({
       issue: L("תקציב חודשי נמוך מ-CAC יחיד", "الميزانية الشهرية أقل من CAC واحد", "Monthly budget is below a single CAC"),
       detail: L(
@@ -230,6 +253,15 @@ export function validateIntake(intake: Intake): IntakeReport {
         "אין מבצע — לא הוספנו הנחה או ייעוץ חינם כברירת מחדל.",
         "لا يوجد عرض — لم نُضف خصماً أو استشارة مجانية افتراضياً.",
         "No offer — we did not add a discount or free consult by default.",
+      ),
+    );
+  }
+  if (isFreeService(intake)) {
+    refusedGuesses.push(
+      L(
+        "מודל שירות חינם — אין קנו עכשיו, אין מחיר, אין קופון, ואין ROAS כמכירה.",
+        "نموذج خدمة مجانية — بلا اشتروا الآن وبلا سعر وبلا كوبون وبلا ROAS كمبيعات.",
+        "Free-service model — no buy-now, no price, no coupon, and no ROAS-as-sales.",
       ),
     );
   }

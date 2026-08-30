@@ -10,15 +10,16 @@ import { isNoOffer } from "../no-offer";
 import { filled } from "../utils";
 import {
   ADVANTAGE_CHIPS,
-  AUDIENCE_CHIPS,
   GOAL_CHIPS,
   OFFER_CHIPS,
-  PROBLEM_CHIPS,
+  audienceChipsFor,
   defaultOfferLabel,
   resolveChipLabel,
 } from "../chips";
 import { isWalkIn, landingBody, rsaLines, spokenCta, whatsappScript, hoursLine, kupaLine, landingH1 } from "./spoken";
 import { canonicalDoctorName } from "../demo";
+import { coverageFactLine, isClalitCoverageFact, isFreeService, problemChipsFor } from "../operating-model";
+import { bofWalkLine, landingVisualLine, smsWalkLine } from "../vertical";
 
 const L = (he: string, ar: string, en: string): Tri => ({ he, ar, en });
 
@@ -29,12 +30,14 @@ function n(i: Intake) {
 export function buildAgency(pack: Pick<CampaignPack, "intake" | "intakeReport" | "diagnosis" | "media" | "optimizer" | "variants">): AgencyPack {
   const i = pack.intake;
   const name = n(i);
-  const audHe = resolveChipLabel(i.audience, AUDIENCE_CHIPS, "he") || "—";
-  const audAr = resolveChipLabel(i.audience, AUDIENCE_CHIPS, "ar") || "—";
-  const audEn = resolveChipLabel(i.audience, AUDIENCE_CHIPS, "en") || "—";
-  const painHe = resolveChipLabel(i.biggestProblem, PROBLEM_CHIPS, "he") || "—";
-  const painAr = resolveChipLabel(i.biggestProblem, PROBLEM_CHIPS, "ar") || "—";
-  const painEn = resolveChipLabel(i.biggestProblem, PROBLEM_CHIPS, "en") || "—";
+  const audChips = audienceChipsFor(i);
+  const painChips = problemChipsFor(i);
+  const audHe = resolveChipLabel(i.audience, audChips, "he") || "—";
+  const audAr = resolveChipLabel(i.audience, audChips, "ar") || "—";
+  const audEn = resolveChipLabel(i.audience, audChips, "en") || "—";
+  const painHe = resolveChipLabel(i.biggestProblem, painChips, "he") || "—";
+  const painAr = resolveChipLabel(i.biggestProblem, painChips, "ar") || "—";
+  const painEn = resolveChipLabel(i.biggestProblem, painChips, "en") || "—";
   const advHe = resolveChipLabel(i.uniqueAdvantage, ADVANTAGE_CHIPS, "he") || "—";
   const advAr = resolveChipLabel(i.uniqueAdvantage, ADVANTAGE_CHIPS, "ar") || "—";
   const advEn = resolveChipLabel(i.uniqueAdvantage, ADVANTAGE_CHIPS, "en") || "—";
@@ -118,7 +121,17 @@ export function buildAgency(pack: Pick<CampaignPack, "intake" | "intakeReport" |
   const discovery = {
     producedBy: ["intake", "diagnostic"] as AgencyPack["discovery"]["producedBy"],
     audit: [
-      { title: L("מודל", "النموذج", "Model"), body: L(i.businessModel || "לא סופק — Intake מסרב לנחש איך נסגר כסף.", i.businessModel || "غير متوفر.", i.businessModel || "Not given — Intake refuses to guess how money closes.") },
+      { title: L("מודל", "النموذج", "Model"), body: L(
+        isFreeService(i)
+          ? (i.businessModel || "שירות חינם — חשיפה בלבד. אין סגירת כסף מהלקוח.")
+          : (i.businessModel || "לא סופק — Intake מסרב לנחש איך נסגר כסף."),
+        isFreeService(i)
+          ? (i.businessModel || "خدمة مجانية — تعرّض فقط. ما في إغلاق فلوس من الزبون.")
+          : (i.businessModel || "غير متوفر."),
+        isFreeService(i)
+          ? (i.businessModel || "Free service — exposure only. No money closes from the client.")
+          : (i.businessModel || "Not given — Intake refuses to guess how money closes."),
+      ) },
       { title: L("יחידה כלכלית", "وحدة الاقتصاد", "Unit economics"), body: L(
         `AOV ${i.avgOrderValue || "חסר"} · מרווח ${i.marginPercent || "חסר"}% · CAC יעד ${i.targetCac || "חסר"} · תקציב ${i.monthlyBudget || "חסר"}.`,
         `AOV ${i.avgOrderValue || "ناقص"} · هامش ${i.marginPercent || "ناقص"} · CAC ${i.targetCac || "ناقص"} · ميزانية ${i.monthlyBudget || "ناقص"}.`,
@@ -159,25 +172,39 @@ export function buildAgency(pack: Pick<CampaignPack, "intake" | "intakeReport" |
       : L("לא הוזנו מתחרים. אין SWOT בדוי. הוסיפו מתחרים שראיתם בשלב הסקירה.", "لا منافسين. لا SWOT مختلق. أضيفوا من رأيتموهم في المراجعة.", "No competitors entered. No fake SWOT. Add competitors you observed on the review step."),
   };
 
-  const magnet = noOffer
+  const magnet = noOffer || isFreeService(i)
     ? L(
-        "מגנט מומלץ ליצירה (לא קיים עדיין): דף הכנה לביקור/שיחה ראשונה. אין ייעוץ חינם ואין הנחה — אין מבצע.",
-        "مغناطيس مقترح للإنشاء (غير موجود بعد): صفحة تحضير للزيارة. لا استشارة مجانية — لا عرض.",
-        "Recommended magnet to create (does not exist yet): a first-visit prep sheet. No free consult, no discount — no offer.",
+        isFreeService(i)
+          ? "מגנט לחשיפה: דף «איך מגיעים / הרשמה». אין מחיר, אין קופון, אין ייעוץ חינם כמבצע."
+          : "מגנט מומלץ ליצירה (לא קיים עדיין): דף הכנה לביקור/שיחה ראשונה. אין ייעוץ חינם ואין הנחה — אין מבצע.",
+        isFreeService(i)
+          ? "مغناطيس تعرّض: صفحة «كيف تجوا / تسجيل». بلا سعر وبلا كوبون."
+          : "مغناطيس مقترح للإنشاء (غير موجود بعد): صفحة تحضير للزيارة. لا استشارة مجانية — لا عرض.",
+        isFreeService(i)
+          ? "Exposure magnet: a how-to-arrive / registration page. No price, no coupon, no free-consult promo."
+          : "Recommended magnet to create (does not exist yet): a first-visit prep sheet. No free consult, no discount — no offer.",
       )
     : L(`מגנט קשור להצעה שסיפקתם: ${offerHe}. לא נרחיב מעבר לזה.`, `المغناطيس مرتبط بعرضكم: ${offerAr}.`, `Magnet tied to the offer you supplied: ${offerEn}. We will not expand it.`);
 
   const strategy = {
     producedBy: ["strategic"] as AgencyPack["strategy"]["producedBy"],
-    positioning: L(
+    positioning: i.brandPositioning?.trim()
+      ? L(i.brandPositioning.trim(), i.brandPositioning.trim(), i.brandPositioning.trim())
+      : L(
       `${name} ל${aud}: ${adv}. לא «הכי טוב בשוק».`,
       `${name} لـ ${audAr}: ${advAr}.`,
       `${name} for ${audEn}: ${advEn}. Not “best in market”.`,
     ),
     uniqueMechanism: L(
-      `המנגנון הייחודי הוא מה שסופק: ${adv}. בלי פטנט מדומה.`,
-      `الآلية الفريدة كما أُعطيت: ${advAr}. بلا براءة وهمية.`,
-      `The unique mechanism is what you gave: ${adv}. No fake proprietary method.`,
+      isFreeService(i) && isClalitCoverageFact(i)
+        ? `${coverageFactLine("he")} המנגנון שסופק: ${adv}. בלי למכור את הקופה כמבצע.`
+        : `המנגנון הייחודי הוא מה שסופק: ${adv}. בלי פטנט מדומה.`,
+      isFreeService(i) && isClalitCoverageFact(i)
+        ? `${coverageFactLine("ar")} الآلية المعطاة: ${advAr}. بلا بيع الصندوق كعرض.`
+        : `الآلية الفريدة كما أُعطيت: ${advAr}. بلا براءة وهمية.`,
+      isFreeService(i) && isClalitCoverageFact(i)
+        ? `${coverageFactLine("en")} Stated mechanism: ${adv}. Do not sell the fund as a promo.`
+        : `The unique mechanism is what you gave: ${adv}. No fake proprietary method.`,
     ),
     hormozi: L(
       `Dream = ${goalEn}. Likelihood = ${advEn}. Time delay / effort = לא סופקו — לא ננחש.`,
@@ -210,7 +237,7 @@ export function buildAgency(pack: Pick<CampaignPack, "intake" | "intakeReport" |
     },
     offerStack: {
       leadMagnet: magnet,
-      tripwire: noOffer
+      tripwire: noOffer || isFreeService(i)
         ? L("Tripwire: אין. אל תמציאו ₪99 «רק החודש».", "لا tripwire. لا تخترعوا ₪99.", "Tripwire: none. Do not invent a ₪99 “this month only”.")
         : L(`Tripwire רק אם זה חלק מ: ${offerHe}`, `Tripwire فقط إن كان جزءاً من ${offerAr}`, `Tripwire only if it is part of: ${offerEn}`),
       core: L(`הליבה: ${i.category || "השירות שתואר"} — ${i.description || "תיאור חסר"}.`, `النواة: ${i.category || "الخدمة"}.`, `Core: ${i.category || "the service described"} — ${i.description || "description missing"}.`),
@@ -222,9 +249,9 @@ export function buildAgency(pack: Pick<CampaignPack, "intake" | "intakeReport" |
       mof: L(`MOF: הוכחה = ${advHe} בלבד. רימרקטינג אחרי אירוע אמיתי.`, `MOF: إثبات = ${advAr} فقط.`, `MOF: proof = ${advEn} only. Remarketing after a real event.`),
       bof: isWalkIn(i)
         ? L(
-            `BOF: ${ctaHe}. קבלה לפי סדר הגעה. וואטסאפ לא לחירום.`,
-            `BOF: ${ctaAr}. جت أولاً. واتساب مش للطوارئ.`,
-            `BOF: ${ctaEn}. Walk-in. WhatsApp is not the ER.`,
+            bofWalkLine(i, "he", ctaHe),
+            bofWalkLine(i, "ar", ctaAr),
+            bofWalkLine(i, "en", ctaEn),
           )
         : L(`BOF: CTA ל${goalHe}. וואטסאפ/תור — לא טופס של 12 שדות.`, `BOF: CTA لـ ${goalAr}.`, `BOF: CTA to ${goalEn}. WhatsApp/booking — not a 12-field form.`),
     },
@@ -262,9 +289,14 @@ export function buildAgency(pack: Pick<CampaignPack, "intake" | "intakeReport" |
     { format: "youtube", title: (l) => (l === "he" ? "YouTube — הוק 8ש׳" : l === "ar" ? "يوتيوب — 8ث" : "YouTube — 8s hook"), body: (l) => `${landingH1(i, l)}\n${l === "he" ? ctaHe : l === "ar" ? ctaAr : ctaEn}` },
     { format: "rsa", title: (_l) => "Google RSA", body: (l) => rsaLines(i, l) },
     { format: "search", title: (l) => (l === "he" ? "מודעת חיפוש" : l === "ar" ? "إعلان بحث" : "Search ad"), body: (_l) => `${name} | ${i.category} | ${loc}`.trim() },
-    { format: "landing", title: (l) => (l === "he" ? "דף נחיתה — מבנה" : l === "ar" ? "صفحة هبوط" : "Landing structure"), body: (l) => landingBody(i, l) },
+    { format: "landing", title: (l) => (l === "he" ? "דף נחיתה — מבנה" : l === "ar" ? "صفحة هبوط" : "Landing structure"), body: (l) => {
+      const base = landingBody(i, l);
+      const assets = i.mediaAssets ?? [];
+      const vis = landingVisualLine(i, l, assets.map((a) => a.label));
+      return `${base}\n${vis}`;
+    } },
     { format: "whatsapp", title: (_l) => "WhatsApp", body: (l) => whatsappScript(i, l) },
-    { format: "sms", title: (_l) => "SMS", body: (l) => l === "he" ? `${name}: ${isWalkIn(i) ? "קבלה לפי סדר הגעה. וואטסאפ לא לחירום." : "אפשר לקבוע תור. השבו."}` : l === "ar" ? `${name}: ${isWalkIn(i) ? "جت أولاً بدون مواعيد. واتساب مش للطوارئ." : "احكوا معنا عالواتساب."}` : `${name}: ${isWalkIn(i) ? "Walk-in, no appointment. WhatsApp is not ER." : "Reply to book."}` },
+    { format: "sms", title: (_l) => "SMS", body: (l) => l === "he" ? `${name}: ${isWalkIn(i) ? smsWalkLine(i, "he") : "אפשר לקבוע תור. השבו."}` : l === "ar" ? `${name}: ${isWalkIn(i) ? smsWalkLine(i, "ar") : "احكوا معنا عالواتساب."}` : `${name}: ${isWalkIn(i) ? smsWalkLine(i, "en") : "Reply to book."}` },
     { format: "flyer", title: (l) => (l === "he" ? "פלאייר" : l === "ar" ? "منشور" : "Flyer"), body: (l) => [name, landingH1(i, l), hoursLine(i, l), kupaLine(i, l), l === "he" ? ctaHe : l === "ar" ? ctaAr : ctaEn, noOffer ? (l === "he" ? "אין מבצע על הנייר." : l === "ar" ? "ما في عرض عالورقة." : "No offer on the paper.") : i.offer].filter(Boolean).join("\n") },
   ];
   for (const lang of ["he", "ar", "en"] as Locale[]) {
@@ -288,6 +320,26 @@ export function buildAgency(pack: Pick<CampaignPack, "intake" | "intakeReport" |
       body: `${v.primaryText}\nCTA: ${v.cta}`,
     });
   }
+  for (const past of i.pastCreatives ?? []) {
+    const warnHe = past.confirmedReal
+      ? "ייחוס מבנה שאושר כטקסט אמיתי — לא להעתיק כטענה חדשה אם המודל חינם אוסר מבצע."
+      : "ייחוס מבנה בלבד. טענות VIP/100%/מחיר לא אושרו — לא להעתיק.";
+    const warnAr = past.confirmedReal
+      ? "مرجع بنية اعتُمد كنص حقيقي — لا يُنسخ كادّعاء جديد إن كان النموذج يمنع العروض."
+      : "مرجع بنية فقط. ادّعاءات VIP/100%/سعر غير مؤكدة — لا تُنسخ.";
+    const warnEn = past.confirmedReal
+      ? "Structure reference confirmed as real text — do not copy as a new claim if free-service forbids offers."
+      : "Structure reference only. Unconfirmed VIP/100%/price claims — do not copy.";
+    const body = [past.headline, past.body, past.cta ? `CTA: ${past.cta}` : "", "tag: past_creative"].filter(Boolean).join("\n");
+    for (const lang of ["he", "ar", "en"] as Locale[]) {
+      pieces.push({
+        format: "past_creative",
+        locale: lang,
+        title: past.headline || past.sourceName,
+        body: `${body}\n${lang === "he" ? warnHe : lang === "ar" ? warnAr : warnEn}`,
+      });
+    }
+  }
 
   const creative = {
     producedBy: ["strategic"] as AgencyPack["creative"]["producedBy"],
@@ -302,7 +354,17 @@ export function buildAgency(pack: Pick<CampaignPack, "intake" | "intakeReport" |
       sawek: { black: "#050505", red: "#ff1a1a", yellow: "#ffe500" },
       clientPrimary: "",
       clientSecondary: "",
-      note: L("ערכת SAWEK AD (שחור/אדום/צהוב). צבעי לקוח לא סופקו — לא יומצא טורקיז.", "طقم SAWEK AD. ألوان العميل غير معطاة.", "SAWEK AD kit (black/red/yellow). Client colors not supplied — no invented teal."),
+      note: L(
+        i.brandTone?.trim()
+          ? `טון שאושר מהמסמך: ${i.brandTone.trim()}. ערכת SAWEK AD (שחור/אדום/צהוב). צבעי לקוח לא סופקו — לא יומצא טורקיז.`
+          : "ערכת SAWEK AD (שחור/אדום/צהוב). צבעי לקוח לא סופקו — לא יומצא טורקיז.",
+        i.brandTone?.trim()
+          ? `نبرة اعتُمدت من المستند: ${i.brandTone.trim()}. طقم SAWEK AD. ألوان العميل غير معطاة.`
+          : "طقم SAWEK AD. ألوان العميل غير معطاة.",
+        i.brandTone?.trim()
+          ? `Tone confirmed from the document: ${i.brandTone.trim()}. SAWEK AD kit (black/red/yellow). Client colors not supplied — no invented teal.`
+          : "SAWEK AD kit (black/red/yellow). Client colors not supplied — no invented teal.",
+      ),
     },
   };
 
@@ -357,7 +419,9 @@ export function buildAgency(pack: Pick<CampaignPack, "intake" | "intakeReport" |
       "Retarget only after a real pixel/message event. No lookalike before 50 conversions.",
     ),
     cadence: [
-      { day: "0", channel: L("WhatsApp", "واتساب", "WhatsApp"), action: L("אישור שקיבלנו פנייה. שאלה אחת.", "تأكيد الاستلام. سؤال واحد.", "Confirm we got the enquiry. One question.") },
+      { day: "0", channel: L("WhatsApp", "واتساب", "WhatsApp"), action: i.whatsappTemplates?.trim()
+        ? L(i.whatsappTemplates.trim(), i.whatsappTemplates.trim(), i.whatsappTemplates.trim())
+        : L("אישור שקיבלנו פנייה. שאלה אחת.", "تأكيد الاستلام. سؤال واحد.", "Confirm we got the enquiry. One question.") },
       { day: "1", channel: L("SMS", "SMS", "SMS"), action: L("רק אם אין תשובה. בלי מבצע.", "فقط إن لم يردّوا. بلا عرض.", "Only if no reply. No offer.") },
       { day: "3", channel: L("אימייל", "بريد", "Email"), action: L("אימייל 2 מהרצף — הבעיה.", "بريد 2 — المشكلة.", "Email 2 in the sequence — the problem.") },
       { day: "7", channel: L("WhatsApp", "واتساب", "WhatsApp"), action: L("סגירה או סגירת ליד. לא לרדוף שבועיים.", "إغلاق أو إقفال. لا ملاحقة لأسبوعين.", "Close or close-out the lead. Don’t chase for two weeks.") },

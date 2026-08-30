@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { AgentId, AgentStatus, CampaignPack } from "@/lib/types";
 import { deleteCampaign, loadCampaigns } from "@/lib/storage";
+import { cachedPublished, fetchPublishedPacks, mergeCampaigns } from "@/lib/published-packs";
 import { installDemoPack } from "@/lib/active-pack";
 import { wantsEmptyCampaign } from "@/lib/empty-campaign";
 import { markEmptyCampaign } from "@/lib/empty-campaign";
@@ -13,7 +14,6 @@ import { Button } from "@/components/ui/button";
 import { useI18n } from "@/components/i18n-provider";
 import { ConquerHeadline } from "@/components/stepper";
 import { DepartmentRail } from "@/components/department-shell";
-import { useIsClient } from "@/lib/use-is-client";
 
 const STATUS_KEY: Record<AgentStatus, "status.idle" | "status.running" | "status.blocked" | "status.needs_approval" | "status.approved" | "status.complete" | "status.refused"> = {
   idle: "status.idle",
@@ -32,25 +32,41 @@ const GATES: { id: AgentId; labelKey: "agents.diagnostic" | "agents.strategic" |
   { id: "optimizer", labelKey: "agents.optimizer" },
 ];
 
+function mergedList(): CampaignPack[] {
+  return mergeCampaigns(loadCampaigns().map(ensureAgency), cachedPublished().map(ensureAgency));
+}
+
 export function CampaignsList() {
   const { t, locale } = useI18n();
-  const client = useIsClient();
   const [list, setList] = useState<CampaignPack[]>([]);
   const [booted, setBooted] = useState(false);
 
-  if (client && !booted) {
-    let rows = loadCampaigns().map(ensureAgency);
-    if (rows.length === 0 && !wantsEmptyCampaign() && locale !== "ar") {
-      installDemoPack();
-      rows = loadCampaigns().map(ensureAgency);
-    }
-    setList(rows);
-    setBooted(true);
-  }
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const published = await fetchPublishedPacks();
+      let rows = mergeCampaigns(loadCampaigns().map(ensureAgency), published.map(ensureAgency));
+      if (rows.length === 0 && !wantsEmptyCampaign() && locale !== "ar") {
+        installDemoPack();
+        rows = mergeCampaigns(loadCampaigns().map(ensureAgency), published.map(ensureAgency));
+      }
+      if (!cancelled) {
+        setList(rows);
+        setBooted(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [locale]);
 
   function loadDemo() {
     installDemoPack();
-    setList(loadCampaigns().map(ensureAgency));
+    setList(mergedList());
+  }
+
+  if (!booted) {
+    return <p className="p-10 text-center text-zinc-500">…</p>;
   }
 
   return (
@@ -104,7 +120,10 @@ export function CampaignsList() {
                   type="button"
                   size="sm"
                   variant="ghost"
-                  onClick={() => setList(deleteCampaign(c.id))}
+                  onClick={() => {
+                    deleteCampaign(c.id);
+                    setList(mergedList());
+                  }}
                 >
                   {t("campaigns.delete")}
                 </Button>

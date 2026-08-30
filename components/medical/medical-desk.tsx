@@ -12,6 +12,8 @@ import { LandingView } from "@/components/medical/landing-view";
 import { useI18n } from "@/components/i18n-provider";
 import { useIsClient } from "@/lib/use-is-client";
 import { uid } from "@/lib/utils";
+import { loadDraft } from "@/lib/storage";
+import { isFreeService } from "@/lib/operating-model";
 import { SPECIALTIES, SERVICE_LIBRARY, specialtyLabel } from "@/lib/medical/specialties";
 import { LANDING_SKINS, defaultTemplateFor } from "@/lib/medical/skins";
 import { DEFAULT_HOURS, EMPTY_TREATMENT, type ClinicProfile, type LandingTemplateId, type MedicalCampaign, type MedicalSpecialty, type Treatment } from "@/lib/medical/types";
@@ -41,12 +43,15 @@ export function MedicalDesk() {
 
   if (client && !booted) {
     const c = loadClinic();
+    const stamped = c
+      ? { ...c, operatingModel: c.operatingModel ?? loadDraft().intake.operatingModel ?? "paid" }
+      : c;
     const list = loadMedCampaigns();
-    setClinic(c);
+    setClinic(stamped);
     setCampaigns(list);
     setPreview(list[0] ?? null);
-    if (c) {
-      setTemplate(defaultTemplateFor(c.specialty));
+    if (stamped) {
+      setTemplate(defaultTemplateFor(stamped.specialty));
       setStep(c ? 2 : 1);
     }
     setBooted(true);
@@ -70,6 +75,7 @@ export function MedicalDesk() {
           disclaimer: "",
           hours: DEFAULT_HOURS.map((h) => ({ ...h })),
           slotMinutes: 20,
+          operatingModel: loadDraft().intake.operatingModel ?? "paid",
         };
     setClinic(next);
     setTemplate(defaultTemplateFor(id));
@@ -84,7 +90,11 @@ export function MedicalDesk() {
 
   function generate() {
     if (!clinic) return;
-    const camp = generateMedicalCampaign(clinic, treatment, template);
+    const model = clinic.operatingModel ?? loadDraft().intake.operatingModel ?? "paid";
+    const stamped = { ...clinic, operatingModel: model };
+    setClinic(stamped);
+    saveClinic(stamped);
+    const camp = generateMedicalCampaign(stamped, treatment, template);
     upsertMedCampaign(camp);
     setCampaigns(loadMedCampaigns());
     setPreview(camp);
@@ -201,6 +211,11 @@ export function MedicalDesk() {
       {clinic && (
         <section className="mt-8 rounded-2xl border border-white/10 bg-omni-card p-5">
           <h2 className="mb-4 text-sm font-black uppercase tracking-wide text-omni-yellow">{t("med.step.clinic")}</h2>
+          {isFreeService(clinic) && (
+            <p className="mb-4 rounded-xl border border-omni-yellow/30 bg-omni-yellow/5 p-3 text-sm text-zinc-200">
+              {t("details.offerLocked")}
+            </p>
+          )}
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
               <Label>{t("med.clinic.name")}</Label>
@@ -309,14 +324,18 @@ export function MedicalDesk() {
               <Label>{t("med.tx.duration")}</Label>
               <Input value={treatment.duration} onChange={(e) => setTreatment({ ...treatment, duration: e.target.value })} />
             </div>
-            <div>
-              <Label>{t("med.tx.price")}</Label>
-              <Input value={treatment.price} onChange={(e) => setTreatment({ ...treatment, price: e.target.value })} placeholder={t("med.tx.leaveEmpty")} />
-            </div>
-            <div>
-              <Label>{t("med.tx.cost")}</Label>
-              <Input value={treatment.cost} onChange={(e) => setTreatment({ ...treatment, cost: e.target.value })} />
-            </div>
+            {!isFreeService(clinic) && (
+              <>
+                <div>
+                  <Label>{t("med.tx.price")}</Label>
+                  <Input value={treatment.price} onChange={(e) => setTreatment({ ...treatment, price: e.target.value })} placeholder={t("med.tx.leaveEmpty")} />
+                </div>
+                <div>
+                  <Label>{t("med.tx.cost")}</Label>
+                  <Input value={treatment.cost} onChange={(e) => setTreatment({ ...treatment, cost: e.target.value })} />
+                </div>
+              </>
+            )}
             <div>
               <Label>{t("med.tx.tech")}</Label>
               <Input value={treatment.technology} onChange={(e) => setTreatment({ ...treatment, technology: e.target.value })} placeholder={t("med.tx.leaveEmpty")} />

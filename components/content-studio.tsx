@@ -3,10 +3,12 @@
 import { useState } from "react";
 import { generateStudioVariants } from "@/lib/studio-engine";
 import { DESIGN_STYLES } from "@/lib/design-styles";
-import { loadStudio, saveStudio } from "@/lib/storage";
+import { loadDraft, loadStudio, saveDraft, saveStudio } from "@/lib/storage";
 import { produceAd } from "@/lib/engine/produce-ad";
 import { emptyIntake } from "@/lib/engine/validate";
-import type { Locale, StudioPiece } from "@/lib/types";
+import { MediaAssetUploader } from "@/components/media-asset-uploader";
+import { CampaignAdVisual } from "@/components/ad-mockup";
+import type { Intake, Locale, MediaAssetMeta, StudioPiece } from "@/lib/types";
 import { uid } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Label, Textarea } from "@/components/ui/input";
@@ -23,11 +25,13 @@ export function ContentStudio({ embedded = false }: { embedded?: boolean }) {
   const [library, setLibrary] = useState<StudioPiece[]>([]);
   const [styleId, setStyleId] = useState(DESIGN_STYLES[0].id);
   const [mock, setMock] = useState<ReturnType<typeof produceAd> | null>(null);
+  const [assets, setAssets] = useState<MediaAssetMeta[]>([]);
   const client = useIsClient();
   const [booted, setBooted] = useState(false);
 
   if (client && !booted) {
     setLibrary(loadStudio());
+    setAssets(loadDraft().intake.mediaAssets ?? []);
     setBooted(true);
   }
 
@@ -47,10 +51,15 @@ export function ContentStudio({ embedded = false }: { embedded?: boolean }) {
     saveStudio(next);
   }
 
+  function currentIntake(): Intake {
+    const intake = { ...emptyIntake(), ...loadDraft().intake, mediaAssets: assets };
+    return intake;
+  }
+
   function produce() {
-    const intake = emptyIntake();
-    intake.businessName = idea.slice(0, 40) || "Studio";
-    intake.uniqueAdvantage = idea;
+    const intake = currentIntake();
+    intake.businessName = intake.businessName || idea.slice(0, 40) || "Studio";
+    intake.uniqueAdvantage = intake.uniqueAdvantage || idea;
     setMock(produceAd(intake, styleId, idea, locale));
   }
 
@@ -94,6 +103,19 @@ export function ContentStudio({ embedded = false }: { embedded?: boolean }) {
         <Button type="button" onClick={generate} disabled={!idea.trim()}>
           {t("cta.next")}
         </Button>
+        {client && (
+          <div className="mt-6">
+            <MediaAssetUploader
+              assets={assets}
+              intake={currentIntake()}
+              onChange={(mediaAssets) => {
+                setAssets(mediaAssets);
+                const d = loadDraft();
+                saveDraft({ ...d, intake: { ...d.intake, mediaAssets } });
+              }}
+            />
+          </div>
+        )}
       </div>
 
       <h3 className="mb-3 mt-10 text-lg font-black">{t("design.title")}</h3>
@@ -119,14 +141,17 @@ export function ContentStudio({ embedded = false }: { embedded?: boolean }) {
         {t("design.make")}
       </Button>
       {mock && (
-        <div
-          className="mt-4 rounded-2xl p-6 text-white"
-          style={{
-            background: `linear-gradient(160deg, ${DESIGN_STYLES.find((s) => s.id === mock.styleId)?.palette[0]}, ${DESIGN_STYLES.find((s) => s.id === mock.styleId)?.palette[1]})`,
-          }}
-        >
-          <h3 className="text-2xl font-black">{mock.headline}</h3>
-          <p className="mt-2">{mock.body}</p>
+        <div className="mt-4 overflow-hidden rounded-2xl border border-white/10">
+          <CampaignAdVisual
+            locale={locale}
+            palette={DESIGN_STYLES.find((s) => s.id === mock.styleId)?.palette ?? ["#111", "#333"]}
+            assets={assets}
+            index={0}
+            className="min-h-40"
+          >
+            <h3 className="text-2xl font-black text-white">{mock.headline}</h3>
+          </CampaignAdVisual>
+          <p className="bg-omni-card p-4 text-sm text-zinc-300">{mock.body}</p>
         </div>
       )}
 

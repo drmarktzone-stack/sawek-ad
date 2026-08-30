@@ -6,24 +6,38 @@ import { Plus, Trash2, WandSparkles } from "lucide-react";
 import type { AgentId, AgentStatus, CampaignPack, Competitor, Intake, WizardStep } from "@/lib/types";
 import { demoIntake, DEMO_LABEL, consumePendingDemo, clearPendingDemo, applyPediatricDemoDraft, isPediatricDemo, relocalizePediatricIntake, canonicalDoctorName } from "@/lib/demo";
 import { installDemoPack } from "@/lib/active-pack";
-import { cmoFieldsMissing, emptyIntake, wizardReady } from "@/lib/engine/validate";
+import { cmoFieldsMissing, emptyIntake, wizardMissingFields, wizardReady } from "@/lib/engine/validate";
 import { assemblePack, idleStatus, runIntakeAndDiagnosis, runMedia, runOptimizerStage, runStrategic } from "@/lib/engine/run";
-import { loadDraft, saveDraft, upsertCampaign, getCampaign } from "@/lib/storage";
+import { loadDraft, saveDraft, upsertCampaign, getCampaign, INGEST_APPLIED_EVENT } from "@/lib/storage";
 import { uid } from "@/lib/utils";
 import { MAX_COMPETITORS } from "@/lib/factory-formats";
 import { AREA_LABEL } from "@/lib/i18n";
-import { markEmptyCampaign, wantsEmptyCampaign, clearEmptyCampaign, explicitDemoInUrl } from "@/lib/empty-campaign";
+import { markEmptyCampaign, wantsEmptyCampaign, clearEmptyCampaign, explicitDemoInUrl, applyEmptyCampaignHydrate, EMPTY_CAMPAIGN_EVENT } from "@/lib/empty-campaign";
 import { stripDemoParamsPreserveLang, withLang } from "@/lib/locale-url";
 import {
   ADVANTAGE_CHIPS,
-  AUDIENCE_CHIPS,
+  CHANNEL_CHIPS,
   DEPTH_OPTIONS,
-  GOAL_CHIPS,
   OFFER_CHIPS,
-  PROBLEM_CHIPS,
   TYPE_OPTIONS,
+  audienceChipsFor,
+  formatChipField,
+  parseChipField,
   resolveChipLabel,
+  toggleChipValue,
 } from "@/lib/chips";
+import {
+  applyOperatingModel,
+  goalChipsFor,
+  isFreeService,
+  offerChipsFor,
+  problemChipsFor,
+  setPlanChannel,
+  visiblePlanChannels,
+} from "@/lib/operating-model";
+import { showsKupaFields } from "@/lib/vertical";
+import { MediaAssetUploader } from "@/components/media-asset-uploader";
+import { DocumentIngest } from "@/components/document-ingest";
 import { Button } from "@/components/ui/button";
 import { Input, Label, Textarea } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -31,6 +45,8 @@ import { ChipGroup } from "@/components/chip-group";
 import { ConquerHeadline, Stepper } from "@/components/stepper";
 import { DepartmentRail } from "@/components/department-shell";
 import { useI18n } from "@/components/i18n-provider";
+import { CoachPanel } from "@/components/coach-panel";
+import { coachIntake } from "@/lib/engine/coach";
 import { useIsClient } from "@/lib/use-is-client";
 import { cn } from "@/lib/utils";
 
@@ -98,12 +114,13 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
         (locale === "ar" && isPediatricDemo(d.intake)) ||
         (emptyWanted && isPediatricDemo(d.intake));
       if (skipDemo) {
-        const blank = emptyIntake();
-        saveDraft({ intake: blank, step: 1, phase: "wizard" });
-        setIntake(blank);
+        const blankState = applyEmptyCampaignHydrate();
+        setIntake(blankState.intake);
         setStep(1);
         setCustom({ audience: false, problem: false, advantage: false, goal: false, offer: false });
         setPhase("wizard");
+        setPack(null);
+        setAgentStatus(idleStatus());
       } else {
         const intake = isPediatricDemo(d.intake)
           ? relocalizePediatricIntake(d.intake, locale)
@@ -136,6 +153,21 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
   }, [client, hydrated, locale]);
 
   useEffect(() => {
+    if (!client) return;
+    const onEmpty = () => {
+      const blankState = applyEmptyCampaignHydrate();
+      setIntake(blankState.intake);
+      setStep(1);
+      setCustom({ audience: false, problem: false, advantage: false, goal: false, offer: false });
+      setPhase("wizard");
+      setPack(null);
+      setAgentStatus(idleStatus());
+    };
+    window.addEventListener(EMPTY_CAMPAIGN_EVENT, onEmpty);
+    return () => window.removeEventListener(EMPTY_CAMPAIGN_EVENT, onEmpty);
+  }, [client]);
+
+  useEffect(() => {
     if (!hydrated || !client) return;
     if (typeof window !== "undefined" && window.location.search.includes("demo=")) {
       router.replace(stripDemoParamsPreserveLang(locale));
@@ -143,8 +175,45 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
   }, [hydrated, client, router, locale]);
 
   useEffect(() => {
+    if (!client) return;
+    const onApplied = () => {
+      const d = loadDraft();
+      setIntake(d.intake);
+      setStep(d.step);
+      setCustom({
+        audience: d.intake.audienceCustom,
+        problem: d.intake.problemCustom,
+        advantage: d.intake.advantageCustom,
+        goal: d.intake.goalCustom,
+        offer: d.intake.offerCustom,
+      });
+      const resume = d.phase === "interview" || d.phase === "agents" ? d.phase : "wizard";
+      if (resume === "wizard") {
+        setPhase("wizard");
+        setPack(null);
+        setAgentStatus(idleStatus());
+      } else if (resume === "agents" && d.packId) {
+        const existing = getCampaign(d.packId);
+        if (existing) {
+          setPack(existing);
+          setAgentStatus(existing.agentStatus);
+          setPhase("agents");
+        } else {
+          setPhase("wizard");
+          setPack(null);
+          setAgentStatus(idleStatus());
+        }
+      } else {
+        setPhase(resume);
+      }
+    };
+    window.addEventListener(INGEST_APPLIED_EVENT, onApplied);
+    return () => window.removeEventListener(INGEST_APPLIED_EVENT, onApplied);
+  }, [client]);
+
+  useEffect(() => {
     if (!hydrated) return;
-    saveDraft({ intake, step, phase, packId: pack?.id });
+    saveDraft({ intake, step, phase, packId: pack?.id, coach: coachIntake(intake) });
     if (intake.businessName.trim() && !isPediatricDemo(intake)) {
       clearEmptyCampaign();
     }
@@ -162,24 +231,66 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
     document.getElementById("studio")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, [phase]);
 
+  useEffect(() => {
+    if (!hydrated || phase !== "wizard" || step !== 4) return;
+    if (isFreeService(intake) || intake.channelNotes.trim()) return;
+    setIntake((s) => (s.channelNotes.trim() || isFreeService(s) ? s : { ...s, channelNotes: "facebook, instagram" }));
+  }, [hydrated, phase, step, intake.operatingModel, intake.channelNotes]);
+
   const patch = (p: Partial<Intake>) => setIntake((s) => ({ ...s, ...p }));
+
+  const coachReport = useMemo(() => coachIntake(intake), [intake]);
+
+  function applyCoach(field: string, value: string) {
+    const extra: Partial<Intake> = {};
+    if (field === "audience") extra.audienceCustom = true;
+    if (field === "biggestProblem") extra.problemCustom = true;
+    if (field === "uniqueAdvantage") extra.advantageCustom = true;
+    if (field === "mainGoal") extra.goalCustom = true;
+    if (field === "offer") extra.offerCustom = true;
+    setCustom((c) => ({
+      ...c,
+      audience: field === "audience" ? true : c.audience,
+      problem: field === "biggestProblem" ? true : c.problem,
+      advantage: field === "uniqueAdvantage" ? true : c.advantage,
+      goal: field === "mainGoal" ? true : c.goal,
+      offer: field === "offer" ? true : c.offer,
+    }));
+    patch({ [field]: value, ...extra } as Partial<Intake>);
+  }
+
+
+  function applyIngest(next: Intake) {
+    setIntake(next);
+    setCustom({
+      audience: next.audienceCustom,
+      problem: next.problemCustom,
+      advantage: next.advantageCustom,
+      goal: next.goalCustom,
+      offer: next.offerCustom,
+    });
+  }
 
   const reviewRows = useMemo(
     () => [
       [t("biz.name"), intake.businessName],
       [t("step.1"), TYPE_OPTIONS.find((o) => o.id === intake.type)?.label[locale] ?? intake.type],
+      [t("review.model"), isFreeService(intake) ? t("model.free") : t("model.paid")],
       [t("details.depth"), DEPTH_OPTIONS.find((o) => o.id === intake.depth)?.label[locale] ?? intake.depth],
       [t("biz.category"), intake.category],
       [t("biz.description"), intake.description],
-      [t("details.audience"), resolveChipLabel(intake.audience, AUDIENCE_CHIPS, locale)],
-      [t("details.problem"), resolveChipLabel(intake.biggestProblem, PROBLEM_CHIPS, locale)],
+      [t("details.audience"), resolveChipLabel(intake.audience, audienceChipsFor(intake), locale)],
+      [t("details.problem"), resolveChipLabel(intake.biggestProblem, problemChipsFor(intake), locale)],
       [t("details.advantage"), resolveChipLabel(intake.uniqueAdvantage, ADVANTAGE_CHIPS, locale)],
-      [t("details.goal"), resolveChipLabel(intake.mainGoal, GOAL_CHIPS, locale)],
+      [t("details.goal"), resolveChipLabel(intake.mainGoal, goalChipsFor(intake), locale)],
       [t("details.offer"), resolveChipLabel(intake.offer, OFFER_CHIPS, locale)],
+      [t("review.assets"), String((intake.mediaAssets ?? []).length)],
+      [t("ingest.docs"), String((intake.ingestedDocs ?? []).length)],
       [t("biz.location"), intake.location],
       [t("biz.hours"), intake.clinicHours],
       [t("details.kupaFile"), intake.kupaFileBy],
       [t("details.kupaMember"), intake.kupaMemberFrom],
+      [t("plan.channels"), visiblePlanChannels(intake).join(", ")],
       [t("biz.website"), intake.website],
       [t("biz.whatsapp"), intake.whatsapp],
     ],
@@ -211,7 +322,8 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
 
   function newCampaign() {
     markEmptyCampaign();
-    setIntake(emptyIntake());
+    const blank = emptyIntake();
+    setIntake(blank);
     setStep(1);
     setPhase("wizard");
     setPack(null);
@@ -337,55 +449,52 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
     <div className={embedded ? "mx-auto w-full max-w-3xl px-4 py-6 sm:py-8" : "mx-auto w-full max-w-3xl px-4 py-8 sm:py-12"}>
       {!embedded && <DepartmentRail />}
       {embedded ? (
-        <div className="mb-6 flex items-center justify-center">
-          <div className="flex items-center rounded-full border border-white/10 bg-black/50 p-0.5">
-            <button
+        <div className="mb-6 flex flex-col items-center gap-2">
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <Button
               type="button"
+              size="lg"
               data-demo="pediatric"
+              className="h-auto max-w-full whitespace-normal py-2 text-start font-black"
               onClick={loadDemo}
-              className={cn(
-                "rounded-full px-4 py-1.5 text-xs font-black transition-colors",
-                isPediatricDemo(intake)
-                  ? "bg-omni-yellow text-black"
-                  : "text-zinc-300 hover:text-white",
-              )}
             >
-              {t("cta.demoShort")}
-            </button>
-            <button
-              type="button"
-              onClick={newCampaign}
-              className={cn(
-                "rounded-full px-4 py-1.5 text-xs font-semibold transition-colors",
-                !isPediatricDemo(intake)
-                  ? "bg-omni-yellow text-black"
-                  : "text-zinc-300 hover:text-white",
-              )}
-            >
+              {DEMO_LABEL[locale]}
+            </Button>
+            <Button type="button" size="lg" onClick={newCampaign}>
               {t("cta.new")}
-            </button>
+            </Button>
           </div>
+          <p className="max-w-md text-center text-xs text-zinc-500">{t("cta.newHint")}</p>
         </div>
       ) : (
-        <div className="mb-6 flex flex-wrap items-center justify-center gap-2">
-          <Button
-            type="button"
-            size="lg"
-            data-demo="pediatric"
-            className="h-auto max-w-full whitespace-normal py-2 text-start font-black"
-            onClick={loadDemo}
-          >
-            {DEMO_LABEL[locale]}
-          </Button>
-          <Button type="button" variant="ghost" size="sm" onClick={newCampaign}>
-            {t("cta.new")}
-          </Button>
+        <div className="mb-6 flex flex-col items-center gap-2">
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <Button
+              type="button"
+              size="lg"
+              data-demo="pediatric"
+              className="h-auto max-w-full whitespace-normal py-2 text-start font-black"
+              onClick={loadDemo}
+            >
+              {DEMO_LABEL[locale]}
+            </Button>
+            <Button type="button" size="lg" onClick={newCampaign}>
+              {t("cta.new")}
+            </Button>
+          </div>
+          <p className="max-w-md text-center text-xs text-zinc-500">{t("cta.newHint")}</p>
         </div>
       )}
 
       {phase === "wizard" && (
         <>
           <Stepper step={step} onStep={(n) => setStep(n)} />
+          <CoachPanel report={coachReport} onApply={applyCoach} />
+          {step > 1 && (
+            <div className="mb-4 flex justify-center">
+              <DocumentIngest intake={intake} onApply={applyIngest} variant="compact" />
+            </div>
+          )}
           {!embedded && <ConquerHeadline subtitle={step === 4 ? t("hero.review") : undefined} />}
           {embedded && step === 4 && (
             <p className="mb-6 text-center text-sm font-medium text-zinc-400">{t("hero.review")}</p>
@@ -410,6 +519,33 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
                     {opt.label[locale]}
                   </button>
                 ))}
+              </div>
+              <h2 className="mb-2 mt-10 text-center text-lg font-bold">{t("model.prompt")}</h2>
+              <p className="mb-6 text-center text-sm text-zinc-400">{t("model.hint")}</p>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {([
+                  { id: "paid" as const, title: t("model.paid"), hint: t("model.paidHint") },
+                  { id: "free_service" as const, title: t("model.free"), hint: t("model.freeHint") },
+                ]).map((opt) => (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => setIntake((s) => applyOperatingModel(s, opt.id))}
+                    className={`rounded-2xl border p-6 text-start transition-all ${
+                      (intake.operatingModel ?? "paid") === opt.id
+                        ? "border-omni-yellow bg-omni-yellow text-black shadow-[0_12px_40px_rgba(255,26,26,0.45)]"
+                        : "border-white/10 bg-omni-card text-white hover:border-omni-yellow/50 hover:shadow-[0_0_24px_rgba(255,229,0,0.12)]"
+                    }`}
+                  >
+                    <span className="block text-xl font-black">{opt.title}</span>
+                    <span className={`mt-2 block text-sm font-medium ${
+                      (intake.operatingModel ?? "paid") === opt.id ? "text-black/70" : "text-zinc-400"
+                    }`}>{opt.hint}</span>
+                  </button>
+                ))}
+              </div>
+              <div className="mt-8">
+                <DocumentIngest intake={intake} onApply={applyIngest} variant="primary" />
               </div>
             </section>
           )}
@@ -477,43 +613,66 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
                 <ChipGroup
                   options={DEPTH_OPTIONS}
                   value={intake.depth}
+                  multi={false}
                   onChange={(_, opt) => patch({ depth: opt.id as Intake["depth"] })}
                 />
               </div>
               <div>
                 <Label>{t("details.audience")}</Label>
                 <ChipGroup
-                  options={AUDIENCE_CHIPS}
+                  options={audienceChipsFor(intake)}
                   value={intake.audience}
+                  multi
                   showCustomField={custom.audience}
                   onChange={(_, opt) => {
+                    const opts = audienceChipsFor(intake);
                     if (opt.custom) {
-                      setCustom((c) => ({ ...c, audience: true }));
-                      patch({ audienceCustom: true });
+                      const nextOn = !custom.audience;
+                      setCustom((c) => ({ ...c, audience: nextOn }));
+                      if (!nextOn) {
+                        const { ids } = parseChipField(intake.audience, opts);
+                        patch({ audience: formatChipField(ids, ""), audienceCustom: false });
+                      } else {
+                        patch({ audienceCustom: true });
+                      }
                     } else {
-                      setCustom((c) => ({ ...c, audience: false }));
-                      patch({ audience: opt.id, audienceCustom: false });
+                      patch({ audience: toggleChipValue(intake.audience, opt, opts, true), audienceCustom: custom.audience });
                     }
                   }}
-                  customValue={intake.audience}
-                  onCustom={(v) => patch({ audience: v, audienceCustom: true })}
+                  customValue={parseChipField(intake.audience, audienceChipsFor(intake)).customText}
+                  onCustom={(v) => {
+                    const { ids } = parseChipField(intake.audience, audienceChipsFor(intake));
+                    patch({ audience: formatChipField(ids, v), audienceCustom: true });
+                  }}
                 />
               </div>
               <div>
                 <Label>{t("details.problem")}</Label>
                 <ChipGroup
-                  options={PROBLEM_CHIPS}
+                  options={problemChipsFor(intake)}
                   value={intake.biggestProblem}
+                  multi
                   showCustomField={custom.problem}
                   onChange={(_, opt) => {
-                    if (opt.custom) setCustom((c) => ({ ...c, problem: true }));
-                    else {
-                      setCustom((c) => ({ ...c, problem: false }));
-                      patch({ biggestProblem: opt.id, problemCustom: false });
+                    const opts = problemChipsFor(intake);
+                    if (opt.custom) {
+                      const nextOn = !custom.problem;
+                      setCustom((c) => ({ ...c, problem: nextOn }));
+                      if (!nextOn) {
+                        const { ids } = parseChipField(intake.biggestProblem, opts);
+                        patch({ biggestProblem: formatChipField(ids, ""), problemCustom: false });
+                      } else {
+                        patch({ problemCustom: true });
+                      }
+                    } else {
+                      patch({ biggestProblem: toggleChipValue(intake.biggestProblem, opt, opts, true), problemCustom: custom.problem });
                     }
                   }}
-                  customValue={intake.biggestProblem}
-                  onCustom={(v) => patch({ biggestProblem: v, problemCustom: true })}
+                  customValue={parseChipField(intake.biggestProblem, problemChipsFor(intake)).customText}
+                  onCustom={(v) => {
+                    const { ids } = parseChipField(intake.biggestProblem, problemChipsFor(intake));
+                    patch({ biggestProblem: formatChipField(ids, v), problemCustom: true });
+                  }}
                 />
               </div>
               <div>
@@ -521,53 +680,108 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
                 <ChipGroup
                   options={ADVANTAGE_CHIPS}
                   value={intake.uniqueAdvantage}
+                  multi
                   showCustomField={custom.advantage}
                   onChange={(_, opt) => {
-                    if (opt.custom) setCustom((c) => ({ ...c, advantage: true }));
-                    else {
-                      setCustom((c) => ({ ...c, advantage: false }));
-                      patch({ uniqueAdvantage: opt.id, advantageCustom: false });
+                    if (opt.custom) {
+                      const nextOn = !custom.advantage;
+                      setCustom((c) => ({ ...c, advantage: nextOn }));
+                      if (!nextOn) {
+                        const { ids } = parseChipField(intake.uniqueAdvantage, ADVANTAGE_CHIPS);
+                        patch({ uniqueAdvantage: formatChipField(ids, ""), advantageCustom: false });
+                      } else {
+                        patch({ advantageCustom: true });
+                      }
+                    } else {
+                      patch({ uniqueAdvantage: toggleChipValue(intake.uniqueAdvantage, opt, ADVANTAGE_CHIPS, true), advantageCustom: custom.advantage });
                     }
                   }}
-                  customValue={intake.uniqueAdvantage}
-                  onCustom={(v) => patch({ uniqueAdvantage: v, advantageCustom: true })}
+                  customValue={parseChipField(intake.uniqueAdvantage, ADVANTAGE_CHIPS).customText}
+                  onCustom={(v) => {
+                    const { ids } = parseChipField(intake.uniqueAdvantage, ADVANTAGE_CHIPS);
+                    patch({ uniqueAdvantage: formatChipField(ids, v), advantageCustom: true });
+                  }}
                 />
               </div>
               <div>
                 <Label>{t("details.goal")}</Label>
+                {isFreeService(intake) && (
+                  <p className="mb-2 text-xs text-zinc-500">{t("details.goalFreeHint")}</p>
+                )}
                 <ChipGroup
-                  options={GOAL_CHIPS}
+                  options={goalChipsFor(intake)}
                   value={intake.mainGoal}
+                  multi
                   showCustomField={custom.goal}
                   onChange={(_, opt) => {
-                    if (opt.custom) setCustom((c) => ({ ...c, goal: true }));
-                    else {
-                      setCustom((c) => ({ ...c, goal: false }));
-                      patch({ mainGoal: opt.id, goalCustom: false });
+                    const opts = goalChipsFor(intake);
+                    if (opt.custom) {
+                      const nextOn = !custom.goal;
+                      setCustom((c) => ({ ...c, goal: nextOn }));
+                      if (!nextOn) {
+                        const { ids } = parseChipField(intake.mainGoal, opts);
+                        patch({ mainGoal: formatChipField(ids, ""), goalCustom: false });
+                      } else {
+                        patch({ goalCustom: true });
+                      }
+                    } else {
+                      patch({ mainGoal: toggleChipValue(intake.mainGoal, opt, opts, true), goalCustom: custom.goal });
                     }
                   }}
-                  customValue={intake.mainGoal}
-                  onCustom={(v) => patch({ mainGoal: v, goalCustom: true })}
+                  customValue={parseChipField(intake.mainGoal, goalChipsFor(intake)).customText}
+                  onCustom={(v) => {
+                    const { ids } = parseChipField(intake.mainGoal, goalChipsFor(intake));
+                    patch({ mainGoal: formatChipField(ids, v), goalCustom: true });
+                  }}
                 />
               </div>
               <div>
                 <Label>{t("details.offer")}</Label>
-                <p className="mb-2 text-xs text-zinc-500">{t("details.offerHint")}</p>
+                <p className="mb-2 text-xs text-zinc-500">
+                  {isFreeService(intake) ? t("details.offerLocked") : t("details.offerHint")}
+                </p>
                 <ChipGroup
-                  options={OFFER_CHIPS}
+                  options={offerChipsFor(intake)}
                   value={intake.offer}
-                  showCustomField={custom.offer}
+                  multi
+                  showCustomField={isFreeService(intake) ? false : custom.offer}
                   onChange={(_, opt) => {
-                    if (opt.custom) setCustom((c) => ({ ...c, offer: true }));
-                    else {
-                      setCustom((c) => ({ ...c, offer: false }));
-                      patch({ offer: opt.id, offerCustom: false });
+                    if (isFreeService(intake)) {
+                      patch({ offer: "no_offer", offerCustom: false });
+                      return;
+                    }
+                    const opts = offerChipsFor(intake);
+                    if (opt.custom) {
+                      const nextOn = !custom.offer;
+                      setCustom((c) => ({ ...c, offer: nextOn }));
+                      if (!nextOn) {
+                        const { ids } = parseChipField(intake.offer, opts);
+                        patch({ offer: formatChipField(ids, "") || "no_offer", offerCustom: false });
+                      } else {
+                        patch({ offerCustom: true });
+                      }
+                    } else {
+                      patch({ offer: toggleChipValue(intake.offer, opt, opts, true), offerCustom: custom.offer });
                     }
                   }}
-                  customValue={intake.offer}
-                  onCustom={(v) => patch({ offer: v, offerCustom: true })}
+                  customValue={parseChipField(intake.offer, offerChipsFor(intake)).customText}
+                  onCustom={(v) => {
+                    if (isFreeService(intake)) {
+                      patch({ offer: "no_offer", offerCustom: false });
+                      return;
+                    }
+                    const { ids } = parseChipField(intake.offer, offerChipsFor(intake));
+                    patch({ offer: formatChipField(ids.filter((id) => id !== "no_offer"), v), offerCustom: true });
+                  }}
                 />
               </div>
+              <MediaAssetUploader
+                assets={intake.mediaAssets ?? []}
+                intake={intake}
+                onChange={(mediaAssets) => patch({ mediaAssets })}
+              />
+              {showsKupaFields(intake) && (
+                <>
               <div>
                 <Label>{t("details.kupaFile")}</Label>
                 <p className="mb-2 text-xs text-zinc-500">{t("details.kupaHint")}</p>
@@ -585,6 +799,8 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
                   onChange={(e) => patch({ kupaMemberFrom: e.target.value })}
                 />
               </div>
+                </>
+              )}
             </section>
           )}
 
@@ -607,6 +823,21 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
                     </div>
                   ))}
                 </dl>
+                {!isFreeService(intake) && (
+                <div className="border-t border-white/10 px-5 py-5">
+                  <h3 className="mb-2 font-bold text-white">{t("plan.channels")}</h3>
+                  <p className="mb-3 text-sm text-zinc-400">{t("plan.channelsHint")}</p>
+                  <ChipGroup
+                    options={CHANNEL_CHIPS.filter((c) => c.id !== "whatsapp" || intake.whatsapp.trim())}
+                    value={visiblePlanChannels(intake).join(",")}
+                    multi
+                    onChange={(_, opt) => {
+                      const on = !visiblePlanChannels(intake).includes(opt.id as "facebook" | "instagram" | "whatsapp");
+                      patch({ channelNotes: setPlanChannel(intake, opt.id as "facebook" | "instagram" | "whatsapp", on) });
+                    }}
+                  />
+                </div>
+                )}
                 <div className="px-5 py-5">
                   <h3 className="mb-2 font-bold text-white">{t("review.competitors")}</h3>
                   <p className="mb-3 text-sm text-zinc-400">{t("review.competitorsHint")}</p>
@@ -660,9 +891,17 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
                 {t("cta.build")}
               </Button>
               {!wizardReady(intake) && (
-                <p className="mt-2 text-center text-xs text-omni-red">
-                  {t("wizard.missing")}
-                </p>
+                <div
+                  className="mt-3 rounded-xl border border-omni-red/40 bg-omni-red/10 px-4 py-3 text-sm text-red-100"
+                  dir={locale === "en" ? "ltr" : "rtl"}
+                >
+                  <p className="font-bold">{t("wizard.missingHeading")}</p>
+                  <ul className="mt-1 list-disc ps-5">
+                    {wizardMissingFields(intake).map((f) => (
+                      <li key={String(f.field)}>{f.label[locale]}</li>
+                    ))}
+                  </ul>
+                </div>
               )}
             </section>
           )}
@@ -684,21 +923,29 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
 
       {phase === "interview" && (
         <section className="rounded-2xl border border-white/10 bg-omni-card p-5 sm:p-8">
+          <CoachPanel report={coachReport} onApply={applyCoach} />
+          <div className="mb-4">
+            <DocumentIngest intake={intake} onApply={applyIngest} variant="compact" />
+          </div>
           <h2 className="mb-2 text-2xl font-black">{t("interview.title")}</h2>
           <p className="mb-6 text-sm text-zinc-400">{t("interview.lead")}</p>
-          <Field label={t("interview.model")}>
+          <Field label={isFreeService(intake) ? t("interview.modelFree") : t("interview.model")}>
             <Textarea value={intake.businessModel} onChange={(e) => patch({ businessModel: e.target.value })} />
           </Field>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label={t("interview.aov")}>
-              <Input value={intake.avgOrderValue} onChange={(e) => patch({ avgOrderValue: e.target.value })} />
-            </Field>
-            <Field label={t("interview.margin")}>
-              <Input value={intake.marginPercent} onChange={(e) => patch({ marginPercent: e.target.value })} />
-            </Field>
-            <Field label={t("interview.cac")}>
-              <Input value={intake.targetCac} onChange={(e) => patch({ targetCac: e.target.value })} />
-            </Field>
+            {!isFreeService(intake) && (
+              <>
+                <Field label={t("interview.aov")}>
+                  <Input value={intake.avgOrderValue} onChange={(e) => patch({ avgOrderValue: e.target.value })} />
+                </Field>
+                <Field label={t("interview.margin")}>
+                  <Input value={intake.marginPercent} onChange={(e) => patch({ marginPercent: e.target.value })} />
+                </Field>
+                <Field label={t("interview.cac")}>
+                  <Input value={intake.targetCac} onChange={(e) => patch({ targetCac: e.target.value })} />
+                </Field>
+              </>
+            )}
             <Field label={t("interview.budget")}>
               <Input value={intake.monthlyBudget} onChange={(e) => patch({ monthlyBudget: e.target.value })} />
             </Field>
@@ -736,6 +983,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
             setPhase("wizard");
             setStep(4);
           }}
+          onNewCampaign={newCampaign}
         />
       )}
 
@@ -793,12 +1041,14 @@ function AgentsPanel({
   running,
   onApprove,
   onBack,
+  onNewCampaign,
 }: {
   pack: CampaignPack | null;
   agentStatus: Record<AgentId, AgentStatus>;
   running: boolean;
   onApprove: () => void;
   onBack: () => void;
+  onNewCampaign: () => void;
 }) {
   const { t, locale } = useI18n();
   return (
@@ -861,6 +1111,12 @@ function AgentsPanel({
           <button type="button" className="mt-3 w-full text-sm text-zinc-400" onClick={onBack}>
             {t("cta.reject")}
           </button>
+          <div className="mt-6 border-t border-white/10 pt-5">
+            <Button type="button" size="lg" className="w-full" onClick={onNewCampaign}>
+              {t("cta.newOther")}
+            </Button>
+            <p className="mt-2 text-center text-sm text-zinc-400">{t("cta.newHint")}</p>
+          </div>
         </div>
       )}
     </section>

@@ -1,19 +1,20 @@
 import type { CampaignPack, Intake, Locale } from "../types";
 import { isNoOffer } from "../no-offer";
+import { isFreeService } from "../operating-model";
 import {
   ADVANTAGE_CHIPS,
-  AUDIENCE_CHIPS,
   GOAL_CHIPS,
   OFFER_CHIPS,
-  PROBLEM_CHIPS,
+  audienceChipsFor,
   resolveChipLabel,
 } from "../chips";
+import { problemChipsFor } from "../operating-model";
 
 function text(intake: Intake, locale: Locale) {
   return {
     name: intake.businessName || "—",
-    audience: resolveChipLabel(intake.audience, AUDIENCE_CHIPS, locale) || "—",
-    problem: resolveChipLabel(intake.biggestProblem, PROBLEM_CHIPS, locale) || "—",
+    audience: resolveChipLabel(intake.audience, audienceChipsFor(intake), locale) || "—",
+    problem: resolveChipLabel(intake.biggestProblem, problemChipsFor(intake), locale) || "—",
     advantage: resolveChipLabel(intake.uniqueAdvantage, ADVANTAGE_CHIPS, locale) || "—",
     goal: resolveChipLabel(intake.mainGoal, GOAL_CHIPS, locale) || "—",
     offer: isNoOffer(intake.offer)
@@ -30,9 +31,15 @@ export function missionOf(intake: Intake): Record<Locale, string> {
   const ar = text(intake, "ar");
   const en = text(intake, "en");
   return L(
-    `המשימה: להביא ${he.goal} מתוך ${he.audience} אל ${he.name} — בלי להמציא מבצע או הוכחות.`,
-    `المهمة: جلب ${ar.goal} من ${ar.audience} إلى ${ar.name} — بلا اختراع عرض أو إثبات.`,
-    `Mission: bring ${en.goal} from ${en.audience} to ${en.name} — without inventing an offer or proof.`,
+    isFreeService(intake)
+      ? `המשימה: חשיפה / הרשמה / ביקור של ${he.audience} אצל ${he.name} — בלי מכירה ובלי מבצע בדוי.`
+      : `המשימה: להביא ${he.goal} מתוך ${he.audience} אל ${he.name} — בלי להמציא מבצע או הוכחות.`,
+    isFreeService(intake)
+      ? `المهمة: تعرّض / تسجيل / زيارة ${ar.audience} عند ${ar.name} — بلا بيع وبلا عرض مختلق.`
+      : `المهمة: جلب ${ar.goal} من ${ar.audience} إلى ${ar.name} — بلا اختراع عرض أو إثبات.`,
+    isFreeService(intake)
+      ? `Mission: exposure / enrollment / visit of ${en.audience} at ${en.name} — no sale and no invented promo.`
+      : `Mission: bring ${en.goal} from ${en.audience} to ${en.name} — without inventing an offer or proof.`,
   );
 }
 

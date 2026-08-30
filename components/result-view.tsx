@@ -2,17 +2,18 @@
 
 import { useMemo, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Copy, Download, FileText, Lightbulb, Link2, Pencil, Save, Shield, WandSparkles } from "lucide-react";
+import { Copy, Download, FileText, Lightbulb, Link2, Pencil, Save, Shield } from "lucide-react";
 import type { CampaignPack, Locale, OptimizerResultInput } from "@/lib/types";
 import { LOCALES, STRATEGY_META, VARIANT_META, orderedStrategy, t } from "@/lib/i18n";
-import { DESIGN_STYLES } from "@/lib/design-styles";
+import { DESIGN_STYLES, stylesForVertical } from "@/lib/design-styles";
+import { detectVertical } from "@/lib/vertical";
 import { copyAllAds, downloadTxt, printBible, printPdf } from "@/lib/export";
 import { DepartmentRail } from "@/components/department-shell";
 import { produceAd } from "@/lib/engine/produce-ad";
 import { adviseFromResults } from "@/lib/engine/optimizer";
 import { highlightsOf, missionOf, pillarsOf } from "@/lib/engine/brief";
 import { saveDraft, upsertCampaign } from "@/lib/storage";
-import { markEmptyCampaign } from "@/lib/empty-campaign";
+import { NewCampaignCta } from "@/components/new-campaign-cta";
 import { LangLink } from "@/components/lang-link";
 import { withLang } from "@/lib/locale-url";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,10 @@ import {
 import { useI18n } from "@/components/i18n-provider";
 import { LanguageToggle } from "@/components/header";
 import { cn } from "@/lib/utils";
+import { isFreeService } from "@/lib/operating-model";
+import { CampaignAdVisual } from "@/components/ad-mockup";
+import { ChannelPack } from "@/components/channel-pack";
+import { CoachImprovedStrip } from "@/components/coach-panel";
 
 export function ResultView({
   pack,
@@ -107,12 +112,13 @@ export function ResultView({
           <h1 className="text-3xl font-black text-white">{tr("result.ready")}</h1>
           <p className="mt-1 text-zinc-400">{pack.name}</p>
         </div>
-        <Button asChild>
-          <LangLink href="/" onClick={() => markEmptyCampaign()}>
-            <WandSparkles className="size-4" />
-            {tr("cta.new")}
-          </LangLink>
-        </Button>
+        <NewCampaignCta other hint className="items-end text-end" />
+      </div>
+
+      <ChannelPack pack={pack} packLang={packLang} />
+
+      <div className="my-6 flex justify-center">
+        <NewCampaignCta other hint className="items-center text-center" />
       </div>
 
       <div className="mb-6 rounded-2xl border border-omni-yellow/20 bg-omni-card p-4">
@@ -234,6 +240,8 @@ export function ResultView({
           )}
         </div>
       </div>
+
+      {pack.coach && <CoachImprovedStrip report={pack.coach} locale={packLang} />}
 
       <div className="mb-8 grid gap-4 lg:grid-cols-2">
         <div className="rounded-2xl border border-omni-yellow/25 bg-omni-card p-5">
@@ -435,7 +443,7 @@ export function ResultView({
           placeholder={pack.intake.uniqueAdvantage}
         />
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {DESIGN_STYLES.map((s, idx) => {
+          {stylesForVertical(detectVertical(pack.intake)).map((s, idx) => {
             const v = ads[idx % Math.max(ads.length, 1)];
             const dark = true;
             return (
@@ -443,16 +451,17 @@ export function ResultView({
                 key={s.id}
                 className="overflow-hidden rounded-2xl border border-white/10 bg-black shadow-[0_0_24px_rgba(255,26,26,0.12)]"
               >
-                <div
-                  className="flex h-36 flex-col justify-end p-3"
-                  style={{
-                    background: `linear-gradient(160deg, ${s.palette[0]}, ${s.palette[1]} 70%, ${s.palette[2]})`,
-                  }}
+                <CampaignAdVisual
+                  locale={locale}
+                  palette={s.palette}
+                  assets={pack.intake.mediaAssets}
+                  index={idx}
+                  className="h-36"
                 >
                   <p className={`text-lg font-black leading-tight ${dark ? "text-white" : "text-black"}`}>
                     {v?.headline ?? pack.intake.businessName}
                   </p>
-                </div>
+                </CampaignAdVisual>
                 <div className="space-y-3 bg-omni-card p-4">
                   <p className="line-clamp-3 text-xs text-zinc-400">
                     {v?.primaryText ?? pack.intake.uniqueAdvantage}
@@ -485,18 +494,21 @@ export function ResultView({
             {pack.producedAds.map((ad) => {
               const style = DESIGN_STYLES.find((s) => s.id === ad.styleId);
               return (
-                <div
-                  key={ad.id}
-                  className="min-h-48 rounded-2xl p-6"
-                  style={{
-                    background: `linear-gradient(160deg, ${style?.palette[0]}, ${style?.palette[1]})`,
-                    color: style?.palette[0] === "#f4f1ea" || style?.id === "pastel" || style?.id === "minimal-light" ? "#111" : "#fff",
-                  }}
-                >
-                  <p className="text-xs font-bold uppercase opacity-70">{style?.name[locale]}</p>
-                  <h3 className="mt-2 text-2xl font-black">{ad.headline}</h3>
-                  <p className="mt-2 text-sm opacity-90">{ad.body}</p>
-                  <p className="mt-4 text-xs opacity-70">{ad.visualNotes[locale]}</p>
+                <div key={ad.id} className="overflow-hidden rounded-2xl border border-white/10">
+                  <CampaignAdVisual
+                    locale={locale}
+                    palette={style?.palette ?? ["#111", "#333"]}
+                    assets={pack.intake.mediaAssets}
+                    index={0}
+                    className="min-h-40"
+                  >
+                    <p className="text-xs font-bold uppercase text-white/70">{style?.name[locale]}</p>
+                    <h3 className="mt-2 text-2xl font-black text-white">{ad.headline}</h3>
+                  </CampaignAdVisual>
+                  <div className="bg-omni-card p-4">
+                    <p className="text-sm text-zinc-300">{ad.body}</p>
+                    <p className="mt-3 text-xs text-zinc-500">{ad.visualNotes[locale]}</p>
+                  </div>
                 </div>
               );
             })}
@@ -512,16 +524,18 @@ export function ResultView({
             <Input value={optIn.spend} onChange={(e) => setOptIn({ ...optIn, spend: e.target.value })} />
           </div>
           <div>
-            <Label>Leads</Label>
+            <Label>{isFreeService(pack.intake) ? tr("opt.visits") : "Leads"}</Label>
             <Input value={optIn.leads} onChange={(e) => setOptIn({ ...optIn, leads: e.target.value })} />
           </div>
-          <div>
-            <Label>Purchases / bookings</Label>
-            <Input
-              value={optIn.purchases}
-              onChange={(e) => setOptIn({ ...optIn, purchases: e.target.value })}
-            />
-          </div>
+          {!isFreeService(pack.intake) && (
+            <div>
+              <Label>Purchases / bookings</Label>
+              <Input
+                value={optIn.purchases}
+                onChange={(e) => setOptIn({ ...optIn, purchases: e.target.value })}
+              />
+            </div>
+          )}
           <div>
             <Label>CTR %</Label>
             <Input value={optIn.ctr} onChange={(e) => setOptIn({ ...optIn, ctr: e.target.value })} />

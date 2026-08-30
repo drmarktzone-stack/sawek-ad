@@ -68,6 +68,7 @@ if (!/طوارئ|الطوارئ/.test(wa.body)) failures.push("WhatsApp missing 
 if (copy["brand.scripts"].ar.includes("סאווק")) failures.push("Arabic chrome still has Hebrew סאווק");
 if (copy["footer.line"].ar.includes("סאווק")) failures.push("Arabic footer still has Hebrew סאווק");
 
+if (intake.operatingModel !== "free_service") failures.push(`demo operatingModel should be free_service, got ${intake.operatingModel}`);
 if (intake.businessName !== LOCKED_NAME) failures.push(`demo name should be ${LOCKED_NAME}, got ${intake.businessName}`);
 if (intake.businessName.includes("أبو موخ")) failures.push(`demo name still has أبو موخ: ${intake.businessName}`);
 if (!intake.businessName.includes("أبو مخ")) failures.push(`demo name missing أبو مخ: ${intake.businessName}`);
@@ -126,6 +127,16 @@ if (typedAd.primaryText.includes(CLALIT_MEMBERS)) {
   failures.push("typed مكابي: strong-offer still uses Clalit-members leftover");
 }
 
+if (/اشتروا الآن|קנו עכשיו|buy now|checkout/i.test(blob)) failures.push("buy-now leaked into free-service output");
+if (!JSON.stringify(optimizer.killRules).includes("ROAS/Purchase")) {
+  failures.push("free-service optimizer missing no-ROAS/Purchase kill rule");
+}
+if (!/Reach \/ traffic|חשיפה \/ תנועה|تعرّض \/ زيارات/.test(JSON.stringify(media.split[0].role))) {
+  failures.push("free-service media mix is not awareness/reach");
+}
+const arCtas = arAds.map((a) => a.cta).join(" ");
+if (!/جيبوه عالعيادة|واتساب/.test(arCtas)) failures.push(`free-service Arabic CTAs missing visit/whatsapp: ${arCtas}`);
+if (/شراء|اشتروا/.test(arCtas)) failures.push(`free-service Arabic CTA still sells: ${arCtas}`);
 if (blob.includes("كوبوت")) failures.push("Arabic ads still contain كوبوت");
 if (copy["details.kupaFile"].ar.includes("كوبوت")) failures.push("i18n kupaFile still has كوبوت");
 if (copy["details.kupaMember"].ar.includes("كوبوت")) failures.push("i18n kupaMember still has كوبوت");

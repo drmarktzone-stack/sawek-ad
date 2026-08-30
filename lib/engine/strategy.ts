@@ -2,12 +2,14 @@ import type { Diagnosis, Intake, Locale, StrategyBlock, StrategyItem } from "../
 import { filled } from "../utils";
 import { isNoOffer } from "../no-offer";
 import { canonicalDoctorName } from "../demo";
+import { coverageFactLine, isClalitCoverageFact, isFreeService, problemChipsFor } from "../operating-model";
+import { detectVertical, showsKupaFields } from "../vertical";
+import { coachIntake } from "./coach";
 import {
   ADVANTAGE_CHIPS,
-  AUDIENCE_CHIPS,
   GOAL_CHIPS,
   OFFER_CHIPS,
-  PROBLEM_CHIPS,
+  audienceChipsFor,
   resolveChipLabel,
 } from "../chips";
 
@@ -15,9 +17,11 @@ const L = (he: string, ar: string, en: string): Record<Locale, string> => ({ he,
 const item = (title: Record<Locale, string>, body: Record<Locale, string>): StrategyItem => ({ title, body });
 
 export function generateStrategy(intake: Intake, diagnosis: Diagnosis): StrategyBlock[] {
-  const n = canonicalDoctorName(intake.businessName) || "—";
-  const aud = resolveChipLabel(intake.audience, AUDIENCE_CHIPS, "he") || "—";
-  const pain = resolveChipLabel(intake.biggestProblem, PROBLEM_CHIPS, "he") || "—";
+  const clinic = detectVertical(intake) === "clinic";
+  const n = (clinic ? canonicalDoctorName(intake.businessName) : intake.businessName) || "—";
+  const coach = coachIntake(intake);
+  const aud = resolveChipLabel(intake.audience, audienceChipsFor(intake), "he") || "—";
+  const pain = resolveChipLabel(intake.biggestProblem, problemChipsFor(intake), "he") || "—";
   const adv = resolveChipLabel(intake.uniqueAdvantage, ADVANTAGE_CHIPS, "he") || "—";
   const goal = resolveChipLabel(intake.mainGoal, GOAL_CHIPS, "he") || "—";
   const loc = intake.location || "";
@@ -81,6 +85,16 @@ export function generateStrategy(intake: Intake, diagnosis: Diagnosis): Strategy
         ];
 
   return [
+    {
+      id: "coach_playbook",
+      items: coach.strategies.map((st) =>
+        item(st.title, L(
+          `${st.body.he}\n${st.plan7.he}`,
+          `${st.body.ar}\n${st.plan7.ar}`,
+          `${st.body.en}\n${st.plan7.en}`,
+        )),
+      ),
+    },
     {
       id: "selling_angles",
       items: [
@@ -171,21 +185,37 @@ export function generateStrategy(intake: Intake, diagnosis: Diagnosis): Strategy
           `${n}. ${intake.category || "category not given"}. ${intake.description || "Description missing."}`,
         )),
         item(L("הקהל", "الجمهور", "The audience"), L(aud, aud, aud)),
-        item(L("שעות קבלה", "ساعات الدوام", "Clinic hours"), L(
-          intake.clinicHours || "לא סופק — לא ננחש שעון.",
-          intake.clinicHours || "مش مكتوب — مش منخترع ساعة.",
-          intake.clinicHours || "Not provided — clock hours will not be guessed.",
-        )),
-        item(L("מעבר קופה", "نقل الصندوق", "Kupa switch"), L(
-          [intake.kupaFileBy && `הגשה עד ${intake.kupaFileBy}`, intake.kupaMemberFrom && `חברות מ-${intake.kupaMemberFrom}`].filter(Boolean).join(" · ") || "לא סופקו תאריכי מעבר.",
-          [intake.kupaFileBy && `تقديم حتى ${intake.kupaFileBy}`, intake.kupaMemberFrom && `عضوية من ${intake.kupaMemberFrom}`].filter(Boolean).join(" · ") || "ما في تواريخ نقل.",
-          [intake.kupaFileBy && `File by ${intake.kupaFileBy}`, intake.kupaMemberFrom && `Membership from ${intake.kupaMemberFrom}`].filter(Boolean).join(" · ") || "No switch dates supplied.",
-        )),
+        item(
+          clinic
+            ? L("שעות קבלה", "ساعات الدوام", "Clinic hours")
+            : L("שעות פתיחה", "ساعات الدوام", "Opening hours"),
+          L(
+            intake.clinicHours || "לא סופק — לא ננחש שעון.",
+            intake.clinicHours || "مش مكتوب — مش منخترع ساعة.",
+            intake.clinicHours || "Not provided — clock hours will not be guessed.",
+          ),
+        ),
+        ...(showsKupaFields(intake)
+          ? [item(L("מעבר קופה", "نقل الصندوق", "Kupa switch"), L(
+              [intake.kupaFileBy && `הגשה עד ${intake.kupaFileBy}`, intake.kupaMemberFrom && `חברות מ-${intake.kupaMemberFrom}`].filter(Boolean).join(" · ") || "לא סופקו תאריכי מעבר.",
+              [intake.kupaFileBy && `تقديم حتى ${intake.kupaFileBy}`, intake.kupaMemberFrom && `عضوية من ${intake.kupaMemberFrom}`].filter(Boolean).join(" · ") || "ما في تواريخ نقل.",
+              [intake.kupaFileBy && `File by ${intake.kupaFileBy}`, intake.kupaMemberFrom && `Membership from ${intake.kupaMemberFrom}`].filter(Boolean).join(" · ") || "No switch dates supplied.",
+            ))]
+          : []),
         item(L("מודל", "النموذج", "Model"), L(
-          intake.businessModel || "לא סופק — לא ננחש איך נסגר הכסף.",
-          intake.businessModel || "غير متوفر — لن نخمن كيف يُغلق المال.",
-          intake.businessModel || "Not provided — we will not guess how money is made.",
+          isFreeService(intake)
+            ? (intake.businessModel || "שירות חינם — חשיפה/הרשמה/ביקור בלבד. לא ננחש מחיר.")
+            : (intake.businessModel || "לא סופק — לא ננחש איך נסגר הכסף."),
+          isFreeService(intake)
+            ? (intake.businessModel || "خدمة مجانية — تعرّض/تسجيل/زيارة فقط. مش منخمن سعر.")
+            : (intake.businessModel || "غير متوفر — لن نخمن كيف يُغلق المال."),
+          isFreeService(intake)
+            ? (intake.businessModel || "Free service — exposure/enrollment/visit only. Price will not be guessed.")
+            : (intake.businessModel || "Not provided — we will not guess how money is made."),
         )),
+        ...(isFreeService(intake) && isClalitCoverageFact(intake)
+          ? [item(L("כיסוי קופה", "تغطية الصندوق", "Fund coverage"), L(coverageFactLine("he"), coverageFactLine("ar"), coverageFactLine("en")))]
+          : []),
       ],
     },
     {
@@ -208,11 +238,16 @@ export function generateStrategy(intake: Intake, diagnosis: Diagnosis): Strategy
     {
       id: "objections",
       items: [
-        item(L("«יקר»", "«غالي»", "“It’s expensive”"), L(
-          "אל תענו בהנחה אוטומטית. ענו בפירוק: מה כלול, מה קורה בלי טיפול/שירות, ומה היתרון.",
-          "لا تجيبوا بخصم تلقائي. فكّكوا: ما المشمول وماذا يحدث بدون الخدمة.",
-          "Don’t auto-answer with a discount. Unpack what’s included, what happens without the service, and the advantage.",
-        )),
+        item(
+          isFreeService(intake) ? L("«זה עולה?»", "«في سعر؟»", "“Does it cost?”") : L("«יקר»", "«غالي»", "“It’s expensive”"),
+          isFreeService(intake)
+            ? L(coverageFactLine("he") + " בלי קופון ובלי «קנו עכשיו».", coverageFactLine("ar") + " بلا كوبون وبلا «اشتروا الآن».", coverageFactLine("en") + " No coupon and no “buy now”.")
+            : L(
+                "אל תענו בהנחה אוטומטית. ענו בפירוק: מה כלול, מה קורה בלי טיפול/שירות, ומה היתרון.",
+                "لا تجيبوا بخصم تلقائي. فكّكوا: ما المشمول وماذا يحدث بدون الخدمة.",
+                "Don’t auto-answer with a discount. Unpack what’s included, what happens without the service, and the advantage.",
+              ),
+        ),
         item(L("«אין לי זמן»", "«لا وقت لدي»", "“I don’t have time”"), L(
           "CTA אחד ברור. אל תבקשו למלא טופס של 12 שדות אם המטרה תור.",
           "CTA واحد واضح. لا تطلبوا نموذجاً من 12 حقلاً إذا الهدف موعد.",

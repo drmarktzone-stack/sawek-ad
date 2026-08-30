@@ -78,6 +78,7 @@ export function demoIntake(locale: Locale = "he"): Intake {
   return {
     type: "business",
     depth: "quick",
+    operatingModel: "free_service",
     businessName: f.businessName[locale],
     category: f.category[locale],
     description: f.description[locale],
@@ -106,6 +107,14 @@ export function demoIntake(locale: Locale = "he"): Intake {
     pastAds: "",
     pastResults: "",
     whatFailed: "",
+    mediaAssets: [],
+    ingestedDocs: [],
+    pastCreatives: [],
+    brandTone: "",
+    brandPositioning: "",
+    channelNotes: "",
+    whatsappTemplates: "",
+    landingLines: "",
   };
 }
 
@@ -189,8 +198,17 @@ export function relocalizePediatricIntake(intake: Intake, locale: Locale): Intak
   ) {
     out.offer = defaultOfferLabel(locale);
   }
+  out.operatingModel = "free_service";
   out.mainGoal = "walk_in";
   out.goalCustom = false;
+  if (!Array.isArray(out.mediaAssets)) out.mediaAssets = [];
+  if (!Array.isArray(out.ingestedDocs)) out.ingestedDocs = [];
+  if (!Array.isArray(out.pastCreatives)) out.pastCreatives = [];
+  out.brandTone = out.brandTone ?? "";
+  out.brandPositioning = out.brandPositioning ?? "";
+  out.channelNotes = out.channelNotes ?? "";
+  out.whatsappTemplates = out.whatsappTemplates ?? "";
+  out.landingLines = out.landingLines ?? "";
   if (!out.clinicHours) out.clinicHours = DEMO_FACTS.clinicHours[locale];
   if (!out.kupaFileBy) out.kupaFileBy = DEMO_FACTS.kupaFileBy[locale];
   if (!out.kupaMemberFrom) out.kupaMemberFrom = DEMO_FACTS.kupaMemberFrom[locale];
