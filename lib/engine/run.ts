@@ -3,7 +3,7 @@ import { uid, sleep } from "../utils";
 import { validateIntake } from "./validate";
 import { diagnose } from "./diagnose";
 import { generateVariants } from "./copy";
-import { enrichVariantsWithGemini } from "./gemini-enrich";
+import { enrichVariantsWithGemini, overlayAgencyPieces } from "./gemini-enrich";
 import { generateStrategy } from "./strategy";
 import { generateMedia } from "./media";
 import { generateOptimizer } from "./optimizer";
@@ -114,7 +114,22 @@ export async function runFullPipeline(
       optimizer: "complete",
     },
   });
-  return { ...pack, saved: true };
+  const overlaid = await overlayPackAgency(pack);
+  return { ...overlaid, saved: true };
+}
+
+
+/** Overlay Gemini channel copy onto agency creative pieces (he+ar+en). No-op if Gemini unavailable. */
+export async function overlayPackAgency(pack: CampaignPack): Promise<CampaignPack> {
+  if (!pack.agency?.creative.pieces.length) return pack;
+  const pieces = await overlayAgencyPieces(pack.intake, pack.agency.creative.pieces);
+  return {
+    ...pack,
+    agency: {
+      ...pack.agency,
+      creative: { ...pack.agency.creative, pieces },
+    },
+  };
 }
 
 export function assemblePack(

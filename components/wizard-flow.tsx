@@ -7,7 +7,7 @@ import type { AgentId, AgentStatus, CampaignPack, Competitor, Intake, WizardStep
 import { demoIntake, DEMO_LABEL, consumePendingDemo, clearPendingDemo, applyPediatricDemoDraft, isPediatricDemo, relocalizePediatricIntake, canonicalDoctorName } from "@/lib/demo";
 import { installDemoPack } from "@/lib/active-pack";
 import { cmoFieldsMissing, emptyIntake, wizardMissingFields, wizardReady } from "@/lib/engine/validate";
-import { assemblePack, idleStatus, runIntakeAndDiagnosis, runMedia, runOptimizerStage, runStrategic } from "@/lib/engine/run";
+import { assemblePack, idleStatus, overlayPackAgency, runIntakeAndDiagnosis, runMedia, runOptimizerStage, runStrategic } from "@/lib/engine/run";
 import { loadDraft, saveDraft, upsertCampaign, getCampaign, INGEST_APPLIED_EVENT } from "@/lib/storage";
 import { uid } from "@/lib/utils";
 import { MAX_COMPETITORS } from "@/lib/factory-formats";
@@ -378,7 +378,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
     setRunning(true);
     if (agentStatus.diagnostic === "needs_approval") {
       const built = await runStrategic(intake, pack.diagnosis, onStatus);
-      const next = assemblePack(intake, {
+      const next = await overlayPackAgency(assemblePack(intake, {
         report: pack.intakeReport,
         diagnosis: { ...pack.diagnosis, approved: true, approvedAt: new Date().toISOString() },
         variants: built.variants,
@@ -391,13 +391,13 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
           media: "blocked",
           optimizer: "blocked",
         },
-      });
+      }));
       upsertCampaign(next);
       setPack(next);
       setAgentStatus(next.agentStatus);
     } else if (agentStatus.strategic === "needs_approval") {
       const built = await runMedia(intake, onStatus);
-      const next = assemblePack(intake, {
+      const next = await overlayPackAgency(assemblePack(intake, {
         report: pack.intakeReport,
         diagnosis: pack.diagnosis,
         variants: pack.variants,
@@ -411,13 +411,13 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
           media: "needs_approval",
           optimizer: "blocked",
         },
-      });
+      }));
       upsertCampaign(next);
       setPack(next);
       setAgentStatus(next.agentStatus);
     } else if (agentStatus.media === "needs_approval") {
       const built = await runOptimizerStage(intake, pack.media, onStatus);
-      const next = assemblePack(intake, {
+      const next = await overlayPackAgency(assemblePack(intake, {
         report: pack.intakeReport,
         diagnosis: pack.diagnosis,
         variants: pack.variants,
@@ -432,7 +432,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
           media: "approved",
           optimizer: "complete",
         },
-      });
+      }));
       const saved = { ...next, saved: true };
       upsertCampaign(saved);
       setPack(saved);
