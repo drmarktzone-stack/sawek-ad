@@ -192,4 +192,34 @@ export function assetsFromPublicUrls(urls: string[], title?: string, cap = 16): 
   return extra;
 }
 
+export function isOfferedAsset(a: MediaAssetMeta): boolean {
+  const n = a.note || "";
+  return (
+    n.startsWith("offer:") ||
+    n.startsWith("graphic-poster:") ||
+    n.startsWith("stock:") ||
+    n === "imagen"
+  );
+}
+
+export function stockToAsset(img: {
+  id: string;
+  full: string;
+  title: string;
+  attribution: string;
+  source: string;
+}): MediaAssetMeta {
+  return {
+    id: uid("asset"),
+    kind: "image",
+    mime: mimeFromUrl(img.full),
+    name: img.title || "Stock photo",
+    size: 0,
+    label: "other",
+    note: `offer:stock:${img.source}:${img.id}|${img.attribution}`.slice(0, 400),
+    createdAt: new Date().toISOString(),
+    publicSrc: img.full,
+  };
+}
+
 export { pickHeroAsset as pickHero };

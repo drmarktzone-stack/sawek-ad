@@ -44,7 +44,7 @@ function AuditList({
               <p className="mt-1.5 text-sm leading-relaxed text-foreground">{evidence}</p>
             )}
             {s.id === "no-photos" && onPack ? (
-              <ImageOfferPicker pack={pack} locale={locale} onPack={onPack} />
+              <ImageOfferPicker pack={pack} locale={locale} onPack={onPack} defaultOpen={false} />
             ) : null}
           </li>
         );

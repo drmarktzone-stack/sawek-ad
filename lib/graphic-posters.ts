@@ -201,7 +201,7 @@ export function posterToAsset(poster: GraphicPoster, name?: string): MediaAssetM
     name: name || poster.name.en,
     size: poster.dataUrl.length,
     label: "interior",
-    note: `graphic-poster:${poster.id}`,
+    note: `offer:graphic:${poster.id}`,
     createdAt: new Date().toISOString(),
     publicSrc: poster.dataUrl,
   };
@@ -215,7 +215,7 @@ export function imagenToAsset(dataUrl: string, mime: string): MediaAssetMeta {
     name: "AI still",
     size: dataUrl.length,
     label: "other",
-    note: "imagen",
+    note: "offer:imagen",
     createdAt: new Date().toISOString(),
     publicSrc: dataUrl,
   };
