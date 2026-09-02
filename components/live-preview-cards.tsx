@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type RefObject } from "react";
+import { useEffect, useRef, useState, type RefObject } from "react";
 import {
   Bookmark,
   Download,
@@ -26,6 +26,8 @@ import { channelFields, downloadNodePng } from "@/lib/channel-copy";
 import { stylesForVertical } from "@/lib/design-styles";
 import { detectVertical } from "@/lib/vertical";
 import { cn } from "@/lib/utils";
+
+const autoImagenPacks = new Set<string>();
 
 export type PreviewImage = { mime: string; dataUrl: string } | null;
 
@@ -94,6 +96,7 @@ export function FacebookFeedCard({
   palette,
   generatedSrc,
   aiLabel,
+  graphicOnlyLabel,
   sponsored,
   like,
   comment,
@@ -108,6 +111,7 @@ export function FacebookFeedCard({
   palette: string[];
   generatedSrc?: string | null;
   aiLabel?: string;
+  graphicOnlyLabel?: string;
   sponsored: string;
   like: string;
   comment: string;
@@ -145,6 +149,12 @@ export function FacebookFeedCard({
         urls={urls}
         overrideSrc={generatedSrc}
         aiLabel={aiLabel}
+        graphicOnlyLabel={graphicOnlyLabel}
+        kicker={fields.pageName}
+        headline={fields.headline}
+        body={fields.shortBody}
+        cta={fields.cta}
+        channel="facebook"
         className="aspect-[1.91/1] h-auto min-h-0 rounded-none p-0"
       />
       <div
@@ -197,6 +207,7 @@ export function InstagramFeedCard({
   palette,
   generatedSrc,
   aiLabel,
+  graphicOnlyLabel,
   ctaComment,
 }: {
   refEl?: RefObject<HTMLDivElement | null>;
@@ -208,6 +219,7 @@ export function InstagramFeedCard({
   palette: string[];
   generatedSrc?: string | null;
   aiLabel?: string;
+  graphicOnlyLabel?: string;
   ctaComment: string;
 }) {
   const dir = dirFor(packLang);
@@ -233,6 +245,12 @@ export function InstagramFeedCard({
         urls={urls}
         overrideSrc={generatedSrc}
         aiLabel={aiLabel}
+        graphicOnlyLabel={graphicOnlyLabel}
+        kicker={fields.pageName}
+        headline={fields.headline}
+        body={fields.shortBody}
+        cta={fields.cta}
+        channel="instagram"
         className="aspect-[4/5] h-auto min-h-0 rounded-none p-0"
       />
       <div className="flex items-center gap-3.5 px-3 py-2">
@@ -264,6 +282,7 @@ export function TikTokFeedCard({
   palette,
   generatedSrc,
   aiLabel,
+  graphicOnlyLabel,
   like,
 }: {
   refEl?: RefObject<HTMLDivElement | null>;
@@ -275,6 +294,7 @@ export function TikTokFeedCard({
   palette: string[];
   generatedSrc?: string | null;
   aiLabel?: string;
+  graphicOnlyLabel?: string;
   like: string;
 }) {
   const dir = dirFor(packLang);
@@ -297,6 +317,12 @@ export function TikTokFeedCard({
           urls={urls}
           overrideSrc={generatedSrc}
           aiLabel={aiLabel}
+          graphicOnlyLabel={graphicOnlyLabel}
+          kicker={fields.pageName}
+          headline={fields.headline}
+          body={fields.shortBody}
+          cta={fields.tiktokCta}
+          channel="tiktok"
           className="aspect-[9/16] h-auto min-h-0 rounded-none p-0"
         />
         {/* TikTok chrome keeps the engagement stack on the physical right, like the real app. */}
@@ -368,6 +394,15 @@ export function LivePreviewStrip({
   const [localImg, setLocalImg] = useState<string | null>(null);
   const generatedSrc = generatedImage ?? localImg;
   const aiLabel = generatedSrc ? t("end.aiGenerated") : undefined;
+  const graphicOnlyLabel = t("end.graphicOnly");
+  const autoKey = useRef("");
+
+  function imagenFailCopy(reason?: string): string {
+    if (reason === "quota") return t("end.imagenQuota");
+    if (reason === "vertex_denied") return t("end.imagenVertexDenied");
+    if (reason === "not_configured") return t("end.imagenNotConfigured");
+    return t("end.imagenError");
+  }
 
   async function generateImage() {
     setBusy("imagen");
@@ -385,9 +420,7 @@ export function LivePreviewStrip({
       });
       const data = (await res.json()) as { ok?: boolean; mime?: string; imageBase64?: string; reason?: string };
       if (!data?.ok || !data.imageBase64) {
-        setImgError(
-          data?.reason === "not_configured" ? t("end.imagenNotConfigured") : t("end.imagenError"),
-        );
+        setImgError(imagenFailCopy(data?.reason));
         return;
       }
       const mime = data.mime && data.mime.startsWith("image/") ? data.mime : "image/png";
@@ -400,6 +433,19 @@ export function LivePreviewStrip({
       setBusy(null);
     }
   }
+
+  useEffect(() => {
+    const hasUserPhoto = (pack.intake.mediaAssets ?? []).some((a) => a.kind === "image");
+    if (hasUserPhoto) return;
+    if (generatedImage || localImg) return;
+    const key = pack.id;
+    if (autoKey.current === key || autoImagenPacks.has(key)) return;
+    autoKey.current = key;
+    autoImagenPacks.add(key);
+    void generateImage();
+    // Auto-fill once per pack when there is no user photo and no generated still.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pack.id, generatedImage]);
 
   async function savePng(which: "fb" | "ig" | "tt") {
     setBusy(which);
@@ -425,6 +471,7 @@ export function LivePreviewStrip({
     logoUrl,
     generatedSrc,
     aiLabel,
+    graphicOnlyLabel,
   };
 
   return (

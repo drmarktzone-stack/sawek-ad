@@ -88,7 +88,20 @@ export function ChannelPack({
           <p className="mb-3 text-[11px] font-black uppercase tracking-[0.18em] text-omni-yellow">
             {t("end.whatsapp")}
           </p>
-          <WhatsAppFrame dir={dir} fields={fields} number={pack.intake.whatsapp} missing={t("end.incomplete")} accent={accent} />
+          <WhatsAppFrame
+            dir={dir}
+            packLang={packLang}
+            fields={fields}
+            number={pack.intake.whatsapp}
+            missing={t("end.incomplete")}
+            accent={accent}
+            palette={pals[3] ?? pals[0] ?? FB_PALETTE}
+            asset={pickAsset(assets, 0)}
+            urls={urls}
+            generatedSrc={generatedImage}
+            aiLabel={generatedImage ? t("end.aiGenerated") : undefined}
+            graphicOnlyLabel={t("end.graphicOnly")}
+          />
           {waUrl ? (
             <Button type="button" className="mt-3 w-full" asChild>
               <a href={waUrl} target="_blank" rel="noreferrer">
@@ -156,16 +169,30 @@ export function ChannelPack({
 
 function WhatsAppFrame({
   dir,
+  packLang,
   fields,
   number,
   missing,
   accent,
+  palette,
+  asset,
+  urls,
+  generatedSrc,
+  aiLabel,
+  graphicOnlyLabel,
 }: {
   dir: "rtl" | "ltr";
+  packLang: Locale;
   fields: ReturnType<typeof channelFields>;
   number: string;
   missing: string;
   accent: string;
+  palette: string[];
+  asset?: MediaAssetMeta;
+  urls: Record<string, string>;
+  generatedSrc?: string | null;
+  aiLabel?: string;
+  graphicOnlyLabel?: string;
 }) {
   const shown = (number ?? "").trim() || missing;
   return (
@@ -179,6 +206,21 @@ function WhatsAppFrame({
         <p style={{ margin: 0, fontSize: 11, color: "#8696a0" }}>{shown}</p>
       </div>
       <div style={{ padding: 12, minHeight: 160, background: "#0b141a" }}>
+        <AdVisual
+          locale={packLang}
+          palette={palette}
+          asset={asset}
+          urls={urls}
+          overrideSrc={generatedSrc}
+          aiLabel={aiLabel}
+          graphicOnlyLabel={graphicOnlyLabel}
+          kicker={fields.pageName}
+          headline={fields.headline}
+          body={fields.shortBody}
+          cta={fields.cta}
+          channel="whatsapp"
+          className="mb-2.5 aspect-square h-auto min-h-0 rounded-lg p-0"
+        />
         <div
           style={{
             maxWidth: "92%",
