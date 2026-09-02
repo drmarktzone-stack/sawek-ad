@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
-import { runtimeEnv } from "@/lib/runtime-env";
+import { publicGeminiStatus } from "@/lib/vertex";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  return NextResponse.json({ configured: Boolean(runtimeEnv("GEMINI_API_KEY")) });
+  const status = await publicGeminiStatus();
+  return NextResponse.json(status);
 }

@@ -24,8 +24,9 @@ import { LangLink } from "./lang-link";
 import { FunctionMenuLinks, FunctionRail } from "./function-rail";
 import { UrlIngest } from "./url-ingest";
 import { cn } from "@/lib/utils";
-import { markEmptyCampaign } from "@/lib/empty-campaign";
+import { beginNewCampaign } from "@/lib/empty-campaign";
 import { Button } from "@/components/ui/button";
+import { GeminiStatusBadge } from "@/components/gemini-status-badge";
 
 /** Captured OmniAd chrome + user list — one link per route, no Creative/Studio or Ops/Campaigns duplicates. */
 const NAV = [
@@ -117,8 +118,9 @@ export function Header() {
         </nav>
 
         <div className="ms-auto flex items-center gap-2">
+          <GeminiStatusBadge />
           <Button asChild size="sm" variant="gold" className="shrink-0">
-            <LangLink href="/" onClick={() => markEmptyCampaign()}>
+            <LangLink href="/" onClick={(e) => beginNewCampaign(e)}>
               {t("cta.new")}
             </LangLink>
           </Button>
@@ -150,7 +152,7 @@ export function Header() {
           </div>
           <div className="flex flex-col gap-1">
             <Button asChild variant="gold" className="mb-2">
-              <LangLink href="/" onClick={() => { markEmptyCampaign(); setOpen(false); }}>
+              <LangLink href="/" onClick={(e) => { beginNewCampaign(e); setOpen(false); }}>
                 {t("cta.new")}
               </LangLink>
             </Button>

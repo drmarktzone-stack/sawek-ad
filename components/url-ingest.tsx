@@ -160,9 +160,9 @@ export function UrlIngest() {
     const selected = posts.filter((p) => p.include).map((p) => ({ text: p.text, image: p.image }));
     const next = applyIngestReview(emptyIntake(), rows, doc, assets, selected);
     next.brandKit = brandKit;
-    applyIntakeToDraft(next, { resetWizard: true });
-    clearPendingDemo();
     clearEmptyCampaign();
+    clearPendingDemo();
+    applyIntakeToDraft(next, { resetWizard: true });
     setDoc(null);
     setRows([]);
     setAssets([]);

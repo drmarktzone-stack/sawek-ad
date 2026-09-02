@@ -345,6 +345,9 @@ export async function enrichVariantsWithGemini(
   intake: Intake,
   variants: AdVariant[],
 ): Promise<{ variants: AdVariant[]; angles?: CampaignAngles }> {
+  if (!intake.businessName.trim() && !intake.description.trim() && !intake.website.trim()) {
+    return { variants };
+  }
   const data = await postGenerate(payloadFromIntake(intake, "he", true, "ads"));
   if (!data) return { variants };
 
@@ -458,6 +461,9 @@ export async function overlayAgencyPieces(
   intake: Intake,
   pieces: FactoryPiece[],
 ): Promise<FactoryPiece[]> {
+  if (!intake.businessName.trim() && !intake.description.trim() && !intake.website.trim()) {
+    return pieces;
+  }
   const cached = cachedChannelsFor(intake);
   if (cached) return applyChannelOverlay(intake, pieces, cached);
 

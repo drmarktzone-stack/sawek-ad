@@ -7,9 +7,12 @@ import {
   clearEmptyCampaign,
   applyEmptyCampaignHydrate,
   EMPTY_CAMPAIGN_KEY,
+  releaseEmptyIfTypedName,
 } from "../lib/empty-campaign";
+import { draftLeaksClinic } from "../lib/clinic-leak";
 import { t } from "../lib/i18n";
 import type { CampaignPack } from "../lib/types";
+import { bodyHasFacts } from "../lib/engine/gemini-generate";
 
 const mem = new Map<string, string>();
 const session = new Map<string, string>();
@@ -36,7 +39,13 @@ function makeStorage(map: Map<string, string>): Storage {
 const localStorageMock = makeStorage(mem);
 const sessionStorageMock = makeStorage(session);
 const g = globalThis as unknown as {
-  window: { localStorage: Storage; sessionStorage: Storage; location: { search: string }; dispatchEvent: (e: Event) => boolean };
+  window: {
+    localStorage: Storage;
+    sessionStorage: Storage;
+    location: { search: string; href: string; pathname: string };
+    history: { replaceState: () => void; state: unknown };
+    dispatchEvent: (e: Event) => boolean;
+  };
   localStorage: Storage;
   sessionStorage: Storage;
 };
@@ -45,7 +54,8 @@ g.sessionStorage = sessionStorageMock;
 g.window = {
   localStorage: localStorageMock,
   sessionStorage: sessionStorageMock,
-  location: { search: "" },
+  location: { search: "?demo=samer", href: "http://local/?demo=samer", pathname: "/" },
+  history: { replaceState: () => undefined, state: null },
   dispatchEvent: () => true,
 };
 
@@ -59,6 +69,8 @@ if (t("ar", "cta.newOther") !== "حملة جديدة لمحل آخر") fail(`cta
 if (t("en", "cta.newOther") !== "New campaign for another business") fail(`cta.newOther en=${t("en", "cta.newOther")}`);
 if (!/My Campaigns|form fields will empty/i.test(t("en", "cta.newHint"))) fail(`cta.newHint en=${t("en", "cta.newHint")}`);
 if (!/הקמפיינים שלי/.test(t("he", "cta.newHint"))) fail(`cta.newHint he missing My Campaigns`);
+if (t("he", "gemini.vertex") !== "Gemini (Vertex)") fail(`gemini.vertex ${t("he", "gemini.vertex")}`);
+if (t("he", "gemini.quota") !== "אין מכסה") fail(`gemini.quota ${t("he", "gemini.quota")}`);
 
 const clinic = demoIntake("he");
 saveDraft({ intake: clinic, step: 4, phase: "agents" });
@@ -72,6 +84,7 @@ saveCampaigns([savedPack]);
 markEmptyCampaign();
 if (!wantsEmptyCampaign()) fail("wantsEmptyCampaign should be true after markEmptyCampaign");
 if (mem.get(EMPTY_CAMPAIGN_KEY) !== "1") fail("EMPTY_CAMPAIGN_KEY not set");
+if (session.get(EMPTY_CAMPAIGN_KEY) !== "1") fail("session EMPTY_CAMPAIGN_KEY not set");
 const afterMark = loadDraft();
 if (String(afterMark.intake.businessName || "").trim()) {
   fail(`draft still has businessName after mark ${JSON.stringify(afterMark.intake.businessName)}`);
@@ -79,6 +92,19 @@ if (String(afterMark.intake.businessName || "").trim()) {
 if (afterMark.step !== 1) fail(`draft step after mark ${afterMark.step}`);
 if (loadCampaigns().some((c) => c.id === "pack-keep-me") === false) {
   fail("published/saved pack was deleted");
+}
+const afterBlob = JSON.stringify(afterMark);
+if (draftLeaksClinic(afterMark) || /052-8885800|drsamerped|אבו מוך/.test(afterBlob)) {
+  fail(`loadDraft after markEmpty leaked clinic: ${afterBlob.slice(0, 400)}`);
+}
+
+saveDraft({ intake: clinic, step: 4, phase: "agents" });
+const guarded = loadDraft();
+if (draftLeaksClinic(guarded) || String(guarded.intake.businessName || "").trim()) {
+  fail("saveDraft during empty session restored clinic");
+}
+if (/052-8885800|drsamerped|אבו מוך/.test(JSON.stringify(guarded))) {
+  fail("guarded draft still has clinic tokens");
 }
 
 const hydrated = applyEmptyCampaignHydrate();
@@ -93,19 +119,28 @@ for (const key of Object.keys(ei) as (keyof typeof ei)[]) {
 if (hydrated.intake.businessName) fail("hydrate leftover businessName");
 if (hydrated.intake.clinicHours) fail("hydrate leftover clinicHours");
 if (hydrated.intake.kupaFileBy || hydrated.intake.kupaMemberFrom) fail("hydrate leftover kupa");
-if (/סאמר|أبو مخ|Abu Mokh|clalit|כללית/i.test(JSON.stringify(hydrated.intake))) {
+if (hydrated.intake.audience) fail("hydrate leftover audience chip");
+if (hydrated.intake.biggestProblem) fail("hydrate leftover problem chip");
+if (hydrated.intake.channelNotes) fail("hydrate leftover channelNotes");
+if (/סאמר|أبو مخ|Abu Mokh|clalit|כללית|052-8885800|drsamerped|אבו מוך/.test(JSON.stringify(hydrated.intake))) {
   fail("hydrate clinic leftover in intake");
 }
-if (wantsEmptyCampaign()) fail("wantsEmptyCampaign should be false after applyEmptyCampaignHydrate");
+if (!wantsEmptyCampaign()) fail("empty flag must stay sticky after applyEmptyCampaignHydrate");
+
+const remount = loadDraft();
+if (draftLeaksClinic(remount) || remount.intake.businessName) {
+  fail("remount loadDraft restored clinic after hydrate");
+}
 
 const typed = { ...emptyIntake(), businessName: "עיר המותגים" };
+if (!releaseEmptyIfTypedName(typed.businessName)) fail("typed new name should release empty session");
 saveDraft({ intake: typed, step: 1, phase: "wizard" });
 const second = loadDraft();
 if (second.intake.businessName !== "עיר המותגים") {
   fail(`second loadDraft lost typed name ${JSON.stringify(second.intake.businessName)}`);
 }
 if (wantsEmptyCampaign()) {
-  fail("second load would skipDemo-wipe because empty flag still set");
+  fail("empty flag should drop after a new business name");
 }
 
 clearEmptyCampaign();
@@ -115,8 +150,14 @@ if (loadCampaigns().some((c) => c.id === "pack-keep-me") === false) {
   fail("saved pack missing after empty hydrate");
 }
 
+if (bodyHasFacts({})) fail("empty body should not look like facts");
+if (bodyHasFacts({ description: "", audience: "" })) fail("blank description is not facts");
+if (!bodyHasFacts({ description: "מכולת שכונתית בחיפה", audience: "neighbors" })) {
+  fail("typed facts should pass bodyHasFacts");
+}
+
 if (failures.length) {
   console.error("FAIL\n" + failures.join("\n"));
   process.exit(1);
 }
-console.log("PASS empty campaign: wipe draft, keep saved pack, clear flag so typed name persists");
+console.log("PASS empty campaign: wipe draft, keep saved pack, sticky empty until new name, no clinic leak");

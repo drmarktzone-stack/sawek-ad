@@ -13,7 +13,8 @@ import { syncCampaign } from "@/lib/supabase";
 import { uid } from "@/lib/utils";
 import { MAX_COMPETITORS } from "@/lib/factory-formats";
 import { AREA_LABEL } from "@/lib/i18n";
-import { markEmptyCampaign, wantsEmptyCampaign, clearEmptyCampaign, explicitDemoInUrl, applyEmptyCampaignHydrate, EMPTY_CAMPAIGN_EVENT } from "@/lib/empty-campaign";
+import { markEmptyCampaign, wantsEmptyCampaign, clearEmptyCampaign, explicitDemoInUrl, applyEmptyCampaignHydrate, EMPTY_CAMPAIGN_EVENT, releaseEmptyIfTypedName } from "@/lib/empty-campaign";
+import { isBlockedEmptySessionName } from "@/lib/clinic-leak";
 import { stripDemoParamsPreserveLang, withLang } from "@/lib/locale-url";
 import {
   ADVANTAGE_CHIPS,
@@ -90,9 +91,9 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
 
   useEffect(() => {
     if (!client || hydrated) return;
-    const urlDemo = explicitDemoInUrl() || consumePendingDemo();
     const emptyWanted = wantsEmptyCampaign();
-    if (urlDemo && !emptyWanted) {
+    const urlDemo = !emptyWanted && (explicitDemoInUrl() || consumePendingDemo());
+    if (urlDemo) {
       demoConsumed.current = true;
       const d = demoIntake(locale);
       clearPendingDemo();
@@ -108,46 +109,43 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
         offer: false,
       });
       setPhase("wizard");
+    } else if (emptyWanted) {
+      const blankState = applyEmptyCampaignHydrate();
+      setIntake(blankState.intake);
+      setStep(1);
+      setCustom({ audience: false, problem: false, advantage: false, goal: false, offer: false });
+      setPhase("wizard");
+      setPack(null);
+      setAgentStatus(idleStatus());
     } else {
       const d = loadDraft();
-      const skipDemo =
-        emptyWanted ||
-        (locale === "ar" && isPediatricDemo(d.intake)) ||
-        (emptyWanted && isPediatricDemo(d.intake));
-      if (skipDemo) {
-        const blankState = applyEmptyCampaignHydrate();
-        setIntake(blankState.intake);
-        setStep(1);
-        setCustom({ audience: false, problem: false, advantage: false, goal: false, offer: false });
-        setPhase("wizard");
-        setPack(null);
-        setAgentStatus(idleStatus());
-      } else {
-        const intake = isPediatricDemo(d.intake)
+      const named = String(d.intake?.businessName ?? "").trim();
+      const intake = !named
+        ? d.intake
+        : isPediatricDemo(d.intake)
           ? relocalizePediatricIntake(d.intake, locale)
           : { ...d.intake, businessName: canonicalDoctorName(d.intake.businessName) };
-        setIntake(intake);
-        setStep(d.step);
-        setCustom({
-          audience: intake.audienceCustom,
-          problem: intake.problemCustom,
-          advantage: intake.advantageCustom,
-          goal: intake.goalCustom,
-          offer: intake.offerCustom,
-        });
-        const resume = d.phase === "agents" || d.phase === "interview" ? d.phase : "wizard";
-        if (resume === "agents" && d.packId) {
-          const existing = getCampaign(d.packId);
-          if (existing) {
-            setPack(existing);
-            setAgentStatus(existing.agentStatus);
-            setPhase("agents");
-          } else {
-            setPhase("wizard");
-          }
+      setIntake(intake);
+      setStep(d.step);
+      setCustom({
+        audience: intake.audienceCustom,
+        problem: intake.problemCustom,
+        advantage: intake.advantageCustom,
+        goal: intake.goalCustom,
+        offer: intake.offerCustom,
+      });
+      const resume = d.phase === "agents" || d.phase === "interview" ? d.phase : "wizard";
+      if (resume === "agents" && d.packId) {
+        const existing = getCampaign(d.packId);
+        if (existing) {
+          setPack(existing);
+          setAgentStatus(existing.agentStatus);
+          setPhase("agents");
         } else {
-          setPhase(resume);
+          setPhase("wizard");
         }
+      } else {
+        setPhase(resume);
       }
     }
     setHydrated(true);
@@ -214,14 +212,21 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
 
   useEffect(() => {
     if (!hydrated) return;
-    saveDraft({ intake, step, phase, packId: pack?.id, coach: coachIntake(intake) });
-    if (intake.businessName.trim() && !isPediatricDemo(intake)) {
-      clearEmptyCampaign();
+    if (wantsEmptyCampaign()) {
+      if (releaseEmptyIfTypedName(intake.businessName)) {
+        saveDraft({ intake, step, phase, packId: pack?.id, coach: coachIntake(intake) });
+      } else {
+        saveDraft({ intake: emptyIntake(), step: 1, phase: "wizard" });
+      }
+      return;
     }
+    saveDraft({ intake, step, phase, packId: pack?.id, coach: coachIntake(intake) });
   }, [intake, step, phase, pack?.id, hydrated]);
 
   useEffect(() => {
     if (!hydrated) return;
+    if (wantsEmptyCampaign()) return;
+    if (!intake.businessName.trim()) return;
     if (isPediatricDemo(intake)) {
       setIntake((prev) => relocalizePediatricIntake(prev, locale));
     }
@@ -234,9 +239,11 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
 
   useEffect(() => {
     if (!hydrated || phase !== "wizard" || step !== 4) return;
+    if (wantsEmptyCampaign()) return;
+    if (!intake.businessName.trim() || isBlockedEmptySessionName(intake.businessName)) return;
     if (isFreeService(intake) || intake.channelNotes.trim()) return;
     setIntake((s) => (s.channelNotes.trim() || isFreeService(s) ? s : { ...s, channelNotes: "facebook, instagram" }));
-  }, [hydrated, phase, step, intake.operatingModel, intake.channelNotes]);
+  }, [hydrated, phase, step, intake.operatingModel, intake.channelNotes, intake.businessName]);
 
   const patch = (p: Partial<Intake>) => setIntake((s) => ({ ...s, ...p }));
 
@@ -489,6 +496,9 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
           <p className="max-w-md text-center text-xs text-muted">{t("cta.newHint")}</p>
         </div>
       )}
+      {!intake.businessName.trim() ? (
+        <p className="mb-4 max-w-md mx-auto text-center text-xs text-muted">{t("gemini.waitFacts")}</p>
+      ) : null}
 
       {phase === "wizard" && (
         <>

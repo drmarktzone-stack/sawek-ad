@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ShieldAlert, Sparkles, Languages, Workflow } from "lucide-react";
 import { WizardFlow } from "@/components/wizard-flow";
 import { useI18n } from "@/components/i18n-provider";
 import { DEMO_LABEL } from "@/lib/demo";
 import { startPediatricDemoFlow } from "@/lib/start-pediatric-demo";
-import { markEmptyCampaign } from "@/lib/empty-campaign";
+import { markEmptyCampaign, EMPTY_CAMPAIGN_EVENT } from "@/lib/empty-campaign";
 import { Button } from "@/components/ui/button";
 import { FunctionRail } from "@/components/function-rail";
 
@@ -14,13 +14,18 @@ export function HomeStudio() {
   const { t, locale } = useI18n();
   const [wizardKey, setWizardKey] = useState(0);
 
+  useEffect(() => {
+    const onEmpty = () => setWizardKey((k) => k + 1);
+    window.addEventListener(EMPTY_CAMPAIGN_EVENT, onEmpty);
+    return () => window.removeEventListener(EMPTY_CAMPAIGN_EVENT, onEmpty);
+  }, []);
+
   function runDemo() {
     startPediatricDemoFlow(locale);
   }
 
   function startEmpty() {
     markEmptyCampaign();
-    setWizardKey((k) => k + 1);
     requestAnimationFrame(() => {
       document.getElementById("studio")?.scrollIntoView({ behavior: "smooth", block: "start" });
     });

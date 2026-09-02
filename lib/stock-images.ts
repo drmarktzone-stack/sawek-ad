@@ -1,7 +1,7 @@
 import type { Vertical } from "./vertical";
 import { detectVertical } from "./vertical";
 
-export type StockSource = "openverse" | "wikimedia";
+export type StockSource = "openverse" | "wikimedia" | "vertex";
 
 export type StockImage = {
   id: string;
@@ -477,6 +477,43 @@ function dedupe(images: StockImage[]): StockImage[] {
     out.push(img);
   }
   return out;
+}
+
+export async function vertexStillsForStock(input: StockSearchInput, max = 2): Promise<StockImage[]> {
+  const topic = sanitizeStockHint(input.q || input.category || "");
+  if (!topic && !input.vertical && !input.category) return [];
+  try {
+    const { runImagen } = await import("./imagen");
+    const n = Math.max(1, Math.min(2, max));
+    const out: StockImage[] = [];
+    for (let i = 0; i < n; i++) {
+      const hit = await Promise.race([
+        runImagen({
+          businessName: topic || "a local business",
+          category: sanitizeStockHint(input.category || input.vertical || "local service"),
+          headline: topic,
+          locale: "en",
+        }),
+        new Promise<{ ok: false }>((resolve) => setTimeout(() => resolve({ ok: false }), 12000)),
+      ]);
+      if (!hit || !("ok" in hit) || !hit.ok) break;
+      const mime = hit.mime && hit.mime.startsWith("image/") ? hit.mime : "image/png";
+      const dataUrl = `data:${mime};base64,${hit.imageBase64}`;
+      out.push({
+        id: `vertex-still-${i + 1}`,
+        thumb: dataUrl,
+        full: dataUrl,
+        title: "Vertex Imagen still",
+        attribution: "Vertex Imagen",
+        source: "vertex",
+        license: "generated",
+        query: topic || "vertex",
+      });
+    }
+    return out;
+  } catch {
+    return [];
+  }
 }
 
 export async function searchStockImages(input: StockSearchInput): Promise<StockSearchResult> {

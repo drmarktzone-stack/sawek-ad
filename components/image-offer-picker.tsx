@@ -226,14 +226,20 @@ export function ImageOfferPicker({
       };
       const hits = data?.images ?? [];
       const opts: OfferOption[] = hits
-        .filter((img) => /^https:\/\//i.test(img.thumb) && /^https:\/\//i.test(img.full))
-        .map((img) => ({
-          id: img.id,
-          kind: "stock" as const,
-          label: img.title || t("audit.tabStock"),
-          src: img.thumb,
-          asset: stockToAsset(img),
-        }));
+        .filter((img) => {
+          const ok = (u: string) => /^https:\/\//i.test(u) || u.startsWith("data:image/");
+          return ok(img.thumb) && ok(img.full);
+        })
+        .map((img) => {
+          const vertex = img.source === "vertex" || img.id.startsWith("vertex-");
+          return {
+            id: img.id,
+            kind: (vertex ? "imagen" : "stock") as OfferKind,
+            label: img.title || t("audit.tabStock"),
+            src: img.thumb,
+            asset: stockToAsset(img),
+          };
+        });
       setStock((prev) => {
         const merged = append ? [...prev, ...opts] : opts;
         const seen = new Set<string>();

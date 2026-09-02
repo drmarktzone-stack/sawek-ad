@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { searchStockImages, type StockSearchInput } from "@/lib/stock-images";
+import { searchStockImages, vertexStillsForStock, type StockSearchInput } from "@/lib/stock-images";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -24,8 +24,14 @@ export async function GET(req: Request) {
       limit: Number(read(req, "limit") || 48) || 48,
       page: Number(read(req, "page") || 1) || 1,
     };
+    const stillsP = vertexStillsForStock(input, 2).catch(() => []);
     const result = await searchStockImages(input);
-    return NextResponse.json(result, { status: 200 });
+    const stills = await Promise.race([
+      stillsP,
+      new Promise<typeof result.images>((resolve) => setTimeout(() => resolve([]), 8000)),
+    ]);
+    const images = [...(Array.isArray(stills) ? stills : []), ...result.images];
+    return NextResponse.json({ ...result, images }, { status: 200 });
   } catch {
     return NextResponse.json(
       { ok: false, images: [], page: 1, nextPage: null, queries: [], error: "stock_error" },

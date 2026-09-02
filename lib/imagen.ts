@@ -1,6 +1,12 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { runtimeEnv } from "./runtime-env";
 import type { Locale } from "./types";
+import {
+  fetchGoogleJson,
+  vertexAccessToken,
+  vertexLocation,
+  vertexProject,
+} from "./vertex";
 
 export type ImagenFailReason = "not_configured" | "imagen_error" | "quota" | "vertex_denied";
 export type ImagenOk = { ok: true; mime: string; imageBase64: string };
@@ -10,8 +16,6 @@ export type ImagenResult = ImagenOk | ImagenFail;
 type AttemptReason = ImagenFailReason | "not_found";
 type Attempt = ImagenOk | { ok: false; reason: AttemptReason };
 
-const DEFAULT_PROJECT = "project-8fd8a005-ae6d-4139-ab4";
-const DEFAULT_LOCATION = "us-central1";
 const VERTEX_MODELS = ["imagen-3.0-generate-001", "imagen-3.0-fast-generate-001"] as const;
 const GOOGLE_AI_MODELS = ["imagen-3.0-generate-001", "imagen-3.0-fast-generate-001"] as const;
 const GEMINI_IMAGE_MODELS = [
@@ -58,38 +62,6 @@ export function buildImagenPrompt(facts: ImagenFacts): string {
     "Do NOT depict a photoreal identifiable doctor, patient, or any recognizable person. Empty place, product, facade, or abstract wellness atmosphere only.",
     "No clinical procedure, no body close-up, no injection, no surgery.",
   ].join(" ");
-}
-
-async function fetchJson(url: string, init: RequestInit, timeoutMs: number): Promise<{ status: number; json: unknown }> {
-  const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
-  try {
-    const res = await fetch(url, { ...init, signal: ctrl.signal, cache: "no-store" });
-    let json: unknown = null;
-    try {
-      json = await res.json();
-    } catch {
-      json = null;
-    }
-    return { status: res.status, json };
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
-async function metadataAccessToken(): Promise<string | null> {
-  try {
-    const { status, json } = await fetchJson(
-      "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token",
-      { headers: { "Metadata-Flavor": "Google" } },
-      1500,
-    );
-    if (status < 200 || status >= 300 || !json || typeof json !== "object") return null;
-    const token = (json as { access_token?: unknown }).access_token;
-    return typeof token === "string" && token.trim() ? token.trim() : null;
-  } catch {
-    return null;
-  }
 }
 
 function jsonBlob(json: unknown): string {
@@ -213,7 +185,7 @@ async function vertexPredict(
 ): Promise<Attempt> {
   try {
     const url = `https://${location}-aiplatform.googleapis.com/v1/projects/${encodeURIComponent(project)}/locations/${encodeURIComponent(location)}/publishers/google/models/${encodeURIComponent(model)}:predict`;
-    const { status, json } = await fetchJson(
+    const { status, json } = await fetchGoogleJson(
       url,
       {
         method: "POST",
@@ -252,7 +224,7 @@ async function googleAiPredict(apiKey: string, model: string, prompt: string): P
   let last: AttemptReason = "imagen_error";
   for (const attempt of bodies) {
     try {
-      const { status, json } = await fetchJson(
+      const { status, json } = await fetchGoogleJson(
         attempt.url,
         {
           method: "POST",
@@ -291,7 +263,7 @@ async function geminiNativeRest(apiKey: string, model: string, prompt: string): 
   let last: AttemptReason = "imagen_error";
   for (const generationConfig of GEMINI_IMAGE_CONFIGS) {
     try {
-      const { status, json } = await fetchJson(
+      const { status, json } = await fetchGoogleJson(
         `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
         {
           method: "POST",
@@ -360,14 +332,14 @@ async function geminiNativeImage(apiKey: string, model: string, prompt: string):
 }
 
 export async function runImagen(facts: ImagenFacts): Promise<ImagenResult> {
-  const project = runtimeEnv("GOOGLE_CLOUD_PROJECT") || DEFAULT_PROJECT;
-  const location = runtimeEnv("VERTEX_LOCATION") || DEFAULT_LOCATION;
+  const project = vertexProject();
+  const location = vertexLocation();
   const geminiKey = runtimeEnv("GEMINI_API_KEY");
   const prompt = buildImagenPrompt(facts);
 
   let token: string | null = null;
   try {
-    token = await metadataAccessToken();
+    token = await vertexAccessToken();
   } catch {
     token = null;
   }

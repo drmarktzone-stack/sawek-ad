@@ -1,9 +1,7 @@
 import type { Intake, Locale, PastCampaignAudit, PastCreative, SiteAuditItem } from "../types";
 import { inventsForbidden } from "./coach";
 import { emptyIntake } from "./validate";
-import { runtimeEnv } from "../runtime-env";
-import { GEMINI_MODEL } from "./gemini-generate";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { completeGemini } from "./gemini-generate";
 
 const L = (he: string, ar: string, en: string): Record<Locale, string> => ({ he, ar, en });
 
@@ -275,21 +273,19 @@ export async function overlayPastCampaignAudit(
   posts: PostLike[],
   ctx: { location?: string; description?: string } = {},
 ): Promise<PastCampaignAudit> {
-  const key = runtimeEnv("GEMINI_API_KEY");
-  if (!key) return heuristic;
   const source = sourceFacts(posts, ctx);
   if (!source.trim()) return heuristic;
   try {
-    const genAI = new GoogleGenerativeAI(key);
-    const model = genAI.getGenerativeModel({
-      model: GEMINI_MODEL,
+    const prompt = `Post texts (evidence only):\n${source.slice(0, 3500)}\n\nLocation if extracted: ${ctx.location || "(none)"}\n\nAudit like an agency: what was strong, what failed, who the posts actually speak to, who the NEXT campaign must target — argued from these posts only.\nReply JSON:\n${AUDIT_SHAPE}`;
+    const completed = await completeGemini({
+      parts: [{ text: prompt }],
+      temperature: 0.2,
+      timeoutMs: 8_000,
       systemInstruction:
         "You are a senior performance-marketing auditor. Use ONLY the provided post texts. Never invent prices, likes, reach, ROAS, follower counts, reviews, or age/gender demographics (no 'women 25-34') unless those exact words appear in the posts. Missing audience → [יש להשלים] / [يجب الاستكمال] / [to complete]. Reply JSON only.",
-      generationConfig: { temperature: 0.2 },
     });
-    const prompt = `Post texts (evidence only):\n${source.slice(0, 3500)}\n\nLocation if extracted: ${ctx.location || "(none)"}\n\nAudit like an agency: what was strong, what failed, who the posts actually speak to, who the NEXT campaign must target — argued from these posts only.\nReply JSON:\n${AUDIT_SHAPE}`;
-    const result = await model.generateContent(prompt, { timeout: 8_000 });
-    const text = result.response.text() ?? "";
+    if (!completed.ok) return heuristic;
+    const text = completed.text;
     const obj = parseLooseJson(text);
     if (!obj) return heuristic;
     const joined = JSON.stringify(obj);

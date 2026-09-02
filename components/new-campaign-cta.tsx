@@ -1,7 +1,7 @@
 "use client";
 
 import { WandSparkles } from "lucide-react";
-import { markEmptyCampaign } from "@/lib/empty-campaign";
+import { beginNewCampaign } from "@/lib/empty-campaign";
 import { Button } from "@/components/ui/button";
 import { LangLink } from "@/components/lang-link";
 import { useI18n } from "@/components/i18n-provider";
@@ -22,7 +22,7 @@ export function NewCampaignCta({
   return (
     <div className={cn("flex flex-col", className)}>
       <Button asChild size={size}>
-        <LangLink href="/" onClick={() => markEmptyCampaign()}>
+        <LangLink href="/" onClick={(e) => beginNewCampaign(e)}>
           <WandSparkles className="size-4" />
           {t(other ? "cta.newOther" : "cta.new")}
         </LangLink>

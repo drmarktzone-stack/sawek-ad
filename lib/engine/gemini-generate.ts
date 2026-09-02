@@ -1,6 +1,17 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import type { AngleCopy, CampaignAngles, Intake } from "../types";
 import { runtimeEnv } from "../runtime-env";
+import {
+  classifyVertexHttp,
+  extractGenerateText,
+  fetchGoogleJson,
+  geminiApiKeyPresent,
+  recordGeminiOutcome,
+  VERTEX_GEMINI_MODELS,
+  vertexAccessToken,
+  vertexLocation,
+  vertexProject,
+} from "../vertex";
 import { inventsForbidden } from "./coach";
 import { emptyIntake } from "./validate";
 import { parseCampaignAngles, sanitizeAngles } from "./angles";
@@ -387,18 +398,181 @@ const GEMINI_TIMEOUT_MS = 20_000;
  * Shared Gemini generate. Used by POST /api/generate and ingest-url (no HTTP self-loop).
  * Never logs the API key.
  */
-export async function runGeminiGenerate(body: GenerateBody): Promise<GenerateResult> {
+export function bodyHasFacts(body: GenerateBody): boolean {
+  const desc = typeof body.description === "string" ? body.description.trim() : "";
+  const audience = typeof body.audience === "string" ? body.audience.trim() : "";
+  if (desc.length > 2 || audience.length > 2) return true;
+  const facts = body.facts;
+  if (typeof facts === "string" && facts.trim().length > 2) return true;
+  if (facts && typeof facts === "object" && !Array.isArray(facts)) {
+    const o = facts as Record<string, unknown>;
+    const name = typeof o.businessName === "string" ? o.businessName.trim() : "";
+    const d = typeof o.description === "string" ? o.description.trim() : "";
+    const site = typeof o.website === "string" ? o.website.trim() : "";
+    if (name || d || site) return true;
+  }
+  return false;
+}
+
+type GeminiPart = { text: string } | { inlineData: { mimeType: string; data: string } };
+
+type CompleteOk = { ok: true; text: string; model: string; provider: "vertex" | "ai_studio" };
+type CompleteFail = { ok: false; reason: "no_key" | "gemini_error" | "quota" | "vertex_denied" };
+
+async function vertexGenerate(
+  parts: GeminiPart[],
+  temperature: number,
+  timeoutMs: number,
+  systemInstruction: string = SYSTEM_INSTRUCTION,
+): Promise<CompleteOk | CompleteFail | { ok: false; reason: "no_token" }> {
+  const project = vertexProject();
+  if (!project) return { ok: false, reason: "no_token" };
+  const token = await vertexAccessToken();
+  if (!token) return { ok: false, reason: "no_token" };
+  const location = vertexLocation();
+  let last: CompleteFail = { ok: false, reason: "gemini_error" };
+  for (const model of VERTEX_GEMINI_MODELS) {
+    try {
+      const url = `https://${location}-aiplatform.googleapis.com/v1/projects/${encodeURIComponent(project)}/locations/${encodeURIComponent(location)}/publishers/google/models/${encodeURIComponent(model)}:generateContent`;
+      const { status, json } = await fetchGoogleJson(
+        url,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            contents: [{ role: "user", parts }],
+            systemInstruction: { parts: [{ text: systemInstruction }] },
+            generationConfig: { temperature, maxOutputTokens: 8192 },
+          }),
+        },
+        timeoutMs,
+      );
+      const kind = classifyVertexHttp(status, json);
+      if (kind === "ok") {
+        const text = extractGenerateText(json);
+        if (!text) {
+          last = { ok: false, reason: "gemini_error" };
+          continue;
+        }
+        return { ok: true, text, model, provider: "vertex" };
+      }
+      if (kind === "quota") return { ok: false, reason: "quota" };
+      if (kind === "not_found") {
+        last = { ok: false, reason: "gemini_error" };
+        continue;
+      }
+      if (kind === "vertex_denied") {
+        last = { ok: false, reason: "vertex_denied" };
+        continue;
+      }
+      last = { ok: false, reason: "gemini_error" };
+    } catch {
+      last = { ok: false, reason: "gemini_error" };
+    }
+  }
+  return last;
+}
+
+async function studioGenerate(
+  parts: GeminiPart[],
+  temperature: number,
+  timeoutMs: number,
+  systemInstruction: string = SYSTEM_INSTRUCTION,
+): Promise<CompleteOk | CompleteFail> {
   const key = runtimeEnv("GEMINI_API_KEY");
-  if (!key) {
-    return noKey();
+  if (!key) return { ok: false, reason: "no_key" };
+  const models = [...VERTEX_GEMINI_MODELS];
+  let last: CompleteFail = { ok: false, reason: "gemini_error" };
+  for (const modelName of models) {
+    try {
+      const genAI = new GoogleGenerativeAI(key);
+      const model = genAI.getGenerativeModel({
+        model: modelName,
+        systemInstruction,
+        generationConfig: { temperature },
+      });
+      const payload =
+        parts.length === 1 && "text" in parts[0]!
+          ? parts[0].text
+          : parts.map((part) =>
+              "text" in part
+                ? { text: part.text }
+                : { inlineData: { mimeType: part.inlineData.mimeType, data: part.inlineData.data } },
+            );
+      const result = await model.generateContent(payload, { timeout: timeoutMs });
+      const text = result.response.text() ?? "";
+      if (!text.trim()) {
+        last = { ok: false, reason: "gemini_error" };
+        continue;
+      }
+      return { ok: true, text, model: modelName, provider: "ai_studio" };
+    } catch (err) {
+      const msg = err instanceof Error ? err.message.toLowerCase() : "";
+      if (/429|resource_exhausted|quota/.test(msg)) return { ok: false, reason: "quota" };
+      if (/404|not found|not supported/.test(msg)) {
+        last = { ok: false, reason: "gemini_error" };
+        continue;
+      }
+      last = { ok: false, reason: "gemini_error" };
+    }
+  }
+  return last;
+}
+
+/** Vertex first when the GCP project is set and a token exists. Never logs keys. */
+export async function completeGemini(opts: {
+  parts: GeminiPart[];
+  temperature: number;
+  timeoutMs?: number;
+  systemInstruction?: string;
+}): Promise<CompleteOk | CompleteFail> {
+  const timeoutMs = opts.timeoutMs ?? GEMINI_TIMEOUT_MS;
+  const system = opts.systemInstruction ?? SYSTEM_INSTRUCTION;
+  const vertex = await vertexGenerate(opts.parts, opts.temperature, timeoutMs, system);
+  if (vertex.ok) {
+    recordGeminiOutcome({ provider: "vertex", reason: "ok", model: vertex.model });
+    return vertex;
+  }
+  if (vertex.reason === "quota") {
+    recordGeminiOutcome({ provider: "vertex", reason: "quota" });
+    return vertex;
+  }
+  const studio = await studioGenerate(opts.parts, opts.temperature, timeoutMs, system);
+  if (studio.ok) {
+    recordGeminiOutcome({ provider: "ai_studio", reason: "ok", model: studio.model });
+    return studio;
+  }
+  recordGeminiOutcome({
+    provider: vertex.reason === "no_token" ? (studio.reason === "no_key" ? "none" : "ai_studio") : "vertex",
+    reason: studio.reason === "no_key" && vertex.reason === "no_token" ? "no_key" : studio.reason === "quota" ? "quota" : "gemini_error",
+  });
+  if (studio.reason === "no_key" && vertex.reason === "no_token") return { ok: false, reason: "no_key" };
+  if (studio.reason === "quota") return { ok: false, reason: "quota" };
+  return { ok: false, reason: studio.reason === "vertex_denied" || vertex.reason === "vertex_denied" ? "vertex_denied" : "gemini_error" };
+}
+
+export async function runGeminiGenerate(body: GenerateBody): Promise<GenerateResult> {
+  if (!bodyHasFacts(body)) {
+    recordGeminiOutcome({ provider: "none", reason: "no_facts" });
+    return { ok: false, reason: "no_facts", useTemplates: true };
   }
   try {
     const mode = asMode(body.mode);
     const language = asLang(body.language);
     const userMessage = buildUserMessage(body);
-    const model = geminiModel(key, body.medical === true);
-    const result = await model.generateContent(userMessage, { timeout: GEMINI_TIMEOUT_MS });
-    const text = result.response.text() ?? "";
+    const completed = await completeGemini({
+      parts: [{ text: userMessage }],
+      temperature: body.medical === true ? 0.2 : 0.4,
+    });
+    if (!completed.ok) {
+      if (completed.reason === "no_key") return noKey();
+      if (completed.reason === "quota") return { ok: false, reason: "quota" };
+      return geminiError();
+    }
+    const text = completed.text;
     const parsed = parseStructured(text);
     const compat = compatFrom(parsed, language);
     const angles = parsed.angles
@@ -421,7 +595,9 @@ export async function runGeminiGenerate(body: GenerateBody): Promise<GenerateRes
   }
 }
 
-export const GEMINI_MODEL = "gemini-3.6-flash";
+
+export const GEMINI_MODEL = "gemini-2.5-flash";
+export const GEMINI_MODELS = VERTEX_GEMINI_MODELS;
 
 const JSON_SHAPE_VISION = `{
   "elements":["..."],
@@ -452,7 +628,7 @@ function geminiError(): GenerateFail {
 }
 
 export function geminiFailFromEnv(): GenerateFail {
-  return runtimeEnv("GEMINI_API_KEY") ? geminiError() : noKey();
+  return geminiApiKeyPresent() || vertexProject() ? geminiError() : noKey();
 }
 
 export function factsToIntake(body: { description?: unknown; audience?: unknown; facts?: unknown }): Intake {
@@ -486,15 +662,6 @@ export function factsToIntake(body: { description?: unknown; audience?: unknown;
     intake.audience = body.audience.trim();
   }
   return intake;
-}
-
-function geminiModel(key: string, medical: boolean) {
-  const genAI = new GoogleGenerativeAI(key);
-  return genAI.getGenerativeModel({
-    model: GEMINI_MODEL,
-    systemInstruction: SYSTEM_INSTRUCTION,
-    generationConfig: { temperature: medical ? 0.2 : 0.4 },
-  });
 }
 
 function padThree(list: string[], fallback: string): string[] {
@@ -618,8 +785,6 @@ export function decodeVisionImage(body: VisionBody): { mime: string; data: strin
 }
 
 export async function runGeminiVision(body: VisionBody, image: { mime: string; data: string }): Promise<VisionResult> {
-  const key = runtimeEnv("GEMINI_API_KEY");
-  if (!key) return noKey();
   try {
     const language = asLang(body.language);
     const intake = factsToIntake(body);
@@ -648,15 +813,19 @@ export async function runGeminiVision(body: VisionBody, image: { mime: string; d
       .filter(Boolean)
       .join("\n\n")
       .slice(0, 4000);
-    const model = geminiModel(key, body.medical === true);
-    const result = await model.generateContent(
-      [
+    const completed = await completeGemini({
+      parts: [
         { inlineData: { mimeType: image.mime, data: image.data } },
         { text: prompt },
       ],
-      { timeout: GEMINI_TIMEOUT_MS },
-    );
-    const text = result.response.text() ?? "";
+      temperature: body.medical === true ? 0.2 : 0.4,
+    });
+    if (!completed.ok) {
+      if (completed.reason === "no_key") return noKey();
+      if (completed.reason === "quota") return { ok: false, reason: "quota" };
+      return geminiError();
+    }
+    const text = completed.text;
     const parsed = parseVision(text);
     if (!parsed) return geminiError();
     return { ok: true, ...parsed };
@@ -728,8 +897,6 @@ function sanitizeRewrite(
 }
 
 export async function runGeminiScore(body: ScoreBody): Promise<ScoreResult> {
-  const key = runtimeEnv("GEMINI_API_KEY");
-  if (!key) return noKey();
   const adText = typeof body.text === "string" ? body.text.trim() : "";
   if (!adText) return geminiError();
   try {
@@ -757,9 +924,16 @@ export async function runGeminiScore(body: ScoreBody): Promise<ScoreResult> {
       .filter(Boolean)
       .join("\n\n")
       .slice(0, 5000);
-    const model = geminiModel(key, body.medical === true);
-    const result = await model.generateContent(prompt, { timeout: GEMINI_TIMEOUT_MS });
-    const text = result.response.text() ?? "";
+    const completed = await completeGemini({
+      parts: [{ text: prompt }],
+      temperature: body.medical === true ? 0.2 : 0.4,
+    });
+    if (!completed.ok) {
+      if (completed.reason === "no_key") return noKey();
+      if (completed.reason === "quota") return { ok: false, reason: "quota" };
+      return geminiError();
+    }
+    const text = completed.text;
     const parsed = parseScore(text);
     if (!parsed) return geminiError();
     const rewrite = sanitizeRewrite(parsed.rewrite, hasFacts ? intake : null);

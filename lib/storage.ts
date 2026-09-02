@@ -1,6 +1,7 @@
 import type { CampaignPack, CoachReport, Intake, LabRun, Locale, SelfPlan, SelfProfile, StudioPiece } from "./types";
 import { emptyIntake } from "./engine/validate";
 import { coachIntake } from "./engine/coach";
+import { intakeIsClinicDemo, isBlockedEmptySessionName } from "./clinic-leak";
 
 const K = {
   locale: "omniad-locale",
@@ -99,7 +100,28 @@ export function loadDraft(): DraftState {
   };
 }
 
+const EMPTY_CAMPAIGN_FLAG = "sawek-empty-campaign";
+
+function emptySessionActive(): boolean {
+  if (!canUse()) return false;
+  try {
+    if (localStorage.getItem(EMPTY_CAMPAIGN_FLAG) === "1") return true;
+    if (sessionStorage.getItem(EMPTY_CAMPAIGN_FLAG) === "1") return true;
+  } catch {
+    return false;
+  }
+  return false;
+}
+
 export function saveDraft(draft: DraftState) {
+  if (emptySessionActive()) {
+    const name = String(draft.intake?.businessName ?? "").trim();
+    const clinic = intakeIsClinicDemo(draft.intake ?? {}) || isBlockedEmptySessionName(name);
+    if (!name || clinic) {
+      write(K.draft, { intake: emptyIntake(), step: 1, phase: "wizard" });
+      return;
+    }
+  }
   write(K.draft, draft);
 }
 

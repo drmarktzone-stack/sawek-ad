@@ -863,6 +863,13 @@ export const copy: Dict = {
   "social.banner.error": { he: "חיבור הרשת נכשל או בוטל.", ar: "ربط الشبكة فشل أو تغيّر.", en: "Social connect failed or was cancelled." },
   "social.settingsTitle": { he: "רשתות חברתיות", ar: "الشبكات الاجتماعية", en: "Social networks" },
   "social.settingsLead": { he: "התחברות ב-OAuth בלבד. הסיסמה נשארת אצל פייסבוק / לינקדאין. הפרסום רק בלחיצה.", ar: "ربط OAuth بس. كلمة السر بتضل عند فيسبوك / لينكدإن. النشر بس لما تضغطوا.", en: "OAuth sign-in only. Passwords stay with Facebook / LinkedIn. Nothing posts until you click." },
+  "gemini.vertex": { he: "Gemini (Vertex)", ar: "Gemini (Vertex)", en: "Gemini (Vertex)" },
+  "gemini.quota": { he: "אין מכסה", ar: "ما في حصّة", en: "No quota" },
+  "gemini.waitFacts": {
+    he: "המתינו לכתובת או לעובדות. לא נייצר קמפיין מרפאה ריק.",
+    ar: "استنوا رابط أو وقائع. مش منولّد حملة عيادة فاضية.",
+    en: "Wait for a URL or typed facts. We will not invent a clinic campaign.",
+  },
 };
 
 
