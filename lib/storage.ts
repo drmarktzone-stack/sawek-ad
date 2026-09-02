@@ -82,6 +82,16 @@ export function loadDraft(): DraftState {
       channelNotes: typeof d.intake?.channelNotes === "string" ? d.intake.channelNotes : "",
       whatsappTemplates: typeof d.intake?.whatsappTemplates === "string" ? d.intake.whatsappTemplates : "",
       landingLines: typeof d.intake?.landingLines === "string" ? d.intake.landingLines : "",
+      brandKit:
+        d.intake?.brandKit && typeof d.intake.brandKit === "object"
+          ? {
+              logoSrc: typeof d.intake.brandKit.logoSrc === "string" ? d.intake.brandKit.logoSrc : undefined,
+              colors: Array.isArray(d.intake.brandKit.colors)
+                ? d.intake.brandKit.colors.filter((c): c is string => typeof c === "string")
+                : [],
+              source: d.intake.brandKit.source === "scan" ? "scan" : "none",
+            }
+          : { colors: [], source: "none" },
     },
     phase,
     packId: typeof d.packId === "string" ? d.packId : undefined,

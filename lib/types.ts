@@ -1,4 +1,19 @@
 export type Locale = "he" | "ar" | "en";
+
+export type SiteAuditKind = "strength" | "weakness";
+
+export interface SiteAuditItem {
+  id: string;
+  kind: SiteAuditKind;
+  label: Record<Locale, string>;
+  evidence: Record<Locale, string>;
+}
+
+export interface SiteAudit {
+  strengths: SiteAuditItem[];
+  weaknesses: SiteAuditItem[];
+}
+
 export type CampaignType = "business" | "product" | "service" | "app" | "personal";
 export type Depth = "quick" | "deep";
 /** Upstream of offer: commercial sale vs exposure-only institution. Not the no-offer chip. */
@@ -102,6 +117,13 @@ export interface Competitor {
   notes: string;
 }
 
+/** Scanned brand kit — colors/logo from the live site only. Never invent a logo. */
+export interface ClientBrandKit {
+  logoSrc?: string;
+  colors: string[];
+  source: "scan" | "none";
+}
+
 export interface Intake {
   type: CampaignType;
   depth: Depth;
@@ -142,6 +164,7 @@ export interface Intake {
   channelNotes: string;
   whatsappTemplates: string;
   landingLines: string;
+  brandKit?: ClientBrandKit;
 }
 
 export interface MissingFlag {
@@ -366,6 +389,7 @@ export interface CampaignPack {
   planActivated: boolean;
   agency?: AgencyPack;
   coach?: CoachReport;
+  siteAudit?: SiteAudit;
   angles?: CampaignAngles;
   featureType?: LabFeatureType;
   lab?: LabRun[];

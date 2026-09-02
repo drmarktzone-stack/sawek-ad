@@ -9,6 +9,7 @@ import { generateMedia } from "./media";
 import { generateOptimizer } from "./optimizer";
 import { buildAgency } from "./agency";
 import { coachIntake } from "./coach";
+import { buildSiteAudit } from "./site-audit";
 import { demoIntake, DEMO_ID } from "../demo";
 import { loadLocale } from "../storage";
 
@@ -167,6 +168,7 @@ export function assemblePack(
     saved: false,
     planActivated: false,
     coach: partial.coach ?? coachIntake(intake),
+    siteAudit: buildSiteAudit(intake),
     ...(partial.angles ? { angles: partial.angles } : {}),
     featureType: "campaign",
   };

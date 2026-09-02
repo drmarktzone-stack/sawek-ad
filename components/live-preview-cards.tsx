@@ -25,6 +25,7 @@ import { useResolvedAssets } from "@/lib/use-resolved-assets";
 import { channelFields, downloadNodePng } from "@/lib/channel-copy";
 import { stylesForVertical } from "@/lib/design-styles";
 import { detectVertical } from "@/lib/vertical";
+import { paletteForIntake } from "@/lib/brand-kit";
 import { cn } from "@/lib/utils";
 
 const autoImagenPacks = new Set<string>();
@@ -32,7 +33,12 @@ const autoImagenPacks = new Set<string>();
 export type PreviewImage = { mime: string; dataUrl: string } | null;
 
 function palettes(intake: CampaignPack["intake"]): [string, string, string][] {
-  return stylesForVertical(detectVertical(intake)).map((st) => st.palette);
+  const brand = paletteForIntake(intake);
+  const styles = stylesForVertical(detectVertical(intake)).map((st) => st.palette);
+  if (intake.brandKit?.source === "scan" && (intake.brandKit.colors?.length ?? 0) >= 2) {
+    return [brand, ...styles];
+  }
+  return styles.length ? styles : [brand];
 }
 
 function isWaCta(cta: string): boolean {

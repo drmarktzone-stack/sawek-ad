@@ -115,6 +115,7 @@ export function demoIntake(locale: Locale = "he"): Intake {
     channelNotes: "",
     whatsappTemplates: "",
     landingLines: "",
+    brandKit: { colors: [], source: "none" },
   };
 }
 
@@ -209,6 +210,7 @@ export function relocalizePediatricIntake(intake: Intake, locale: Locale): Intak
   out.channelNotes = out.channelNotes ?? "";
   out.whatsappTemplates = out.whatsappTemplates ?? "";
   out.landingLines = out.landingLines ?? "";
+  if (!out.brandKit) out.brandKit = { colors: [], source: "none" };
   if (!out.clinicHours) out.clinicHours = DEMO_FACTS.clinicHours[locale];
   if (!out.kupaFileBy) out.kupaFileBy = DEMO_FACTS.kupaFileBy[locale];
   if (!out.kupaMemberFrom) out.kupaMemberFrom = DEMO_FACTS.kupaMemberFrom[locale];

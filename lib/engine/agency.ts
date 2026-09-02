@@ -20,6 +20,7 @@ import { isWalkIn, landingBody, rsaLines, spokenCta, whatsappScript, hoursLine, 
 import { canonicalDoctorName } from "../demo";
 import { coverageFactLine, isClalitCoverageFact, isFreeService, problemChipsFor } from "../operating-model";
 import { bofWalkLine, landingVisualLine, smsWalkLine } from "../vertical";
+import { brandNote, paletteForIntake } from "../brand-kit";
 
 const L = (he: string, ar: string, en: string): Tri => ({ he, ar, en });
 
@@ -352,19 +353,9 @@ export function buildAgency(pack: Pick<CampaignPack, "intake" | "intakeReport" |
     pieces,
     brandKit: {
       sawek: { black: "#050505", red: "#ff1a1a", yellow: "#ffe500" },
-      clientPrimary: "",
-      clientSecondary: "",
-      note: L(
-        i.brandTone?.trim()
-          ? `טון שאושר מהמסמך: ${i.brandTone.trim()}. ערכת SAWEK AD (שחור/אדום/צהוב). צבעי לקוח לא סופקו — לא יומצא טורקיז.`
-          : "ערכת SAWEK AD (שחור/אדום/צהוב). צבעי לקוח לא סופקו — לא יומצא טורקיז.",
-        i.brandTone?.trim()
-          ? `نبرة اعتُمدت من المستند: ${i.brandTone.trim()}. طقم SAWEK AD. ألوان العميل غير معطاة.`
-          : "طقم SAWEK AD. ألوان العميل غير معطاة.",
-        i.brandTone?.trim()
-          ? `Tone confirmed from the document: ${i.brandTone.trim()}. SAWEK AD kit (black/red/yellow). Client colors not supplied — no invented teal.`
-          : "SAWEK AD kit (black/red/yellow). Client colors not supplied — no invented teal.",
-      ),
+      clientPrimary: paletteForIntake(i)[1],
+      clientSecondary: (i.brandKit?.colors ?? [])[2] || paletteForIntake(i)[2],
+      note: L(brandNote(i.brandKit, "he"), brandNote(i.brandKit, "ar"), brandNote(i.brandKit, "en")),
     },
   };
 

@@ -1,6 +1,11 @@
 import { existsSync, readFileSync } from "fs";
 import { join } from "path";
 import { inspectUrl, parseFetchedHtml, ingestUrl, collectSameOriginNavUrls, mergeExtractedFields, extractScriptBundleText } from "../lib/url-ingest";
+import { extractCssColors, extractLogoUrl, emptyBrandKit } from "../lib/brand-kit";
+import { buildSiteAudit } from "../lib/engine/site-audit";
+import { buildPostingCalendar } from "../lib/engine/posting-calendar";
+import { RESIZE_FORMATS } from "../lib/resize-formats";
+import { assemblePack } from "../lib/engine/run";
 import { applyIngestReview, rowsFromExtracted } from "../lib/document-ingest";
 import { emptyIntake, wizardReady } from "../lib/engine/validate";
 import { detectVertical, isPediatrics, showsHmoAudience } from "../lib/vertical";
@@ -242,6 +247,10 @@ const navHtml = `<html><body>
   <a href="/gallery">Gallery</a>
   <a href="/blog">Blog</a>
   <a href="/team">Team</a>
+  <a href="/services">Services</a>
+  <a href="/shop">Shop</a>
+  <a href="/password-reset">Reset</a>
+  <a href="/cart">Cart</a>
   <a href="mailto:hi@fiction.example">Email</a>
 </nav>
 </body></html>`;
@@ -254,6 +263,13 @@ if (!navUrls.some((u) => /\/menu\b/i.test(u))) fail("nav missing תפריט");
 if (navUrls.some((u) => /127\.0\.0\.1/.test(u))) fail("nav allowed private IP");
 if (navUrls.some((u) => /other\.example/.test(u))) fail("nav allowed other origin");
 if (navUrls.some((u) => /mailto:/.test(u))) fail("nav allowed mailto");
+if (navUrls.some((u) => /password-reset|\/cart\b/.test(u))) fail("nav allowed password-reset/cart");
+const navWide = collectSameOriginNavUrls(navHtml, "https://fiction.example/");
+if (navWide.length > 12) fail(`default nav cap exceeded ${navWide.length}`);
+if (!navWide.some((u) => /\/gallery\b/i.test(u))) fail("default cap should keep gallery");
+if (!navWide.some((u) => /\/team\b/i.test(u))) fail("default cap should keep team");
+if (!navWide.some((u) => /\/services\b/i.test(u))) fail("default cap should keep services");
+if (navWide.some((u) => /password-reset|\/cart\b/.test(u))) fail("wide nav allowed skip URLs");
 
 const merged = mergeExtractedFields(
   { businessName: "פיקציה גריל", website: "https://fiction.example/", clinicHours: "" },
@@ -543,6 +559,78 @@ if (!/ו-/.test(joinedHe) || !/נשים/.test(joinedHe) || !/גברים/.test(jo
 }
 const joinedAr = resolveChipLabel("men,women", AUDIENCE_CHIPS, "ar");
 if (!joinedAr.includes("و")) fail(`resolveChipLabel ar join missing و (got ${JSON.stringify(joinedAr)})`);
+
+
+const colorHtml = `<html><head>
+<title>Brand shop</title>
+<meta name="theme-color" content="#0f766e" />
+<style>:root{--brand:#fb7185;color:#1e3a5f} .x{background:#f4efe6}</style>
+<link rel="apple-touch-icon" href="/apple-touch.png" />
+<link rel="icon" type="image/png" href="/favicon-32.png" />
+</head><body>
+<header><img class="site-logo" src="/brand-logo.png" alt="לוגו" width="120" height="40" /></header>
+<p>חנות מקומית בבאקה.</p>
+<img src="https://cdn.example.com/hero.jpg" width="800" height="500" class="hero" />
+<img src="/pixel.gif" width="1" height="1" />
+</body></html>`;
+const cols = extractCssColors(colorHtml, 5);
+if (!cols.includes("#0f766e")) fail(`theme-color missing ${JSON.stringify(cols)}`);
+if (cols.length < 3) fail(`expected 3+ colors, got ${JSON.stringify(cols)}`);
+if (cols.length > 5) fail(`color cap ${cols.length}`);
+const logo = extractLogoUrl(colorHtml, "https://fiction.example/");
+if (!/apple-touch|brand-logo/i.test(logo)) fail(`logo missing apple-touch/header logo (got ${logo})`);
+const colorParsed = parseFetchedHtml(colorHtml, "https://fiction.example/", "https://fiction.example/");
+if (!colorParsed.ok) fail("color html parse failed");
+else {
+  if (!colorParsed.logo) fail("parsed logo empty");
+  if (!(colorParsed.colors || []).length) fail("parsed colors empty");
+  const imgs = colorParsed.images ?? [];
+  if (imgs.some((u) => /pixel\\.gif/i.test(u))) fail(`kept pixel ${JSON.stringify(imgs)}`);
+  if (imgs.length > 16) fail(`image cap ${imgs.length}`);
+}
+
+if (RESIZE_FORMATS.length !== 4) fail(`resize formats ${RESIZE_FORMATS.length}`);
+if (!RESIZE_FORMATS.some((f) => f.ratio === "1.91:1")) fail("missing feed 1.91:1");
+if (!RESIZE_FORMATS.some((f) => f.ratio === "1:1")) fail("missing 1:1");
+if (!RESIZE_FORMATS.some((f) => f.ratio === "4:5")) fail("missing 4:5");
+if (!RESIZE_FORMATS.some((f) => f.ratio === "9:16")) fail("missing 9:16");
+
+if (clinic.ok) {
+  const appliedClinic = applyIngestReview(emptyIntake(), rowsFromExtracted(clinic.fields, false), urlDoc("doc-clinic-audit", clinicUrl), []);
+  const audit = buildSiteAudit(appliedClinic);
+  if (!audit.strengths.length) fail("clinic audit strengths empty");
+  if (!audit.weaknesses.length) fail("clinic audit should list weaknesses (photos/cta/etc) or strengths only is ok");
+  if (!audit.strengths.some((s) => s.id === "phone" || s.id === "hours" || s.id === "address")) {
+    fail(`clinic audit missing phone/hours/address strengths ${audit.strengths.map((s) => s.id).join(",")}`);
+  }
+  if (JSON.stringify(audit).match(/ROAS|32–68|leads\/month/i)) fail("audit invented ROAS");
+}
+
+const packIntake = emptyIntake();
+packIntake.businessName = "פיקציה גריל";
+packIntake.description = "גריל בבאקה עם תפריט בשרים.";
+packIntake.location = "רחוב הדקל 1, באקה";
+packIntake.whatsapp = "04-1234567";
+packIntake.audience = "families";
+packIntake.biggestProblem = "אין מקום בשבת";
+packIntake.uniqueAdvantage = "פחם אמיתי בבאקה";
+packIntake.mainGoal = "bookings";
+packIntake.brandKit = { colors: ["#111111", "#f5c518", "#ff1a1a"], source: "scan", logoSrc: "https://cdn.example.com/logo.png" };
+const pack = assemblePack(packIntake, {
+  report: { completeness: 50, missing: [], inconsistencies: [], refusedGuesses: [] },
+  diagnosis: { summary: { he: "", ar: "", en: "" }, hypotheses: [], approved: true },
+  agentStatus: { intake: "complete", diagnostic: "approved", strategic: "approved", media: "approved", optimizer: "complete" },
+});
+const siteAudit = pack.siteAudit;
+if (!siteAudit) fail("assemblePack missing siteAudit");
+else if (!siteAudit.strengths.length) fail("pack siteAudit strengths empty");
+const week = buildPostingCalendar(pack, "he");
+if (week.length !== 7) fail(`calendar days ${week.length}`);
+if (week[0].channel !== "facebook") fail("day 1 should be facebook");
+if (week[1].channel !== "instagram") fail("day 2 should be instagram");
+if (week.some((d) => /best time|שעה הכי|أفضل وقت/i.test(`${d.headline} ${d.body}`))) fail("calendar invented best-time science");
+if (emptyBrandKit().source !== "none") fail("empty brand kit invented source");
+
 
 const liveUrl = "https://grillking.multiscreensite.com/";
 if (process.env.URL_INGEST_LIVE === "1") {

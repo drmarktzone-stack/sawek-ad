@@ -3,7 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { usePathname } from "next/navigation";
 import { Globe, Link2 } from "lucide-react";
-import type { IngestedDocument, IngestTag, MediaAssetMeta } from "@/lib/types";
+import type { ClientBrandKit, IngestedDocument, IngestTag, MediaAssetMeta } from "@/lib/types";
 import {
   applyIngestReview,
   rowsFromExtracted,
@@ -19,6 +19,7 @@ import { useI18n } from "@/components/i18n-provider";
 import { IngestReviewDialog } from "@/components/document-ingest";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { assetsFromPublicUrls } from "@/lib/media-assets";
 
 type ErrorCode = "invalid_url" | "blocked" | "timeout" | "non_html" | "empty" | "too_large" | "network";
 
@@ -36,14 +37,6 @@ function isErrorCode(v: string): v is ErrorCode {
   return v in ERROR_KEY;
 }
 
-function mimeFromUrl(url: string): string {
-  const p = url.split("?")[0]?.toLowerCase() ?? "";
-  if (p.endsWith(".png")) return "image/png";
-  if (p.endsWith(".webp")) return "image/webp";
-  if (p.endsWith(".gif")) return "image/gif";
-  return "image/jpeg";
-}
-
 export function UrlIngest() {
   const { t } = useI18n();
   const pathname = usePathname();
@@ -54,6 +47,7 @@ export function UrlIngest() {
   const [rows, setRows] = useState<IngestReviewRow[]>([]);
   const [doc, setDoc] = useState<IngestedDocument | null>(null);
   const [assets, setAssets] = useState<MediaAssetMeta[]>([]);
+  const [brandKit, setBrandKit] = useState<ClientBrandKit>({ colors: [], source: "none" });
 
   function patchRow(id: string, p: Partial<IngestReviewRow>) {
     setRows((rs) => rs.map((r) => (r.id === id ? { ...r, ...p, missing: !(p.value ?? r.value).trim() } : r)));
@@ -83,6 +77,8 @@ export function UrlIngest() {
         fields?: Partial<Record<IngestFieldId, string>>;
         ogImage?: string;
         images?: string[];
+        logo?: string;
+        colors?: string[];
         jsonLdHits?: string[];
       };
       if (!data?.ok) {
@@ -109,25 +105,21 @@ export function UrlIngest() {
         excerpt: (data.text || "").slice(0, 800),
         createdAt: new Date().toISOString(),
       };
-      const extra: MediaAssetMeta[] = [];
       const imageUrls: string[] = [];
-      for (const u of [...(data.images ?? []), data.ogImage ?? ""]) {
+      const logoUrl = typeof (data as { logo?: string }).logo === "string" ? (data as { logo: string }).logo : "";
+      for (const u of [logoUrl, ...(data.images ?? []), data.ogImage ?? ""]) {
         if (u && /^https?:\/\//i.test(u) && !imageUrls.includes(u)) imageUrls.push(u);
       }
-      for (const src of imageUrls.slice(0, 8)) {
-        const logo = /logo|לוגו|شعار/i.test(src);
-        extra.push({
-          id: uid("asset"),
-          kind: "image",
-          mime: mimeFromUrl(src),
-          name: data.title ? `${data.title} · image` : src.split("/").pop() || "image",
-          size: 0,
-          label: logo ? "logo" : "exterior",
-          note: src,
-          createdAt: new Date().toISOString(),
-          publicSrc: src,
-        });
-      }
+      const extra: MediaAssetMeta[] = assetsFromPublicUrls(imageUrls, data.title, 16);
+      const colors = Array.isArray((data as { colors?: unknown }).colors)
+        ? ((data as { colors: unknown[] }).colors.filter((c): c is string => typeof c === "string" && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(c)))
+        : [];
+      const kit: ClientBrandKit = {
+        ...(logoUrl && /^https?:\/\//i.test(logoUrl) ? { logoSrc: logoUrl } : extra.find((a) => a.label === "logo")?.publicSrc ? { logoSrc: extra.find((a) => a.label === "logo")!.publicSrc } : {}),
+        colors: colors.slice(0, 5),
+        source: colors.length || logoUrl ? "scan" : "none",
+      };
+      setBrandKit(kit);
       setDoc(ingested);
       setAssets(extra);
       setRows(nextRows);
@@ -141,12 +133,14 @@ export function UrlIngest() {
   function confirm() {
     if (!doc) return;
     const next = applyIngestReview(emptyIntake(), rows, doc, assets);
+    next.brandKit = brandKit;
     applyIntakeToDraft(next, { resetWizard: true });
     clearPendingDemo();
     clearEmptyCampaign();
     setDoc(null);
     setRows([]);
     setAssets([]);
+    setBrandKit({ colors: [], source: "none" });
   }
 
   return (
@@ -196,6 +190,7 @@ export function UrlIngest() {
             setDoc(null);
             setRows([]);
             setAssets([]);
+            setBrandKit({ colors: [], source: "none" });
           }
         }}
         sourceLabel={doc?.name ?? ""}

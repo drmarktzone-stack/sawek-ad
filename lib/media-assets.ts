@@ -1,5 +1,6 @@
 import type { Locale, MediaAssetLabel, MediaAssetMeta } from "./types";
 import { uid } from "./utils";
+import { pickHeroAsset } from "./brand-kit";
 
 export const IMAGE_MAX_BYTES = 8 * 1024 * 1024;
 export const VIDEO_MAX_BYTES = 40 * 1024 * 1024;
@@ -148,6 +149,47 @@ export function pickLogo(metas: MediaAssetMeta[] | undefined): MediaAssetMeta | 
   const list = metas ?? [];
   return (
     list.find((m) => m.label === "logo" && m.kind === "image") ??
-    list.find((m) => m.kind === "image" && /logo|לוגו|شعار/i.test(m.name))
+    list.find((m) => m.kind === "image" && /logo|לוגו|شعار|favicon/i.test(`${m.name} ${m.publicSrc || ""} ${m.note}`))
   );
 }
+
+function mimeFromUrl(url: string): string {
+  const q = url.split("?")[0]?.toLowerCase() ?? "";
+  if (q.endsWith(".png")) return "image/png";
+  if (q.endsWith(".webp")) return "image/webp";
+  if (q.endsWith(".gif")) return "image/gif";
+  if (q.endsWith(".svg")) return "image/svg+xml";
+  return "image/jpeg";
+}
+
+function labelFromUrl(url: string): MediaAssetLabel {
+  if (/logo|לוגו|شعار|favicon|apple-touch|icon/i.test(url)) return "logo";
+  if (/interior|inside|פנים/i.test(url)) return "interior";
+  if (/gallery|גלריה|hero|og|cover|banner|exterior|חזית/i.test(url)) return "exterior";
+  return "other";
+}
+
+/** Absolute https URLs from a site scan. IndexedDB not required — publicSrc is the src. */
+export function assetsFromPublicUrls(urls: string[], title?: string, cap = 16): MediaAssetMeta[] {
+  const extra: MediaAssetMeta[] = [];
+  const seen: string[] = [];
+  for (const src of urls) {
+    if (!src || !/^https?:\/\//i.test(src) || seen.includes(src)) continue;
+    seen.push(src);
+    extra.push({
+      id: uid("asset"),
+      kind: "image",
+      mime: mimeFromUrl(src),
+      name: title ? `${title} · image` : src.split("/").pop() || "image",
+      size: 0,
+      label: labelFromUrl(src),
+      note: src,
+      createdAt: new Date().toISOString(),
+      publicSrc: src,
+    });
+    if (extra.length >= cap) break;
+  }
+  return extra;
+}
+
+export { pickHeroAsset as pickHero };

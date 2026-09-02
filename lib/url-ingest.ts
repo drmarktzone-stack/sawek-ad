@@ -9,19 +9,21 @@ import {
   isJunkUiText,
   type IngestFieldId,
 } from "./document-ingest";
+import { extractCssColors, extractLogoUrl } from "./brand-kit";
 
 /** Extra-page per-request timeout. Homepage uses URL_HOMEPAGE_TIMEOUT_MS. */
 export const URL_FETCH_TIMEOUT_MS = 8_000;
 /** Slow WooCommerce homepages (~1.5MB) need more than 8s; extras stay shorter. */
 export const URL_HOMEPAGE_TIMEOUT_MS = 25_000;
 /** Wall-clock budget for all extra nav fetches together (parallel). */
-export const URL_EXTRA_PAGES_BUDGET_MS = 8_000;
+export const URL_EXTRA_PAGES_BUDGET_MS = 14_000;
 /** Abort the body once we have enough HTML to parse (do not wait for the catalog). */
 export const URL_PARSE_BODY_CAP = 512 * 1024;
 export const URL_MAX_BODY = Math.floor(1.5 * 1024 * 1024);
 export const URL_MAX_REDIRECTS = 5;
 export const URL_TEXT_CAP = 20_000;
-export const URL_MAX_EXTRA_PAGES = 5;
+export const URL_MAX_EXTRA_PAGES = 12;
+export const URL_MAX_IMAGES = 16;
 
 export type UrlIngestErrorCode =
   | "invalid_url"
@@ -42,6 +44,8 @@ export interface UrlIngestOk {
   fields: UrlIngestFields;
   ogImage?: string;
   images?: string[];
+  logo?: string;
+  colors?: string[];
   jsonLdHits?: string[];
 }
 
@@ -535,10 +539,15 @@ function navChunks(html: string): string[] {
 
 function navScore(href: string, label: string): number {
   const blob = `${href} ${label}`;
-  if (/about|אודות|من نحن|حولنا|\bحول\b|about-us|who-we-are/i.test(blob)) return 100;
-  if (/contact|צור קשר|اتصل|contact-us/i.test(blob)) return 90;
-  if (/תפריט|\bmenu\b|قائمة/i.test(blob)) return 80;
-  if (/hours|שעות|ساعات|opening/i.test(blob)) return 70;
+  if (/about|אודות|من نحن|حولنا|\bحول\b|about-us|who-we-are|our-story|מי אנחנו/i.test(blob)) return 100;
+  if (/services|שירותים|خدمات|service/i.test(blob)) return 95;
+  if (/contact|צור קשר|צור\b|اتصل|contact-us/i.test(blob)) return 90;
+  if (/תפריט|\bmenu\b|قائمة/i.test(blob)) return 85;
+  if (/shop|חנות|متجر|store|catalog|קטלוג|product/i.test(blob)) return 82;
+  if (/offer|sale|מבצע|خصم|تنزيلات|promo/i.test(blob)) return 80;
+  if (/hours|שעות|ساعات|opening/i.test(blob)) return 75;
+  if (/team|צוות|فريق|staff|doctors/i.test(blob)) return 70;
+  if (/gallery|גלריה|معرض|photos/i.test(blob)) return 68;
   if (/location|כתובת|عنوان|access|הגעה|find-us/i.test(blob)) return 60;
   return 10;
 }
@@ -550,13 +559,39 @@ function skipNavUrl(u: URL, home: URL): boolean {
   const homePath = home.pathname.replace(/\/+$/, "") || "/";
   if (path === homePath && !u.search) return true;
   if (/\.(pdf|jpe?g|png|webp|gif|svg|zip|mp4|mp3|css|js)$/i.test(path)) return true;
-  if (/\/(login|signin|signup|register|cart|checkout|account|wp-admin|admin)(\/|$)/i.test(path)) return true;
+  if (/\/(login|signin|sign-in|signup|sign-up|register|cart|basket|checkout|account|wp-admin|admin|password-reset|lost-password|forgot-password|my-account|wishlist|wp-login)(\/|$)/i.test(path)) return true;
+  if (/[?&](add-to-cart|login)=/i.test(u.search)) return true;
   const inspected = inspectUrl(u.href);
   if (!inspected.ok) return true;
   return false;
 }
 
-/** Same-origin in-nav links, preferring About/Contact/תפריט/من نحن. Caps extras. Skips blocked hosts. */
+function pushNavLink(
+  scored: { href: string; score: number }[],
+  seen: Set<string>,
+  home: URL,
+  rawHref: string,
+  label: string,
+  minScore: number,
+) {
+  if (!rawHref || rawHref.startsWith("mailto:") || rawHref.startsWith("tel:") || rawHref.startsWith("javascript:")) return;
+  let u: URL;
+  try {
+    u = new URL(rawHref, home.href);
+  } catch {
+    return;
+  }
+  u.hash = "";
+  if (skipNavUrl(u, home)) return;
+  const key = `${u.origin}${u.pathname.replace(/\/+$/, "") || "/"}${u.search}`;
+  if (seen.has(key)) return;
+  const score = navScore(u.pathname + " " + u.href, label);
+  if (score < minScore) return;
+  seen.add(key);
+  scored.push({ href: u.href, score });
+}
+
+/** Same-origin in-nav links, preferring About/Services/Contact/Shop/תפריט/من نحن. Caps extras. Skips blocked hosts. */
 export function collectSameOriginNavUrls(html: string, baseUrl: string, cap = URL_MAX_EXTRA_PAGES): string[] {
   let home: URL;
   try {
@@ -570,20 +605,20 @@ export function collectSameOriginNavUrls(html: string, baseUrl: string, cap = UR
   for (const chunk of chunks) {
     for (const m of chunk.matchAll(/<a\b[^>]*href\s*=\s*["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi)) {
       const rawHref = decodeEntities((m[1] || "").trim());
-      if (!rawHref || rawHref.startsWith("mailto:") || rawHref.startsWith("tel:") || rawHref.startsWith("javascript:")) continue;
-      let u: URL;
-      try {
-        u = new URL(rawHref, home.href);
-      } catch {
-        continue;
-      }
-      u.hash = "";
-      if (skipNavUrl(u, home)) continue;
-      const key = `${u.origin}${u.pathname.replace(/\/+$/, "") || "/"}${u.search}`;
-      if (seen.has(key)) continue;
-      seen.add(key);
       const label = navLabelText(m[2] || "");
-      scored.push({ href: u.href, score: navScore(u.pathname + " " + u.href, label) });
+      pushNavLink(scored, seen, home, rawHref, label, 0);
+    }
+  }
+  for (const m of html.matchAll(/<footer\b[^>]*>([\s\S]*?)<\/footer>/gi)) {
+    const foot = m[1] || "";
+    for (const a of foot.matchAll(/<a\b[^>]*href\s*=\s*["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi)) {
+      pushNavLink(scored, seen, home, decodeEntities((a[1] || "").trim()), navLabelText(a[2] || ""), 50);
+    }
+  }
+  if (scored.length < cap) {
+    for (const m of html.matchAll(/<a\b[^>]*href\s*=\s*["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi)) {
+      pushNavLink(scored, seen, home, decodeEntities((m[1] || "").trim()), navLabelText(m[2] || ""), 50);
+      if (scored.length >= cap * 3) break;
     }
   }
   scored.sort((a, b) => b.score - a.score);
@@ -744,20 +779,46 @@ function jsonLdImageUrls(nodes: Record<string, unknown>[]): string[] {
   return out;
 }
 
-const TRACKER_IMG = /sprite|favicon|pixel|1x1|tracking|spacer|blank\.gif|data:image\/gif/i;
+const TRACKER_IMG = /sprite|favicon|pixel|1x1|tracking|spacer|blank\.gif|data:image\/gif|gravatar|emoji|icon-?\d{2}|woocommerce-placeholder|spinner|loader/i;
 
-/** og:image, JSON-LD image/logo, same-origin hero/product/logo imgs. Skip 1px/icons <64px. */
+function srcsetLargest(srcset: string, base: string): string {
+  let best = "";
+  let bestW = -1;
+  for (const part of srcset.split(",")) {
+    const bits = part.trim().split(/\s+/);
+    const u = absHttpUrl(bits[0] || "", base);
+    const w = Number((bits[1] || "").replace(/w$/i, "")) || 0;
+    if (u && w >= bestW) {
+      best = u;
+      bestW = w;
+    }
+  }
+  return best;
+}
+
+function imageRank(url: string): number {
+  const u = url.toLowerCase();
+  if (TRACKER_IMG.test(u)) return -1;
+  if (/hero|og|cover|banner|gallery|product|sale|חיסול/i.test(u)) return 10;
+  if (/logo|לוגו|شعار/i.test(u)) return 3;
+  return 5;
+}
+
+/** og:image, JSON-LD image/logo, hero/product/gallery imgs. Skip 1px/icons <64px. Cap URL_MAX_IMAGES. */
 export function collectPageImages(html: string, baseUrl: string, jsonLdNodes: Record<string, unknown>[] = []): string[] {
   const out: string[] = [];
   const push = (raw: string) => {
     const abs = absHttpUrl(raw, baseUrl);
     if (!abs || out.includes(abs)) return;
+    if (TRACKER_IMG.test(abs)) return;
     out.push(abs);
   };
   for (const u of jsonLdImageUrls(jsonLdNodes)) push(u);
   for (const m of html.matchAll(/<img\b([^>]*)>/gi)) {
     const attrs = m[1] || "";
-    const src = (attrs.match(/(?:src|data-src|data-lazy-src)\s*=\s*["']([^"']+)["']/i) || [])[1];
+    const srcset = (attrs.match(/(?:srcset|data-srcset)\s*=\s*["']([^"']+)["']/i) || [])[1];
+    const fromSet = srcset ? srcsetLargest(srcset, baseUrl) : "";
+    const src = fromSet || (attrs.match(/(?:src|data-src|data-lazy-src|data-full-url)\s*=\s*["']([^"']+)["']/i) || [])[1];
     if (!src) continue;
     const blob = `${src} ${attrs}`;
     if (TRACKER_IMG.test(blob)) continue;
@@ -774,9 +835,10 @@ export function collectPageImages(html: string, baseUrl: string, jsonLdNodes: Re
       continue;
     }
     push(src);
-    if (out.length >= 8) break;
+    if (out.length >= URL_MAX_IMAGES) break;
   }
-  return out.slice(0, 8);
+  out.sort((a, b) => imageRank(b) - imageRank(a));
+  return out.slice(0, URL_MAX_IMAGES);
 }
 
 
@@ -941,6 +1003,8 @@ export function parseFetchedHtml(
 
   const pageImages = collectPageImages(raw, finalUrl, nodes);
   if (ogImage && !pageImages.includes(ogImage)) pageImages.unshift(ogImage);
+  const logo = extractLogoUrl(raw, finalUrl) || undefined;
+  const colors = extractCssColors(raw, 5);
 
   const out: UrlIngestOk = {
     ok: true,
@@ -950,7 +1014,9 @@ export function parseFetchedHtml(
     fields,
   };
   if (ogImage) out.ogImage = ogImage;
-  if (pageImages.length) out.images = pageImages;
+  if (pageImages.length) out.images = pageImages.slice(0, URL_MAX_IMAGES);
+  if (logo) out.logo = logo;
+  if (colors.length) out.colors = colors;
   if (types.length) out.jsonLdHits = types;
   return out;
 }
@@ -1162,6 +1228,11 @@ function mergeUrlIngestResults(home: UrlIngestOk, extras: UrlIngestOk[]): UrlIng
   if (home.fields.website) fields.website = home.fields.website;
   if (home.fields.businessName) fields.businessName = home.fields.businessName;
   const text = clip([home.text, ...extras.map((e) => e.text)].filter(Boolean).join("\n"), URL_TEXT_CAP);
+  const fromAll = extractFieldsFromText(text, filenameFromUrl(home.url));
+  fields = mergeExtractedFields(fields, fromAll);
+  fields = fillEmptyFromPageProse(fields, text);
+  if (home.fields.website) fields.website = home.fields.website;
+  if (home.fields.businessName) fields.businessName = home.fields.businessName;
   const ogImage = home.ogImage || extras.find((e) => e.ogImage)?.ogImage;
   const images: string[] = [...(home.images ?? [])];
   for (const e of extras) {
@@ -1176,9 +1247,18 @@ function mergeUrlIngestResults(home: UrlIngestOk, extras: UrlIngestOk[]): UrlIng
       if (!jsonLdHits.includes(t)) jsonLdHits.push(t);
     }
   }
+  const colors: string[] = [...(home.colors ?? [])];
+  for (const e of extras) {
+    for (const c of e.colors ?? []) {
+      if (!colors.includes(c)) colors.push(c);
+    }
+  }
+  const logo = home.logo || extras.find((e) => e.logo)?.logo;
   const out: UrlIngestOk = { ...home, fields, text };
   if (ogImage) out.ogImage = ogImage;
-  if (images.length) out.images = images.slice(0, 8);
+  if (images.length) out.images = images.slice(0, URL_MAX_IMAGES);
+  if (logo) out.logo = logo;
+  if (colors.length) out.colors = colors.slice(0, 5);
   if (jsonLdHits.length) out.jsonLdHits = jsonLdHits;
   return out;
 }

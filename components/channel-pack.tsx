@@ -11,10 +11,14 @@ import { pickAsset } from "@/lib/media-assets";
 import { useResolvedAssets } from "@/lib/use-resolved-assets";
 import { withLang } from "@/lib/locale-url";
 import { LangLink } from "@/components/lang-link";
-import { channelFields, incompleteLabel, waMeUrl } from "@/lib/channel-copy";
+import { channelFields, waMeUrl } from "@/lib/channel-copy";
 import { cn } from "@/lib/utils";
 import { stylesForVertical } from "@/lib/design-styles";
 import { detectVertical } from "@/lib/vertical";
+import { paletteForIntake } from "@/lib/brand-kit";
+import { PackLandingScreen } from "@/components/pack-landing";
+import { ResizeStrip } from "@/components/resize-strip";
+import { PostingWeek } from "@/components/posting-week";
 import {
   FacebookFeedCard,
   InstagramFeedCard,
@@ -26,8 +30,12 @@ const FB_PALETTE = ["#111111", "#1877F2", "#F5C518"];
 const LP_PALETTE = ["#050505", "#F5C518", "#FF1A1A"];
 
 function palettesForPack(intake: CampaignPack["intake"]): [string, string, string][] {
-  const styles = stylesForVertical(detectVertical(intake));
-  return styles.map((st) => st.palette);
+  const brand = paletteForIntake(intake);
+  const styles = stylesForVertical(detectVertical(intake)).map((st) => st.palette);
+  if (intake.brandKit?.source === "scan" && (intake.brandKit.colors?.length ?? 0) >= 2) {
+    return [brand, ...styles.filter((p) => p[0] !== brand[0])];
+  }
+  return styles.length ? styles : [brand];
 }
 
 export function ChannelPack({
@@ -147,12 +155,15 @@ export function ChannelPack({
             <Button type="button" variant="dark" className="flex-1" asChild>
               <LangLink href={lpPath}>
                 <ExternalLink className="size-4" />
-                {t("end.openLp")}
+                {t("end.clientLanding")}
               </LangLink>
             </Button>
           </div>
         </article>
       </div>
+
+      <ResizeStrip pack={pack} packLang={packLang} generatedImage={generatedImage} />
+      <PostingWeek pack={pack} locale={packLang} />
 
       <div className="mt-5 rounded-2xl border border-omni-yellow/25 bg-omni-card p-4">
         <Button type="button" disabled className="w-full sm:w-auto" title={t("end.publishNeedLogin")}>
@@ -311,61 +322,6 @@ function PackLandingCard({
   );
 }
 
-export function PackLandingScreen({ pack, locale }: { pack: CampaignPack; locale: Locale }) {
-  const assets = pack.intake.mediaAssets ?? [];
-  const urls = useResolvedAssets(assets);
-  const fields = channelFields(pack, locale);
-  const pals = palettesForPack(pack.intake);
-  const lpPalette = pals[2] ?? pals[0] ?? LP_PALETTE;
-  const accent = (pals[0] ?? LP_PALETTE)[1];
-  const waUrl = waMeUrl(pack.intake.whatsapp, fields.waScript, locale);
-  const loc = pack.intake.location?.trim() ?? "";
-  const hours = pack.intake.clinicHours?.trim() ?? "";
-  const site = pack.intake.website?.trim() ?? "";
-  return (
-    <div dir={dirFor(locale)} className="min-h-screen" style={{ background: "#050505", color: "#f4f4f4" }}>
-      <AdVisual locale={locale} palette={lpPalette} asset={pickAsset(assets, 0)} urls={urls} className="min-h-[52vh] p-8">
-        <p className="text-xs font-bold uppercase tracking-[0.2em] text-omni-yellow">{fields.pageName}</p>
-        <h1 className="mt-2 max-w-3xl text-4xl font-black leading-tight text-white sm:text-5xl">{fields.headline}</h1>
-        {waUrl ? (
-          <a
-            href={waUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="mt-5 inline-block rounded-full px-5 py-2 text-sm font-black"
-            style={{ background: accent, color: "#050505" }}
-          >
-            {fields.cta}
-          </a>
-        ) : (
-          <span
-            className="mt-5 inline-block rounded-full px-5 py-2 text-sm font-black"
-            style={{ background: accent, color: "#050505" }}
-          >
-            {fields.cta}
-          </span>
-        )}
-      </AdVisual>
-      <div className="mx-auto max-w-2xl space-y-4 px-4 py-8">
-        <p className="whitespace-pre-wrap text-base leading-relaxed text-zinc-300">{fields.body}</p>
-        {loc ? <p className="text-sm text-zinc-400">{loc}</p> : null}
-        {hours ? <p className="text-sm text-zinc-400">{hours}</p> : null}
-        {site ? (
-          <a
-            href={site.startsWith("http") ? site : `https://${site}`}
-            target="_blank"
-            rel="noreferrer"
-            className="text-sm font-bold text-omni-yellow"
-          >
-            {site}
-          </a>
-        ) : null}
-        {fields.landingBody && fields.landingBody !== incompleteLabel(locale) ? (
-          <pre className="whitespace-pre-wrap font-sans text-sm leading-6 text-zinc-400">{fields.landingBody}</pre>
-        ) : null}
-      </div>
-    </div>
-  );
-}
+export { PackLandingScreen };
 
 export { FacebookFeedCard, InstagramFeedCard, TikTokFeedCard, LivePreviewStrip };

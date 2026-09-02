@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Copy, Download, FileText, Lightbulb, Link2, Pencil, Save, Shield } from "lucide-react";
+import { Copy, Download, ExternalLink, FileText, Lightbulb, Link2, Pencil, Save, Shield } from "lucide-react";
 import type { CampaignPack, Locale, OptimizerResultInput } from "@/lib/types";
 import { LOCALES, STRATEGY_META, VARIANT_META, orderedStrategy, t } from "@/lib/i18n";
 import { DESIGN_STYLES, stylesForVertical } from "@/lib/design-styles";
@@ -36,6 +36,7 @@ import { LivePreviewStrip } from "@/components/live-preview-cards";
 import { AnglesStrip } from "@/components/angles-strip";
 import { CoachImprovedStrip } from "@/components/coach-panel";
 import { PublishToSocial } from "@/components/publish-to-social";
+import { SiteAuditPanel } from "@/components/site-audit-panel";
 
 export function ResultView({
   pack,
@@ -125,9 +126,18 @@ export function ResultView({
         <div>
           <h1 className="text-3xl font-black text-white">{tr("result.ready")}</h1>
           <p className="mt-1 text-zinc-400">{pack.name}</p>
+          <LangLink
+            href={`/lp/${pack.id}`}
+            className="mt-3 inline-flex items-center gap-2 rounded-full bg-omni-yellow px-4 py-2 text-sm font-black text-black"
+          >
+            <ExternalLink className="size-4" />
+            {tr("end.clientLanding")}
+          </LangLink>
         </div>
         <NewCampaignCta other hint className="items-end text-end" />
       </div>
+
+      <SiteAuditPanel pack={pack} locale={packLang} />
 
       <LivePreviewStrip
         pack={pack}
