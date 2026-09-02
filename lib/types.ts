@@ -14,6 +14,16 @@ export interface SiteAudit {
   weaknesses: SiteAuditItem[];
 }
 
+/** Agency read of old Facebook/Instagram posts as past campaigns. Evidence-only. */
+export interface PastCampaignAudit {
+  strengths: SiteAuditItem[];
+  weaknesses: SiteAuditItem[];
+  inferredAudience: Record<Locale, string>;
+  recommendedAudience: Record<Locale, string>;
+  failedWhere: SiteAuditItem[];
+  source: "heuristic" | "gemini";
+}
+
 export type CampaignType = "business" | "product" | "service" | "app" | "personal";
 export type Depth = "quick" | "deep";
 /** Upstream of offer: commercial sale vs exposure-only institution. Not the no-offer chip. */
@@ -390,6 +400,7 @@ export interface CampaignPack {
   agency?: AgencyPack;
   coach?: CoachReport;
   siteAudit?: SiteAudit;
+  pastCampaignAudit?: PastCampaignAudit;
   angles?: CampaignAngles;
   featureType?: LabFeatureType;
   lab?: LabRun[];

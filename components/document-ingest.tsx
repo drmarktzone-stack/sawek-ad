@@ -29,6 +29,8 @@ export function IngestReviewDialog({
   onConfirm,
   extra,
   showPastTag,
+  posts,
+  onTogglePost,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -38,6 +40,8 @@ export function IngestReviewDialog({
   onConfirm: () => void;
   extra?: ReactNode;
   showPastTag?: boolean;
+  posts?: { id: string; text: string; image?: string; include: boolean }[];
+  onTogglePost?: (id: string, include: boolean) => void;
 }) {
   const { t, locale } = useI18n();
   return (
@@ -96,6 +100,27 @@ export function IngestReviewDialog({
             </tbody>
           </table>
         </div>
+        {posts && posts.length > 0 && (
+          <div className="mt-4 rounded-xl border border-omni-yellow/25 bg-black/40 p-3">
+            <p className="text-xs font-black uppercase tracking-wide text-omni-yellow">{t("ingest.pastPosts")}</p>
+            <ul className="mt-2 space-y-2">
+              {posts.map((p) => (
+                <li key={p.id} className="flex items-start gap-2 rounded-lg border border-white/10 px-2 py-2">
+                  <input
+                    type="checkbox"
+                    className="mt-1"
+                    checked={p.include}
+                    onChange={(e) => onTogglePost?.(p.id, e.target.checked)}
+                  />
+                  <div className="min-w-0">
+                    <p className="text-xs text-zinc-200">{p.text}</p>
+                    {p.image ? <p className="mt-1 truncate text-[10px] text-zinc-500" dir="ltr">{p.image}</p> : null}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
         {showPastTag && <p className="mt-3 text-xs text-zinc-400">{t("ingest.pastTag")}</p>}
         <div className="mt-5 flex flex-wrap gap-3">
           <Button type="button" onClick={onConfirm}>

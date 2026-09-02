@@ -585,16 +585,16 @@ export const copy: Dict = {
   "fn.dashboard": { he: "לוח בקרה", ar: "لوحة التحكم", en: "Dashboard" },
   "fn.dashboardHint": { he: "קמפיינים + ריצות מעבדה", ar: "حملات + تشغيل المختبر", en: "Campaigns + lab runs" },
   "url.placeholder": {
-    he: "הדביקו קישור לאתר העסק או לדף הבית",
-    ar: "الصقوا رابط موقع العمل أو الصفحة الرئيسية",
-    en: "Paste a link to the business site or homepage",
+    he: "אתר, דף פייסבוק או אינסטגרם",
+    ar: "موقع، صفحة فيسبوك أو إنستغرام",
+    en: "Website, Facebook Page, or Instagram",
   },
   "url.scan": { he: "סרוק אתר", ar: "امسح الموقع", en: "Scan site" },
   "url.reading": { he: "קורא את האתר…", ar: "يقرأ الموقع…", en: "Reading the site…" },
   "url.hint": {
-    he: "קודם אתר העסק / דף הבית. חילוץ רק ממה שכתוב בדף (JSON-LD, og, טלפון, שעות). בלי ניחוש דירוג או מחיר. סקירה לפני החלה. קישור למודעה ישנה — רק אם זה באמת מודעה.",
-    ar: "أولاً موقع العمل / الصفحة الرئيسية. استخراج بس اللي مكتوب بالصفحة (JSON-LD وog وهاتف وساعات). بلا تخمين تقييم أو سعر. مراجعة قبل التطبيق. رابط إعلان سابق — فقط إن كان إعلاناً فعلاً.",
-    en: "Business site / homepage first. Extract only what is on the page (JSON-LD, og, phone, hours). No guessed ratings or prices. Review before applying. An old ad URL only if it is actually an ad.",
+    he: "אתר, דף פייסבוק או אינסטגרם. חילוץ רק ממה שכתוב בדף (שם, אודות, טלפון, שעות, פוסטים). פוסטים ישנים = קידומים קודמים. בלי ניחוש דירוג, לייקים או מחיר.",
+    ar: "موقع أو صفحة فيسبوك أو إنستغرام. استخراج بس اللي مكتوب (اسم، عن، هاتف، ساعات، منشورات). المنشورات القديمة = ترويجات سابقة. بلا تخمين تقييم أو لايكات أو سعر.",
+    en: "Website, Facebook Page, or Instagram. Extract only what is on the page (name, about, phone, hours, posts). Old posts = past campaigns. No guessed ratings, likes, or prices.",
   },
   "url.error.invalid": {
     he: "כתובת לא תקינה. צריך http או https.",
@@ -611,6 +611,11 @@ export const copy: Dict = {
   "url.error.empty": { he: "אין טקסט בדף לחילוץ.", ar: "ما في نص بالصفحة للاستخراج.", en: "No text on the page to extract." },
   "url.error.tooLarge": { he: "הדף גדול מדי.", ar: "الصفحة أكبر من اللازم.", en: "The page is too large." },
   "url.error.network": { he: "לא הצלחנו לטעון את הדף.", ar: "ما قدرنا نحمّل الصفحة.", en: "Could not load the page." },
+  "url.error.socialLoginWall": {
+    he: "הדף פרטי או ש-Meta חסמה את הסריקה. נסו כתובת של דף ציבורי.",
+    ar: "الصفحة خاصة أو ميتا حجبَت المسح. جرّبوا رابط صفحة عامة.",
+    en: "The page is private or Meta blocked the scan. Try a public Page URL.",
+  },
   "ingest.scan": { he: "סרוק מסמך", ar: "امسح مستنداً", en: "Scan document" },
   "ingest.title": { he: "העלאת מסמך / נתונים", ar: "رفع مستند / بيانات", en: "Document / data upload" },
   "ingest.hint": {
@@ -642,6 +647,11 @@ export const copy: Dict = {
   },
   "ingest.imageNote": { he: "טקסט שקראתם מהסריקה", ar: "النص الذي قرأتموه من المسح", en: "Text you read from the scan" },
   "ingest.useTyped": { he: "חלץ מהטקסט שהקלדתי", ar: "استخرج من النص الذي كتبته", en: "Extract from the text I typed" },
+  "ingest.pastPosts": {
+    he: "קידומים ישנים שחולצו — אשרו כמודעות עבר",
+    ar: "ترويجات قديمة مستخرجة — أكّدوا كإعلانات سابقة",
+    en: "Extracted old posts — confirm as past ads",
+  },
   "ingest.pastTag": {
     he: "מתויג past_creative: ייחוס מבנה בלבד. לא מועתק כטענה חדשה. VIP/100%/מחירים דורשים אישור שהמחרוזת אמיתית ומותרת. שירות חינם עדיין אוסר מבצע בדוי.",
     ar: "موسوم past_creative: مرجع بنية فقط. لا يُنسخ كادّعاء جديد. VIP/100%/أسعار تحتاج تأكيد أن النص حقيقي ومسموح. الخدمة المجانية ما زالت تمنع عرضاً مختلقاً.",
@@ -698,6 +708,15 @@ export const copy: Dict = {
   },
   "audit.strengths": { he: "מה חזק", ar: "وين قوي", en: "What's strong" },
   "audit.weaknesses": { he: "מה חלש", ar: "وين ضعيف", en: "What's weak" },
+  "audit.pastTitle": { he: "קידומים ישנים", ar: "ترويجات قديمة", en: "Past promotions" },
+  "audit.pastLead": {
+    he: "קריאה של הפוסטים האמיתיים כמו סוכנות — מה חזק, מה נכשל, למי דיברו, ולמי הקמפיין הבא. בלי לייקים / ריץ׳ / ROAS מומצאים.",
+    ar: "قراءة المنشورات الحقيقية كوكالة — وين قوي، وين فشل، لمين حكوا، ولمين الحملة الجاية. بلا لايكات / وصول / ROAS مختلق.",
+    en: "A senior-agency read of the real posts — what was strong, what failed, who they spoke to, who the next campaign must target. No invented likes / reach / ROAS.",
+  },
+  "audit.inferredAudience": { he: "למי הפוסטים דיברו", ar: "لمين حكوا المنشورات", en: "Who the posts spoke to" },
+  "audit.recommendedAudience": { he: "קהל לקמפיין הבא", ar: "جمهور الحملة الجاية", en: "Who the next campaign must target" },
+  "audit.failedWhere": { he: "איפה זה נכשל", ar: "وين فشل", en: "Where it failed" },
   "resize.title": { he: "Magic Resize — אותה מודעה, ארבעה פורמטים", ar: "Magic Resize — نفس الإعلان بأربع مقاسات", en: "Magic Resize — one ad, four sizes" },
   "resize.lead": {
     he: "אותה כותרת, גוף, CTA ותמונה. פיד 1.91:1 · אינסטגרם 1:1 ו־4:5 · סטורי/טיקטוק 9:16.",

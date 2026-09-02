@@ -10,6 +10,7 @@ import { generateOptimizer } from "./optimizer";
 import { buildAgency } from "./agency";
 import { coachIntake } from "./coach";
 import { buildSiteAudit } from "./site-audit";
+import { buildPastCampaignAudit, overlayPastCampaignAudit, creativesToPosts } from "./past-campaign-audit";
 import { demoIntake, DEMO_ID } from "../demo";
 import { loadLocale } from "../storage";
 
@@ -123,15 +124,34 @@ export async function runFullPipeline(
 
 /** Overlay Gemini channel copy onto agency creative pieces (he+ar+en). No-op if Gemini unavailable. */
 export async function overlayPackAgency(pack: CampaignPack): Promise<CampaignPack> {
-  if (!pack.agency?.creative.pieces.length) return pack;
-  const pieces = await overlayAgencyPieces(pack.intake, pack.agency.creative.pieces);
-  return {
-    ...pack,
-    agency: {
-      ...pack.agency,
-      creative: { ...pack.agency.creative, pieces },
-    },
-  };
+  let next = pack;
+  if (pack.agency?.creative.pieces.length) {
+    try {
+      const pieces = await overlayAgencyPieces(pack.intake, pack.agency.creative.pieces);
+      next = {
+        ...next,
+        agency: {
+          ...pack.agency,
+          creative: { ...pack.agency.creative, pieces },
+        },
+      };
+    } catch {
+      /* keep heuristic agency */
+    }
+  }
+  const audit = next.pastCampaignAudit ?? buildPastCampaignAudit(next.intake);
+  if (audit) {
+    try {
+      const overlaid = await overlayPastCampaignAudit(audit, creativesToPosts(next.intake.pastCreatives), {
+        location: next.intake.location,
+        description: next.intake.description,
+      });
+      next = { ...next, pastCampaignAudit: overlaid };
+    } catch {
+      next = { ...next, pastCampaignAudit: audit };
+    }
+  }
+  return next;
 }
 
 export function assemblePack(
@@ -150,6 +170,7 @@ export function assemblePack(
   },
 ): CampaignPack {
   const now = new Date().toISOString();
+  const pastCampaignAudit = buildPastCampaignAudit(intake);
   const base: CampaignPack = {
     id: partial.id ?? uid("camp"),
     createdAt: now,
@@ -169,6 +190,7 @@ export function assemblePack(
     planActivated: false,
     coach: partial.coach ?? coachIntake(intake),
     siteAudit: buildSiteAudit(intake),
+    ...(pastCampaignAudit ? { pastCampaignAudit } : {}),
     ...(partial.angles ? { angles: partial.angles } : {}),
     featureType: "campaign",
   };

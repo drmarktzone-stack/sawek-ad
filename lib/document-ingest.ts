@@ -1211,6 +1211,7 @@ export function applyIngestReview(
   rows: IngestReviewRow[],
   doc: IngestedDocument,
   extraAssets: MediaAssetMeta[],
+  extraPastPosts: { text: string; image?: string }[] = [],
 ): Intake {
   // URL ingest replaces the previous business. Empty HITL rows must not keep clinic demo leftovers.
   const base = doc.kind === "url" ? emptyIntake() : intake;
@@ -1331,6 +1332,28 @@ export function applyIngestReview(
     ];
     const blob = [h?.value, b?.value, c?.value].filter(Boolean).join("\n");
     next.pastAds = appendUnique(next.pastAds, `past_creative · ${doc.name}\n${blob}`);
+    if (!doc.tags.includes("past_creative")) doc.tags = [...doc.tags, "past_creative"];
+  }
+
+  const extra = extraPastPosts.filter((p) => String(p.text || "").trim()).slice(0, 12);
+  if (extra.length) {
+    const added: PastCreative[] = extra.map((p, i) => {
+      const raw = p.text.replace(/\s+/g, " ").trim();
+      const sentence = raw.split(/(?<=[.!?。؟!])\s+/)[0] || raw;
+      const headline = sentence.slice(0, 80).trim();
+      return {
+        id: uid(`past${i}`),
+        sourceDocId: doc.id,
+        sourceName: doc.name,
+        headline,
+        body: raw,
+        cta: "",
+        tag: "past_creative" as const,
+        confirmedReal: true,
+      };
+    });
+    next.pastCreatives = [...added, ...next.pastCreatives].slice(0, 12);
+    next.pastAds = appendUnique(next.pastAds, extra.map((p) => p.text.trim()).join("\n"));
     if (!doc.tags.includes("past_creative")) doc.tags = [...doc.tags, "past_creative"];
   }
 

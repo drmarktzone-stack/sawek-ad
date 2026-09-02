@@ -21,9 +21,9 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { assetsFromPublicUrls } from "@/lib/media-assets";
 
-type ErrorCode = "invalid_url" | "blocked" | "timeout" | "non_html" | "empty" | "too_large" | "network";
+type ErrorCode = "invalid_url" | "blocked" | "timeout" | "non_html" | "empty" | "too_large" | "network" | "social_login_wall";
 
-const ERROR_KEY: Record<ErrorCode, "url.error.invalid" | "url.error.blocked" | "url.error.timeout" | "url.error.nonHtml" | "url.error.empty" | "url.error.tooLarge" | "url.error.network"> = {
+const ERROR_KEY: Record<ErrorCode, "url.error.invalid" | "url.error.blocked" | "url.error.timeout" | "url.error.nonHtml" | "url.error.empty" | "url.error.tooLarge" | "url.error.network" | "url.error.socialLoginWall"> = {
   invalid_url: "url.error.invalid",
   blocked: "url.error.blocked",
   timeout: "url.error.timeout",
@@ -31,6 +31,7 @@ const ERROR_KEY: Record<ErrorCode, "url.error.invalid" | "url.error.blocked" | "
   empty: "url.error.empty",
   too_large: "url.error.tooLarge",
   network: "url.error.network",
+  social_login_wall: "url.error.socialLoginWall",
 };
 
 function isErrorCode(v: string): v is ErrorCode {
@@ -48,6 +49,7 @@ export function UrlIngest() {
   const [doc, setDoc] = useState<IngestedDocument | null>(null);
   const [assets, setAssets] = useState<MediaAssetMeta[]>([]);
   const [brandKit, setBrandKit] = useState<ClientBrandKit>({ colors: [], source: "none" });
+  const [posts, setPosts] = useState<{ id: string; text: string; image?: string; include: boolean }[]>([]);
 
   function patchRow(id: string, p: Partial<IngestReviewRow>) {
     setRows((rs) => rs.map((r) => (r.id === id ? { ...r, ...p, missing: !(p.value ?? r.value).trim() } : r)));
@@ -80,6 +82,8 @@ export function UrlIngest() {
         logo?: string;
         colors?: string[];
         jsonLdHits?: string[];
+        posts?: { text?: string; image?: string }[];
+        sourceKind?: string;
       };
       if (!data?.ok) {
         const code = typeof data?.error === "string" && isErrorCode(data.error) ? data.error : "network";
@@ -89,7 +93,18 @@ export function UrlIngest() {
       const fields = data.fields ?? {};
       const nextRows = rowsFromExtracted(fields, false);
       const tags: IngestTag[] = [];
-      if (fields.pastHeadline || fields.pastBody || fields.pastCta) tags.push("past_creative");
+      const extractedPosts = Array.isArray(data.posts)
+        ? data.posts
+            .filter((p) => typeof p?.text === "string" && p.text.trim().length >= 8)
+            .slice(0, 12)
+            .map((p, i) => ({
+              id: `post-${i}`,
+              text: String(p.text).replace(/\s+/g, " ").trim(),
+              ...(typeof p.image === "string" && /^https?:\/\//i.test(p.image) ? { image: p.image } : {}),
+              include: true,
+            }))
+        : [];
+      if (fields.pastHeadline || fields.pastBody || fields.pastCta || extractedPosts.length) tags.push("past_creative");
       if (fields.businessName || fields.whatsapp || fields.location) tags.push("identity");
       if (fields.brandTone || fields.brandPositioning || fields.uniqueAdvantage) tags.push("branding");
       if (fields.channelNotes) tags.push("media_plan");
@@ -106,7 +121,12 @@ export function UrlIngest() {
         createdAt: new Date().toISOString(),
       };
       const imageUrls: string[] = [];
-      const logoUrl = typeof (data as { logo?: string }).logo === "string" ? (data as { logo: string }).logo : "";
+      const socialLogo = data.sourceKind === "facebook" || data.sourceKind === "instagram";
+      const logoUrl = typeof data.logo === "string" && /^https?:\/\//i.test(data.logo)
+        ? data.logo
+        : socialLogo && typeof data.ogImage === "string"
+          ? data.ogImage
+          : "";
       for (const u of [logoUrl, ...(data.images ?? []), data.ogImage ?? ""]) {
         if (u && /^https?:\/\//i.test(u) && !imageUrls.includes(u)) imageUrls.push(u);
       }
@@ -119,10 +139,15 @@ export function UrlIngest() {
         colors: colors.slice(0, 5),
         source: colors.length || logoUrl ? "scan" : "none",
       };
+      if (socialLogo && logoUrl) {
+        const logoAsset = extra.find((a) => a.publicSrc === logoUrl);
+        if (logoAsset) logoAsset.label = "logo";
+      }
       setBrandKit(kit);
       setDoc(ingested);
       setAssets(extra);
       setRows(nextRows);
+      setPosts(extractedPosts);
     } catch {
       setError(t("url.error.network"));
     } finally {
@@ -132,7 +157,8 @@ export function UrlIngest() {
 
   function confirm() {
     if (!doc) return;
-    const next = applyIngestReview(emptyIntake(), rows, doc, assets);
+    const selected = posts.filter((p) => p.include).map((p) => ({ text: p.text, image: p.image }));
+    const next = applyIngestReview(emptyIntake(), rows, doc, assets, selected);
     next.brandKit = brandKit;
     applyIntakeToDraft(next, { resetWizard: true });
     clearPendingDemo();
@@ -140,6 +166,7 @@ export function UrlIngest() {
     setDoc(null);
     setRows([]);
     setAssets([]);
+    setPosts([]);
     setBrandKit({ colors: [], source: "none" });
   }
 
@@ -190,6 +217,7 @@ export function UrlIngest() {
             setDoc(null);
             setRows([]);
             setAssets([]);
+            setPosts([]);
             setBrandKit({ colors: [], source: "none" });
           }
         }}
@@ -198,6 +226,8 @@ export function UrlIngest() {
         patchRow={patchRow}
         onConfirm={confirm}
         showPastTag={doc?.tags.includes("past_creative")}
+        posts={posts}
+        onTogglePost={(id, include) => setPosts((ps) => ps.map((p) => (p.id === id ? { ...p, include } : p)))}
       />
     </div>
   );

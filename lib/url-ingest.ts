@@ -10,6 +10,18 @@ import {
   type IngestFieldId,
 } from "./document-ingest";
 import { extractCssColors, extractLogoUrl } from "./brand-kit";
+import {
+  detectSocialKind,
+  facebookAboutUrl,
+  facebookMbasicUrl,
+  mergeSocialParses,
+  parseSocialPage,
+  SOCIAL_BROWSER_UA,
+  type SocialKind,
+  type SocialPageParse,
+  type SocialPost,
+} from "./social-page";
+import type { PastCampaignAudit } from "./types";
 
 /** Extra-page per-request timeout. Homepage uses URL_HOMEPAGE_TIMEOUT_MS. */
 export const URL_FETCH_TIMEOUT_MS = 8_000;
@@ -32,7 +44,8 @@ export type UrlIngestErrorCode =
   | "non_html"
   | "empty"
   | "too_large"
-  | "network";
+  | "network"
+  | "social_login_wall";
 
 export type UrlIngestFields = Partial<Record<IngestFieldId, string>>;
 
@@ -47,6 +60,9 @@ export interface UrlIngestOk {
   logo?: string;
   colors?: string[];
   jsonLdHits?: string[];
+  posts?: SocialPost[];
+  sourceKind?: "website" | "facebook" | "instagram";
+  pastCampaignAudit?: PastCampaignAudit;
 }
 
 export interface UrlIngestErr {
@@ -1127,7 +1143,7 @@ function mergeAbortSignals(timeoutMs: number, extra?: AbortSignal): AbortSignal 
 async function fetchHtmlDocument(
   raw: string,
   extraBlockedHosts: string[] = [],
-  opts: { timeoutMs?: number; signal?: AbortSignal; accept?: "html" | "script" } = {},
+  opts: { timeoutMs?: number; signal?: AbortSignal; accept?: "html" | "script"; browserLike?: boolean } = {},
 ): Promise<{ ok: true; html: string; finalUrl: string } | UrlIngestErr> {
   const submitted = String(raw ?? "").trim();
   let current: URL;
@@ -1152,8 +1168,11 @@ async function fetchHtmlDocument(
             Accept:
               opts.accept === "script"
                 ? "application/javascript,text/javascript,*/*;q=0.1"
-                : "text/html,application/xhtml+xml;q=0.9,*/*;q=0.1",
-            "User-Agent": "Mozilla/5.0 (compatible; SAWEK-AD-Ingest/0.1)",
+                : "text/html,application/xhtml+xml;q=0.9,*/*;q=0.8",
+            "User-Agent": opts.browserLike
+              ? SOCIAL_BROWSER_UA
+              : "Mozilla/5.0 (compatible; SAWEK-AD-Ingest/0.1)",
+            ...(opts.browserLike ? { "Accept-Language": "he-IL,he;q=0.9,ar;q=0.8,en-US;q=0.7,en;q=0.6" } : {}),
           },
         });
       } catch (e) {
@@ -1283,8 +1302,176 @@ async function fetchScriptCorpus(urls: string[], extraBlockedHosts: string[]): P
   return clipPreserveNewlines(parts.join("\n"), URL_TEXT_CAP);
 }
 
+function applySocialOntoParsed(
+  parsed: UrlIngestOk,
+  social: SocialPageParse,
+  submitted: string,
+  kind: SocialKind,
+): UrlIngestOk {
+  const fields: UrlIngestFields = { ...parsed.fields };
+  if (social.name && (!fields.businessName || isJunkUiText(fields.businessName) || /^(facebook|instagram)$/i.test(fields.businessName))) {
+    fields.businessName = clip(social.name, 120);
+  }
+  if (social.description && (!fields.description || fields.description.length < social.description.length)) {
+    fields.description = clip(social.description, 500);
+  }
+  if (social.address && !fields.location) fields.location = clip(social.address, 280);
+  if (social.phone && !fields.whatsapp) fields.whatsapp = social.phone;
+  if (social.whatsapp && !fields.whatsapp) fields.whatsapp = social.whatsapp;
+  if (social.hours && !fields.clinicHours) fields.clinicHours = clip(social.hours, 280);
+  if (/^https?:\/\//i.test(submitted)) fields.website = submitted.split("#")[0];
+  if (!fields.channelNotes) fields.channelNotes = kind;
+  delete fields.pastHeadline;
+  delete fields.pastBody;
+  delete fields.pastCta;
+
+  const images: string[] = [...(parsed.images ?? [])];
+  const logo = social.ogImage || parsed.logo || parsed.ogImage;
+  if (social.ogImage && !images.includes(social.ogImage)) images.unshift(social.ogImage);
+  if (social.coverImage && !images.includes(social.coverImage)) images.push(social.coverImage);
+  for (const p of social.posts) {
+    if (p.image && !images.includes(p.image)) images.push(p.image);
+  }
+  const text = clip(
+    [parsed.text, social.description, ...social.posts.map((p) => p.text)].filter(Boolean).join("\n"),
+    URL_TEXT_CAP,
+  );
+  const out: UrlIngestOk = {
+    ...parsed,
+    url: submitted.split("#")[0],
+    title: social.title || parsed.title,
+    text,
+    fields,
+    sourceKind: kind,
+    posts: social.posts,
+  };
+  if (logo) {
+    out.logo = logo;
+    out.ogImage = parsed.ogImage || social.ogImage;
+  } else if (social.ogImage) {
+    out.ogImage = social.ogImage;
+  }
+  if (images.length) out.images = images.slice(0, URL_MAX_IMAGES);
+  return out;
+}
+
+function socialParseToIngest(social: SocialPageParse, submitted: string, kind: SocialKind): UrlIngestOk {
+  const fields: UrlIngestFields = {};
+  if (social.name) fields.businessName = clip(social.name, 120);
+  if (social.description) fields.description = clip(social.description, 500);
+  if (social.address) fields.location = clip(social.address, 280);
+  if (social.phone) fields.whatsapp = social.phone;
+  else if (social.whatsapp) fields.whatsapp = social.whatsapp;
+  if (social.hours) fields.clinicHours = clip(social.hours, 280);
+  fields.website = submitted.split("#")[0];
+  fields.channelNotes = kind;
+  const images: string[] = [];
+  if (social.ogImage) images.push(social.ogImage);
+  if (social.coverImage && !images.includes(social.coverImage)) images.push(social.coverImage);
+  for (const p of social.posts) {
+    if (p.image && !images.includes(p.image)) images.push(p.image);
+  }
+  const text = clip([social.description, ...social.posts.map((p) => p.text)].filter(Boolean).join("\n"), URL_TEXT_CAP);
+  const out: UrlIngestOk = {
+    ok: true,
+    url: submitted.split("#")[0],
+    title: social.title || social.name,
+    text,
+    fields,
+    sourceKind: kind,
+    posts: social.posts,
+  };
+  if (social.ogImage) {
+    out.ogImage = social.ogImage;
+    out.logo = social.ogImage;
+  }
+  if (images.length) out.images = images.slice(0, URL_MAX_IMAGES);
+  return out;
+}
+
+async function fetchSocialDoc(
+  href: string,
+  extraBlockedHosts: string[],
+): Promise<{ ok: true; html: string; finalUrl: string } | UrlIngestErr> {
+  return fetchHtmlDocument(href, extraBlockedHosts, {
+    timeoutMs: URL_HOMEPAGE_TIMEOUT_MS,
+    browserLike: true,
+  });
+}
+
+async function ingestSocialUrl(
+  submitted: string,
+  extraBlockedHosts: string[],
+  kind: SocialKind,
+  parsedUrl: URL,
+): Promise<UrlIngestResult> {
+  const targets: string[] = [];
+  if (kind === "facebook") {
+    const mbasic = facebookMbasicUrl(parsedUrl).href;
+    targets.push(mbasic);
+    if (parsedUrl.hostname.replace(/^www\./i, "").toLowerCase() !== "mbasic.facebook.com") {
+      targets.push(parsedUrl.href);
+    }
+  } else {
+    targets.push(parsedUrl.href);
+  }
+
+  const docs: { html: string; finalUrl: string }[] = [];
+  const errors: UrlIngestErr[] = [];
+  await Promise.allSettled(
+    targets.map(async (href, idx) => {
+      const doc = await fetchSocialDoc(href, extraBlockedHosts);
+      if (doc.ok) docs[idx] = doc;
+      else errors.push(doc);
+    }),
+  );
+  const fetched = docs.filter(Boolean);
+
+  if (kind === "facebook" && fetched[0]) {
+    try {
+      const aboutHref = facebookAboutUrl(new URL(fetched[0].finalUrl));
+      if (aboutHref !== fetched[0].finalUrl) {
+        const about = await fetchSocialDoc(aboutHref, extraBlockedHosts);
+        if (about.ok) fetched.push(about);
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+
+  if (!fetched.length) {
+    const wall = errors.find((e) => e.error === "empty");
+    return wall ?? errors[0] ?? { ok: false, error: "network" };
+  }
+
+  let social: SocialPageParse | undefined;
+  for (const doc of fetched) {
+    const parsed = parseSocialPage(doc.html, doc.finalUrl, kind);
+    social = social ? mergeSocialParses(social, parsed) : parsed;
+  }
+  if (!social) return { ok: false, error: "empty" };
+
+  const allWalls = fetched.every((d) => parseSocialPage(d.html, d.finalUrl, kind).loginWall) && !social.name;
+  if (allWalls) return { ok: false, error: "social_login_wall" };
+
+  const htmlDoc = fetched[0];
+  const page = parseFetchedHtml(htmlDoc.html, htmlDoc.finalUrl, submitted);
+  const merged = page.ok
+    ? applySocialOntoParsed(page, social, submitted, kind)
+    : socialParseToIngest(social, submitted, kind);
+  if (!merged.fields.businessName && !merged.fields.description && !(merged.posts && merged.posts.length)) {
+    return { ok: false, error: social.loginWall ? "social_login_wall" : "empty" };
+  }
+  return merged;
+}
+
 export async function ingestUrl(raw: string, extraBlockedHosts: string[] = []): Promise<UrlIngestResult> {
   const submitted = String(raw ?? "").trim().split("#")[0];
+  const inspected = inspectUrl(submitted, extraBlockedHosts);
+  if (!inspected.ok) return inspected;
+  const kind = detectSocialKind(inspected.url);
+  if (kind) return ingestSocialUrl(submitted, extraBlockedHosts, kind, inspected.url);
+
   const homeDoc = await fetchHtmlDocument(submitted, extraBlockedHosts, {
     timeoutMs: URL_HOMEPAGE_TIMEOUT_MS,
   });

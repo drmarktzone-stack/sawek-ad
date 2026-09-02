@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { ingestUrl, inspectUrl, type UrlIngestErrorCode, type UrlIngestFields, type UrlIngestOk } from "@/lib/url-ingest";
+import { buildPastCampaignAuditFromPosts, overlayPastCampaignAudit } from "@/lib/engine/past-campaign-audit";
 import { runtimeEnv } from "@/lib/runtime-env";
 import { runGeminiGenerate, type GenerateBrand } from "@/lib/engine/gemini-generate";
 import { inventsForbidden } from "@/lib/engine/coach";
@@ -128,6 +129,28 @@ async function enrichScanWithGemini(result: UrlIngestOk): Promise<UrlIngestOk> {
   return mergeScanBrand(result, generated.brand);
 }
 
+async function attachPastCampaignAudit(result: UrlIngestOk): Promise<UrlIngestOk> {
+  const posts = result.posts ?? [];
+  if (!posts.length) return result;
+  const heuristic = buildPastCampaignAuditFromPosts(posts, {
+    location: result.fields.location,
+    description: result.fields.description,
+  });
+  if (!heuristic) return result;
+  try {
+    const overlaid = await withTimeout(
+      overlayPastCampaignAudit(heuristic, posts, {
+        location: result.fields.location,
+        description: result.fields.description,
+      }),
+      SCAN_TIMEOUT_MS,
+    );
+    return { ...result, pastCampaignAudit: overlaid ?? heuristic };
+  } catch {
+    return { ...result, pastCampaignAudit: heuristic };
+  }
+}
+
 export async function POST(req: Request) {
   let body: unknown;
   try {
@@ -146,7 +169,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: result.error }, { status: statusFor(result.error) });
   }
   try {
-    const merged = await enrichScanWithGemini(result);
+    const merged = await attachPastCampaignAudit(await enrichScanWithGemini(result));
     return NextResponse.json(merged);
   } catch {
     return NextResponse.json(result);

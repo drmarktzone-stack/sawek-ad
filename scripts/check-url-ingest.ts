@@ -1,6 +1,8 @@
 import { existsSync, readFileSync } from "fs";
 import { join } from "path";
 import { inspectUrl, parseFetchedHtml, ingestUrl, collectSameOriginNavUrls, mergeExtractedFields, extractScriptBundleText } from "../lib/url-ingest";
+import { detectSocialKind, facebookMbasicUrl, isSocialLoginWall, parseSocialPage } from "../lib/social-page";
+import { buildPastCampaignAuditFromPosts } from "../lib/engine/past-campaign-audit";
 import { extractCssColors, extractLogoUrl, emptyBrandKit } from "../lib/brand-kit";
 import { buildSiteAudit } from "../lib/engine/site-audit";
 import { buildPostingCalendar } from "../lib/engine/posting-calendar";
@@ -631,6 +633,72 @@ if (week[1].channel !== "instagram") fail("day 2 should be instagram");
 if (week.some((d) => /best time|שעה הכי|أفضل وقت/i.test(`${d.headline} ${d.body}`))) fail("calendar invented best-time science");
 if (emptyBrandKit().source !== "none") fail("empty brand kit invented source");
 
+
+
+const fbPage = inspectUrl("https://www.facebook.com/FictionGrill");
+if (!fbPage.ok) fail("facebook.com page should pass inspectUrl");
+else {
+  if (detectSocialKind(fbPage.url) !== "facebook") fail("detectSocialKind facebook");
+  const mbasic = facebookMbasicUrl(fbPage.url);
+  if (mbasic.hostname !== "mbasic.facebook.com") fail(`mbasic host ${mbasic.hostname}`);
+  if (!mbasic.pathname.includes("FictionGrill")) fail(`mbasic path ${mbasic.pathname}`);
+}
+const fbShort = inspectUrl("https://fb.com/FictionGrill");
+if (!fbShort.ok || detectSocialKind(fbShort.url) !== "facebook") fail("fb.com should be facebook");
+const igInspect = inspectUrl("https://www.instagram.com/fictiongrill/");
+if (!igInspect.ok || detectSocialKind(igInspect.url) !== "instagram") fail("instagram detect");
+
+const fbHtml = readFileSync(join(__dirname, "fixtures/url-ingest-facebook-mbasic.html"), "utf8");
+const fbSocial = parseSocialPage(fbHtml, "https://mbasic.facebook.com/FictionGrill", "facebook");
+if (fbSocial.loginWall) fail("public facebook fixture treated as login wall");
+if (!/פיקציה גריל/.test(fbSocial.name)) fail(`facebook name ${JSON.stringify(fbSocial.name)}`);
+if (fbSocial.posts.length < 2) fail(`facebook posts ${fbSocial.posts.length}`);
+if (!fbSocial.posts.some((p) => /1\s*\+\s*1/.test(p.text))) fail("facebook missing 1+1 post");
+if (!fbSocial.posts.some((p) => /הורים/.test(p.text))) fail("facebook missing parents post");
+if (fbSocial.posts.some((p) => /^log in$/i.test(p.text) || /^create account$/i.test(p.text))) {
+  fail("facebook kept login chrome as a post");
+}
+if (/12K|followers|ROAS|25-34/i.test(JSON.stringify(fbSocial))) fail(`facebook invented metrics ${JSON.stringify(fbSocial)}`);
+const fbParsed = parseFetchedHtml(fbHtml, "https://mbasic.facebook.com/FictionGrill", "https://www.facebook.com/FictionGrill");
+if (fbParsed.ok) {
+  const appliedFb = applyIngestReview(
+    emptyIntake(),
+    rowsFromExtracted(fbParsed.fields, false),
+    urlDoc("doc-fb", "https://www.facebook.com/FictionGrill"),
+    [],
+    fbSocial.posts,
+  );
+  if (appliedFb.pastCreatives.length < 2) fail(`facebook pastCreatives ${appliedFb.pastCreatives.length}`);
+  if (!appliedFb.pastCreatives.every((c) => c.confirmedReal && c.tag === "past_creative")) {
+    fail("facebook past creatives must be confirmedReal past_creative");
+  }
+  if (appliedFb.pastCreatives.length > 12) fail("facebook past cap 12");
+  const audit = buildPastCampaignAuditFromPosts(appliedFb.pastCreatives, { location: appliedFb.location || "באקה" });
+  if (!audit) fail("facebook past audit empty");
+  else {
+    if (!audit.strengths.length) fail("facebook audit strengths empty");
+    if (!audit.weaknesses.length) fail("facebook audit weaknesses empty");
+    if (!/הורים/.test(audit.inferredAudience.he)) fail(`inferred audience ${JSON.stringify(audit.inferredAudience)}`);
+    if (/25-34|women 25|ROAS|likes|reach/i.test(JSON.stringify(audit))) fail(`audit invented metrics ${JSON.stringify(audit)}`);
+    if (!audit.failedWhere.length) fail("facebook audit failedWhere empty");
+  }
+}
+
+const wallHtml = readFileSync(join(__dirname, "fixtures/url-ingest-facebook-login-wall.html"), "utf8");
+if (!isSocialLoginWall(wallHtml)) fail("login wall fixture not detected");
+const wallSocial = parseSocialPage(wallHtml, "https://mbasic.facebook.com/private", "facebook");
+if (!wallSocial.loginWall) fail("login wall parse loginWall=false");
+if (wallSocial.name) fail(`login wall leaked name ${JSON.stringify(wallSocial.name)}`);
+if (wallSocial.posts.length) fail("login wall invented posts");
+
+const igHtml = readFileSync(join(__dirname, "fixtures/url-ingest-instagram.html"), "utf8");
+const igSocial = parseSocialPage(igHtml, "https://www.instagram.com/fictiongrill/", "instagram");
+if (igSocial.loginWall) fail("instagram fixture login wall");
+if (!/פיקציה גריל/.test(igSocial.name)) fail(`instagram name ${JSON.stringify(igSocial.name)}`);
+if (!/גריל מקומי/.test(igSocial.description)) fail(`instagram bio ${JSON.stringify(igSocial.description)}`);
+if (/12K Followers/.test(igSocial.description)) fail("instagram kept follower chrome as bio");
+if (/ROAS|25-34/.test(JSON.stringify(igSocial))) fail("instagram invented metrics");
+if (igSocial.posts.length && !igSocial.posts.every((p) => p.text.trim())) fail("instagram empty invented post");
 
 const liveUrl = "https://grillking.multiscreensite.com/";
 if (process.env.URL_INGEST_LIVE === "1") {
