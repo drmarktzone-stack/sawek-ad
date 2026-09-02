@@ -1,9 +1,10 @@
 /**
  * Dry-run the clinic URL through ingest + applyIngestReview (same path as the UI),
- * then serialize the applied intake into lib/demo-snapshot.json.
- * Does not hand-write ad copy. Re-run after ingest/engine fixes.
+ * then serialize the applied intake into lib/demo-snapshot.json and publish the
+ * assembled pack first in public/packs/published.json. Does not hand-write ad copy.
+ * Re-run after ingest/engine fixes. Keeps existing Pedi-Guide / Rinan packs.
  */
-import { writeFileSync } from "fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { join } from "path";
 import { ingestUrl } from "../lib/url-ingest";
 import { applyIngestReview, rowsFromExtracted } from "../lib/document-ingest";
@@ -15,9 +16,24 @@ import { diagnose } from "../lib/engine/diagnose";
 import { generateStrategy } from "../lib/engine/strategy";
 import { generateMedia } from "../lib/engine/media";
 import { generateOptimizer } from "../lib/engine/optimizer";
-import type { IngestedDocument } from "../lib/types";
+import type { CampaignPack, IngestedDocument } from "../lib/types";
 
 const SOURCE = "https://drsamerped.ai.studio";
+const PACK_ID = "demo-samer-clinic";
+
+function writePublished(pack: CampaignPack): { outPath: string; ids: string[] } {
+  const outDir = join(process.cwd(), "public/packs");
+  mkdirSync(outDir, { recursive: true });
+  const outPath = join(outDir, "published.json");
+  let published: CampaignPack[] = [];
+  if (existsSync(outPath)) {
+    const prev = JSON.parse(readFileSync(outPath, "utf8")) as unknown;
+    published = Array.isArray(prev) ? (prev as CampaignPack[]) : [];
+  }
+  const next = [pack, ...published.filter((p) => p.id !== pack.id)];
+  writeFileSync(outPath, JSON.stringify(next, null, 2), "utf8");
+  return { outPath, ids: next.map((p) => p.id) };
+}
 
 async function main() {
   const r = await ingestUrl(SOURCE);
@@ -58,7 +74,7 @@ async function main() {
   const diagnosis = { ...diagnose(intake, report), approved: true, approvedAt: new Date().toISOString() };
   const variants = generateVariants(intake);
   const media = generateMedia(intake);
-  assemblePack(intake, {
+  const pack = assemblePack(intake, {
     report,
     diagnosis,
     variants,
@@ -72,9 +88,19 @@ async function main() {
       media: "approved",
       optimizer: "complete",
     },
-    id: "demo-samer-clinic",
+    id: PACK_ID,
   });
+  const publishedPack: CampaignPack = {
+    ...pack,
+    id: PACK_ID,
+    saved: true,
+    planActivated: true,
+    name: pack.intake.businessName || pack.name,
+  };
+  writeFileSync("/tmp/clinic-pack.json", JSON.stringify(publishedPack, null, 2), "utf8");
+  const pub = writePublished(publishedPack);
   console.log("wrote", outPath);
+  console.log("PUBLISHED", pub.outPath, "ids=" + pub.ids.join(","));
   console.log("INGEST_FIELDS", JSON.stringify({
     filled: Object.fromEntries(Object.entries(snap).filter(([,v]) => String(v||"").trim())),
     emptyKeys: ["kupaFileBy","kupaMemberFrom","brandTone","brandPositioning","whatsappTemplates","photos"].filter(Boolean),

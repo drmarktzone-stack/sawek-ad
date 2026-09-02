@@ -1,5 +1,2753 @@
 [
   {
+    "id": "demo-samer-clinic",
+    "createdAt": "2026-09-02T08:17:04.766Z",
+    "updatedAt": "2026-09-02T08:17:04.766Z",
+    "name": "د. سامر محمد أبو مخ",
+    "intake": {
+      "type": "business",
+      "depth": "quick",
+      "operatingModel": "free_service",
+      "businessName": "د. سامر محمد أبو مخ",
+      "category": "طبيب أطفال",
+      "description": "ד\"ר סאמר מחמד אבו מוך - רופא ילדים | كلاليت - عيادة طب الأطفال والعائلة في باقة الغربية. رعاية طبية متكاملة، بدون طوابير، فحوصات سريعة ومجانية 100% لمؤمني كلاليت.",
+      "location": "باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات)",
+      "website": "https://drsamerped.ai.studio",
+      "whatsapp": "052-8885800",
+      "clinicHours": "الأحد 08:00 - 13:00 / 16:00 - 19:30 · الإثنين 08:00 - 13:00 / 16:00 - 19:30 · الثلاثاء 08:00 - 13:30 / مغلق (استشارات واتساب) · الأربعاء 08:00 - 13:00 / 16:00 - 19:30 · الخميس 08:00 - 13:00 / 16:00 - 19:30 · الجمعة 08:00 - 12:30 / عطلة نهاية الأسبوع · السبت طوارئ واستفسارات هاتفية للمسجلين / مغلق",
+      "kupaFileBy": "",
+      "kupaMemberFrom": "",
+      "audience": "parents",
+      "audienceCustom": false,
+      "biggestProblem": "طوابير الساعات",
+      "problemCustom": true,
+      "uniqueAdvantage": "بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت",
+      "advantageCustom": true,
+      "mainGoal": "walk_in",
+      "goalCustom": false,
+      "offer": "no_offer",
+      "offerCustom": false,
+      "competitors": [],
+      "businessModel": "",
+      "avgOrderValue": "",
+      "marginPercent": "",
+      "targetCac": "",
+      "monthlyBudget": "",
+      "pastAds": "",
+      "pastResults": "",
+      "whatFailed": "",
+      "mediaAssets": [],
+      "ingestedDocs": [
+        {
+          "id": "doc-clinic-scan",
+          "name": "https://drsamerped.ai.studio",
+          "mime": "text/html",
+          "size": 8136,
+          "kind": "url",
+          "tags": [
+            "identity"
+          ],
+          "excerpt": "title: د. سامر محمد أبو مخ - عيادة طب الأطفال والعائلة | كلاليت باقة الغربية תיאור: ד\"ר סאמר מחמד אבו מוך - רופא ילדים | كلاليت - عيادة طب الأطفال والعائلة في باقة الغربية. رعاية طبية متكاملة، بدون طوابير، فحوصات سريعة ومجانية 100% لمؤمني كلاليت. د. سامر محمد أبو مخ - عيادة طب الأطفال والعائلة | كلاليت باقة الغربية اسم الطبيب: د. سامر محمد أبو مخ תחום: طبيب أطفال תחום: רופא ילדים اسم الطبيب: عيادة طب الأطفال والعائلة כתובת: باقة الغربية - الشارع الرئيسي (بالقرب من الدوار المركزي) כתובת: باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات) טלפון: 052-8885800 וואטסאפ: +972528885800 כתובת: باقة الغربية כתובת: باقة الغربية (حي الشقفان) כתובת: باقة الغربية / جت תיאור: ד\"ר סאמר מחמד אבו מוך שעות: الأحد 08:00 - 13:00 / 16:00",
+          "createdAt": "2026-09-02T08:17:04.754Z"
+        }
+      ],
+      "pastCreatives": [],
+      "brandTone": "",
+      "brandPositioning": "",
+      "channelNotes": "facebook, instagram, TikTok, whatsapp",
+      "whatsappTemplates": "",
+      "landingLines": "سجل طفلك اليوم واضمن له الرعاية الطبية الأرقى في باقة 📲",
+      "brandKit": {
+        "colors": [],
+        "source": "none"
+      }
+    },
+    "intakeReport": {
+      "completeness": 78,
+      "missing": [
+        {
+          "field": "businessModel",
+          "label": {
+            "he": "מודל עסקי",
+            "ar": "نموذج العمل",
+            "en": "Business model"
+          },
+          "reason": {
+            "he": "בלי לדעת מה נחשב המרה, אי אפשר לתכנן באדג'ט.",
+            "ar": "بدون معرفة التحويل لا خطة ميزانية.",
+            "en": "Without the conversion event, budget planning is guesswork."
+          },
+          "impact": {
+            "he": "סוכן המדיה יסרב לנחש CPA.",
+            "ar": "وكيل الميديا سيرفض تخمين CPA.",
+            "en": "The media agent will refuse to guess CPA."
+          }
+        },
+        {
+          "field": "monthlyBudget",
+          "label": {
+            "he": "תקציב",
+            "ar": "الميزانية",
+            "en": "Budget"
+          },
+          "reason": {
+            "he": "בלי תקציב אין פיצול ערוצים מספרי.",
+            "ar": "بدون ميزانية لا تقسيم قنوات رقمياً.",
+            "en": "No budget means no numeric channel split."
+          },
+          "impact": {
+            "he": "לא יוצג מד לידים.",
+            "ar": "لن يُعرض مقياس عملاء.",
+            "en": "No lead gauge will be shown."
+          }
+        },
+        {
+          "field": "pastAds",
+          "label": {
+            "he": "מודעות קודמות",
+            "ar": "إعلانات سابقة",
+            "en": "Past ads"
+          },
+          "reason": {
+            "he": "בלי היסטוריה האבחון הוא השערה.",
+            "ar": "بدون تاريخ التشخيص افتراض.",
+            "en": "Without history the diagnosis is a hypothesis."
+          },
+          "impact": {
+            "he": "ביטחון האבחון יהיה נמוך.",
+            "ar": "ثقة التشخيص ستكون منخفضة.",
+            "en": "Diagnosis confidence will be low."
+          }
+        }
+      ],
+      "inconsistencies": [],
+      "refusedGuesses": [
+        {
+          "he": "לא הומצאו מתחרים, דירוגים, או המלצות לקוחות.",
+          "ar": "لم تُخترع منافسون أو تقييمات أو توصيات عملاء.",
+          "en": "No competitors, ratings, or testimonials were invented."
+        },
+        {
+          "he": "לא הומצא טווח לידים חודשי בלי תקציב ו-CAC שסיפקת.",
+          "ar": "لم يُخترع نطاق عملاء شهري بدون ميزانية وCAC منك.",
+          "en": "No monthly lead range was invented without budget and CAC you supplied."
+        },
+        {
+          "he": "אין מבצע — לא הוספנו הנחה או ייעוץ חינם כברירת מחדל.",
+          "ar": "لا يوجد عرض — لم نُضف خصماً أو استشارة مجانية افتراضياً.",
+          "en": "No offer — we did not add a discount or free consult by default."
+        },
+        {
+          "he": "מודל שירות חינם — אין קנו עכשיו, אין מחיר, אין קופון, ואין ROAS כמכירה.",
+          "ar": "نموذج خدمة مجانية — بلا اشتروا الآن وبلا سعر وبلا كوبون وبلا ROAS كمبيعات.",
+          "en": "Free-service model — no buy-now, no price, no coupon, and no ROAS-as-sales."
+        }
+      ]
+    },
+    "diagnosis": {
+      "summary": {
+        "he": "אבחון מבוסס רק על מה שמולא. אין ניחוש של מתחרים או תוצאות. נדרש אישור אנושי לפני הבנייה.",
+        "ar": "التشخيص مبني فقط على ما مُلئ. لا تخمين لمنافسين أو نتائج. يلزم اعتماد بشري قبل البناء.",
+        "en": "Diagnosis uses only what you filled in. No guessed competitors or results. Human approval is required before build."
+      },
+      "hypotheses": [
+        {
+          "area": "offer",
+          "confidence": "low",
+          "finding": {
+            "he": "אין מבצע — זה תקין. הערך חייב לבוא מהשירות ומהיתרון, לא מהנחה מומצאת.",
+            "ar": "لا يوجد عرض — وهذا سليم. القيمة يجب أن تأتي من الخدمة والميزة.",
+            "en": "No promo — that’s valid. Value must come from the service and the advantage, not a fake discount."
+          },
+          "evidence": {
+            "he": "שדה המבצע הוא «אין מבצע» או ריק.",
+            "ar": "حقل العرض «لا يوجد عرض» أو فارغ.",
+            "en": "The offer field is “No offer” or empty."
+          },
+          "recommendation": {
+            "he": "אל תמציאו קופון. חזקו את ההוּק סביב הבעיה והיתרון הייחודי.",
+            "ar": "لا تخترعوا كوبوناً. قوّوا الخطاف حول المشكلة والميزة.",
+            "en": "Do not invent a coupon. Strengthen the hook around the problem and unique advantage."
+          }
+        },
+        {
+          "area": "hook",
+          "confidence": "low",
+          "finding": {
+            "he": "ההוק צריך לפתוח בבעיה של הקהל, לא בשם העסק.",
+            "ar": "يجب أن يبدأ الخطاف بمشكلة الجمهور لا باسم النشاط.",
+            "en": "The hook should open on the audience’s problem, not the business name."
+          },
+          "evidence": {
+            "he": "קהל: parents. בעיה: طوابير الساعات.",
+            "ar": "الجمهور: parents. المشكلة: طوابير الساعات.",
+            "en": "Audience: parents. Problem: طوابير الساعات."
+          },
+          "recommendation": {
+            "he": "משפט ראשון = כאב ספציפי. שם העסק בשורה השנייה או ב-CTA.",
+            "ar": "الجملة الأولى = ألم محدد. اسم النشاط في الثانية أو في CTA.",
+            "en": "First line = specific pain. Business name on line two or in the CTA."
+          }
+        },
+        {
+          "area": "creative",
+          "confidence": "low",
+          "finding": {
+            "he": "אין היסטוריית מודעות — אי אפשר לדעת מה נכשל. האבחון הוא כיוון עבודה, לא פסק דין.",
+            "ar": "لا تاريخ إعلانات — لا يمكن معرفة ما فشل. التشخيص اتجاه عمل لا حكم.",
+            "en": "No ad history — we cannot know what failed. This diagnosis is a working direction, not a verdict."
+          },
+          "evidence": {
+            "he": "מודעות קודמות לא מולאו.",
+            "ar": "الإعلانات السابقة غير مملوءة.",
+            "en": "Past ads were not filled in."
+          },
+          "recommendation": {
+            "he": "שמרו צילומי מודעות הבאים (טקסט, קהל, הוצאה, תוצאה) כדי שהאבחון הבא יהיה מבוסס.",
+            "ar": "احفظوا لقطات الإعلانات القادمة (نص، جمهور، إنفاق، نتيجة).",
+            "en": "Keep screenshots of the next ads (copy, audience, spend, result) so the next diagnosis is grounded."
+          }
+        },
+        {
+          "area": "offer",
+          "confidence": "high",
+          "finding": {
+            "he": "מוסד ללא תשלום מהלקוח — הקמפיין הוא חשיפה/הרשמה/ביקור, לא רכישה.",
+            "ar": "مؤسسة بلا دفع من الزبون — الحملة تعرّض/تسجيل/زيارة، مش شراء.",
+            "en": "Institution with no charge to the client — the campaign is exposure/enrollment/visit, not a purchase."
+          },
+          "evidence": {
+            "he": "מודל הפעלה: שירות חינם.",
+            "ar": "نموذج التشغيل: خدمة مجانية.",
+            "en": "Operating model: free service."
+          },
+          "recommendation": {
+            "he": "CTA: הרשמה / וואטסאפ / הגיעו למרפאה. בלי קנו עכשיו, בלי קופון, בלי ROAS כמכירה.",
+            "ar": "CTA: تسجيل / واتساب / جيبوه عالعيادة. بلا اشتروا الآن وبلا كوبون وبلا ROAS كمبيعات.",
+            "en": "CTA: register / WhatsApp / Come to the clinic. No buy-now, no coupon, no ROAS-as-sales."
+          }
+        },
+        {
+          "area": "offer",
+          "confidence": "medium",
+          "finding": {
+            "he": "שירות חינם: אין מכירה ואין קופון. הערך = בעיה + יתרון + חשיפה/ביקור.",
+            "ar": "خدمة مجانية: ما في بيع وما في كوبون. القيمة = مشكلة + ميزة + تعرّض/زيارة.",
+            "en": "Free service: no sale and no coupon. Value = problem + advantage + exposure/visit."
+          },
+          "evidence": {
+            "he": "ראיה מהקליטה · offer: no_offer",
+            "ar": "دليل من البيانات · offer: no_offer",
+            "en": "Evidence from intake · offer: no_offer"
+          },
+          "recommendation": {
+            "he": "אסטרטגיה: בעיה + יתרון. בלי ₪ שלא פורסם.",
+            "ar": "الاستراتيجية: مشكلة + ميزة. بلا ₪ غير منشور.",
+            "en": "Strategy: problem + advantage. No unpublished ₪."
+          }
+        },
+        {
+          "area": "creative",
+          "confidence": "medium",
+          "finding": {
+            "he": "אין תמונה/מודעה ישנה. המוקאפ יישאר דוגמה — בלי להמציא פנים.",
+            "ar": "ما في صورة/إعلان سابق. النموذج رح يبقى عينة — بلا اختراع وجوه.",
+            "en": "No photo / past ad. The mockup stays a sample — no invented faces."
+          },
+          "evidence": {
+            "he": "ראיה מהקליטה · mediaAssets: 0",
+            "ar": "دليل من البيانات · mediaAssets: 0",
+            "en": "Evidence from intake · mediaAssets: 0"
+          },
+          "recommendation": {
+            "he": "זוויות מהבנק: אמון · הגיעו למרפאה · د. سامر محمد أبو مخ.",
+            "ar": "زوايا من البنك: ثقة · تعوا عالعيادة · د. سامر محمد أبو مخ.",
+            "en": "Bank angles: trust · Come to the clinic · د. سامر محمد أبو مخ."
+          }
+        }
+      ],
+      "approved": true,
+      "approvedAt": "2026-09-02T08:17:04.760Z"
+    },
+    "variants": [
+      {
+        "kind": "strong_offer",
+        "locale": "he",
+        "cta": "הגיעו למרפאה",
+        "headline": "ד\"ר סאמר מחמד אבו מוך — לפי סדר הגעה",
+        "primaryText": "ד\"ר סאמר מחמד אבו מוך — קבלה לפי סדר הגעה, בלי תור מראש.\n\nלמשפחות באקה שמחפשות רופא ילדים בכללית.\n\nשעות: ראשון 08:00 - 13:00 / 16:00 - 19:30 · שני 08:00 - 13:00 / 16:00 - 19:30 · שלישי 08:00 - 13:30 / סגור (ייעוץ וואטסאפ) · רביעי 08:00 - 13:00 / 16:00 - 19:30 · חמישי 08:00 - 13:00 / 16:00 - 19:30 · שישי 08:00 - 12:30 / סופ״ש · שבת חירום ובירורים טלפוניים לרשומים / סגור\nוואטסאפ 052-8885800 (לא לחירום).\nhttps://drsamerped.ai.studio\nאין מבצע ואין קופון.\n\nהגיעו למרפאה"
+      },
+      {
+        "kind": "very_short",
+        "locale": "he",
+        "cta": "הגיעו למרפאה",
+        "headline": "מתחם אל-נור, קומה 1",
+        "primaryText": "ד\"ר סאמר מחמד אבו מוך — קבלה לפי סדר הגעה, בלי תור מראש. שעות: ראשון 08:00 - 13:00 / 16:00 - 19:30 · שני 08:00 - 13:00 / 16:00 - 19:30 · שלישי 08:00 - 13:30 / סגור (ייעוץ וואטסאפ) · רביעי 08:00 - 13:00 / 16:00 - 19:30 · חמישי 08:00 - 13:00 / 16:00 - 19:30 · שישי 08:00 - 12:30 / סופ״ש · שבת חירום ובירורים טלפוניים לרשומים / סגור וואטסאפ 052-8885800 (לא לחירום). הגיעו למרפאה"
+      },
+      {
+        "kind": "emotional",
+        "locale": "he",
+        "cta": "הגיעו למרפאה",
+        "headline": "הילד חולה? מגיעים לפי סדר הגעה",
+        "primaryText": "כשהילד חולה צריך לדעת לאן הולכים היום.\n\nד\"ר סאמר מחמד אבו מוך — קבלה לפי סדר הגעה, בלי תור מראש.\n\nשעות: ראשון 08:00 - 13:00 / 16:00 - 19:30 · שני 08:00 - 13:00 / 16:00 - 19:30 · שלישי 08:00 - 13:30 / סגור (ייעוץ וואטסאפ) · רביעי 08:00 - 13:00 / 16:00 - 19:30 · חמישי 08:00 - 13:00 / 16:00 - 19:30 · שישי 08:00 - 12:30 / סופ״ש · שבת חירום ובירורים טלפוניים לרשומים / סגור\nוואטסאפ 052-8885800 (לא לחירום).\nhttps://drsamerped.ai.studio\nאין מבצע ואין קופון."
+      },
+      {
+        "kind": "narrative",
+        "locale": "he",
+        "cta": "הגיעו למרפאה",
+        "headline": "ד\"ר סאמר מחמד אבו מוך במתחם אל-נור, קומה 1",
+        "primaryText": "ד\"ר סאמר מחמד אבו מוך — קבלה לפי סדר הגעה, בלי תור מראש.\n\nמקום: מתחם אל-נור, קומה 1.\n\nשעות: ראשון 08:00 - 13:00 / 16:00 - 19:30 · שני 08:00 - 13:00 / 16:00 - 19:30 · שלישי 08:00 - 13:30 / סגור (ייעוץ וואטסאפ) · רביעי 08:00 - 13:00 / 16:00 - 19:30 · חמישי 08:00 - 13:00 / 16:00 - 19:30 · שישי 08:00 - 12:30 / סופ״ש · שבת חירום ובירורים טלפוניים לרשומים / סגור\nוואטסאפ 052-8885800 (לא לחירום).\nhttps://drsamerped.ai.studio\nאין מבצע ואין קופון."
+      },
+      {
+        "kind": "direct_sales",
+        "locale": "he",
+        "cta": "הגיעו למרפאה",
+        "headline": "וואטסאפ: 052-8885800",
+        "primaryText": "ד\"ר סאמר מחמד אבו מוך — קבלה לפי סדר הגעה, בלי תור מראש.\n\nשעות: ראשון 08:00 - 13:00 / 16:00 - 19:30 · שני 08:00 - 13:00 / 16:00 - 19:30 · שלישי 08:00 - 13:30 / סגור (ייעוץ וואטסאפ) · רביעי 08:00 - 13:00 / 16:00 - 19:30 · חמישי 08:00 - 13:00 / 16:00 - 19:30 · שישי 08:00 - 12:30 / סופ״ש · שבת חירום ובירורים טלפוניים לרשומים / סגור\nוואטסאפ 052-8885800 (לא לחירום).\nhttps://drsamerped.ai.studio\nאין מבצע ואין קופון.\n\nאם זה רלוונטי — הגיעו למרפאה."
+      },
+      {
+        "kind": "unique_advantage",
+        "locale": "he",
+        "cta": "הגיעו למרפאה",
+        "headline": "בלי תורים · בלי המתנה · 100% למבוטחי כללית",
+        "primaryText": "בלי תורים · בלי המתנה · 100% למבוטחי כללית.\n\nכיסוי כללית הוא עובדה למבוטחים — לא מבצע ולא קופון.\n\nד\"ר סאמר מחמד אבו מוך — קבלה לפי סדר הגעה, בלי תור מראש.\n\nשעות: ראשון 08:00 - 13:00 / 16:00 - 19:30 · שני 08:00 - 13:00 / 16:00 - 19:30 · שלישי 08:00 - 13:30 / סגור (ייעוץ וואטסאפ) · רביעי 08:00 - 13:00 / 16:00 - 19:30 · חמישי 08:00 - 13:00 / 16:00 - 19:30 · שישי 08:00 - 12:30 / סופ״ש · שבת חירום ובירורים טלפוניים לרשומים / סגור\nוואטסאפ 052-8885800 (לא לחירום).\nhttps://drsamerped.ai.studio\nאין מבצע ואין קופון."
+      },
+      {
+        "kind": "strong_offer",
+        "locale": "ar",
+        "cta": "جيبوه عالعيادة",
+        "headline": "الولد مريض، جيبوه عالعيادة",
+        "primaryText": "د. سامر محمد أبو مخ بباقة — جت أولاً بدون مواعيد.\n\nلأهل باقة اللي بدهم طبيب أطفال كلاليت قريب.\n\nالدوام: الأحد 08:00 - 13:00 / 16:00 - 19:30 · الإثنين 08:00 - 13:00 / 16:00 - 19:30 · الثلاثاء 08:00 - 13:30 / مغلق (استشارات واتساب) · الأربعاء 08:00 - 13:00 / 16:00 - 19:30 · الخميس 08:00 - 13:00 / 16:00 - 19:30 · الجمعة 08:00 - 12:30 / عطلة نهاية الأسبوع · السبت طوارئ واستفسارات هاتفية للمسجلين / مغلق\nواتساب 052-8885800 (مش للطوارئ).\nhttps://drsamerped.ai.studio\nما في عرض وما في كوبون.\n\nجيبوه عالعيادة"
+      },
+      {
+        "kind": "very_short",
+        "locale": "ar",
+        "cta": "جيبوه عالعيادة",
+        "headline": "مجمع النور، طابق 1",
+        "primaryText": "د. سامر محمد أبو مخ بباقة — جت أولاً بدون مواعيد. الدوام: الأحد 08:00 - 13:00 / 16:00 - 19:30 · الإثنين 08:00 - 13:00 / 16:00 - 19:30 · الثلاثاء 08:00 - 13:30 / مغلق (استشارات واتساب) · الأربعاء 08:00 - 13:00 / 16:00 - 19:30 · الخميس 08:00 - 13:00 / 16:00 - 19:30 · الجمعة 08:00 - 12:30 / عطلة نهاية الأسبوع · السبت طوارئ واستفسارات هاتفية للمسجلين / مغلق واتساب 052-8885800 (مش للطوارئ). جيبوه عالعيادة"
+      },
+      {
+        "kind": "emotional",
+        "locale": "ar",
+        "cta": "جيبوه عالعيادة",
+        "headline": "الولد مريض، جيبوه عالعيادة",
+        "primaryText": "لما الولد بيمرض، الأهل بدهم يعرفوا وين يروحوا اليوم — مش إعلان عام.\n\nد. سامر محمد أبو مخ بباقة — جت أولاً بدون مواعيد.\n\nالدوام: الأحد 08:00 - 13:00 / 16:00 - 19:30 · الإثنين 08:00 - 13:00 / 16:00 - 19:30 · الثلاثاء 08:00 - 13:30 / مغلق (استشارات واتساب) · الأربعاء 08:00 - 13:00 / 16:00 - 19:30 · الخميس 08:00 - 13:00 / 16:00 - 19:30 · الجمعة 08:00 - 12:30 / عطلة نهاية الأسبوع · السبت طوارئ واستفسارات هاتفية للمسجلين / مغلق\nواتساب 052-8885800 (مش للطوارئ).\nhttps://drsamerped.ai.studio\nما في عرض وما في كوبون."
+      },
+      {
+        "kind": "narrative",
+        "locale": "ar",
+        "cta": "جيبوه عالعيادة",
+        "headline": "الولد مريض، جيبوه عالعيادة",
+        "primaryText": "د. سامر محمد أبو مخ بباقة — جت أولاً بدون مواعيد.\n\nالمكان: مجمع النور، طابق 1.\n\nالدوام: الأحد 08:00 - 13:00 / 16:00 - 19:30 · الإثنين 08:00 - 13:00 / 16:00 - 19:30 · الثلاثاء 08:00 - 13:30 / مغلق (استشارات واتساب) · الأربعاء 08:00 - 13:00 / 16:00 - 19:30 · الخميس 08:00 - 13:00 / 16:00 - 19:30 · الجمعة 08:00 - 12:30 / عطلة نهاية الأسبوع · السبت طوارئ واستفسارات هاتفية للمسجلين / مغلق\nواتساب 052-8885800 (مش للطوارئ).\nhttps://drsamerped.ai.studio\nما في عرض وما في كوبون."
+      },
+      {
+        "kind": "direct_sales",
+        "locale": "ar",
+        "cta": "جيبوه عالعيادة",
+        "headline": "واتساب العيادة: 052-8885800",
+        "primaryText": "د. سامر محمد أبو مخ بباقة — جت أولاً بدون مواعيد.\n\nالدوام: الأحد 08:00 - 13:00 / 16:00 - 19:30 · الإثنين 08:00 - 13:00 / 16:00 - 19:30 · الثلاثاء 08:00 - 13:30 / مغلق (استشارات واتساب) · الأربعاء 08:00 - 13:00 / 16:00 - 19:30 · الخميس 08:00 - 13:00 / 16:00 - 19:30 · الجمعة 08:00 - 12:30 / عطلة نهاية الأسبوع · السبت طوارئ واستفسارات هاتفية للمسجلين / مغلق\nواتساب 052-8885800 (مش للطوارئ).\nhttps://drsamerped.ai.studio\nما في عرض وما في كوبون.\n\nإذا مناسب — جيبوه عالعيادة."
+      },
+      {
+        "kind": "unique_advantage",
+        "locale": "ar",
+        "cta": "جيبوه عالعيادة",
+        "headline": "مجمع النور، طابق 1 — جت أولاً",
+        "primaryText": "بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت.\n\nتغطية كلاليت واقعة للأعضاء — مش عرض ومش كوبون.\n\nد. سامر محمد أبو مخ بباقة — جت أولاً بدون مواعيد.\n\nالدوام: الأحد 08:00 - 13:00 / 16:00 - 19:30 · الإثنين 08:00 - 13:00 / 16:00 - 19:30 · الثلاثاء 08:00 - 13:30 / مغلق (استشارات واتساب) · الأربعاء 08:00 - 13:00 / 16:00 - 19:30 · الخميس 08:00 - 13:00 / 16:00 - 19:30 · الجمعة 08:00 - 12:30 / عطلة نهاية الأسبوع · السبت طوارئ واستفسارات هاتفية للمسجلين / مغلق\nواتساب 052-8885800 (مش للطوارئ).\nhttps://drsamerped.ai.studio\nما في عرض وما في كوبون."
+      },
+      {
+        "kind": "strong_offer",
+        "locale": "en",
+        "cta": "Come to the clinic",
+        "headline": "Dr. Samer Abu Mokh — walk-in",
+        "primaryText": "Dr. Samer Abu Mokh — walk-in, first come first served.\n\nFor Parents.\n\nHours: Sun 08:00 - 13:00 / 16:00 - 19:30 · Mon 08:00 - 13:00 / 16:00 - 19:30 · Tue 08:00 - 13:30 / closed (WhatsApp consults) · Wed 08:00 - 13:00 / 16:00 - 19:30 · Thu 08:00 - 13:00 / 16:00 - 19:30 · Fri 08:00 - 12:30 / weekend · Sat emergency / phone questions for registered families / closed\nWhatsApp 052-8885800 (not for emergencies).\nhttps://drsamerped.ai.studio\nNo offer and no coupon.\n\nCome to the clinic"
+      },
+      {
+        "kind": "very_short",
+        "locale": "en",
+        "cta": "Come to the clinic",
+        "headline": "Al-Nour, 1st floor",
+        "primaryText": "Dr. Samer Abu Mokh — walk-in, first come first served. Hours: Sun 08:00 - 13:00 / 16:00 - 19:30 · Mon 08:00 - 13:00 / 16:00 - 19:30 · Tue 08:00 - 13:30 / closed (WhatsApp consults) · Wed 08:00 - 13:00 / 16:00 - 19:30 · Thu 08:00 - 13:00 / 16:00 - 19:30 · Fri 08:00 - 12:30 / weekend · Sat emergency / phone questions for registered families / closed WhatsApp 052-8885800 (not for emergencies). Come to the clinic"
+      },
+      {
+        "kind": "emotional",
+        "locale": "en",
+        "cta": "Come to the clinic",
+        "headline": "Child sick? Walk in today",
+        "primaryText": "When a child is sick, families need to know where to go today.\n\nDr. Samer Abu Mokh — walk-in, first come first served.\n\nHours: Sun 08:00 - 13:00 / 16:00 - 19:30 · Mon 08:00 - 13:00 / 16:00 - 19:30 · Tue 08:00 - 13:30 / closed (WhatsApp consults) · Wed 08:00 - 13:00 / 16:00 - 19:30 · Thu 08:00 - 13:00 / 16:00 - 19:30 · Fri 08:00 - 12:30 / weekend · Sat emergency / phone questions for registered families / closed\nWhatsApp 052-8885800 (not for emergencies).\nhttps://drsamerped.ai.studio\nNo offer and no coupon."
+      },
+      {
+        "kind": "narrative",
+        "locale": "en",
+        "cta": "Come to the clinic",
+        "headline": "Dr. Samer Abu Mokh at Al-Nour, 1st floor",
+        "primaryText": "Dr. Samer Abu Mokh — walk-in, first come first served.\n\nPlace: Al-Nour, 1st floor.\n\nHours: Sun 08:00 - 13:00 / 16:00 - 19:30 · Mon 08:00 - 13:00 / 16:00 - 19:30 · Tue 08:00 - 13:30 / closed (WhatsApp consults) · Wed 08:00 - 13:00 / 16:00 - 19:30 · Thu 08:00 - 13:00 / 16:00 - 19:30 · Fri 08:00 - 12:30 / weekend · Sat emergency / phone questions for registered families / closed\nWhatsApp 052-8885800 (not for emergencies).\nhttps://drsamerped.ai.studio\nNo offer and no coupon."
+      },
+      {
+        "kind": "direct_sales",
+        "locale": "en",
+        "cta": "Come to the clinic",
+        "headline": "WhatsApp 052-8885800",
+        "primaryText": "Dr. Samer Abu Mokh — walk-in, first come first served.\n\nHours: Sun 08:00 - 13:00 / 16:00 - 19:30 · Mon 08:00 - 13:00 / 16:00 - 19:30 · Tue 08:00 - 13:30 / closed (WhatsApp consults) · Wed 08:00 - 13:00 / 16:00 - 19:30 · Thu 08:00 - 13:00 / 16:00 - 19:30 · Fri 08:00 - 12:30 / weekend · Sat emergency / phone questions for registered families / closed\nWhatsApp 052-8885800 (not for emergencies).\nhttps://drsamerped.ai.studio\nNo offer and no coupon.\n\nIf this is you — Come to the clinic."
+      },
+      {
+        "kind": "unique_advantage",
+        "locale": "en",
+        "cta": "Come to the clinic",
+        "headline": "no queues · no long wait · 100% for",
+        "primaryText": "no queues · no long wait · 100% for Clalit members.\n\nClalit coverage is a fact for members — not a promo and not a coupon.\n\nDr. Samer Abu Mokh — walk-in, first come first served.\n\nHours: Sun 08:00 - 13:00 / 16:00 - 19:30 · Mon 08:00 - 13:00 / 16:00 - 19:30 · Tue 08:00 - 13:30 / closed (WhatsApp consults) · Wed 08:00 - 13:00 / 16:00 - 19:30 · Thu 08:00 - 13:00 / 16:00 - 19:30 · Fri 08:00 - 12:30 / weekend · Sat emergency / phone questions for registered families / closed\nWhatsApp 052-8885800 (not for emergencies).\nhttps://drsamerped.ai.studio\nNo offer and no coupon."
+      }
+    ],
+    "strategy": [
+      {
+        "id": "coach_playbook",
+        "items": [
+          {
+            "title": {
+              "he": "הוק על הכאב",
+              "ar": "خطاف الألم",
+              "en": "Hook on the pain"
+            },
+            "body": {
+              "he": "طوابير الساعات\nשבוע 1: פתיחה בבעיה, לא בשם. ימים 1–2: הוק על הבעיה, לא על שם המרפאה. ימים 3–4: יתרון שסופק. ימים 5–7: חשיפה / ביקור לפי סדר הגעה — לא מכירה ולא קופון. פייסבוק+אינסטגרם+וואטסאפ+נחיתה. PLAN.",
+              "ar": "طوابير الساعات\nالأسبوع 1: افتتاح بالمشكلة لا بالاسم. يوم 1–2: خطاف المشكلة لا اسم العيادة. يوم 3–4: الميزة المعطاة. يوم 5–7: تعرّض / زيارة جت أولاً — مش بيع ومش كوبون. فيسبوك+إنستغرام+واتساب+هبوط. خطة.",
+              "en": "طوابير الساعات\nWeek 1: open on the problem, not the name. Days 1–2: hook on the problem, not the clinic name. Days 3–4: stated advantage. Days 5–7: Exposure / walk-in visit — not a sale and not a coupon. Facebook+Instagram+WhatsApp+landing. PLAN."
+            }
+          },
+          {
+            "title": {
+              "he": "הוכחה / יתרון",
+              "ar": "إثبات / ميزة",
+              "en": "Proof / advantage"
+            },
+            "body": {
+              "he": "بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت מודל: חשיפה/ביקור — לא מכירה.\nימים 1–2: הוק על הבעיה, לא על שם המרפאה. ימים 3–4: יתרון שסופק. ימים 5–7: חשיפה / ביקור לפי סדר הגעה — לא מכירה ולא קופון. פייסבוק+אינסטגרם+וואטסאפ+נחיתה. PLAN.",
+              "ar": "بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت النموذج: تعرّض/زيارة — مش بيع.\nيوم 1–2: خطاف المشكلة لا اسم العيادة. يوم 3–4: الميزة المعطاة. يوم 5–7: تعرّض / زيارة جت أولاً — مش بيع ومش كوبون. فيسبوك+إنستغرام+واتساب+هبوط. خطة.",
+              "en": "بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت Model: exposure/visit — not a sale.\nDays 1–2: hook on the problem, not the clinic name. Days 3–4: stated advantage. Days 5–7: Exposure / walk-in visit — not a sale and not a coupon. Facebook+Instagram+WhatsApp+landing. PLAN."
+            }
+          },
+          {
+            "title": {
+              "he": "מיקס ערוצים + 7 ימים",
+              "ar": "مزيج قنوات + 7 أيام",
+              "en": "Channel mix + 7 days"
+            },
+            "body": {
+              "he": "פייסבוק + אינסטגרם לפיד וסטורי. וואטסאפ 052-8885800 להודעות — PLAN בלבד. דף נחיתה עם אותה זווית. בלי פרסום חי לרשת.\nימים 1–2: הוק על הבעיה, לא על שם המרפאה. ימים 3–4: יתרון שסופק. ימים 5–7: חשיפה / ביקור לפי סדר הגעה — לא מכירה ולא קופון. פייסבוק+אינסטגרם+וואטסאפ+נחיתה. PLAN.",
+              "ar": "فيسبوك + إنستغرام للفيد والستوري. واتساب 052-8885800 للرسائل — خطة فقط. صفحة هبوط بنفس الزاوية. بلا نشر حي.\nيوم 1–2: خطاف المشكلة لا اسم العيادة. يوم 3–4: الميزة المعطاة. يوم 5–7: تعرّض / زيارة جت أولاً — مش بيع ومش كوبون. فيسبوك+إنستغرام+واتساب+هبوط. خطة.",
+              "en": "Facebook + Instagram for feed and stories. WhatsApp 052-8885800 for messages — PLAN only. Landing page with the same angle. No live network publish.\nDays 1–2: hook on the problem, not the clinic name. Days 3–4: stated advantage. Days 5–7: Exposure / walk-in visit — not a sale and not a coupon. Facebook+Instagram+WhatsApp+landing. PLAN."
+            }
+          }
+        ]
+      },
+      {
+        "id": "selling_angles",
+        "items": [
+          {
+            "title": {
+              "he": "AIDA",
+              "ar": "AIDA",
+              "en": "AIDA"
+            },
+            "body": {
+              "he": "Attention: طوابير الساعات. Interest: הורים. Desire: بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت. Action: ביקור לפי סדר הגעה (בלי תור).",
+              "ar": "انتباه: طوابير الساعات. اهتمام: הורים. رغبة: بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت. فعل: ביקור לפי סדר הגעה (בלי תור).",
+              "en": "Attention: طوابير الساعات. Interest: הורים. Desire: بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت. Action: ביקור לפי סדר הגעה (בלי תור)."
+            }
+          },
+          {
+            "title": {
+              "he": "PAS",
+              "ar": "PAS",
+              "en": "PAS"
+            },
+            "body": {
+              "he": "Problem: طوابير الساعات. Agitate: מה קורה אם ממשיכים לדחות. Solution: د. سامر محمد أبو مخ — بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت.",
+              "ar": "مشكلة: طوابير الساعات. تحريض: ماذا يحدث إذا استمر التأجيل. حل: د. سامر محمد أبو مخ — بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت.",
+              "en": "Problem: طوابير الساعات. Agitate: what happens if they keep delaying. Solution: د. سامر محمد أبو مخ — بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت."
+            }
+          },
+          {
+            "title": {
+              "he": "Hook–Story–Offer",
+              "ar": "Hook–Story–Offer",
+              "en": "Hook–Story–Offer"
+            },
+            "body": {
+              "he": "Hook = הבעיה. Story = איך د. سامر محمد أبو مخ עובד בפועל. Offer = אין מבצע — לא ממציאים הנחה.",
+              "ar": "الخطاف = المشكلة. القصة = كيف يعمل د. سامر محمد أبو مخ. العرض = لا يوجد عرض — لا نخترع خصماً.",
+              "en": "Hook = the problem. Story = how د. سامر محمد أبو مخ actually works. Offer = No offer — we will not invent a discount."
+            }
+          },
+          {
+            "title": {
+              "he": "משוואת הורמוזי",
+              "ar": "معادلة هورموزي",
+              "en": "Hormozi value equation"
+            },
+            "body": {
+              "he": "תוצאה חלומית: ביקור לפי סדר הגעה (בלי תור). סבירות נתפסת: بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت. עיכוב זמן: לא סופק לוח זמנים — לא ננחש. מאמץ: לא סופק — לא ננחש.",
+              "ar": "النتيجة الحلم: ביקור לפי סדר הגעה (בלי תור). الاحتمال المدرك: بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت. تأخير الوقت: غير مذكور — لن نخمن. الجهد: غير مذكور — لن نخمن.",
+              "en": "Dream outcome: ביקור לפי סדר הגעה (בלי תור). Perceived likelihood: بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت. Time delay: no timeline given — will not guess. Effort: not given — will not guess."
+            }
+          }
+        ]
+      },
+      {
+        "id": "video_scripts",
+        "items": [
+          {
+            "title": {
+              "he": "15 שניות — בעיה",
+              "ar": "15 ثانية — مشكلة",
+              "en": "15s — problem"
+            },
+            "body": {
+              "he": "0–3: طوابير الساعات. 3–10: بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت. 10–15: CTA לביקור לפי סדר הגעה (בלי תור). בלי מוזיקה שמסתירה דיבור.",
+              "ar": "0–3: طوابير الساعات. 3–10: بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت. 10–15: CTA لـ ביקור לפי סדר הגעה (בלי תור).",
+              "en": "0–3: طوابير الساعات. 3–10: بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت. 10–15: CTA to ביקור לפי סדר הגעה (בלי תור). Don’t bury speech under music."
+            }
+          },
+          {
+            "title": {
+              "he": "30 שניות — סיפור",
+              "ar": "30 ثانية — قصة",
+              "en": "30s — story"
+            },
+            "body": {
+              "he": "פתיחה במקום (باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات)). מישהו מהורים מתאר את הבעיה. חיתוך לد. سامر محمد أبو مخ. סגירה עם אין מבצע — לא ממציאים הנחה.",
+              "ar": "افتتاح في المكان (باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات)). شخص من הורים يصف المشكلة. قطع إلى د. سامر محمد أبو مخ. إغلاق بـ لا يوجد عرض — لا نخترع خصماً.",
+              "en": "Open in-place (باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات)). Someone from הורים names the problem. Cut to د. سامر محمد أبو مخ. Close on No offer — we will not invent a discount."
+            }
+          },
+          {
+            "title": {
+              "he": "מה לא לצלם",
+              "ar": "ما لا يُصوَّر",
+              "en": "What not to film"
+            },
+            "body": {
+              "he": "לא לביים לקוחות מרוצים אם אין אנשים אמיתיים שנתנו רשות. בלי כוכבי דירוג מומצאים.",
+              "ar": "لا تمثيل لعملاء راضين دون أناس حقيقيين أعطوا إذناً. بلا نجوم تقييم مختلقة.",
+              "en": "Do not stage happy customers unless real people consented. No invented star ratings."
+            }
+          }
+        ]
+      },
+      {
+        "id": "campaign_sequence",
+        "items": [
+          {
+            "title": {
+              "he": "שבוע 1 — למידה",
+              "ar": "الأسبوع 1 — تعلّم",
+              "en": "Week 1 — learn"
+            },
+            "body": {
+              "he": "2–3 קריאייטיבים (חזק / קצר / יתרון). תקציב קטן. המרה אחת. בלי סקייל.",
+              "ar": "2–3 إبداعات (قوي / قصير / ميزة). ميزانية صغيرة. تحويل واحد. بلا توسيع.",
+              "en": "2–3 creatives (strong / short / advantage). Small budget. One conversion. No scale."
+            }
+          },
+          {
+            "title": {
+              "he": "שבוע 2 — חיתוך",
+              "ar": "الأسبوع 2 — قص",
+              "en": "Week 2 — cut"
+            },
+            "body": {
+              "he": "כבו מודעות בלי הודעות אמיתיות. השאירו זווית אחת מנצחת לפי הודעות, לא לפי CTR בלבד.",
+              "ar": "أوقفوا إعلانات بلا رسائل حقيقية. أبقوا زاوية واحدة وفق الرسائل لا CTR فقط.",
+              "en": "Kill ads with no real messages. Keep one winning angle by messages, not CTR alone."
+            }
+          },
+          {
+            "title": {
+              "he": "שבוע 3–4 — הרחבה זהירה",
+              "ar": "الأسبوع 3–4 — توسيع حذر",
+              "en": "Weeks 3–4 — careful expansion"
+            },
+            "body": {
+              "he": "קמפיין מהיר: הישארו בקהל הליבה. אל תפתחו 8 אדסטים.",
+              "ar": "حملة سريعة: ابقوا على الجمهور الأساسي.",
+              "en": "Quick campaign: stay on the core audience. Don’t open 8 ad sets."
+            }
+          }
+        ]
+      },
+      {
+        "id": "app_marketing",
+        "items": [
+          {
+            "title": {
+              "he": "אין אפליקציה בקליטה",
+              "ar": "لا تطبيق في البيانات",
+              "en": "No app in the intake"
+            },
+            "body": {
+              "he": "העסק לא סומן כאפליקציה. לא ממציאים אפליקציה. תחליף: וואטסאפ / תור / דף נחיתה כ«התקנה».",
+              "ar": "النشاط ليس تطبيقاً. لن نخترع تطبيقاً. البديل: واتساب / موعد / صفحة كـ«تثبيت».",
+              "en": "The business was not marked as an app. We will not invent one. Substitute: WhatsApp / booking / landing page as the “install”."
+            }
+          }
+        ]
+      },
+      {
+        "id": "marketing_diagnosis",
+        "items": [
+          {
+            "title": {
+              "he": "offer",
+              "ar": "offer",
+              "en": "offer"
+            },
+            "body": {
+              "he": "אין מבצע — זה תקין. הערך חייב לבוא מהשירות ומהיתרון, לא מהנחה מומצאת.\nאל תמציאו קופון. חזקו את ההוּק סביב הבעיה והיתרון הייחודי.",
+              "ar": "لا يوجد عرض — وهذا سليم. القيمة يجب أن تأتي من الخدمة والميزة.\nلا تخترعوا كوبوناً. قوّوا الخطاف حول المشكلة والميزة.",
+              "en": "No promo — that’s valid. Value must come from the service and the advantage, not a fake discount.\nDo not invent a coupon. Strengthen the hook around the problem and unique advantage."
+            }
+          },
+          {
+            "title": {
+              "he": "hook",
+              "ar": "hook",
+              "en": "hook"
+            },
+            "body": {
+              "he": "ההוק צריך לפתוח בבעיה של הקהל, לא בשם העסק.\nמשפט ראשון = כאב ספציפי. שם העסק בשורה השנייה או ב-CTA.",
+              "ar": "يجب أن يبدأ الخطاف بمشكلة الجمهور لا باسم النشاط.\nالجملة الأولى = ألم محدد. اسم النشاط في الثانية أو في CTA.",
+              "en": "The hook should open on the audience’s problem, not the business name.\nFirst line = specific pain. Business name on line two or in the CTA."
+            }
+          },
+          {
+            "title": {
+              "he": "creative",
+              "ar": "creative",
+              "en": "creative"
+            },
+            "body": {
+              "he": "אין היסטוריית מודעות — אי אפשר לדעת מה נכשל. האבחון הוא כיוון עבודה, לא פסק דין.\nשמרו צילומי מודעות הבאים (טקסט, קהל, הוצאה, תוצאה) כדי שהאבחון הבא יהיה מבוסס.",
+              "ar": "لا تاريخ إعلانات — لا يمكن معرفة ما فشل. التشخيص اتجاه عمل لا حكم.\nاحفظوا لقطات الإعلانات القادمة (نص، جمهور، إنفاق، نتيجة).",
+              "en": "No ad history — we cannot know what failed. This diagnosis is a working direction, not a verdict.\nKeep screenshots of the next ads (copy, audience, spend, result) so the next diagnosis is grounded."
+            }
+          },
+          {
+            "title": {
+              "he": "offer",
+              "ar": "offer",
+              "en": "offer"
+            },
+            "body": {
+              "he": "מוסד ללא תשלום מהלקוח — הקמפיין הוא חשיפה/הרשמה/ביקור, לא רכישה.\nCTA: הרשמה / וואטסאפ / הגיעו למרפאה. בלי קנו עכשיו, בלי קופון, בלי ROAS כמכירה.",
+              "ar": "مؤسسة بلا دفع من الزبون — الحملة تعرّض/تسجيل/زيارة، مش شراء.\nCTA: تسجيل / واتساب / جيبوه عالعيادة. بلا اشتروا الآن وبلا كوبون وبلا ROAS كمبيعات.",
+              "en": "Institution with no charge to the client — the campaign is exposure/enrollment/visit, not a purchase.\nCTA: register / WhatsApp / Come to the clinic. No buy-now, no coupon, no ROAS-as-sales."
+            }
+          },
+          {
+            "title": {
+              "he": "offer",
+              "ar": "offer",
+              "en": "offer"
+            },
+            "body": {
+              "he": "שירות חינם: אין מכירה ואין קופון. הערך = בעיה + יתרון + חשיפה/ביקור.\nאסטרטגיה: בעיה + יתרון. בלי ₪ שלא פורסם.",
+              "ar": "خدمة مجانية: ما في بيع وما في كوبون. القيمة = مشكلة + ميزة + تعرّض/زيارة.\nالاستراتيجية: مشكلة + ميزة. بلا ₪ غير منشور.",
+              "en": "Free service: no sale and no coupon. Value = problem + advantage + exposure/visit.\nStrategy: problem + advantage. No unpublished ₪."
+            }
+          },
+          {
+            "title": {
+              "he": "creative",
+              "ar": "creative",
+              "en": "creative"
+            },
+            "body": {
+              "he": "אין תמונה/מודעה ישנה. המוקאפ יישאר דוגמה — בלי להמציא פנים.\nזוויות מהבנק: אמון · הגיעו למרפאה · د. سامر محمد أبو مخ.",
+              "ar": "ما في صورة/إعلان سابق. النموذج رح يبقى عينة — بلا اختراع وجوه.\nزوايا من البنك: ثقة · تعوا عالعيادة · د. سامر محمد أبو مخ.",
+              "en": "No photo / past ad. The mockup stays a sample — no invented faces.\nBank angles: trust · Come to the clinic · د. سامر محمد أبو مخ."
+            }
+          }
+        ]
+      },
+      {
+        "id": "business_audience",
+        "items": [
+          {
+            "title": {
+              "he": "העסק",
+              "ar": "النشاط",
+              "en": "The business"
+            },
+            "body": {
+              "he": "د. سامر محمد أبو مخ. طبيب أطفال. ד\"ר סאמר מחמד אבו מוך - רופא ילדים | كلاليت - عيادة طب الأطفال والعائلة في باقة الغربية. رعاية طبية متكاملة، بدون طوابير، فحوصات سريعة ومجانية 100% لمؤمني كلاليت.",
+              "ar": "د. سامر محمد أبو مخ. طبيب أطفال. ד\"ר סאמר מחמד אבו מוך - רופא ילדים | كلاليت - عيادة طب الأطفال والعائلة في باقة الغربية. رعاية طبية متكاملة، بدون طوابير، فحوصات سريعة ومجانية 100% لمؤمني كلاليت.",
+              "en": "د. سامر محمد أبو مخ. طبيب أطفال. ד\"ר סאמר מחמד אבו מוך - רופא ילדים | كلاليت - عيادة طب الأطفال والعائلة في باقة الغربية. رعاية طبية متكاملة، بدون طوابير، فحوصات سريعة ومجانية 100% لمؤمني كلاليت."
+            }
+          },
+          {
+            "title": {
+              "he": "הקהל",
+              "ar": "الجمهور",
+              "en": "The audience"
+            },
+            "body": {
+              "he": "הורים",
+              "ar": "הורים",
+              "en": "הורים"
+            }
+          },
+          {
+            "title": {
+              "he": "שעות קבלה",
+              "ar": "ساعات الدوام",
+              "en": "Clinic hours"
+            },
+            "body": {
+              "he": "الأحد 08:00 - 13:00 / 16:00 - 19:30 · الإثنين 08:00 - 13:00 / 16:00 - 19:30 · الثلاثاء 08:00 - 13:30 / مغلق (استشارات واتساب) · الأربعاء 08:00 - 13:00 / 16:00 - 19:30 · الخميس 08:00 - 13:00 / 16:00 - 19:30 · الجمعة 08:00 - 12:30 / عطلة نهاية الأسبوع · السبت طوارئ واستفسارات هاتفية للمسجلين / مغلق",
+              "ar": "الأحد 08:00 - 13:00 / 16:00 - 19:30 · الإثنين 08:00 - 13:00 / 16:00 - 19:30 · الثلاثاء 08:00 - 13:30 / مغلق (استشارات واتساب) · الأربعاء 08:00 - 13:00 / 16:00 - 19:30 · الخميس 08:00 - 13:00 / 16:00 - 19:30 · الجمعة 08:00 - 12:30 / عطلة نهاية الأسبوع · السبت طوارئ واستفسارات هاتفية للمسجلين / مغلق",
+              "en": "الأحد 08:00 - 13:00 / 16:00 - 19:30 · الإثنين 08:00 - 13:00 / 16:00 - 19:30 · الثلاثاء 08:00 - 13:30 / مغلق (استشارات واتساب) · الأربعاء 08:00 - 13:00 / 16:00 - 19:30 · الخميس 08:00 - 13:00 / 16:00 - 19:30 · الجمعة 08:00 - 12:30 / عطلة نهاية الأسبوع · السبت طوارئ واستفسارات هاتفية للمسجلين / مغلق"
+            }
+          },
+          {
+            "title": {
+              "he": "מעבר קופה",
+              "ar": "نقل الصندوق",
+              "en": "Kupa switch"
+            },
+            "body": {
+              "he": "לא סופקו תאריכי מעבר.",
+              "ar": "ما في تواريخ نقل.",
+              "en": "No switch dates supplied."
+            }
+          },
+          {
+            "title": {
+              "he": "מודל",
+              "ar": "النموذج",
+              "en": "Model"
+            },
+            "body": {
+              "he": "שירות חינם — חשיפה/הרשמה/ביקור בלבד. לא ננחש מחיר.",
+              "ar": "خدمة مجانية — تعرّض/تسجيل/زيارة فقط. مش منخمن سعر.",
+              "en": "Free service — exposure/enrollment/visit only. Price will not be guessed."
+            }
+          },
+          {
+            "title": {
+              "he": "כיסוי קופה",
+              "ar": "تغطية الصندوق",
+              "en": "Fund coverage"
+            },
+            "body": {
+              "he": "כיסוי כללית הוא עובדה למבוטחים — לא מבצע ולא קופון.",
+              "ar": "تغطية كلاليت واقعة للأعضاء — مش عرض ومش كوبون.",
+              "en": "Clalit coverage is a fact for members — not a promo and not a coupon."
+            }
+          }
+        ]
+      },
+      {
+        "id": "buying_psychology",
+        "items": [
+          {
+            "title": {
+              "he": "פחד מדחייה / בזבוז",
+              "ar": "خوف من الرفض / الهدر",
+              "en": "Fear of rejection / waste"
+            },
+            "body": {
+              "he": "הקהל (הורים) דוחה כי: طوابير الساعات. המודעה צריכה להוריד סיכון, לא להגדיל הבטחה.",
+              "ar": "الجمهور (הורים) يؤجّل لأن: طوابير الساعات. الإعلان يجب أن يقلل الخطر لا أن يضخّم الوعد.",
+              "en": "The audience (הורים) delays because: طوابير الساعات. The ad should lower risk, not inflate the promise."
+            }
+          },
+          {
+            "title": {
+              "he": "אמון מקומי",
+              "ar": "ثقة محلية",
+              "en": "Local trust"
+            },
+            "body": {
+              "he": "מיקום ידוע (باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات)) — השתמשו בו. אל תחליפו ב«פריסה ארצית» אם אין.",
+              "ar": "الموقع معروف (باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات)) — استخدموه.",
+              "en": "Location is known (باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات)) — use it. Don’t swap in “nationwide” if that isn’t true."
+            }
+          }
+        ]
+      },
+      {
+        "id": "objections",
+        "items": [
+          {
+            "title": {
+              "he": "«זה עולה?»",
+              "ar": "«في سعر؟»",
+              "en": "“Does it cost?”"
+            },
+            "body": {
+              "he": "כיסוי כללית הוא עובדה למבוטחים — לא מבצע ולא קופון. בלי קופון ובלי «קנו עכשיו».",
+              "ar": "تغطية كلاليت واقعة للأعضاء — مش عرض ومش كوبون. بلا كوبون وبلا «اشتروا الآن».",
+              "en": "Clalit coverage is a fact for members — not a promo and not a coupon. No coupon and no “buy now”."
+            }
+          },
+          {
+            "title": {
+              "he": "«אין לי זמן»",
+              "ar": "«لا وقت لدي»",
+              "en": "“I don’t have time”"
+            },
+            "body": {
+              "he": "CTA אחד ברור. אל תבקשו למלא טופס של 12 שדות אם המטרה תור.",
+              "ar": "CTA واحد واضح. لا تطلبوا نموذجاً من 12 حقلاً إذا الهدف موعد.",
+              "en": "One clear CTA. Don’t ask for a 12-field form if the goal is a booking."
+            }
+          },
+          {
+            "title": {
+              "he": "«לא מכיר אתכם»",
+              "ar": "«لا أعرفكم»",
+              "en": "“I don’t know you”"
+            },
+            "body": {
+              "he": "יתרון אמיתי בלבד: بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت. בלי המלצות מומצאות.",
+              "ar": "ميزة حقيقية فقط: بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت. بلا توصيات مختلقة.",
+              "en": "Only a real advantage: بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت. No invented testimonials."
+            }
+          }
+        ]
+      },
+      {
+        "id": "targeting",
+        "items": [
+          {
+            "title": {
+              "he": "ליבה",
+              "ar": "النواة",
+              "en": "Core"
+            },
+            "body": {
+              "he": "הורים · باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات).",
+              "ar": "הורים · باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات).",
+              "en": "הורים · باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات)."
+            }
+          },
+          {
+            "title": {
+              "he": "שפות",
+              "ar": "اللغات",
+              "en": "Languages"
+            },
+            "body": {
+              "he": "עברית + ערבית + אנגלית כשפות שוות. אל תריצו רק ערבית אם הקהל דו-לשוני.",
+              "ar": "العبرية والعربية والإنجليزية لغات متساوية. لا تشغّلوا العربية وحدها إذا كان الجمهور ثنائي اللغة.",
+              "en": "Hebrew, Arabic, and English are equal. Don’t run Arabic-only if the audience is bilingual."
+            }
+          },
+          {
+            "title": {
+              "he": "מה לא לטרגט",
+              "ar": "ما لا يُستهدف",
+              "en": "What not to target"
+            },
+            "body": {
+              "he": "לא «כולם בני 18–65». לא תחומי עניין שלא הוזכרו בקליטה.",
+              "ar": "ليس «الجميع 18–65». ليست اهتمامات لم تُذكر في البيانات.",
+              "en": "Not “everyone 18–65”. No interests that were not mentioned in intake."
+            }
+          }
+        ]
+      },
+      {
+        "id": "creative_ideas",
+        "items": [
+          {
+            "title": {
+              "he": "סטיל חיים",
+              "ar": "حياة يومية",
+              "en": "Lived still"
+            },
+            "body": {
+              "he": "סביבה אמיתית בباقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات). טקסט על גבי: طوابير الساعات.",
+              "ar": "بيئة حقيقية في باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات). نص فوق: طوابير الساعات.",
+              "en": "A real environment in باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات). On-image text: طوابير الساعات."
+            }
+          },
+          {
+            "title": {
+              "he": "טיפוגרפיה בלבד",
+              "ar": "طباعة فقط",
+              "en": "Type only"
+            },
+            "body": {
+              "he": "צהוב על שחור. משפט אחד: بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت.",
+              "ar": "أصفر على أسود. جملة واحدة: بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت.",
+              "en": "Yellow on black. One sentence: بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت."
+            }
+          },
+          {
+            "title": {
+              "he": "איסור",
+              "ar": "ممنوع",
+              "en": "Forbidden"
+            },
+            "body": {
+              "he": "אין כוכבי 5, אין «אלפי לקוחות מרוצים», אין לפני/אחרי רפואי מזויף.",
+              "ar": "لا نجوم 5، لا «آلاف العملاء الراضين»، لا قبل/بعد طبي مزيف.",
+              "en": "No 5-stars, no “thousands of happy clients”, no fake clinical before/after."
+            }
+          }
+        ]
+      },
+      {
+        "id": "campaign_structure",
+        "items": [
+          {
+            "title": {
+              "he": "קמפיין אחד, שלוש מודעות",
+              "ar": "حملة واحدة، ثلاثة إعلانات",
+              "en": "One campaign, three ads"
+            },
+            "body": {
+              "he": "קמפיין מהיר: קמפיין המרות אחד. 3 מודעות (חזקה / קצרה / יתרון). קהל אחד.",
+              "ar": "حملة سريعة: حملة تحويلات واحدة و3 إعلانات وجمهور واحد.",
+              "en": "Quick: one conversions campaign. 3 ads (strong / short / advantage). One audience."
+            }
+          },
+          {
+            "title": {
+              "he": "ערוצים",
+              "ar": "القنوات",
+              "en": "Channels"
+            },
+            "body": {
+              "he": "מטא לצפייה והודעה. גוגל לחיפוש כוונה. טיקטוק רק אם הקהל צעיר או שיש וידאו אמיתי.",
+              "ar": "ميتا للمشاهدة والرسالة. جوجل لبحث النية. تيك توك فقط إذا كان الجمهور شاباً أو يوجد فيديو حقيقي.",
+              "en": "Meta for view-and-message. Google for intent search. TikTok only if the audience is young or you have real video."
+            }
+          }
+        ]
+      },
+      {
+        "id": "keywords",
+        "items": [
+          {
+            "title": {
+              "he": "מילות כוונה",
+              "ar": "كلمات النية",
+              "en": "Intent keywords"
+            },
+            "body": {
+              "he": "طبيب أطفال · باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات) · walk_in",
+              "ar": "طبيب أطفال · باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات) · walk_in",
+              "en": "طبيب أطفال · باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات) · walk_in"
+            }
+          }
+        ]
+      },
+      {
+        "id": "platforms",
+        "items": [
+          {
+            "title": {
+              "he": "מטא / גוגל / טיקטוק",
+              "ar": "ميتا / جوجل / تيك توك",
+              "en": "Meta / Google / TikTok"
+            },
+            "body": {
+              "he": "תוכנית בלבד. אין פרסום חי לרשת. הפעלה = PLAN.",
+              "ar": "خطة فقط. لا نشر حي. التفعيل = PLAN.",
+              "en": "Plan only. No live network publish. Activate = PLAN."
+            }
+          }
+        ]
+      },
+      {
+        "id": "budget",
+        "items": [
+          {
+            "title": {
+              "he": "תקציב",
+              "ar": "الميزانية",
+              "en": "Budget"
+            },
+            "body": {
+              "he": "תקציב לא סופק — אין פיצול מספרי ולא מד לידים.",
+              "ar": "الميزانية غير معطاة — لا تقسيم رقمي.",
+              "en": "Budget not supplied — no numeric split and no lead gauge."
+            }
+          }
+        ]
+      },
+      {
+        "id": "missing_questions",
+        "items": [
+          {
+            "title": {
+              "he": "תקציב ו-CAC",
+              "ar": "الميزانية وCAC",
+              "en": "Budget and CAC"
+            },
+            "body": {
+              "he": "חסרים מספרים — תרחיש העלות לא יוצג כתחזית.",
+              "ar": "أرقام ناقصة — لن يُعرض سيناريو التكلفة كتوقع.",
+              "en": "Numbers missing — the cost scenario will not be shown as a forecast."
+            }
+          },
+          {
+            "title": {
+              "he": "מה רץ בעבר?",
+              "ar": "ماذا اشتغل سابقاً؟",
+              "en": "What ran before?"
+            },
+            "body": {
+              "he": "בלי צילום מודעה קודמת האבחון נשאר ברמת ביטחון נמוכה.",
+              "ar": "بدون لقطة إعلان سابق يبقى التشخيص منخفض الثقة.",
+              "en": "Without a past-ad snapshot diagnosis stays low-confidence."
+            }
+          },
+          {
+            "title": {
+              "he": "מתחרים",
+              "ar": "المنافسون",
+              "en": "Competitors"
+            },
+            "body": {
+              "he": "לא הוזנו. לא יומצאו שמות או מחירי מתחרים.",
+              "ar": "لم تُدخل. لن تُخترع أسماء أو أسعار منافسين.",
+              "en": "None given. Competitor names or prices will not be invented."
+            }
+          }
+        ]
+      }
+    ],
+    "media": {
+      "split": [
+        {
+          "channel": "meta",
+          "role": {
+            "he": "חשיפה / תנועה — לא המרת רכישה",
+            "ar": "تعرّض / زيارات — مش تحويل شراء",
+            "en": "Reach / traffic — not purchase conversion"
+          },
+          "budgetSharePercent": 50,
+          "targeting": {
+            "geos": [
+              "باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات)"
+            ],
+            "age": "only if the audience implies it; otherwise leave Advantage+ off and do not default 18–65",
+            "interests": [
+              "parents"
+            ],
+            "exclusions": [
+              "existing customers — if you have a list; otherwise leave empty, do not guess"
+            ],
+            "placements": "Feed + Stories. Skip Audience Network until you have clean conversion data.",
+            "keywords": []
+          },
+          "notes": {
+            "he": "גיאו: باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات). קהל ליבה: parents. בלי Lookalike לפני 50 המרות.",
+            "ar": "الجغرافيا: باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات). النواة: parents. بلا lookalike قبل 50 تحويلاً.",
+            "en": "Geo: باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات). Core: parents. No lookalike before 50 conversions."
+          }
+        },
+        {
+          "channel": "google",
+          "role": {
+            "he": "חיפוש מודעות — מי מחפש את המוסד",
+            "ar": "بحث وعي — مين بيدوّر على المؤسسة",
+            "en": "Awareness search — people looking up the institution"
+          },
+          "budgetSharePercent": 25,
+          "targeting": {
+            "geos": [
+              "باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات)"
+            ],
+            "age": "",
+            "interests": [],
+            "exclusions": [
+              "existing customers — if you have a list; otherwise leave empty, do not guess"
+            ],
+            "placements": "Search only in week 1. Display later, and only with brand exclusions.",
+            "keywords": [
+              "طبيب أطفال",
+              "طبيب أطفال باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات)",
+              "walk_in"
+            ]
+          },
+          "notes": {
+            "he": "רק מילות כוונה מהקליטה. לא נרחיב למילות מתחרים שלא הוזנו.",
+            "ar": "كلمات نية من البيانات فقط. لن نوسّع إلى كلمات منافسين غير مُدخلة.",
+            "en": "Intent keywords from intake only. We will not expand into competitor terms that were not entered."
+          }
+        },
+        {
+          "channel": "tiktok",
+          "role": {
+            "he": "וידאו גולמי — רק אם יש חומר אמיתי",
+            "ar": "فيديو خام — فقط إن وُجد مواد حقيقية",
+            "en": "Raw video — only if real footage exists"
+          },
+          "budgetSharePercent": 10,
+          "targeting": {
+            "geos": [
+              "باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات)"
+            ],
+            "age": "",
+            "interests": [],
+            "exclusions": [
+              "existing customers — if you have a list; otherwise leave empty, do not guess"
+            ],
+            "placements": "In-feed only. Spark Ads only if you have real organic posts — do not fake them.",
+            "keywords": []
+          },
+          "notes": {
+            "he": "חלק קטן. אל תצרו טיקטוק מבוים אם אין נוכחות. אפשר 0% אם אין וידאו.",
+            "ar": "حصة صغيرة. لا تصنعوا تيك توك ممثلاً إن لم توجد مادة.",
+            "en": "Small share. Don’t fabricate TikToks if you have no presence. 0% is allowed if there is no video."
+          }
+        },
+        {
+          "channel": "youtube",
+          "role": {
+            "he": "הוכחה בוידאו — שיקול דעת, לא ליד זול",
+            "ar": "إثبات بالفيديو — اعتبار لا عميل رخيص",
+            "en": "Video proof — consideration, not a cheap lead"
+          },
+          "budgetSharePercent": 15,
+          "targeting": {
+            "geos": [
+              "باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات)"
+            ],
+            "age": "",
+            "interests": [],
+            "exclusions": [
+              "existing customers — if you have a list; otherwise leave empty, do not guess"
+            ],
+            "placements": "In-stream skippable + in-feed. No bumper until a real 6s cut exists. No invented view counts.",
+            "keywords": [
+              "طبيب أطفال",
+              "طبيب أطفال باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات)",
+              "طوابير الساعات"
+            ]
+          },
+          "notes": {
+            "he": "אין מספר צפיות מובטח. בלי נכס 6–15 שניות אמיתי — השאירו 0% עד שיש צילום.",
+            "ar": "لا مشاهدات مضمونة. بلا أصل 6–15 ثانية حقيقي اتركوا 0% حتى يتوفر تصوير.",
+            "en": "No guaranteed views. Without a real 6–15s asset, leave 0% until you have footage."
+          }
+        }
+      ],
+      "assumptions": [
+        {
+          "he": "אין APIs חיים למטא/גוגל/טיקטוק/יוטיוב — זה בלופרינט לקנייה ידנית.",
+          "ar": "لا واجهات حية — هذا مخطط للشراء اليدوي.",
+          "en": "No live Meta/Google/TikTok/YouTube APIs — this is a blueprint for a manual buy."
+        },
+        {
+          "he": "מודל חינם: המדיה היא PLAN לחשיפה. אין אופטימיזציית Purchase/ROAS.",
+          "ar": "نموذج مجاني: الميديا PLAN للتعرّض. بلا تحسين Purchase/ROAS.",
+          "en": "Free-service: media is an exposure PLAN. No Purchase/ROAS optimization."
+        },
+        {
+          "he": "ערוצים שאושרו מהמסמך: facebook, instagram, TikTok, whatsapp. PLAN בלבד — אין פרסום חי.",
+          "ar": "قنوات اعتُمدت من المستند: facebook, instagram, TikTok, whatsapp. خطة فقط — بلا نشر حي.",
+          "en": "Channels confirmed from the document: facebook, instagram, TikTok, whatsapp. PLAN only — no live publish."
+        }
+      ],
+      "missingForLiveBuy": [
+        {
+          "he": "תקציב חודשי",
+          "ar": "ميزانية شهرية",
+          "en": "Monthly budget"
+        }
+      ],
+      "worstCase": {
+        "he": "אין תרחיש מספרי — חסר תקציב או CAC. לא יוצג מד 32–68 לידים.",
+        "ar": "لا سيناريو رقمي — تنقص الميزانية أو CAC. لن يُعرض مقياس 32–68.",
+        "en": "No numeric scenario — budget or CAC missing. No 32–68 leads gauge will be shown."
+      },
+      "realistic": {
+        "he": "אין תרחיש מספרי — חסר תקציב או CAC. לא יוצג מד 32–68 לידים.",
+        "ar": "لا سيناريو رقمي — تنقص الميزانية أو CAC. لن يُعرض مقياس 32–68.",
+        "en": "No numeric scenario — budget or CAC missing. No 32–68 leads gauge will be shown."
+      },
+      "scenarioFromUserNumbers": false
+    },
+    "optimizer": {
+      "ifThen": [
+        {
+          "if": {
+            "he": "CTR גבוה אבל אין הודעות / תורים",
+            "ar": "CTR مرتفع بلا رسائل / مواعيد",
+            "en": "High CTR but no messages / bookings"
+          },
+          "then": {
+            "he": "ההוק עובד, ההצעה או הנחיתה נשברים. אל תסקיילו קריאייטיב — תקנו CTA ומסך הבא.",
+            "ar": "الخطاف يعمل والعرض أو الصفحة ينكسران. لا توسّعوا الإبداع — أصلحوا CTA.",
+            "en": "The hook works; the offer or landing is broken. Don’t scale the creative — fix the CTA and next screen."
+          }
+        },
+        {
+          "if": {
+            "he": "פניות רבות בלי שם אמיתי / סקרנים",
+            "ar": "طلبات كثيرة بلا اسم حقيقي / فضوليون",
+            "en": "Many enquiries with no real name / tyre-kickers"
+          },
+          "then": {
+            "he": "החמירו CTA להרשמה / ביקור / וואטסאפ — לא «לפרטים» ולא רכישה.",
+            "ar": "شدّدوا CTA للتسجيل / الزيارة / واتساب — مش «للتفاصيل» ومش شراء.",
+            "en": "Tighten CTA to register / visit / WhatsApp — not “learn more” and not a purchase."
+          }
+        },
+        {
+          "if": {
+            "he": "יש חשיפה בלי ביקורים / הרשמות אחרי שבוע",
+            "ar": "في وصول بلا زيارات / تسجيل بعد أسبوع",
+            "en": "Reach without visits / enrollments after a week"
+          },
+          "then": {
+            "he": "אל תמטבו ל-Purchase/ROAS — אין תשלום מהלקוח. בדקו מסר, גיאו, ו-CTA לביקור.",
+            "ar": "لا تحسّنوا على Purchase/ROAS — الزبون ما بدفع. افحصوا الرسالة والجغرافيا وCTA للزيارة.",
+            "en": "Do not optimize for Purchase/ROAS — the client does not pay. Check message, geo, and visit CTA."
+          }
+        },
+        {
+          "if": {
+            "he": "יש 3+ ביקורים / הרשמות אמיתיות",
+            "ar": "3+ زيارات / تسجيلات حقيقية",
+            "en": "3+ real visits / enrollments"
+          },
+          "then": {
+            "he": "העלו תקציב ב-20% כל 3 ימים, לא פי 3 ביום אחד.",
+            "ar": "ارفعوا الميزانية 20% كل 3 أيام لا ×3 في يوم.",
+            "en": "Raise budget 20% every 3 days, not 3× in one day."
+          }
+        }
+      ],
+      "killRules": [
+        {
+          "he": "אין תשלום מהלקוח → אל תהרגו לפי ROAS/Purchase. המרה = ביקור / הרשמה / הודעה.",
+          "ar": "الزبون ما بدفع → لا توقفوا حسب ROAS/Purchase. التحويل = زيارة / تسجيل / رسالة.",
+          "en": "Client does not pay → do not kill on ROAS/Purchase. Conversion = visit / enrollment / message."
+        },
+        {
+          "he": "קריאייטיב עם הבטחה שלא בקליטה (הנחה, דירוג, «אלפים») → כבו.",
+          "ar": "إبداع بوعد ليس في البيانات (خصم، تقييم، «آلاف») → أوقفوا.",
+          "en": "Creative promising something not in intake (discount, rating, “thousands”) → kill."
+        }
+      ],
+      "scaleRules": [
+        {
+          "he": "סקייל רק על זווית עם פניות איכות, לא על סרטון ש«הלך ויראלי».",
+          "ar": "وسّعوا فقط زاوية بطلبات جودة لا فيديو «انتشر».",
+          "en": "Scale only an angle with quality enquiries, not a video that “went viral”."
+        },
+        {
+          "he": "אין תקציב בקליטה — אין סקייל אוטומטי.",
+          "ar": "لا ميزانية في البيانات — لا توسيع تلقائي.",
+          "en": "No budget in intake — no automatic scale."
+        }
+      ]
+    },
+    "optimizerRuns": [],
+    "producedAds": [],
+    "agentStatus": {
+      "intake": "complete",
+      "diagnostic": "approved",
+      "strategic": "approved",
+      "media": "approved",
+      "optimizer": "complete"
+    },
+    "saved": true,
+    "planActivated": true,
+    "coach": {
+      "score": 100,
+      "vertical": "clinic",
+      "critiques": [
+        {
+          "stage": "offer",
+          "finding": {
+            "he": "שירות חינם: אין מכירה ואין קופון. הערך = בעיה + יתרון + חשיפה/ביקור.",
+            "ar": "خدمة مجانية: ما في بيع وما في كوبون. القيمة = مشكلة + ميزة + تعرّض/زيارة.",
+            "en": "Free service: no sale and no coupon. Value = problem + advantage + exposure/visit."
+          },
+          "why": {
+            "he": "אסטרטגיה: בעיה + יתרון. בלי ₪ שלא פורסם.",
+            "ar": "الاستراتيجية: مشكلة + ميزة. بلا ₪ غير منشور.",
+            "en": "Strategy: problem + advantage. No unpublished ₪."
+          },
+          "evidence": {
+            "he": "ראיה מהקליטה · offer: no_offer",
+            "ar": "دليل من البيانات · offer: no_offer",
+            "en": "Evidence from intake · offer: no_offer"
+          }
+        },
+        {
+          "stage": "creative",
+          "finding": {
+            "he": "אין תמונה/מודעה ישנה. המוקאפ יישאר דוגמה — בלי להמציא פנים.",
+            "ar": "ما في صورة/إعلان سابق. النموذج رح يبقى عينة — بلا اختراع وجوه.",
+            "en": "No photo / past ad. The mockup stays a sample — no invented faces."
+          },
+          "why": {
+            "he": "זוויות מהבנק: אמון · הגיעו למרפאה · د. سامر محمد أبو مخ.",
+            "ar": "زوايا من البنك: ثقة · تعوا عالعيادة · د. سامر محمد أبو مخ.",
+            "en": "Bank angles: trust · Come to the clinic · د. سامر محمد أبو مخ."
+          },
+          "evidence": {
+            "he": "ראיה מהקליטה · mediaAssets: 0",
+            "ar": "دليل من البيانات · mediaAssets: 0",
+            "en": "Evidence from intake · mediaAssets: 0"
+          }
+        }
+      ],
+      "suggestions": [],
+      "strategies": [
+        {
+          "id": "hook-on-pain",
+          "title": {
+            "he": "הוק על הכאב",
+            "ar": "خطاف الألم",
+            "en": "Hook on the pain"
+          },
+          "body": {
+            "he": "طوابير الساعات",
+            "ar": "طوابير الساعات",
+            "en": "طوابير الساعات"
+          },
+          "plan7": {
+            "he": "שבוע 1: פתיחה בבעיה, לא בשם. ימים 1–2: הוק על הבעיה, לא על שם המרפאה. ימים 3–4: יתרון שסופק. ימים 5–7: חשיפה / ביקור לפי סדר הגעה — לא מכירה ולא קופון. פייסבוק+אינסטגרם+וואטסאפ+נחיתה. PLAN.",
+            "ar": "الأسبوع 1: افتتاح بالمشكلة لا بالاسم. يوم 1–2: خطاف المشكلة لا اسم العيادة. يوم 3–4: الميزة المعطاة. يوم 5–7: تعرّض / زيارة جت أولاً — مش بيع ومش كوبون. فيسبوك+إنستغرام+واتساب+هبوط. خطة.",
+            "en": "Week 1: open on the problem, not the name. Days 1–2: hook on the problem, not the clinic name. Days 3–4: stated advantage. Days 5–7: Exposure / walk-in visit — not a sale and not a coupon. Facebook+Instagram+WhatsApp+landing. PLAN."
+          }
+        },
+        {
+          "id": "proof-advantage",
+          "title": {
+            "he": "הוכחה / יתרון",
+            "ar": "إثبات / ميزة",
+            "en": "Proof / advantage"
+          },
+          "body": {
+            "he": "بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت מודל: חשיפה/ביקור — לא מכירה.",
+            "ar": "بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت النموذج: تعرّض/زيارة — مش بيع.",
+            "en": "بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت Model: exposure/visit — not a sale."
+          },
+          "plan7": {
+            "he": "ימים 1–2: הוק על הבעיה, לא על שם המרפאה. ימים 3–4: יתרון שסופק. ימים 5–7: חשיפה / ביקור לפי סדר הגעה — לא מכירה ולא קופון. פייסבוק+אינסטגרם+וואטסאפ+נחיתה. PLAN.",
+            "ar": "يوم 1–2: خطاف المشكلة لا اسم العيادة. يوم 3–4: الميزة المعطاة. يوم 5–7: تعرّض / زيارة جت أولاً — مش بيع ومش كوبون. فيسبوك+إنستغرام+واتساب+هبوط. خطة.",
+            "en": "Days 1–2: hook on the problem, not the clinic name. Days 3–4: stated advantage. Days 5–7: Exposure / walk-in visit — not a sale and not a coupon. Facebook+Instagram+WhatsApp+landing. PLAN."
+          }
+        },
+        {
+          "id": "channel-mix",
+          "title": {
+            "he": "מיקס ערוצים + 7 ימים",
+            "ar": "مزيج قنوات + 7 أيام",
+            "en": "Channel mix + 7 days"
+          },
+          "body": {
+            "he": "פייסבוק + אינסטגרם לפיד וסטורי. וואטסאפ 052-8885800 להודעות — PLAN בלבד. דף נחיתה עם אותה זווית. בלי פרסום חי לרשת.",
+            "ar": "فيسبوك + إنستغرام للفيد والستوري. واتساب 052-8885800 للرسائل — خطة فقط. صفحة هبوط بنفس الزاوية. بلا نشر حي.",
+            "en": "Facebook + Instagram for feed and stories. WhatsApp 052-8885800 for messages — PLAN only. Landing page with the same angle. No live network publish."
+          },
+          "plan7": {
+            "he": "ימים 1–2: הוק על הבעיה, לא על שם המרפאה. ימים 3–4: יתרון שסופק. ימים 5–7: חשיפה / ביקור לפי סדר הגעה — לא מכירה ולא קופון. פייסבוק+אינסטגרם+וואטסאפ+נחיתה. PLAN.",
+            "ar": "يوم 1–2: خطاف المشكلة لا اسم العيادة. يوم 3–4: الميزة المعطاة. يوم 5–7: تعرّض / زيارة جت أولاً — مش بيع ومش كوبون. فيسبوك+إنستغرام+واتساب+هبوط. خطة.",
+            "en": "Days 1–2: hook on the problem, not the clinic name. Days 3–4: stated advantage. Days 5–7: Exposure / walk-in visit — not a sale and not a coupon. Facebook+Instagram+WhatsApp+landing. PLAN."
+          }
+        }
+      ],
+      "anglesUsed": [
+        {
+          "he": "אמון",
+          "ar": "ثقة",
+          "en": "trust"
+        },
+        {
+          "he": "הגיעו למרפאה",
+          "ar": "تعوا عالعيادة",
+          "en": "Come to the clinic"
+        },
+        {
+          "he": "د. سامر محمد أبو مخ",
+          "ar": "د. سامر محمد أبو مخ",
+          "en": "د. سامر محمد أبو مخ"
+        },
+        {
+          "he": "תחום: clinic. ציון שלמות קליטה: 100/100.",
+          "ar": "المجال: clinic. درجة اكتمال البيانات: 100/100.",
+          "en": "Vertical: clinic. Intake quality score: 100/100."
+        }
+      ]
+    },
+    "siteAudit": {
+      "strengths": [
+        {
+          "id": "phone",
+          "kind": "strength",
+          "label": {
+            "he": "יש טלפון / וואטסאפ שאפשר לפתוח",
+            "ar": "في هاتف / واتساب ممكن ينفتح",
+            "en": "Phone / WhatsApp that can actually open"
+          },
+          "evidence": {
+            "he": "ראיה · whatsapp: 052-8885800",
+            "ar": "دليل · whatsapp: 052-8885800",
+            "en": "Evidence · whatsapp: 052-8885800"
+          }
+        },
+        {
+          "id": "hours",
+          "kind": "strength",
+          "label": {
+            "he": "שעות / אופן הגעה כתובים באתר",
+            "ar": "ساعات / طريقة الوصول مكتوبة بالموقع",
+            "en": "Hours / how-to-arrive are on the site"
+          },
+          "evidence": {
+            "he": "ראיה · clinicHours: الأحد 08:00 - 13:00 / 16:00 - 19:30 · الإثنين 08:00 - 13:00 / 16:00 - 19:30 · الثلاثاء 08:00 - 13:30 / مغلق (استشارات واتساب) · الأربعاء 08:00 - 13:00 / 16:00 - 19:30 · الخميس 08:00 - 13:00 / 16:00 - 19:30 · الجمعة 08:00 - 12:30 / عطلة نهاية الأسبوع · السبت طوارئ واستفسارات هاتفية للمسجلين / مغلق",
+            "ar": "دليل · clinicHours: الأحد 08:00 - 13:00 / 16:00 - 19:30 · الإثنين 08:00 - 13:00 / 16:00 - 19:30 · الثلاثاء 08:00 - 13:30 / مغلق (استشارات واتساب) · الأربعاء 08:00 - 13:00 / 16:00 - 19:30 · الخميس 08:00 - 13:00 / 16:00 - 19:30 · الجمعة 08:00 - 12:30 / عطلة نهاية الأسبوع · السبت طوارئ واستفسارات هاتفية للمسجلين / مغلق",
+            "en": "Evidence · clinicHours: الأحد 08:00 - 13:00 / 16:00 - 19:30 · الإثنين 08:00 - 13:00 / 16:00 - 19:30 · الثلاثاء 08:00 - 13:30 / مغلق (استشارات واتساب) · الأربعاء 08:00 - 13:00 / 16:00 - 19:30 · الخميس 08:00 - 13:00 / 16:00 - 19:30 · الجمعة 08:00 - 12:30 / عطلة نهاية الأسبوع · السبت طوارئ واستفسارات هاتفية للمسجلين / مغلق"
+          }
+        },
+        {
+          "id": "address",
+          "kind": "strength",
+          "label": {
+            "he": "כתובת מקומית ברורה",
+            "ar": "عنوان محلي واضح",
+            "en": "Clear local address"
+          },
+          "evidence": {
+            "he": "ראיה · location: باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات)",
+            "ar": "دليل · location: باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات)",
+            "en": "Evidence · location: باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات)"
+          }
+        },
+        {
+          "id": "lang",
+          "kind": "strength",
+          "label": {
+            "he": "האתר מדבר עברית וערבית — שתי השפות שוות בקמפיין",
+            "ar": "الموقع بالعبرية والعربية — اللغتان متساويتان بالحملة",
+            "en": "The site speaks Hebrew and Arabic — both languages are first-class"
+          },
+          "evidence": {
+            "he": "ראיה · language: he+ar",
+            "ar": "دليل · language: he+ar",
+            "en": "Evidence · language: he+ar"
+          }
+        },
+        {
+          "id": "advantage",
+          "kind": "strength",
+          "label": {
+            "he": "יתרון אחד חד יותר מהתיאור",
+            "ar": "ميزة واحدة أحدّ من الوصف",
+            "en": "One advantage tighter than the description"
+          },
+          "evidence": {
+            "he": "ראיה · uniqueAdvantage: بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت",
+            "ar": "دليل · uniqueAdvantage: بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت",
+            "en": "Evidence · uniqueAdvantage: بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت"
+          }
+        },
+        {
+          "id": "cta",
+          "kind": "strength",
+          "label": {
+            "he": "יש CTA אמיתי לוואטסאפ / טלפון",
+            "ar": "في نداء حقيقي لواتساب / هاتف",
+            "en": "A real CTA to WhatsApp / phone"
+          },
+          "evidence": {
+            "he": "ראיה · cta: 052-8885800",
+            "ar": "دليل · cta: 052-8885800",
+            "en": "Evidence · cta: 052-8885800"
+          }
+        }
+      ],
+      "weaknesses": [
+        {
+          "id": "no-photos",
+          "kind": "weakness",
+          "label": {
+            "he": "אין תמונות מהאתר — הנחיתה תישען על טיפוגרפיה וגרפיקה",
+            "ar": "ما في صور من الموقع — الهبوط رح يعتمد عالخط والغرافيك",
+            "en": "No photos from the site — the landing will lean on type and graphics"
+          },
+          "evidence": {
+            "he": "ראיה · mediaAssets: 0",
+            "ar": "دليل · mediaAssets: 0",
+            "en": "Evidence · mediaAssets: 0"
+          }
+        }
+      ]
+    },
+    "featureType": "campaign",
+    "agency": {
+      "discovery": {
+        "producedBy": [
+          "intake",
+          "diagnostic"
+        ],
+        "audit": [
+          {
+            "title": {
+              "he": "מודל",
+              "ar": "النموذج",
+              "en": "Model"
+            },
+            "body": {
+              "he": "שירות חינם — חשיפה בלבד. אין סגירת כסף מהלקוח.",
+              "ar": "خدمة مجانية — تعرّض فقط. ما في إغلاق فلوس من الزبون.",
+              "en": "Free service — exposure only. No money closes from the client."
+            }
+          },
+          {
+            "title": {
+              "he": "יחידה כלכלית",
+              "ar": "وحدة الاقتصاد",
+              "en": "Unit economics"
+            },
+            "body": {
+              "he": "AOV חסר · מרווח חסר% · CAC יעד חסר · תקציב חסר.",
+              "ar": "AOV ناقص · هامش ناقص · CAC ناقص · ميزانية ناقص.",
+              "en": "AOV missing · margin missing% · target CAC missing · budget missing."
+            }
+          },
+          {
+            "title": {
+              "he": "היסטוריה",
+              "ar": "التاريخ",
+              "en": "History"
+            },
+            "body": {
+              "he": "אין מודעות קודמות בקליטה.",
+              "ar": "لا إعلانات سابقة.",
+              "en": "No past ads in intake."
+            }
+          },
+          {
+            "title": {
+              "he": "אבחון",
+              "ar": "التشخيص",
+              "en": "Diagnosis"
+            },
+            "body": {
+              "he": "אבחון מבוסס רק על מה שמולא. אין ניחוש של מתחרים או תוצאות. נדרש אישור אנושי לפני הבנייה.",
+              "ar": "التشخيص مبني فقط على ما مُلئ. لا تخمين لمنافسين أو نتائج. يلزم اعتماد بشري قبل البناء.",
+              "en": "Diagnosis uses only what you filled in. No guessed competitors or results. Human approval is required before build."
+            }
+          }
+        ],
+        "icp": {
+          "he": "ICP = הורים · باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات). לא «כולם באזור».",
+          "ar": "ICP = הורים · باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات).",
+          "en": "ICP = Parents · باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات). Not “everyone nearby”."
+        },
+        "personas": [
+          {
+            "name": {
+              "he": "פרסונה א׳ — ליבה",
+              "ar": "شخصية أ — النواة",
+              "en": "Persona A — core"
+            },
+            "jtbd": {
+              "he": "כשהורים נתקלים ב: طوابير الساعات — הם רוצים ביקור לפי סדר הגעה (בלי תור) בלי להרגיש מטופלים כמספר.",
+              "ar": "عندما يواجه أهل: طوابير الساعات — يريدون جت أولاً بدون مواعيد دون الشعور برقم.",
+              "en": "When Parents hit: طوابير الساعات — they want Walk-in (no appointment) without feeling like a number."
+            },
+            "given": {
+              "he": "מתוך הקליטה: הורים. باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات)",
+              "ar": "من البيانات: أهل. باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات)",
+              "en": "From intake: Parents. باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات)"
+            },
+            "unknown": {
+              "he": "חסר: budget, cac, competitors — לא הומצא.",
+              "ar": "ناقص: budget, cac, competitors.",
+              "en": "Missing: budget, cac, competitors — not invented."
+            }
+          },
+          {
+            "name": {
+              "he": "פרסונה ב׳ — דוחה החלטה",
+              "ar": "شخصية ب — يؤجّل",
+              "en": "Persona B — delayer"
+            },
+            "jtbd": {
+              "he": "רוצה ביטחון לפני תור/רכישה. JTBD: להפחית סיכון, לא «לצרוך תוכן».",
+              "ar": "يريد أماناً قبل الموعد. JTBD: تقليل الخطر.",
+              "en": "Wants safety before booking. JTBD: reduce risk, not “consume content”."
+            },
+            "given": {
+              "he": "בעיה שסופקה: طوابير الساعات",
+              "ar": "المشكلة المعطاة: طوابير الساعات",
+              "en": "Stated problem: طوابير الساعات"
+            },
+            "unknown": {
+              "he": "גיל מדויק לא סופק — לא נקבע 25–45 כברירת מחדל.",
+              "ar": "العمر الدقيق غير مذكور — لن نفترض 25–45.",
+              "en": "Exact age not given — will not default to 25–45."
+            }
+          },
+          {
+            "name": {
+              "he": "פרסונה ג׳ — ממליץ / קובע לאחר",
+              "ar": "شخصية ج — يوصي / يحجز لغيره",
+              "en": "Persona C — booker for someone else"
+            },
+            "jtbd": {
+              "he": "כשמישהו מהמעגל של הורים צריך ביקור לפי סדר הגעה (בלי תור) — הפרסונה הזו קובעת בשמם.",
+              "ar": "عندما يحتاج أحد دائرة أهل إلى جت أولاً بدون مواعيد — هذه الشخصية تحجز باسمهم.",
+              "en": "When someone in Parents’s circle needs Walk-in (no appointment) — this person books on their behalf."
+            },
+            "given": {
+              "he": "קהל שסופק: הורים. מטרה: ביקור לפי סדר הגעה (בלי תור).",
+              "ar": "الجمهور المعطى: أهل. الهدف: جت أولاً بدون مواعيد.",
+              "en": "Stated audience: Parents. Goal: Walk-in (no appointment)."
+            },
+            "unknown": {
+              "he": "אין רשימת מפנים בקליטה — לא יומצא «שגריר מותג».",
+              "ar": "لا قائمة محيلين — لن يُخترع سفير علامة.",
+              "en": "No referrer list in intake — no invented brand ambassador."
+            }
+          }
+        ],
+        "battlecards": [],
+        "swot": {
+          "strength": {
+            "he": "חוזק שסופק: بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت",
+            "ar": "قوة معطاة: بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت",
+            "en": "Stated strength: بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت"
+          },
+          "weakness": {
+            "he": "חולשה תפעולית לא סופקה — לא נכתוב «אין נוכחות דיגיטלית» סתם.",
+            "ar": "ضعف تشغيلي غير مذكور.",
+            "en": "Operational weakness not supplied — will not write “no digital presence” for flavor."
+          },
+          "opportunity": {
+            "he": "קהל הורים בباقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات). מטרה: ביקור לפי סדר הגעה (בלי תור).",
+            "ar": "جمهور أهل في باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات). الهدف: جت أولاً بدون مواعيد.",
+            "en": "Audience Parents in باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات). Goal: Walk-in (no appointment)."
+          },
+          "threat": {
+            "he": "איום תחרותי לא תועד. אין SWOT מתחרה בדוי.",
+            "ar": "تهديد المنافسة غير موثّق.",
+            "en": "Competitive threat not documented. No fake competitor SWOT."
+          }
+        },
+        "competitorsMissing": {
+          "he": "לא הוזנו מתחרים. אין SWOT בדוי. הוסיפו מתחרים שראיתם בשלב הסקירה.",
+          "ar": "لا منافسين. لا SWOT مختلق. أضيفوا من رأيتموهم في المراجعة.",
+          "en": "No competitors entered. No fake SWOT. Add competitors you observed on the review step."
+        }
+      },
+      "strategy": {
+        "producedBy": [
+          "strategic"
+        ],
+        "positioning": {
+          "he": "د. سامر محمد أبو مخ להורים: بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت. לא «הכי טוב בשוק».",
+          "ar": "د. سامر محمد أبو مخ لـ أهل: بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت.",
+          "en": "د. سامر محمد أبو مخ for Parents: بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت. Not “best in market”."
+        },
+        "uniqueMechanism": {
+          "he": "כיסוי כללית הוא עובדה למבוטחים — לא מבצע ולא קופון. המנגנון שסופק: بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت. בלי למכור את הקופה כמבצע.",
+          "ar": "تغطية كلاليت واقعة للأعضاء — مش عرض ومش كوبون. الآلية المعطاة: بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت. بلا بيع الصندوق كعرض.",
+          "en": "Clalit coverage is a fact for members — not a promo and not a coupon. Stated mechanism: بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت. Do not sell the fund as a promo."
+        },
+        "hormozi": {
+          "he": "Dream = Walk-in (no appointment). Likelihood = بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت. Time delay / effort = לא סופקו — לא ננחש.",
+          "ar": "الحلم = جت أولاً بدون مواعيد. الاحتمال = بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت. الوقت/الجهد غير مذكورين.",
+          "en": "Dream = Walk-in (no appointment). Likelihood = بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت. Time delay / effort not given — will not guess."
+        },
+        "aida": {
+          "attention": {
+            "he": "طوابير الساعات",
+            "ar": "طوابير الساعات",
+            "en": "طوابير الساعات"
+          },
+          "interest": {
+            "he": "הורים",
+            "ar": "أهل",
+            "en": "Parents"
+          },
+          "desire": {
+            "he": "بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت",
+            "ar": "بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت",
+            "en": "بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت"
+          },
+          "action": {
+            "he": "ביקור לפי סדר הגעה (בלי תור)",
+            "ar": "جت أولاً بدون مواعيد",
+            "en": "Walk-in (no appointment)"
+          }
+        },
+        "pas": {
+          "problem": {
+            "he": "طوابير الساعات",
+            "ar": "طوابير الساعات",
+            "en": "طوابير الساعات"
+          },
+          "agitate": {
+            "he": "מה קורה אם ממשיכים לדחות: הבעיה נשארת, והפרסום הכללי נשמע כמו כולם.",
+            "ar": "إن استمر التأجيل تبقى المشكلة ويبدو الإعلان كالجميع.",
+            "en": "If they keep delaying: the problem stays, and generic ads still sound like everyone else."
+          },
+          "solution": {
+            "he": "د. سامر محمد أبو مخ — بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت",
+            "ar": "د. سامر محمد أبو مخ — بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت",
+            "en": "د. سامر محمد أبو مخ — بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت"
+          }
+        },
+        "hso": {
+          "hook": {
+            "he": "طوابير الساعات",
+            "ar": "طوابير الساعات",
+            "en": "طوابير الساعات"
+          },
+          "story": {
+            "he": "د. سامر محمد أبو مخ: ד\"ר סאמר מחמד אבו מוך - רופא ילדים | كلاليت - عيادة طب الأطفال والعائلة في باقة الغربية. رعاية طبية متكاملة، بدون طوابير، فحوصات سريعة ومجانية 100% لمؤمني كلاليت.",
+            "ar": "د. سامر محمد أبو مخ: ד\"ר סאמר מחמד אבו מוך - רופא ילדים | كلاليت - عيادة طب الأطفال والعائلة في باقة الغربية. رعاية طبية متكاملة، بدون طوابير، فحوصات سريعة ومجانية 100% لمؤمني كلاليت.",
+            "en": "د. سامر محمد أبو مخ: ד\"ר סאמר מחמד אבו מוך - רופא ילדים | كلاليت - عيادة طب الأطفال والعائلة في باقة الغربية. رعاية طبية متكاملة، بدون طوابير، فحوصات سريعة ومجانية 100% لمؤمني كلاليت."
+          },
+          "offer": {
+            "he": "אין מבצע. הסיפור נגמר ב-CTA אמיתי, לא בקופון.",
+            "ar": "لا عرض. القصة تنتهي بنداء حقيقي.",
+            "en": "No offer. The story ends on a real CTA, not a coupon."
+          }
+        },
+        "offerStack": {
+          "leadMagnet": {
+            "he": "מגנט לחשיפה: דף «איך מגיעים / הרשמה». אין מחיר, אין קופון, אין ייעוץ חינם כמבצע.",
+            "ar": "مغناطيس تعرّض: صفحة «كيف تجوا / تسجيل». بلا سعر وبلا كوبون.",
+            "en": "Exposure magnet: a how-to-arrive / registration page. No price, no coupon, no free-consult promo."
+          },
+          "tripwire": {
+            "he": "Tripwire: אין. אל תמציאו ₪99 «רק החודש».",
+            "ar": "لا tripwire. لا تخترعوا ₪99.",
+            "en": "Tripwire: none. Do not invent a ₪99 “this month only”."
+          },
+          "core": {
+            "he": "הליבה: طبيب أطفال — ד\"ר סאמר מחמד אבו מוך - רופא ילדים | كلاليت - عيادة طب الأطفال والعائلة في باقة الغربية. رعاية طبية متكاملة، بدون طوابير، فحوصات سريعة ومجانية 100% لمؤمني كلاليت..",
+            "ar": "النواة: طبيب أطفال.",
+            "en": "Core: طبيب أطفال — ד\"ר סאמר מחמד אבו מוך - רופא ילדים | كلاليت - عيادة طب الأطفال والعائلة في باقة الغربية. رعاية طبية متكاملة، بدون طوابير، فحوصات سريعة ومجانية 100% لمؤمني كلاليت.."
+          },
+          "upsell": {
+            "he": "Upsell רק אם סיפקתם חבילה. לא סופק — ריק.",
+            "ar": "لا upsell إن لم تُعط حزمة.",
+            "en": "Upsell only if you supplied a package. None given — empty."
+          },
+          "continuity": {
+            "he": "רצף/מנוי: לא צוין. לא נמציא «תוכנית חודשית».",
+            "ar": "استمرار غير مذكور.",
+            "en": "Continuity/membership: not stated. Will not invent a monthly plan."
+          }
+        },
+        "funnel": {
+          "tof": {
+            "he": "TOF: הוק על طوابير الساعات. מטא/טיקטוק לפי תוכנית המדיה. בלי לידים מזויפים.",
+            "ar": "TOF: خطاف على طوابير الساعات.",
+            "en": "TOF: hook on طوابير الساعات. Meta/TikTok per the media plan. No fake leads."
+          },
+          "mof": {
+            "he": "MOF: הוכחה = بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت בלבד. רימרקטינג אחרי אירוע אמיתי.",
+            "ar": "MOF: إثبات = بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت فقط.",
+            "en": "MOF: proof = بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت only. Remarketing after a real event."
+          },
+          "bof": {
+            "he": "BOF: הגיעו למרפאה. קבלה לפי סדר הגעה. וואטסאפ לא לחירום.",
+            "ar": "BOF: جيبوه عالعيادة. جت أولاً. واتساب مش للطوارئ.",
+            "en": "BOF: Come to the clinic. Walk-in. WhatsApp is not the ER."
+          }
+        },
+        "calendar": [
+          {
+            "week": 1,
+            "theme": {
+              "he": "למידה — 2–3 קריאייטיבים",
+              "ar": "تعلّم — 2–3 إبداعات",
+              "en": "Learn — 2–3 creatives"
+            },
+            "action": {
+              "he": "שבוע 1: د. سامر محمد أبو مخ · ביקור לפי סדר הגעה (בלי תור). בלי «חודש ויראלי» כתחזית.",
+              "ar": "أسبوع 1: د. سامر محمد أبو مخ · جت أولاً بدون مواعيد.",
+              "en": "Week 1: د. سامر محمد أبو مخ · Walk-in (no appointment). No “viral month” forecast."
+            }
+          },
+          {
+            "week": 2,
+            "theme": {
+              "he": "למידה — 2–3 קריאייטיבים",
+              "ar": "تعلّم — 2–3 إبداعات",
+              "en": "Learn — 2–3 creatives"
+            },
+            "action": {
+              "he": "שבוע 2: د. سامر محمد أبو مخ · ביקור לפי סדר הגעה (בלי תור). בלי «חודש ויראלי» כתחזית.",
+              "ar": "أسبوع 2: د. سامر محمد أبو مخ · جت أولاً بدون مواعيد.",
+              "en": "Week 2: د. سامر محمد أبو مخ · Walk-in (no appointment). No “viral month” forecast."
+            }
+          },
+          {
+            "week": 3,
+            "theme": {
+              "he": "זווית אחת מנצחת לפי פניות",
+              "ar": "زاوية واحدة وفق الطلبات",
+              "en": "One winning angle by enquiries"
+            },
+            "action": {
+              "he": "שבוע 3: د. سامر محمد أبو مخ · ביקור לפי סדר הגעה (בלי תור). בלי «חודש ויראלי» כתחזית.",
+              "ar": "أسبوع 3: د. سامر محمد أبو مخ · جت أولاً بدون مواعيد.",
+              "en": "Week 3: د. سامر محمد أبو مخ · Walk-in (no appointment). No “viral month” forecast."
+            }
+          },
+          {
+            "week": 4,
+            "theme": {
+              "he": "זווית אחת מנצחת לפי פניות",
+              "ar": "زاوية واحدة وفق الطلبات",
+              "en": "One winning angle by enquiries"
+            },
+            "action": {
+              "he": "שבוע 4: د. سامر محمد أبو مخ · ביקור לפי סדר הגעה (בלי תור). בלי «חודש ויראלי» כתחזית.",
+              "ar": "أسبوع 4: د. سامر محمد أبو مخ · جت أولاً بدون مواعيد.",
+              "en": "Week 4: د. سامر محمد أبو مخ · Walk-in (no appointment). No “viral month” forecast."
+            }
+          },
+          {
+            "week": 5,
+            "theme": {
+              "he": "זווית אחת מנצחת לפי פניות",
+              "ar": "زاوية واحدة وفق الطلبات",
+              "en": "One winning angle by enquiries"
+            },
+            "action": {
+              "he": "שבוע 5: د. سامر محمد أبو مخ · ביקור לפי סדר הגעה (בלי תור). בלי «חודש ויראלי» כתחזית.",
+              "ar": "أسبوع 5: د. سامر محمد أبو مخ · جت أولاً بدون مواعيد.",
+              "en": "Week 5: د. سامر محمد أبو مخ · Walk-in (no appointment). No “viral month” forecast."
+            }
+          },
+          {
+            "week": 6,
+            "theme": {
+              "he": "זווית אחת מנצחת לפי פניות",
+              "ar": "زاوية واحدة وفق الطلبات",
+              "en": "One winning angle by enquiries"
+            },
+            "action": {
+              "he": "שבוע 6: د. سامر محمد أبو مخ · ביקור לפי סדר הגעה (בלי תור). בלי «חודש ויראלי» כתחזית.",
+              "ar": "أسبوع 6: د. سامر محمد أبو مخ · جت أولاً بدون مواعيد.",
+              "en": "Week 6: د. سامر محمد أبو مخ · Walk-in (no appointment). No “viral month” forecast."
+            }
+          },
+          {
+            "week": 7,
+            "theme": {
+              "he": "תוכן אורגני + רימרקטינג זהיר",
+              "ar": "محتوى عضوي + إعادة استهداف حذرة",
+              "en": "Organic + careful remarketing"
+            },
+            "action": {
+              "he": "שבוע 7: د. سامر محمد أبو مخ · ביקור לפי סדר הגעה (בלי תור). בלי «חודש ויראלי» כתחזית.",
+              "ar": "أسبوع 7: د. سامر محمد أبو مخ · جت أولاً بدون مواعيد.",
+              "en": "Week 7: د. سامر محمد أبو مخ · Walk-in (no appointment). No “viral month” forecast."
+            }
+          },
+          {
+            "week": 8,
+            "theme": {
+              "he": "תוכן אורגני + רימרקטינג זהיר",
+              "ar": "محتوى عضوي + إعادة استهداف حذرة",
+              "en": "Organic + careful remarketing"
+            },
+            "action": {
+              "he": "שבוע 8: د. سامر محمد أبو مخ · ביקור לפי סדר הגעה (בלי תור). בלי «חודש ויראלי» כתחזית.",
+              "ar": "أسبوع 8: د. سامر محمد أبو مخ · جت أولاً بدون مواعيد.",
+              "en": "Week 8: د. سامر محمد أبو مخ · Walk-in (no appointment). No “viral month” forecast."
+            }
+          },
+          {
+            "week": 9,
+            "theme": {
+              "he": "תוכן אורגני + רימרקטינג זהיר",
+              "ar": "محتوى عضوي + إعادة استهداف حذرة",
+              "en": "Organic + careful remarketing"
+            },
+            "action": {
+              "he": "שבוע 9: د. سامر محمد أبو مخ · ביקור לפי סדר הגעה (בלי תור). בלי «חודש ויראלי» כתחזית.",
+              "ar": "أسبوع 9: د. سامر محمد أبو مخ · جت أولاً بدون مواعيد.",
+              "en": "Week 9: د. سامر محمد أبو مخ · Walk-in (no appointment). No “viral month” forecast."
+            }
+          },
+          {
+            "week": 10,
+            "theme": {
+              "he": "תוכן אורגני + רימרקטינג זהיר",
+              "ar": "محتوى عضوي + إعادة استهداف حذرة",
+              "en": "Organic + careful remarketing"
+            },
+            "action": {
+              "he": "שבוע 10: د. سامر محمد أبو مخ · ביקור לפי סדר הגעה (בלי תור). בלי «חודש ויראלי» כתחזית.",
+              "ar": "أسبوع 10: د. سامر محمد أبو مخ · جت أولاً بدون مواعيد.",
+              "en": "Week 10: د. سامر محمد أبو مخ · Walk-in (no appointment). No “viral month” forecast."
+            }
+          },
+          {
+            "week": 11,
+            "theme": {
+              "he": "סיכום מספרים שמדדתם בפועל",
+              "ar": "تلخيص أرقام قستمها",
+              "en": "Recap numbers you actually measured"
+            },
+            "action": {
+              "he": "שבוע 11: د. سامر محمد أبو مخ · ביקור לפי סדר הגעה (בלי תור). בלי «חודש ויראלי» כתחזית.",
+              "ar": "أسبوع 11: د. سامر محمد أبو مخ · جت أولاً بدون مواعيد.",
+              "en": "Week 11: د. سامر محمد أبو مخ · Walk-in (no appointment). No “viral month” forecast."
+            }
+          },
+          {
+            "week": 12,
+            "theme": {
+              "he": "סיכום מספרים שמדדתם בפועל",
+              "ar": "تلخيص أرقام قستمها",
+              "en": "Recap numbers you actually measured"
+            },
+            "action": {
+              "he": "שבוע 12: د. سامر محمد أبو مخ · ביקור לפי סדר הגעה (בלי תור). בלי «חודש ויראלי» כתחזית.",
+              "ar": "أسبوع 12: د. سامر محمد أبو مخ · جت أولاً بدون مواعيد.",
+              "en": "Week 12: د. سامر محمد أبو مخ · Walk-in (no appointment). No “viral month” forecast."
+            }
+          },
+          {
+            "week": 13,
+            "theme": {
+              "he": "סיכום מספרים שמדדתם בפועל",
+              "ar": "تلخيص أرقام قستمها",
+              "en": "Recap numbers you actually measured"
+            },
+            "action": {
+              "he": "שבוע 13: د. سامر محمد أبو مخ · ביקור לפי סדר הגעה (בלי תור). בלי «חודש ויראלי» כתחזית.",
+              "ar": "أسبوع 13: د. سامر محمد أبو مخ · جت أولاً بدون مواعيد.",
+              "en": "Week 13: د. سامر محمد أبو مخ · Walk-in (no appointment). No “viral month” forecast."
+            }
+          }
+        ]
+      },
+      "creative": {
+        "producedBy": [
+          "strategic"
+        ],
+        "hooks": [
+          {
+            "id": "pain",
+            "angle": {
+              "he": "בעיה",
+              "ar": "مشكلة",
+              "en": "Problem"
+            },
+            "hook": {
+              "he": "ד\"ר סאמר מחמד אבו מוך — לפי סדר הגעה",
+              "ar": "الولد مريض، جيبوه عالعيادة",
+              "en": "Dr. Samer Abu Mokh — walk-in"
+            }
+          },
+          {
+            "id": "edge",
+            "angle": {
+              "he": "יתרון",
+              "ar": "ميزة",
+              "en": "Advantage"
+            },
+            "hook": {
+              "he": "بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت",
+              "ar": "بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت",
+              "en": "بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت"
+            }
+          },
+          {
+            "id": "place",
+            "angle": {
+              "he": "מקום",
+              "ar": "مكان",
+              "en": "Place"
+            },
+            "hook": {
+              "he": "باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات)",
+              "ar": "باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات)",
+              "en": "باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات)"
+            }
+          },
+          {
+            "id": "no-fake",
+            "angle": {
+              "he": "יושרה",
+              "ar": "صدق",
+              "en": "Integrity"
+            },
+            "hook": {
+              "he": "בלי קופון מלאכותי.",
+              "ar": "بلا كوبون.",
+              "en": "No manufactured coupon."
+            }
+          },
+          {
+            "id": "lang",
+            "angle": {
+              "he": "שפה",
+              "ar": "لغة",
+              "en": "Language"
+            },
+            "hook": {
+              "he": "עברית וערבית כשפות שוות.",
+              "ar": "العبرية والعربية متساويتان.",
+              "en": "Hebrew and Arabic as equal languages."
+            }
+          },
+          {
+            "id": "cta",
+            "angle": {
+              "he": "CTA",
+              "ar": "CTA",
+              "en": "CTA"
+            },
+            "hook": {
+              "he": "הגיעו למרפאה",
+              "ar": "جيبوه عالعيادة",
+              "en": "Come to the clinic"
+            }
+          }
+        ],
+        "angleMatrix": [
+          {
+            "angle": {
+              "he": "בעיה",
+              "ar": "مشكلة",
+              "en": "Problem"
+            },
+            "proof": {
+              "he": "بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت",
+              "ar": "بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت",
+              "en": "بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت"
+            },
+            "cta": {
+              "he": "הגיעו למרפאה",
+              "ar": "جيبوه عالعيادة",
+              "en": "Come to the clinic"
+            }
+          },
+          {
+            "angle": {
+              "he": "יתרון",
+              "ar": "ميزة",
+              "en": "Advantage"
+            },
+            "proof": {
+              "he": "بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت",
+              "ar": "بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت",
+              "en": "بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت"
+            },
+            "cta": {
+              "he": "הגיעו למרפאה",
+              "ar": "جيبوه عالعيادة",
+              "en": "Come to the clinic"
+            }
+          },
+          {
+            "angle": {
+              "he": "מקום",
+              "ar": "مكان",
+              "en": "Place"
+            },
+            "proof": {
+              "he": "بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت",
+              "ar": "بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت",
+              "en": "بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت"
+            },
+            "cta": {
+              "he": "הגיעו למרפאה",
+              "ar": "جيبوه عالعيادة",
+              "en": "Come to the clinic"
+            }
+          },
+          {
+            "angle": {
+              "he": "יושרה",
+              "ar": "صدق",
+              "en": "Integrity"
+            },
+            "proof": {
+              "he": "بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت",
+              "ar": "بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت",
+              "en": "بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت"
+            },
+            "cta": {
+              "he": "הגיעו למרפאה",
+              "ar": "جيبوه عالعيادة",
+              "en": "Come to the clinic"
+            }
+          }
+        ],
+        "pieces": [
+          {
+            "format": "feed",
+            "locale": "he",
+            "title": "د. سامر محمد أبو مخ",
+            "body": "ד\"ר סאמר מחמד אבו מוך — לפי סדר הגעה\nהגיעו למרפאה"
+          },
+          {
+            "format": "story",
+            "locale": "he",
+            "title": "פריים 1",
+            "body": "ד\"ר סאמר מחמד אבו מוך — לפי סדר הגעה\nהגיעו למרפאה"
+          },
+          {
+            "format": "reels",
+            "locale": "he",
+            "title": "סקריפט 15ש׳",
+            "body": "0–3: ד\"ר סאמר מחמד אבו מוך — לפי סדר הגעה. 3–12: שעות: ראשון 08:00 - 13:00 / 16:00 - 19:30 · שני 08:00 - 13:00 / 16:00 - 19:30 · שלישי 08:00 - 13:30 / סגור (ייעוץ וואטסאפ) · רביעי 08:00 - 13:00 / 16:00 - 19:30 · חמישי 08:00 - 13:00 / 16:00 - 19:30 · שישי 08:00 - 12:30 / סופ״ש · שבת חירום ובירורים טלפוניים לרשומים / סגור. 12–15: הגיעו למרפאה."
+          },
+          {
+            "format": "youtube",
+            "locale": "he",
+            "title": "YouTube — הוק 8ש׳",
+            "body": "ד\"ר סאמר מחמד אבו מוך — לפי סדר הגעה\nהגיעו למרפאה"
+          },
+          {
+            "format": "rsa",
+            "locale": "he",
+            "title": "Google RSA",
+            "body": "H1: ד\"ר סאמר מחמד אבו מוך — לפי סדר הגעה\nH2: לפי סדר הגעה\nH3: מתחם אל-נור, קומה 1\nD1: שעות: ראשון 08:00 - 13:00 / 16:00 - 19:30 · שני 08:00 - 13:00 / 16:00 - 19:30 · שלישי 08:00 - 13:30 / סגור (ייעוץ וואטסאפ) · רביעי 08:00 - 13:00 / 16:00 - 19:30 · חמישי 08:00 - 13:00 / 16:00 - 19:30 · שישי 08:00 - 12:30 / סופ״ש · שבת חירום ובירורים טלפוניים לרשומים / סגור\nD2: הגיעו למרפאה"
+          },
+          {
+            "format": "search",
+            "locale": "he",
+            "title": "מודעת חיפוש",
+            "body": "د. سامر محمد أبو مخ | طبيب أطفال | باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات)"
+          },
+          {
+            "format": "landing",
+            "locale": "he",
+            "title": "דף נחיתה — מבנה",
+            "body": "H1: ד\"ר סאמר מחמד אבו מוך — לפי סדר הגעה\nקבלה לפי סדר הגעה, בלי לקבוע תור.\nמתחם אל-נור, קומה 1\nשעות: ראשון 08:00 - 13:00 / 16:00 - 19:30 · שני 08:00 - 13:00 / 16:00 - 19:30 · שלישי 08:00 - 13:30 / סגור (ייעוץ וואטסאפ) · רביעי 08:00 - 13:00 / 16:00 - 19:30 · חמישי 08:00 - 13:00 / 16:00 - 19:30 · שישי 08:00 - 12:30 / סופ״ש · שבת חירום ובירורים טלפוניים לרשומים / סגור\nhttps://drsamerped.ai.studio\nוואטסאפ: 052-8885800 — לא לחירום.\nטופס: שם + טלפון + שפה. בלי המלצות בדויות.\nויזואל: דוגמה — אין תמונת מרפאה/רופא בקליטה."
+          },
+          {
+            "format": "whatsapp",
+            "locale": "he",
+            "title": "WhatsApp",
+            "body": "שלום, כאן ד\"ר סאמר מחמד אבו מוך. וואטסאפ 052-8885800. מתחם אל-נור, קומה 1 קבלה לפי סדר הגעה, בלי לקבוע תור בוואטסאפ. שעות: ראשון 08:00 - 13:00 / 16:00 - 19:30 · שני 08:00 - 13:00 / 16:00 - 19:30 · שלישי 08:00 - 13:30 / סגור (ייעוץ וואטסאפ) · רביעי 08:00 - 13:00 / 16:00 - 19:30 · חמישי 08:00 - 13:00 / 16:00 - 19:30 · שישי 08:00 - 12:30 / סופ״ש · שבת חירום ובירורים טלפוניים לרשומים / סגור וואטסאפ לא לחירום — לחדר מיון."
+          },
+          {
+            "format": "sms",
+            "locale": "he",
+            "title": "SMS",
+            "body": "د. سامر محمد أبو مخ: קבלה לפי סדר הגעה. וואטסאפ לא לחירום."
+          },
+          {
+            "format": "flyer",
+            "locale": "he",
+            "title": "פלאייר",
+            "body": "د. سامر محمد أبو مخ\nד\"ר סאמר מחמד אבו מוך — לפי סדר הגעה\nשעות: ראשון 08:00 - 13:00 / 16:00 - 19:30 · שני 08:00 - 13:00 / 16:00 - 19:30 · שלישי 08:00 - 13:30 / סגור (ייעוץ וואטסאפ) · רביעי 08:00 - 13:00 / 16:00 - 19:30 · חמישי 08:00 - 13:00 / 16:00 - 19:30 · שישי 08:00 - 12:30 / סופ״ש · שבת חירום ובירורים טלפוניים לרשומים / סגור\nהגיעו למרפאה\nאין מבצע על הנייר."
+          },
+          {
+            "format": "email-1",
+            "locale": "he",
+            "title": "אימייל 1",
+            "body": "1/5 היכרות: د. سامر محمد أبو مخ — بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت"
+          },
+          {
+            "format": "email-2",
+            "locale": "he",
+            "title": "אימייל 2",
+            "body": "2/5 הבעיה: طوابير الساعات"
+          },
+          {
+            "format": "email-3",
+            "locale": "he",
+            "title": "אימייל 3",
+            "body": "3/5 איך זה עובד בפועל (בלי הבטחות חסרות)."
+          },
+          {
+            "format": "email-4",
+            "locale": "he",
+            "title": "אימייל 4",
+            "body": "4/5 התנגדות: יקר/אין זמן — תשובה בלי הנחה אוטומטית."
+          },
+          {
+            "format": "email-5",
+            "locale": "he",
+            "title": "אימייל 5",
+            "body": "5/5 CTA: הגיעו למרפאה"
+          },
+          {
+            "format": "feed",
+            "locale": "ar",
+            "title": "د. سامر محمد أبو مخ",
+            "body": "الولد مريض، جيبوه عالعيادة\nجيبوه عالعيادة"
+          },
+          {
+            "format": "story",
+            "locale": "ar",
+            "title": "إطار 1",
+            "body": "الولد مريض، جيبوه عالعيادة\nجيبوه عالعيادة"
+          },
+          {
+            "format": "reels",
+            "locale": "ar",
+            "title": "سكربت 15ث",
+            "body": "0–3: الولد مريض، جيبوه عالعيادة. 3–12: الدوام: الأحد 08:00 - 13:00 / 16:00 - 19:30 · الإثنين 08:00 - 13:00 / 16:00 - 19:30 · الثلاثاء 08:00 - 13:30 / مغلق (استشارات واتساب) · الأربعاء 08:00 - 13:00 / 16:00 - 19:30 · الخميس 08:00 - 13:00 / 16:00 - 19:30 · الجمعة 08:00 - 12:30 / عطلة نهاية الأسبوع · السبت طوارئ واستفسارات هاتفية للمسجلين / مغلق. 12–15: جيبوه عالعيادة."
+          },
+          {
+            "format": "youtube",
+            "locale": "ar",
+            "title": "يوتيوب — 8ث",
+            "body": "الولد مريض، جيبوه عالعيادة\nجيبوه عالعيادة"
+          },
+          {
+            "format": "rsa",
+            "locale": "ar",
+            "title": "Google RSA",
+            "body": "H1: الولد مريض، جيبوه عالعيادة\nH2: جت أولاً بدون مواعيد\nH3: مجمع النور، طابق 1\nD1: الدوام: الأحد 08:00 - 13:00 / 16:00 - 19:30 · الإثنين 08:00 - 13:00 / 16:00 - 19:30 · الثلاثاء 08:00 - 13:30 / مغلق (استشارات واتساب) · الأربعاء 08:00 - 13:00 / 16:00 - 19:30 · الخميس 08:00 - 13:00 / 16:00 - 19:30 · الجمعة 08:00 - 12:30 / عطلة نهاية الأسبوع · السبت طوارئ واستفسارات هاتفية للمسجلين / مغلق\nD2: جيبوه عالعيادة"
+          },
+          {
+            "format": "search",
+            "locale": "ar",
+            "title": "إعلان بحث",
+            "body": "د. سامر محمد أبو مخ | طبيب أطفال | باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات)"
+          },
+          {
+            "format": "landing",
+            "locale": "ar",
+            "title": "صفحة هبوط",
+            "body": "H1: الولد مريض، جيبوه عالعيادة\nسجل طفلك اليوم واضمن له الرعاية الطبية الأرقى في باقة 📲\nجت أولاً بدون مواعيد. مش حاجة تحجزوا دور.\nمجمع النور، طابق 1\nالدوام: الأحد 08:00 - 13:00 / 16:00 - 19:30 · الإثنين 08:00 - 13:00 / 16:00 - 19:30 · الثلاثاء 08:00 - 13:30 / مغلق (استشارات واتساب) · الأربعاء 08:00 - 13:00 / 16:00 - 19:30 · الخميس 08:00 - 13:00 / 16:00 - 19:30 · الجمعة 08:00 - 12:30 / عطلة نهاية الأسبوع · السبت طوارئ واستفسارات هاتفية للمسجلين / مغلق\nhttps://drsamerped.ai.studio\nواتساب: 052-8885800 — مش للطوارئ.\nفورم: اسم + تلفون + لغة. بلا شهادات مختلقة.\nالبصري: عينة — ما في صورة عيادة/دكتور بالبيانات."
+          },
+          {
+            "format": "whatsapp",
+            "locale": "ar",
+            "title": "WhatsApp",
+            "body": "الولد مريض، جيبوه عالعيادة. أهلا، هون د. سامر محمد أبو مخ. مجمع النور، طابق 1. واتساب 052-8885800. جت أولاً بدون مواعيد — مش منحجز دور من الواتساب. الدوام: الأحد 08:00 - 13:00 / 16:00 - 19:30 · الإثنين 08:00 - 13:00 / 16:00 - 19:30 · الثلاثاء 08:00 - 13:30 / مغلق (استشارات واتساب) · الأربعاء 08:00 - 13:00 / 16:00 - 19:30 · الخميس 08:00 - 13:00 / 16:00 - 19:30 · الجمعة 08:00 - 12:30 / عطلة نهاية الأسبوع · السبت طوارئ واستفسارات هاتفية للمسجلين / مغلق واتساب مش للطوارئ. بالطوارئ روحوا على المستشفى أو غرفة الطوارئ."
+          },
+          {
+            "format": "sms",
+            "locale": "ar",
+            "title": "SMS",
+            "body": "د. سامر محمد أبو مخ: جت أولاً بدون مواعيد. واتساب مش للطوارئ."
+          },
+          {
+            "format": "flyer",
+            "locale": "ar",
+            "title": "منشور",
+            "body": "د. سامر محمد أبو مخ\nالولد مريض، جيبوه عالعيادة\nالدوام: الأحد 08:00 - 13:00 / 16:00 - 19:30 · الإثنين 08:00 - 13:00 / 16:00 - 19:30 · الثلاثاء 08:00 - 13:30 / مغلق (استشارات واتساب) · الأربعاء 08:00 - 13:00 / 16:00 - 19:30 · الخميس 08:00 - 13:00 / 16:00 - 19:30 · الجمعة 08:00 - 12:30 / عطلة نهاية الأسبوع · السبت طوارئ واستفسارات هاتفية للمسجلين / مغلق\nجيبوه عالعيادة\nما في عرض عالورقة."
+          },
+          {
+            "format": "email-1",
+            "locale": "ar",
+            "title": "بريد 1",
+            "body": "1/5 تعارف: د. سامر محمد أبو مخ"
+          },
+          {
+            "format": "email-2",
+            "locale": "ar",
+            "title": "بريد 2",
+            "body": "2/5 المشكلة: طوابير الساعات"
+          },
+          {
+            "format": "email-3",
+            "locale": "ar",
+            "title": "بريد 3",
+            "body": "3/5 كيف يعمل."
+          },
+          {
+            "format": "email-4",
+            "locale": "ar",
+            "title": "بريد 4",
+            "body": "4/5 اعتراض السعر/الوقت."
+          },
+          {
+            "format": "email-5",
+            "locale": "ar",
+            "title": "بريد 5",
+            "body": "5/5 CTA: جيبوه عالعيادة"
+          },
+          {
+            "format": "feed",
+            "locale": "en",
+            "title": "د. سامر محمد أبو مخ",
+            "body": "Dr. Samer Abu Mokh — walk-in\nCome to the clinic"
+          },
+          {
+            "format": "story",
+            "locale": "en",
+            "title": "Frame 1",
+            "body": "Dr. Samer Abu Mokh — walk-in\nCome to the clinic"
+          },
+          {
+            "format": "reels",
+            "locale": "en",
+            "title": "15s script",
+            "body": "0–3: Dr. Samer Abu Mokh — walk-in. 3–12: Hours: Sun 08:00 - 13:00 / 16:00 - 19:30 · Mon 08:00 - 13:00 / 16:00 - 19:30 · Tue 08:00 - 13:30 / closed (WhatsApp consults) · Wed 08:00 - 13:00 / 16:00 - 19:30 · Thu 08:00 - 13:00 / 16:00 - 19:30 · Fri 08:00 - 12:30 / weekend · Sat emergency / phone questions for registered families / closed. 12–15: Come to the clinic."
+          },
+          {
+            "format": "youtube",
+            "locale": "en",
+            "title": "YouTube — 8s hook",
+            "body": "Dr. Samer Abu Mokh — walk-in\nCome to the clinic"
+          },
+          {
+            "format": "rsa",
+            "locale": "en",
+            "title": "Google RSA",
+            "body": "H1: Dr. Samer Abu Mokh — walk-in\nH2: Walk-in, no appointment\nH3: Al-Nour, 1st floor\nD1: Hours: Sun 08:00 - 13:00 / 16:00 - 19:30 · Mon 08:00 - 13:00 / 16:00 - 19:30 · Tue 08:00 - 13:30 / closed (WhatsApp consults) · Wed 08:00 - 13:00 / 16:00 - 19:30 · Thu 08:00 - 13:00 / 16:00 - 19:30 · Fri 08:00 - 12:30 / weekend · Sat emergency / phone questions for registered families / closed\nD2: Come to the clinic"
+          },
+          {
+            "format": "search",
+            "locale": "en",
+            "title": "Search ad",
+            "body": "د. سامر محمد أبو مخ | طبيب أطفال | باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات)"
+          },
+          {
+            "format": "landing",
+            "locale": "en",
+            "title": "Landing structure",
+            "body": "H1: Dr. Samer Abu Mokh — walk-in\nWalk-in, first come first served. No booking required.\nAl-Nour, 1st floor\nHours: Sun 08:00 - 13:00 / 16:00 - 19:30 · Mon 08:00 - 13:00 / 16:00 - 19:30 · Tue 08:00 - 13:30 / closed (WhatsApp consults) · Wed 08:00 - 13:00 / 16:00 - 19:30 · Thu 08:00 - 13:00 / 16:00 - 19:30 · Fri 08:00 - 12:30 / weekend · Sat emergency / phone questions for registered families / closed\nhttps://drsamerped.ai.studio\nWhatsApp: 052-8885800 — not for emergencies.\nForm: name + phone + language. No fake testimonials.\nVisual: sample — no clinic/doctor photo on file."
+          },
+          {
+            "format": "whatsapp",
+            "locale": "en",
+            "title": "WhatsApp",
+            "body": "Hi, this is Dr. Samer Abu Mokh. WhatsApp 052-8885800. Al-Nour, 1st floor Walk-in, first come first served — we do not book slots on WhatsApp. Hours: Sun 08:00 - 13:00 / 16:00 - 19:30 · Mon 08:00 - 13:00 / 16:00 - 19:30 · Tue 08:00 - 13:30 / closed (WhatsApp consults) · Wed 08:00 - 13:00 / 16:00 - 19:30 · Thu 08:00 - 13:00 / 16:00 - 19:30 · Fri 08:00 - 12:30 / weekend · Sat emergency / phone questions for registered families / closed WhatsApp is not for emergencies — go to the ER."
+          },
+          {
+            "format": "sms",
+            "locale": "en",
+            "title": "SMS",
+            "body": "د. سامر محمد أبو مخ: Walk-in, no appointment. WhatsApp is not ER."
+          },
+          {
+            "format": "flyer",
+            "locale": "en",
+            "title": "Flyer",
+            "body": "د. سامر محمد أبو مخ\nDr. Samer Abu Mokh — walk-in\nHours: Sun 08:00 - 13:00 / 16:00 - 19:30 · Mon 08:00 - 13:00 / 16:00 - 19:30 · Tue 08:00 - 13:30 / closed (WhatsApp consults) · Wed 08:00 - 13:00 / 16:00 - 19:30 · Thu 08:00 - 13:00 / 16:00 - 19:30 · Fri 08:00 - 12:30 / weekend · Sat emergency / phone questions for registered families / closed\nCome to the clinic\nNo offer on the paper."
+          },
+          {
+            "format": "email-1",
+            "locale": "en",
+            "title": "Email 1",
+            "body": "1/5 Intro: د. سامر محمد أبو مخ — بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت"
+          },
+          {
+            "format": "email-2",
+            "locale": "en",
+            "title": "Email 2",
+            "body": "2/5 Problem: طوابير الساعات"
+          },
+          {
+            "format": "email-3",
+            "locale": "en",
+            "title": "Email 3",
+            "body": "3/5 How it actually works (no missing promises)."
+          },
+          {
+            "format": "email-4",
+            "locale": "en",
+            "title": "Email 4",
+            "body": "4/5 Objection: expensive/no time — answer without an auto-discount."
+          },
+          {
+            "format": "email-5",
+            "locale": "en",
+            "title": "Email 5",
+            "body": "5/5 CTA: Come to the clinic"
+          },
+          {
+            "format": "ad-strong_offer",
+            "locale": "he",
+            "title": "ד\"ר סאמר מחמד אבו מוך — לפי סדר הגעה",
+            "body": "ד\"ר סאמר מחמד אבו מוך — קבלה לפי סדר הגעה, בלי תור מראש.\n\nלמשפחות באקה שמחפשות רופא ילדים בכללית.\n\nשעות: ראשון 08:00 - 13:00 / 16:00 - 19:30 · שני 08:00 - 13:00 / 16:00 - 19:30 · שלישי 08:00 - 13:30 / סגור (ייעוץ וואטסאפ) · רביעי 08:00 - 13:00 / 16:00 - 19:30 · חמישי 08:00 - 13:00 / 16:00 - 19:30 · שישי 08:00 - 12:30 / סופ״ש · שבת חירום ובירורים טלפוניים לרשומים / סגור\nוואטסאפ 052-8885800 (לא לחירום).\nhttps://drsamerped.ai.studio\nאין מבצע ואין קופון.\n\nהגיעו למרפאה\nCTA: הגיעו למרפאה"
+          },
+          {
+            "format": "ad-very_short",
+            "locale": "he",
+            "title": "מתחם אל-נור, קומה 1",
+            "body": "ד\"ר סאמר מחמד אבו מוך — קבלה לפי סדר הגעה, בלי תור מראש. שעות: ראשון 08:00 - 13:00 / 16:00 - 19:30 · שני 08:00 - 13:00 / 16:00 - 19:30 · שלישי 08:00 - 13:30 / סגור (ייעוץ וואטסאפ) · רביעי 08:00 - 13:00 / 16:00 - 19:30 · חמישי 08:00 - 13:00 / 16:00 - 19:30 · שישי 08:00 - 12:30 / סופ״ש · שבת חירום ובירורים טלפוניים לרשומים / סגור וואטסאפ 052-8885800 (לא לחירום). הגיעו למרפאה\nCTA: הגיעו למרפאה"
+          },
+          {
+            "format": "ad-emotional",
+            "locale": "he",
+            "title": "הילד חולה? מגיעים לפי סדר הגעה",
+            "body": "כשהילד חולה צריך לדעת לאן הולכים היום.\n\nד\"ר סאמר מחמד אבו מוך — קבלה לפי סדר הגעה, בלי תור מראש.\n\nשעות: ראשון 08:00 - 13:00 / 16:00 - 19:30 · שני 08:00 - 13:00 / 16:00 - 19:30 · שלישי 08:00 - 13:30 / סגור (ייעוץ וואטסאפ) · רביעי 08:00 - 13:00 / 16:00 - 19:30 · חמישי 08:00 - 13:00 / 16:00 - 19:30 · שישי 08:00 - 12:30 / סופ״ש · שבת חירום ובירורים טלפוניים לרשומים / סגור\nוואטסאפ 052-8885800 (לא לחירום).\nhttps://drsamerped.ai.studio\nאין מבצע ואין קופון.\nCTA: הגיעו למרפאה"
+          },
+          {
+            "format": "ad-narrative",
+            "locale": "he",
+            "title": "ד\"ר סאמר מחמד אבו מוך במתחם אל-נור, קומה 1",
+            "body": "ד\"ר סאמר מחמד אבו מוך — קבלה לפי סדר הגעה, בלי תור מראש.\n\nמקום: מתחם אל-נור, קומה 1.\n\nשעות: ראשון 08:00 - 13:00 / 16:00 - 19:30 · שני 08:00 - 13:00 / 16:00 - 19:30 · שלישי 08:00 - 13:30 / סגור (ייעוץ וואטסאפ) · רביעי 08:00 - 13:00 / 16:00 - 19:30 · חמישי 08:00 - 13:00 / 16:00 - 19:30 · שישי 08:00 - 12:30 / סופ״ש · שבת חירום ובירורים טלפוניים לרשומים / סגור\nוואטסאפ 052-8885800 (לא לחירום).\nhttps://drsamerped.ai.studio\nאין מבצע ואין קופון.\nCTA: הגיעו למרפאה"
+          },
+          {
+            "format": "ad-direct_sales",
+            "locale": "he",
+            "title": "וואטסאפ: 052-8885800",
+            "body": "ד\"ר סאמר מחמד אבו מוך — קבלה לפי סדר הגעה, בלי תור מראש.\n\nשעות: ראשון 08:00 - 13:00 / 16:00 - 19:30 · שני 08:00 - 13:00 / 16:00 - 19:30 · שלישי 08:00 - 13:30 / סגור (ייעוץ וואטסאפ) · רביעי 08:00 - 13:00 / 16:00 - 19:30 · חמישי 08:00 - 13:00 / 16:00 - 19:30 · שישי 08:00 - 12:30 / סופ״ש · שבת חירום ובירורים טלפוניים לרשומים / סגור\nוואטסאפ 052-8885800 (לא לחירום).\nhttps://drsamerped.ai.studio\nאין מבצע ואין קופון.\n\nאם זה רלוונטי — הגיעו למרפאה.\nCTA: הגיעו למרפאה"
+          },
+          {
+            "format": "ad-unique_advantage",
+            "locale": "he",
+            "title": "בלי תורים · בלי המתנה · 100% למבוטחי כללית",
+            "body": "בלי תורים · בלי המתנה · 100% למבוטחי כללית.\n\nכיסוי כללית הוא עובדה למבוטחים — לא מבצע ולא קופון.\n\nד\"ר סאמר מחמד אבו מוך — קבלה לפי סדר הגעה, בלי תור מראש.\n\nשעות: ראשון 08:00 - 13:00 / 16:00 - 19:30 · שני 08:00 - 13:00 / 16:00 - 19:30 · שלישי 08:00 - 13:30 / סגור (ייעוץ וואטסאפ) · רביעי 08:00 - 13:00 / 16:00 - 19:30 · חמישי 08:00 - 13:00 / 16:00 - 19:30 · שישי 08:00 - 12:30 / סופ״ש · שבת חירום ובירורים טלפוניים לרשומים / סגור\nוואטסאפ 052-8885800 (לא לחירום).\nhttps://drsamerped.ai.studio\nאין מבצע ואין קופון.\nCTA: הגיעו למרפאה"
+          },
+          {
+            "format": "ad-strong_offer",
+            "locale": "ar",
+            "title": "الولد مريض، جيبوه عالعيادة",
+            "body": "د. سامر محمد أبو مخ بباقة — جت أولاً بدون مواعيد.\n\nلأهل باقة اللي بدهم طبيب أطفال كلاليت قريب.\n\nالدوام: الأحد 08:00 - 13:00 / 16:00 - 19:30 · الإثنين 08:00 - 13:00 / 16:00 - 19:30 · الثلاثاء 08:00 - 13:30 / مغلق (استشارات واتساب) · الأربعاء 08:00 - 13:00 / 16:00 - 19:30 · الخميس 08:00 - 13:00 / 16:00 - 19:30 · الجمعة 08:00 - 12:30 / عطلة نهاية الأسبوع · السبت طوارئ واستفسارات هاتفية للمسجلين / مغلق\nواتساب 052-8885800 (مش للطوارئ).\nhttps://drsamerped.ai.studio\nما في عرض وما في كوبون.\n\nجيبوه عالعيادة\nCTA: جيبوه عالعيادة"
+          },
+          {
+            "format": "ad-very_short",
+            "locale": "ar",
+            "title": "مجمع النور، طابق 1",
+            "body": "د. سامر محمد أبو مخ بباقة — جت أولاً بدون مواعيد. الدوام: الأحد 08:00 - 13:00 / 16:00 - 19:30 · الإثنين 08:00 - 13:00 / 16:00 - 19:30 · الثلاثاء 08:00 - 13:30 / مغلق (استشارات واتساب) · الأربعاء 08:00 - 13:00 / 16:00 - 19:30 · الخميس 08:00 - 13:00 / 16:00 - 19:30 · الجمعة 08:00 - 12:30 / عطلة نهاية الأسبوع · السبت طوارئ واستفسارات هاتفية للمسجلين / مغلق واتساب 052-8885800 (مش للطوارئ). جيبوه عالعيادة\nCTA: جيبوه عالعيادة"
+          },
+          {
+            "format": "ad-emotional",
+            "locale": "ar",
+            "title": "الولد مريض، جيبوه عالعيادة",
+            "body": "لما الولد بيمرض، الأهل بدهم يعرفوا وين يروحوا اليوم — مش إعلان عام.\n\nد. سامر محمد أبو مخ بباقة — جت أولاً بدون مواعيد.\n\nالدوام: الأحد 08:00 - 13:00 / 16:00 - 19:30 · الإثنين 08:00 - 13:00 / 16:00 - 19:30 · الثلاثاء 08:00 - 13:30 / مغلق (استشارات واتساب) · الأربعاء 08:00 - 13:00 / 16:00 - 19:30 · الخميس 08:00 - 13:00 / 16:00 - 19:30 · الجمعة 08:00 - 12:30 / عطلة نهاية الأسبوع · السبت طوارئ واستفسارات هاتفية للمسجلين / مغلق\nواتساب 052-8885800 (مش للطوارئ).\nhttps://drsamerped.ai.studio\nما في عرض وما في كوبون.\nCTA: جيبوه عالعيادة"
+          },
+          {
+            "format": "ad-narrative",
+            "locale": "ar",
+            "title": "الولد مريض، جيبوه عالعيادة",
+            "body": "د. سامر محمد أبو مخ بباقة — جت أولاً بدون مواعيد.\n\nالمكان: مجمع النور، طابق 1.\n\nالدوام: الأحد 08:00 - 13:00 / 16:00 - 19:30 · الإثنين 08:00 - 13:00 / 16:00 - 19:30 · الثلاثاء 08:00 - 13:30 / مغلق (استشارات واتساب) · الأربعاء 08:00 - 13:00 / 16:00 - 19:30 · الخميس 08:00 - 13:00 / 16:00 - 19:30 · الجمعة 08:00 - 12:30 / عطلة نهاية الأسبوع · السبت طوارئ واستفسارات هاتفية للمسجلين / مغلق\nواتساب 052-8885800 (مش للطوارئ).\nhttps://drsamerped.ai.studio\nما في عرض وما في كوبون.\nCTA: جيبوه عالعيادة"
+          },
+          {
+            "format": "ad-direct_sales",
+            "locale": "ar",
+            "title": "واتساب العيادة: 052-8885800",
+            "body": "د. سامر محمد أبو مخ بباقة — جت أولاً بدون مواعيد.\n\nالدوام: الأحد 08:00 - 13:00 / 16:00 - 19:30 · الإثنين 08:00 - 13:00 / 16:00 - 19:30 · الثلاثاء 08:00 - 13:30 / مغلق (استشارات واتساب) · الأربعاء 08:00 - 13:00 / 16:00 - 19:30 · الخميس 08:00 - 13:00 / 16:00 - 19:30 · الجمعة 08:00 - 12:30 / عطلة نهاية الأسبوع · السبت طوارئ واستفسارات هاتفية للمسجلين / مغلق\nواتساب 052-8885800 (مش للطوارئ).\nhttps://drsamerped.ai.studio\nما في عرض وما في كوبون.\n\nإذا مناسب — جيبوه عالعيادة.\nCTA: جيبوه عالعيادة"
+          },
+          {
+            "format": "ad-unique_advantage",
+            "locale": "ar",
+            "title": "مجمع النور، طابق 1 — جت أولاً",
+            "body": "بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت.\n\nتغطية كلاليت واقعة للأعضاء — مش عرض ومش كوبون.\n\nد. سامر محمد أبو مخ بباقة — جت أولاً بدون مواعيد.\n\nالدوام: الأحد 08:00 - 13:00 / 16:00 - 19:30 · الإثنين 08:00 - 13:00 / 16:00 - 19:30 · الثلاثاء 08:00 - 13:30 / مغلق (استشارات واتساب) · الأربعاء 08:00 - 13:00 / 16:00 - 19:30 · الخميس 08:00 - 13:00 / 16:00 - 19:30 · الجمعة 08:00 - 12:30 / عطلة نهاية الأسبوع · السبت طوارئ واستفسارات هاتفية للمسجلين / مغلق\nواتساب 052-8885800 (مش للطوارئ).\nhttps://drsamerped.ai.studio\nما في عرض وما في كوبون.\nCTA: جيبوه عالعيادة"
+          },
+          {
+            "format": "ad-strong_offer",
+            "locale": "en",
+            "title": "Dr. Samer Abu Mokh — walk-in",
+            "body": "Dr. Samer Abu Mokh — walk-in, first come first served.\n\nFor Parents.\n\nHours: Sun 08:00 - 13:00 / 16:00 - 19:30 · Mon 08:00 - 13:00 / 16:00 - 19:30 · Tue 08:00 - 13:30 / closed (WhatsApp consults) · Wed 08:00 - 13:00 / 16:00 - 19:30 · Thu 08:00 - 13:00 / 16:00 - 19:30 · Fri 08:00 - 12:30 / weekend · Sat emergency / phone questions for registered families / closed\nWhatsApp 052-8885800 (not for emergencies).\nhttps://drsamerped.ai.studio\nNo offer and no coupon.\n\nCome to the clinic\nCTA: Come to the clinic"
+          },
+          {
+            "format": "ad-very_short",
+            "locale": "en",
+            "title": "Al-Nour, 1st floor",
+            "body": "Dr. Samer Abu Mokh — walk-in, first come first served. Hours: Sun 08:00 - 13:00 / 16:00 - 19:30 · Mon 08:00 - 13:00 / 16:00 - 19:30 · Tue 08:00 - 13:30 / closed (WhatsApp consults) · Wed 08:00 - 13:00 / 16:00 - 19:30 · Thu 08:00 - 13:00 / 16:00 - 19:30 · Fri 08:00 - 12:30 / weekend · Sat emergency / phone questions for registered families / closed WhatsApp 052-8885800 (not for emergencies). Come to the clinic\nCTA: Come to the clinic"
+          },
+          {
+            "format": "ad-emotional",
+            "locale": "en",
+            "title": "Child sick? Walk in today",
+            "body": "When a child is sick, families need to know where to go today.\n\nDr. Samer Abu Mokh — walk-in, first come first served.\n\nHours: Sun 08:00 - 13:00 / 16:00 - 19:30 · Mon 08:00 - 13:00 / 16:00 - 19:30 · Tue 08:00 - 13:30 / closed (WhatsApp consults) · Wed 08:00 - 13:00 / 16:00 - 19:30 · Thu 08:00 - 13:00 / 16:00 - 19:30 · Fri 08:00 - 12:30 / weekend · Sat emergency / phone questions for registered families / closed\nWhatsApp 052-8885800 (not for emergencies).\nhttps://drsamerped.ai.studio\nNo offer and no coupon.\nCTA: Come to the clinic"
+          },
+          {
+            "format": "ad-narrative",
+            "locale": "en",
+            "title": "Dr. Samer Abu Mokh at Al-Nour, 1st floor",
+            "body": "Dr. Samer Abu Mokh — walk-in, first come first served.\n\nPlace: Al-Nour, 1st floor.\n\nHours: Sun 08:00 - 13:00 / 16:00 - 19:30 · Mon 08:00 - 13:00 / 16:00 - 19:30 · Tue 08:00 - 13:30 / closed (WhatsApp consults) · Wed 08:00 - 13:00 / 16:00 - 19:30 · Thu 08:00 - 13:00 / 16:00 - 19:30 · Fri 08:00 - 12:30 / weekend · Sat emergency / phone questions for registered families / closed\nWhatsApp 052-8885800 (not for emergencies).\nhttps://drsamerped.ai.studio\nNo offer and no coupon.\nCTA: Come to the clinic"
+          },
+          {
+            "format": "ad-direct_sales",
+            "locale": "en",
+            "title": "WhatsApp 052-8885800",
+            "body": "Dr. Samer Abu Mokh — walk-in, first come first served.\n\nHours: Sun 08:00 - 13:00 / 16:00 - 19:30 · Mon 08:00 - 13:00 / 16:00 - 19:30 · Tue 08:00 - 13:30 / closed (WhatsApp consults) · Wed 08:00 - 13:00 / 16:00 - 19:30 · Thu 08:00 - 13:00 / 16:00 - 19:30 · Fri 08:00 - 12:30 / weekend · Sat emergency / phone questions for registered families / closed\nWhatsApp 052-8885800 (not for emergencies).\nhttps://drsamerped.ai.studio\nNo offer and no coupon.\n\nIf this is you — Come to the clinic.\nCTA: Come to the clinic"
+          },
+          {
+            "format": "ad-unique_advantage",
+            "locale": "en",
+            "title": "no queues · no long wait · 100% for",
+            "body": "no queues · no long wait · 100% for Clalit members.\n\nClalit coverage is a fact for members — not a promo and not a coupon.\n\nDr. Samer Abu Mokh — walk-in, first come first served.\n\nHours: Sun 08:00 - 13:00 / 16:00 - 19:30 · Mon 08:00 - 13:00 / 16:00 - 19:30 · Tue 08:00 - 13:30 / closed (WhatsApp consults) · Wed 08:00 - 13:00 / 16:00 - 19:30 · Thu 08:00 - 13:00 / 16:00 - 19:30 · Fri 08:00 - 12:30 / weekend · Sat emergency / phone questions for registered families / closed\nWhatsApp 052-8885800 (not for emergencies).\nhttps://drsamerped.ai.studio\nNo offer and no coupon.\nCTA: Come to the clinic"
+          }
+        ],
+        "brandKit": {
+          "sawek": {
+            "black": "#050505",
+            "red": "#ff1a1a",
+            "yellow": "#ffe500"
+          },
+          "clientPrimary": "#ffe500",
+          "clientSecondary": "#ff1a1a",
+          "note": {
+            "he": "צבעי לקוח לא נמצאו בסריקה — ערכת העיצוב לפי תחום.",
+            "ar": "ألوان العميل ما انوجدت بالمسح — طقم التصميم حسب المجال.",
+            "en": "No client colors in the scan — design kit follows the vertical."
+          }
+        }
+      },
+      "mediaExtra": {
+        "producedBy": [
+          "media"
+        ],
+        "frequency": {
+          "he": "תקרת תדירות 2/יום עד שיש אירוע המרה אמיתי. לא ננחש reach.",
+          "ar": "سقف تكرار 2/يوم حتى حدث تحويل حقيقي.",
+          "en": "Frequency cap 2/day until a real conversion event exists. Reach will not be guessed."
+        },
+        "tests": [
+          {
+            "name": {
+              "he": "A/B הוק",
+              "ar": "A/B الخطاف",
+              "en": "A/B hook"
+            },
+            "a": {
+              "he": "הוק בעיה: طوابير الساعات",
+              "ar": "خطاف المشكلة",
+              "en": "Problem hook: طوابير الساعات"
+            },
+            "b": {
+              "he": "הוק יתרון: بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت",
+              "ar": "خطاف الميزة",
+              "en": "Advantage hook: بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت"
+            },
+            "metric": {
+              "he": "פניות אמיתיות עם שם, לא CTR לבד.",
+              "ar": "طلبات باسم حقيقي لا CTR فقط.",
+              "en": "Real named enquiries, not CTR alone."
+            }
+          },
+          {
+            "name": {
+              "he": "A/B CTA",
+              "ar": "A/B CTA",
+              "en": "A/B CTA"
+            },
+            "a": {
+              "he": "הגיעו למרפאה",
+              "ar": "جيبوه عالعيادة",
+              "en": "Come to the clinic"
+            },
+            "b": {
+              "he": "לפרטים",
+              "ar": "للتفاصيل",
+              "en": "Learn more"
+            },
+            "metric": {
+              "he": "אם «לפרטים» מביא סקרנים — כבו.",
+              "ar": "إذا «للتفاصيل» يجلب فضوليين — أوقفوا.",
+              "en": "If “learn more” brings tyre-kickers — kill it."
+            }
+          }
+        ],
+        "weekly": [
+          {
+            "he": "IF CTR גבוה אבל אין הודעות / תורים THEN ההוק עובד, ההצעה או הנחיתה נשברים. אל תסקיילו קריאייטיב — תקנו CTA ומסך הבא.",
+            "ar": "IF CTR مرتفع بلا رسائل / مواعيد THEN الخطاف يعمل والعرض أو الصفحة ينكسران. لا توسّعوا الإبداع — أصلحوا CTA.",
+            "en": "IF High CTR but no messages / bookings THEN The hook works; the offer or landing is broken. Don’t scale the creative — fix the CTA and next screen."
+          },
+          {
+            "he": "IF פניות רבות בלי שם אמיתי / סקרנים THEN החמירו CTA להרשמה / ביקור / וואטסאפ — לא «לפרטים» ולא רכישה.",
+            "ar": "IF طلبات كثيرة بلا اسم حقيقي / فضوليون THEN شدّدوا CTA للتسجيل / الزيارة / واتساب — مش «للتفاصيل» ومش شراء.",
+            "en": "IF Many enquiries with no real name / tyre-kickers THEN Tighten CTA to register / visit / WhatsApp — not “learn more” and not a purchase."
+          },
+          {
+            "he": "IF יש חשיפה בלי ביקורים / הרשמות אחרי שבוע THEN אל תמטבו ל-Purchase/ROAS — אין תשלום מהלקוח. בדקו מסר, גיאו, ו-CTA לביקור.",
+            "ar": "IF في وصول بلا زيارات / تسجيل بعد أسبوع THEN لا تحسّنوا على Purchase/ROAS — الزبون ما بدفع. افحصوا الرسالة والجغرافيا وCTA للزيارة.",
+            "en": "IF Reach without visits / enrollments after a week THEN Do not optimize for Purchase/ROAS — the client does not pay. Check message, geo, and visit CTA."
+          },
+          {
+            "he": "IF יש 3+ ביקורים / הרשמות אמיתיות THEN העלו תקציב ב-20% כל 3 ימים, לא פי 3 ביום אחד.",
+            "ar": "IF 3+ زيارات / تسجيلات حقيقية THEN ارفعوا الميزانية 20% كل 3 أيام لا ×3 في يوم.",
+            "en": "IF 3+ real visits / enrollments THEN Raise budget 20% every 3 days, not 3× in one day."
+          }
+        ],
+        "planOnly": {
+          "he": "PLAN בלבד. SAWEK AD לא מפרסם למטא/גוגל/טיקטוק/יוטיוב.",
+          "ar": "خطة فقط. SAWEK AD لا ينشر على الشبكات.",
+          "en": "PLAN only. SAWEK AD does not publish to Meta/Google/TikTok/YouTube."
+        },
+        "audiences": {
+          "he": "גיאו: باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات). ליבה: הורים. בלי lookalike לפני 50 המרות.",
+          "ar": "الجغرافيا: باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات). النواة: הורים.",
+          "en": "Geo: باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات). Core: הורים. No lookalike before 50 conversions."
+        },
+        "keywords": [
+          "طبيب أطفال",
+          "طبيب أطفال باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات)",
+          "walk_in"
+        ],
+        "placements": {
+          "he": "meta: Feed + Stories. Skip Audience Network until you have clean conversion data. · google: Search only in week 1. Display later, and only with brand exclusions. · tiktok: In-feed only. Spark Ads only if you have real organic posts — do not fake them. · youtube: In-stream skippable + in-feed. No bumper until a real 6s cut exists. No invented view counts.",
+          "ar": "meta: Feed + Stories. Skip Audience Network until you have clean conversion data. · google: Search only in week 1. Display later, and only with brand exclusions. · tiktok: In-feed only. Spark Ads only if you have real organic posts — do not fake them. · youtube: In-stream skippable + in-feed. No bumper until a real 6s cut exists. No invented view counts.",
+          "en": "meta: Feed + Stories. Skip Audience Network until you have clean conversion data. · google: Search only in week 1. Display later, and only with brand exclusions. · tiktok: In-feed only. Spark Ads only if you have real organic posts — do not fake them. · youtube: In-stream skippable + in-feed. No bumper until a real 6s cut exists. No invented view counts."
+        }
+      },
+      "leads": {
+        "producedBy": [
+          "optimizer",
+          "strategic"
+        ],
+        "magnet": {
+          "he": "מגנט לחשיפה: דף «איך מגיעים / הרשמה». אין מחיר, אין קופון, אין ייעוץ חינם כמבצע.",
+          "ar": "مغناطيس تعرّض: صفحة «كيف تجوا / تسجيل». بلا سعر وبلا كوبون.",
+          "en": "Exposure magnet: a how-to-arrive / registration page. No price, no coupon, no free-consult promo."
+        },
+        "formFields": [
+          {
+            "field": {
+              "he": "שם מלא",
+              "ar": "الاسم الكامل",
+              "en": "Full name"
+            },
+            "required": true
+          },
+          {
+            "field": {
+              "he": "טלפון",
+              "ar": "هاتف",
+              "en": "Phone"
+            },
+            "required": true
+          },
+          {
+            "field": {
+              "he": "שפה מועדפת (עב/ער/En)",
+              "ar": "اللغة المفضلة",
+              "en": "Preferred language (HE/AR/EN)"
+            },
+            "required": true
+          },
+          {
+            "field": {
+              "he": "סיבת הפנייה — במילים שלהם",
+              "ar": "سبب التواصل",
+              "en": "Reason — in their words"
+            },
+            "required": false
+          }
+        ],
+        "crm": [
+          {
+            "stage": {
+              "he": "חדש",
+              "ar": "جديد",
+              "en": "New"
+            },
+            "meaning": {
+              "he": "הודעה נכנסה. אין ליד בלי שם.",
+              "ar": "رسالة واردة. لا عميل بلا اسم.",
+              "en": "Inbound message. No lead without a name."
+            }
+          },
+          {
+            "stage": {
+              "he": "שיחה",
+              "ar": "حديث",
+              "en": "Talk"
+            },
+            "meaning": {
+              "he": "נקבע מגע אנושי.",
+              "ar": "تواصل بشري.",
+              "en": "Human contact booked."
+            }
+          },
+          {
+            "stage": {
+              "he": "תור / ביקור",
+              "ar": "موعد / زيارة",
+              "en": "Booked / visit"
+            },
+            "meaning": {
+              "he": "הגיעו לפי סדר הגעה.",
+              "ar": "إجو حسب الدور.",
+              "en": "They walked in."
+            }
+          },
+          {
+            "stage": {
+              "he": "לא רלוונטי",
+              "ar": "غير مناسب",
+              "en": "Unqualified"
+            },
+            "meaning": {
+              "he": "סקרן / אין כוונה. אל תסקיילו את ההצעה שהביאה אותם.",
+              "ar": "فضولي. لا توسّعوا العرض الذي جلبهم.",
+              "en": "Curious / no intent. Don’t scale the offer that brought them."
+            }
+          }
+        ],
+        "bookingCta": {
+          "he": "הגיעו למרפאה",
+          "ar": "جيبوه عالعيادة",
+          "en": "Come to the clinic"
+        },
+        "promoCodes": {
+          "he": "אין קודי מבצע. Intake סירב להמציא קוד הנחה.",
+          "ar": "لا أكواد. رفض اختراع رمز خصم.",
+          "en": "No promo codes. Intake refused to invent a discount code."
+        },
+        "retargeting": {
+          "he": "רימרקטינג רק אחרי פיקסל/הודעה אמיתית. בלי קהל «דומה» לפני 50 המרות.",
+          "ar": "إعادة استهداف بعد حدث حقيقي. بلا lookalike قبل 50 تحويلاً.",
+          "en": "Retarget only after a real pixel/message event. No lookalike before 50 conversions."
+        },
+        "cadence": [
+          {
+            "day": "0",
+            "channel": {
+              "he": "WhatsApp",
+              "ar": "واتساب",
+              "en": "WhatsApp"
+            },
+            "action": {
+              "he": "אישור שקיבלנו פנייה. שאלה אחת.",
+              "ar": "تأكيد الاستلام. سؤال واحد.",
+              "en": "Confirm we got the enquiry. One question."
+            }
+          },
+          {
+            "day": "1",
+            "channel": {
+              "he": "SMS",
+              "ar": "SMS",
+              "en": "SMS"
+            },
+            "action": {
+              "he": "רק אם אין תשובה. בלי מבצע.",
+              "ar": "فقط إن لم يردّوا. بلا عرض.",
+              "en": "Only if no reply. No offer."
+            }
+          },
+          {
+            "day": "3",
+            "channel": {
+              "he": "אימייל",
+              "ar": "بريد",
+              "en": "Email"
+            },
+            "action": {
+              "he": "אימייל 2 מהרצף — הבעיה.",
+              "ar": "بريد 2 — المشكلة.",
+              "en": "Email 2 in the sequence — the problem."
+            }
+          },
+          {
+            "day": "7",
+            "channel": {
+              "he": "WhatsApp",
+              "ar": "واتساب",
+              "en": "WhatsApp"
+            },
+            "action": {
+              "he": "סגירה או סגירת ליד. לא לרדוף שבועיים.",
+              "ar": "إغلاق أو إقفال. لا ملاحقة لأسبوعين.",
+              "en": "Close or close-out the lead. Don’t chase for two weeks."
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
     "id": "e3e112bd-d36a-4a10-8b5f-fccf4edfd83d",
     "createdAt": "2026-08-27T20:42:54.500Z",
     "updatedAt": "2026-08-27T20:42:54.503Z",
