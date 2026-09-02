@@ -120,12 +120,12 @@ export function DashboardPage() {
     { id: "score", key: "lab.tab.score" },
   ];
 
-  if (!booted) return <p className="p-10 text-center text-zinc-500">…</p>;
+  if (!booted) return <p className="p-10 text-center text-muted">…</p>;
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10" dir={locale === "en" ? "ltr" : "rtl"}>
       <ConquerHeadline subtitle={t("nav.dashboard")} />
-      <p className="mb-4 text-center text-xs text-zinc-500">{t("dash.filter")}</p>
+      <p className="mb-4 text-center text-xs text-muted">{t("dash.filter")}</p>
       <div className="mb-6 flex flex-wrap justify-center gap-2">
         {filters.map((f) => (
           <button
@@ -134,7 +134,7 @@ export function DashboardPage() {
             onClick={() => setFilter(f.id)}
             className={cn(
               "rounded-full px-3 py-1 text-xs font-bold",
-              filter === f.id ? "bg-omni-yellow text-black" : "border border-white/15 text-zinc-300",
+              filter === f.id ? "bg-navy text-white" : "border border-navy/15 text-muted",
             )}
           >
             {t(f.key)}
@@ -142,15 +142,15 @@ export function DashboardPage() {
         ))}
       </div>
 
-      {shown.length === 0 && <p className="text-center text-zinc-400">{t("dash.empty")}</p>}
+      {shown.length === 0 && <p className="text-center text-muted">{t("dash.empty")}</p>}
 
       <ul className="space-y-3">
         {shown.map((item) => (
-          <li key={item.id} className="rounded-2xl border border-white/10 bg-omni-card p-4">
+          <li key={item.id} className="rounded-2xl border border-navy/10 bg-white p-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <p className="font-bold text-white">{item.name}</p>
-                <p className="text-xs text-zinc-500">
+                <p className="font-bold text-navy">{item.name}</p>
+                <p className="text-xs text-muted">
                   {item.updatedAt.slice(0, 16).replace("T", " ")} · {item.featureType}
                 </p>
               </div>

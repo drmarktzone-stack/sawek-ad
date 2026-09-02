@@ -27,21 +27,21 @@ function AuditList({
         const chips = hours ? hoursChips(pack.intake.clinicHours || "", locale, 3) : [];
         const evidence = hours ? t("audit.hoursFromScan") : clipEvidence(s.evidence[locale]);
         return (
-          <li key={s.id} className="rounded-xl border border-white/10 bg-black/30 px-3 py-2.5">
-            <p className="text-sm leading-relaxed text-zinc-100">{s.label[locale]}</p>
+          <li key={s.id} className="rounded-xl border border-navy/10 bg-background px-3 py-2.5">
+            <p className="text-sm leading-relaxed text-foreground">{s.label[locale]}</p>
             {hours && chips.length ? (
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {chips.map((c) => (
                   <span
                     key={c}
-                    className="rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-[13px] font-semibold text-zinc-100"
+                    className="rounded-full border border-navy/15 bg-navy/10 px-2.5 py-1 text-[13px] font-semibold text-foreground"
                   >
                     {c}
                   </span>
                 ))}
               </div>
             ) : (
-              <p className="mt-1.5 text-sm leading-relaxed text-zinc-200">{evidence}</p>
+              <p className="mt-1.5 text-sm leading-relaxed text-foreground">{evidence}</p>
             )}
             {s.id === "no-photos" && onPack ? (
               <ImageOfferPicker pack={pack} locale={locale} onPack={onPack} />
@@ -69,12 +69,12 @@ export function SiteAuditPanel({
   return (
     <>
       {(audit.strengths.length || audit.weaknesses.length) ? (
-        <section data-audit="site" className="mb-8 rounded-2xl border border-omni-yellow/25 bg-omni-card p-5">
+        <section data-audit="site" className="mb-8 rounded-2xl border border-omni-yellow/25 bg-white p-5">
           <p className="text-[13px] font-black uppercase tracking-[0.18em] text-omni-yellow">{t("audit.title")}</p>
-          <p className="mt-1 text-sm leading-relaxed text-zinc-300">{t("audit.lead")}</p>
+          <p className="mt-1 text-sm leading-relaxed text-muted">{t("audit.lead")}</p>
           <div className="mt-4 grid gap-4 md:grid-cols-2">
             <div>
-              <p className="text-[13px] font-bold uppercase tracking-wide text-emerald-400">{t("audit.strengths")}</p>
+              <p className="text-[13px] font-bold uppercase tracking-wide text-emerald-700">{t("audit.strengths")}</p>
               <AuditList items={audit.strengths} locale={locale} pack={pack} onPack={onPack} />
             </div>
             <div>
@@ -86,12 +86,12 @@ export function SiteAuditPanel({
       ) : null}
 
       {past ? (
-        <section data-audit="past-campaigns" className="mb-8 rounded-2xl border border-omni-yellow/25 bg-omni-card p-5">
+        <section data-audit="past-campaigns" className="mb-8 rounded-2xl border border-omni-yellow/25 bg-white p-5">
           <p className="text-[13px] font-black uppercase tracking-[0.18em] text-omni-yellow">{t("audit.pastTitle")}</p>
-          <p className="mt-1 text-sm leading-relaxed text-zinc-300">{t("audit.pastLead")}</p>
+          <p className="mt-1 text-sm leading-relaxed text-muted">{t("audit.pastLead")}</p>
           <div className="mt-4 grid gap-4 md:grid-cols-2">
             <div>
-              <p className="text-[13px] font-bold uppercase tracking-wide text-emerald-400">{t("audit.strengths")}</p>
+              <p className="text-[13px] font-bold uppercase tracking-wide text-emerald-700">{t("audit.strengths")}</p>
               <AuditList items={past.strengths} locale={locale} pack={pack} onPack={onPack} />
             </div>
             <div>
@@ -100,19 +100,19 @@ export function SiteAuditPanel({
             </div>
           </div>
           <div className="mt-4 grid gap-3 md:grid-cols-3">
-            <div className="rounded-xl border border-white/10 bg-black/30 px-3 py-2">
+            <div className="rounded-xl border border-navy/10 bg-background px-3 py-2">
               <p className="text-[13px] font-bold uppercase tracking-wide text-omni-yellow">{t("audit.inferredAudience")}</p>
-              <p className="mt-1 text-sm leading-relaxed text-zinc-100">{past.inferredAudience[locale]}</p>
+              <p className="mt-1 text-sm leading-relaxed text-foreground">{past.inferredAudience[locale]}</p>
             </div>
-            <div className="rounded-xl border border-white/10 bg-black/30 px-3 py-2">
+            <div className="rounded-xl border border-navy/10 bg-background px-3 py-2">
               <p className="text-[13px] font-bold uppercase tracking-wide text-omni-yellow">{t("audit.recommendedAudience")}</p>
-              <p className="mt-1 text-sm leading-relaxed text-zinc-100">{past.recommendedAudience[locale]}</p>
+              <p className="mt-1 text-sm leading-relaxed text-foreground">{past.recommendedAudience[locale]}</p>
             </div>
-            <div className="rounded-xl border border-white/10 bg-black/30 px-3 py-2">
+            <div className="rounded-xl border border-navy/10 bg-background px-3 py-2">
               <p className="text-[13px] font-bold uppercase tracking-wide text-omni-red">{t("audit.failedWhere")}</p>
               <ul className="mt-1 space-y-1">
                 {past.failedWhere.map((s) => (
-                  <li key={s.id} className="text-sm leading-relaxed text-zinc-100">
+                  <li key={s.id} className="text-sm leading-relaxed text-foreground">
                     {s.label[locale]}
                   </li>
                 ))}

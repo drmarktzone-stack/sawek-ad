@@ -52,8 +52,8 @@ export function DepartmentRail() {
             className={cn(
               "shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold",
               active
-                ? "bg-omni-yellow text-black"
-                : "border border-white/10 text-zinc-300 hover:border-omni-yellow/40",
+                ? "bg-navy text-white"
+                : "border border-navy/10 text-muted hover:border-gold",
             )}
           >
             {t(item.key)}
@@ -67,7 +67,7 @@ export function DepartmentRail() {
 export function ProducedBy({ agents }: { agents: AgentId[] }) {
   const { locale, t } = useI18n();
   return (
-    <p className="mb-4 text-xs text-zinc-500">
+    <p className="mb-4 text-xs text-muted">
       {t("dept.producedBy")}{" "}
       {agents.map((a) => AGENT_LABEL[a][locale]).join(" · ")}
     </p>
@@ -84,8 +84,8 @@ export function PackLangToggle({
   const { t } = useI18n();
   return (
     <div className="flex items-center gap-2">
-      <span className="text-xs text-zinc-500">{t("result.packLang")}</span>
-      <div className="flex rounded-full border border-white/10 p-0.5">
+      <span className="text-xs text-muted">{t("result.packLang")}</span>
+      <div className="flex rounded-full border border-navy/10 p-0.5">
         {LOCALES.map((l) => (
           <button
             key={l.id}
@@ -93,7 +93,7 @@ export function PackLangToggle({
             onClick={() => onChange(l.id)}
             className={cn(
               "rounded-full px-2.5 py-1 text-xs font-semibold",
-              value === l.id ? "bg-omni-yellow text-black" : "text-zinc-300",
+              value === l.id ? "bg-navy text-white" : "text-muted",
             )}
           >
             {l.label}
@@ -141,14 +141,14 @@ export function DepartmentShell({
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <ConquerHeadline subtitle={t(titleKey)} />
-      <p className="mx-auto mb-6 max-w-2xl text-center text-sm text-zinc-400">{t(leadKey)}</p>
+      <p className="mx-auto mb-6 max-w-2xl text-center text-sm text-muted">{t(leadKey)}</p>
       <DepartmentRail />
 
-      {!booted && <p className="text-center text-zinc-500">…</p>}
+      {!booted && <p className="text-center text-muted">…</p>}
 
       {booted && !pack && (
-        <div className="rounded-2xl border border-white/10 bg-omni-card p-8 text-center">
-          <p className="text-zinc-300">{t("dept.empty")}</p>
+        <div className="rounded-2xl border border-navy/10 bg-white p-8 text-center">
+          <p className="text-muted">{t("dept.empty")}</p>
           <div className="mt-5 flex flex-wrap justify-center gap-3">
             <Button type="button" onClick={loadDemo}>
               {t("dept.loadDemo")}
@@ -162,10 +162,10 @@ export function DepartmentShell({
 
       {pack && (
         <>
-          <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-omni-card px-4 py-3">
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-navy/10 bg-white px-4 py-3">
             <div>
-              <p className="text-sm font-black text-white">{pack.name}</p>
-              <p className="text-[11px] text-zinc-500">
+              <p className="text-sm font-black text-navy">{pack.name}</p>
+              <p className="text-sm text-muted">
                 {t("result.score")}: {pack.intakeReport.completeness}/100 · {pack.intake.offer}
               </p>
             </div>
@@ -194,7 +194,7 @@ export function Card({
   children: ReactNode;
 }) {
   return (
-    <section className="rounded-2xl border border-white/10 bg-omni-card p-5">
+    <section className="rounded-2xl border border-navy/10 bg-white p-5">
       <h2 className="mb-3 text-sm font-black uppercase tracking-wide text-omni-yellow">{title}</h2>
       {children}
     </section>

@@ -124,11 +124,11 @@ export function ResultView({
       <DepartmentRail />
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black text-white">{tr("result.ready")}</h1>
-          <p className="mt-1 text-zinc-400">{pack.name}</p>
+          <h1 className="text-3xl font-black text-navy">{tr("result.ready")}</h1>
+          <p className="mt-1 text-muted">{pack.name}</p>
           <LangLink
             href={`/lp/${pack.id}`}
-            className="mt-3 inline-flex items-center gap-2 rounded-full bg-omni-yellow px-4 py-2 text-sm font-black text-black"
+            className="mt-3 inline-flex items-center gap-2 rounded-full bg-gold px-4 py-2 text-sm font-black text-navy"
           >
             <ExternalLink className="size-4" />
             {tr("end.clientLanding")}
@@ -162,7 +162,7 @@ export function ResultView({
         <NewCampaignCta other hint className="items-center text-center" />
       </div>
 
-      <div className="mb-6 rounded-2xl border border-omni-yellow/20 bg-omni-card p-4">
+      <div className="mb-6 rounded-2xl border border-omni-yellow/20 bg-white p-4">
         <p className="mb-3 text-xs font-black uppercase tracking-[0.18em] text-omni-yellow">
           {tr("agents.title")}
         </p>
@@ -176,8 +176,8 @@ export function ResultView({
               ["optimizer", "agents.optimizer"],
             ] as const
           ).map(([id, key]) => (
-            <li key={id} className="rounded-xl border border-white/10 px-3 py-2">
-              <p className="text-[13px] font-semibold text-white">{tr(key)}</p>
+            <li key={id} className="rounded-xl border border-navy/10 px-3 py-2">
+              <p className="text-[13px] font-semibold text-navy">{tr(key)}</p>
               <p className="mt-1 text-[13px] font-bold uppercase tracking-wide text-omni-yellow">
                 {pack.agentStatus[id] === "approved" || pack.agentStatus[id] === "complete"
                   ? tr("status.complete")
@@ -186,7 +186,7 @@ export function ResultView({
             </li>
           ))}
         </ul>
-        <p className="mt-3 text-xs text-zinc-500">{tr("agents.hitl")}</p>
+        <p className="mt-3 text-xs text-muted">{tr("agents.hitl")}</p>
       </div>
 
       <div className="mb-6 flex flex-wrap items-center gap-2">
@@ -231,8 +231,8 @@ export function ResultView({
         </Button>
         <PublishToSocial campaignId={pack.id} pack={pack} locale={packLang} compact />
         <div className="ms-auto flex items-center gap-2">
-          <span className="text-xs text-zinc-500">{tr("result.packLang")}</span>
-          <div className="flex rounded-full border border-white/10 p-0.5">
+          <span className="text-xs text-muted">{tr("result.packLang")}</span>
+          <div className="flex rounded-full border border-navy/10 p-0.5">
             {LOCALES.map((l) => (
               <button
                 key={l.id}
@@ -240,7 +240,7 @@ export function ResultView({
                 onClick={() => setPackLang(l.id)}
                 className={cn(
                   "rounded-full px-2.5 py-1 text-xs font-semibold",
-                  packLang === l.id ? "bg-omni-yellow text-black" : "text-zinc-300",
+                  packLang === l.id ? "bg-navy text-white" : "text-muted",
                 )}
               >
                 {l.label}
@@ -251,34 +251,34 @@ export function ResultView({
       </div>
 
       <div className="mb-8 grid gap-4 md:grid-cols-2">
-        <div className="rounded-2xl border border-white/10 bg-omni-card p-5">
-          <p className="text-xs font-bold uppercase tracking-wide text-zinc-500">
+        <div className="rounded-2xl border border-navy/10 bg-white p-5">
+          <p className="text-xs font-bold uppercase tracking-wide text-muted">
             {tr("result.score")}
           </p>
           <p className="mt-1 text-3xl font-black text-omni-yellow">
             {pack.intakeReport.completeness}/100
           </p>
-          <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/10">
+          <div className="mt-3 h-2 overflow-hidden rounded-full bg-navy/10">
             <div
               className="h-full bg-omni-yellow"
               style={{ width: `${pack.intakeReport.completeness}%` }}
             />
           </div>
-          <p className="mt-2 text-xs text-zinc-500">
+          <p className="mt-2 text-xs text-muted">
             {tr("result.scoreHint")}
           </p>
         </div>
-        <div className="rounded-2xl border border-white/10 bg-omni-card p-5">
-          <p className="text-xs font-bold uppercase tracking-wide text-zinc-500">
+        <div className="rounded-2xl border border-navy/10 bg-white p-5">
+          <p className="text-xs font-bold uppercase tracking-wide text-muted">
             {tr("result.scenario")}
           </p>
           {pack.media.scenarioFromUserNumbers ? (
             <>
-              <p className="mt-2 text-sm text-zinc-200">{pack.media.worstCase[locale]}</p>
-              <p className="mt-2 text-sm text-zinc-200">{pack.media.realistic[locale]}</p>
+              <p className="mt-2 text-sm text-foreground">{pack.media.worstCase[locale]}</p>
+              <p className="mt-2 text-sm text-foreground">{pack.media.realistic[locale]}</p>
             </>
           ) : (
-            <p className="mt-2 text-sm text-zinc-400">{tr("result.noScenario")}</p>
+            <p className="mt-2 text-sm text-muted">{tr("result.noScenario")}</p>
           )}
         </div>
       </div>
@@ -286,13 +286,13 @@ export function ResultView({
       {pack.coach && <CoachImprovedStrip report={pack.coach} locale={packLang} />}
 
       <div className="mb-8 grid gap-4 lg:grid-cols-2">
-        <div className="rounded-2xl border border-omni-yellow/25 bg-omni-card p-5">
+        <div className="rounded-2xl border border-omni-yellow/25 bg-white p-5">
           <p className="text-xs font-bold uppercase tracking-wide text-omni-yellow">{tr("result.mission")}</p>
-          <p className="mt-2 text-sm leading-relaxed text-zinc-200">{missionOf(pack.intake)[locale]}</p>
+          <p className="mt-2 text-sm leading-relaxed text-foreground">{missionOf(pack.intake)[locale]}</p>
         </div>
-        <div className="rounded-2xl border border-white/10 bg-omni-card p-5">
+        <div className="rounded-2xl border border-navy/10 bg-white p-5">
           <p className="text-xs font-bold uppercase tracking-wide text-omni-yellow">{tr("result.highlights")}</p>
-          <ul className="mt-2 list-disc space-y-1 pe-5 text-sm text-zinc-300">
+          <ul className="mt-2 list-disc space-y-1 pe-5 text-sm text-muted">
             {highlightsOf(pack).map((h, i) => (
               <li key={i}>{h[locale]}</li>
             ))}
@@ -312,10 +312,10 @@ export function ResultView({
           <LangLink
             key={card.href}
             href={card.href}
-            className="rounded-2xl border border-white/10 bg-omni-card p-4 transition hover:border-omni-yellow/50"
+            className="rounded-2xl border border-navy/10 bg-white p-4 transition hover:border-gold"
           >
             <p className="text-xs font-black uppercase tracking-wide text-omni-yellow">{tr(card.key)}</p>
-            <p className="mt-2 line-clamp-3 text-sm text-zinc-300">{card.body}</p>
+            <p className="mt-2 line-clamp-3 text-sm text-muted">{card.body}</p>
           </LangLink>
         ))}
       </div>
@@ -324,16 +324,16 @@ export function ResultView({
         <h2 className="mb-3 text-lg font-black">{tr("result.pillars")}</h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {pillarsOf(pack.intake).map((p) => (
-            <div key={p.name} className="rounded-2xl border border-white/10 bg-omni-card p-4">
+            <div key={p.name} className="rounded-2xl border border-navy/10 bg-white p-4">
               <p className="text-sm font-black text-omni-yellow">{p.name}</p>
-              <p className="mt-2 text-xs leading-relaxed text-zinc-400">{p.body[locale]}</p>
+              <p className="mt-2 text-xs leading-relaxed text-muted">{p.body[locale]}</p>
             </div>
           ))}
         </div>
       </div>
 
       {pack.intakeReport.missing.length > 0 && (
-        <div className="mb-4 rounded-2xl border border-omni-yellow/30 bg-omni-yellow/5 p-4 text-sm text-zinc-200">
+        <div className="mb-4 rounded-2xl border border-omni-yellow/30 bg-omni-yellow/5 p-4 text-sm text-foreground">
           {pack.intakeReport.missing.slice(0, 6).map((m) => (
             <p key={m.field}>
               <strong>{m.label[locale]}:</strong> {m.reason[locale]} — {m.impact[locale]}
@@ -342,7 +342,7 @@ export function ResultView({
         </div>
       )}
       {pack.intakeReport.inconsistencies.length > 0 && (
-        <div className="mb-8 rounded-2xl border border-omni-red/40 bg-red-950/40 p-4 text-sm text-red-100">
+        <div className="mb-8 rounded-2xl border border-omni-red/40 bg-red-50 p-4 text-sm text-red-800">
           {pack.intakeReport.inconsistencies.map((inc, i) => (
             <p key={i}>
               <strong>{inc.issue[locale]}:</strong> {inc.detail[locale]}
@@ -390,13 +390,13 @@ export function ResultView({
           .map((p) => (
             <article
               key={`${p.format}-${p.locale}`}
-              className="rounded-2xl border border-omni-yellow/25 bg-omni-card p-5"
+              className="rounded-2xl border border-omni-yellow/25 bg-white p-5"
             >
               <p className="text-[13px] font-black uppercase tracking-[0.14em] text-omni-yellow">
                 {p.format === "landing" ? tr("end.landing") : tr("end.whatsapp")}
               </p>
-              <h3 className="mt-1 font-black text-white">{p.title}</h3>
-              <pre className="mt-3 whitespace-pre-wrap font-sans text-sm leading-6 text-zinc-300">
+              <h3 className="mt-1 font-black text-navy">{p.title}</h3>
+              <pre className="mt-3 whitespace-pre-wrap font-sans text-sm leading-6 text-muted">
                 {p.body}
               </pre>
               {p.format === "landing" && pack.intake.website ? (
@@ -417,22 +417,22 @@ export function ResultView({
           ))}
       </div>
 
-      <div className="mt-10 rounded-2xl border border-white/10 bg-omni-card p-5">
+      <div className="mt-10 rounded-2xl border border-navy/10 bg-white p-5">
         <h2 className="mb-4 text-lg font-black">{tr("media.title")}</h2>
         <div className="grid gap-3 md:grid-cols-3">
           {pack.media.split.map((ch) => (
-            <div key={ch.channel} className="rounded-xl border border-white/10 p-4">
+            <div key={ch.channel} className="rounded-xl border border-navy/10 p-4">
               <p className="text-sm font-black uppercase text-omni-yellow">{ch.channel}</p>
               <p className="text-2xl font-black">{ch.budgetSharePercent}%</p>
               {ch.monthlyBudget != null && (
-                <p className="text-xs text-zinc-400">{ch.monthlyBudget} ₪ / {ch.dailyBudget} ₪</p>
+                <p className="text-xs text-muted">{ch.monthlyBudget} ₪ / {ch.dailyBudget} ₪</p>
               )}
-              <p className="mt-2 text-sm text-zinc-300">{ch.role[locale]}</p>
-              <p className="mt-2 text-xs text-zinc-500">{ch.notes[locale]}</p>
+              <p className="mt-2 text-sm text-muted">{ch.role[locale]}</p>
+              <p className="mt-2 text-xs text-muted">{ch.notes[locale]}</p>
             </div>
           ))}
         </div>
-        <ul className="mt-4 list-disc pe-5 text-xs text-zinc-500">
+        <ul className="mt-4 list-disc pe-5 text-xs text-muted">
           {pack.media.assumptions.map((a, i) => (
             <li key={i}>{a[locale]}</li>
           ))}
@@ -440,7 +440,7 @@ export function ResultView({
       </div>
 
       <div className="mt-10">
-        <Accordion type="multiple" className="rounded-2xl border border-white/10 bg-omni-card px-4">
+        <Accordion type="multiple" className="rounded-2xl border border-navy/10 bg-white px-4">
           {orderedStrategy(pack.strategy).map((block) => {
             const meta = STRATEGY_META.find((s) => s.id === block.id);
             return (
@@ -457,8 +457,8 @@ export function ResultView({
                   <div className="space-y-3">
                     {block.items.map((it, i) => (
                       <div key={i}>
-                        <p className="font-semibold text-white">{it.title[locale]}</p>
-                        <p className="whitespace-pre-wrap text-zinc-400">{it.body[locale]}</p>
+                        <p className="font-semibold text-navy">{it.title[locale]}</p>
+                        <p className="whitespace-pre-wrap text-muted">{it.body[locale]}</p>
                       </div>
                     ))}
                   </div>
@@ -485,7 +485,7 @@ export function ResultView({
             return (
               <article
                 key={s.id}
-                className="overflow-hidden rounded-2xl border border-white/10 bg-black shadow-[0_0_24px_rgba(255,26,26,0.12)]"
+                className="overflow-hidden rounded-2xl border border-navy/10 bg-black shadow-[0_8px_24px_rgba(27,42,74,0.08)]"
               >
                 <CampaignAdVisual
                   locale={locale}
@@ -494,24 +494,24 @@ export function ResultView({
                   index={idx}
                   className="h-36"
                 >
-                  <p className={`text-lg font-black leading-tight ${dark ? "text-white" : "text-black"}`}>
+                  <p className={`text-lg font-black leading-tight ${dark ? "text-navy" : "text-black"}`}>
                     {v?.headline ?? pack.intake.businessName}
                   </p>
                 </CampaignAdVisual>
-                <div className="space-y-3 bg-omni-card p-4">
-                  <p className="line-clamp-3 text-xs text-zinc-400">
+                <div className="space-y-3 bg-white p-4">
+                  <p className="line-clamp-3 text-xs text-muted">
                     {v?.primaryText ?? pack.intake.uniqueAdvantage}
                   </p>
                   <span className="inline-block rounded-full bg-omni-yellow px-3 py-1 text-[13px] font-black text-black">
                     {v?.cta ?? tr("design.produce")}
                   </span>
                   <div className="flex items-center justify-between gap-2">
-                    <p className="text-[13px] font-bold text-zinc-300">{s.name[locale]}</p>
+                    <p className="text-[13px] font-bold text-muted">{s.name[locale]}</p>
                     <div className="flex gap-1">
                       {s.palette.map((c) => (
                         <span
                           key={c}
-                          className="size-3 rounded-full border border-white/20"
+                          className="size-3 rounded-full border border-navy/15"
                           style={{ background: c }}
                         />
                       ))}
@@ -530,7 +530,7 @@ export function ResultView({
             {pack.producedAds.map((ad) => {
               const style = DESIGN_STYLES.find((s) => s.id === ad.styleId);
               return (
-                <div key={ad.id} className="overflow-hidden rounded-2xl border border-white/10">
+                <div key={ad.id} className="overflow-hidden rounded-2xl border border-navy/10">
                   <CampaignAdVisual
                     locale={locale}
                     palette={style?.palette ?? ["#111", "#333"]}
@@ -538,12 +538,12 @@ export function ResultView({
                     index={0}
                     className="min-h-40"
                   >
-                    <p className="text-xs font-bold uppercase text-white/70">{style?.name[locale]}</p>
-                    <h3 className="mt-2 text-2xl font-black text-white">{ad.headline}</h3>
+                    <p className="text-xs font-bold uppercase text-navy/70">{style?.name[locale]}</p>
+                    <h3 className="mt-2 text-2xl font-black text-navy">{ad.headline}</h3>
                   </CampaignAdVisual>
-                  <div className="bg-omni-card p-4">
-                    <p className="text-sm text-zinc-300">{ad.body}</p>
-                    <p className="mt-3 text-xs text-zinc-500">{ad.visualNotes[locale]}</p>
+                  <div className="bg-white p-4">
+                    <p className="text-sm text-muted">{ad.body}</p>
+                    <p className="mt-3 text-xs text-muted">{ad.visualNotes[locale]}</p>
                   </div>
                 </div>
               );
@@ -552,7 +552,7 @@ export function ResultView({
         )}
       </div>
 
-      <div className="mt-10 rounded-2xl border border-white/10 bg-omni-card p-5">
+      <div className="mt-10 rounded-2xl border border-navy/10 bg-white p-5">
         <h2 className="mb-4 text-lg font-black">{tr("opt.title")}</h2>
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
@@ -584,7 +584,7 @@ export function ResultView({
         <Button type="button" className="mt-4" onClick={runOpt}>
           {tr("opt.run")}
         </Button>
-        <ul className="mt-4 space-y-2 text-sm text-zinc-300">
+        <ul className="mt-4 space-y-2 text-sm text-muted">
           {pack.optimizer.ifThen.map((r, i) => (
             <li key={i}>
               <strong>IF</strong> {r.if[locale]} — <strong>THEN</strong> {r.then[locale]}
@@ -601,17 +601,17 @@ export function ResultView({
       </div>
 
       <div className="mt-10 grid gap-4 md:grid-cols-2">
-        <div className="rounded-2xl border border-white/10 bg-omni-card p-5">
+        <div className="rounded-2xl border border-navy/10 bg-white p-5">
           <h3 className="mb-3 font-black">{tr("truth.quality")}</h3>
-          <ul className="list-disc space-y-1 pe-5 text-sm text-zinc-400">
+          <ul className="list-disc space-y-1 pe-5 text-sm text-muted">
             <li>{tr("truth.numbers")}</li>
             <li>{tr("truth.noFake")}</li>
             <li>{tr("truth.worst")}</li>
           </ul>
         </div>
-        <div className="rounded-2xl border border-white/10 bg-omni-card p-5">
+        <div className="rounded-2xl border border-navy/10 bg-white p-5">
           <h3 className="mb-3 font-black">{tr("truth.layer")}</h3>
-          <ul className="list-disc space-y-1 pe-5 text-sm text-zinc-400">
+          <ul className="list-disc space-y-1 pe-5 text-sm text-muted">
             {pack.intakeReport.refusedGuesses.map((g, i) => (
               <li key={i}>{g[locale]}</li>
             ))}
@@ -649,8 +649,8 @@ function AdCard({
   return (
     <article
       className={cn(
-        "rounded-2xl border bg-omni-card p-5",
-        featured ? "border-omni-yellow/50" : "border-white/10",
+        "rounded-2xl border bg-white p-5",
+        featured ? "border-omni-yellow/50" : "border-navy/10",
       )}
     >
       <div className="mb-2 flex items-center justify-between gap-2">
@@ -660,8 +660,8 @@ function AdCard({
           {copied ? t(locale, "cta.copied") : t(locale, "cta.copy")}
         </Button>
       </div>
-      <h3 className="text-xl font-black text-white">{headline}</h3>
-      <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-zinc-300">{body}</p>
+      <h3 className="text-xl font-black text-navy">{headline}</h3>
+      <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-muted">{body}</p>
       <span className="mt-4 inline-block rounded-lg bg-omni-yellow px-3 py-1 text-xs font-black text-black">
         {cta}
       </span>

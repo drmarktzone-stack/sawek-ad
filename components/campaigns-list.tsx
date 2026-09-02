@@ -77,13 +77,13 @@ export function CampaignsList() {
   }
 
   if (!booted) {
-    return <p className="p-10 text-center text-zinc-500">…</p>;
+    return <p className="p-10 text-center text-muted">…</p>;
   }
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10">
       <ConquerHeadline subtitle={t("nav.campaigns")} />
-      <p className="mx-auto mb-6 max-w-2xl text-center text-sm text-zinc-400">{t("dept.opsLead")}</p>
+      <p className="mx-auto mb-6 max-w-2xl text-center text-sm text-muted">{t("dept.opsLead")}</p>
       <DepartmentRail />
 
       {socialFlash && (
@@ -101,18 +101,18 @@ export function CampaignsList() {
       </div>
 
       {list.length === 0 && (
-        <p className="text-center text-zinc-400">{t("campaigns.empty")}</p>
+        <p className="text-center text-muted">{t("campaigns.empty")}</p>
       )}
       <ul className="space-y-3">
         {list.map((c) => (
           <li
             key={c.id}
-            className="rounded-2xl border border-white/10 bg-omni-card p-4"
+            className="rounded-2xl border border-navy/10 bg-white p-4"
           >
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <p className="font-bold text-white">{c.name}</p>
-                <p className="text-[13px] text-zinc-300">
+                <p className="font-bold text-navy">{c.name}</p>
+                <p className="text-[13px] text-muted">
                   {c.createdAt.slice(0, 16).replace("T", " ")} · {c.intake.type} · {c.intake.depth}
                 </p>
                 <p className="mt-1 text-xs text-omni-yellow">
@@ -148,7 +148,7 @@ export function CampaignsList() {
             </div>
             <CampaignMiniPreview pack={c} locale={locale} />
             <div className="mt-3">
-              <p className="mb-2 text-[13px] font-bold uppercase tracking-wide text-zinc-300">
+              <p className="mb-2 text-[13px] font-bold uppercase tracking-wide text-muted">
                 {t("dept.hitl")}
               </p>
               <div className="flex flex-wrap gap-1">
@@ -159,7 +159,7 @@ export function CampaignsList() {
                     <span
                       key={g.id}
                       className={`rounded-full px-2 py-0.5 text-[13px] font-semibold ${
-                        ok ? "bg-omni-yellow text-black" : "border border-white/15 text-zinc-400"
+                        ok ? "bg-navy text-white" : "border border-navy/15 text-muted"
                       }`}
                     >
                       {t(g.labelKey)} · {t(STATUS_KEY[st])}
@@ -168,7 +168,7 @@ export function CampaignsList() {
                 })}
               </div>
             </div>
-            <p className="mt-3 text-xs text-zinc-500">
+            <p className="mt-3 text-xs text-muted">
               {c.media.scenarioFromUserNumbers ? c.media.realistic[locale] : t("result.noScenario")}
             </p>
           </li>

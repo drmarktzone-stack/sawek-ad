@@ -29,7 +29,7 @@ export function Stepper({
                 <div
                   className={cn(
                     "h-0.5 flex-1",
-                    step >= n ? "bg-omni-yellow" : "bg-white/15",
+                    step >= n ? "bg-gold" : "bg-navy/15",
                   )}
                 />
               )}
@@ -42,8 +42,8 @@ export function Stepper({
                   "flex shrink-0 items-center justify-center rounded-full text-sm font-black transition-all",
                   canJump && "cursor-pointer hover:scale-105",
                   !canJump && "cursor-default",
-                  active ? "size-12 bg-omni-yellow text-black shadow-[0_0_24px_rgba(255,229,0,0.55)]" : "size-9",
-                  !active && (done ? "bg-omni-yellow text-black" : "bg-white/10 text-zinc-400"),
+                  active ? "size-12 bg-navy text-white shadow-[0_8px_24px_rgba(27,42,74,0.18)]" : "size-9",
+                  !active && (done ? "bg-gold text-navy" : "bg-navy/10 text-muted"),
                 )}
               >
                 {done ? <Check className="size-4" strokeWidth={3} /> : n}
@@ -52,7 +52,7 @@ export function Stepper({
                 <div
                   className={cn(
                     "h-0.5 flex-1",
-                    step > n ? "bg-omni-yellow" : "bg-white/15",
+                    step > n ? "bg-gold" : "bg-navy/15",
                   )}
                 />
               )}
@@ -60,7 +60,7 @@ export function Stepper({
             <span
               className={cn(
                 "text-xs font-semibold",
-                active || done ? "text-omni-yellow" : "text-zinc-500",
+                active || done ? "text-navy" : "text-muted",
               )}
             >
               {t(key)}
@@ -76,16 +76,16 @@ export function ConquerHeadline({ subtitle }: { subtitle?: string }) {
   const { t } = useI18n();
   return (
     <div className="mb-8 text-center">
-      <h1 className="text-3xl font-black tracking-tight text-white sm:text-4xl">
+      <h1 className="text-3xl font-black tracking-tight text-navy sm:text-4xl">
         {t("hero.titlePrefix")}{" "}
-        <span className="relative inline-block rounded-md bg-omni-yellow px-2 text-black">
+        <span className="relative inline-block rounded-md bg-gold px-2 text-navy">
           {t("hero.conquer")}
-          <span className="absolute inset-x-1 -bottom-1 h-1.5 rounded-full bg-omni-red" />
+          <span className="absolute inset-x-1 -bottom-1 h-1 rounded-full bg-navy/80" />
         </span>{" "}
         {t("hero.titleSuffix")}
       </h1>
       {subtitle && (
-        <p className="mt-3 text-sm font-medium text-zinc-400">{subtitle}</p>
+        <p className="mt-3 text-sm font-medium text-muted">{subtitle}</p>
       )}
     </div>
   );

@@ -21,18 +21,18 @@ export function StrategyDeptView({ pack, packLang }: { pack: CampaignPack; packL
       <ProducedBy agents={s.producedBy} />
       <div className="grid gap-4 md:grid-cols-2">
         <Card title={t("dept.positioning")}>
-          <p className="text-sm leading-relaxed text-zinc-200">{s.positioning[l]}</p>
+          <p className="text-sm leading-relaxed text-foreground">{s.positioning[l]}</p>
         </Card>
         <Card title={t("dept.mechanism")}>
-          <p className="text-sm leading-relaxed text-zinc-200">{s.uniqueMechanism[l]}</p>
+          <p className="text-sm leading-relaxed text-foreground">{s.uniqueMechanism[l]}</p>
         </Card>
       </div>
       <Card title={t("dept.hormozi")}>
-        <p className="text-sm leading-relaxed text-zinc-200">{s.hormozi[l]}</p>
+        <p className="text-sm leading-relaxed text-foreground">{s.hormozi[l]}</p>
       </Card>
       <div className="grid gap-4 lg:grid-cols-3">
         <Card title="AIDA">
-          <ul className="space-y-2 text-sm text-zinc-300">
+          <ul className="space-y-2 text-sm text-muted">
             <li>
               <strong className="text-omni-yellow">A. </strong>
               {s.aida.attention[l]}
@@ -52,7 +52,7 @@ export function StrategyDeptView({ pack, packLang }: { pack: CampaignPack; packL
           </ul>
         </Card>
         <Card title="PAS">
-          <ul className="space-y-2 text-sm text-zinc-300">
+          <ul className="space-y-2 text-sm text-muted">
             <li>
               <strong className="text-omni-yellow">P. </strong>
               {s.pas.problem[l]}
@@ -68,7 +68,7 @@ export function StrategyDeptView({ pack, packLang }: { pack: CampaignPack; packL
           </ul>
         </Card>
         <Card title="Hook–Story–Offer">
-          <ul className="space-y-2 text-sm text-zinc-300">
+          <ul className="space-y-2 text-sm text-muted">
             <li>
               <strong className="text-omni-yellow">H. </strong>
               {s.hso.hook[l]}
@@ -87,9 +87,9 @@ export function StrategyDeptView({ pack, packLang }: { pack: CampaignPack; packL
       <Card title={t("dept.offerStack")}>
         <ol className="space-y-3">
           {stack.map(([key, body]) => (
-            <li key={key} className="rounded-xl border border-white/10 p-3">
+            <li key={key} className="rounded-xl border border-navy/10 p-3">
             <p className="text-xs font-black uppercase text-omni-yellow">{t(key)}</p>
-              <p className="mt-1 text-sm text-zinc-200">{body[l]}</p>
+              <p className="mt-1 text-sm text-foreground">{body[l]}</p>
             </li>
           ))}
         </ol>
@@ -97,9 +97,9 @@ export function StrategyDeptView({ pack, packLang }: { pack: CampaignPack; packL
       <Card title={t("dept.funnel")}>
         <div className="grid gap-3 md:grid-cols-3">
           {(["tof", "mof", "bof"] as const).map((k) => (
-            <div key={k} className="rounded-xl border border-white/10 p-4">
+            <div key={k} className="rounded-xl border border-navy/10 p-4">
               <p className="text-xs font-black uppercase text-omni-yellow">{k}</p>
-              <p className="mt-2 text-sm text-zinc-200">{s.funnel[k][l]}</p>
+              <p className="mt-2 text-sm text-foreground">{s.funnel[k][l]}</p>
             </div>
           ))}
         </div>
@@ -107,12 +107,12 @@ export function StrategyDeptView({ pack, packLang }: { pack: CampaignPack; packL
       <Card title={t("dept.calendar")}>
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {s.calendar.map((w) => (
-            <div key={w.week} className="rounded-xl border border-white/10 p-3">
+            <div key={w.week} className="rounded-xl border border-navy/10 p-3">
               <p className="text-xs font-black text-omni-yellow">
                 {t("dept.week")} {w.week}
               </p>
-              <p className="mt-1 text-sm font-semibold text-white">{w.theme[l]}</p>
-              <p className="mt-1 text-xs text-zinc-400">{w.action[l]}</p>
+              <p className="mt-1 text-sm font-semibold text-navy">{w.theme[l]}</p>
+              <p className="mt-1 text-xs text-muted">{w.action[l]}</p>
             </div>
           ))}
         </div>

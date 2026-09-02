@@ -48,13 +48,13 @@ export function IngestReviewDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[min(94vw,820px)] max-h-[86vh] overflow-y-auto">
         <DialogTitle>{t("ingest.review")}</DialogTitle>
-        <p className="mt-1 text-xs text-zinc-500">
+        <p className="mt-1 text-xs text-muted">
           {sourceLabel} · {t("ingest.noGuess")}
         </p>
         {extra}
         <div className="mt-4 overflow-x-auto">
           <table className="w-full min-w-[560px] text-start text-sm">
-            <thead className="text-[11px] uppercase tracking-wide text-zinc-500">
+            <thead className="text-sm uppercase tracking-wide text-muted">
               <tr>
                 <th className="p-2">{t("ingest.include")}</th>
                 <th className="p-2">{t("ingest.field")}</th>
@@ -64,7 +64,7 @@ export function IngestReviewDialog({
             </thead>
             <tbody>
               {rows.map((r) => (
-                <tr key={r.id} className="border-t border-white/10 align-top">
+                <tr key={r.id} className="border-t border-navy/10 align-top">
                   <td className="p-2">
                     <input
                       type="checkbox"
@@ -72,19 +72,19 @@ export function IngestReviewDialog({
                       onChange={(e) => patchRow(r.id, { include: e.target.checked })}
                     />
                   </td>
-                  <td className="p-2 text-zinc-300">{INGEST_FIELD_META[r.field].label[locale]}</td>
+                  <td className="p-2 text-muted">{INGEST_FIELD_META[r.field].label[locale]}</td>
                   <td className="p-2">
                     <input
-                      className="h-9 w-full rounded-lg border border-white/15 bg-black/50 px-2 text-xs text-white"
+                      className="h-9 w-full rounded-lg border border-navy/15 bg-background px-2 text-xs text-navy"
                       value={r.value}
                       placeholder={ingestToComplete(locale)}
                       onChange={(e) =>
                         patchRow(r.id, { value: e.target.value, include: Boolean(e.target.value.trim()) })
                       }
                     />
-                    {r.missing && <p className="mt-1 text-[10px] text-zinc-500">{ingestToComplete(locale)}</p>}
+                    {r.missing && <p className="mt-1 text-sm text-muted">{ingestToComplete(locale)}</p>}
                     {r.needsClaimConfirm && (
-                      <label className="mt-2 flex items-start gap-2 text-[11px] text-omni-red">
+                      <label className="mt-2 flex items-start gap-2 text-sm text-omni-red">
                         <input
                           type="checkbox"
                           checked={r.claimsAllowed}
@@ -101,11 +101,11 @@ export function IngestReviewDialog({
           </table>
         </div>
         {posts && posts.length > 0 && (
-          <div className="mt-4 rounded-xl border border-omni-yellow/25 bg-black/40 p-3">
+          <div className="mt-4 rounded-xl border border-omni-yellow/25 bg-background p-3">
             <p className="text-xs font-black uppercase tracking-wide text-omni-yellow">{t("ingest.pastPosts")}</p>
             <ul className="mt-2 space-y-2">
               {posts.map((p) => (
-                <li key={p.id} className="flex items-start gap-2 rounded-lg border border-white/10 px-2 py-2">
+                <li key={p.id} className="flex items-start gap-2 rounded-lg border border-navy/10 px-2 py-2">
                   <input
                     type="checkbox"
                     className="mt-1"
@@ -113,15 +113,15 @@ export function IngestReviewDialog({
                     onChange={(e) => onTogglePost?.(p.id, e.target.checked)}
                   />
                   <div className="min-w-0">
-                    <p className="text-xs text-zinc-200">{p.text}</p>
-                    {p.image ? <p className="mt-1 truncate text-[10px] text-zinc-500" dir="ltr">{p.image}</p> : null}
+                    <p className="text-xs text-foreground">{p.text}</p>
+                    {p.image ? <p className="mt-1 truncate text-sm text-muted" dir="ltr">{p.image}</p> : null}
                   </div>
                 </li>
               ))}
             </ul>
           </div>
         )}
-        {showPastTag && <p className="mt-3 text-xs text-zinc-400">{t("ingest.pastTag")}</p>}
+        {showPastTag && <p className="mt-3 text-xs text-muted">{t("ingest.pastTag")}</p>}
         <div className="mt-5 flex flex-wrap gap-3">
           <Button type="button" onClick={onConfirm}>
             {t("ingest.apply")}
@@ -220,11 +220,11 @@ export function DocumentIngest({
   return (
     <div>
       {variant === "primary" ? (
-        <div className="rounded-2xl border border-dashed border-omni-yellow/40 bg-black/40 p-5">
+        <div className="rounded-2xl border border-dashed border-omni-yellow/40 bg-background p-5">
           <p className="mb-1 text-sm font-black text-omni-yellow">{t("ingest.title")}</p>
-          <p className="mb-3 text-xs text-zinc-400">{t("ingest.hint")}</p>
+          <p className="mb-3 text-xs text-muted">{t("ingest.hint")}</p>
           {trigger}
-          <p className="mt-2 text-[11px] text-zinc-500">{t("ingest.types")}</p>
+          <p className="mt-2 text-sm text-muted">{t("ingest.types")}</p>
         </div>
       ) : (
         <div className="flex flex-wrap items-center gap-2">{trigger}</div>
@@ -242,7 +242,7 @@ export function DocumentIngest({
         extra={
           prep?.imageNeedsTypedText ? (
             <div className="mt-4 space-y-2 rounded-xl border border-omni-yellow/30 bg-omni-yellow/5 p-3">
-              <p className="text-xs text-zinc-300">{t("ingest.imageAsk")}</p>
+              <p className="text-xs text-muted">{t("ingest.imageAsk")}</p>
               <Textarea value={typed} onChange={(e) => setTyped(e.target.value)} placeholder={t("ingest.imageNote")} />
               <Button type="button" size="sm" variant="outline" onClick={useTyped} disabled={!typed.trim()}>
                 {t("ingest.useTyped")}

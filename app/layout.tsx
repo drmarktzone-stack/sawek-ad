@@ -28,7 +28,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="he"
       dir="rtl"
       suppressHydrationWarning
-      className={`${heebo.variable} ${cairo.variable} h-full dark antialiased`}
+      className={`${heebo.variable} ${cairo.variable} h-full antialiased`}
     >
       <head>
         <script

@@ -173,7 +173,7 @@ export function UrlIngest() {
   return (
     <div
       className={cn(
-        "border-b border-omni-yellow/25 bg-black/90",
+        "border-b border-gold/30 bg-[#F7F3EA]/80",
         home ? "px-3 py-3" : "px-3 py-1.5",
       )}
     >
@@ -185,12 +185,12 @@ export function UrlIngest() {
         )}
       >
         <div className="flex min-w-0 flex-1 items-center gap-2">
-          <Globe className={cn("shrink-0 text-omni-yellow", home ? "size-5" : "size-4")} />
+          <Globe className={cn("shrink-0 text-gold", home ? "size-5" : "size-4")} />
           <input
             dir="ltr"
             className={cn(
-              "w-full rounded-xl border border-white/10 bg-black/50 px-3 text-sm text-white placeholder:text-zinc-500 outline-none focus:border-omni-yellow/70",
-              home ? "h-12" : "h-9 text-xs",
+              "w-full rounded-full border border-navy/15 bg-white px-4 text-base text-foreground placeholder:text-muted outline-none focus:border-gold",
+              home ? "h-12" : "h-10 text-sm",
             )}
             value={value}
             onChange={(e) => setValue(e.target.value)}
@@ -205,7 +205,7 @@ export function UrlIngest() {
           {busy ? t("url.reading") : t("url.scan")}
         </Button>
       </form>
-      <p className={cn("mx-auto max-w-[92rem] text-[11px] text-zinc-500", home ? "mt-1.5" : "mt-1 hidden sm:block")}>
+      <p className={cn("mx-auto max-w-[92rem] text-sm text-muted", home ? "mt-1.5" : "mt-1 hidden sm:block")}>
         {t("url.hint")}
       </p>
       {error && <p className="mx-auto mt-1 max-w-[92rem] text-xs font-semibold text-omni-red">{error}</p>}

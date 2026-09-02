@@ -81,8 +81,8 @@ export function ChannelPack({
     <section data-end-product="ready" className="mb-10">
       {skipLivePreview ? (
         <>
-          <h2 className="text-2xl font-black text-white">{t("end.title")}</h2>
-          <p className="mt-1 text-sm text-zinc-400">{t("end.lead")}</p>
+          <h2 className="text-2xl font-black text-navy">{t("end.title")}</h2>
+          <p className="mt-1 text-sm text-muted">{t("end.lead")}</p>
         </>
       ) : (
         <LivePreviewStrip
@@ -95,7 +95,7 @@ export function ChannelPack({
       )}
 
       <div className="mt-5 grid gap-4 lg:grid-cols-2">
-        <article className="rounded-2xl border border-white/10 bg-omni-card p-4">
+        <article className="rounded-2xl border border-navy/10 bg-white p-4">
           <p className="mb-3 text-[13px] font-black uppercase tracking-[0.14em] text-omni-yellow">
             {t("end.whatsapp")}
           </p>
@@ -126,12 +126,12 @@ export function ChannelPack({
                 <Send className="size-4" />
                 {t("end.openWa")}
               </Button>
-              <p className="mt-2 text-sm leading-relaxed text-zinc-300">{t("end.waMissing")}</p>
+              <p className="mt-2 text-sm leading-relaxed text-muted">{t("end.waMissing")}</p>
             </>
           )}
         </article>
 
-        <article className="rounded-2xl border border-white/10 bg-omni-card p-4">
+        <article className="rounded-2xl border border-navy/10 bg-white p-4">
           <p className="mb-3 text-[13px] font-black uppercase tracking-[0.14em] text-omni-yellow">
             {t("end.landing")} · /lp/{pack.id}
           </p>
@@ -168,12 +168,12 @@ export function ChannelPack({
       <ResizeStrip pack={pack} packLang={packLang} generatedImage={generatedImage} />
       <PostingWeek pack={pack} locale={packLang} />
 
-      <div className="mt-5 rounded-2xl border border-omni-yellow/25 bg-omni-card p-4">
+      <div className="mt-5 rounded-2xl border border-omni-yellow/25 bg-white p-4">
         <Button type="button" disabled className="w-full sm:w-auto" title={t("end.publishNeedLogin")}>
           {t("end.publish")}
         </Button>
-        <p className="mt-2 text-xs leading-relaxed text-zinc-400">{t("end.publishHint")}</p>
-        <p className="mt-1 text-[11px] font-bold uppercase tracking-wide text-omni-yellow">
+        <p className="mt-2 text-xs leading-relaxed text-muted">{t("end.publishHint")}</p>
+        <p className="mt-1 text-sm font-bold uppercase tracking-wide text-omni-yellow">
           {t("end.publishNeedLogin")}
         </p>
       </div>
@@ -295,8 +295,7 @@ function PackLandingCard({
   return (
     <div
       dir={dirFor(packLang)}
-      style={{ background: "#0a0a0a", color: "#f4f4f4" }}
-      className={cn("overflow-hidden rounded-xl", compact && "border border-white/10")}
+      className={cn("overflow-hidden rounded-xl bg-white text-foreground", compact && "border border-navy/10")}
     >
       <AdVisual
         locale={packLang}
@@ -307,17 +306,17 @@ function PackLandingCard({
         className={compact ? "h-40 p-4" : "min-h-[280px] p-6"}
       >
         <p className="text-[13px] font-bold uppercase tracking-[0.14em] text-omni-yellow">{fields.pageName}</p>
-        <h3 className={cn("mt-1 font-black leading-tight text-white", compact ? "text-xl" : "text-3xl")}>
+        <h3 className={cn("mt-1 font-black leading-tight text-navy", compact ? "text-xl" : "text-3xl")}>
           {fields.headline}
         </h3>
       </AdVisual>
       <div className="space-y-2 p-4">
-        <p className="text-sm leading-relaxed text-zinc-300">{fields.shortBody}</p>
-        {loc ? <p className="text-xs text-zinc-500">{loc}</p> : null}
-        {hours ? <p className="text-sm leading-relaxed text-zinc-300">{hours.split(/[·\n]/)[0]}</p> : null}
+        <p className="text-sm leading-relaxed text-muted">{fields.shortBody}</p>
+        {loc ? <p className="text-xs text-muted">{loc}</p> : null}
+        {hours ? <p className="text-sm leading-relaxed text-muted">{hours.split(/[·\n]/)[0]}</p> : null}
         <span
           className="inline-block rounded-full px-3 py-1 text-xs font-black"
-          style={{ background: accent, color: "#050505" }}
+          style={{ background: accent, color: "#1B2A4A" }}
         >
           {fields.cta}
         </span>

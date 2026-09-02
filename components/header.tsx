@@ -48,7 +48,7 @@ export function LanguageToggle({ compact = false }: { compact?: boolean }) {
   return (
     <div
       className={cn(
-        "flex items-center rounded-full border border-white/10 bg-black/40 p-0.5",
+        "flex items-center rounded-full border border-navy/10 bg-white p-0.5",
         compact && "scale-90 origin-center",
       )}
     >
@@ -58,10 +58,10 @@ export function LanguageToggle({ compact = false }: { compact?: boolean }) {
           type="button"
           onClick={() => setLocale(l.id)}
           className={cn(
-            "rounded-full px-2.5 py-1 text-xs font-semibold transition-colors",
+            "rounded-full px-2.5 py-1 text-sm font-semibold transition-colors",
             locale === l.id
-              ? "bg-omni-yellow text-black"
-              : "text-zinc-300 hover:text-white",
+              ? "bg-gold text-navy"
+              : "text-muted hover:text-navy",
           )}
         >
           {l.label}
@@ -79,16 +79,16 @@ export function Header() {
   if (pathname.startsWith("/lp/")) return null;
 
   return (
-    <header className="sticky top-0 z-40 border-b border-omni-yellow/20 bg-black/85 backdrop-blur-md">
+    <header className="sticky top-0 z-40 border-b border-gold/40 bg-white/85 backdrop-blur-md">
       <UrlIngest />
-      <div className="h-1 w-full bg-gradient-to-l from-omni-yellow via-omni-red to-omni-yellow" />
+      <div className="h-px w-full bg-gold" />
       <div className="mx-auto flex max-w-[92rem] items-center gap-2 px-3 py-3">
         <LangLink href="/" className="flex shrink-0 flex-col leading-tight">
-          <span className="bg-gradient-to-l from-omni-yellow to-omni-red bg-clip-text text-xl font-black tracking-tight text-transparent sm:text-2xl">
+          <span className="text-xl font-black tracking-tight text-navy sm:text-2xl">
             {t("brand.name")}
           </span>
-          <span className="text-[10px] font-semibold text-omni-yellow">{t("brand.scripts")}</span>
-          <span className="text-[9px] text-zinc-500">{t("brand.tagline")}</span>
+          <span className="text-sm font-semibold text-gold">{t("brand.scripts")}</span>
+          <span className="text-sm text-muted">{t("brand.tagline")}</span>
         </LangLink>
 
         <nav className="ms-2 hidden min-w-0 flex-1 items-center gap-1 overflow-x-auto lg:flex">
@@ -103,10 +103,10 @@ export function Header() {
                 key={item.key}
                 href={item.href}
                 className={cn(
-                  "flex shrink-0 items-center gap-1 rounded-full px-2 py-1.5 text-[11px] font-semibold transition-colors",
+                  "flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1.5 text-sm font-semibold transition-colors",
                   active
-                    ? "bg-omni-yellow text-black"
-                    : "text-zinc-300 hover:bg-white/5 hover:text-white",
+                    ? "bg-navy text-white"
+                    : "text-muted hover:bg-navy/5 hover:text-navy",
                 )}
               >
                 <Icon className="size-3.5" />
@@ -117,7 +117,7 @@ export function Header() {
         </nav>
 
         <div className="ms-auto flex items-center gap-2">
-          <Button asChild size="sm" className="shrink-0">
+          <Button asChild size="sm" variant="gold" className="shrink-0">
             <LangLink href="/" onClick={() => markEmptyCampaign()}>
               {t("cta.new")}
             </LangLink>
@@ -127,7 +127,7 @@ export function Header() {
           </div>
           <button
             type="button"
-            className="rounded-lg p-2 text-white lg:hidden"
+            className="rounded-lg p-2 text-navy lg:hidden"
             onClick={() => setOpen((v) => !v)}
             aria-label={t("menu")}
           >
@@ -135,21 +135,21 @@ export function Header() {
           </button>
         </div>
       </div>
-      <div className="hidden border-t border-white/5 md:block">
+      <div className="hidden border-t border-navy/10 md:block">
         <div className="mx-auto flex max-w-[92rem] items-center gap-2 overflow-x-auto px-3 py-1.5">
-          <span className="shrink-0 text-[10px] font-bold uppercase tracking-[0.18em] text-omni-red">{t("fn.title")}</span>
+          <span className="shrink-0 text-sm font-bold uppercase tracking-[0.18em] text-navy">{t("fn.title")}</span>
           <FunctionRail compact />
-          <span className="ms-auto shrink-0 text-[10px] text-zinc-600">{t("fn.engines")}</span>
+          <span className="ms-auto shrink-0 text-sm text-muted">{t("fn.engines")}</span>
         </div>
       </div>
 
       {open && (
-        <div className="border-t border-white/10 bg-black px-4 py-3 lg:hidden">
+        <div className="border-t border-navy/10 bg-white px-4 py-3 lg:hidden">
           <div className="mb-3 sm:hidden">
             <LanguageToggle />
           </div>
           <div className="flex flex-col gap-1">
-            <Button asChild className="mb-2">
+            <Button asChild variant="gold" className="mb-2">
               <LangLink href="/" onClick={() => { markEmptyCampaign(); setOpen(false); }}>
                 {t("cta.new")}
               </LangLink>
@@ -161,9 +161,9 @@ export function Header() {
                   key={item.key}
                   href={item.href}
                   onClick={() => setOpen(false)}
-                  className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-zinc-200 hover:bg-white/5"
+                  className="flex items-center gap-2 rounded-xl px-3 py-2 text-base text-navy hover:bg-navy/5"
                 >
-                  <Icon className="size-4 text-omni-yellow" />
+                  <Icon className="size-4 text-gold" />
                   {t(item.key)}
                 </LangLink>
               );
@@ -181,8 +181,8 @@ export function Footer() {
   const pathname = usePathname();
   if (pathname.startsWith("/lp/")) return null;
   return (
-    <footer className="mt-auto border-t border-omni-red/30 bg-black py-8 text-center text-xs text-zinc-500">
-      <p className="mb-1 font-black text-omni-yellow">{t("brand.name")} · {t("brand.scripts")}</p>
+    <footer className="mt-auto border-t border-gold/40 bg-white py-8 text-center text-sm text-muted">
+      <p className="mb-1 font-black text-navy">{t("brand.name")} · {t("brand.scripts")}</p>
       {t("footer.line")}
     </footer>
   );

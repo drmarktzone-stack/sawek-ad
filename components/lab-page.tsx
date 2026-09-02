@@ -267,7 +267,7 @@ export function LabPage() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-10">
       <ConquerHeadline subtitle={t("lab.title")} />
-      <p className="mx-auto mb-6 max-w-2xl text-center text-sm text-zinc-400">{t("lab.lead")}</p>
+      <p className="mx-auto mb-6 max-w-2xl text-center text-sm text-muted">{t("lab.lead")}</p>
 
       <div className="mb-6 flex flex-wrap justify-center gap-2">
         {tabs.map((tb) => (
@@ -277,7 +277,7 @@ export function LabPage() {
             onClick={() => setTab(tb.id)}
             className={cn(
               "rounded-full px-4 py-1.5 text-sm font-bold",
-              tab === tb.id ? "bg-omni-yellow text-black" : "border border-white/15 text-zinc-300",
+              tab === tb.id ? "bg-navy text-white" : "border border-navy/15 text-muted",
             )}
           >
             {t(tb.key)}
@@ -285,7 +285,7 @@ export function LabPage() {
         ))}
       </div>
 
-      <div className="mb-6 rounded-2xl border border-white/10 bg-omni-card p-4">
+      <div className="mb-6 rounded-2xl border border-navy/10 bg-white p-4">
         <Label>{t("lab.facts")}</Label>
         <Textarea value={facts} onChange={(e) => setFacts(e.target.value)} rows={5} />
       </div>
@@ -330,13 +330,13 @@ export function LabPage() {
           {fileError && <p className="mt-2 text-sm text-omni-red">{fileError}</p>}
           {preview && (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={preview} alt="" className="mt-4 max-h-56 rounded-xl border border-white/10 object-contain" />
+            <img src={preview} alt="" className="mt-4 max-h-56 rounded-xl border border-navy/10 object-contain" />
           )}
           {vision && (
             <div className="mt-6 space-y-6">
               <div>
                 <h3 className="mb-2 text-sm font-black text-omni-yellow">{t("lab.elements")}</h3>
-                <ul className="list-disc space-y-1 pe-5 text-sm text-zinc-300">
+                <ul className="list-disc space-y-1 pe-5 text-sm text-muted">
                   {vision.elements.map((el, i) => (
                     <li key={i}>{el}</li>
                   ))}
@@ -344,7 +344,7 @@ export function LabPage() {
               </div>
               <div>
                 <h3 className="mb-2 text-sm font-black text-omni-yellow">{t("lab.fixes")}</h3>
-                <ol className="list-decimal space-y-1 pe-5 text-sm text-zinc-300">
+                <ol className="list-decimal space-y-1 pe-5 text-sm text-muted">
                   {vision.visualFixes.slice(0, 3).map((el, i) => (
                     <li key={i}>{el}</li>
                   ))}
@@ -364,16 +364,16 @@ export function LabPage() {
                       .filter(Boolean)
                       .join("\n");
                     return (
-                      <article key={`${reel.channel}-${i}`} className="rounded-2xl border border-white/10 bg-black/40 p-4">
-                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-omni-yellow">
+                      <article key={`${reel.channel}-${i}`} className="rounded-2xl border border-navy/10 bg-background p-4">
+                        <p className="text-sm font-black uppercase tracking-[0.18em] text-omni-yellow">
                           {reel.channel}
                         </p>
-                        <p className="mt-2 text-sm font-black text-white">{pack?.headline || INCOMPLETE[locale]}</p>
-                        <p className="mt-1 text-xs text-zinc-300">{pack?.copy}</p>
-                        <ul className="mt-3 space-y-1 text-[11px] text-zinc-400">
+                        <p className="mt-2 text-sm font-black text-navy">{pack?.headline || INCOMPLETE[locale]}</p>
+                        <p className="mt-1 text-xs text-muted">{pack?.copy}</p>
+                        <ul className="mt-3 space-y-1 text-sm text-muted">
                           {reel.shots.map((s, j) => (
                             <li key={j}>
-                              <span className="font-bold text-zinc-200">{s.t}</span> {s.scene} — {s.onScreen} / {s.vo}
+                              <span className="font-bold text-foreground">{s.t}</span> {s.scene} — {s.onScreen} / {s.vo}
                             </li>
                           ))}
                         </ul>
@@ -416,7 +416,7 @@ export function LabPage() {
               <p className="text-3xl font-black text-omni-yellow">{score.score}/100</p>
               <div>
                 <h3 className="mb-2 text-sm font-black text-omni-yellow">{t("lab.weaknesses")}</h3>
-                <ol className="list-decimal space-y-1 pe-5 text-sm text-zinc-300">
+                <ol className="list-decimal space-y-1 pe-5 text-sm text-muted">
                   {score.weaknesses.slice(0, 3).map((w, i) => (
                     <li key={i}>{w}</li>
                   ))}
@@ -430,10 +430,10 @@ export function LabPage() {
                     if (!pack) return null;
                     const text = [pack.headline, pack.copy, pack.cta].join("\n");
                     return (
-                      <article key={loc} className="rounded-2xl border border-white/10 p-4" dir={loc === "en" ? "ltr" : "rtl"}>
-                        <p className="text-[10px] font-black uppercase text-omni-yellow">{loc}</p>
-                        <p className="mt-2 text-sm font-black text-white">{pack.headline}</p>
-                        <p className="mt-1 text-xs text-zinc-300">{pack.copy}</p>
+                      <article key={loc} className="rounded-2xl border border-navy/10 p-4" dir={loc === "en" ? "ltr" : "rtl"}>
+                        <p className="text-sm font-black uppercase text-omni-yellow">{loc}</p>
+                        <p className="mt-2 text-sm font-black text-navy">{pack.headline}</p>
+                        <p className="mt-1 text-xs text-muted">{pack.copy}</p>
                         <p className="mt-2 text-xs font-bold text-omni-yellow">{pack.cta}</p>
                         <Button
                           type="button"

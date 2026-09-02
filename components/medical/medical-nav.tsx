@@ -26,7 +26,7 @@ export function MedicalNav() {
             href={item.href}
             className={cn(
               "rounded-full px-3 py-1.5 text-xs font-semibold",
-              active ? "bg-omni-yellow text-black" : "border border-white/10 text-zinc-300 hover:border-omni-yellow/40",
+              active ? "bg-navy text-white" : "border border-navy/10 text-muted hover:border-gold",
             )}
           >
             {t(item.key)}

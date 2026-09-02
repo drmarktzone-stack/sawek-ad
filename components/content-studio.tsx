@@ -76,14 +76,14 @@ export function ContentStudio({ embedded = false }: { embedded?: boolean }) {
       {!embedded && (
         <>
           <ConquerHeadline subtitle={t("studio.title")} />
-          <p className="mx-auto mb-8 max-w-xl text-center text-sm text-zinc-400">{t("studio.lead")}</p>
+          <p className="mx-auto mb-8 max-w-xl text-center text-sm text-muted">{t("studio.lead")}</p>
         </>
       )}
       {embedded && (
         <h2 className="mb-4 mt-8 text-lg font-black text-omni-yellow">{t("studio.title")}</h2>
       )}
 
-      <div className="rounded-2xl border border-white/10 bg-omni-card p-5 sm:p-8">
+      <div className="rounded-2xl border border-navy/10 bg-white p-5 sm:p-8">
         <div className="mb-4 flex flex-wrap gap-2">
           {KINDS.map((k) => (
             <button
@@ -91,7 +91,7 @@ export function ContentStudio({ embedded = false }: { embedded?: boolean }) {
               type="button"
               onClick={() => setKind(k)}
               className={`rounded-full px-3 py-1.5 text-sm font-semibold ${
-                kind === k ? "bg-omni-yellow text-black" : "bg-white/5 text-zinc-300"
+                kind === k ? "bg-navy text-white" : "bg-navy/5 text-muted"
               }`}
             >
               {kindLabel[k][locale]}
@@ -126,7 +126,7 @@ export function ContentStudio({ embedded = false }: { embedded?: boolean }) {
             type="button"
             onClick={() => setStyleId(s.id)}
             className={`overflow-hidden rounded-xl border text-start ${
-              styleId === s.id ? "border-omni-yellow" : "border-white/10"
+              styleId === s.id ? "border-omni-yellow" : "border-navy/10"
             }`}
           >
             <div
@@ -141,7 +141,7 @@ export function ContentStudio({ embedded = false }: { embedded?: boolean }) {
         {t("design.make")}
       </Button>
       {mock && (
-        <div className="mt-4 overflow-hidden rounded-2xl border border-white/10">
+        <div className="mt-4 overflow-hidden rounded-2xl border border-navy/10">
           <CampaignAdVisual
             locale={locale}
             palette={DESIGN_STYLES.find((s) => s.id === mock.styleId)?.palette ?? ["#111", "#333"]}
@@ -149,29 +149,29 @@ export function ContentStudio({ embedded = false }: { embedded?: boolean }) {
             index={0}
             className="min-h-40"
           >
-            <h3 className="text-2xl font-black text-white">{mock.headline}</h3>
+            <h3 className="text-2xl font-black text-navy">{mock.headline}</h3>
           </CampaignAdVisual>
-          <p className="bg-omni-card p-4 text-sm text-zinc-300">{mock.body}</p>
+          <p className="bg-white p-4 text-sm text-muted">{mock.body}</p>
         </div>
       )}
 
       <ul className="mt-10 space-y-4">
         {library.length === 0 && (
-          <li className="text-center text-sm text-zinc-500">
+          <li className="text-center text-sm text-muted">
             {locale === "he" ? "הספרייה ריקה." : locale === "ar" ? "المكتبة فارغة." : "Library is empty."}
           </li>
         )}
         {library.map((p) => (
-          <li key={p.id} className="rounded-2xl border border-white/10 bg-omni-card p-4">
+          <li key={p.id} className="rounded-2xl border border-navy/10 bg-white p-4">
             <p className="text-xs text-omni-yellow">
               {kindLabel[p.kind][locale]} · {p.locale}
             </p>
             <p className="mt-1 font-semibold">{p.idea}</p>
             <div className="mt-3 grid gap-2 sm:grid-cols-3">
               {p.variants.map((v, i) => (
-                <div key={i} className="rounded-xl bg-black/30 p-3 text-sm">
-                  <p className="text-xs text-zinc-500">{v.title}</p>
-                  <p className="whitespace-pre-wrap text-zinc-200">{v.body}</p>
+                <div key={i} className="rounded-xl bg-background p-3 text-sm">
+                  <p className="text-xs text-muted">{v.title}</p>
+                  <p className="whitespace-pre-wrap text-foreground">{v.body}</p>
                 </div>
               ))}
             </div>

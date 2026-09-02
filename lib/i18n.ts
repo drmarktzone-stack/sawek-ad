@@ -728,6 +728,11 @@ export const copy: Dict = {
   "audit.aiStill": { he: "תמונת AI", ar: "صورة ذكاء اصطناعي", en: "AI still" },
   "audit.sitePhoto": { he: "מהאתר", ar: "من الموقع", en: "From the site" },
   "audit.hoursFromScan": { he: "שעות מהסריקה", ar: "ساعات من المسح", en: "Hours from the scan" },
+  "audit.imagenDown": {
+    he: "יצירת תמונה לא זמינה כרגע — בחרו כרזה גרפית או תמונה מהאתר.",
+    ar: "إنشاء الصورة غير متاح الآن — اختاروا ملصق غرافيك أو صورة من الموقع.",
+    en: "Image generation is unavailable right now — pick a graphic poster or a site photo.",
+  },
 
   "resize.title": { he: "Magic Resize — אותה מודעה, ארבעה פורמטים", ar: "Magic Resize — نفس الإعلان بأربع مقاسات", en: "Magic Resize — one ad, four sizes" },
   "resize.lead": {

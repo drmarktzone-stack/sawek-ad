@@ -95,10 +95,10 @@ export function SelfMarketing() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-10">
       <ConquerHeadline subtitle={t("self.title")} />
-      <p className="mb-6 text-center text-sm text-zinc-400">{t("self.lead")}</p>
+      <p className="mb-6 text-center text-sm text-muted">{t("self.lead")}</p>
       <DepartmentRail />
 
-      <section className="rounded-2xl border border-white/10 bg-omni-card p-5 sm:p-8">
+      <section className="rounded-2xl border border-navy/10 bg-white p-5 sm:p-8">
         {fields.map((f) => (
           <div key={f.key} className="mb-3">
             <Label>{f.label}</Label>
@@ -120,11 +120,11 @@ export function SelfMarketing() {
         </Button>
       </section>
 
-      <section className="mt-8 rounded-2xl border border-white/10 bg-omni-card p-5">
+      <section className="mt-8 rounded-2xl border border-navy/10 bg-white p-5">
         <h3 className="mb-3 font-black">
           {locale === "he" ? "צ׳קליסט שבועי" : locale === "ar" ? "قائمة أسبوعية" : "Weekly checklist"}
         </h3>
-        <ul className="list-disc space-y-1 pe-5 text-sm text-zinc-300">
+        <ul className="list-disc space-y-1 pe-5 text-sm text-muted">
           {checklist.map((c) => (
             <li key={c}>{c}</li>
           ))}
@@ -132,12 +132,12 @@ export function SelfMarketing() {
       </section>
 
       {plans.map((plan) => (
-        <section key={plan.id} className="mt-6 rounded-2xl border border-white/10 bg-omni-card p-5">
-          <p className="mb-3 text-xs text-zinc-500">{plan.createdAt.slice(0, 10)}</p>
+        <section key={plan.id} className="mt-6 rounded-2xl border border-navy/10 bg-white p-5">
+          <p className="mb-3 text-xs text-muted">{plan.createdAt.slice(0, 10)}</p>
           <ul className="space-y-2">
             {plan.days.map((d, i) => (
               <li key={i}>
-                <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-white/10 p-3">
+                <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-navy/10 p-3">
                   <input
                     type="checkbox"
                     checked={d.done}
@@ -146,7 +146,7 @@ export function SelfMarketing() {
                   />
                   <span>
                     <strong className="text-omni-yellow">{d.day[locale]}</strong>
-                    <span className="block text-sm text-zinc-300">{d.task[locale]}</span>
+                    <span className="block text-sm text-muted">{d.task[locale]}</span>
                   </span>
                 </label>
               </li>

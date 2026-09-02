@@ -16,26 +16,26 @@ export function DiscoveryDeptView({ pack, packLang }: { pack: CampaignPack; pack
         <dl className="space-y-3">
           {d.audit.map((row) => (
             <div key={row.title[l]}>
-              <dt className="text-xs font-bold text-zinc-500">{row.title[l]}</dt>
-              <dd className="mt-1 text-sm leading-relaxed text-zinc-200">{row.body[l]}</dd>
+              <dt className="text-xs font-bold text-muted">{row.title[l]}</dt>
+              <dd className="mt-1 text-sm leading-relaxed text-foreground">{row.body[l]}</dd>
             </div>
           ))}
         </dl>
       </Card>
       <Card title={t("dept.icp")}>
-        <p className="text-sm leading-relaxed text-zinc-200">{d.icp[l]}</p>
+        <p className="text-sm leading-relaxed text-foreground">{d.icp[l]}</p>
       </Card>
       <Card title={t("dept.personas")}>
         <div className="grid gap-3 md:grid-cols-3">
           {d.personas.map((p) => (
-            <article key={p.name[l]} className="rounded-xl border border-white/10 p-4">
-              <p className="font-black text-white">{p.name[l]}</p>
-              <p className="mt-2 text-sm text-zinc-300">
+            <article key={p.name[l]} className="rounded-xl border border-navy/10 p-4">
+              <p className="font-black text-navy">{p.name[l]}</p>
+              <p className="mt-2 text-sm text-muted">
                 <span className="text-omni-yellow">JTBD. </span>
                 {p.jtbd[l]}
               </p>
-              <p className="mt-2 text-xs text-zinc-400">{p.given[l]}</p>
-              <p className="mt-1 text-xs text-zinc-500">{p.unknown[l]}</p>
+              <p className="mt-2 text-xs text-muted">{p.given[l]}</p>
+              <p className="mt-1 text-xs text-muted">{p.unknown[l]}</p>
             </article>
           ))}
         </div>
@@ -50,24 +50,24 @@ export function DiscoveryDeptView({ pack, packLang }: { pack: CampaignPack; pack
               ["T", d.swot.threat],
             ] as const
           ).map(([k, v]) => (
-            <div key={k} className="rounded-xl border border-white/10 p-4">
+            <div key={k} className="rounded-xl border border-navy/10 p-4">
               <p className="text-xs font-black text-omni-yellow">{k}</p>
-              <p className="mt-1 text-sm text-zinc-200">{v[l]}</p>
+              <p className="mt-1 text-sm text-foreground">{v[l]}</p>
             </div>
           ))}
         </div>
       </Card>
       <Card title={t("dept.battlecards")}>
-        <p className="mb-3 text-sm text-zinc-400">{d.competitorsMissing[l]}</p>
+        <p className="mb-3 text-sm text-muted">{d.competitorsMissing[l]}</p>
         {d.battlecards.length === 0 ? (
-          <p className="text-sm text-zinc-500">{t("review.competitorsEmpty")}</p>
+          <p className="text-sm text-muted">{t("review.competitorsEmpty")}</p>
         ) : (
           <div className="grid gap-3 md:grid-cols-2">
             {d.battlecards.map((b) => (
-              <article key={b.competitorId} className="rounded-xl border border-white/10 p-4">
-                <p className="font-black text-white">{b.name}</p>
-                {b.notes && <p className="mt-1 text-xs text-zinc-500">{b.notes}</p>}
-                <ul className="mt-3 space-y-1 text-sm text-zinc-300">
+              <article key={b.competitorId} className="rounded-xl border border-navy/10 p-4">
+                <p className="font-black text-navy">{b.name}</p>
+                {b.notes && <p className="mt-1 text-xs text-muted">{b.notes}</p>}
+                <ul className="mt-3 space-y-1 text-sm text-muted">
                   <li>
                     <strong className="text-omni-yellow">S. </strong>
                     {b.strength[l]}

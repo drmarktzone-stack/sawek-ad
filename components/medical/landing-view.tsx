@@ -135,7 +135,7 @@ export function LandingView({
                 ) : urls[a.id] && a.kind === "video" ? (
                   <video src={urls[a.id]} className="h-40 w-full object-cover" muted playsInline controls />
                 ) : (
-                  <div className="flex h-40 items-center justify-center text-[10px] font-black uppercase tracking-widest" style={{ color: skin.muted }}>
+                  <div className="flex h-40 items-center justify-center text-sm font-black uppercase tracking-widest" style={{ color: skin.muted }}>
                     {sampleLabel(locale)}
                   </div>
                 )}

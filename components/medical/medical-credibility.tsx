@@ -37,7 +37,7 @@ export function MedicalCredibility() {
       <DepartmentRail />
       <MedicalNav />
       <EthicsBanner locale={locale} />
-      <p className="mt-4 text-sm text-zinc-400">{t("med.cred.lead")}</p>
+      <p className="mt-4 text-sm text-muted">{t("med.cred.lead")}</p>
       <Button
         type="button"
         data-demo="pediatric"
@@ -50,13 +50,13 @@ export function MedicalCredibility() {
       >
         {t("med.demo")}
       </Button>
-      {!camp && <p className="mt-8 text-center text-zinc-400">{t("med.cred.empty")}</p>}
+      {!camp && <p className="mt-8 text-center text-muted">{t("med.cred.empty")}</p>}
       {camp && (
         <ul className="mt-6 space-y-3">
           {camp.claims.map((cl) => (
-            <li key={cl.id} className="rounded-2xl border border-white/10 bg-omni-card p-4">
-              <p className="text-sm text-zinc-200">{cl.text[locale]}</p>
-              <p className="mt-1 text-[11px] text-zinc-500">{cl.source}</p>
+            <li key={cl.id} className="rounded-2xl border border-navy/10 bg-white p-4">
+              <p className="text-sm text-foreground">{cl.text[locale]}</p>
+              <p className="mt-1 text-sm text-muted">{cl.source}</p>
               <div className="mt-3 flex flex-wrap gap-1">
                 {KINDS.map((k) => (
                   <Button

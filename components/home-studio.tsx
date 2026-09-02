@@ -37,21 +37,21 @@ export function HomeStudio() {
     <div className="relative overflow-hidden">
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,229,0,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(255,229,0,0.035)_1px,transparent_1px)] bg-[size:56px_56px] [mask-image:radial-gradient(ellipse_at_center,black_35%,transparent_75%)]"
+        className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(27,42,74,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(27,42,74,0.04)_1px,transparent_1px)] bg-[size:56px_56px] [mask-image:radial-gradient(ellipse_at_center,black_40%,transparent_78%)]"
       />
       <section className="relative mx-auto max-w-5xl px-4 pb-4 pt-8 sm:pt-12">
-        <p className="mb-3 text-center text-[11px] font-bold uppercase tracking-[0.28em] text-omni-red">
+        <p className="mb-3 text-center text-sm font-bold uppercase tracking-[0.28em] text-gold">
           {t("home.kicker")}
         </p>
-        <h1 className="text-center text-4xl font-black leading-[1.1] tracking-tight text-white sm:text-6xl">
+        <h1 className="text-center text-4xl font-black leading-[1.1] tracking-tight text-navy sm:text-6xl">
           {t("hero.titlePrefix")}{" "}
-          <span className="relative inline-block rounded-md bg-omni-yellow px-2.5 text-black">
+          <span className="relative inline-block rounded-md bg-gold px-2.5 text-navy">
             {t("hero.conquer")}
-            <span className="absolute inset-x-1 -bottom-1 h-1.5 rounded-full bg-omni-red" />
+            <span className="absolute inset-x-1 -bottom-1 h-1 rounded-full bg-navy/80" />
           </span>{" "}
           {t("hero.titleSuffix")}
         </h1>
-        <p className="mx-auto mt-5 max-w-2xl text-center text-base text-zinc-300 sm:text-lg">
+        <p className="mx-auto mt-5 max-w-2xl text-center text-base text-muted sm:text-lg">
           {t("home.pitch")}
         </p>
         <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
@@ -68,8 +68,8 @@ export function HomeStudio() {
             {t("cta.new")}
           </Button>
         </div>
-        <p className="mx-auto mt-2 max-w-md text-center text-xs text-zinc-500">{t("cta.newHint")}</p>
-        <p className="mx-auto mt-4 max-w-xl text-center text-xs text-zinc-500">{t("home.truth")}</p>
+        <p className="mx-auto mt-2 max-w-md text-center text-sm text-muted">{t("cta.newHint")}</p>
+        <p className="mx-auto mt-4 max-w-xl text-center text-sm text-muted">{t("home.truth")}</p>
       </section>
       <FunctionRail />
       <section className="relative mx-auto max-w-5xl px-4">
@@ -77,9 +77,9 @@ export function HomeStudio() {
           {stats.map((s) => (
             <li
               key={s.label}
-              className="flex items-center justify-center gap-2 rounded-2xl border border-omni-red/30 bg-black/50 px-3 py-3 text-center text-xs font-bold text-omni-yellow"
+              className="flex items-center justify-center gap-2 rounded-[22px] border border-navy/10 bg-white px-3 py-3 text-center text-sm font-bold text-navy shadow-[0_8px_24px_rgba(27,42,74,0.06)]"
             >
-              <s.icon className="size-3.5 shrink-0 text-omni-red" />
+              <s.icon className="size-3.5 shrink-0 text-gold" />
               {s.label}
             </li>
           ))}
@@ -87,8 +87,8 @@ export function HomeStudio() {
       </section>
 
       <div id="studio" className="relative mx-auto max-w-4xl px-3 pb-8 sm:px-4">
-        <div className="rounded-[28px] border border-omni-yellow/35 bg-black/70 p-[1px] shadow-[0_0_80px_rgba(255,26,26,0.22)]">
-          <div className="rounded-[26px] border border-omni-red/25 bg-omni-surface/90">
+        <div className="rounded-[28px] border border-navy/10 bg-white p-[1px] shadow-[0_18px_50px_rgba(27,42,74,0.08)]">
+          <div className="rounded-[26px] border border-gold/25 bg-white">
             <WizardFlow key={wizardKey} embedded />
           </div>
         </div>
@@ -105,13 +105,13 @@ export function HomeStudio() {
         ).map(([title, body], i) => (
           <li
             key={title}
-            className="rounded-2xl border border-omni-yellow/25 bg-black/60 p-4 text-start"
+            className="rounded-[22px] border border-navy/10 bg-white p-4 text-start shadow-[0_8px_24px_rgba(27,42,74,0.06)]"
           >
-            <p className="text-[11px] font-black uppercase tracking-[0.2em] text-omni-red">
+            <p className="text-sm font-black uppercase tracking-[0.2em] text-gold">
               {t("home.how.title")} · 0{i + 1}
             </p>
-            <p className="mt-2 text-lg font-black text-omni-yellow">{t(title)}</p>
-            <p className="mt-1 text-sm text-zinc-400">{t(body)}</p>
+            <p className="mt-2 text-lg font-black text-navy">{t(title)}</p>
+            <p className="mt-1 text-sm text-muted">{t(body)}</p>
           </li>
         ))}
       </ol>

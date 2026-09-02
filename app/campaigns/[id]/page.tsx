@@ -28,12 +28,12 @@ export default function CampaignDetailPage() {
   }, [params.id]);
 
   if (pack === undefined) {
-    return <p className="p-10 text-center text-zinc-500">…</p>;
+    return <p className="p-10 text-center text-muted">…</p>;
   }
   if (!pack) {
     return (
       <div className="p-10 text-center">
-        <p className="text-zinc-400">{t("campaigns.empty")}</p>
+        <p className="text-muted">{t("campaigns.empty")}</p>
         <LangLink href="/" onClick={() => markEmptyCampaign()} className="mt-4 inline-block text-omni-yellow">
           {t("cta.new")}
         </LangLink>

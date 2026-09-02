@@ -9,7 +9,7 @@ export default function SocialSettingsPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-10" dir={locale === "en" ? "ltr" : "rtl"}>
       <ConquerHeadline subtitle={t("social.settingsTitle")} />
-      <p className="mb-6 text-center text-sm text-zinc-400">{t("social.settingsLead")}</p>
+      <p className="mb-6 text-center text-sm text-muted">{t("social.settingsLead")}</p>
       <SocialConnectStrip />
     </div>
   );

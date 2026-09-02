@@ -90,7 +90,7 @@ export function PackLandingScreen({ pack, locale }: { pack: CampaignPack; locale
   const logoSrc = logo?.publicSrc || (logo ? urls[logo.id] : undefined) || pack.intake.brandKit?.logoSrc;
 
   return (
-    <div dir={dirFor(locale)} className="min-h-screen" style={{ background: bg, color: pageInk }}>
+    <div dir={dirFor(locale)} className="min-h-screen bg-background text-foreground">
       <section className="relative flex min-h-[100svh] flex-col justify-end overflow-hidden">
         {plate ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -99,7 +99,7 @@ export function PackLandingScreen({ pack, locale }: { pack: CampaignPack; locale
           <div
             className="absolute inset-0"
             style={{
-              background: `linear-gradient(165deg, ${bg} 0%, ${bg} 40%, ${accent}33 100%)`,
+              background: `linear-gradient(165deg, #F7F3EA 0%, #F7F3EA 42%, ${accent}33 100%)`,
             }}
           />
         )}
@@ -119,11 +119,11 @@ export function PackLandingScreen({ pack, locale }: { pack: CampaignPack; locale
           <p className="text-sm font-bold uppercase tracking-[0.28em]" style={{ color: accent }}>
             {name}
           </p>
-          <h1 className="mt-4 max-w-4xl text-4xl font-black leading-[1.05] text-white sm:text-6xl lg:text-7xl">
+          <h1 className={`mt-4 max-w-4xl text-4xl font-black leading-[1.05] sm:text-6xl lg:text-7xl ${plate ? "text-white" : "text-navy"}`}>
             {headline}
           </h1>
           {filled(pack.intake.uniqueAdvantage) && pack.intake.uniqueAdvantage !== headline ? (
-            <p className="mt-5 max-w-2xl text-lg leading-relaxed text-white/85">{pack.intake.uniqueAdvantage}</p>
+            <p className={`mt-5 max-w-2xl text-lg leading-relaxed ${plate ? "text-white/85" : "text-muted"}`}>{pack.intake.uniqueAdvantage}</p>
           ) : null}
           <div className="mt-8 flex flex-wrap gap-3">
             {waUrl ? (
@@ -160,7 +160,7 @@ export function PackLandingScreen({ pack, locale }: { pack: CampaignPack; locale
 
       {about ? (
         <section className="mx-auto max-w-5xl px-6 py-16 sm:px-10">
-          <p className="text-xs font-black uppercase tracking-[0.22em]" style={{ color: accent }}>
+          <p className="text-sm font-black uppercase tracking-[0.22em]" style={{ color: accent }}>
             {copy.about}
           </p>
           <p className="mt-4 max-w-3xl whitespace-pre-wrap text-xl font-medium leading-relaxed sm:text-2xl">{about}</p>
@@ -170,7 +170,7 @@ export function PackLandingScreen({ pack, locale }: { pack: CampaignPack; locale
       {showOffer ? (
         <section className="mx-auto max-w-5xl px-6 pb-16 sm:px-10">
           <div className="rounded-[2rem] px-8 py-10" style={{ background: accent, color: ink }}>
-            <p className="text-xs font-black uppercase tracking-[0.22em] opacity-70">{copy.offer}</p>
+            <p className="text-sm font-black uppercase tracking-[0.22em] opacity-70">{copy.offer}</p>
             <p className="mt-3 text-3xl font-black leading-tight">{offer}</p>
           </div>
         </section>
@@ -179,13 +179,13 @@ export function PackLandingScreen({ pack, locale }: { pack: CampaignPack; locale
       {(hours || loc) ? (
         <section className="mx-auto grid max-w-5xl gap-6 px-6 pb-16 sm:grid-cols-2 sm:px-10">
           {hours ? (
-            <div className="rounded-[1.5rem] border border-white/10 p-6">
+            <div className="rounded-[1.5rem] border border-navy/10 bg-white p-6 shadow-[0_8px_24px_rgba(27,42,74,0.06)]">
               <p className="flex items-center gap-2 text-[13px] font-black uppercase tracking-[0.22em]" style={{ color: accent }}>
                 <Clock className="size-4" /> {copy.hours}
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {hoursChips(hours, locale, 6).map((c) => (
-                  <span key={c} className="rounded-full border border-white/20 px-3 py-1.5 text-sm font-semibold">
+                  <span key={c} className="rounded-full border border-navy/15 bg-white px-3 py-1.5 text-sm font-semibold">
                     {c}
                   </span>
                 ))}
@@ -193,8 +193,8 @@ export function PackLandingScreen({ pack, locale }: { pack: CampaignPack; locale
             </div>
           ) : null}
           {loc ? (
-            <div className="rounded-[1.5rem] border border-white/10 p-6">
-              <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.22em]" style={{ color: accent }}>
+            <div className="rounded-[1.5rem] border border-navy/10 bg-white p-6 shadow-[0_8px_24px_rgba(27,42,74,0.06)]">
+              <p className="flex items-center gap-2 text-sm font-black uppercase tracking-[0.22em]" style={{ color: accent }}>
                 <MapPin className="size-4" /> {copy.address}
               </p>
               <p className="mt-3 text-lg leading-relaxed">{loc}</p>
@@ -205,7 +205,7 @@ export function PackLandingScreen({ pack, locale }: { pack: CampaignPack; locale
 
       {gallery.length ? (
         <section className="mx-auto max-w-6xl px-6 pb-16 sm:px-10">
-          <p className="mb-6 text-xs font-black uppercase tracking-[0.22em]" style={{ color: accent }}>
+          <p className="mb-6 text-sm font-black uppercase tracking-[0.22em]" style={{ color: accent }}>
             {copy.gallery}
           </p>
           <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
@@ -227,7 +227,7 @@ export function PackLandingScreen({ pack, locale }: { pack: CampaignPack; locale
       ) : null}
 
       <section className="mx-auto max-w-5xl px-6 pb-20 sm:px-10">
-        <p className="text-xs font-black uppercase tracking-[0.22em]" style={{ color: accent }}>
+        <p className="text-sm font-black uppercase tracking-[0.22em]" style={{ color: accent }}>
           {copy.contact}
         </p>
         <div className="mt-4 flex flex-wrap gap-4 text-lg">
@@ -262,7 +262,7 @@ export function PackLandingScreen({ pack, locale }: { pack: CampaignPack; locale
         ) : null}
       </section>
 
-      <div className="border-t border-white/10 bg-black/20 px-4 py-10 text-white">
+      <div className="border-t border-navy/10 bg-white px-4 py-10 text-foreground">
         <div className="mx-auto max-w-6xl">
           <ResizeStrip pack={pack} packLang={locale} generatedImage={aiHero} />
           <PostingWeek pack={pack} locale={locale} />

@@ -25,7 +25,7 @@ function applyDocumentLocale(locale: Locale) {
   if (typeof document === "undefined") return;
   document.documentElement.lang = locale;
   document.documentElement.dir = dirFor(locale);
-  document.documentElement.classList.add("dark");
+  document.documentElement.classList.remove("dark");
   document.title =
     locale === "ar" ? "سوِّق إعلانك بنفسك" : locale === "he" ? "SAWEK AD — סאווק / سوِّق إعلانك بنفسك" : "SAWEK AD — سوِّق إعلانك بنفسك / סאווק";
 }

@@ -52,15 +52,15 @@ export function MedicalAppointments() {
       <DepartmentRail />
       <MedicalNav />
       <EthicsBanner locale={locale} />
-      <p className="mt-4 text-sm text-zinc-400">{t("med.appts.lead")}</p>
+      <p className="mt-4 text-sm text-muted">{t("med.appts.lead")}</p>
       <div className="mt-4 grid gap-3 sm:grid-cols-3">
         {[
           { label: t("med.appts.upcoming"), value: upcoming.length },
           { label: t("med.appts.pending"), value: pendingN },
           { label: t("med.appts.past"), value: pastN },
         ].map((s) => (
-          <div key={s.label} className="rounded-2xl border border-white/10 bg-omni-card p-4 text-center">
-            <p className="text-xs text-zinc-500">{s.label}</p>
+          <div key={s.label} className="rounded-2xl border border-navy/10 bg-white p-4 text-center">
+            <p className="text-xs text-muted">{s.label}</p>
             <p className="mt-1 text-3xl font-black text-omni-yellow">{s.value}</p>
           </div>
         ))}
@@ -80,11 +80,11 @@ export function MedicalAppointments() {
         </Button>
       </div>
       {clinic && (
-        <p className="mt-4 text-xs text-zinc-500">
+        <p className="mt-4 text-xs text-muted">
           {t("med.clinic.slot")}: {clinic.slotMinutes} · {clinic.name}
         </p>
       )}
-      {list.length === 0 && <p className="mt-8 text-center text-zinc-400">{t("med.appts.empty")}</p>}
+      {list.length === 0 && <p className="mt-8 text-center text-muted">{t("med.appts.empty")}</p>}
       <ul className="mt-6 space-y-3">
         {list.map((a) => {
           const wa = clinic
@@ -98,12 +98,12 @@ export function MedicalAppointments() {
               )
             : "";
           return (
-            <li key={a.id} className="rounded-2xl border border-white/10 bg-omni-card p-4">
-              <p className="font-black text-white">{a.name}</p>
-              <p className="text-sm text-zinc-400">{a.phone}</p>
+            <li key={a.id} className="rounded-2xl border border-navy/10 bg-white p-4">
+              <p className="font-black text-navy">{a.name}</p>
+              <p className="text-sm text-muted">{a.phone}</p>
               <p className="mt-1 text-sm text-omni-yellow">{new Date(a.startsAt).toLocaleString()}</p>
               <p className="mt-1 text-xs font-bold text-omni-red">{statusLabel[a.status ?? "pending"]}</p>
-              <p className="mt-2 text-xs text-zinc-500">{a.reminderPlan}</p>
+              <p className="mt-2 text-xs text-muted">{a.reminderPlan}</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {wa && (
                   <Button asChild size="sm" variant="outline">

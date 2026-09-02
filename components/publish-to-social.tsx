@@ -41,7 +41,7 @@ const emptyStatus = (): SocialStatusResponse => ({
 
 export function SocialConnectStrip({ className }: { className?: string }) {
   return (
-    <div className={cn("rounded-2xl border border-white/10 bg-omni-card p-4", className)}>
+    <div className={cn("rounded-2xl border border-navy/10 bg-white p-4", className)}>
       <PublishToSocial campaignId="" showConnect compact={false} />
     </div>
   );
@@ -157,7 +157,7 @@ export function PublishToSocial({ campaignId, pack: packProp, locale: localeProp
     <div className="flex min-w-0 flex-col gap-2">
       {showConnect && (
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-[13px] font-bold uppercase tracking-wide text-zinc-300">{t("social.networks")}</span>
+          <span className="text-[13px] font-bold uppercase tracking-wide text-muted">{t("social.networks")}</span>
           {PROVIDERS.map((p) => {
             const connected = status[p.id].connected;
             const cfg = p.start === "facebook" ? status.configured.facebook : status.configured.linkedin;
@@ -168,7 +168,7 @@ export function PublishToSocial({ campaignId, pack: packProp, locale: localeProp
                 onClick={() => (connected ? undefined : connect(p.start))}
                 className={cn(
                   "rounded-full px-2.5 py-0.5 text-[13px] font-semibold",
-                  connected ? "bg-omni-yellow text-black" : "border border-white/15 text-zinc-300 hover:border-omni-yellow/50",
+                  connected ? "bg-navy text-white" : "border border-navy/15 text-muted hover:border-gold",
                 )}
                 title={status[p.id].pageName ?? t(p.labelKey)}
               >
@@ -180,10 +180,10 @@ export function PublishToSocial({ campaignId, pack: packProp, locale: localeProp
       )}
 
       {!anyConfigured && (
-        <p className="text-sm text-zinc-300">{t("social.notConfigured")}</p>
+        <p className="text-sm text-muted">{t("social.notConfigured")}</p>
       )}
       {status.needs_service_role && anyConfigured && (
-        <p className="text-sm text-zinc-300">{t("social.needsServiceRole")}</p>
+        <p className="text-sm text-muted">{t("social.needsServiceRole")}</p>
       )}
 
       {showPublish && (
@@ -196,13 +196,13 @@ export function PublishToSocial({ campaignId, pack: packProp, locale: localeProp
       )}
 
       {open && showPublish && (
-        <div className="mt-1 rounded-xl border border-white/10 bg-black/40 p-3 text-start">
-          <p className="mb-2 text-[13px] font-bold uppercase tracking-wide text-zinc-300">{t("social.selectNetworks")}</p>
+        <div className="mt-1 rounded-xl border border-navy/10 bg-background p-3 text-start">
+          <p className="mb-2 text-[13px] font-bold uppercase tracking-wide text-muted">{t("social.selectNetworks")}</p>
           <div className="mb-3 flex flex-wrap gap-3">
             {PROVIDERS.map((p) => {
               const connected = status[p.id].connected;
               return (
-                <label key={p.id} className="flex items-center gap-1.5 text-xs text-zinc-200">
+                <label key={p.id} className="flex items-center gap-1.5 text-xs text-foreground">
                   <input
                     type="checkbox"
                     disabled={!connected}
@@ -210,17 +210,17 @@ export function PublishToSocial({ campaignId, pack: packProp, locale: localeProp
                     onChange={(e) => setPicked((prev) => ({ ...prev, [p.id]: e.target.checked }))}
                   />
                   {t(p.labelKey)}
-                  {!connected && <span className="text-zinc-500">({t("social.notConnected")})</span>}
+                  {!connected && <span className="text-muted">({t("social.notConnected")})</span>}
                 </label>
               );
             })}
           </div>
-          <p className="mb-1 text-[13px] font-bold uppercase tracking-wide text-zinc-300">{t("social.preview")}</p>
+          <p className="mb-1 text-[13px] font-bold uppercase tracking-wide text-muted">{t("social.preview")}</p>
           {pack ? <PublishExactMockup pack={pack} locale={loc} /> : null}
-          <pre className="mb-2 mt-2 max-h-28 overflow-auto whitespace-pre-wrap rounded-lg bg-black/50 p-2 text-sm leading-relaxed text-zinc-200">
+          <pre className="mb-2 mt-2 max-h-28 overflow-auto whitespace-pre-wrap rounded-lg bg-background p-2 text-sm leading-relaxed text-foreground">
             {message || t("social.emptyMessage")}
           </pre>
-          {!hasImageHint && <p className="mb-2 text-sm text-zinc-300">{t("social.noImage")}</p>}
+          {!hasImageHint && <p className="mb-2 text-sm text-muted">{t("social.noImage")}</p>}
           <div className="flex flex-wrap gap-2">
             <Button type="button" size="sm" disabled={busy || !message.trim()} onClick={() => void confirm()}>
               {busy ? t("social.publishing") : t("social.confirm")}
@@ -236,7 +236,7 @@ export function PublishToSocial({ campaignId, pack: packProp, locale: localeProp
       {results.length > 0 && (
         <ul className="space-y-1 text-xs">
           {results.map((r) => (
-            <li key={r.platform} className={r.ok ? "text-omni-yellow" : "text-zinc-400"}>
+            <li key={r.platform} className={r.ok ? "text-omni-yellow" : "text-muted"}>
               {r.platform}:{" "}
               {r.ok
                 ? r.permalink

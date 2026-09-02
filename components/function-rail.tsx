@@ -83,7 +83,7 @@ export function FunctionRail({ compact = false }: { compact?: boolean }) {
             <LangLink
               key={fn.id}
               href={fn.href}
-              className="flex shrink-0 items-center gap-1 rounded-full border border-omni-yellow/25 px-2 py-1 text-[10px] font-bold text-omni-yellow hover:bg-omni-yellow/10"
+              className="flex shrink-0 items-center gap-1 rounded-full border border-navy/15 px-2.5 py-1 text-sm font-bold text-navy hover:bg-gold/15"
             >
               <Icon className="size-3" />
               {t(fn.key)}
@@ -95,7 +95,7 @@ export function FunctionRail({ compact = false }: { compact?: boolean }) {
   }
   return (
     <section className="mx-auto max-w-5xl px-4 pb-2">
-      <p className="mb-2 text-center text-[11px] font-bold uppercase tracking-[0.22em] text-omni-red">
+      <p className="mb-2 text-center text-sm font-bold uppercase tracking-[0.22em] text-gold">
         {t("fn.title")} · {t("fn.engines")}
       </p>
       <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-7">
@@ -106,17 +106,17 @@ export function FunctionRail({ compact = false }: { compact?: boolean }) {
               <LangLink
                 href={fn.href}
                 className={cn(
-                  "flex h-full flex-col rounded-2xl border border-omni-yellow/30 bg-black/55 p-3 hover:border-omni-yellow hover:bg-omni-yellow/10",
+                  "flex h-full flex-col rounded-[22px] border border-navy/10 bg-white p-3 shadow-[0_8px_24px_rgba(27,42,74,0.06)] hover:border-gold hover:bg-gold/10",
                 )}
               >
-                <span className="flex items-center gap-2 text-sm font-black text-omni-yellow">
-                  <Icon className="size-4 text-omni-red" />
+                <span className="flex items-center gap-2 text-sm font-black text-navy">
+                  <Icon className="size-4 text-gold" />
                   {t(fn.key)}
                 </span>
-                <span className="mt-1 text-[11px] text-zinc-400">{t(fn.hint)}</span>
+                <span className="mt-1 text-sm text-muted">{t(fn.hint)}</span>
               </LangLink>
               {fn.extraHref && fn.extraKey && (
-                <LangLink href={fn.extraHref} className="mt-1 inline-block px-1 text-[10px] text-zinc-500 hover:text-omni-yellow">
+                <LangLink href={fn.extraHref} className="mt-1 inline-block px-1 text-sm text-muted hover:text-navy">
                   {t(fn.extraKey)}
                 </LangLink>
               )}
@@ -124,7 +124,7 @@ export function FunctionRail({ compact = false }: { compact?: boolean }) {
           );
         })}
       </ul>
-      <p className="mt-2 flex items-center justify-center gap-2 text-[10px] text-zinc-600">
+      <p className="mt-2 flex items-center justify-center gap-2 text-sm text-muted">
         <Compass className="size-3" />
         {t("fn.engines")}
       </p>
@@ -135,8 +135,8 @@ export function FunctionRail({ compact = false }: { compact?: boolean }) {
 export function FunctionMenuLinks({ onPick }: { onPick?: () => void }) {
   const { t } = useI18n();
   return (
-    <div className="mt-2 border-t border-white/10 pt-2">
-      <p className="mb-1 px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-omni-red">{t("fn.title")}</p>
+    <div className="mt-2 border-t border-navy/10 pt-2">
+      <p className="mb-1 px-3 text-sm font-bold uppercase tracking-[0.18em] text-navy">{t("fn.title")}</p>
       {PRODUCT_FUNCTIONS.map((fn) => {
         const Icon = fn.icon;
         return (
@@ -144,11 +144,11 @@ export function FunctionMenuLinks({ onPick }: { onPick?: () => void }) {
             key={fn.id}
             href={fn.href}
             onClick={onPick}
-            className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-zinc-200 hover:bg-white/5"
+            className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-navy hover:bg-navy/5"
           >
-            <Icon className="size-4 text-omni-yellow" />
+            <Icon className="size-4 text-gold" />
             {t(fn.key)}
-            <span className="ms-auto text-[10px] text-zinc-500">{t(fn.hint)}</span>
+            <span className="ms-auto text-sm text-muted">{t(fn.hint)}</span>
           </LangLink>
         );
       })}

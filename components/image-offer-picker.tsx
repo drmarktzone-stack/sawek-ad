@@ -46,7 +46,8 @@ export function ImageOfferPicker({
   onOpenChange?: (open: boolean) => void;
 }) {
   const { t } = useI18n();
-  const [internalOpen, setInternalOpen] = useState(false);
+  const hasPhoto = (pack.intake.mediaAssets ?? []).some((a) => a.kind === "image");
+  const [internalOpen, setInternalOpen] = useState(!hasPhoto);
   const open = openProp ?? internalOpen;
   const setOpen = onOpenChange ?? setInternalOpen;
   const posters = useMemo(() => graphicPostersForIntake(pack.intake), [pack.intake.category, pack.intake.businessName, pack.intake.operatingModel]);
@@ -84,6 +85,7 @@ export function ImageOfferPicker({
         if (cancelled) return;
         if (!data?.ok || !data.imageBase64) {
           setImagen(null);
+          setImgError(t("audit.imagenDown"));
           return;
         }
         const mime = data.mime && data.mime.startsWith("image/") ? data.mime : "image/png";
@@ -97,7 +99,10 @@ export function ImageOfferPicker({
           asset,
         });
       } catch {
-        if (!cancelled) setImagen(null);
+        if (!cancelled) {
+          setImagen(null);
+          setImgError(t("audit.imagenDown"));
+        }
       } finally {
         if (!cancelled) setBusy((b) => (b === "imagen" ? null : b));
       }
@@ -169,8 +174,8 @@ export function ImageOfferPicker({
         {t("audit.offerPhotos")}
       </Button>
       {open ? (
-        <div className="mt-3 rounded-xl border border-omni-yellow/30 bg-black/40 p-3">
-          <p className="text-sm leading-relaxed text-zinc-200">{t("audit.offerPhotosLead")}</p>
+        <div className="mt-3 rounded-[22px] border border-navy/10 bg-white p-4 shadow-[0_10px_28px_rgba(27,42,74,0.07)]">
+          <p className="text-sm leading-relaxed text-foreground">{t("audit.offerPhotosLead")}</p>
           {imgError ? <p className="mt-1 text-sm text-omni-red">{imgError}</p> : null}
           <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
             {options.map((opt) => (
@@ -179,12 +184,12 @@ export function ImageOfferPicker({
                 type="button"
                 onClick={() => apply(opt)}
                 className={cn(
-                  "overflow-hidden rounded-xl border border-white/15 text-start transition hover:border-omni-yellow",
+                  "overflow-hidden rounded-xl border border-navy/15 text-start transition hover:border-omni-yellow",
                 )}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={opt.src} alt="" className="aspect-[4/5] w-full object-cover" />
-                <span className="block bg-black/60 px-2 py-1.5 text-[13px] font-bold text-white">
+                <span className="block bg-white px-2 py-1.5 text-[13px] font-bold text-navy">
                   {opt.kind === "imagen"
                     ? t("audit.aiStill")
                     : opt.kind === "site"
@@ -194,7 +199,7 @@ export function ImageOfferPicker({
               </button>
             ))}
           </div>
-          <p className="mt-2 text-[13px] text-zinc-300">{t("audit.pickPhoto")}</p>
+          <p className="mt-2 text-[13px] text-muted">{t("audit.pickPhoto")}</p>
         </div>
       ) : null}
     </div>

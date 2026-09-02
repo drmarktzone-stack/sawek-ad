@@ -5,7 +5,7 @@ import { LabPage } from "@/components/lab-page";
 
 export default function LabRoute() {
   return (
-    <Suspense fallback={<p className="p-10 text-center text-zinc-500">…</p>}>
+    <Suspense fallback={<p className="p-10 text-center text-muted">…</p>}>
       <LabPage />
     </Suspense>
   );

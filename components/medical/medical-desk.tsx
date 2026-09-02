@@ -128,7 +128,7 @@ export function MedicalDesk() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <ConquerHeadline subtitle={t("nav.medical")} />
-      <p className="mx-auto mb-6 max-w-2xl text-center text-sm text-zinc-400">{t("med.lead")}</p>
+      <p className="mx-auto mb-6 max-w-2xl text-center text-sm text-muted">{t("med.lead")}</p>
       <DepartmentRail />
       <MedicalNav />
 
@@ -145,7 +145,7 @@ export function MedicalDesk() {
         >
           {t("med.demo")}
         </Button>
-        <div className="flex gap-2 text-xs font-semibold text-zinc-400">
+        <div className="flex gap-2 text-xs font-semibold text-muted">
           <span className={step >= 1 ? "text-omni-yellow" : ""}>1. {t("med.step.specialty")}</span>
           <span className={step >= 2 ? "text-omni-yellow" : ""}>2. {t("med.step.clinic")}</span>
           <span className={step >= 3 ? "text-omni-yellow" : ""}>3. {t("med.step.campaign")}</span>
@@ -165,9 +165,9 @@ export function MedicalDesk() {
               ["med.leadsCtrl.title", "med.leadsCtrl.body"],
             ] as const
           ).map(([h, b]) => (
-            <li key={h} className="rounded-2xl border border-white/10 bg-omni-card p-4">
+            <li key={h} className="rounded-2xl border border-navy/10 bg-white p-4">
               <p className="font-black text-omni-yellow">{t(h)}</p>
-              <p className="mt-2 text-sm text-zinc-400">{t(b)}</p>
+              <p className="mt-2 text-sm text-muted">{t(b)}</p>
             </li>
           ))}
         </ul>
@@ -180,9 +180,9 @@ export function MedicalDesk() {
               "med.how.4",
             ] as const
           ).map((k, i) => (
-            <li key={k} className="rounded-2xl border border-omni-yellow/20 bg-black/40 p-4">
+            <li key={k} className="rounded-2xl border border-omni-yellow/20 bg-background p-4">
               <p className="text-xs font-black text-omni-red">0{i + 1}</p>
-              <p className="mt-1 text-sm font-semibold text-white">{t(k)}</p>
+              <p className="mt-1 text-sm font-semibold text-navy">{t(k)}</p>
             </li>
           ))}
         </ol>
@@ -198,21 +198,21 @@ export function MedicalDesk() {
               onClick={() => pickSpecialty(s.id)}
               className={cn(
                 "rounded-2xl border p-4 text-start",
-                clinic?.specialty === s.id ? "border-omni-yellow bg-omni-yellow/10" : "border-white/10 bg-omni-card",
+                clinic?.specialty === s.id ? "border-omni-yellow bg-omni-yellow/10" : "border-navy/10 bg-white",
               )}
             >
-              <p className="font-black text-white">{s.label[locale]}</p>
-              <p className="mt-1 text-xs text-zinc-400">{s.hint[locale]}</p>
+              <p className="font-black text-navy">{s.label[locale]}</p>
+              <p className="mt-1 text-xs text-muted">{s.hint[locale]}</p>
             </button>
           ))}
         </div>
       </section>
 
       {clinic && (
-        <section className="mt-8 rounded-2xl border border-white/10 bg-omni-card p-5">
+        <section className="mt-8 rounded-2xl border border-navy/10 bg-white p-5">
           <h2 className="mb-4 text-sm font-black uppercase tracking-wide text-omni-yellow">{t("med.step.clinic")}</h2>
           {isFreeService(clinic) && (
-            <p className="mb-4 rounded-xl border border-omni-yellow/30 bg-omni-yellow/5 p-3 text-sm text-zinc-200">
+            <p className="mb-4 rounded-xl border border-omni-yellow/30 bg-omni-yellow/5 p-3 text-sm text-foreground">
               {t("details.offerLocked")}
             </p>
           )}
@@ -252,7 +252,7 @@ export function MedicalDesk() {
           </div>
           <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
             {clinic.hours.map((h, i) => (
-              <label key={h.day} className="flex items-center gap-2 rounded-xl border border-white/10 p-2 text-xs">
+              <label key={h.day} className="flex items-center gap-2 rounded-xl border border-navy/10 p-2 text-xs">
                 <input
                   type="checkbox"
                   checked={!h.closed}
@@ -291,9 +291,9 @@ export function MedicalDesk() {
       )}
 
       {clinic && (
-        <section className="mt-8 rounded-2xl border border-white/10 bg-omni-card p-5">
+        <section className="mt-8 rounded-2xl border border-navy/10 bg-white p-5">
           <h2 className="mb-4 text-sm font-black uppercase tracking-wide text-omni-yellow">{t("med.step.campaign")}</h2>
-          <p className="mb-3 text-xs text-zinc-500">
+          <p className="mb-3 text-xs text-muted">
             {t("med.library")} · {specialtyLabel(clinic.specialty, locale)}
           </p>
           <div className="mb-4 flex flex-wrap gap-2">
@@ -304,7 +304,7 @@ export function MedicalDesk() {
                 onClick={() => setTreatment({ ...treatment, serviceId: s.id, name: s.name[locale] })}
                 className={cn(
                   "rounded-full px-3 py-1.5 text-xs font-semibold",
-                  treatment.serviceId === s.id ? "bg-omni-yellow text-black" : "border border-white/10",
+                  treatment.serviceId === s.id ? "bg-navy text-white" : "border border-navy/10",
                 )}
               >
                 {s.name[locale]}
@@ -348,7 +348,7 @@ export function MedicalDesk() {
               <Label>{t("med.tx.source")}</Label>
               <Input value={treatment.sourceUrl} onChange={(e) => setTreatment({ ...treatment, sourceUrl: e.target.value })} />
             </div>
-            <label className="flex items-center gap-2 text-sm text-zinc-300 sm:col-span-2">
+            <label className="flex items-center gap-2 text-sm text-muted sm:col-span-2">
               <input
                 type="checkbox"
                 checked={treatment.consentBeforeAfter}
@@ -369,7 +369,7 @@ export function MedicalDesk() {
               </>
             )}
           </div>
-          <p className="mt-4 mb-2 text-xs font-bold uppercase text-zinc-500">{t("med.templates")}</p>
+          <p className="mt-4 mb-2 text-xs font-bold uppercase text-muted">{t("med.templates")}</p>
           <div className="flex flex-wrap gap-2">
             {LANDING_SKINS.map((s) => (
               <button
@@ -378,7 +378,7 @@ export function MedicalDesk() {
                 onClick={() => setTemplate(s.id)}
                 className={cn(
                   "rounded-xl border px-3 py-2 text-xs font-semibold",
-                  template === s.id ? "border-omni-yellow" : "border-white/10",
+                  template === s.id ? "border-omni-yellow" : "border-navy/10",
                 )}
                 style={{ background: s.bg, color: s.ink }}
               >
@@ -394,13 +394,13 @@ export function MedicalDesk() {
 
       {preview && copy && (
         <section className="mt-8 space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-omni-card px-4 py-3">
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-navy/10 bg-white px-4 py-3">
             <div>
-              <p className="font-black text-white">{preview.clinic.name}</p>
+              <p className="font-black text-navy">{preview.clinic.name}</p>
               <MarkerCount n={preview.markerCount} locale={locale} />
             </div>
             <div className="flex flex-wrap gap-2">
-              <div className="flex rounded-full border border-white/10 p-0.5">
+              <div className="flex rounded-full border border-navy/10 p-0.5">
                 {LOCALES.map((l) => (
                   <button
                     key={l.id}
@@ -408,7 +408,7 @@ export function MedicalDesk() {
                     onClick={() => setPackLang(l.id)}
                     className={cn(
                       "rounded-full px-2.5 py-1 text-xs font-semibold",
-                      packLang === l.id ? "bg-omni-yellow text-black" : "text-zinc-300",
+                      packLang === l.id ? "bg-navy text-white" : "text-muted",
                     )}
                   >
                     {l.label}
@@ -456,22 +456,22 @@ export function MedicalDesk() {
           </div>
           <EthicsBanner locale={packLang} />
           <div className="grid gap-3 md:grid-cols-2">
-            <article className="rounded-2xl border border-white/10 bg-omni-card p-4">
+            <article className="rounded-2xl border border-navy/10 bg-white p-4">
               <p className="text-xs font-black uppercase text-omni-yellow">{t("med.social")}</p>
               {copy.socialPosts.map((p) => (
-                <pre key={p.platform} className="mt-2 whitespace-pre-wrap font-sans text-sm text-zinc-300">
+                <pre key={p.platform} className="mt-2 whitespace-pre-wrap font-sans text-sm text-muted">
                   {p.platform}: {p.body}
                 </pre>
               ))}
             </article>
-            <article className="rounded-2xl border border-white/10 bg-omni-card p-4">
+            <article className="rounded-2xl border border-navy/10 bg-white p-4">
               <p className="text-xs font-black uppercase text-omni-yellow">{t("med.waScript")}</p>
-              <p className="mt-2 whitespace-pre-wrap text-sm text-zinc-300">{copy.whatsappScript}</p>
+              <p className="mt-2 whitespace-pre-wrap text-sm text-muted">{copy.whatsappScript}</p>
               <p className="mt-4 text-xs font-black uppercase text-omni-yellow">{t("med.voice")}</p>
-              <p className="mt-2 text-sm text-zinc-400">{copy.voiceScript}</p>
+              <p className="mt-2 text-sm text-muted">{copy.voiceScript}</p>
             </article>
           </div>
-          <div className="overflow-hidden rounded-3xl border border-white/10">
+          <div className="overflow-hidden rounded-3xl border border-navy/10">
             <LandingView campaign={preview} locale={packLang} />
           </div>
         </section>
@@ -481,7 +481,7 @@ export function MedicalDesk() {
         <ul className="mt-8 space-y-2">
           {campaigns.map((c) => (
             <li key={c.id}>
-              <button type="button" className="w-full rounded-xl border border-white/10 px-4 py-2 text-start text-sm" onClick={() => setPreview(c)}>
+              <button type="button" className="w-full rounded-xl border border-navy/10 px-4 py-2 text-start text-sm" onClick={() => setPreview(c)}>
                 {c.clinic.name} · {c.treatment.name} · {c.markerCount} markers
               </button>
             </li>

@@ -42,7 +42,7 @@ export default function PublicLandingPage() {
   }, [params.slug]);
 
   if (camp === undefined || (camp === null && pack === undefined)) {
-    return <p className="p-10 text-center text-zinc-500">…</p>;
+    return <p className="p-10 text-center text-muted">…</p>;
   }
 
   if (camp) {
@@ -69,7 +69,7 @@ export default function PublicLandingPage() {
 
   return (
     <div className="mx-auto max-w-lg px-4 py-16 text-center">
-      <p className="text-zinc-300">{t("med.cred.empty")}</p>
+      <p className="text-muted">{t("med.cred.empty")}</p>
       <Button
         type="button"
         data-demo="pediatric"

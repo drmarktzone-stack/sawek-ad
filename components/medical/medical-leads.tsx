@@ -99,20 +99,20 @@ export function MedicalLeads() {
           </Button>
         ))}
       </div>
-      {shown.length === 0 && <p className="mt-8 text-center text-zinc-400">{t("med.leads.empty")}</p>}
+      {shown.length === 0 && <p className="mt-8 text-center text-muted">{t("med.leads.empty")}</p>}
       <ul className="mt-6 space-y-3">
         {shown.map((lead) => {
           const camp = camps.find((c) => c.id === lead.campaignId);
           const copy = camp ? blockFor(camp, locale) : null;
           const wa = camp && copy ? waLink(camp.clinic.whatsapp, copy.whatsappScript) : "";
           return (
-            <li key={lead.id} className="rounded-2xl border border-white/10 bg-omni-card p-4">
+            <li key={lead.id} className="rounded-2xl border border-navy/10 bg-white p-4">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <p className="font-black text-white">{lead.name}</p>
-                  <p className="text-sm text-zinc-400">{lead.phone}</p>
-                  {lead.message && <p className="mt-1 text-sm text-zinc-300">{lead.message}</p>}
-                  <p className="mt-1 text-[11px] text-zinc-500">{lead.createdAt.slice(0, 16).replace("T", " ")}</p>
+                  <p className="font-black text-navy">{lead.name}</p>
+                  <p className="text-sm text-muted">{lead.phone}</p>
+                  {lead.message && <p className="mt-1 text-sm text-muted">{lead.message}</p>}
+                  <p className="mt-1 text-sm text-muted">{lead.createdAt.slice(0, 16).replace("T", " ")}</p>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {(["new", "in-progress", "closed"] as const).map((st) => (

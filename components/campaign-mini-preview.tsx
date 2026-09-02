@@ -16,7 +16,7 @@ export function CampaignMiniPreview({ pack, locale }: { pack: CampaignPack; loca
   const asset = pickAsset(assets, 0);
   const fallback = !asset ? graphicPostersForIntake(pack.intake)[0]?.dataUrl : undefined;
   return (
-    <div className="mt-3 overflow-hidden rounded-xl border border-white/10">
+    <div className="mt-3 overflow-hidden rounded-xl border border-navy/10">
       <AdVisual
         locale={locale}
         palette={palette}

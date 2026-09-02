@@ -130,7 +130,7 @@ export function FacebookFeedCard({
     <div
       ref={refEl}
       dir={dir}
-      className="overflow-hidden rounded-xl border border-white/10 text-start"
+      className="overflow-hidden rounded-xl border border-navy/10 text-start"
       style={{ background: "#242526", color: "#e4e6eb", fontFamily: "Helvetica, Arial, sans-serif" }}
     >
       <div className="flex items-center gap-2.5 px-3 py-2.5">
@@ -236,7 +236,7 @@ export function InstagramFeedCard({
     <div
       ref={refEl}
       dir={dir}
-      className="overflow-hidden rounded-xl border border-white/10 text-start"
+      className="overflow-hidden rounded-xl border border-navy/10 text-start"
       style={{ background: "#000", color: "#f5f5f5", fontFamily: "Helvetica, Arial, sans-serif" }}
     >
       <div className="flex items-center gap-2.5 px-3 py-2.5">
@@ -347,7 +347,7 @@ export function TikTokFeedCard({
           </span>
           <span className="flex flex-col items-center gap-0.5">
             <Share2 className="size-8" />
-            <span className="text-[11px] font-bold">{like}</span>
+            <span className="text-sm font-bold">{like}</span>
           </span>
           <span className="flex size-10 items-center justify-center rounded-full bg-zinc-800 ring-2 ring-white/20">
             <Music2 className="size-4" />
@@ -401,7 +401,7 @@ export function WhatsAppPreviewCard({
   return (
     <div
       dir={dir}
-      className="overflow-hidden rounded-xl border border-white/10 text-start"
+      className="overflow-hidden rounded-xl border border-navy/10 text-start"
       style={{ background: "#0b141a", color: "#e9edef", fontFamily: "Helvetica, Arial, sans-serif" }}
     >
       <div style={{ background: "#202c33", padding: "10px 12px" }}>
@@ -560,8 +560,8 @@ export function LivePreviewStrip({
     <section data-live-preview="feed" className="mb-10">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="text-2xl font-black text-white">{t("end.previewTitle")}</h2>
-          <p className="mt-1 text-sm text-zinc-400">{t("end.previewLead")}</p>
+          <h2 className="text-2xl font-black text-navy">{t("end.previewTitle")}</h2>
+          <p className="mt-1 text-sm text-muted">{t("end.previewLead")}</p>
         </div>
         <Button type="button" onClick={() => void generateImage()} disabled={busy === "imagen"}>
           {busy === "imagen" ? <Loader2 className="size-4 animate-spin" /> : <ImagePlus className="size-4" />}
@@ -575,7 +575,7 @@ export function LivePreviewStrip({
       ) : null}
 
       <div className="mt-5 grid items-start gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <article className="rounded-2xl border border-white/10 bg-omni-card p-4">
+        <article className="rounded-[22px] border border-navy/10 bg-white p-4 shadow-[0_10px_28px_rgba(27,42,74,0.07)]">
           <p className="mb-3 text-[13px] font-black uppercase tracking-[0.14em] text-omni-yellow">
             {t("end.facebook")} · 1.91:1
           </p>
@@ -597,7 +597,7 @@ export function LivePreviewStrip({
           ) : null}
         </article>
 
-        <article className="rounded-2xl border border-white/10 bg-omni-card p-4">
+        <article className="rounded-[22px] border border-navy/10 bg-white p-4 shadow-[0_10px_28px_rgba(27,42,74,0.07)]">
           <p className="mb-3 text-[13px] font-black uppercase tracking-[0.14em] text-omni-yellow">
             {t("end.instagram")} · 4:5
           </p>
@@ -616,7 +616,7 @@ export function LivePreviewStrip({
           ) : null}
         </article>
 
-        <article className="rounded-2xl border border-white/10 bg-omni-card p-4">
+        <article className="rounded-[22px] border border-navy/10 bg-white p-4 shadow-[0_10px_28px_rgba(27,42,74,0.07)]">
           <p className="mb-3 text-[13px] font-black uppercase tracking-[0.14em] text-omni-yellow">
             {t("end.tiktok")} · 9:16
           </p>
@@ -635,7 +635,7 @@ export function LivePreviewStrip({
           ) : null}
         </article>
 
-        <article className="rounded-2xl border border-white/10 bg-omni-card p-4">
+        <article className="rounded-[22px] border border-navy/10 bg-white p-4 shadow-[0_10px_28px_rgba(27,42,74,0.07)]">
           <p className="mb-3 text-[13px] font-black uppercase tracking-[0.14em] text-omni-yellow">
             {t("end.whatsapp")}
           </p>

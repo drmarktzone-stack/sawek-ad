@@ -53,12 +53,12 @@ export function CreativeDeptView({
         <Card title={t("dept.pastCreative")}>
           <ul className="space-y-3">
             {(pack.intake.pastCreatives ?? []).map((past) => (
-              <li key={past.id} className="rounded-xl border border-white/10 p-3 text-sm">
-                <p className="text-[10px] font-black uppercase tracking-widest text-omni-red">past_creative</p>
-                <p className="mt-1 font-semibold text-white">{past.headline || past.sourceName}</p>
-                {past.body && <pre className="mt-1 whitespace-pre-wrap font-sans text-zinc-300">{past.body}</pre>}
+              <li key={past.id} className="rounded-xl border border-navy/10 p-3 text-sm">
+                <p className="text-sm font-black uppercase tracking-widest text-omni-red">past_creative</p>
+                <p className="mt-1 font-semibold text-navy">{past.headline || past.sourceName}</p>
+                {past.body && <pre className="mt-1 whitespace-pre-wrap font-sans text-muted">{past.body}</pre>}
                 {past.cta && <p className="mt-1 text-omni-yellow">CTA: {past.cta}</p>}
-                <p className="mt-2 text-[11px] text-zinc-500">{t("ingest.pastTag")}</p>
+                <p className="mt-2 text-sm text-muted">{t("ingest.pastTag")}</p>
               </li>
             ))}
           </ul>
@@ -67,23 +67,23 @@ export function CreativeDeptView({
       <Card title={t("dept.brandkit")}>
         <div className="flex flex-wrap items-center gap-3">
           {(["black", "red", "yellow"] as const).map((k) => (
-            <span key={k} className="flex items-center gap-2 text-xs text-zinc-300">
+            <span key={k} className="flex items-center gap-2 text-xs text-muted">
               <i
-                className="size-6 rounded-full border border-white/20"
+                className="size-6 rounded-full border border-navy/15"
                 style={{ background: c.brandKit.sawek[k] }}
               />
               SAWEK {k}
             </span>
           ))}
         </div>
-        <p className="mt-3 text-sm text-zinc-400">{c.brandKit.note[l]}</p>
+        <p className="mt-3 text-sm text-muted">{c.brandKit.note[l]}</p>
       </Card>
       <Card title={t("dept.hooks")}>
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {c.hooks.map((h) => (
-            <article key={h.id} className="rounded-xl border border-white/10 p-3">
+            <article key={h.id} className="rounded-xl border border-navy/10 p-3">
               <p className="text-xs font-black uppercase text-omni-yellow">{h.angle[l]}</p>
-              <p className="mt-1 text-sm text-zinc-200">{h.hook[l]}</p>
+              <p className="mt-1 text-sm text-foreground">{h.hook[l]}</p>
             </article>
           ))}
         </div>
@@ -91,7 +91,7 @@ export function CreativeDeptView({
       <Card title={t("dept.angles")}>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[480px] text-start text-sm">
-            <thead className="text-xs uppercase text-zinc-500">
+            <thead className="text-xs uppercase text-muted">
               <tr>
                 <th className="p-2">{t("dept.angles")}</th>
                 <th className="p-2">{t("details.advantage")}</th>
@@ -100,9 +100,9 @@ export function CreativeDeptView({
             </thead>
             <tbody>
               {c.angleMatrix.map((row, i) => (
-                <tr key={i} className="border-t border-white/10">
-                  <td className="p-2 text-zinc-200">{row.angle[l]}</td>
-                  <td className="p-2 text-zinc-400">{row.proof[l]}</td>
+                <tr key={i} className="border-t border-navy/10">
+                  <td className="p-2 text-foreground">{row.angle[l]}</td>
+                  <td className="p-2 text-muted">{row.proof[l]}</td>
                   <td className="p-2 font-semibold text-omni-yellow">{row.cta[l]}</td>
                 </tr>
               ))}
@@ -119,7 +119,7 @@ export function CreativeDeptView({
               onClick={() => setFormat(f.id)}
               className={cn(
                 "rounded-full px-3 py-1 text-xs font-semibold",
-                format === f.id ? "bg-omni-yellow text-black" : "border border-white/10 text-zinc-300",
+                format === f.id ? "bg-navy text-white" : "border border-navy/10 text-muted",
               )}
             >
               {f.label[l]}
@@ -128,9 +128,9 @@ export function CreativeDeptView({
         </div>
         <div className="grid gap-3 md:grid-cols-2">
           {pieces.map((p, i) => (
-            <article key={`${p.format}-${p.locale}-${i}`} className="rounded-xl border border-white/10 p-4">
+            <article key={`${p.format}-${p.locale}-${i}`} className="rounded-xl border border-navy/10 p-4">
               <p className="text-xs font-bold uppercase text-omni-yellow">{p.title}</p>
-              <pre className="mt-2 whitespace-pre-wrap font-sans text-sm text-zinc-300">{p.body}</pre>
+              <pre className="mt-2 whitespace-pre-wrap font-sans text-sm text-muted">{p.body}</pre>
             </article>
           ))}
         </div>
@@ -160,7 +160,7 @@ export function CreativeDeptView({
             onClick={() => setStyleFilter("all")}
             className={cn(
               "rounded-full px-3 py-1 text-xs font-semibold",
-              styleFilter === "all" ? "bg-omni-yellow text-black" : "border border-white/10 text-zinc-300",
+              styleFilter === "all" ? "bg-navy text-white" : "border border-navy/10 text-muted",
             )}
           >
             {t("design.filterAll")}
@@ -170,7 +170,7 @@ export function CreativeDeptView({
             onClick={() => setStyleFilter(packVertical)}
             className={cn(
               "rounded-full px-3 py-1 text-xs font-semibold",
-              styleFilter === packVertical ? "bg-omni-yellow text-black" : "border border-white/10 text-zinc-300",
+              styleFilter === packVertical ? "bg-navy text-white" : "border border-navy/10 text-muted",
             )}
           >
             {packVertical}
@@ -181,7 +181,7 @@ export function CreativeDeptView({
             const ads = pack.variants.filter((v) => v.locale === packLang);
             const v = ads[idx % Math.max(ads.length, 1)];
             return (
-              <article key={s.id} className="overflow-hidden rounded-2xl border border-white/10 bg-black">
+              <article key={s.id} className="overflow-hidden rounded-2xl border border-navy/10 bg-black">
                 <CampaignAdVisual
                   locale={packLang}
                   palette={s.palette}
@@ -193,14 +193,14 @@ export function CreativeDeptView({
                     {v?.headline ?? pack.intake.businessName}
                   </p>
                 </CampaignAdVisual>
-                <div className="space-y-2 bg-omni-card p-3">
+                <div className="space-y-2 bg-white p-3">
                   <div className="flex gap-1" aria-label={t("design.swatch")}>
                     {s.palette.map((c) => (
-                      <i key={c} className="h-4 flex-1 rounded-sm border border-white/10" style={{ background: c }} />
+                      <i key={c} className="h-4 flex-1 rounded-sm border border-navy/10" style={{ background: c }} />
                     ))}
                   </div>
-                  <p className="text-[11px] font-bold text-zinc-300">{s.name[packLang]}</p>
-                  <p className="line-clamp-2 text-[11px] text-zinc-500">{s.description[packLang]}</p>
+                  <p className="text-sm font-bold text-muted">{s.name[packLang]}</p>
+                  <p className="line-clamp-2 text-sm text-muted">{s.description[packLang]}</p>
                   <Button type="button" size="sm" className="w-full" onClick={() => makeAd(s.id)}>
                     {t("design.make")}
                   </Button>
@@ -215,7 +215,7 @@ export function CreativeDeptView({
           {LAYOUT_THUMBS.map((lay, idx) => {
             const pal = visibleStyles[idx % Math.max(visibleStyles.length, 1)]?.palette ?? ["#111", "#ffe500", "#ff1a1a"];
             return (
-              <article key={lay.id} className="overflow-hidden rounded-xl border border-white/10 bg-black">
+              <article key={lay.id} className="overflow-hidden rounded-xl border border-navy/10 bg-black">
                 <CampaignAdVisual
                   locale={packLang}
                   palette={pal}
@@ -223,9 +223,9 @@ export function CreativeDeptView({
                   index={idx}
                   className={cn("w-full", lay.aspect, "h-auto min-h-0")}
                 >
-                  <p className="text-[10px] font-black leading-tight text-white drop-shadow">{pack.intake.businessName}</p>
+                  <p className="text-sm font-black leading-tight text-white drop-shadow">{pack.intake.businessName}</p>
                 </CampaignAdVisual>
-                <p className="px-2 py-1.5 text-center text-[10px] font-bold text-zinc-400">{lay.label[packLang]}</p>
+                <p className="px-2 py-1.5 text-center text-sm font-bold text-muted">{lay.label[packLang]}</p>
               </article>
             );
           })}

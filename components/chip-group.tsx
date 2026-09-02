@@ -26,7 +26,7 @@ export function ChipGroup({
   const { locale, t } = useI18n();
   return (
     <div>
-      {multi && <p className="mb-2 text-xs text-zinc-500">{t("details.multiHint")}</p>}
+      {multi && <p className="mb-2 text-sm text-muted">{t("details.multiHint")}</p>}
       <div className="flex flex-wrap gap-2">
         {options.map((opt) => {
           const label = opt.label[locale];
@@ -43,8 +43,8 @@ export function ChipGroup({
               className={cn(
                 "rounded-full border px-3 py-1.5 text-sm font-medium transition-colors",
                 selected
-                  ? "border-omni-yellow bg-omni-yellow text-black"
-                  : "border-white/15 bg-white/5 text-zinc-200 hover:border-omni-yellow/50",
+                  ? "border-navy bg-navy text-white"
+                  : "border-navy/15 bg-white text-navy hover:border-gold",
               )}
             >
               {label}
@@ -54,7 +54,7 @@ export function ChipGroup({
       </div>
       {showCustomField && (
         <input
-          className="mt-3 h-11 w-full rounded-xl border border-omni-yellow/40 bg-black/40 px-3 text-sm text-white outline-none"
+          className="mt-3 h-11 w-full rounded-full border border-gold/40 bg-white px-4 text-base text-foreground outline-none"
           placeholder={t("details.writeOwn")}
           value={customValue ?? value}
           onChange={(e) => onCustom?.(e.target.value)}

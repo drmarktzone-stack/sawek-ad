@@ -65,7 +65,7 @@ export function MediaAssetUploader({
   return (
     <div>
       <Label>{t("details.assets")}</Label>
-      <p className="mb-2 text-xs text-zinc-500">{t("details.assetsHint")}</p>
+      <p className="mb-2 text-xs text-muted">{t("details.assetsHint")}</p>
       <input
         ref={inputRef}
         type="file"
@@ -80,13 +80,13 @@ export function MediaAssetUploader({
       </Button>
       {error && <p className="mt-2 text-sm font-semibold text-omni-red">{error}</p>}
       {assets.length === 0 && (
-        <p className="mt-3 rounded-xl border border-dashed border-white/15 bg-black/30 px-3 py-6 text-center text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
+        <p className="mt-3 rounded-xl border border-dashed border-navy/15 bg-background px-3 py-6 text-center text-xs font-bold uppercase tracking-[0.18em] text-muted">
           {sampleLabel(locale)}
         </p>
       )}
       <ul className="mt-3 grid gap-3 sm:grid-cols-2">
         {assets.map((a) => (
-          <li key={a.id} className="overflow-hidden rounded-xl border border-white/10 bg-black/40">
+          <li key={a.id} className="overflow-hidden rounded-xl border border-navy/10 bg-background">
             <div className="relative h-28 bg-zinc-900">
               {(a.publicSrc || urls[a.id]) && a.kind === "image" ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -94,15 +94,15 @@ export function MediaAssetUploader({
               ) : (a.publicSrc || urls[a.id]) && a.kind === "video" ? (
                 <video src={a.publicSrc || urls[a.id]} className="h-full w-full object-cover" muted playsInline />
               ) : (
-                <div className="flex h-full items-center justify-center text-[10px] font-black uppercase tracking-widest text-zinc-600">
+                <div className="flex h-full items-center justify-center text-sm font-black uppercase tracking-widest text-muted">
                   {sampleLabel(locale)}
                 </div>
               )}
             </div>
             <div className="space-y-2 p-3">
-              <p className="truncate text-xs text-zinc-400">{a.name}</p>
+              <p className="truncate text-xs text-muted">{a.name}</p>
               <select
-                className="h-9 w-full rounded-lg border border-white/15 bg-black/50 px-2 text-xs text-white"
+                className="h-9 w-full rounded-lg border border-navy/15 bg-background px-2 text-xs text-navy"
                 value={a.label}
                 onChange={(e) => patch(a.id, { label: e.target.value as MediaAssetLabel })}
               >
@@ -113,14 +113,14 @@ export function MediaAssetUploader({
                 ))}
               </select>
               <input
-                className="h-9 w-full rounded-lg border border-white/10 bg-black/40 px-2 text-xs text-white"
+                className="h-9 w-full rounded-lg border border-navy/10 bg-background px-2 text-xs text-navy"
                 placeholder={t("details.assetNote")}
                 value={a.note}
                 onChange={(e) => patch(a.id, { note: e.target.value })}
               />
               <button
                 type="button"
-                className="flex items-center gap-1 text-xs text-zinc-500 hover:text-omni-red"
+                className="flex items-center gap-1 text-xs text-muted hover:text-omni-red"
                 onClick={() => void remove(a.id)}
               >
                 <Trash2 className="size-3.5" />

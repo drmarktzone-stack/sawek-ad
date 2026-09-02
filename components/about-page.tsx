@@ -111,15 +111,15 @@ export function AboutPage() {
     <div className="mx-auto max-w-3xl px-4 py-10">
       <ConquerHeadline subtitle={t("about.title")} />
       <DepartmentRail />
-      <p className="mb-8 text-center text-sm text-zinc-400">
+      <p className="mb-8 text-center text-sm text-muted">
         {locale === "ar" ? t("brand.name") : "SAWEK AD · סאווק · سوِّق إعلانك بنفسك"}
-        <span className="mt-1 block text-xs text-zinc-600">{t("brand.tagline")}</span>
+        <span className="mt-1 block text-xs text-muted">{t("brand.tagline")}</span>
       </p>
       <div className="space-y-4">
         {blocks.map((b) => (
-          <article key={b.h} className="rounded-2xl border border-white/10 bg-omni-card p-5">
+          <article key={b.h} className="rounded-2xl border border-navy/10 bg-white p-5">
             <h2 className="mb-2 text-lg font-black text-omni-yellow">{b.h}</h2>
-            <p className="text-sm leading-relaxed text-zinc-300">{b.p}</p>
+            <p className="text-sm leading-relaxed text-muted">{b.p}</p>
           </article>
         ))}
       </div>

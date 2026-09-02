@@ -468,7 +468,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
               {t("cta.new")}
             </Button>
           </div>
-          <p className="max-w-md text-center text-xs text-zinc-500">{t("cta.newHint")}</p>
+          <p className="max-w-md text-center text-xs text-muted">{t("cta.newHint")}</p>
         </div>
       ) : (
         <div className="mb-6 flex flex-col items-center gap-2">
@@ -486,7 +486,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
               {t("cta.new")}
             </Button>
           </div>
-          <p className="max-w-md text-center text-xs text-zinc-500">{t("cta.newHint")}</p>
+          <p className="max-w-md text-center text-xs text-muted">{t("cta.newHint")}</p>
         </div>
       )}
 
@@ -501,13 +501,13 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
           )}
           {!embedded && <ConquerHeadline subtitle={step === 4 ? t("hero.review") : undefined} />}
           {embedded && step === 4 && (
-            <p className="mb-6 text-center text-sm font-medium text-zinc-400">{t("hero.review")}</p>
+            <p className="mb-6 text-center text-sm font-medium text-muted">{t("hero.review")}</p>
           )}
 
           {step === 1 && (
             <section>
               <h2 className="mb-2 text-center text-lg font-bold">{t("type.prompt")}</h2>
-              <p className="mb-6 text-center text-sm text-zinc-400">{t("type.hint")}</p>
+              <p className="mb-6 text-center text-sm text-muted">{t("type.hint")}</p>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {TYPE_OPTIONS.map((opt) => (
                   <button
@@ -516,8 +516,8 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
                     onClick={() => patch({ type: opt.id as Intake["type"] })}
                     className={`rounded-2xl border p-6 text-start text-xl font-black transition-all ${
                       intake.type === opt.id
-                        ? "border-omni-yellow bg-omni-yellow text-black shadow-[0_12px_40px_rgba(255,26,26,0.45)]"
-                        : "border-white/10 bg-omni-card text-white hover:border-omni-yellow/50 hover:shadow-[0_0_24px_rgba(255,229,0,0.12)]"
+                        ? "border-omni-yellow bg-navy text-white shadow-[0_12px_32px_rgba(27,42,74,0.12)]"
+                        : "border-navy/10 bg-white text-navy hover:border-gold hover:shadow-[0_8px_24px_rgba(27,42,74,0.08)]"
                     }`}
                   >
                     {opt.label[locale]}
@@ -525,7 +525,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
                 ))}
               </div>
               <h2 className="mb-2 mt-10 text-center text-lg font-bold">{t("model.prompt")}</h2>
-              <p className="mb-6 text-center text-sm text-zinc-400">{t("model.hint")}</p>
+              <p className="mb-6 text-center text-sm text-muted">{t("model.hint")}</p>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {([
                   { id: "paid" as const, title: t("model.paid"), hint: t("model.paidHint") },
@@ -537,13 +537,13 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
                     onClick={() => setIntake((s) => applyOperatingModel(s, opt.id))}
                     className={`rounded-2xl border p-6 text-start transition-all ${
                       (intake.operatingModel ?? "paid") === opt.id
-                        ? "border-omni-yellow bg-omni-yellow text-black shadow-[0_12px_40px_rgba(255,26,26,0.45)]"
-                        : "border-white/10 bg-omni-card text-white hover:border-omni-yellow/50 hover:shadow-[0_0_24px_rgba(255,229,0,0.12)]"
+                        ? "border-omni-yellow bg-navy text-white shadow-[0_12px_32px_rgba(27,42,74,0.12)]"
+                        : "border-navy/10 bg-white text-navy hover:border-gold hover:shadow-[0_8px_24px_rgba(27,42,74,0.08)]"
                     }`}
                   >
                     <span className="block text-xl font-black">{opt.title}</span>
                     <span className={`mt-2 block text-sm font-medium ${
-                      (intake.operatingModel ?? "paid") === opt.id ? "text-black/70" : "text-zinc-400"
+                      (intake.operatingModel ?? "paid") === opt.id ? "text-black/70" : "text-muted"
                     }`}>{opt.hint}</span>
                   </button>
                 ))}
@@ -555,7 +555,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
           )}
 
           {step === 2 && (
-            <section className="rounded-2xl border border-white/10 bg-omni-card p-5 sm:p-8">
+            <section className="rounded-2xl border border-navy/10 bg-white p-5 sm:p-8">
               <Field label={t("biz.name")}>
                 <Input
                   value={intake.businessName}
@@ -600,7 +600,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
                 />
               </Field>
               <Field label={t("biz.hours")}>
-                <p className="mb-2 text-xs text-zinc-500">{t("biz.hoursHint")}</p>
+                <p className="mb-2 text-xs text-muted">{t("biz.hoursHint")}</p>
                 <Textarea
                   value={intake.clinicHours ?? ""}
                   placeholder={t("biz.hoursPh")}
@@ -611,7 +611,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
           )}
 
           {step === 3 && (
-            <section className="space-y-8 rounded-2xl border border-white/10 bg-omni-card p-5 sm:p-8">
+            <section className="space-y-8 rounded-2xl border border-navy/10 bg-white p-5 sm:p-8">
               <div>
                 <Label>{t("details.depth")}</Label>
                 <ChipGroup
@@ -710,7 +710,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
               <div>
                 <Label>{t("details.goal")}</Label>
                 {isFreeService(intake) && (
-                  <p className="mb-2 text-xs text-zinc-500">{t("details.goalFreeHint")}</p>
+                  <p className="mb-2 text-xs text-muted">{t("details.goalFreeHint")}</p>
                 )}
                 <ChipGroup
                   options={goalChipsFor(intake)}
@@ -741,7 +741,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
               </div>
               <div>
                 <Label>{t("details.offer")}</Label>
-                <p className="mb-2 text-xs text-zinc-500">
+                <p className="mb-2 text-xs text-muted">
                   {isFreeService(intake) ? t("details.offerLocked") : t("details.offerHint")}
                 </p>
                 <ChipGroup
@@ -788,7 +788,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
                 <>
               <div>
                 <Label>{t("details.kupaFile")}</Label>
-                <p className="mb-2 text-xs text-zinc-500">{t("details.kupaHint")}</p>
+                <p className="mb-2 text-xs text-muted">{t("details.kupaHint")}</p>
                 <Input
                   value={intake.kupaFileBy ?? ""}
                   placeholder={t("details.kupaFilePh")}
@@ -810,27 +810,27 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
 
           {step === 4 && (
             <section>
-              <div className="overflow-hidden rounded-2xl border border-white/10 bg-omni-card">
-                <div className="border-b border-white/10 px-5 py-4 text-center text-sm font-bold text-omni-yellow">
+              <div className="overflow-hidden rounded-2xl border border-navy/10 bg-white">
+                <div className="border-b border-navy/10 px-5 py-4 text-center text-sm font-bold text-omni-yellow">
                   {t("review.heading")}
                 </div>
                 <dl>
                   {reviewRows.map(([k, v]) => (
                     <div
                       key={k}
-                      className="grid grid-cols-1 border-b border-white/5 px-5 py-3 sm:grid-cols-[200px_1fr]"
+                      className="grid grid-cols-1 border-b border-navy/10 px-5 py-3 sm:grid-cols-[200px_1fr]"
                     >
-                      <dt className="text-sm text-zinc-400">{k}</dt>
-                      <dd className="text-sm font-medium text-white">
-                        {v?.trim() ? v : <span className="text-zinc-600">{t("empty.dash")}</span>}
+                      <dt className="text-sm text-muted">{k}</dt>
+                      <dd className="text-sm font-medium text-navy">
+                        {v?.trim() ? v : <span className="text-muted">{t("empty.dash")}</span>}
                       </dd>
                     </div>
                   ))}
                 </dl>
                 {!isFreeService(intake) && (
-                <div className="border-t border-white/10 px-5 py-5">
-                  <h3 className="mb-2 font-bold text-white">{t("plan.channels")}</h3>
-                  <p className="mb-3 text-sm text-zinc-400">{t("plan.channelsHint")}</p>
+                <div className="border-t border-navy/10 px-5 py-5">
+                  <h3 className="mb-2 font-bold text-navy">{t("plan.channels")}</h3>
+                  <p className="mb-3 text-sm text-muted">{t("plan.channelsHint")}</p>
                   <ChipGroup
                     options={CHANNEL_CHIPS.filter((c) => c.id !== "whatsapp" || intake.whatsapp.trim())}
                     value={visiblePlanChannels(intake).join(",")}
@@ -843,22 +843,22 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
                 </div>
                 )}
                 <div className="px-5 py-5">
-                  <h3 className="mb-2 font-bold text-white">{t("review.competitors")}</h3>
-                  <p className="mb-3 text-sm text-zinc-400">{t("review.competitorsHint")}</p>
+                  <h3 className="mb-2 font-bold text-navy">{t("review.competitors")}</h3>
+                  <p className="mb-3 text-sm text-muted">{t("review.competitorsHint")}</p>
                   <ul className="mb-3 space-y-2">
                     {intake.competitors.map((c) => (
                       <li
                         key={c.id}
-                        className="flex items-start justify-between gap-3 rounded-xl border border-white/10 p-3"
+                        className="flex items-start justify-between gap-3 rounded-xl border border-navy/10 p-3"
                       >
                         <div>
                           <p className="font-semibold">{c.name}</p>
-                          {c.url && <p className="text-xs text-zinc-500">{c.url}</p>}
-                          {c.notes && <p className="text-sm text-zinc-300">{c.notes}</p>}
+                          {c.url && <p className="text-xs text-muted">{c.url}</p>}
+                          {c.notes && <p className="text-sm text-muted">{c.notes}</p>}
                         </div>
                         <button
                           type="button"
-                          className="text-zinc-500 hover:text-omni-red"
+                          className="text-muted hover:text-omni-red"
                           onClick={() =>
                             patch({ competitors: intake.competitors.filter((x) => x.id !== c.id) })
                           }
@@ -887,7 +887,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
               <Button
                 type="button"
                 size="lg"
-                className="mt-6 w-full text-base font-black shadow-[0_12px_40px_rgba(255,26,26,0.55)]"
+                className="mt-6 w-full text-base font-black shadow-[0_12px_32px_rgba(27,42,74,0.12)]"
                 disabled={!wizardReady(intake) || running}
                 onClick={startBuild}
               >
@@ -896,7 +896,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
               </Button>
               {!wizardReady(intake) && (
                 <div
-                  className="mt-3 rounded-xl border border-omni-red/40 bg-omni-red/10 px-4 py-3 text-sm text-red-100"
+                  className="mt-3 rounded-xl border border-omni-red/40 bg-omni-red/10 px-4 py-3 text-sm text-red-800"
                   dir={locale === "en" ? "ltr" : "rtl"}
                 >
                   <p className="font-bold">{t("wizard.missingHeading")}</p>
@@ -912,7 +912,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
 
           <div className="mt-8 flex justify-center gap-6">
             {step > 1 && (
-              <button type="button" className="text-sm text-zinc-400 hover:text-white" onClick={() => setStep((s) => (s - 1) as WizardStep)}>
+              <button type="button" className="text-sm text-muted hover:text-navy" onClick={() => setStep((s) => (s - 1) as WizardStep)}>
                 {t("cta.back")}
               </button>
             )}
@@ -926,13 +926,13 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
       )}
 
       {phase === "interview" && (
-        <section className="rounded-2xl border border-white/10 bg-omni-card p-5 sm:p-8">
+        <section className="rounded-2xl border border-navy/10 bg-white p-5 sm:p-8">
           <CoachPanel report={coachReport} onApply={applyCoach} />
           <div className="mb-4">
             <DocumentIngest intake={intake} onApply={applyIngest} variant="compact" />
           </div>
           <h2 className="mb-2 text-2xl font-black">{t("interview.title")}</h2>
-          <p className="mb-6 text-sm text-zinc-400">{t("interview.lead")}</p>
+          <p className="mb-6 text-sm text-muted">{t("interview.lead")}</p>
           <Field label={isFreeService(intake) ? t("interview.modelFree") : t("interview.model")}>
             <Textarea value={intake.businessModel} onChange={(e) => patch({ businessModel: e.target.value })} />
           </Field>
@@ -967,10 +967,10 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
             <Button type="button" size="lg" onClick={runAgents} disabled={running}>
               {t("cta.next")}
             </Button>
-            <button type="button" className="text-sm text-zinc-400 hover:text-white" onClick={runAgents}>
+            <button type="button" className="text-sm text-muted hover:text-navy" onClick={runAgents}>
               {t("interview.skip")}
             </button>
-            <button type="button" className="text-sm text-zinc-500" onClick={() => setPhase("wizard")}>
+            <button type="button" className="text-sm text-muted" onClick={() => setPhase("wizard")}>
               {t("cta.back")}
             </button>
           </div>
@@ -1058,12 +1058,12 @@ function AgentsPanel({
   return (
     <section>
       <h2 className="mb-2 text-center text-2xl font-black">{t("agents.title")}</h2>
-      <p className="mb-6 text-center text-sm text-zinc-400">{t("agents.hitl")}</p>
+      <p className="mb-6 text-center text-sm text-muted">{t("agents.hitl")}</p>
       <ul className="mb-8 space-y-2">
         {AGENT_KEYS.map((a, i) => (
           <li
             key={a.id}
-            className="flex items-center justify-between rounded-xl border border-white/10 bg-omni-card px-4 py-3"
+            className="flex items-center justify-between rounded-xl border border-navy/10 bg-white px-4 py-3"
           >
             <span className="text-sm font-semibold">
               {i + 1}. {t(a.key)}
@@ -1074,25 +1074,25 @@ function AgentsPanel({
       </ul>
 
       {pack && (
-        <div className="rounded-2xl border border-omni-yellow/30 bg-omni-card p-5">
-          <p className="mb-4 text-sm text-zinc-300">{pack.diagnosis.summary[locale]}</p>
+        <div className="rounded-2xl border border-omni-yellow/30 bg-white p-5">
+          <p className="mb-4 text-sm text-muted">{pack.diagnosis.summary[locale]}</p>
           <div className="space-y-3">
             {pack.diagnosis.hypotheses.map((h, i) => (
-              <article key={i} className="rounded-xl border border-white/10 p-4">
+              <article key={i} className="rounded-xl border border-navy/10 p-4">
                 <div className="mb-2 flex flex-wrap items-center gap-2">
                   <span className="rounded-full bg-omni-red/20 px-2 py-0.5 text-xs font-bold text-omni-red">
                     {AREA_LABEL[h.area][locale]}
                   </span>
-                  <span className="text-xs text-zinc-500">{h.confidence}</span>
+                  <span className="text-xs text-muted">{h.confidence}</span>
                 </div>
-                <p className="font-semibold text-white">{h.finding[locale]}</p>
-                <p className="mt-1 text-sm text-zinc-400">{h.evidence[locale]}</p>
+                <p className="font-semibold text-navy">{h.finding[locale]}</p>
+                <p className="mt-1 text-sm text-muted">{h.evidence[locale]}</p>
                 <p className="mt-2 text-sm text-omni-yellow">{h.recommendation[locale]}</p>
               </article>
             ))}
           </div>
           {pack.intakeReport.missing.length > 0 && (
-            <div className="mt-4 rounded-xl border border-omni-yellow/30 bg-omni-yellow/5 p-3 text-sm text-zinc-200">
+            <div className="mt-4 rounded-xl border border-omni-yellow/30 bg-omni-yellow/5 p-3 text-sm text-foreground">
               {pack.intakeReport.missing.map((m) => (
                 <p key={m.field}>
                   <strong>{m.label[locale]}:</strong> {m.reason[locale]}
@@ -1101,7 +1101,7 @@ function AgentsPanel({
             </div>
           )}
           {pack.intakeReport.inconsistencies.length > 0 && (
-            <div className="mt-3 rounded-xl border border-omni-red/40 bg-omni-red/10 p-3 text-sm text-red-100">
+            <div className="mt-3 rounded-xl border border-omni-red/40 bg-omni-red/10 p-3 text-sm text-red-800">
               {pack.intakeReport.inconsistencies.map((inc, i) => (
                 <p key={i}>
                   <strong>{inc.issue[locale]}:</strong> {inc.detail[locale]}
@@ -1112,14 +1112,14 @@ function AgentsPanel({
           <Button type="button" size="lg" className="mt-6 w-full" disabled={running} onClick={onApprove}>
             {agentStatus.diagnostic === "needs_approval" ? t("cta.approve") : t("cta.continueStage")}
           </Button>
-          <button type="button" className="mt-3 w-full text-sm text-zinc-400" onClick={onBack}>
+          <button type="button" className="mt-3 w-full text-sm text-muted" onClick={onBack}>
             {t("cta.reject")}
           </button>
-          <div className="mt-6 border-t border-white/10 pt-5">
+          <div className="mt-6 border-t border-navy/10 pt-5">
             <Button type="button" size="lg" className="w-full" onClick={onNewCampaign}>
               {t("cta.newOther")}
             </Button>
-            <p className="mt-2 text-center text-sm text-zinc-400">{t("cta.newHint")}</p>
+            <p className="mt-2 text-center text-sm text-muted">{t("cta.newHint")}</p>
           </div>
         </div>
       )}
@@ -1141,16 +1141,16 @@ function StatusPill({ status }: { status: AgentStatus }) {
   const { t } = useI18n();
   const key = STATUS_I18N[status];
   const colors: Record<AgentStatus, string> = {
-    idle: "bg-white/10 text-zinc-400",
+    idle: "bg-navy/10 text-muted",
     running: "bg-omni-yellow/20 text-omni-yellow animate-pulse",
-    blocked: "bg-white/5 text-zinc-600",
+    blocked: "bg-navy/5 text-muted",
     needs_approval: "bg-omni-red/20 text-omni-red",
-    approved: "bg-omni-yellow text-black",
-    complete: "bg-omni-yellow text-black",
+    approved: "bg-navy text-white",
+    complete: "bg-navy text-white",
     refused: "bg-omni-red text-white",
   };
   return (
-    <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold ${colors[status]}`}>
+    <span className={`rounded-full px-2.5 py-0.5 text-sm font-bold ${colors[status]}`}>
       {t(key)}
     </span>
   );

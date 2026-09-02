@@ -36,12 +36,12 @@ export default function PlanPage() {
   }, [locale]);
 
   if (pack === undefined) {
-    return <p className="p-10 text-center text-zinc-500">…</p>;
+    return <p className="p-10 text-center text-muted">…</p>;
   }
   if (!pack) {
     return (
       <div className="p-10 text-center">
-        <p className="text-zinc-400">{t("campaigns.empty")}</p>
+        <p className="text-muted">{t("campaigns.empty")}</p>
         <LangLink href="/" onClick={() => markEmptyCampaign()} className="mt-4 inline-block text-omni-yellow">
           {t("cta.new")}
         </LangLink>
@@ -52,7 +52,7 @@ export default function PlanPage() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <ConquerHeadline subtitle={t("plan.title")} />
-      <p className="mx-auto mb-6 max-w-2xl text-center text-sm text-zinc-400">{t("plan.lead")}</p>
+      <p className="mx-auto mb-6 max-w-2xl text-center text-sm text-muted">{t("plan.lead")}</p>
       <DepartmentRail />
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <Button asChild variant="dark">
