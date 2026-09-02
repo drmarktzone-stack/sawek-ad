@@ -137,13 +137,14 @@ export function ResultView({
         <NewCampaignCta other hint className="items-end text-end" />
       </div>
 
-      <SiteAuditPanel pack={pack} locale={packLang} />
+      <SiteAuditPanel pack={pack} locale={packLang} onPack={onChange} />
 
       <LivePreviewStrip
         pack={pack}
         packLang={packLang}
         generatedImage={generatedImage}
         onGeneratedImage={setGeneratedImage}
+        onPack={onChange}
       />
 
       <ChannelPack
@@ -151,6 +152,7 @@ export function ResultView({
         packLang={packLang}
         generatedImage={generatedImage}
         onGeneratedImage={setGeneratedImage}
+        onPack={onChange}
         skipLivePreview
       />
 
@@ -175,8 +177,8 @@ export function ResultView({
             ] as const
           ).map(([id, key]) => (
             <li key={id} className="rounded-xl border border-white/10 px-3 py-2">
-              <p className="text-[11px] font-semibold text-white">{tr(key)}</p>
-              <p className="mt-1 text-[10px] font-bold uppercase tracking-wide text-omni-yellow">
+              <p className="text-[13px] font-semibold text-white">{tr(key)}</p>
+              <p className="mt-1 text-[13px] font-bold uppercase tracking-wide text-omni-yellow">
                 {pack.agentStatus[id] === "approved" || pack.agentStatus[id] === "complete"
                   ? tr("status.complete")
                   : tr("status.needs_approval")}
@@ -390,7 +392,7 @@ export function ResultView({
               key={`${p.format}-${p.locale}`}
               className="rounded-2xl border border-omni-yellow/25 bg-omni-card p-5"
             >
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-omni-yellow">
+              <p className="text-[13px] font-black uppercase tracking-[0.14em] text-omni-yellow">
                 {p.format === "landing" ? tr("end.landing") : tr("end.whatsapp")}
               </p>
               <h3 className="mt-1 font-black text-white">{p.title}</h3>
@@ -500,11 +502,11 @@ export function ResultView({
                   <p className="line-clamp-3 text-xs text-zinc-400">
                     {v?.primaryText ?? pack.intake.uniqueAdvantage}
                   </p>
-                  <span className="inline-block rounded-full bg-omni-yellow px-3 py-1 text-[11px] font-black text-black">
+                  <span className="inline-block rounded-full bg-omni-yellow px-3 py-1 text-[13px] font-black text-black">
                     {v?.cta ?? tr("design.produce")}
                   </span>
                   <div className="flex items-center justify-between gap-2">
-                    <p className="text-[11px] font-bold text-zinc-500">{s.name[locale]}</p>
+                    <p className="text-[13px] font-bold text-zinc-300">{s.name[locale]}</p>
                     <div className="flex gap-1">
                       {s.palette.map((c) => (
                         <span

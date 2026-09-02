@@ -717,6 +717,18 @@ export const copy: Dict = {
   "audit.inferredAudience": { he: "למי הפוסטים דיברו", ar: "لمين حكوا المنشورات", en: "Who the posts spoke to" },
   "audit.recommendedAudience": { he: "קהל לקמפיין הבא", ar: "جمهور الحملة الجاية", en: "Who the next campaign must target" },
   "audit.failedWhere": { he: "איפה זה נכשל", ar: "وين فشل", en: "Where it failed" },
+  "audit.offerPhotos": { he: "הציעו תמונות", ar: "اقترحوا صور", en: "Offer photos" },
+  "audit.offerPhotosLead": {
+    he: "בחרו כרזה גרפית, תמונת AI אם עובדת, או תמונה שחולצה מהאתר. בלי פנים מומצאות ובלי סימן כללית.",
+    ar: "اختاروا ملصق غرافيك، صورة ذكاء اصطناعي إن اشتغلت، أو صورة من الموقع. بلا وجوه مختلقة وبلا علامة كلاليت.",
+    en: "Pick a graphic poster, an AI still if it works, or a photo extracted from the site. No invented faces and no Clalit mark.",
+  },
+  "audit.pickPhoto": { he: "החילו על המודעות", ar: "طبّقوا عالإعلانات", en: "Apply to ads" },
+  "audit.graphicPoster": { he: "כרזה גרפית", ar: "ملصق غرافيك", en: "Graphic poster" },
+  "audit.aiStill": { he: "תמונת AI", ar: "صورة ذكاء اصطناعي", en: "AI still" },
+  "audit.sitePhoto": { he: "מהאתר", ar: "من الموقع", en: "From the site" },
+  "audit.hoursFromScan": { he: "שעות מהסריקה", ar: "ساعات من المسح", en: "Hours from the scan" },
+
   "resize.title": { he: "Magic Resize — אותה מודעה, ארבעה פורמטים", ar: "Magic Resize — نفس الإعلان بأربع مقاسات", en: "Magic Resize — one ad, four sizes" },
   "resize.lead": {
     he: "אותה כותרת, גוף, CTA ותמונה. פיד 1.91:1 · אינסטגרם 1:1 ו־4:5 · סטורי/טיקטוק 9:16.",

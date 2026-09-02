@@ -61,48 +61,48 @@ function Atmosphere({
         }}
       />
       <div
-        className="absolute -top-[18%] rounded-full blur-3xl"
+        className="absolute rounded-full blur-3xl"
         style={{
           background: accent,
           opacity: 0.34,
-          width: channel === "facebook" ? "58%" : "72%",
-          height: channel === "tiktok" ? "42%" : "62%",
-          insetInlineEnd: channel === "facebook" ? "-8%" : "-18%",
+          width: channel === "facebook" ? "50%" : "64%",
+          height: channel === "tiktok" ? "36%" : "52%",
+          top: "8%",
+          insetInlineEnd: channel === "facebook" ? "-4%" : "-12%",
         }}
       />
       <div
-        className="absolute -bottom-[22%] rounded-full blur-3xl"
+        className="absolute rounded-full blur-3xl"
         style={{
           background: secondary,
           opacity: 0.28,
-          width: "62%",
-          height: "55%",
-          insetInlineStart: "-16%",
+          width: "52%",
+          height: "42%",
+          bottom: "6%",
+          insetInlineStart: "-10%",
         }}
       />
-      <div className="absolute inset-x-0 top-0 h-1.5" style={{ background: accent }} />
+      {/* Inset bars so Magic Resize never clips the accent. */}
+      <div
+        className="absolute inset-x-3 top-2 h-1.5 rounded-full"
+        style={{ background: accent }}
+      />
       {channel === "facebook" ? (
         <div
-          className="absolute top-6 h-[62%] w-[3px] rounded-full"
-          style={{ background: accent, insetInlineStart: 14, opacity: 0.85 }}
+          className="absolute top-6 bottom-6 w-[3px] rounded-full"
+          style={{ background: accent, insetInlineStart: 10, opacity: 0.85 }}
         />
       ) : null}
       {channel === "instagram" ? (
         <div
-          className="absolute inset-x-8 top-[14%] h-px"
+          className="absolute inset-x-8 top-[12%] h-px"
           style={{ background: accent, opacity: 0.45 }}
         />
       ) : null}
       {channel === "tiktok" ? (
         <div
-          className="absolute top-10 h-36 w-1.5 rounded-full"
-          style={{ background: accent, insetInlineStart: 16 }}
-        />
-      ) : null}
-      {channel === "whatsapp" ? (
-        <div
-          className="absolute bottom-0 inset-x-0 h-1/3"
-          style={{ background: `linear-gradient(to top, ${bg}, transparent)` }}
+          className="absolute top-14 h-28 w-1.5 rounded-full"
+          style={{ background: accent, insetInlineStart: 14 }}
         />
       ) : null}
       <div
@@ -116,6 +116,41 @@ function Atmosphere({
   );
 }
 
+function HoursChips({
+  chips,
+  ink,
+  accent,
+  compact,
+}: {
+  chips?: string[];
+  ink: string;
+  accent: string;
+  compact?: boolean;
+}) {
+  const list = (chips ?? []).filter(Boolean).slice(0, 3);
+  if (!list.length) return null;
+  return (
+    <div className={cn("flex flex-wrap", compact ? "mt-1.5 gap-1" : "mt-2 gap-1.5")}>
+      {list.map((c) => (
+        <span
+          key={c}
+          className={cn(
+            "inline-flex max-w-full rounded-full border px-2 font-bold leading-tight",
+            compact ? "py-0.5 text-[13px]" : "py-1 text-[13px]",
+          )}
+          style={{
+            color: ink,
+            borderColor: accent,
+            background: "rgba(0,0,0,0.28)",
+          }}
+        >
+          {c}
+        </span>
+      ))}
+    </div>
+  );
+}
+
 function TypeBlock({
   locale,
   channel,
@@ -123,6 +158,7 @@ function TypeBlock({
   headline,
   body,
   cta,
+  hoursChips,
   ink,
   accent,
   onPhoto,
@@ -133,6 +169,7 @@ function TypeBlock({
   headline: string;
   body?: string;
   cta?: string;
+  hoursChips?: string[];
   ink: string;
   accent: string;
   onPhoto: boolean;
@@ -143,23 +180,25 @@ function TypeBlock({
   const ig = channel === "instagram";
   const tt = channel === "tiktok";
   const wa = channel === "whatsapp";
-  const muted = onPhoto ? "rgba(255,255,255,0.88)" : isLight(ink) ? "rgba(247,247,245,0.82)" : "rgba(17,17,17,0.72)";
+  const muted = onPhoto ? "rgba(255,255,255,0.92)" : isLight(ink) ? "rgba(247,247,245,0.88)" : "rgba(17,17,17,0.78)";
+  const showKicker = Boolean(kicker) && !fb && !tt;
+  const showCta = Boolean(cta) && !tt;
   return (
     <div
       dir={dir}
       className={cn(
-        "relative z-[1] flex h-full min-h-0 flex-col text-start",
-        fb && "w-[78%] justify-end px-5 py-4",
-        ig && "justify-between px-5 py-6",
-        tt && "justify-start px-5 pb-[40%] pt-12",
-        wa && "justify-end p-4",
-        !channel && "justify-end p-4",
+        "relative z-[1] box-border flex h-full min-h-0 w-full flex-col text-start",
+        fb && "justify-between gap-2 px-5 py-3 ps-7",
+        ig && "justify-between gap-2 px-5 py-5",
+        tt && "justify-start gap-2 px-4 pb-[34%] pe-[4.75rem] pt-14",
+        wa && "justify-end gap-2 p-4",
+        !channel && "justify-end gap-2 p-4",
       )}
     >
-      <div>
-        {kicker ? (
+      <div className="min-h-0 overflow-hidden">
+        {showKicker ? (
           <p
-            className="mb-2 text-[10px] font-black uppercase tracking-[0.22em]"
+            className="mb-1.5 text-[13px] font-black uppercase tracking-[0.16em]"
             style={{ color: accent, margin: 0 }}
           >
             {kicker}
@@ -167,41 +206,38 @@ function TypeBlock({
         ) : null}
         <h2
           className={cn(
-            "font-black tracking-tight",
-            fb && "line-clamp-3 text-[22px] leading-[1.08]",
-            ig && "line-clamp-4 text-[26px] leading-[1.06]",
-            tt && "line-clamp-4 text-[28px] leading-[1.05]",
-            wa && "line-clamp-3 text-[18px] leading-[1.1]",
-            !channel && "line-clamp-3 text-xl leading-tight",
+            "font-black tracking-tight break-words",
+            fb && "text-[clamp(15px,3.6vw,20px)] leading-[1.12]",
+            ig && "text-[clamp(18px,4.2vw,26px)] leading-[1.08]",
+            tt && "text-[clamp(18px,5vw,26px)] leading-[1.1]",
+            wa && "text-[18px] leading-[1.12]",
+            !channel && "text-xl leading-tight",
           )}
-          style={{ color: ink, margin: 0 }}
+          style={{ color: ink, margin: 0, overflowWrap: "anywhere" }}
         >
           {headline}
         </h2>
         {body && !tt ? (
           <p
             className={cn(
-              "mt-2 font-medium",
-              fb && "line-clamp-2 text-[12px] leading-snug",
-              ig && "line-clamp-3 text-[13px] leading-snug",
-              wa && "line-clamp-2 text-[12px] leading-snug",
-              !channel && "line-clamp-2 text-xs",
+              "mt-1.5 font-medium break-words",
+              fb && "text-[13px] leading-snug",
+              ig && "text-[14px] leading-snug",
+              wa && "text-[13px] leading-snug",
+              !channel && "text-sm leading-snug",
             )}
-            style={{ color: muted, margin: 0 }}
+            style={{ color: muted, margin: 0, overflowWrap: "anywhere" }}
           >
             {body}
           </p>
         ) : null}
+        <HoursChips chips={hoursChips} ink={ink} accent={accent} compact={fb} />
       </div>
-      {cta ? (
+      {showCta ? (
         <span
           className={cn(
-            "inline-flex w-fit max-w-full truncate rounded-full px-3.5 py-1.5 text-[11px] font-black",
-            fb && "mt-3",
-            ig && "mt-4",
-            tt && "mt-4",
-            wa && "mt-3",
-            !channel && "mt-3",
+            "inline-flex w-fit max-w-full shrink-0 items-center rounded-full px-3.5 py-1.5 text-[13px] font-black leading-tight",
+            "whitespace-normal text-center",
           )}
           style={{ background: accent, color: ctaColor }}
         >
@@ -226,6 +262,7 @@ export function AdVisual({
   body,
   cta,
   kicker,
+  hoursChips,
   channel,
 }: {
   locale: Locale;
@@ -241,6 +278,7 @@ export function AdVisual({
   body?: string;
   cta?: string;
   kicker?: string;
+  hoursChips?: string[];
   channel?: AdPosterChannel;
 }) {
   const assetUrl = asset?.publicSrc || (asset ? urls[asset.id] : undefined);
@@ -261,7 +299,7 @@ export function AdVisual({
   return (
     <div
       className={cn(
-        "relative overflow-hidden",
+        "relative box-border overflow-hidden",
         !hasPosterType && "flex flex-col justify-end p-3",
         className ?? "h-36",
       )}
@@ -287,17 +325,17 @@ export function AdVisual({
         />
       )}
       {emptySample ? (
-        <span className="absolute start-2 top-2 z-[2] rounded bg-black/55 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.18em] text-zinc-400">
+        <span className="absolute start-2 top-2 z-[2] rounded bg-black/55 px-2 py-0.5 text-[13px] font-black uppercase tracking-[0.14em] text-zinc-200">
           {sample}
         </span>
       ) : null}
       {!hasPlate && graphicOnlyLabel && !fromAi ? (
-        <span className="absolute start-2 top-2 z-[2] rounded bg-black/55 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.18em] text-white/80">
+        <span className="absolute start-2 top-2 z-[2] rounded bg-black/70 px-2 py-0.5 text-[13px] font-black uppercase tracking-[0.12em] text-white">
           {graphicOnlyLabel}
         </span>
       ) : null}
       {fromAi && aiLabel ? (
-        <span className="absolute start-2 top-2 z-[2] rounded bg-black/65 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.18em] text-omni-yellow">
+        <span className="absolute start-2 top-2 z-[2] rounded bg-black/70 px-2 py-0.5 text-[13px] font-black uppercase tracking-[0.12em] text-omni-yellow">
           {aiLabel}
         </span>
       ) : null}
@@ -309,6 +347,7 @@ export function AdVisual({
           headline={posterHeadline}
           body={body}
           cta={cta}
+          hoursChips={hoursChips}
           ink={ink}
           accent={accent}
           onPhoto={hasPlate}

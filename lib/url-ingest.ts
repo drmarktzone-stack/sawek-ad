@@ -881,6 +881,74 @@ export function collectPageImages(html: string, baseUrl: string, jsonLdNodes: Re
   return out.slice(0, URL_MAX_IMAGES);
 }
 
+const BUNDLE_IMG = /(?:https?:)?\/\/[^"'()\s]+?\.(?:jpe?g|png|webp|gif|svg|avif)(?:\?[^"'()\s]*)?|\/?assets\/[^"'()\s]+?\.(?:jpe?g|png|webp|gif|svg|avif)(?:\?[^"'()\s]*)?/gi;
+
+/** Image URLs baked into Vite/SPA JS or CSS (clinic sites often have 0 HTML <img>). */
+export function collectBundleImageUrls(raw: string, baseUrl: string, cap = 12): string[] {
+  const out: string[] = [];
+  const push = (maybe: string) => {
+    const src = maybe.startsWith("//") ? `https:${maybe}` : maybe;
+    const abs = absHttpUrl(src, baseUrl);
+    if (!abs || out.includes(abs)) return;
+    if (TRACKER_IMG.test(abs)) return;
+    const path = abs.split("?")[0] ?? "";
+    if (!/\.(?:jpe?g|png|webp|gif|svg|avif)$/i.test(path)) return;
+    out.push(abs);
+  };
+  for (const m of String(raw ?? "").matchAll(BUNDLE_IMG)) {
+    push(m[0]);
+    if (out.length >= cap) break;
+  }
+  for (const m of String(raw ?? "").matchAll(/url\(\s*["']?([^"')]+?\.(?:jpe?g|png|webp|gif|svg|avif)[^"')]*)["']?\s*\)/gi)) {
+    push(m[1] || "");
+    if (out.length >= cap) break;
+  }
+  return out.slice(0, cap);
+}
+
+/** Same-origin stylesheets. Caps count. */
+export function collectSameOriginCssUrls(html: string, baseUrl: string, cap = 4): string[] {
+  let home: URL;
+  try {
+    home = new URL(baseUrl);
+  } catch {
+    return [];
+  }
+  const out: string[] = [];
+  const seen = new Set<string>();
+  for (const m of html.matchAll(/<link\b[^>]*rel\s*=\s*["'][^"']*stylesheet[^"']*["'][^>]*>/gi)) {
+    const tag = m[0] || "";
+    const href = (tag.match(/href\s*=\s*["']([^"']+)["']/i) || [])[1];
+    if (!href) continue;
+    let u: URL;
+    try {
+      u = new URL(decodeEntities(href), home.href);
+    } catch {
+      continue;
+    }
+    if (u.protocol !== "http:" && u.protocol !== "https:") continue;
+    if (!sameSiteOrigin(u, home)) continue;
+    const inspected = inspectUrl(u.href);
+    if (!inspected.ok) continue;
+    const key = `${u.origin}${u.pathname}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(u.href);
+    if (out.length >= cap) break;
+  }
+  return out;
+}
+
+function isCssResponse(contentType: string | null, sniff: string): boolean {
+  const ct = (contentType || "").toLowerCase();
+  if (ct.includes("text/css")) return true;
+  if (!ct || ct.includes("text/plain") || ct.includes("application/octet-stream")) {
+    const head = sniff.slice(0, 256);
+    return /[{:;]/.test(head) && !/<html/i.test(head);
+  }
+  return false;
+}
+
 
 const PAGE_ADDRESS_HINT =
   /(?:מחלף|רחוב\s+\S|שדרות\s+\S|כביש\s*\d|الشارع|شارع\s+|مجمع|الطابق|קומה|בצד|بجانب|street|avenue|\bfloor\b)/i;
@@ -1042,6 +1110,9 @@ export function parseFetchedHtml(
   }
 
   const pageImages = collectPageImages(raw, finalUrl, nodes);
+  for (const u of collectBundleImageUrls(raw, finalUrl)) {
+    if (!pageImages.includes(u)) pageImages.push(u);
+  }
   if (ogImage && !pageImages.includes(ogImage)) pageImages.unshift(ogImage);
   const logo = extractLogoUrl(raw, finalUrl) || undefined;
   const colors = extractCssColors(raw, 5);
@@ -1167,7 +1238,7 @@ function mergeAbortSignals(timeoutMs: number, extra?: AbortSignal): AbortSignal 
 async function fetchHtmlDocument(
   raw: string,
   extraBlockedHosts: string[] = [],
-  opts: { timeoutMs?: number; signal?: AbortSignal; accept?: "html" | "script"; browserLike?: boolean } = {},
+  opts: { timeoutMs?: number; signal?: AbortSignal; accept?: "html" | "script" | "css"; browserLike?: boolean } = {},
 ): Promise<{ ok: true; html: string; finalUrl: string } | UrlIngestErr> {
   const submitted = String(raw ?? "").trim();
   let current: URL;
@@ -1192,7 +1263,9 @@ async function fetchHtmlDocument(
             Accept:
               opts.accept === "script"
                 ? "application/javascript,text/javascript,*/*;q=0.1"
-                : "text/html,application/xhtml+xml;q=0.9,*/*;q=0.8",
+                : opts.accept === "css"
+                  ? "text/css,*/*;q=0.1"
+                  : "text/html,application/xhtml+xml;q=0.9,*/*;q=0.8",
             "User-Agent": opts.browserLike
               ? SOCIAL_BROWSER_UA
               : "Mozilla/5.0 (compatible; SAWEK-AD-Ingest/0.1)",
@@ -1233,7 +1306,9 @@ async function fetchHtmlDocument(
   const sniff = new TextDecoder("utf-8", { fatal: false }).decode(capped.buf.slice(0, 512));
   const ct = res.headers.get("content-type");
   if (opts.accept === "script") {
-    if (!isScriptResponse(ct, sniff) && !isHtmlResponse(ct, sniff)) return { ok: false, error: "non_html" };
+    if (!isScriptResponse(ct, sniff) && !isHtmlResponse(ct, sniff) && !isCssResponse(ct, sniff)) return { ok: false, error: "non_html" };
+  } else if (opts.accept === "css") {
+    if (!isCssResponse(ct, sniff) && !isHtmlResponse(ct, sniff)) return { ok: false, error: "non_html" };
   } else if (!isHtmlResponse(ct, sniff)) {
     return { ok: false, error: "non_html" };
   }
@@ -1324,6 +1399,32 @@ async function fetchScriptCorpus(urls: string[], extraBlockedHosts: string[]): P
     }),
   );
   return clipPreserveNewlines(parts.join("\n"), URL_TEXT_CAP);
+}
+
+async function fetchBundleImages(
+  urls: string[],
+  extraBlockedHosts: string[],
+  baseUrl: string,
+): Promise<string[]> {
+  if (!urls.length) return [];
+  const budget = AbortSignal.timeout(URL_EXTRA_PAGES_BUDGET_MS);
+  const images: string[] = [];
+  await Promise.allSettled(
+    urls.map(async (href) => {
+      if (budget.aborted) return;
+      const css = /\.css(?:\?|$)/i.test(href);
+      const doc = await fetchHtmlDocument(href, extraBlockedHosts, {
+        timeoutMs: URL_FETCH_TIMEOUT_MS,
+        signal: budget,
+        accept: css ? "css" : "script",
+      });
+      if (!doc.ok) return;
+      for (const u of collectBundleImageUrls(doc.html, baseUrl)) {
+        if (!images.includes(u)) images.push(u);
+      }
+    }),
+  );
+  return images.slice(0, URL_MAX_IMAGES);
 }
 
 function applySocialOntoParsed(
@@ -1503,15 +1604,25 @@ export async function ingestUrl(raw: string, extraBlockedHosts: string[] = []): 
   if (!homeDoc.ok) return homeDoc;
 
   let extraCorpus = "";
+  let bundleImages: string[] = [];
   try {
     const scriptUrls = collectSameOriginScriptUrls(homeDoc.html, homeDoc.finalUrl, 2);
+    const cssUrls = collectSameOriginCssUrls(homeDoc.html, homeDoc.finalUrl, 4);
     extraCorpus = await fetchScriptCorpus(scriptUrls, extraBlockedHosts);
+    bundleImages = await fetchBundleImages([...scriptUrls, ...cssUrls], extraBlockedHosts, homeDoc.finalUrl);
   } catch {
     extraCorpus = "";
   }
 
   const parsed = parseFetchedHtml(homeDoc.html, homeDoc.finalUrl, submitted, extraCorpus);
   if (!parsed.ok) return parsed;
+  if (bundleImages.length) {
+    const images = [...(parsed.images ?? [])];
+    for (const u of bundleImages) {
+      if (!images.includes(u)) images.push(u);
+    }
+    parsed.images = images.slice(0, URL_MAX_IMAGES);
+  }
 
   const navUrls = collectSameOriginNavUrls(homeDoc.html, homeDoc.finalUrl, URL_MAX_EXTRA_PAGES);
   if (!navUrls.length) return parsed;

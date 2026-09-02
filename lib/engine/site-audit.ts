@@ -47,7 +47,7 @@ export function buildSiteAudit(intake: Intake): SiteAudit {
       id: "hours",
       kind: "strength",
       label: L("שעות / אופן הגעה כתובים באתר", "ساعات / طريقة الوصول مكتوبة بالموقع", "Hours / how-to-arrive are on the site"),
-      evidence: ev("clinicHours", hours),
+      evidence: L("ראיה · שעות קבלה מהאתר — פירוט בכרטיסים", "دليل · ساعات الدوام من الموقع — التفصيل بالبطاقات", "Evidence · clinic hours from the site — details as chips"),
     });
   }
   if (photos.length) {
@@ -139,7 +139,7 @@ export function buildSiteAudit(intake: Intake): SiteAudit {
     weaknesses.push({
       id: "no-photos",
       kind: "weakness",
-      label: L("אין תמונות מהאתר — הנחיתה תישען על טיפוגרפיה וגרפיקה", "ما في صور من الموقع — الهبوط رح يعتمد عالخط والغرافيك", "No photos from the site — the landing will lean on type and graphics"),
+      label: L("אין תמונות מהאתר — אפשר להציע כרזות גרפיות או תמונת AI", "ما في صور من الموقع — فينا نقترح ملصقات غرافيك أو صورة ذكاء اصطناعي", "No photos from the site — offer graphic posters or an AI still"),
       evidence: ev("mediaAssets", "0"),
     });
   }

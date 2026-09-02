@@ -15,6 +15,7 @@ import { useI18n } from "@/components/i18n-provider";
 import { ConquerHeadline } from "@/components/stepper";
 import { DepartmentRail } from "@/components/department-shell";
 import { PublishToSocial, SocialConnectStrip } from "@/components/publish-to-social";
+import { CampaignMiniPreview } from "@/components/campaign-mini-preview";
 
 const STATUS_KEY: Record<AgentStatus, "status.idle" | "status.running" | "status.blocked" | "status.needs_approval" | "status.approved" | "status.complete" | "status.refused"> = {
   idle: "status.idle",
@@ -111,7 +112,7 @@ export function CampaignsList() {
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <p className="font-bold text-white">{c.name}</p>
-                <p className="text-xs text-zinc-500">
+                <p className="text-[13px] text-zinc-300">
                   {c.createdAt.slice(0, 16).replace("T", " ")} · {c.intake.type} · {c.intake.depth}
                 </p>
                 <p className="mt-1 text-xs text-omni-yellow">
@@ -145,8 +146,9 @@ export function CampaignsList() {
                 </Button>
               </div>
             </div>
+            <CampaignMiniPreview pack={c} locale={locale} />
             <div className="mt-3">
-              <p className="mb-2 text-[11px] font-bold uppercase tracking-wide text-zinc-500">
+              <p className="mb-2 text-[13px] font-bold uppercase tracking-wide text-zinc-300">
                 {t("dept.hitl")}
               </p>
               <div className="flex flex-wrap gap-1">
@@ -156,7 +158,7 @@ export function CampaignsList() {
                   return (
                     <span
                       key={g.id}
-                      className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                      className={`rounded-full px-2 py-0.5 text-[13px] font-semibold ${
                         ok ? "bg-omni-yellow text-black" : "border border-white/15 text-zinc-400"
                       }`}
                     >

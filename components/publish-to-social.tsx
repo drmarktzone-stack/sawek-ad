@@ -10,6 +10,12 @@ import { getCampaign, getClientId } from "@/lib/storage";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/components/i18n-provider";
 import { cn } from "@/lib/utils";
+import { FacebookFeedCard } from "@/components/live-preview-cards";
+import { channelFields } from "@/lib/channel-copy";
+import { paletteForIntake } from "@/lib/brand-kit";
+import { pickAsset, pickLogo } from "@/lib/media-assets";
+import { useResolvedAssets } from "@/lib/use-resolved-assets";
+import { graphicPostersForIntake } from "@/lib/graphic-posters";
 
 const PROVIDERS: { id: SocialProvider; start: "facebook" | "linkedin"; labelKey: "social.facebook" | "social.instagram" | "social.linkedin" }[] = [
   { id: "facebook", start: "facebook", labelKey: "social.facebook" },
@@ -151,7 +157,7 @@ export function PublishToSocial({ campaignId, pack: packProp, locale: localeProp
     <div className="flex min-w-0 flex-col gap-2">
       {showConnect && (
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-[11px] font-bold uppercase tracking-wide text-zinc-500">{t("social.networks")}</span>
+          <span className="text-[13px] font-bold uppercase tracking-wide text-zinc-300">{t("social.networks")}</span>
           {PROVIDERS.map((p) => {
             const connected = status[p.id].connected;
             const cfg = p.start === "facebook" ? status.configured.facebook : status.configured.linkedin;
@@ -161,7 +167,7 @@ export function PublishToSocial({ campaignId, pack: packProp, locale: localeProp
                 type="button"
                 onClick={() => (connected ? undefined : connect(p.start))}
                 className={cn(
-                  "rounded-full px-2.5 py-0.5 text-[10px] font-semibold",
+                  "rounded-full px-2.5 py-0.5 text-[13px] font-semibold",
                   connected ? "bg-omni-yellow text-black" : "border border-white/15 text-zinc-300 hover:border-omni-yellow/50",
                 )}
                 title={status[p.id].pageName ?? t(p.labelKey)}
@@ -174,10 +180,10 @@ export function PublishToSocial({ campaignId, pack: packProp, locale: localeProp
       )}
 
       {!anyConfigured && (
-        <p className="text-[11px] text-zinc-500">{t("social.notConfigured")}</p>
+        <p className="text-sm text-zinc-300">{t("social.notConfigured")}</p>
       )}
       {status.needs_service_role && anyConfigured && (
-        <p className="text-[11px] text-zinc-500">{t("social.needsServiceRole")}</p>
+        <p className="text-sm text-zinc-300">{t("social.needsServiceRole")}</p>
       )}
 
       {showPublish && (
@@ -191,7 +197,7 @@ export function PublishToSocial({ campaignId, pack: packProp, locale: localeProp
 
       {open && showPublish && (
         <div className="mt-1 rounded-xl border border-white/10 bg-black/40 p-3 text-start">
-          <p className="mb-2 text-[11px] font-bold uppercase tracking-wide text-zinc-500">{t("social.selectNetworks")}</p>
+          <p className="mb-2 text-[13px] font-bold uppercase tracking-wide text-zinc-300">{t("social.selectNetworks")}</p>
           <div className="mb-3 flex flex-wrap gap-3">
             {PROVIDERS.map((p) => {
               const connected = status[p.id].connected;
@@ -209,11 +215,12 @@ export function PublishToSocial({ campaignId, pack: packProp, locale: localeProp
               );
             })}
           </div>
-          <p className="mb-1 text-[11px] font-bold uppercase tracking-wide text-zinc-500">{t("social.preview")}</p>
-          <pre className="mb-2 max-h-40 overflow-auto whitespace-pre-wrap rounded-lg bg-black/50 p-2 text-xs text-zinc-200">
+          <p className="mb-1 text-[13px] font-bold uppercase tracking-wide text-zinc-300">{t("social.preview")}</p>
+          {pack ? <PublishExactMockup pack={pack} locale={loc} /> : null}
+          <pre className="mb-2 mt-2 max-h-28 overflow-auto whitespace-pre-wrap rounded-lg bg-black/50 p-2 text-sm leading-relaxed text-zinc-200">
             {message || t("social.emptyMessage")}
           </pre>
-          {!hasImageHint && <p className="mb-2 text-[11px] text-zinc-500">{t("social.noImage")}</p>}
+          {!hasImageHint && <p className="mb-2 text-sm text-zinc-300">{t("social.noImage")}</p>}
           <div className="flex flex-wrap gap-2">
             <Button type="button" size="sm" disabled={busy || !message.trim()} onClick={() => void confirm()}>
               {busy ? t("social.publishing") : t("social.confirm")}
@@ -264,3 +271,31 @@ function mapError(code: string, t: (k: Parameters<typeof import("@/lib/i18n").t>
       return t("social.error");
   }
 }
+
+function PublishExactMockup({ pack, locale }: { pack: CampaignPack; locale: Locale }) {
+  const { t } = useI18n();
+  const fields = channelFields(pack, locale);
+  const palette = paletteForIntake(pack.intake);
+  const assets = pack.intake.mediaAssets ?? [];
+  const urls = useResolvedAssets(assets);
+  const logo = pickLogo(assets);
+  const logoUrl = logo ? logo.publicSrc || urls[logo.id] : undefined;
+  const fallback = !pickAsset(assets, 0) ? graphicPostersForIntake(pack.intake)[0]?.dataUrl : undefined;
+  return (
+    <FacebookFeedCard
+      packLang={locale}
+      fields={fields}
+      asset={pickAsset(assets, 0)}
+      urls={urls}
+      logoUrl={logoUrl}
+      palette={palette}
+      generatedSrc={fallback}
+      graphicOnlyLabel={t("end.graphicOnly")}
+      sponsored={t("end.sponsored")}
+      like={t("end.like")}
+      comment={t("end.comment")}
+      share={t("end.share")}
+    />
+  );
+}
+

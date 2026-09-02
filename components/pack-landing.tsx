@@ -11,6 +11,7 @@ import { useResolvedAssets } from "@/lib/use-resolved-assets";
 import { isNoOffer } from "@/lib/no-offer";
 import { filled } from "@/lib/utils";
 import { shortName } from "@/lib/engine/spoken";
+import { hoursChips } from "@/lib/hours-chips";
 import { ResizeStrip } from "@/components/resize-strip";
 import { PostingWeek } from "@/components/posting-week";
 
@@ -179,10 +180,16 @@ export function PackLandingScreen({ pack, locale }: { pack: CampaignPack; locale
         <section className="mx-auto grid max-w-5xl gap-6 px-6 pb-16 sm:grid-cols-2 sm:px-10">
           {hours ? (
             <div className="rounded-[1.5rem] border border-white/10 p-6">
-              <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.22em]" style={{ color: accent }}>
+              <p className="flex items-center gap-2 text-[13px] font-black uppercase tracking-[0.22em]" style={{ color: accent }}>
                 <Clock className="size-4" /> {copy.hours}
               </p>
-              <p className="mt-3 whitespace-pre-wrap text-lg leading-relaxed">{hours}</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {hoursChips(hours, locale, 6).map((c) => (
+                  <span key={c} className="rounded-full border border-white/20 px-3 py-1.5 text-sm font-semibold">
+                    {c}
+                  </span>
+                ))}
+              </div>
             </div>
           ) : null}
           {loc ? (

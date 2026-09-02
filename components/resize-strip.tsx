@@ -47,13 +47,13 @@ export function ResizeStrip({
       <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
         <div>
           <h2 className="text-lg font-black text-white">{t("resize.title")}</h2>
-          <p className="mt-1 text-xs text-zinc-500">{t("resize.lead")}</p>
+          <p className="mt-1 text-sm leading-relaxed text-zinc-300">{t("resize.lead")}</p>
         </div>
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {RESIZE_FORMATS.map((fmt) => (
           <article key={fmt.id} className="rounded-2xl border border-white/10 bg-omni-card p-3">
-            <p className="mb-2 text-[10px] font-black uppercase tracking-[0.16em] text-omni-yellow">
+            <p className="mb-2 text-[13px] font-black uppercase tracking-[0.12em] text-omni-yellow">
               {fmt.label[packLang]} · {fmt.ratio}
             </p>
             <div
@@ -69,12 +69,13 @@ export function ResizeStrip({
                 asset={hero}
                 urls={urls}
                 overrideSrc={generatedImage}
-                kicker={fields.pageName}
-                headline={fields.headline}
-                body={fields.shortBody}
-                cta={fields.cta}
+                kicker={fmt.channel === "facebook" || fmt.channel === "tiktok" ? undefined : fields.pageName}
+                headline={fields.posterHeadline}
+                body={fields.posterSupport}
+                cta={fmt.channel === "tiktok" ? undefined : fields.cta}
+                hoursChips={fields.hoursChips}
                 channel={fmt.channel}
-                className="h-full min-h-0 p-0"
+                className="h-full min-h-0 box-border p-0"
               />
             </div>
             {(logo?.publicSrc || pack.intake.brandKit?.logoSrc) ? (

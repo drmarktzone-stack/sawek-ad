@@ -1,5 +1,6 @@
 import type { AdVariant, CampaignPack, Locale } from "./types";
-import { clipAtWord, shortName } from "./engine/spoken";
+import { clipAtWord, isWalkIn, shortName } from "./engine/spoken";
+import { hoursChips, isHoursWall, stripHoursWall } from "./hours-chips";
 
 export function incompleteLabel(locale: Locale): string {
   return locale === "he" ? "יש להשלים" : locale === "ar" ? "يجب الاستكمال" : "TO COMPLETE";
@@ -33,6 +34,9 @@ export function isIncompleteMarker(text: string, locale: Locale): boolean {
 
 export interface ChannelFields {
   headline: string;
+  posterHeadline: string;
+  posterSupport: string;
+  hoursChips: string[];
   body: string;
   shortBody: string;
   cta: string;
@@ -44,6 +48,23 @@ export interface ChannelFields {
   pageName: string;
   tiktokCaption: string;
   tiktokCta: string;
+}
+
+function walkInSupport(locale: Locale): string {
+  if (locale === "he") return "קבלה לפי סדר הגעה, בלי תור";
+  if (locale === "ar") return "جت أولاً، بدون طوابير";
+  return "Walk-in, first come, no queue";
+}
+
+function oneSupportLine(pack: CampaignPack, locale: Locale, headline: string): string {
+  const adv = stripHoursWall(pack.intake.uniqueAdvantage || "");
+  if (adv && adv !== headline && adv.length >= 4) return clipAtWord(adv, 72);
+  const pos = stripHoursWall(pack.intake.brandPositioning || "");
+  if (pos && pos !== headline) return clipAtWord(pos, 72);
+  if (isWalkIn(pack.intake)) return walkInSupport(locale);
+  const loc = (pack.intake.location || "").trim();
+  if (loc) return clipAtWord(loc, 72);
+  return "";
 }
 
 /** Copy only from pack.variants / agency landing+whatsapp / intake. Never invent claims. */
@@ -58,21 +79,31 @@ export function channelFields(pack: CampaignPack, locale: Locale): ChannelFields
   const waScript = fieldOrIncomplete(waFromIntake || waPiece?.body, locale);
   const landingTitle = fieldOrIncomplete(lpPiece?.title || v?.headline, locale);
   const landingBody = fieldOrIncomplete(lpPiece?.body, locale);
-  const shortBody = v?.primaryText?.trim()
-    ? clipAtWord(v.primaryText.replace(/\s+/g, " "), 160)
-    : incompleteLabel(locale);
+  const posterHeadline = clipAtWord(stripHoursWall(headline) || headline, 56);
+  const posterSupport = oneSupportLine(pack, locale, posterHeadline);
+  const chips = hoursChips(pack.intake.clinicHours || "", locale, 3);
+  const cleanedPrimary = v?.primaryText?.trim() ? stripHoursWall(v.primaryText.replace(/\s+/g, " ")) : "";
+  const shortBody = cleanedPrimary
+    ? clipAtWord(cleanedPrimary, 90)
+    : posterSupport || incompleteLabel(locale);
   const primaryText = [v?.headline, v?.primaryText, v?.cta].filter((x) => (x ?? "").trim()).join("\n\n");
   const caption = primaryText.trim() ? primaryText : incompleteLabel(locale);
   const pageName = fieldOrIncomplete(shortName(pack.intake, locale) || pack.intake.businessName, locale);
   const reelsPiece = agencyPiece(pack, "reels", locale);
   const tiktokPiece = agencyPiece(pack, "tiktok", locale);
-  const reelBody = (tiktokPiece?.body || reelsPiece?.body || "").trim();
-  const tiktokCaption = reelBody
-    ? clipAtWord(reelBody.replace(/\s+/g, " "), 180)
-    : shortBody;
+  const reelBody = stripHoursWall((tiktokPiece?.body || reelsPiece?.body || "").trim());
+  const tiktokCaption = clipAtWord(
+    reelBody && !isHoursWall(reelBody)
+      ? reelBody
+      : [posterHeadline, posterSupport].filter(Boolean).join(" · "),
+    90,
+  );
   const tiktokCta = fieldOrIncomplete(v?.cta, locale);
   return {
     headline,
+    posterHeadline,
+    posterSupport,
+    hoursChips: chips,
     body,
     shortBody,
     cta,

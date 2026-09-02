@@ -27,6 +27,7 @@ import { stylesForVertical } from "@/lib/design-styles";
 import { detectVertical } from "@/lib/vertical";
 import { paletteForIntake } from "@/lib/brand-kit";
 import { cn } from "@/lib/utils";
+import { ImageOfferPicker } from "@/components/image-offer-picker";
 
 const autoImagenPacks = new Set<string>();
 
@@ -138,7 +139,7 @@ export function FacebookFeedCard({
           <p className="truncate text-[13px] font-bold leading-tight" style={{ margin: 0 }}>
             {fields.pageName}
           </p>
-          <p className="mt-0.5 flex items-center gap-1 text-[11px]" style={{ color: "#b0b3b8", margin: 0 }}>
+          <p className="mt-0.5 flex items-center gap-1 text-[13px]" style={{ color: "#b0b3b8", margin: 0 }}>
             {sponsored}
             <Globe style={{ width: 10, height: 10 }} />
           </p>
@@ -157,11 +158,12 @@ export function FacebookFeedCard({
         aiLabel={aiLabel}
         graphicOnlyLabel={graphicOnlyLabel}
         kicker={fields.pageName}
-        headline={fields.headline}
-        body={fields.shortBody}
+        headline={fields.posterHeadline}
+        body={fields.posterSupport}
         cta={fields.cta}
+        hoursChips={fields.hoursChips}
         channel="facebook"
-        className="aspect-[1.91/1] h-auto min-h-0 rounded-none p-0"
+        className="aspect-[1.91/1] h-auto min-h-[168px] rounded-none p-0"
       />
       <div
         className="flex items-center justify-between gap-2 px-3 py-2.5"
@@ -171,7 +173,7 @@ export function FacebookFeedCard({
           <p className="truncate text-[13px] font-bold leading-tight" style={{ margin: 0 }}>
             {fields.headline}
           </p>
-          <p className="truncate text-[11px] uppercase tracking-wide" style={{ color: "#b0b3b8", margin: 0 }}>
+          <p className="truncate text-[13px] uppercase tracking-wide" style={{ color: "#b0b3b8", margin: 0 }}>
             {fields.pageName}
           </p>
         </div>
@@ -253,11 +255,12 @@ export function InstagramFeedCard({
         aiLabel={aiLabel}
         graphicOnlyLabel={graphicOnlyLabel}
         kicker={fields.pageName}
-        headline={fields.headline}
-        body={fields.shortBody}
+        headline={fields.posterHeadline}
+        body={fields.posterSupport}
         cta={fields.cta}
+        hoursChips={fields.hoursChips}
         channel="instagram"
-        className="aspect-[4/5] h-auto min-h-0 rounded-none p-0"
+        className="aspect-[4/5] h-auto min-h-[220px] rounded-none p-0"
       />
       <div className="flex items-center gap-3.5 px-3 py-2">
         <Heart style={{ width: 24, height: 24 }} />
@@ -325,22 +328,22 @@ export function TikTokFeedCard({
           aiLabel={aiLabel}
           graphicOnlyLabel={graphicOnlyLabel}
           kicker={fields.pageName}
-          headline={fields.headline}
-          body={fields.shortBody}
-          cta={fields.tiktokCta}
+          headline={fields.posterHeadline}
+          body={fields.posterSupport}
+          hoursChips={fields.hoursChips}
           channel="tiktok"
-          className="aspect-[9/16] h-auto min-h-0 rounded-none p-0"
+          className="aspect-[9/16] h-auto min-h-[320px] rounded-none p-0"
         />
         {/* TikTok chrome keeps the engagement stack on the physical right, like the real app. */}
-        <div className="absolute right-2 bottom-24 z-[2] flex flex-col items-center gap-4 text-white">
+        <div className="absolute right-2 bottom-28 z-[2] flex flex-col items-center gap-3 text-white">
           <Avatar name={fields.pageName} logoUrl={logoUrl} size={44} bg="#fe2c55" />
           <span className="flex flex-col items-center gap-0.5">
             <Heart className="size-8 fill-white" />
-            <span className="text-[11px] font-bold">128</span>
+            <span className="text-[13px] font-bold">128</span>
           </span>
           <span className="flex flex-col items-center gap-0.5">
             <MessageCircle className="size-8" />
-            <span className="text-[11px] font-bold">24</span>
+            <span className="text-[13px] font-bold">24</span>
           </span>
           <span className="flex flex-col items-center gap-0.5">
             <Share2 className="size-8" />
@@ -350,19 +353,90 @@ export function TikTokFeedCard({
             <Music2 className="size-4" />
           </span>
         </div>
-        <div className="absolute inset-x-0 bottom-0 z-[2] bg-gradient-to-t from-black/80 via-black/40 to-transparent px-3 pb-4 pt-16">
-          <p className="text-[13px] font-extrabold" style={{ margin: 0 }}>
+        <div className="absolute inset-x-0 bottom-0 z-[2] bg-gradient-to-t from-black/85 via-black/45 to-transparent pe-14 ps-3 pb-5 pt-16">
+          <p className="text-[13px] font-extrabold leading-tight" style={{ margin: 0 }}>
             @{handle}
           </p>
-          <p className="mt-1 line-clamp-3 text-[12px] leading-snug text-white/90" style={{ margin: 0 }}>
+          <p className="mt-1 line-clamp-2 text-[13px] leading-snug text-white" style={{ margin: 0 }}>
             {fields.tiktokCaption}
           </p>
           <span
-            className="mt-2 inline-block rounded-md px-3 py-1 text-[11px] font-black"
+            className="mt-2 inline-block rounded-md px-3 py-1.5 text-[13px] font-black"
             style={{ background: "#fe2c55", color: "#fff" }}
           >
             {fields.tiktokCta}
           </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+export function WhatsAppPreviewCard({
+  packLang,
+  fields,
+  asset,
+  urls,
+  palette,
+  generatedSrc,
+  aiLabel,
+  graphicOnlyLabel,
+  number,
+  missing,
+}: {
+  packLang: Locale;
+  fields: ReturnType<typeof channelFields>;
+  asset?: MediaAssetMeta;
+  urls: Record<string, string>;
+  palette: string[];
+  generatedSrc?: string | null;
+  aiLabel?: string;
+  graphicOnlyLabel?: string;
+  number: string;
+  missing: string;
+}) {
+  const dir = dirFor(packLang);
+  const shown = (number ?? "").trim() || missing;
+  return (
+    <div
+      dir={dir}
+      className="overflow-hidden rounded-xl border border-white/10 text-start"
+      style={{ background: "#0b141a", color: "#e9edef", fontFamily: "Helvetica, Arial, sans-serif" }}
+    >
+      <div style={{ background: "#202c33", padding: "10px 12px" }}>
+        <p style={{ margin: 0, fontWeight: 800, fontSize: 13 }}>{fields.pageName}</p>
+        <p style={{ margin: "4px 0 0", fontSize: 13, color: "#d1d7db" }}>{shown}</p>
+      </div>
+      <div style={{ padding: 12 }}>
+        <AdVisual
+          locale={packLang}
+          palette={palette}
+          asset={asset}
+          urls={urls}
+          overrideSrc={generatedSrc}
+          aiLabel={aiLabel}
+          graphicOnlyLabel={graphicOnlyLabel}
+          headline={fields.posterHeadline}
+          body={fields.posterSupport}
+          cta={fields.cta}
+          hoursChips={fields.hoursChips}
+          channel="whatsapp"
+          className="mb-2.5 aspect-square h-auto min-h-[160px] rounded-lg p-0"
+        />
+        <div
+          style={{
+            maxWidth: "92%",
+            background: "#005c4b",
+            color: "#e9edef",
+            borderRadius: dir === "rtl" ? "10px 10px 4px 10px" : "10px 10px 10px 4px",
+            padding: "8px 10px",
+            fontSize: 13,
+            lineHeight: 1.45,
+            whiteSpace: "pre-wrap",
+          }}
+        >
+          {fields.waScript}
         </div>
       </div>
     </div>
@@ -374,12 +448,14 @@ export function LivePreviewStrip({
   packLang,
   generatedImage,
   onGeneratedImage,
+  onPack,
   showDownloads = true,
 }: {
   pack: CampaignPack;
   packLang: Locale;
   generatedImage?: string | null;
   onGeneratedImage?: (dataUrl: string | null) => void;
+  onPack?: (p: CampaignPack) => void;
   showDownloads?: boolean;
 }) {
   const { t } = useI18n();
@@ -492,11 +568,15 @@ export function LivePreviewStrip({
           {busy === "imagen" ? t("end.generatingImage") : t("end.generateImage")}
         </Button>
       </div>
-      {imgError ? <p className="mt-2 text-xs text-omni-red">{imgError}</p> : null}
+      {imgError ? <p className="mt-2 text-sm text-omni-red">{imgError}</p> : null}
 
-      <div className="mt-5 grid items-start gap-4 lg:grid-cols-3">
+      {!(pack.intake.mediaAssets ?? []).some((a) => a.kind === "image") && onPack ? (
+        <ImageOfferPicker pack={pack} locale={packLang} onPack={onPack} />
+      ) : null}
+
+      <div className="mt-5 grid items-start gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <article className="rounded-2xl border border-white/10 bg-omni-card p-4">
-          <p className="mb-3 text-[11px] font-black uppercase tracking-[0.18em] text-omni-yellow">
+          <p className="mb-3 text-[13px] font-black uppercase tracking-[0.14em] text-omni-yellow">
             {t("end.facebook")} · 1.91:1
           </p>
           <FacebookFeedCard
@@ -518,7 +598,7 @@ export function LivePreviewStrip({
         </article>
 
         <article className="rounded-2xl border border-white/10 bg-omni-card p-4">
-          <p className="mb-3 text-[11px] font-black uppercase tracking-[0.18em] text-omni-yellow">
+          <p className="mb-3 text-[13px] font-black uppercase tracking-[0.14em] text-omni-yellow">
             {t("end.instagram")} · 4:5
           </p>
           <InstagramFeedCard
@@ -537,7 +617,7 @@ export function LivePreviewStrip({
         </article>
 
         <article className="rounded-2xl border border-white/10 bg-omni-card p-4">
-          <p className="mb-3 text-[11px] font-black uppercase tracking-[0.18em] text-omni-yellow">
+          <p className="mb-3 text-[13px] font-black uppercase tracking-[0.14em] text-omni-yellow">
             {t("end.tiktok")} · 9:16
           </p>
           <TikTokFeedCard
@@ -553,6 +633,24 @@ export function LivePreviewStrip({
               {t("end.tiktokButton")}
             </Button>
           ) : null}
+        </article>
+
+        <article className="rounded-2xl border border-white/10 bg-omni-card p-4">
+          <p className="mb-3 text-[13px] font-black uppercase tracking-[0.14em] text-omni-yellow">
+            {t("end.whatsapp")}
+          </p>
+          <WhatsAppPreviewCard
+            packLang={packLang}
+            fields={fields}
+            asset={pickAsset(assets, 0)}
+            urls={urls}
+            palette={fbPalette}
+            generatedSrc={generatedSrc}
+            aiLabel={aiLabel}
+            graphicOnlyLabel={graphicOnlyLabel}
+            number={pack.intake.whatsapp}
+            missing={t("end.incomplete")}
+          />
         </article>
       </div>
     </section>

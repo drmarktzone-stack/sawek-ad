@@ -43,12 +43,14 @@ export function ChannelPack({
   packLang,
   generatedImage,
   onGeneratedImage,
+  onPack,
   skipLivePreview = false,
 }: {
   pack: CampaignPack;
   packLang: Locale;
   generatedImage?: string | null;
   onGeneratedImage?: (dataUrl: string | null) => void;
+  onPack?: (p: CampaignPack) => void;
   skipLivePreview?: boolean;
 }) {
   const { t } = useI18n();
@@ -88,12 +90,13 @@ export function ChannelPack({
           packLang={packLang}
           generatedImage={generatedImage}
           onGeneratedImage={onGeneratedImage}
+          onPack={onPack}
         />
       )}
 
       <div className="mt-5 grid gap-4 lg:grid-cols-2">
         <article className="rounded-2xl border border-white/10 bg-omni-card p-4">
-          <p className="mb-3 text-[11px] font-black uppercase tracking-[0.18em] text-omni-yellow">
+          <p className="mb-3 text-[13px] font-black uppercase tracking-[0.14em] text-omni-yellow">
             {t("end.whatsapp")}
           </p>
           <WhatsAppFrame
@@ -123,13 +126,13 @@ export function ChannelPack({
                 <Send className="size-4" />
                 {t("end.openWa")}
               </Button>
-              <p className="mt-2 text-[11px] leading-relaxed text-zinc-500">{t("end.waMissing")}</p>
+              <p className="mt-2 text-sm leading-relaxed text-zinc-300">{t("end.waMissing")}</p>
             </>
           )}
         </article>
 
         <article className="rounded-2xl border border-white/10 bg-omni-card p-4">
-          <p className="mb-3 text-[11px] font-black uppercase tracking-[0.18em] text-omni-yellow">
+          <p className="mb-3 text-[13px] font-black uppercase tracking-[0.14em] text-omni-yellow">
             {t("end.landing")} · /lp/{pack.id}
           </p>
           <PackLandingCard
@@ -226,11 +229,12 @@ function WhatsAppFrame({
           aiLabel={aiLabel}
           graphicOnlyLabel={graphicOnlyLabel}
           kicker={fields.pageName}
-          headline={fields.headline}
-          body={fields.shortBody}
+          headline={fields.posterHeadline}
+          body={fields.posterSupport}
           cta={fields.cta}
+          hoursChips={fields.hoursChips}
           channel="whatsapp"
-          className="mb-2.5 aspect-square h-auto min-h-0 rounded-lg p-0"
+          className="mb-2.5 aspect-square h-auto min-h-[160px] rounded-lg p-0"
         />
         <div
           style={{
@@ -302,7 +306,7 @@ function PackLandingCard({
         overrideSrc={generatedSrc}
         className={compact ? "h-40 p-4" : "min-h-[280px] p-6"}
       >
-        <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-omni-yellow">{fields.pageName}</p>
+        <p className="text-[13px] font-bold uppercase tracking-[0.14em] text-omni-yellow">{fields.pageName}</p>
         <h3 className={cn("mt-1 font-black leading-tight text-white", compact ? "text-xl" : "text-3xl")}>
           {fields.headline}
         </h3>
@@ -310,7 +314,7 @@ function PackLandingCard({
       <div className="space-y-2 p-4">
         <p className="text-sm leading-relaxed text-zinc-300">{fields.shortBody}</p>
         {loc ? <p className="text-xs text-zinc-500">{loc}</p> : null}
-        {hours ? <p className="text-xs text-zinc-500">{hours}</p> : null}
+        {hours ? <p className="text-sm leading-relaxed text-zinc-300">{hours.split(/[·\n]/)[0]}</p> : null}
         <span
           className="inline-block rounded-full px-3 py-1 text-xs font-black"
           style={{ background: accent, color: "#050505" }}
