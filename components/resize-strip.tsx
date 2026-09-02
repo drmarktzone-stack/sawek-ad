@@ -60,6 +60,8 @@ export function ResizeStrip({
               ref={(n) => {
                 refs.current[fmt.id] = n;
               }}
+              data-kit-png={`resize-${fmt.id}`}
+              data-kit-width={String(fmt.width)}
               className="overflow-hidden rounded-xl"
               style={{ aspectRatio: fmt.css }}
             >

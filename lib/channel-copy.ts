@@ -142,12 +142,11 @@ export function waMeUrl(phone: string | undefined | null, text: string, locale: 
   return `https://wa.me/${digits}${q}`;
 }
 
-export async function downloadNodePng(
+export async function nodeToPngBlob(
   node: HTMLElement | null,
-  filename: string,
   targetWidth: number,
-): Promise<boolean> {
-  if (!node || typeof document === "undefined") return false;
+): Promise<Blob | null> {
+  if (!node || typeof document === "undefined") return null;
   try {
     const html2canvas = (await import("html2canvas")).default;
     const w = Math.max(node.offsetWidth, 1);
@@ -167,20 +166,28 @@ export async function downloadNodePng(
         resolve(null);
       }
     });
-    const a = document.createElement("a");
-    if (blob) {
-      const url = URL.createObjectURL(blob);
-      a.href = url;
-      a.download = filename;
-      a.click();
-      URL.revokeObjectURL(url);
-      return true;
-    }
-    a.href = canvas.toDataURL("image/png");
-    a.download = filename;
-    a.click();
-    return true;
+    if (blob) return blob;
+    const dataUrl = canvas.toDataURL("image/png");
+    const res = await fetch(dataUrl);
+    return await res.blob();
   } catch {
-    return false;
+    return null;
   }
+}
+
+export async function downloadNodePng(
+  node: HTMLElement | null,
+  filename: string,
+  targetWidth: number,
+): Promise<boolean> {
+  if (!node || typeof document === "undefined") return false;
+  const blob = await nodeToPngBlob(node, targetWidth);
+  if (!blob) return false;
+  const a = document.createElement("a");
+  const url = URL.createObjectURL(blob);
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+  return true;
 }

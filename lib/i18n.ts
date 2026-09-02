@@ -768,6 +768,15 @@ export const copy: Dict = {
   "end.share": { he: "שיתוף", ar: "مشاركة", en: "Share" },
   "end.tiktok": { he: "טיקטוק", ar: "تيك توك", en: "TikTok" },
   "end.tiktokButton": { he: "הורד PNG", ar: "تنزيل PNG", en: "Download PNG" },
+  "end.waButton": { he: "הורד PNG", ar: "تنزيل PNG", en: "Download PNG" },
+  "end.kit": { he: "הורד חבילת שיווק", ar: "حمّل حزمة التسويق", en: "Download marketing kit" },
+  "end.kitBusy": { he: "מכין חבילה…", ar: "عم نجهّز الحزمة…", en: "Preparing kit…" },
+  "end.kitHint": {
+    he: "PNG של הכרטיסים החיים + קופי עברית/ערבית + נתיב דף הנחיתה. רק טקסט מהחבילה — בלי טענות מומצאות.",
+    ar: "PNG للبطاقات الحيّة + نص عبري/عربي + مسار صفحة الهبوط. بس نص الحزمة — بلا ادّعاءات مختلقة.",
+    en: "PNGs of the live cards + Hebrew/Arabic copy + landing path. Pack text only — no invented claims.",
+  },
+  "end.kitError": { he: "ההורדה נכשלה.", ar: "فشل التنزيل.", en: "Download failed." },
   "end.previewTitle": { he: "תצוגה חיה בפיד", ar: "معاينة حيّة في الخلاصة", en: "Live feed preview" },
   "end.previewLead": {
     he: "פייסבוק, אינסטגרם וטיקטוק — מתעדכן עם השפה, הקופי והתמונה.",

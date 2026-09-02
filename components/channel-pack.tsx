@@ -19,6 +19,7 @@ import { paletteForIntake } from "@/lib/brand-kit";
 import { PackLandingScreen } from "@/components/pack-landing";
 import { ResizeStrip } from "@/components/resize-strip";
 import { PostingWeek } from "@/components/posting-week";
+import { DeliveryKitButton } from "@/components/delivery-kit-button";
 import {
   FacebookFeedCard,
   InstagramFeedCard,
@@ -80,10 +81,13 @@ export function ChannelPack({
   return (
     <section data-end-product="ready" className="mb-10">
       {skipLivePreview ? (
-        <>
-          <h2 className="text-2xl font-black text-navy">{t("end.title")}</h2>
-          <p className="mt-1 text-sm text-muted">{t("end.lead")}</p>
-        </>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 className="text-2xl font-black text-navy">{t("end.title")}</h2>
+            <p className="mt-1 text-sm text-muted">{t("end.lead")}</p>
+          </div>
+          <DeliveryKitButton pack={pack} />
+        </div>
       ) : (
         <LivePreviewStrip
           pack={pack}

@@ -37,6 +37,7 @@ import { AnglesStrip } from "@/components/angles-strip";
 import { CoachImprovedStrip } from "@/components/coach-panel";
 import { PublishToSocial } from "@/components/publish-to-social";
 import { SiteAuditPanel } from "@/components/site-audit-panel";
+import { DeliveryKitButton } from "@/components/delivery-kit-button";
 
 export function ResultView({
   pack,
@@ -206,6 +207,7 @@ export function ResultView({
           <FileText className="size-4" />
           {tr("cta.txt")}
         </Button>
+        <DeliveryKitButton pack={pack} compact />
         <Button
           type="button"
           variant="dark"

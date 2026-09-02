@@ -28,6 +28,7 @@ import { detectVertical } from "@/lib/vertical";
 import { paletteForIntake } from "@/lib/brand-kit";
 import { cn } from "@/lib/utils";
 import { ImageOfferPicker } from "@/components/image-offer-picker";
+import { DeliveryKitButton } from "@/components/delivery-kit-button";
 
 const autoImagenPacks = new Set<string>();
 
@@ -129,6 +130,8 @@ export function FacebookFeedCard({
   return (
     <div
       ref={refEl}
+      data-kit-png="facebook"
+      data-kit-width="1200"
       dir={dir}
       className="overflow-hidden rounded-xl border border-navy/10 text-start"
       style={{ background: "#242526", color: "#e4e6eb", fontFamily: "Helvetica, Arial, sans-serif" }}
@@ -235,6 +238,8 @@ export function InstagramFeedCard({
   return (
     <div
       ref={refEl}
+      data-kit-png="instagram"
+      data-kit-width="1080"
       dir={dir}
       className="overflow-hidden rounded-xl border border-navy/10 text-start"
       style={{ background: "#000", color: "#f5f5f5", fontFamily: "Helvetica, Arial, sans-serif" }}
@@ -312,6 +317,8 @@ export function TikTokFeedCard({
     <div className="mx-auto w-full max-w-[280px]">
       <div
         ref={refEl}
+        data-kit-png="tiktok"
+        data-kit-width="1080"
         dir={dir}
         className="relative overflow-hidden rounded-[28px] border-[3px] border-zinc-600 bg-black text-start shadow-[0_0_0_2px_#111]"
         style={{ fontFamily: "Helvetica, Arial, sans-serif", color: "#fff" }}
@@ -374,6 +381,7 @@ export function TikTokFeedCard({
 
 
 export function WhatsAppPreviewCard({
+  refEl,
   packLang,
   fields,
   asset,
@@ -385,6 +393,7 @@ export function WhatsAppPreviewCard({
   number,
   missing,
 }: {
+  refEl?: RefObject<HTMLDivElement | null>;
   packLang: Locale;
   fields: ReturnType<typeof channelFields>;
   asset?: MediaAssetMeta;
@@ -400,6 +409,9 @@ export function WhatsAppPreviewCard({
   const shown = (number ?? "").trim() || missing;
   return (
     <div
+      ref={refEl}
+      data-kit-png="whatsapp"
+      data-kit-width="1080"
       dir={dir}
       className="overflow-hidden rounded-xl border border-navy/10 text-start"
       style={{ background: "#0b141a", color: "#e9edef", fontFamily: "Helvetica, Arial, sans-serif" }}
@@ -471,6 +483,7 @@ export function LivePreviewStrip({
   const fbRef = useRef<HTMLDivElement>(null);
   const igRef = useRef<HTMLDivElement>(null);
   const ttRef = useRef<HTMLDivElement>(null);
+  const waRef = useRef<HTMLDivElement>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [imgError, setImgError] = useState("");
   const [localImg, setLocalImg] = useState<string | null>(null);
@@ -529,17 +542,26 @@ export function LivePreviewStrip({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pack.id, generatedImage]);
 
-  async function savePng(which: "fb" | "ig" | "tt") {
+  async function savePng(which: "fb" | "ig" | "tt" | "wa") {
     setBusy(which);
     try {
-      const node = which === "fb" ? fbRef.current : which === "ig" ? igRef.current : ttRef.current;
+      const node =
+        which === "fb"
+          ? fbRef.current
+          : which === "ig"
+            ? igRef.current
+            : which === "tt"
+              ? ttRef.current
+              : waRef.current;
       const name =
         which === "fb"
           ? `sawek-facebook-${pack.id}.png`
           : which === "ig"
             ? `sawek-instagram-${pack.id}.png`
-            : `sawek-tiktok-${pack.id}.png`;
-      const width = which === "tt" ? 1080 : which === "ig" ? 1080 : 1200;
+            : which === "tt"
+              ? `sawek-tiktok-${pack.id}.png`
+              : `sawek-whatsapp-${pack.id}.png`;
+      const width = which === "fb" ? 1200 : 1080;
       await downloadNodePng(node, name, width);
     } finally {
       setBusy(null);
@@ -563,10 +585,13 @@ export function LivePreviewStrip({
           <h2 className="text-2xl font-black text-navy">{t("end.previewTitle")}</h2>
           <p className="mt-1 text-sm text-muted">{t("end.previewLead")}</p>
         </div>
-        <Button type="button" onClick={() => void generateImage()} disabled={busy === "imagen"}>
-          {busy === "imagen" ? <Loader2 className="size-4 animate-spin" /> : <ImagePlus className="size-4" />}
-          {busy === "imagen" ? t("end.generatingImage") : t("end.generateImage")}
-        </Button>
+        <div className="flex flex-wrap items-start gap-2">
+          <DeliveryKitButton pack={pack} />
+          <Button type="button" onClick={() => void generateImage()} disabled={busy === "imagen"}>
+            {busy === "imagen" ? <Loader2 className="size-4 animate-spin" /> : <ImagePlus className="size-4" />}
+            {busy === "imagen" ? t("end.generatingImage") : t("end.generateImage")}
+          </Button>
+        </div>
       </div>
       {imgError ? <p className="mt-2 text-sm text-omni-red">{imgError}</p> : null}
 
@@ -638,6 +663,7 @@ export function LivePreviewStrip({
             {t("end.whatsapp")}
           </p>
           <WhatsAppPreviewCard
+            refEl={waRef}
             packLang={packLang}
             fields={fields}
             asset={pickAsset(assets, 0)}
@@ -649,6 +675,12 @@ export function LivePreviewStrip({
             number={pack.intake.whatsapp}
             missing={t("end.incomplete")}
           />
+          {showDownloads ? (
+            <Button type="button" variant="dark" className="mt-3 w-full" onClick={() => void savePng("wa")} disabled={busy === "wa"}>
+              <Download className="size-4" />
+              {t("end.waButton")}
+            </Button>
+          ) : null}
         </article>
       </div>
     </section>
