@@ -7,6 +7,9 @@ import { downloadDeliveryKit } from "@/lib/delivery-kit";
 import { useI18n } from "@/components/i18n-provider";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/components/auth-provider";
+import { PlanGate } from "@/components/plan-gate";
+import { canUse } from "@/lib/plan";
 
 export function DeliveryKitButton({
   pack,
@@ -20,8 +23,12 @@ export function DeliveryKitButton({
   compact?: boolean;
 }) {
   const { t } = useI18n();
+  const { plan } = useAuth();
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
+  if (!canUse(plan, "zip")) {
+    return <PlanGate feature="zip" className={className} />;
+  }
 
   async function run() {
     setBusy(true);

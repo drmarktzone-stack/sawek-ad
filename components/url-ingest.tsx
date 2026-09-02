@@ -73,6 +73,9 @@ export function UrlIngest() {
       const data = (await res.json()) as {
         ok?: boolean;
         error?: string;
+        messageHe?: string;
+        messageAr?: string;
+        messageEn?: string;
         url?: string;
         title?: string;
         text?: string;
@@ -87,6 +90,12 @@ export function UrlIngest() {
       };
       if (!data?.ok) {
         const code = typeof data?.error === "string" && isErrorCode(data.error) ? data.error : "network";
+        if (code === "social_login_wall") {
+          const he = typeof data.messageHe === "string" && data.messageHe.trim() ? data.messageHe.trim() : t("url.error.socialLoginWall");
+          const ar = typeof data.messageAr === "string" && data.messageAr.trim() ? data.messageAr.trim() : t("url.error.socialLoginWallAr");
+          setError(`${he}\n${ar}`);
+          return;
+        }
         setError(t(ERROR_KEY[code]));
         return;
       }
@@ -208,7 +217,7 @@ export function UrlIngest() {
       <p className={cn("mx-auto max-w-[92rem] text-sm text-muted", home ? "mt-1.5" : "mt-1 hidden sm:block")}>
         {t("url.hint")}
       </p>
-      {error && <p className="mx-auto mt-1 max-w-[92rem] text-xs font-semibold text-omni-red">{error}</p>}
+      {error && <p className="mx-auto mt-1 max-w-[92rem] whitespace-pre-line text-xs font-semibold text-omni-red">{error}</p>}
 
       <IngestReviewDialog
         open={Boolean(doc)}

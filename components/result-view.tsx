@@ -31,6 +31,7 @@ import { LanguageToggle } from "@/components/header";
 import { cn } from "@/lib/utils";
 import { isFreeService } from "@/lib/operating-model";
 import { CampaignAdVisual } from "@/components/ad-mockup";
+import { studioStillsForIntake } from "@/lib/studio-stills";
 import { ChannelPack } from "@/components/channel-pack";
 import { LivePreviewStrip } from "@/components/live-preview-cards";
 import { AnglesStrip } from "@/components/angles-strip";
@@ -38,6 +39,10 @@ import { CoachImprovedStrip } from "@/components/coach-panel";
 import { PublishToSocial } from "@/components/publish-to-social";
 import { SiteAuditPanel } from "@/components/site-audit-panel";
 import { DeliveryKitButton } from "@/components/delivery-kit-button";
+import { useAuth } from "@/components/auth-provider";
+import { PlanGate } from "@/components/plan-gate";
+import { canSaveAnotherCampaign, canUse } from "@/lib/plan";
+import { loadCampaigns } from "@/lib/storage";
 
 export function ResultView({
   pack,
@@ -47,6 +52,7 @@ export function ResultView({
   onChange: (p: CampaignPack) => void;
 }) {
   const { locale, t: tr } = useI18n();
+  const { plan } = useAuth();
   const router = useRouter();
   const [packLang, setPackLang] = useState<Locale>(locale);
 
@@ -54,6 +60,7 @@ export function ResultView({
     setPackLang(locale);
   }, [locale]);
   const [copied, setCopied] = useState<string | null>(null);
+  const [saveLimit, setSaveLimit] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [idea, setIdea] = useState("");
   const [optIn, setOptIn] = useState<OptimizerResultInput>({
@@ -78,6 +85,12 @@ export function ResultView({
   }
 
   function save() {
+    const list = loadCampaigns();
+    const exists = list.some((c) => c.id === pack.id);
+    if (!canSaveAnotherCampaign(plan, list.length, exists)) {
+      setSaveLimit(true);
+      return;
+    }
     const next = { ...pack, saved: true };
     void syncCampaign(next);
     onChange(next);
@@ -127,6 +140,7 @@ export function ResultView({
         <div>
           <h1 className="text-3xl font-black text-navy">{tr("result.ready")}</h1>
           <p className="mt-1 text-muted">{pack.name}</p>
+          {canUse(plan, "landing") ? (
           <LangLink
             href={`/lp/${pack.id}`}
             className="mt-3 inline-flex items-center gap-2 rounded-full bg-gold px-4 py-2 text-sm font-black text-navy"
@@ -134,6 +148,9 @@ export function ResultView({
             <ExternalLink className="size-4" />
             {tr("end.clientLanding")}
           </LangLink>
+          ) : (
+            <PlanGate feature="landing" className="mt-3" />
+          )}
         </div>
         <NewCampaignCta other hint className="items-end text-end" />
       </div>
@@ -195,6 +212,7 @@ export function ResultView({
           <Save className="size-4" />
           {pack.saved ? tr("cta.saved") : tr("cta.save")}
         </Button>
+        {saveLimit ? <PlanGate feature="extraCampaign" /> : null}
         <Button type="button" variant="dark" onClick={() => printBible(pack, packLang)}>
           <Download className="size-4" />
           {tr("cta.bible")}
@@ -483,28 +501,26 @@ export function ResultView({
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {stylesForVertical(detectVertical(pack.intake)).map((s, idx) => {
             const v = ads[idx % Math.max(ads.length, 1)];
-            const dark = true;
             return (
               <article
                 key={s.id}
-                className="overflow-hidden rounded-2xl border border-navy/10 bg-black shadow-[0_8px_24px_rgba(27,42,74,0.08)]"
+                className="overflow-hidden rounded-2xl border border-navy/10 bg-white shadow-[0_8px_24px_rgba(27,42,74,0.08)]"
               >
                 <CampaignAdVisual
                   locale={locale}
                   palette={s.palette}
                   assets={pack.intake.mediaAssets}
                   index={idx}
-                  className="h-36"
-                >
-                  <p className={`text-lg font-black leading-tight ${dark ? "text-navy" : "text-black"}`}>
-                    {v?.headline ?? pack.intake.businessName}
-                  </p>
-                </CampaignAdVisual>
+                  className="h-44"
+                  headline={v?.headline ?? pack.intake.businessName}
+                  cta={v?.cta}
+                  fallbackSrc={studioStillsForIntake(pack.intake)[idx % 8]?.dataUrl}
+                />
                 <div className="space-y-3 bg-white p-4">
                   <p className="line-clamp-3 text-xs text-muted">
                     {v?.primaryText ?? pack.intake.uniqueAdvantage}
                   </p>
-                  <span className="inline-block rounded-full bg-omni-yellow px-3 py-1 text-[13px] font-black text-black">
+                  <span className="inline-block rounded-full bg-navy px-3 py-1 text-[13px] font-black text-white">
                     {v?.cta ?? tr("design.produce")}
                   </span>
                   <div className="flex items-center justify-between gap-2">

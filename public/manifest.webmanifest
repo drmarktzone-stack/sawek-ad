@@ -1,0 +1,28 @@
+{
+  "id": "/",
+  "name": "SAWEK AD / سوِّق إعلانك بنفسك",
+  "short_name": "SAWEK AD",
+  "description": "RTL campaign studio. Hebrew, Arabic, English. Installable web app — not a Play or App Store listing.",
+  "lang": "he",
+  "dir": "rtl",
+  "start_url": "/?lang=he",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F7F3EA",
+  "theme_color": "#1B2A4A",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import {
   Brain,
+  Coins,
   Compass,
   FlaskConical,
   Folder,
@@ -27,6 +28,8 @@ import { cn } from "@/lib/utils";
 import { beginNewCampaign } from "@/lib/empty-campaign";
 import { Button } from "@/components/ui/button";
 import { GeminiStatusBadge } from "@/components/gemini-status-badge";
+import { useAuth } from "@/components/auth-provider";
+import { isPro } from "@/lib/plan";
 
 /** Captured OmniAd chrome + user list — one link per route, no Creative/Studio or Ops/Campaigns duplicates. */
 const NAV = [
@@ -40,6 +43,7 @@ const NAV = [
   { href: "/campaigns", key: "nav.campaigns" as const, icon: Folder },
   { href: "/dashboard", key: "nav.dashboard" as const, icon: LayoutDashboard },
   { href: "/lab", key: "nav.lab" as const, icon: FlaskConical },
+  { href: "/pricing", key: "nav.pricing" as const, icon: Coins },
   { href: "/about", key: "nav.about" as const, icon: HelpCircle },
   { href: "/self", key: "nav.self" as const, icon: SlidersHorizontal },
 ];
@@ -68,6 +72,38 @@ export function LanguageToggle({ compact = false }: { compact?: boolean }) {
           {l.label}
         </button>
       ))}
+    </div>
+  );
+}
+
+function AuthChip() {
+  const { t } = useI18n();
+  const { user, plan, logout, ready } = useAuth();
+  if (!ready) return null;
+  if (!user) {
+    return (
+      <LangLink
+        href="/login"
+        className="shrink-0 rounded-full border border-navy/15 bg-white px-3 py-1.5 text-sm font-black text-navy hover:border-gold"
+      >
+        {t("nav.login")}
+      </LangLink>
+    );
+  }
+  const letter = (user.email || "?").slice(0, 1).toUpperCase();
+  return (
+    <div className="flex items-center gap-1.5">
+      <LangLink
+        href="/pricing"
+        title={user.email}
+        className="flex size-8 items-center justify-center rounded-full bg-navy text-sm font-black text-white"
+      >
+        {letter}
+      </LangLink>
+      <span className="hidden text-xs font-bold text-muted sm:inline">{isPro(plan) ? t("auth.plan.pro") : t("auth.plan.free")}</span>
+      <button type="button" className="text-xs font-semibold text-muted hover:text-navy" onClick={() => void logout()}>
+        {t("nav.logout")}
+      </button>
     </div>
   );
 }
@@ -119,6 +155,7 @@ export function Header() {
 
         <div className="ms-auto flex items-center gap-2">
           <GeminiStatusBadge />
+          <AuthChip />
           <Button asChild size="sm" variant="gold" className="shrink-0">
             <LangLink href="/" onClick={(e) => beginNewCampaign(e)}>
               {t("cta.new")}
@@ -171,6 +208,12 @@ export function Header() {
               );
             })}
             <FunctionMenuLinks onPick={() => setOpen(false)} />
+            <LangLink href="/login" onClick={() => setOpen(false)} className="mt-2 rounded-xl px-3 py-2 text-base font-black text-navy hover:bg-navy/5">
+              {t("nav.login")}
+            </LangLink>
+            <LangLink href="/pricing" onClick={() => setOpen(false)} className="rounded-xl px-3 py-2 text-base text-navy hover:bg-navy/5">
+              {t("nav.pricing")}
+            </LangLink>
           </div>
         </div>
       )}

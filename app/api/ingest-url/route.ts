@@ -164,7 +164,14 @@ export async function POST(req: Request) {
   }
   const result = await ingestUrl(url, blocked);
   if (!result.ok) {
-    return NextResponse.json({ ok: false, error: result.error }, { status: statusFor(result.error) });
+    return NextResponse.json(
+      {
+        ok: false,
+        error: result.error,
+        ...(result.messageHe ? { messageHe: result.messageHe, messageAr: result.messageAr, messageEn: result.messageEn } : {}),
+      },
+      { status: statusFor(result.error) },
+    );
   }
   try {
     const merged = await attachPastCampaignAudit(await enrichScanWithGemini(result));

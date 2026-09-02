@@ -20,6 +20,9 @@ import { PackLandingScreen } from "@/components/pack-landing";
 import { ResizeStrip } from "@/components/resize-strip";
 import { PostingWeek } from "@/components/posting-week";
 import { DeliveryKitButton } from "@/components/delivery-kit-button";
+import { useAuth } from "@/components/auth-provider";
+import { PlanGate } from "@/components/plan-gate";
+import { canUse } from "@/lib/plan";
 import {
   FacebookFeedCard,
   InstagramFeedCard,
@@ -55,6 +58,7 @@ export function ChannelPack({
   skipLivePreview?: boolean;
 }) {
   const { t } = useI18n();
+  const { plan } = useAuth();
   const dir = dirFor(packLang);
   const pals = palettesForPack(pack.intake);
   const lpPalette = pals[2] ?? pals[0] ?? LP_PALETTE;
@@ -115,7 +119,7 @@ export function ChannelPack({
             urls={urls}
             generatedSrc={generatedImage}
             aiLabel={generatedImage ? t("end.aiGenerated") : undefined}
-            graphicOnlyLabel={t("end.graphicOnly")}
+            graphicOnlyLabel={undefined}
           />
           {waUrl ? (
             <Button type="button" className="mt-3 w-full" asChild>
@@ -150,6 +154,7 @@ export function ChannelPack({
             generatedSrc={generatedImage}
             compact
           />
+          {canUse(plan, "landing") ? (
           <div className="mt-3 flex flex-wrap gap-2">
             <Button
               type="button"
@@ -166,11 +171,14 @@ export function ChannelPack({
               </LangLink>
             </Button>
           </div>
+          ) : (
+            <PlanGate feature="landing" className="mt-3" />
+          )}
         </article>
       </div>
 
       <ResizeStrip pack={pack} packLang={packLang} generatedImage={generatedImage} />
-      <PostingWeek pack={pack} locale={packLang} />
+      {canUse(plan, "calendar") ? <PostingWeek pack={pack} locale={packLang} /> : <PlanGate feature="calendar" className="mt-4" />}
 
       <div className="mt-5 rounded-2xl border border-omni-yellow/25 bg-white p-4">
         <Button type="button" disabled className="w-full sm:w-auto" title={t("end.publishNeedLogin")}>

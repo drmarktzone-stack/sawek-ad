@@ -1,7 +1,8 @@
 import { existsSync, readFileSync } from "fs";
 import { join } from "path";
 import { inspectUrl, parseFetchedHtml, ingestUrl, collectSameOriginNavUrls, mergeExtractedFields, extractScriptBundleText } from "../lib/url-ingest";
-import { detectSocialKind, facebookMbasicUrl, isSocialLoginWall, parseSocialPage } from "../lib/social-page";
+import { detectSocialKind, facebookMbasicUrl, facebookPagePluginUrl, isSocialLoginWall, parseOembedJson, parseSocialPage, socialHasPublicContent } from "../lib/social-page";
+import { SOCIAL_LOGIN_WALL_COPY, socialLoginWallError } from "../lib/url-ingest";
 import { buildPastCampaignAuditFromPosts } from "../lib/engine/past-campaign-audit";
 import { extractCssColors, extractLogoUrl, emptyBrandKit } from "../lib/brand-kit";
 import { buildSiteAudit } from "../lib/engine/site-audit";
@@ -697,6 +698,30 @@ const wallSocial = parseSocialPage(wallHtml, "https://mbasic.facebook.com/privat
 if (!wallSocial.loginWall) fail("login wall parse loginWall=false");
 if (wallSocial.name) fail(`login wall leaked name ${JSON.stringify(wallSocial.name)}`);
 if (wallSocial.posts.length) fail("login wall invented posts");
+
+const plugin = facebookPagePluginUrl(new URL("https://www.facebook.com/NASA"));
+if (!/plugins\/page\.php/.test(plugin) || !/NASA/.test(plugin)) fail(`page plugin url ${plugin}`);
+const oembed = parseOembedJson(JSON.stringify({
+  author_name: "NASA",
+  title: "NASA",
+  thumbnail_url: "https://cdn.example.com/nasa.jpg",
+  html: "<blockquote>Public telescope night at the visitor center this Friday.</blockquote>",
+}), "facebook");
+if (!oembed || oembed.loginWall) fail("oembed NASA treated as wall");
+if (oembed?.name !== "NASA") fail(`oembed name ${JSON.stringify(oembed?.name)}`);
+if (oembed?.phone || oembed?.whatsapp) fail("oembed invented phone");
+if (!socialHasPublicContent(oembed)) fail("oembed should be public content");
+const oembedErr = parseOembedJson(JSON.stringify({ error: { message: "login required" } }), "facebook");
+if (oembedErr) fail("oembed error object must be ignored");
+
+const wallErr = socialLoginWallError();
+if (wallErr.error !== "social_login_wall") fail("socialLoginWallError code");
+if (!/הדביקו כתובת אתר|ייצוא/.test(wallErr.messageHe || "")) fail("missing Hebrew paste/export copy");
+if (!/الصقوا رابط موقع|تصدير/.test(wallErr.messageAr || "")) fail("missing Arabic paste/export copy");
+if (/סיסמת|كلمة سر/.test(SOCIAL_LOGIN_WALL_COPY.he) === false) fail("Hebrew must say we do not ask for password");
+if (/password|סיסמה|كلمة سر/i.test(JSON.stringify(SOCIAL_LOGIN_WALL_COPY)) === false) fail("must mention passwords are not asked");
+if (wallSocial.phone || wallSocial.whatsapp) fail("login wall leaked phone after sanitize");
+
 
 const igHtml = readFileSync(join(__dirname, "fixtures/url-ingest-instagram.html"), "utf8");
 const igSocial = parseSocialPage(igHtml, "https://www.instagram.com/fictiongrill/", "instagram");

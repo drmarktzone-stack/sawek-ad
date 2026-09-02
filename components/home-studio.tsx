@@ -8,6 +8,7 @@ import { DEMO_LABEL } from "@/lib/demo";
 import { startPediatricDemoFlow } from "@/lib/start-pediatric-demo";
 import { markEmptyCampaign, EMPTY_CAMPAIGN_EVENT } from "@/lib/empty-campaign";
 import { Button } from "@/components/ui/button";
+import { PwaInstallHint } from "@/components/pwa-install-hint";
 import { FunctionRail } from "@/components/function-rail";
 
 export function HomeStudio() {
@@ -75,6 +76,7 @@ export function HomeStudio() {
         </div>
         <p className="mx-auto mt-2 max-w-md text-center text-sm text-muted">{t("cta.newHint")}</p>
         <p className="mx-auto mt-4 max-w-xl text-center text-sm text-muted">{t("home.truth")}</p>
+        <PwaInstallHint />
       </section>
       <FunctionRail />
       <section className="relative mx-auto max-w-5xl px-4">

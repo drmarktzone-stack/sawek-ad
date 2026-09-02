@@ -146,6 +146,102 @@ export function facebookAboutUrl(page: URL): string {
   return u.href;
 }
 
+export function canonicalFacebookUrl(page: URL): URL {
+  const next = new URL(page.href);
+  next.protocol = "https:";
+  const h = next.hostname.replace(/^www\./i, "").toLowerCase();
+  if (
+    h === "facebook.com" ||
+    h === "fb.com" ||
+    h === "m.facebook.com" ||
+    h === "mbasic.facebook.com" ||
+    h === "web.facebook.com" ||
+    h === "l.facebook.com" ||
+    h === "lm.facebook.com"
+  ) {
+    next.hostname = "www.facebook.com";
+  }
+  next.port = "";
+  next.search = "";
+  next.hash = "";
+  return next;
+}
+
+export function facebookPagePluginUrl(page: URL): string {
+  const href = encodeURIComponent(canonicalFacebookUrl(page).href);
+  return `https://www.facebook.com/plugins/page.php?href=${href}&tabs=timeline%2Cabout&width=500&height=800&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=false`;
+}
+
+export function instagramEmbedUrl(page: URL): string {
+  const path = page.pathname.replace(/\/+$/, "") || "/";
+  return `https://www.instagram.com${path}/embed/`;
+}
+
+export function instagramOembedEndpoint(page: URL, accessToken = ""): string {
+  const u = new URL("https://graph.facebook.com/v21.0/instagram_oembed");
+  u.searchParams.set("url", page.href);
+  u.searchParams.set("omitscript", "true");
+  if (accessToken) u.searchParams.set("access_token", accessToken);
+  return u.href;
+}
+
+export function facebookOembedEndpoint(page: URL, accessToken = ""): string {
+  const u = new URL("https://graph.facebook.com/v21.0/oembed_page");
+  u.searchParams.set("url", canonicalFacebookUrl(page).href);
+  u.searchParams.set("omitscript", "true");
+  if (accessToken) u.searchParams.set("access_token", accessToken);
+  return u.href;
+}
+
+export function parseOembedJson(raw: string, kind: SocialKind): SocialPageParse | null {
+  try {
+    const data = JSON.parse(String(raw ?? ""));
+    if (!data || typeof data !== "object" || Array.isArray(data)) return null;
+    const rec = data as Record<string, unknown>;
+    if (rec.error) return null;
+    const name = clip(String(rec.author_name || rec.title || rec.author_url || ""), 120)
+      .replace(/\s*[|–—-]\s*(facebook|instagram).*$/i, "")
+      .trim();
+    if (!name || LOGIN_TITLE.test(name) || isJunkUiText(name) || isLoginChrome(name)) return null;
+    const html = String(rec.html || "");
+    const title = clip(String(rec.title || name), 160);
+    const thumb = String(rec.thumbnail_url || rec.thumbnailUrl || "");
+    const ogImage = /^https?:\/\//i.test(thumb) ? thumb : undefined;
+    const posts: SocialPost[] = [];
+    const seen = new Set<string>();
+    const fromHtml = clip(stripTags(html), 800);
+    if (isPostWorthy(fromHtml) && fromHtml.length >= 24) pushPost(posts, seen, fromHtml, ogImage);
+    return {
+      kind,
+      loginWall: false,
+      name,
+      description: clip(String(rec.title || rec.author_name || ""), 500),
+      phone: "",
+      address: "",
+      hours: "",
+      whatsapp: "",
+      ogImage,
+      posts,
+      title: title || name,
+    };
+  } catch {
+    return null;
+  }
+}
+
+export function socialHasPublicContent(p: SocialPageParse | undefined | null): p is SocialPageParse {
+  if (!p) return false;
+  if (p.loginWall) return false;
+  const name = (p.name || "").trim();
+  if (name && (LOGIN_TITLE.test(name) || isJunkUiText(name) || /^(facebook|instagram)$/i.test(name))) return false;
+  return Boolean(name || (p.description || "").trim() || (p.posts && p.posts.length));
+}
+
+export function stripLoginWallContact(p: SocialPageParse): SocialPageParse {
+  if (!p.loginWall) return p;
+  return { ...p, phone: "", whatsapp: "", address: "", hours: "" };
+}
+
 function distinctiveTitle(title: string, ogTitle: string): string {
   const og = clip(ogTitle, 160);
   const t = clip(title, 160);
@@ -377,39 +473,39 @@ export function parseSocialPage(html: string, finalUrl: string, kind: SocialKind
     const name = instagramName(ogTitle, title);
     const description = instagramBio(ogDescription);
     const posts = extractInstagramJsonPosts(raw);
-    return {
+    return stripLoginWallContact({
       kind,
       loginWall: loginWall && !name,
       name,
       description,
-      phone: contact.phone,
-      address: contact.address,
-      hours: contact.hours,
-      whatsapp: contact.whatsapp,
+      phone: loginWall ? "" : contact.phone,
+      address: loginWall ? "" : contact.address,
+      hours: loginWall ? "" : contact.hours,
+      whatsapp: loginWall ? "" : contact.whatsapp,
       ogImage,
       posts,
       title: name || title,
-    };
+    });
   }
 
   const name = distinctiveTitle(title, ogTitle).replace(/\s*[|–—-]\s*facebook.*$/i, "").trim();
   const aboutish = ogDescription && !isLoginChrome(ogDescription) ? clip(ogDescription, 500) : "";
   const posts = extractFacebookPosts(raw, finalUrl);
   const cover = firstImg(raw, finalUrl);
-  return {
+  return stripLoginWallContact({
     kind,
     loginWall: loginWall && !name,
     name,
     description: aboutish,
-    phone: contact.phone,
-    address: contact.address,
-    hours: contact.hours,
-    whatsapp: contact.whatsapp,
+    phone: loginWall ? "" : contact.phone,
+    address: loginWall ? "" : contact.address,
+    hours: loginWall ? "" : contact.hours,
+    whatsapp: loginWall ? "" : contact.whatsapp,
     ogImage,
     coverImage: cover && cover !== ogImage ? cover : undefined,
     posts,
     title: name || title,
-  };
+  });
 }
 
 export function mergeSocialParses(primary: SocialPageParse, extra?: SocialPageParse): SocialPageParse {

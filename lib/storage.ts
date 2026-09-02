@@ -2,6 +2,7 @@ import type { CampaignPack, CoachReport, Intake, LabRun, Locale, SelfPlan, SelfP
 import { emptyIntake } from "./engine/validate";
 import { coachIntake } from "./engine/coach";
 import { intakeIsClinicDemo, isBlockedEmptySessionName } from "./clinic-leak";
+import { canSaveAnotherCampaign, clientPlan } from "./plan";
 
 const K = {
   locale: "omniad-locale",
@@ -160,6 +161,7 @@ export function upsertCampaign(pack: CampaignPack): CampaignPack[] {
   const idx = list.findIndex((c) => c.id === pack.id);
   const next = { ...pack, saved: true, updatedAt: new Date().toISOString() };
   if (idx >= 0) list[idx] = next;
+  else if (!canSaveAnotherCampaign(clientPlan(), list.length, false)) return list;
   else list.unshift(next);
   saveCampaigns(list);
   return list;

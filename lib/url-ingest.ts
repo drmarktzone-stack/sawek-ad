@@ -14,8 +14,15 @@ import {
   detectSocialKind,
   facebookAboutUrl,
   facebookMbasicUrl,
+  facebookOembedEndpoint,
+  facebookPagePluginUrl,
+  instagramEmbedUrl,
+  instagramOembedEndpoint,
   mergeSocialParses,
+  parseOembedJson,
   parseSocialPage,
+  socialHasPublicContent,
+  stripLoginWallContact,
   SOCIAL_BROWSER_UA,
   type SocialKind,
   type SocialPageParse,
@@ -68,6 +75,25 @@ export interface UrlIngestOk {
 export interface UrlIngestErr {
   ok: false;
   error: UrlIngestErrorCode;
+  messageHe?: string;
+  messageAr?: string;
+  messageEn?: string;
+}
+
+export const SOCIAL_LOGIN_WALL_COPY = {
+  he: "הדף פרטי או ש-Meta חסמה את הסריקה. הדביקו כתובת אתר או ייצוא — אל תמלאו שדות מניחוש. לא מבקשים ולא שומרים סיסמת פייסבוק/אינסטגרם.",
+  ar: "الصفحة خاصة أو ميتا حجبَت المسح. الصقوا رابط موقع أو ملف تصدير — لا تملأوا حقولاً من تخمين. ما منطلب وما منِحفظ كلمة سر فيسبوك/إنستغرام.",
+  en: "This page is private or Meta blocked the scrape. Paste a website URL or an export — do not fill fields from guesses. We never ask for or store Facebook/Instagram passwords.",
+} as const;
+
+export function socialLoginWallError(): UrlIngestErr {
+  return {
+    ok: false,
+    error: "social_login_wall",
+    messageHe: SOCIAL_LOGIN_WALL_COPY.he,
+    messageAr: SOCIAL_LOGIN_WALL_COPY.ar,
+    messageEn: SOCIAL_LOGIN_WALL_COPY.en,
+  };
 }
 
 export type UrlIngestResult = UrlIngestOk | UrlIngestErr;
@@ -1524,71 +1550,128 @@ async function fetchSocialDoc(
   });
 }
 
+function facebookAppToken(): string {
+  const id = String(process.env.FACEBOOK_APP_ID ?? "").trim();
+  const secret = String(process.env.FACEBOOK_APP_SECRET ?? "").trim();
+  if (!id || !secret) return "";
+  return `${id}|${secret}`;
+}
+
+async function fetchJsonText(
+  href: string,
+  extraBlockedHosts: string[],
+): Promise<{ ok: true; text: string } | UrlIngestErr> {
+  const safe = await assertSafeUrl(href, extraBlockedHosts);
+  if (!safe.ok) return safe;
+  try {
+    const res = await fetch(safe.url.href, {
+      method: "GET",
+      redirect: "follow",
+      signal: AbortSignal.timeout(URL_FETCH_TIMEOUT_MS),
+      headers: {
+        Accept: "application/json,text/javascript,*/*;q=0.1",
+        "User-Agent": SOCIAL_BROWSER_UA,
+      },
+    });
+    const text = await res.text();
+    if (!String(text || "").trim()) return { ok: false, error: "empty" };
+    return { ok: true, text };
+  } catch (e) {
+    const name = e instanceof Error ? e.name : "";
+    if (name === "TimeoutError" || name === "AbortError") return { ok: false, error: "timeout" };
+    return { ok: false, error: "network" };
+  }
+}
+
 async function ingestSocialUrl(
   submitted: string,
   extraBlockedHosts: string[],
   kind: SocialKind,
   parsedUrl: URL,
 ): Promise<UrlIngestResult> {
-  const targets: string[] = [];
-  if (kind === "facebook") {
-    const mbasic = facebookMbasicUrl(parsedUrl).href;
-    targets.push(mbasic);
-    if (parsedUrl.hostname.replace(/^www\./i, "").toLowerCase() !== "mbasic.facebook.com") {
-      targets.push(parsedUrl.href);
-    }
-  } else {
-    targets.push(parsedUrl.href);
-  }
-
+  const parses: SocialPageParse[] = [];
   const docs: { html: string; finalUrl: string }[] = [];
-  const errors: UrlIngestErr[] = [];
-  await Promise.allSettled(
-    targets.map(async (href, idx) => {
-      const doc = await fetchSocialDoc(href, extraBlockedHosts);
-      if (doc.ok) docs[idx] = doc;
-      else errors.push(doc);
-    }),
-  );
-  const fetched = docs.filter(Boolean);
 
-  if (kind === "facebook" && fetched[0] && !/login\.php|\/login\//i.test(fetched[0].finalUrl)) {
-    try {
-      const aboutHref = facebookAboutUrl(new URL(fetched[0].finalUrl));
-      if (aboutHref !== fetched[0].finalUrl) {
-        const about = await fetchSocialDoc(aboutHref, extraBlockedHosts);
-        if (about.ok) fetched.push(about);
+  async function takeHtml(href: string): Promise<void> {
+    const doc = await fetchSocialDoc(href, extraBlockedHosts);
+    if (!doc.ok) return;
+    docs.push(doc);
+    parses.push(stripLoginWallContact(parseSocialPage(doc.html, doc.finalUrl, kind)));
+  }
+
+  function mergedSocial(): SocialPageParse | undefined {
+    if (!parses.length) return undefined;
+    return parses.reduce((a, b) => mergeSocialParses(a, b));
+  }
+
+  // 1) mbasic (Facebook), then public og/html.
+  if (kind === "facebook") {
+    await takeHtml(facebookMbasicUrl(parsedUrl).href);
+    const first = docs[0];
+    if (first && !/login\.php|\/login\//i.test(first.finalUrl)) {
+      try {
+        const aboutHref = facebookAboutUrl(new URL(first.finalUrl));
+        if (aboutHref !== first.finalUrl) await takeHtml(aboutHref);
+      } catch {
+        /* ignore */
       }
-    } catch {
-      /* ignore */
+    }
+    const host = parsedUrl.hostname.replace(/^www\./i, "").toLowerCase();
+    if (host !== "mbasic.facebook.com") await takeHtml(parsedUrl.href);
+  } else {
+    await takeHtml(parsedUrl.href);
+  }
+
+  // 2) Page plugin / oEmbed when public HTML is a login wall or empty.
+  if (!socialHasPublicContent(mergedSocial())) {
+    if (kind === "facebook") {
+      await takeHtml(facebookPagePluginUrl(parsedUrl));
+      const token = facebookAppToken();
+      const oembed = await fetchJsonText(facebookOembedEndpoint(parsedUrl, token), extraBlockedHosts);
+      if (oembed.ok) {
+        const parsed = parseOembedJson(oembed.text, "facebook");
+        if (parsed) parses.push(parsed);
+      }
+    } else {
+      await takeHtml(instagramEmbedUrl(parsedUrl));
+      const token = facebookAppToken();
+      const endpoints = [instagramOembedEndpoint(parsedUrl, token)];
+      if (!token) {
+        endpoints.push(`https://www.instagram.com/oembed/?url=${encodeURIComponent(parsedUrl.href)}&omitscript=true`);
+      }
+      for (const href of endpoints) {
+        const oembed = await fetchJsonText(href, extraBlockedHosts);
+        if (!oembed.ok) continue;
+        const parsed = parseOembedJson(oembed.text, "instagram");
+        if (parsed) {
+          parses.push(parsed);
+          break;
+        }
+      }
     }
   }
 
-  if (!fetched.length) {
-    const wall = errors.find((e) => e.error === "empty");
-    return wall ?? errors[0] ?? { ok: false, error: "network" };
+  const social = mergedSocial();
+  if (!socialHasPublicContent(social)) {
+    return socialLoginWallError();
   }
 
-  let social: SocialPageParse | undefined;
-  for (const doc of fetched) {
-    const parsed = parseSocialPage(doc.html, doc.finalUrl, kind);
-    social = social ? mergeSocialParses(social, parsed) : parsed;
+  if (!social) return socialLoginWallError();
+  const publicDoc = docs.find((d) => {
+    const parsed = parseSocialPage(d.html, d.finalUrl, kind);
+    return socialHasPublicContent(stripLoginWallContact(parsed));
+  });
+  if (publicDoc) {
+    const page = parseFetchedHtml(publicDoc.html, publicDoc.finalUrl, submitted);
+    if (page.ok) {
+      const merged = applySocialOntoParsed(page, social, submitted, kind);
+      if (merged.fields.businessName || merged.fields.description || (merged.posts && merged.posts.length)) {
+        if (!social.phone && !social.whatsapp) delete merged.fields.whatsapp;
+        return merged;
+      }
+    }
   }
-  if (!social) return { ok: false, error: "empty" };
-
-  if (social.loginWall && !social.name && !(social.posts && social.posts.length)) {
-    return { ok: false, error: "social_login_wall" };
-  }
-
-  const htmlDoc = fetched[0];
-  const page = parseFetchedHtml(htmlDoc.html, htmlDoc.finalUrl, submitted);
-  const merged = page.ok
-    ? applySocialOntoParsed(page, social, submitted, kind)
-    : socialParseToIngest(social, submitted, kind);
-  if (!merged.fields.businessName && !merged.fields.description && !(merged.posts && merged.posts.length)) {
-    return { ok: false, error: social.loginWall ? "social_login_wall" : "empty" };
-  }
-  return merged;
+  return socialParseToIngest(social, submitted, kind);
 }
 
 export async function ingestUrl(raw: string, extraBlockedHosts: string[] = []): Promise<UrlIngestResult> {
