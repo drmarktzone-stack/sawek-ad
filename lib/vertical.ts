@@ -80,11 +80,12 @@ export function isRetailLike(intake: VerticalFacts): boolean {
  * Citing "Dr. Samer Abu Mukh, pediatrician" as content author on a product site must not lock clinic headlines.
  */
 export function isPediatrics(intake: Intake): boolean {
-  const text = blob(intake);
+  const site = "website" in intake ? String((intake as Intake).website || "") : "";
+  const text = `${blob(intake)} ${site}`;
   if (/drsamerped\.ai\.studio/i.test(text)) return true;
   if (detectVertical(intake) !== "clinic") return false;
-  const nameCat = `${intake.businessName ?? ""} ${intake.category ?? ""}`;
-  const namedPedsClinic = /מרפאת ילדים|عيادة أطفال|מרפאה|عيادة|\bclinic\b/i.test(nameCat);
+  const nameCat = `${intake.businessName ?? ""} ${intake.category ?? ""} ${intake.description ?? ""}`;
+  const namedPedsClinic = /מרפאת ילדים|عيادة أطفال|מרפאה|عيادة|\bclinic\b|طبيب أطفال|רופא ילדים|pediatric/i.test(nameCat);
   if (!namedPedsClinic) return false;
   return /pedia|pediatric|מרפאת ילדים|عيادة أطفال|רופא ילדים|طبيب أطفال|סאמר אבו מוך|سامر أبو مخ|Samer Abu Mokh/i.test(text);
 }

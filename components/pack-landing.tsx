@@ -10,6 +10,7 @@ import { pickLogo } from "@/lib/media-assets";
 import { useResolvedAssets } from "@/lib/use-resolved-assets";
 import { isNoOffer } from "@/lib/no-offer";
 import { filled } from "@/lib/utils";
+import { shortName } from "@/lib/engine/spoken";
 import { ResizeStrip } from "@/components/resize-strip";
 import { PostingWeek } from "@/components/posting-week";
 
@@ -49,7 +50,7 @@ export function PackLandingScreen({ pack, locale }: { pack: CampaignPack; locale
   const offer = pack.intake.offer?.trim() ?? "";
   const showOffer = filled(offer) && !isNoOffer(offer);
   const site = pack.intake.website?.trim() ?? "";
-  const name = pack.intake.businessName.trim() || fields.pageName;
+  const name = shortName(pack.intake, locale) || pack.intake.businessName.trim() || fields.pageName;
   const headline = !isIncompleteMarker(fields.headline, locale) ? fields.headline : (pack.intake.uniqueAdvantage || pack.intake.brandPositioning || name);
   const waUrl = waMeUrl(pack.intake.whatsapp, fields.waScript, locale);
   const phoneUrl = telHref(pack.intake.whatsapp);

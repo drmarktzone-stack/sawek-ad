@@ -1,5 +1,5 @@
 import type { AdVariant, CampaignPack, Locale } from "./types";
-import { clipAtWord } from "./engine/spoken";
+import { clipAtWord, shortName } from "./engine/spoken";
 
 export function incompleteLabel(locale: Locale): string {
   return locale === "he" ? "יש להשלים" : locale === "ar" ? "يجب الاستكمال" : "TO COMPLETE";
@@ -63,7 +63,7 @@ export function channelFields(pack: CampaignPack, locale: Locale): ChannelFields
     : incompleteLabel(locale);
   const primaryText = [v?.headline, v?.primaryText, v?.cta].filter((x) => (x ?? "").trim()).join("\n\n");
   const caption = primaryText.trim() ? primaryText : incompleteLabel(locale);
-  const pageName = fieldOrIncomplete(pack.intake.businessName, locale);
+  const pageName = fieldOrIncomplete(shortName(pack.intake, locale) || pack.intake.businessName, locale);
   const reelsPiece = agencyPiece(pack, "reels", locale);
   const tiktokPiece = agencyPiece(pack, "tiktok", locale);
   const reelBody = (tiktokPiece?.body || reelsPiece?.body || "").trim();

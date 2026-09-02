@@ -70,7 +70,7 @@ export function isWalkIn(intake: Intake): boolean {
   ]
     .join(" ")
     .toLowerCase();
-  return /walk-?in|جت أولاً|جت اولا|بدون مواعيد|للا תור|ללא תור|בלי לקבוע|סדר הגעה|first come|no appointment|no pre-book|بدون موعد/.test(
+  return /walk-?in|جت أولاً|جت اولا|بدون مواعيد|بدون طوابير|بدون انتظار|للا תור|ללא תור|בלי לקבוע|סדר הגעה|first come|no appointment|no pre-book|بدون موعد/.test(
     blob,
   );
 }
@@ -88,13 +88,59 @@ export function spokenProblem(intake: Intake, locale: Locale): string {
   const raw = (resolveChipLabel(withoutUnknown, problemChipsFor(intake), locale) || "").replace(/\s+/g, " ").trim();
   if (!raw) return "";
   if (INTERNAL_AR.some((x) => raw.includes(x))) return "";
-  return raw;
+  return localizeFactBlob(raw, locale);
 }
 
 export function spokenAdvantage(intake: Intake, locale: Locale): string {
   const raw = (resolveChipLabel(intake.uniqueAdvantage, ADVANTAGE_CHIPS, locale) || "").replace(/\s+/g, " ").trim();
   if (!raw || /^custom$/i.test(raw)) return "";
-  return raw;
+  return localizeFactBlob(raw, locale);
+}
+
+
+const HE_RE = /[\u0590-\u05FF]/;
+const AR_RE = /[\u0600-\u06FF]/;
+
+const FACT_PHRASES: Array<{ re: RegExp; he: string; ar: string; en: string }> = [
+  { re: /بدون طوابير/, he: "בלי תורים", ar: "بدون طوابير", en: "no queues" },
+  { re: /بدون انتظار/, he: "בלי המתנה", ar: "بدون انتظار", en: "no long wait" },
+  { re: /100\s*%[^\n]{0,24}(?:كلاليت|כללית)/, he: "100% למבוטחי כללית", ar: "100% لمؤمني كلاليت", en: "100% for Clalit members" },
+  { re: /لمؤمني كلاليت/, he: "למבוטחי כללית", ar: "لمؤمني كلاليت", en: "for Clalit members" },
+  { re: /وقفتكم بالساعات/, he: "שעות בתור עם ילד חולה", ar: "وقفتكم بالساعات مع طفل مريض", en: "hours in line with a sick child" },
+  { re: /طوابير الساعات/, he: "תורים של שעות", ar: "طوابير الساعات", en: "hours-long queues" },
+];
+
+/** Map extracted HE/AR fact fragments into the pack locale. Never invents new claims. */
+export function localizeFactBlob(raw: string, locale: Locale): string {
+  const src = raw.replace(/\s+/g, " ").trim();
+  if (!src) return "";
+  if (locale === "he" && HE_RE.test(src) && !AR_RE.test(src)) return src;
+  if (locale === "ar" && AR_RE.test(src) && !HE_RE.test(src)) return src;
+  if (locale === "en" && !HE_RE.test(src) && !AR_RE.test(src)) return src;
+  const parts = src.split(/\s*\+\s*|\s*·\s*/).map((s) => s.trim()).filter(Boolean);
+  const mapped = parts.map((p) => {
+    for (const f of FACT_PHRASES) {
+      if (f.re.test(p)) return locale === "he" ? f.he : locale === "ar" ? f.ar : f.en;
+    }
+    return p;
+  });
+  const joiner = locale === "ar" ? " + " : " · ";
+  let joined = mapped.join(joiner);
+  if (locale === "he") joined = mapped.filter((x) => !AR_RE.test(x)).join(joiner) || joined.replace(/[\u0600-\u06FF]+/g, "").replace(/\s+/g, " ").trim();
+  if (locale === "ar") joined = mapped.filter((x) => !HE_RE.test(x)).join(joiner) || joined.replace(/[\u0590-\u05FF]+/g, "").replace(/\s+/g, " ").trim();
+  return joined.replace(/[·+,]\s*$/u, "").trim();
+}
+
+function mentionsReceptionLanguages(intake: Intake): boolean {
+  const blob = `${intake.description} ${intake.uniqueAdvantage} ${intake.brandTone} ${intake.brandPositioning} ${intake.landingLines}`;
+  return /עברית\s*[,\/ו]?\s*ערבית|ערבית.*אנגלית|عبري.*إنجليز|hebrew.*arabic.*english|שירות בעברית|خدمة عبري/i.test(blob);
+}
+
+function languageLine(intake: Intake, locale: Locale): string {
+  if (!mentionsReceptionLanguages(intake)) return "";
+  if (locale === "ar") return "خدمة عبري وعربي وإنجليزي.";
+  if (locale === "he") return "עברית, ערבית ואנגלית.";
+  return "Hebrew, Arabic, and English.";
 }
 
 function productProblemH1(intake: Intake, locale: Locale): string | null {
@@ -120,9 +166,25 @@ export function shortCity(intake: Intake, locale: Locale): string {
   return clipAtWord(first, 22);
 }
 
+function extractedDoctorNames(intake: Intake): { he: string; ar: string; en: string } {
+  const blob = `${intake.businessName}\n${intake.description}\n${intake.category}`;
+  const arHit = blob.match(/د\.?\s*سامر[\s\u0600-\u06FF]{0,48}أبو مخ/) || blob.match(/عيادة أطفال د\.?\s*سامر أبو مخ/);
+  const heHit = blob.match(/ד["״']?ר\s*סאמר[^|\n,]{0,40}אבו מוך/);
+  const ar = canonicalDoctorName((arHit?.[0] || "").replace(/\s+/g, " ").trim());
+  const he = (heHit?.[0] || "").replace(/\s+/g, " ").trim();
+  const en = /سامر|סאמר|Samer/i.test(blob) && (ar || he) ? "Dr. Samer Abu Mokh" : "";
+  return { he, ar, en };
+}
+
 export function shortName(intake: Intake, locale: Locale): string {
+  const names = extractedDoctorNames(intake);
+  if (locale === "he" && names.he) return clipAtWord(names.he, 36);
+  if (locale === "ar" && names.ar) return clipAtWord(names.ar, 36);
+  if (locale === "en" && names.en) return names.en;
   const n = canonicalDoctorName(intake.businessName.trim());
   if (!n) return placeNoun(intake, locale);
+  if (locale === "he" && /[\u0600-\u06FF]/.test(n)) return placeNoun(intake, locale);
+  if (locale === "ar" && /[\u0590-\u05FF]/.test(n) && names.ar) return clipAtWord(names.ar, 36);
   return clipAtWord(n, 36);
 }
 
@@ -160,6 +222,7 @@ export function audienceWhoLine(intake: Intake, locale: Locale): string {
     if (kupa === "meuhedet") return `למשפחות ${c} במאוחדת שרוצים לעבור לכללית.`;
     if (kupa === "leumit") return `למשפחות ${c} בלאומית שרוצים לעבור לכללית.`;
     if (kupa === "switch_clalit") return `למשפחות ${c} שרוצים לעבור לכללית מקופה אחרת.`;
+    if (isPediatrics(intake)) return `למשפחות ${c} שמחפשות רופא ילדים בכללית.`;
     return `ל${crowd}.`;
   }
   const c = city || "the area";
@@ -178,8 +241,34 @@ function arWalkInH1(intake: Intake): string {
   return n;
 }
 
+const HOUR_AR: Array<[string, string, string]> = [
+  ["طوارئ واستفسارات هاتفية للمسجلين", "חירום ובירורים טלפוניים לרשומים", "emergency / phone questions for registered families"],
+  ["مغلق (استشارات واتساب)", "סגור (ייעוץ וואטסאפ)", "closed (WhatsApp consults)"],
+  ["استشارات واتساب", "ייעוץ וואטסאפ", "WhatsApp consults"],
+  ["عطلة نهاية الأسبوع", "סופ״ש", "weekend"],
+  ["الأحد", "ראשון", "Sun"],
+  ["الإثنين", "שני", "Mon"],
+  ["الاثنين", "שני", "Mon"],
+  ["الثلاثاء", "שלישי", "Tue"],
+  ["الأربعاء", "רביעי", "Wed"],
+  ["الخميس", "חמישי", "Thu"],
+  ["الجمعة", "שישי", "Fri"],
+  ["السبت", "שבת", "Sat"],
+  ["مغلق", "סגור", "closed"],
+];
+
+export function localizeHours(raw: string, locale: Locale): string {
+  const h = raw.replace(/\s+/g, " ").trim();
+  if (!h || locale === "ar") return h;
+  let out = h;
+  for (const [ar, he, en] of HOUR_AR) {
+    if (out.includes(ar)) out = out.split(ar).join(locale === "he" ? he : en);
+  }
+  return out;
+}
+
 export function hoursLine(intake: Intake, locale: Locale): string {
-  const h = intake.clinicHours?.trim() ?? "";
+  const h = localizeHours(intake.clinicHours?.trim() ?? "", locale);
   if (!h) return "";
   if (locale === "ar") return `الدوام: ${h}`;
   if (locale === "he") return `שעות: ${h}`;
@@ -299,7 +388,7 @@ export function whatsappScript(intake: Intake, locale: Locale): string {
   }
   const n = shortName(intake, locale);
   const wa = waBit(intake) || (locale === "ar" ? "[يجب الاستكمال]" : locale === "he" ? "[יש להשלים]" : "[TO COMPLETE]");
-  const hours = intake.clinicHours?.trim() ?? "";
+  const hours = hoursLine(intake, locale);
   const kupa = kupaLine(intake, locale);
   const place = placeBit(intake, locale);
   if (locale === "ar") {
@@ -313,7 +402,7 @@ export function whatsappScript(intake: Intake, locale: Locale): string {
       place ? place + "." : "",
       `واتساب ${wa}.`,
       walk,
-      hours ? `الدوام: ${hours}` : "",
+      hours,
       kupa,
       emergencyDisclaimer(intake, locale),
     ]
@@ -326,7 +415,7 @@ export function whatsappScript(intake: Intake, locale: Locale): string {
       `שלום, כאן ${n}. וואטסאפ ${wa}.`,
       place,
       walk,
-      hours ? `שעות: ${hours}` : "",
+      hours,
       kupa,
       emergencyDisclaimer(intake, locale),
     ]
@@ -340,7 +429,7 @@ export function whatsappScript(intake: Intake, locale: Locale): string {
     `Hi, this is ${n}. WhatsApp ${wa}.`,
     place,
     walk,
-    hours ? `Hours: ${hours}` : "",
+    hours,
     kupa,
     emergencyDisclaimer(intake, locale),
   ]
@@ -364,13 +453,14 @@ function edgeShort(intake: Intake, locale: Locale, max = 48): string {
   if (raw) return clipAtWord(raw, max);
   const place = placeBit(intake, locale);
   const wa = waBit(intake);
+  const langs = languageLine(intake, locale).replace(/[.]$/, "");
   if (locale === "ar") {
-    return [place, wa ? `واتساب ${wa}` : "", "خدمة عبري / عربي / إنجليزي"].filter(Boolean).join("، ");
+    return [place, wa ? `واتساب ${wa}` : "", langs].filter(Boolean).join("، ");
   }
   if (locale === "he") {
-    return [place, wa ? `וואטסאפ ${wa}` : "", "עברית / ערבית / אנגלית"].filter(Boolean).join(" · ");
+    return [place, wa ? `וואטסאפ ${wa}` : "", langs].filter(Boolean).join(" · ");
   }
-  return [place, wa ? `WhatsApp ${wa}` : "", "HE / AR / EN"].filter(Boolean).join(" · ");
+  return [place, wa ? `WhatsApp ${wa}` : "", langs].filter(Boolean).join(" · ");
 }
 
 function painShort(intake: Intake, locale: Locale): string {
@@ -429,7 +519,7 @@ export function spokenHeadline(kind: VariantKind, intake: Intake, locale: Locale
         h = wa ? `וואטסאפ: ${wa}` : cta;
         break;
       case "unique_advantage":
-        h = clipAtWord(edgeShort(intake, locale), 40);
+        h = clipAtWord(edgeShort(intake, locale), 48);
         break;
     }
   } else {
@@ -531,7 +621,7 @@ export function spokenBody(kind: VariantKind, intake: Intake, locale: Locale): s
         return [
           open,
           place ? `المكان: ${place}.` : "",
-          "خدمة عبري وعربي وإنجليزي.",
+          languageLine(intake, locale),
           facts,
         ].filter(Boolean).join("\n\n");
       case "direct_sales":
@@ -560,7 +650,7 @@ export function spokenBody(kind: VariantKind, intake: Intake, locale: Locale): s
       case "emotional":
         return [emotionalOpen(intake, locale), open, facts].filter(Boolean).join("\n\n");
       case "narrative":
-        return [open, place ? `מקום: ${place}.` : "", "עברית, ערבית ואנגלית.", facts].filter(Boolean).join("\n\n");
+        return [open, place ? `מקום: ${place}.` : "", languageLine(intake, locale), facts].filter(Boolean).join("\n\n");
       case "direct_sales":
         return [open, facts, `אם זה רלוונטי — ${cta}.`].filter(Boolean).join("\n\n");
       case "unique_advantage":
@@ -586,7 +676,7 @@ export function spokenBody(kind: VariantKind, intake: Intake, locale: Locale): s
     case "emotional":
       return [emotionalOpen(intake, locale), open, facts].filter(Boolean).join("\n\n");
     case "narrative":
-      return [open, place ? `Place: ${place}.` : "", "Hebrew, Arabic, and English.", facts].filter(Boolean).join("\n\n");
+      return [open, place ? `Place: ${place}.` : "", languageLine(intake, locale), facts].filter(Boolean).join("\n\n");
     case "direct_sales":
       return [open, facts, `If this is you — ${cta}.`].filter(Boolean).join("\n\n");
     case "unique_advantage":
@@ -624,8 +714,17 @@ export function rsaLines(intake: Intake, locale: Locale): string {
   return `H1: ${h1}\nH2: ${h2}\nH3: ${h3}\nD1: ${d1}\nD2: ${d2}`;
 }
 
+function landingLinesForLocale(raw: string, locale: Locale): string {
+  const s = raw.replace(/\s+/g, " ").trim();
+  if (!s) return "";
+  if (/\$\{|whatsappDisplay|contentHe:|contentAr:/.test(s)) return "";
+  if (locale === "ar") return AR_RE.test(s) && !HE_RE.test(s) ? s : "";
+  if (locale === "he") return HE_RE.test(s) && !AR_RE.test(s) ? s : "";
+  return !HE_RE.test(s) && !AR_RE.test(s) ? s : "";
+}
+
 export function landingBody(intake: Intake, locale: Locale): string {
-  const supplied = intake.landingLines?.trim() ?? "";
+  const supplied = landingLinesForLocale(intake.landingLines?.trim() ?? "", locale);
   const h1 = landingH1(intake, locale);
   const n = shortName(intake, locale);
   const product = isProduct(intake);
@@ -639,8 +738,8 @@ export function landingBody(intake: Intake, locale: Locale): string {
   const adv = spokenAdvantage(intake, locale);
   if (locale === "ar") {
     return [
-      supplied,
       `H1: ${h1}`,
+      supplied,
       product ? adv : "",
       walk ? "جت أولاً بدون مواعيد. مش حاجة تحجزوا دور." : "",
       place,
@@ -655,8 +754,8 @@ export function landingBody(intake: Intake, locale: Locale): string {
   }
   if (locale === "he") {
     return [
-      supplied,
       `H1: ${h1}`,
+      supplied,
       product ? adv : "",
       walk ? "קבלה לפי סדר הגעה, בלי לקבוע תור." : "",
       place,
@@ -670,8 +769,8 @@ export function landingBody(intake: Intake, locale: Locale): string {
       .join("\n");
   }
   return [
-    supplied,
     `H1: ${h1}`,
+    supplied,
     product ? adv : "",
     walk ? "Walk-in, first come first served. No booking required." : "",
     place,

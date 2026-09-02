@@ -236,8 +236,13 @@ const CATALOG_H1 = /חדשים על המדפים|hot sale|קטלוג|catalog|new
 const JUNK_UI_RE =
   /איפוס סיסמה|שחזור סיסמה|התחבר(?:ות)?|\bהרשם\b|הרשמה|skip to|\bcookie\b|forgot password|\blogin\b|\bcart\b|lost.?password|woocommerce-LostPassword/i;
 const SHIPPING_PROMO = /משלוח(?:ים)? חינם|free shipping/i;
+/** Advantage phrasing (no queues) — never the problem field. */
+const QUEUE_ADVANTAGE =
+  /بدون طوابير(?:\s*\/?\s*بدون انتظار)?|بدون طوابير ولا انتظار(?: طويل)?|بدون انتظار|בלי תור|ללא תור|ללא המתנה|no waiting/i;
+/** Actual waiting pain on the page — hours in line, crowded public clinics. */
 const QUEUE_PAIN =
-  /بدون طوابير(?:\s*\/?\s*بدون انتظار)?|بدون طوابير ولا انتظار(?: طويل)?|بدون انتظار|בלי תור|ללא המתנה|no waiting|long queues/i;
+  /وقفتكم بالساعات[^\n.]{0,90}|طوابير الساعات|انتظار طويل مع (?:طفل|ولد)|العيادات العامة|long queues|עומס תורים|שעות של תור/i;
+const INSTAGRAM_BIO_JUNK = /بايو|البيو|تاب[عف]وا الصفحة|خلال دقيقة واحدة|سجلي طفلك الآن مجاناً خلال/i;
 
 const INDIC_DIGITS: Record<string, string> = {
   "٠": "0",
@@ -323,12 +328,17 @@ export function extractUnlabeledPromo(text: string): string {
     }
     if (line.length < 4 || line.length > 240) continue;
     if (!stripped) continue;
+    if (INSTAGRAM_BIO_JUNK.test(line) || /\$\{|whatsappDisplay|contentHe:|contentAr:/.test(line)) continue;
     if (/₪|\bNIS\b|\d+[.,]\d{2}/.test(line) && !SHIPPING_PROMO.test(line)) continue;
     const concrete = /[0-9]|1\s*\+\s*1|חינם|חיסול|مجانا|مجاني|تصفية|חדש|₪|%|ש״ח|ש"ח|hot\s*sale|קופון|كوبون|كلاليت|כללית/i.test(line) || stripped.length >= 3;
     if (!concrete) continue;
     if (!sales.includes(line)) sales.push(line);
   }
-  sales.sort((a, b) => a.length - b.length);
+  sales.sort((a, b) => {
+    const score = (s: string) =>
+      (/100\s*%/.test(s) ? 40 : 0) + (/كلاليت|כללית|clalit/i.test(s) ? 30 : 0) + (/مجانا|مجاني|חינם/.test(s) ? 10 : 0) - s.length / 100;
+    return score(b) - score(a);
+  });
   return [...shipping, ...sales].slice(0, 2).join(", ");
 }
 
@@ -398,7 +408,7 @@ function extractLooseHours(text: string): string {
         if (TIME.test(L) && L.length <= 400) collected.push(L);
         else if (collected.length && !HEAD.test(L) && L.length > 80) break;
       }
-      if (collected.length) return clip(collected.join(" · "), 280);
+      if (collected.length) return clip(collected.join(" · "), 800);
     }
   }
   return "";
@@ -465,7 +475,7 @@ function extractOperatingModel(text: string): OperatingModel | "" {
   return "";
 }
 
-function extractChannels(text: string): string {
+export function extractChannels(text: string): string {
   const found: string[] = [];
   const meta = /\bmeta\b/i.test(text);
   if (meta || /פייסבוק|فيسبوك|\bfacebook\b/i.test(text)) found.push("facebook");
@@ -618,6 +628,9 @@ export function fillEmptyFromPageProse(
   if (out.biggestProblem && /^(?:תחום|קטגוריה)\s*:/i.test(out.biggestProblem)) {
     delete out.biggestProblem;
   }
+  if (out.biggestProblem && QUEUE_ADVANTAGE.test(out.biggestProblem) && !QUEUE_PAIN.test(out.biggestProblem)) {
+    delete out.biggestProblem;
+  }
   if (out.uniqueAdvantage && (isJunkUiText(out.uniqueAdvantage) || isCatalogHeading(out.uniqueAdvantage))) {
     delete out.uniqueAdvantage;
   }
@@ -673,7 +686,7 @@ export function fillEmptyFromPageProse(
     }
     if (!String(out.biggestProblem || "").trim()) {
       const queue = hay.match(QUEUE_PAIN);
-      if (queue) acceptProblem(queue[0], hay);
+      if (queue && !QUEUE_ADVANTAGE.test(queue[0])) acceptProblem(queue[0], hay);
     }
     if (!String(out.biggestProblem || "").trim()) {
       for (const src of [extra, blob].filter(Boolean)) {
@@ -770,6 +783,12 @@ export function fillEmptyFromPageProse(
       const t = (m[1] || "").replace(/\s+/g, " ").trim();
       if (t && !isJunkUiText(t) && !heads.includes(t)) heads.push(t);
     }
+    if (!heads.length) {
+      for (const m of blob.matchAll(/(?:^|\n)CTA:\s*(.+)/g)) {
+        const t = (m[1] || "").replace(/\s+/g, " ").trim();
+        if (t && !isJunkUiText(t) && !INSTAGRAM_BIO_JUNK.test(t) && !heads.includes(t)) heads.push(t);
+      }
+    }
     if (heads.length) out.landingLines = clip(heads.slice(0, 3).join(" · "), 400);
   }
 
@@ -851,6 +870,7 @@ export function extractFieldsFromText(text: string, filename: string): Partial<R
     "اسم العمل",
     "اسم النشاط",
     "اسم العيادة",
+    "اسم الطبيب",
     "اسم المركز",
     "الاسم",
     "business name",
@@ -884,7 +904,7 @@ export function extractFieldsFromText(text: string, filename: string): Partial<R
     "hours",
     "opening hours",
     "clinic hours",
-  ], 400);
+  ], 800);
   if (hoursHits.length) out.clinicHours = hoursHits.join(" · ");
   else {
     const looseH = extractLooseHours(text);

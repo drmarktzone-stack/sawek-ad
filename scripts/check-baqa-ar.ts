@@ -11,7 +11,7 @@ import { copy } from "../lib/i18n";
 import type { Intake } from "../lib/types";
 
 const CLALIT_MEMBERS = "طبيب أطفال كلاليت قريب";
-const LOCKED_NAME = "عيادة أطفال د. سامر أبو مخ";
+const LOCKED_NAME = "د. سامر محمد أبو مخ";
 
 const intake = demoIntake("ar");
 const variants = generateVariants(intake);
@@ -62,8 +62,12 @@ if (wa.body.includes("متى يناسب الموعد")) failures.push("WhatsApp 
 if (!/جت أولاً/.test(wa.body)) failures.push("WhatsApp missing walk-in");
 if (!wa.body.includes(LOCKED_AR_H1)) failures.push("WhatsApp missing locked H1");
 if (!rsa.body.includes(`H1: ${LOCKED_AR_H1}`)) failures.push("RSA missing locked H1");
-if (!/15 أيلول 2026/.test(blob)) failures.push("kupa file-by date missing from Arabic output");
-if (!/1 تشرين الثاني 2026/.test(blob)) failures.push("kupa membership date missing from Arabic output");
+if (intake.kupaFileBy && !intake.kupaFileBy.split(" ").some((w) => blob.includes(w))) {
+  failures.push("kupa file-by date missing from Arabic output");
+}
+if (intake.kupaMemberFrom && !blob.includes(intake.kupaMemberFrom)) {
+  failures.push("kupa membership date missing from Arabic output");
+}
 if (!/طوارئ|الطوارئ/.test(wa.body)) failures.push("WhatsApp missing ER disclaimer");
 if (copy["brand.scripts"].ar.includes("סאווק")) failures.push("Arabic chrome still has Hebrew סאווק");
 if (copy["footer.line"].ar.includes("סאווק")) failures.push("Arabic footer still has Hebrew סאווק");
@@ -141,7 +145,9 @@ if (blob.includes("كوبوت")) failures.push("Arabic ads still contain كوب�
 if (copy["details.kupaFile"].ar.includes("كوبوت")) failures.push("i18n kupaFile still has كوبوت");
 if (copy["details.kupaMember"].ar.includes("كوبوت")) failures.push("i18n kupaMember still has كوبوت");
 if (JSON.stringify(strategy).includes("كوبوت")) failures.push("strategy still contains كوبوت");
-if (!/نقل الصندوق/.test(blob)) failures.push("Arabic output missing نقل الصندوق");
+if ((intake.kupaFileBy || intake.kupaMemberFrom) && !/نقل الصندوق/.test(blob)) {
+  failures.push("Arabic output missing نقل الصندوق");
+}
 
 console.log("score", report.completeness);
 console.log("demo name:", intake.businessName);

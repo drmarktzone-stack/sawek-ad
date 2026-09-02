@@ -678,7 +678,7 @@ export function collectSameOriginScriptUrls(html: string, baseUrl: string, cap =
 }
 
 const JS_CONTACT_KEY =
-  /(?:phone|telephone|mobile|whatsappDisplay|whatsapp|tel|addressDetails|streetAddress|addressLocality|address|locationName|location|openingHours|hours)\s*:\s*["']([^"']{3,280})["']/gi;
+  /(?:phone|telephone|mobile|whatsappDisplay|whatsapp|tel|addressDetails|streetAddress|addressLocality|address|locationName|location|openingHours|hours|doctorNameAr|doctorNameHe|clinicTitleAr|clinicTitleHe|specialtyAr|specialtyHe|nameHe)\s*:\s*["']([^"']{3,400})["']/gi;
 
 const HE_AR = /[\u0590-\u05FF\u0600-\u06FF]/;
 
@@ -690,8 +690,8 @@ export function extractScriptBundleText(js: string): string {
   const human: string[] = [];
   const seen = new Set<string>();
   let phoneLabels = 0;
-  const push = (label: string, value: string) => {
-    const v = clip(decodeEntities(value), 280);
+  const push = (label: string, value: string, max = 280) => {
+    const v = clip(decodeEntities(value), max);
     if (!v || seen.has(`${label}:${v}`)) return;
     seen.add(`${label}:${v}`);
     labeled.push(`${label}: ${v}`);
@@ -699,12 +699,23 @@ export function extractScriptBundleText(js: string): string {
   for (const m of raw.matchAll(JS_CONTACT_KEY)) {
     const key = (m[0].split(":")[0] || "").toLowerCase();
     const val = m[1] || "";
+    if (/patient|count|daysremaining|target|campaign/i.test(key)) continue;
     if (/phone|tel|mobile|whatsapp/.test(key)) {
       if (phoneLabels >= 3) continue;
       phoneLabels += 1;
       push(/whatsapp/.test(key) ? "וואטסאפ" : "טלפון", val);
-    } else if (/address|location|street/.test(key)) push("כתובת", val);
-    else if (/hour/.test(key)) push("שעות", val);
+    } else if (/doctornam(?:ear)|clinictitlear/.test(key)) push("اسم الطبيب", val);
+    else if (/doctornamehe|namehe|clinictitlehe/.test(key)) push("תיאור", val, 200);
+    else if (/specialty/.test(key)) push("תחום", val);
+    else if (/address|location|street/.test(key)) push("כתובת", val, 400);
+    else if (/hour/.test(key)) push("שעות", val, 800);
+  }
+  // Single-quoted JS strings (Hebrew ד"ר contains a double-quote).
+  for (const m of raw.matchAll(/(?:doctorNameHe|nameHe|clinicTitleHe)\s*:\s*'([^']{3,160})'/g)) {
+    push("תיאור", m[1], 200);
+  }
+  for (const m of raw.matchAll(/(?:doctorNameAr|clinicTitleAr)\s*:\s*"([^"]{3,160})"/g)) {
+    push("اسم الطبيب", m[1]);
   }
   const hourRows: string[] = [];
   for (const m of raw.matchAll(
@@ -712,17 +723,30 @@ export function extractScriptBundleText(js: string): string {
   )) {
     hourRows.push(`${m[1].trim()} ${m[2].trim()}${m[3].trim() ? ` / ${m[3].trim()}` : ""}`);
   }
-  if (hourRows.length) push("שעות", hourRows.join(" · "));
+  if (hourRows.length) push("שעות", hourRows.join(" · "), 800);
+  const CTA_JS =
+    /تواصل واتساب|واتساب مباشر|سجل(?:ي|وا)? طفلك|تسجيل طفلك|הגיעו למרפאה|דברו בוואטסאפ|צור קשר/i;
   for (const m of raw.matchAll(/["']([^"'\\]{6,240})["']/g)) {
     const str = decodeEntities(m[1] || "").replace(/\s+/g, " ").trim();
     if (!str) continue;
+    if (/currentPatientsCount|targetPatientsCount|campaignDaysRemaining|لاكتمال السعة|مسجلين جدد/.test(str)) continue;
     if (!HE_AR.test(str) && !/\d{1,2}:\d{2}/.test(str) && !/0\d[\s-]?\d{3}/.test(str)) continue;
     if (/^(?:https?:|\/assets\/|#|\.)/.test(str)) continue;
     if (/(?:className|px-|bg-|text-slate|rounded-|flex |font-\[|w-\d|h-\d)/.test(str)) continue;
     if (isJunkUiText(str) || isCatalogHeading(str)) continue;
+    if (CTA_JS.test(str)) {
+      const ctaLine = `CTA: ${clip(str, 80)}`;
+      if (!labeled.includes(ctaLine)) labeled.push(ctaLine);
+    }
     if (!human.includes(str)) human.push(str);
-    if (human.length >= 80) break;
+    if (human.length >= 140) break;
   }
+  const channels: string[] = [];
+  if (/فيسبوك|פייסבוק|\bfacebook\b/i.test(raw)) channels.push("facebook");
+  if (/انستغرام|إنستغرام|אינסטגרם|\binstagram\b/i.test(raw)) channels.push("instagram");
+  if (/تيك توك|טיקטוק|\btiktok\b/i.test(raw)) channels.push("TikTok");
+  if (/واتساب|וואטסאפ|\bwhatsapp\b/i.test(raw)) channels.push("whatsapp");
+  if (channels.length) labeled.push(`ערוצים: ${channels.join(", ")}`);
   return clipPreserveNewlines([...labeled, ...human].join("\n"), URL_TEXT_CAP);
 }
 
