@@ -28,7 +28,7 @@ const BROWSER_UA =
 export const SOCIAL_BROWSER_UA = BROWSER_UA;
 
 const LOGIN_TITLE =
-  /^(facebook|instagram|log in(?:to)? facebook|log into facebook|log in to instagram)$/i;
+  /^(facebook|instagram|שגיאה|خطأ|error|log in(?:to)? facebook|log into facebook|log in to instagram)$/i;
 
 const LOGIN_SIGNAL =
   /log in to facebook|log into facebook|you must log in before|you must log in to continue|create new account|create new facebook account|log in to instagram|sign up for instagram/i;
@@ -154,12 +154,14 @@ function distinctiveTitle(title: string, ogTitle: string): string {
   return "";
 }
 
-export function isSocialLoginWall(html: string): boolean {
+export function isSocialLoginWall(html: string, finalUrl = ""): boolean {
+  if (/\/login\.php\b|\/accounts\/login\b|\/login\/\?/i.test(finalUrl)) return true;
   const ogTitle = metaContent(html, "og:title");
   const title = tagText(html, "title");
   const name = distinctiveTitle(title, ogTitle);
   if (name) return false;
-  return LOGIN_SIGNAL.test(html) || LOGIN_TITLE.test(title) || LOGIN_TITLE.test(ogTitle);
+  const genericDesc = /see posts, photos and more on facebook|ראה\/ראי פוסטים|انظر المنشورات/i.test(html);
+  return LOGIN_SIGNAL.test(html) || LOGIN_TITLE.test(title) || LOGIN_TITLE.test(ogTitle) || genericDesc;
 }
 
 function isLoginChrome(text: string): boolean {
@@ -210,9 +212,9 @@ function labeledNear(text: string, labels: RegExp, max = 180): string {
 }
 
 function extractContact(blob: string): { phone: string; address: string; hours: string; whatsapp: string } {
-  const phone =
-    labeledNear(blob, /(?:phone|טלפון|هاتف|mobile|נייד)\s*[:：]\s*([+\d][\d\s\-()]{6,22})/i) ||
-    (blob.match(/(?:\+972|0)[\d\s\-]{8,14}/)?.[0] ?? "");
+  const labeledPhone = labeledNear(blob, /(?:phone|טלפון|هاتف|mobile|נייד)\s*[:：]\s*([+\d][\d\s\-()]{6,22})/i);
+  const loose = blob.match(/(?:\+972|0(?:5\d|4\d|2\d|3\d|7\d|8\d|9\d))[\d\s\-]{7,10}/)?.[0] ?? "";
+  const phone = labeledPhone || loose;
   const address = labeledNear(
     blob,
     /(?:address|כתובת|عنوان|located in)\s*[:：]\s*([^\n]{8,160})/i,
@@ -365,7 +367,10 @@ export function parseSocialPage(html: string, finalUrl: string, kind: SocialKind
     metaContent(raw, "og:description") || metaContent(raw, "twitter:description") || metaContent(raw, "description");
   const ogImageRaw = metaContent(raw, "og:image") || metaContent(raw, "twitter:image");
   const ogImage = absHttpUrl(ogImageRaw, finalUrl) || undefined;
-  const loginWall = isSocialLoginWall(raw);
+  const loginWall = isSocialLoginWall(raw, finalUrl);
+  if (loginWall && !distinctiveTitle(title, ogTitle) && !(kind === "instagram" && instagramName(ogTitle, title))) {
+    return { ...emptyParse(kind), title, loginWall: true };
+  }
   const contact = extractContact(raw);
 
   if (kind === "instagram") {

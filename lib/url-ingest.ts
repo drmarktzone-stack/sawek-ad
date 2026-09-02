@@ -1427,7 +1427,7 @@ async function ingestSocialUrl(
   );
   const fetched = docs.filter(Boolean);
 
-  if (kind === "facebook" && fetched[0]) {
+  if (kind === "facebook" && fetched[0] && !/login\.php|\/login\//i.test(fetched[0].finalUrl)) {
     try {
       const aboutHref = facebookAboutUrl(new URL(fetched[0].finalUrl));
       if (aboutHref !== fetched[0].finalUrl) {
@@ -1451,8 +1451,9 @@ async function ingestSocialUrl(
   }
   if (!social) return { ok: false, error: "empty" };
 
-  const allWalls = fetched.every((d) => parseSocialPage(d.html, d.finalUrl, kind).loginWall) && !social.name;
-  if (allWalls) return { ok: false, error: "social_login_wall" };
+  if (social.loginWall && !social.name && !(social.posts && social.posts.length)) {
+    return { ok: false, error: "social_login_wall" };
+  }
 
   const htmlDoc = fetched[0];
   const page = parseFetchedHtml(htmlDoc.html, htmlDoc.finalUrl, submitted);

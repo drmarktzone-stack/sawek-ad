@@ -684,6 +684,13 @@ if (fbParsed.ok) {
   }
 }
 
+const heError = `<html><head><title>שגיאה</title></head><body>ראה/ראי פוסטים, תמונות ועוד בפייסבוק.</body></html>`;
+const heWall = parseSocialPage(heError, "https://mbasic.facebook.com/login.php?next=%2Fnasa", "facebook");
+if (!heWall.loginWall) fail("hebrew Facebook error page should be login wall");
+if (heWall.name) fail(`hebrew error leaked name ${JSON.stringify(heWall.name)}`);
+if (heWall.posts.length) fail("hebrew error invented posts");
+if (heWall.phone || heWall.whatsapp) fail("hebrew error leaked phone");
+
 const wallHtml = readFileSync(join(__dirname, "fixtures/url-ingest-facebook-login-wall.html"), "utf8");
 if (!isSocialLoginWall(wallHtml)) fail("login wall fixture not detected");
 const wallSocial = parseSocialPage(wallHtml, "https://mbasic.facebook.com/private", "facebook");
