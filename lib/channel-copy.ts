@@ -76,7 +76,8 @@ export function channelFields(pack: CampaignPack, locale: Locale): ChannelFields
   const body = fieldOrIncomplete(v?.primaryText, locale);
   const cta = fieldOrIncomplete(v?.cta, locale);
   const waFromIntake = pack.intake.whatsappTemplates?.trim() ?? "";
-  const waScript = fieldOrIncomplete(waFromIntake || waPiece?.body, locale);
+  const waRaw = stripHoursWall(waFromIntake || waPiece?.body || "");
+  const waScript = fieldOrIncomplete(waRaw, locale);
   const landingTitle = fieldOrIncomplete(lpPiece?.title || v?.headline, locale);
   const landingBody = fieldOrIncomplete(lpPiece?.body, locale);
   const posterHeadline = clipAtWord(stripHoursWall(headline) || headline, 56);

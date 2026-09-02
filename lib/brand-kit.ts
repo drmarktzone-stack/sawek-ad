@@ -1,5 +1,5 @@
 import type { ClientBrandKit, Intake, Locale, MediaAssetMeta } from "./types";
-import { stylesForVertical } from "./design-styles";
+import { stylesForVertical, CLINIC_POSTER_PALETTE, isNeonPosterHex } from "./design-styles";
 import { detectVertical } from "./vertical";
 
 export function emptyBrandKit(): ClientBrandKit {
@@ -193,7 +193,9 @@ export function normalizeBrandKit(raw: unknown): ClientBrandKit {
 
 /** Scanned colors when ≥2; otherwise vertical design palette (not invented brand colors). */
 export function paletteForIntake(intake: Intake): [string, string, string] {
-  const colors = (intake.brandKit?.colors ?? []).map((c) => clipHex(c)).filter((c): c is string => Boolean(c));
+  const colors = (intake.brandKit?.colors ?? [])
+    .map((c) => clipHex(c))
+    .filter((c): c is string => typeof c === "string" && !isNeonPosterHex(c));
   if (colors.length >= 2) {
     const sorted = [...colors].sort((a, b) => luminance(a) - luminance(b));
     const bg = sorted[0];
@@ -202,8 +204,10 @@ export function paletteForIntake(intake: Intake): [string, string, string] {
     const third = rest.find((c) => c !== accent) || sorted[sorted.length - 1] || accent;
     return [bg, accent, third];
   }
-  const styles = stylesForVertical(detectVertical(intake));
-  return (styles[0]?.palette ?? ["#050505", "#F5C518", "#FF1A1A"]) as [string, string, string];
+  const vertical = detectVertical(intake);
+  const styles = stylesForVertical(vertical);
+  if (vertical === "clinic") return styles[0]?.palette ?? CLINIC_POSTER_PALETTE;
+  return (styles[0]?.palette ?? CLINIC_POSTER_PALETTE) as [string, string, string];
 }
 
 export function inkOn(bg: string): string {

@@ -20,7 +20,7 @@ import { dirFor } from "@/lib/i18n";
 import { useI18n } from "@/components/i18n-provider";
 import { Button } from "@/components/ui/button";
 import { AdVisual } from "@/components/ad-mockup";
-import { pickAsset, pickLogo } from "@/lib/media-assets";
+import { pickHero, pickLogo } from "@/lib/media-assets";
 import { useResolvedAssets } from "@/lib/use-resolved-assets";
 import { channelFields, downloadNodePng } from "@/lib/channel-copy";
 import { stylesForVertical } from "@/lib/design-styles";
@@ -29,6 +29,7 @@ import { paletteForIntake } from "@/lib/brand-kit";
 import { cn } from "@/lib/utils";
 import { ImageOfferPicker } from "@/components/image-offer-picker";
 import { DeliveryKitButton } from "@/components/delivery-kit-button";
+import { studioStillsForIntake } from "@/lib/studio-stills";
 
 const autoImagenPacks = new Set<string>();
 
@@ -448,7 +449,7 @@ export function WhatsAppPreviewCard({
             whiteSpace: "pre-wrap",
           }}
         >
-          {fields.waScript}
+          {fields.hoursChips.length ? fields.hoursChips.join(" · ") + "\n" + fields.shortBody : fields.shortBody}
         </div>
       </div>
     </div>
@@ -471,10 +472,7 @@ export function LivePreviewStrip({
   showDownloads?: boolean;
 }) {
   const { t } = useI18n();
-  const pals = palettes(pack.intake);
-  const fbPalette = pals[0] ?? ["#111111", "#1877F2", "#F5C518"];
-  const igPalette = pals[1] ?? pals[0] ?? ["#050505", "#E1306C", "#F5C518"];
-  const ttPalette = pals[2] ?? pals[0] ?? ["#010101", "#FE2C55", "#25F4EE"];
+  const adPalette = paletteForIntake(pack.intake);
   const assets = pack.intake.mediaAssets ?? [];
   const urls = useResolvedAssets(assets);
   const fields = channelFields(pack, packLang);
@@ -487,9 +485,10 @@ export function LivePreviewStrip({
   const [busy, setBusy] = useState<string | null>(null);
   const [imgError, setImgError] = useState("");
   const [localImg, setLocalImg] = useState<string | null>(null);
-  const generatedSrc = generatedImage ?? localImg;
+  const studioSrc = studioStillsForIntake(pack.intake)[0]?.dataUrl;
+  const generatedSrc = generatedImage ?? localImg ?? studioSrc;
   const aiLabel = generatedSrc ? t("end.aiGenerated") : undefined;
-  const graphicOnlyLabel = t("end.graphicOnly");
+  const graphicOnlyLabel = undefined;
   const autoKey = useRef("");
 
   function imagenFailCopy(reason?: string): string {
@@ -599,21 +598,21 @@ export function LivePreviewStrip({
 
       <div className="mt-5 grid items-start gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <article className="rounded-[22px] border border-navy/10 bg-white p-4 shadow-[0_10px_28px_rgba(27,42,74,0.07)]">
-          <p className="mb-3 text-[13px] font-black uppercase tracking-[0.14em] text-omni-yellow">
+          <p className="mb-3 text-[13px] font-black uppercase tracking-[0.14em] text-navy/55">
             {t("end.facebook")} · 1.91:1
           </p>
           <FacebookFeedCard
             refEl={fbRef}
             {...cardProps}
-            asset={pickAsset(assets, 0)}
-            palette={fbPalette}
+            asset={pickHero(assets)}
+            palette={adPalette}
             sponsored={t("end.sponsored")}
             like={t("end.like")}
             comment={t("end.comment")}
             share={t("end.share")}
           />
           {showDownloads ? (
-            <Button type="button" variant="dark" className="mt-3 w-full" onClick={() => void savePng("fb")} disabled={busy === "fb"}>
+            <Button type="button" variant="outline" className="mt-3 w-full" onClick={() => void savePng("fb")} disabled={busy === "fb"}>
               <Download className="size-4" />
               {t("end.fbButton")}
             </Button>
@@ -621,18 +620,18 @@ export function LivePreviewStrip({
         </article>
 
         <article className="rounded-[22px] border border-navy/10 bg-white p-4 shadow-[0_10px_28px_rgba(27,42,74,0.07)]">
-          <p className="mb-3 text-[13px] font-black uppercase tracking-[0.14em] text-omni-yellow">
+          <p className="mb-3 text-[13px] font-black uppercase tracking-[0.14em] text-navy/55">
             {t("end.instagram")} · 4:5
           </p>
           <InstagramFeedCard
             refEl={igRef}
             {...cardProps}
-            asset={pickAsset(assets, 1)}
-            palette={igPalette}
+            asset={pickHero(assets)}
+            palette={adPalette}
             ctaComment={t("end.ctaComment")}
           />
           {showDownloads ? (
-            <Button type="button" variant="dark" className="mt-3 w-full" onClick={() => void savePng("ig")} disabled={busy === "ig"}>
+            <Button type="button" variant="outline" className="mt-3 w-full" onClick={() => void savePng("ig")} disabled={busy === "ig"}>
               <Download className="size-4" />
               {t("end.igButton")}
             </Button>
@@ -640,18 +639,18 @@ export function LivePreviewStrip({
         </article>
 
         <article className="rounded-[22px] border border-navy/10 bg-white p-4 shadow-[0_10px_28px_rgba(27,42,74,0.07)]">
-          <p className="mb-3 text-[13px] font-black uppercase tracking-[0.14em] text-omni-yellow">
+          <p className="mb-3 text-[13px] font-black uppercase tracking-[0.14em] text-navy/55">
             {t("end.tiktok")} · 9:16
           </p>
           <TikTokFeedCard
             refEl={ttRef}
             {...cardProps}
-            asset={pickAsset(assets, 2)}
-            palette={ttPalette}
+            asset={pickHero(assets)}
+            palette={adPalette}
             like={t("end.share")}
           />
           {showDownloads ? (
-            <Button type="button" variant="dark" className="mt-3 w-full" onClick={() => void savePng("tt")} disabled={busy === "tt"}>
+            <Button type="button" variant="outline" className="mt-3 w-full" onClick={() => void savePng("tt")} disabled={busy === "tt"}>
               <Download className="size-4" />
               {t("end.tiktokButton")}
             </Button>
@@ -659,16 +658,16 @@ export function LivePreviewStrip({
         </article>
 
         <article className="rounded-[22px] border border-navy/10 bg-white p-4 shadow-[0_10px_28px_rgba(27,42,74,0.07)]">
-          <p className="mb-3 text-[13px] font-black uppercase tracking-[0.14em] text-omni-yellow">
+          <p className="mb-3 text-[13px] font-black uppercase tracking-[0.14em] text-navy/55">
             {t("end.whatsapp")}
           </p>
           <WhatsAppPreviewCard
             refEl={waRef}
             packLang={packLang}
             fields={fields}
-            asset={pickAsset(assets, 0)}
+            asset={pickHero(assets)}
             urls={urls}
-            palette={fbPalette}
+            palette={adPalette}
             generatedSrc={generatedSrc}
             aiLabel={aiLabel}
             graphicOnlyLabel={graphicOnlyLabel}
@@ -676,7 +675,7 @@ export function LivePreviewStrip({
             missing={t("end.incomplete")}
           />
           {showDownloads ? (
-            <Button type="button" variant="dark" className="mt-3 w-full" onClick={() => void savePng("wa")} disabled={busy === "wa"}>
+            <Button type="button" variant="outline" className="mt-3 w-full" onClick={() => void savePng("wa")} disabled={busy === "wa"}>
               <Download className="size-4" />
               {t("end.waButton")}
             </Button>

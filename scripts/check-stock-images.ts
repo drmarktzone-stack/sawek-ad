@@ -10,6 +10,7 @@ import {
 import { isOfferedAsset, stockToAsset } from "../lib/media-assets";
 import { graphicPostersForIntake, posterToAsset } from "../lib/graphic-posters";
 import { demoIntake } from "../lib/demo";
+import { IMAGEN_PICKER_COUNT, imagenScenesFor } from "../lib/imagen-scenes";
 
 const failures: string[] = [];
 function fail(m: string) {
@@ -27,11 +28,7 @@ for (const need of [
   "pediatric clinic waiting room",
   "children's doctor office interior",
   "family clinic",
-  "stethoscope",
   "warm medical clinic",
-  "kids healthcare",
-  "no queue clinic",
-  "Arabic family health",
 ]) {
   if (!clinicQs.some((q) => q.toLowerCase() === need.toLowerCase() || q.toLowerCase().includes(need.toLowerCase()))) {
     fail(`clinic missing query: ${need} in ${clinicQs.join(" | ")}`);

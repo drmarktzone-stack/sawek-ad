@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { searchStockImages, vertexStillsForStock, type StockSearchInput } from "@/lib/stock-images";
+import { IMAGEN_PICKER_COUNT } from "@/lib/imagen-scenes";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -11,30 +12,79 @@ function read(req: Request, key: string): string {
 }
 
 /**
- * CC stock photos from Openverse and/or Wikimedia Commons. No paid key.
- * Maps vertical + category + location into English topic queries.
+ * Vertex Imagen stills are the library. Wikimedia/Openverse are optional CC only
+ * (never the default wall). source=imagen | cc | all.
  */
 export async function GET(req: Request) {
   try {
+    const source = (read(req, "source") || "imagen").toLowerCase();
     const input: StockSearchInput = {
       q: read(req, "q"),
       vertical: read(req, "vertical"),
       category: read(req, "category"),
       location: read(req, "location"),
+      description: read(req, "description"),
+      offer: read(req, "offer"),
       limit: Number(read(req, "limit") || 48) || 48,
       page: Number(read(req, "page") || 1) || 1,
     };
-    const stillsP = vertexStillsForStock(input, 2).catch(() => []);
-    const result = await searchStockImages(input);
+    const requested = IMAGEN_PICKER_COUNT;
+
+    if (source === "cc") {
+      const result = await searchStockImages(input);
+      return NextResponse.json(
+        { ...result, imagen: [], imagenRequested: 0, imagenGot: 0 },
+        { status: 200 },
+      );
+    }
+
+    const stillsP = vertexStillsForStock(input, requested).catch(() => []);
     const stills = await Promise.race([
       stillsP,
-      new Promise<typeof result.images>((resolve) => setTimeout(() => resolve([]), 8000)),
+      new Promise<Awaited<typeof stillsP>>((resolve) => setTimeout(() => resolve([]), 45000)),
     ]);
-    const images = [...(Array.isArray(stills) ? stills : []), ...result.images];
-    return NextResponse.json({ ...result, images }, { status: 200 });
+    const imagen = Array.isArray(stills) ? stills : [];
+
+    if (source === "imagen") {
+      return NextResponse.json(
+        {
+          ok: true,
+          images: imagen,
+          imagen,
+          page: 1,
+          nextPage: null,
+          queries: [],
+          imagenRequested: requested,
+          imagenGot: imagen.length,
+        },
+        { status: 200 },
+      );
+    }
+
+    const result = await searchStockImages(input);
+    return NextResponse.json(
+      {
+        ...result,
+        imagen,
+        images: result.images,
+        imagenRequested: requested,
+        imagenGot: imagen.length,
+      },
+      { status: 200 },
+    );
   } catch {
     return NextResponse.json(
-      { ok: false, images: [], page: 1, nextPage: null, queries: [], error: "stock_error" },
+      {
+        ok: false,
+        images: [],
+        imagen: [],
+        page: 1,
+        nextPage: null,
+        queries: [],
+        imagenRequested: IMAGEN_PICKER_COUNT,
+        imagenGot: 0,
+        error: "stock_error",
+      },
       { status: 200 },
     );
   }

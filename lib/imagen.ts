@@ -7,6 +7,10 @@ import {
   vertexLocation,
   vertexProject,
 } from "./vertex";
+import { IMAGEN_PICKER_COUNT, imagenScenesFor } from "./imagen-scenes";
+
+export { IMAGEN_PICKER_COUNT, imagenScenesFor } from "./imagen-scenes";
+export const CLOUD_RUN_ORIGIN = "https://sawek-ad-308665814452.me-west1.run.app";
 
 export type ImagenFailReason = "not_configured" | "imagen_error" | "quota" | "vertex_denied";
 export type ImagenOk = { ok: true; mime: string; imageBase64: string };
@@ -30,6 +34,18 @@ export type ImagenFacts = {
   category?: unknown;
   headline?: unknown;
   locale?: unknown;
+  scene?: unknown;
+  prompts?: unknown;
+  sampleCount?: unknown;
+  vertical?: unknown;
+  location?: unknown;
+  description?: unknown;
+  offer?: unknown;
+};
+
+export type ImagenBatch = {
+  images: ImagenOk[];
+  reason: ImagenFailReason | null;
 };
 
 function asText(v: unknown, max = 180): string {
@@ -51,7 +67,20 @@ export function buildImagenPrompt(facts: ImagenFacts): string {
     locale === "he" ? "Israel, natural Mediterranean light"
     : locale === "ar" ? "Levant / Arabic-speaking street, warm daylight"
     : "clean contemporary setting, natural light";
+  const scene = asText(facts.scene, 500);
   const mood = headline ? `Campaign mood (do not typeset or paint this text): ${headline}.` : "";
+  if (scene) {
+    return [
+      "Tasteful cinematic marketing photography still for an advertisement.",
+      scene,
+      `Category: ${category}. Setting: ${region}.`,
+      "Style: cinematic product-or-place mood, shallow depth, realistic materials, no collage.",
+      "No text, letters, numbers, logos, watermarks, UI chrome, or captions in the image.",
+      "Do NOT invent prices, discounts, coupons, medical claims, before/after comparisons, star ratings, or fake reviews.",
+      "Do NOT depict a photoreal identifiable doctor, patient, or any recognizable person. Empty place, product, facade, or abstract wellness atmosphere only.",
+      "No clinical procedure, no body close-up, no injection, no surgery.",
+    ].join(" ");
+  }
   return [
     "Tasteful marketing photography still for an advertisement.",
     `Business: ${name}. Category: ${category}. Setting: ${region}.`,
@@ -161,13 +190,15 @@ function extractImage(json: unknown): { mime: string; imageBase64: string } | nu
   return null;
 }
 
-const PARAMETERS = {
-  sampleCount: 1,
-  aspectRatio: "1:1",
-  personGeneration: "dont_allow",
-  safetySetting: "block_medium_and_above",
-  addWatermark: true,
-};
+function parameters(sampleCount = 1) {
+  return {
+    sampleCount: Math.max(1, Math.min(4, Math.floor(sampleCount) || 1)),
+    aspectRatio: "1:1",
+    personGeneration: "dont_allow",
+    safetySetting: "block_medium_and_above",
+    addWatermark: true,
+  };
+}
 
 function foldReason(prev: ImagenFailReason | null, next: AttemptReason): ImagenFailReason | null {
   if (next === "not_found") return prev;
@@ -182,6 +213,7 @@ async function vertexPredict(
   location: string,
   model: string,
   prompt: string,
+  sampleCount = 1,
 ): Promise<Attempt> {
   try {
     const url = `https://${location}-aiplatform.googleapis.com/v1/projects/${encodeURIComponent(project)}/locations/${encodeURIComponent(location)}/publishers/google/models/${encodeURIComponent(model)}:predict`;
@@ -195,10 +227,10 @@ async function vertexPredict(
         },
         body: JSON.stringify({
           instances: [{ prompt }],
-          parameters: PARAMETERS,
+          parameters: parameters(sampleCount),
         }),
       },
-      40000,
+      45000,
     );
     if (status >= 200 && status < 300) {
       const img = extractImage(json);
@@ -331,11 +363,56 @@ async function geminiNativeImage(apiKey: string, model: string, prompt: string):
   return rest;
 }
 
-export async function runImagen(facts: ImagenFacts): Promise<ImagenResult> {
+async function cloudRunImagen(facts: ImagenFacts): Promise<ImagenResult> {
+  if (runtimeEnv("K_SERVICE")) return { ok: false, reason: "not_configured" };
+  const base = (runtimeEnv("APP_BASE_URL") || CLOUD_RUN_ORIGIN).replace(/\/$/, "");
+  if (!base) return { ok: false, reason: "not_configured" };
+  try {
+    const { status, json } = await fetchGoogleJson(
+      `${base}/api/imagen`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          businessName: facts.businessName,
+          category: facts.category,
+          headline: facts.headline,
+          locale: facts.locale,
+          scene: facts.scene,
+          vertical: facts.vertical,
+        }),
+      },
+      45000,
+    );
+    if (status < 200 || status >= 300 || !json || typeof json !== "object") {
+      return { ok: false, reason: "imagen_error" };
+    }
+    const o = json as Record<string, unknown>;
+    if (Array.isArray(o.images) && o.images[0] && typeof o.images[0] === "object") {
+      const first = o.images[0] as Record<string, unknown>;
+      const b64 = typeof first.imageBase64 === "string" ? first.imageBase64 : "";
+      const mime = typeof first.mime === "string" ? first.mime : "image/png";
+      if (b64.length > 80) return { ok: true, mime, imageBase64: b64 };
+    }
+    if (o.ok === true && typeof o.imageBase64 === "string" && o.imageBase64.length > 80) {
+      const mime = typeof o.mime === "string" && o.mime.startsWith("image/") ? o.mime : "image/png";
+      return { ok: true, mime, imageBase64: o.imageBase64 };
+    }
+    const reason = o.reason;
+    if (reason === "quota" || reason === "vertex_denied" || reason === "not_configured" || reason === "imagen_error") {
+      return { ok: false, reason };
+    }
+    return { ok: false, reason: "imagen_error" };
+  } catch {
+    return { ok: false, reason: "imagen_error" };
+  }
+}
+
+async function runImagenAttempt(facts: ImagenFacts, prompt: string): Promise<ImagenResult> {
   const project = vertexProject();
   const location = vertexLocation();
   const geminiKey = runtimeEnv("GEMINI_API_KEY");
-  const prompt = buildImagenPrompt(facts);
+  const sampleCount = Math.max(1, Math.min(4, Math.floor(Number(facts.sampleCount) || 1)));
 
   let token: string | null = null;
   try {
@@ -344,16 +421,12 @@ export async function runImagen(facts: ImagenFacts): Promise<ImagenResult> {
     token = null;
   }
 
-  if (!token && !geminiKey) {
-    return { ok: false, reason: "not_configured" };
-  }
-
   let folded: ImagenFailReason | null = null;
 
   if (token) {
     for (const model of VERTEX_MODELS) {
       try {
-        const hit = await vertexPredict(token, project, location, model, prompt);
+        const hit = await vertexPredict(token, project, location, model, prompt, sampleCount);
         if (hit.ok) return hit;
         folded = foldReason(folded, hit.reason);
       } catch {
@@ -383,5 +456,67 @@ export async function runImagen(facts: ImagenFacts): Promise<ImagenResult> {
     }
   }
 
-  return { ok: false, reason: folded ?? "imagen_error" };
+  const remote = await cloudRunImagen({ ...facts, scene: prompt, headline: asText(prompt, 140) });
+  if (remote.ok) return remote;
+  folded = foldReason(folded, remote.reason);
+
+  if (!token && !geminiKey && remote.reason === "not_configured") {
+    return { ok: false, reason: "not_configured" };
+  }
+  return { ok: false, reason: folded ?? remote.reason };
+}
+
+function promptList(facts: ImagenFacts): string[] {
+  if (Array.isArray(facts.prompts)) {
+    const out = facts.prompts.filter((p): p is string => typeof p === "string" && p.trim().length > 8).map((p) => p.trim());
+    if (out.length) return out.slice(0, 12);
+  }
+  const scene = asText(facts.scene, 500);
+  if (scene) return [scene];
+  const generated = imagenScenesFor({
+    vertical: facts.vertical,
+    category: facts.category,
+    location: facts.location,
+    locale: facts.locale,
+    q: asText(facts.headline, 80),
+    description: facts.description,
+    offer: facts.offer,
+  });
+  if (Number(facts.sampleCount) > 1 && generated.length) return generated.map((s) => s.prompt);
+  return [buildImagenPrompt(facts)];
+}
+
+export async function runImagen(facts: ImagenFacts): Promise<ImagenResult> {
+  const prompts = promptList(facts);
+  if (prompts.length > 1) {
+    const batch = await runImagenMany(facts, prompts);
+    const first = batch.images[0];
+    if (first) return first;
+    return { ok: false, reason: batch.reason ?? "imagen_error" };
+  }
+  return runImagenAttempt(facts, prompts[0] ?? buildImagenPrompt(facts));
+}
+
+export async function runImagenMany(facts: ImagenFacts, prompts?: string[]): Promise<ImagenBatch> {
+  const list = (prompts && prompts.length ? prompts : promptList(facts)).slice(0, 12);
+  const wanted = Math.max(1, Math.min(12, Math.floor(Number(facts.sampleCount) || list.length || IMAGEN_PICKER_COUNT)));
+  const jobs = (list.length ? list : imagenScenesFor(facts).map((s) => s.prompt)).slice(0, wanted);
+  const settled = await Promise.all(
+    jobs.map(async (prompt, i) => {
+      const hit = await Promise.race([
+        runImagenAttempt({ ...facts, scene: prompt, sampleCount: 1 }, prompt),
+        new Promise<ImagenResult>((resolve) =>
+          setTimeout(() => resolve({ ok: false, reason: "imagen_error" }), 45000),
+        ),
+      ]);
+      return { i, hit };
+    }),
+  );
+  const images: ImagenOk[] = [];
+  let reason: ImagenFailReason | null = null;
+  for (const row of settled.sort((a, b) => a.i - b.i)) {
+    if (row.hit.ok) images.push(row.hit);
+    else reason = foldReason(reason, row.hit.reason);
+  }
+  return { images, reason: images.length ? null : reason ?? "imagen_error" };
 }

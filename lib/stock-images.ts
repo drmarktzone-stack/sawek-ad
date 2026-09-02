@@ -20,6 +20,8 @@ export type StockSearchInput = {
   vertical?: string;
   category?: string;
   location?: string;
+  description?: string;
+  offer?: string;
   limit?: number;
   page?: number;
 };
@@ -44,13 +46,12 @@ const TOPIC_QUERIES: Record<Vertical, string[]> = {
     "pediatric clinic waiting room",
     "children's doctor office interior",
     "family clinic",
-    "stethoscope",
     "warm medical clinic",
-    "kids healthcare",
-    "no queue clinic",
-    "Arabic family health",
-    "medical clinic reception",
-    "clinic interior",
+    "kids healthcare waiting room",
+    "Mediterranean clinic facade",
+    "clinic reception desk",
+    "empty clinic corridor",
+    "olive courtyard clinic",
   ],
   pool: [
     "hydrotherapy pool",
@@ -97,7 +98,7 @@ const TOPIC_QUERIES: Record<Vertical, string[]> = {
 };
 
 const WIKI_CATEGORIES: Record<Vertical, string[]> = {
-  clinic: ["Waiting rooms", "Clinics", "Stethoscopes", "Pediatrics"],
+  clinic: ["Waiting rooms", "Clinics", "Pediatrics"],
   pool: ["Hydrotherapy", "Indoor swimming pools", "Physical therapy"],
   retail: ["Clothing shops", "Boutiques"],
   restaurant: ["Grilled food", "Restaurants"],
@@ -108,7 +109,7 @@ const WIKI_CATEGORIES: Record<Vertical, string[]> = {
 
 const TOPIC_NEEDLES: Record<Vertical, RegExp> = {
   clinic:
-    /clinic|hospital|pediatric|stethoscope|waiting.?room|waiting area|doctor.?office|medical office|medical|healthcare|physician|nurse|exam(ination)? room|family health|outpatient|urgent care/i,
+    /clinic|hospital|pediatric|waiting.?room|waiting area|doctor.?office|medical office|exam(ination)? room|family health|outpatient/i,
   pool: /pool|hydrotherap|swim|rehab|therapy water|aquatic/i,
   retail: /boutique|clothing|apparel|fashion|shop|store|retail|dress|garment|mannequin/i,
   restaurant: /grill|food|restaurant|chicken|kebab|shawarma|dining|meal|kitchen|burger|plate/i,
@@ -250,11 +251,12 @@ export function isJunkStockTitle(title: string, extra = ""): boolean {
   if (NAMED_PORTRAIT.test(blob)) return true;
   if (HISTORICAL.test(blob) && /wellcome|engraving|lithograph|census|blitz/.test(blob.toLowerCase())) return true;
   if (/\.svg($|\s)|\.pdf($|\s)|\.djvu/i.test(title)) return true;
+  if (/church|cathedral|priest|altar|mosque|synagogue|military|camouflage|soldier|parking lot|car park|stethoscope|microscope|vintage medical|antique medical|black and white|monochrome|respirator|ventilator|sanatorium|polio/i.test(blob)) return true;
   return false;
 }
 
 const OFF_TOPIC: Record<Vertical, RegExp | null> = {
-  clinic: /train station|bus station|ferry|airport|railway|metro station|swimsuit|bikini|nude|immigration|behörde/i,
+  clinic: /train station|bus station|ferry|airport|railway|metro station|swimsuit|bikini|nude|immigration|behörde|church|cathedral|priest|military|soldier|parking|microscope/i,
   pool: /hotel luxury|bikini|swimsuit fashion|beach party/i,
   retail: /weapon|ammo|pharmacy/i,
   restaurant: /pet food|dog food/i,
@@ -479,38 +481,52 @@ function dedupe(images: StockImage[]): StockImage[] {
   return out;
 }
 
-export async function vertexStillsForStock(input: StockSearchInput, max = 2): Promise<StockImage[]> {
+export async function vertexStillsForStock(input: StockSearchInput, max = 10): Promise<StockImage[]> {
   const topic = sanitizeStockHint(input.q || input.category || "");
-  if (!topic && !input.vertical && !input.category) return [];
   try {
-    const { runImagen } = await import("./imagen");
-    const n = Math.max(1, Math.min(2, max));
-    const out: StockImage[] = [];
-    for (let i = 0; i < n; i++) {
-      const hit = await Promise.race([
-        runImagen({
+    const { runImagenMany, imagenScenesFor, IMAGEN_PICKER_COUNT } = await import("./imagen");
+    const n = Math.max(8, Math.min(12, max || IMAGEN_PICKER_COUNT));
+    const scenes = imagenScenesFor({
+      vertical: input.vertical,
+      category: input.category,
+      location: input.location,
+      q: input.q,
+      description: input.description || input.q,
+      offer: input.offer,
+      locale: "en",
+    }).slice(0, n);
+    const prompts = scenes.map((s) => s.prompt);
+    const batch = await Promise.race([
+      runImagenMany(
+        {
           businessName: topic || "a local business",
           category: sanitizeStockHint(input.category || input.vertical || "local service"),
-          headline: topic,
+          vertical: input.vertical,
+          location: input.location,
           locale: "en",
-        }),
-        new Promise<{ ok: false }>((resolve) => setTimeout(() => resolve({ ok: false }), 12000)),
-      ]);
-      if (!hit || !("ok" in hit) || !hit.ok) break;
+          sampleCount: n,
+          prompts,
+        },
+        prompts,
+      ),
+      new Promise<{ images: [] }>((resolve) => setTimeout(() => resolve({ images: [] }), 45000)),
+    ]);
+    const images = Array.isArray(batch?.images) ? batch.images : [];
+    return images.map((hit, i) => {
       const mime = hit.mime && hit.mime.startsWith("image/") ? hit.mime : "image/png";
       const dataUrl = `data:${mime};base64,${hit.imageBase64}`;
-      out.push({
-        id: `vertex-still-${i + 1}`,
+      const scene = scenes[i];
+      return {
+        id: `vertex-still-${scene?.id || i + 1}`,
         thumb: dataUrl,
         full: dataUrl,
-        title: "Vertex Imagen still",
+        title: scene?.title || "Vertex Imagen still",
         attribution: "Vertex Imagen",
-        source: "vertex",
+        source: "vertex" as const,
         license: "generated",
-        query: topic || "vertex",
-      });
-    }
-    return out;
+        query: scene?.id || topic || "vertex",
+      };
+    });
   } catch {
     return [];
   }

@@ -5,11 +5,13 @@ import { Check, ImagePlus, Loader2, X } from "lucide-react";
 import type { CampaignPack, Locale, MediaAssetMeta } from "@/lib/types";
 import { useI18n } from "@/components/i18n-provider";
 import { Button } from "@/components/ui/button";
-import { graphicPostersForIntake, imagenToAsset, posterToAsset } from "@/lib/graphic-posters";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { graphicPostersForIntake, posterToAsset } from "@/lib/graphic-posters";
 import { assetsFromPublicUrls, isOfferedAsset, stockToAsset } from "@/lib/media-assets";
 import { buildSiteAudit } from "@/lib/engine/site-audit";
 import { syncCampaign } from "@/lib/supabase";
 import { detectVertical } from "@/lib/vertical";
+import { IMAGEN_PICKER_COUNT, verticalNoun } from "@/lib/imagen-scenes";
 import { cn } from "@/lib/utils";
 
 export type OfferKind = "graphic" | "imagen" | "site" | "stock";
@@ -21,8 +23,6 @@ export type OfferOption = {
   src: string;
   asset: MediaAssetMeta;
 };
-
-type Tab = "all" | "site" | "stock" | "graphic" | "ai";
 
 type StockHit = {
   id: string;
@@ -59,6 +59,24 @@ function keepNonOffered(assets: MediaAssetMeta[] | undefined, dropId?: string): 
   });
 }
 
+function hitsToOptions(hits: StockHit[], t: (k: string) => string): OfferOption[] {
+  return hits
+    .filter((img) => {
+      const ok = (u: string) => /^https:\/\//i.test(u) || u.startsWith("data:image/");
+      return ok(img.thumb) && ok(img.full);
+    })
+    .map((img) => {
+      const vertex = img.source === "vertex" || img.id.startsWith("vertex-");
+      return {
+        id: img.id,
+        kind: (vertex ? "imagen" : "stock") as OfferKind,
+        label: img.title || (vertex ? t("audit.aiStill") : t("audit.tabStock")),
+        src: img.thumb,
+        asset: stockToAsset(img),
+      };
+    });
+}
+
 export function ImageOfferPicker({
   pack,
   locale,
@@ -75,24 +93,25 @@ export function ImageOfferPicker({
   defaultOpen?: boolean;
 }) {
   const { t } = useI18n();
+  const vertical = detectVertical(pack.intake);
+  const noun = verticalNoun(vertical, locale);
   const hasOffered = (pack.intake.mediaAssets ?? []).some((a) => a.kind === "image" && isOfferedAsset(a));
   const [internalOpen, setInternalOpen] = useState(defaultOpen);
   const open = openProp ?? internalOpen;
   const setOpen = onOpenChange ?? setInternalOpen;
   const posters = useMemo(
     () => graphicPostersForIntake(pack.intake),
-    [pack.intake.category, pack.intake.businessName, pack.intake.operatingModel],
+    [pack.intake.category, pack.intake.businessName, pack.intake.operatingModel, pack.intake.description],
   );
   const [imagen, setImagen] = useState<OfferOption[]>([]);
   const [site, setSite] = useState<OfferOption[]>([]);
   const [stock, setStock] = useState<OfferOption[]>([]);
-  const [stockPage, setStockPage] = useState(1);
-  const [stockNext, setStockNext] = useState<number | null>(1);
+  const [stockLoaded, setStockLoaded] = useState(false);
   const [stockBusy, setStockBusy] = useState(false);
   const [aiBusy, setAiBusy] = useState(false);
   const [siteBusy, setSiteBusy] = useState(false);
   const [imgError, setImgError] = useState("");
-  const [tab, setTab] = useState<Tab>("all");
+  const [requested, setRequested] = useState(IMAGEN_PICKER_COUNT);
 
   const graphicOpts: OfferOption[] = posters.map((p) => ({
     id: p.id,
@@ -112,56 +131,45 @@ export function ImageOfferPicker({
     return false;
   }
 
-  useEffect(() => {
-    if (!open) return;
-    let cancelled = false;
+  async function loadImagen() {
     setAiBusy(true);
     setImgError("");
-    (async () => {
-      try {
-        const res = await fetch("/api/imagen", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            businessName: pack.intake.businessName,
-            category: pack.intake.category,
-            headline: pack.intake.uniqueAdvantage || pack.intake.businessName,
-            locale,
-          }),
-        });
-        const data = (await res.json()) as { ok?: boolean; mime?: string; imageBase64?: string; reason?: string };
-        if (cancelled) return;
-        if (!data?.ok || !data.imageBase64) {
-          setImgError(t("audit.imagenDown"));
-          return;
-        }
-        const mime = data.mime && data.mime.startsWith("image/") ? data.mime : "image/png";
-        const dataUrl = `data:${mime};base64,${data.imageBase64}`;
-        const asset = imagenToAsset(dataUrl, mime);
-        setImagen((prev) => {
-          if (prev.some((p) => p.src === dataUrl)) return prev;
-          return [
-            ...prev,
-            {
-              id: `imagen-${prev.length + 1}`,
-              kind: "imagen" as const,
-              label: t("audit.aiStill"),
-              src: dataUrl,
-              asset,
-            },
-          ].slice(0, 2);
-        });
-      } catch {
-        if (!cancelled) setImgError(t("audit.imagenDown"));
-      } finally {
-        if (!cancelled) setAiBusy(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
+    try {
+      const params = new URLSearchParams({
+        source: "imagen",
+        vertical,
+        category: pack.intake.category || "",
+        location: pack.intake.location || "",
+        q: (pack.intake.description || pack.intake.uniqueAdvantage || "").slice(0, 160),
+        description: (pack.intake.description || "").slice(0, 160),
+        offer: (pack.intake.offer || "").slice(0, 80),
+        limit: String(IMAGEN_PICKER_COUNT),
+      });
+      const res = await fetch(`/api/stock-images?${params.toString()}`);
+      const data = (await res.json()) as {
+        ok?: boolean;
+        imagen?: StockHit[];
+        images?: StockHit[];
+        imagenRequested?: number;
+        imagenGot?: number;
+      };
+      if (typeof data.imagenRequested === "number") setRequested(data.imagenRequested);
+      const hits = data.imagen ?? data.images ?? [];
+      const opts = hitsToOptions(hits, t).filter((o) => o.kind === "imagen");
+      setImagen(opts);
+      if (!opts.length) setImgError(t("audit.retryVertex"));
+    } catch {
+      setImgError(t("audit.retryVertex"));
+    } finally {
+      setAiBusy(false);
+    }
+  }
+
+  useEffect(() => {
+    if (!open) return;
+    void loadImagen();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, pack.id]);
+  }, [open, pack.id, pack.intake.category, pack.intake.description, pack.intake.offer]);
 
   useEffect(() => {
     if (!open) return;
@@ -205,110 +213,39 @@ export function ImageOfferPicker({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, pack.id, pack.intake.website]);
 
-  async function loadStock(page: number, append: boolean) {
+  async function loadFreeStock() {
+    if (stockBusy) return;
     setStockBusy(true);
     try {
-      const vertical = detectVertical(pack.intake);
       const params = new URLSearchParams({
+        source: "cc",
         vertical,
         category: pack.intake.category || "",
         location: pack.intake.location || "",
-        q: (pack.intake.description || pack.intake.uniqueAdvantage || "").slice(0, 160),
-        limit: "48",
-        page: String(page),
+        q: (pack.intake.description || "").slice(0, 160),
+        limit: "24",
+        page: "1",
       });
       const res = await fetch(`/api/stock-images?${params.toString()}`);
-      const data = (await res.json()) as {
-        ok?: boolean;
-        images?: StockHit[];
-        nextPage?: number | null;
-        page?: number;
-      };
-      const hits = data?.images ?? [];
-      const opts: OfferOption[] = hits
-        .filter((img) => {
-          const ok = (u: string) => /^https:\/\//i.test(u) || u.startsWith("data:image/");
-          return ok(img.thumb) && ok(img.full);
-        })
-        .map((img) => {
-          const vertex = img.source === "vertex" || img.id.startsWith("vertex-");
-          return {
-            id: img.id,
-            kind: (vertex ? "imagen" : "stock") as OfferKind,
-            label: img.title || t("audit.tabStock"),
-            src: img.thumb,
-            asset: stockToAsset(img),
-          };
-        });
-      setStock((prev) => {
-        const merged = append ? [...prev, ...opts] : opts;
-        const seen = new Set<string>();
-        return merged.filter((o) => {
-          if (seen.has(o.id) || seen.has(o.src)) return false;
-          seen.add(o.id);
-          seen.add(o.src);
-          return true;
-        });
-      });
-      setStockPage(data.page ?? page);
-      setStockNext(data.nextPage ?? null);
+      const data = (await res.json()) as { images?: StockHit[] };
+      setStock(hitsToOptions(data.images ?? [], t).filter((o) => o.kind === "stock"));
+      setStockLoaded(true);
     } catch {
-      if (!append) setStock([]);
-      setStockNext(null);
+      setStock([]);
+      setStockLoaded(true);
     } finally {
       setStockBusy(false);
     }
   }
 
-  useEffect(() => {
-    if (!open) return;
-    void loadStock(1, false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, pack.id, pack.intake.category, pack.intake.location]);
-
-  async function moreAi() {
-    if (aiBusy || imagen.length >= 2) return;
-    setAiBusy(true);
-    try {
-      const res = await fetch("/api/imagen", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          businessName: pack.intake.businessName,
-          category: pack.intake.category,
-          headline: pack.intake.uniqueAdvantage || pack.intake.businessName,
-          locale,
-        }),
-      });
-      const data = (await res.json()) as { ok?: boolean; mime?: string; imageBase64?: string };
-      if (!data?.ok || !data.imageBase64) {
-        setImgError(t("audit.imagenDown"));
-        return;
-      }
-      const mime = data.mime && data.mime.startsWith("image/") ? data.mime : "image/png";
-      const dataUrl = `data:${mime};base64,${data.imageBase64}`;
-      const asset = imagenToAsset(dataUrl, mime);
-      setImagen((prev) =>
-        [
-          ...prev,
-          {
-            id: `imagen-${prev.length + 1}`,
-            kind: "imagen" as const,
-            label: t("audit.aiStill"),
-            src: dataUrl,
-            asset,
-          },
-        ].slice(0, 2),
-      );
-    } catch {
-      setImgError(t("audit.imagenDown"));
-    } finally {
-      setAiBusy(false);
-    }
-  }
-
   function apply(opt: OfferOption) {
     if (!onPack) return;
+    if (optionSelected(opt)) {
+      const next = packWithAssets(pack, keepNonOffered(pack.intake.mediaAssets));
+      onPack(next);
+      void syncCampaign(next);
+      return;
+    }
     const next = packWithAssets(pack, [opt.asset, ...keepNonOffered(pack.intake.mediaAssets, opt.asset.id)]);
     onPack(next);
     void syncCampaign(next);
@@ -321,32 +258,46 @@ export function ImageOfferPicker({
     void syncCampaign(next);
   }
 
-  const tabs: { id: Tab; label: string }[] = [
-    { id: "all", label: t("audit.tabAll") },
-    { id: "site", label: t("audit.tabSite") },
-    { id: "stock", label: t("audit.tabStock") },
-    { id: "graphic", label: t("audit.tabGraphic") },
-    { id: "ai", label: t("audit.tabAi") },
-  ];
+  const shown = imagen.length ? [...imagen, ...graphicOpts.slice(0, 4)] : graphicOpts;
+  const making = t("audit.makingImages").replace("{vertical}", noun);
+  const vertexBusy = t("audit.makingVertex");
 
-  const mainGrid: OfferOption[] = (() => {
-    if (tab === "site") return site;
-    if (tab === "stock") return stock;
-    if (tab === "graphic") return graphicOpts;
-    if (tab === "ai") return imagen;
-    return [...stock, ...site, ...imagen];
-  })();
-
-  const showGraphicRow = tab === "all";
-  const loadingMain = (tab === "stock" || tab === "all") && stockBusy && stock.length === 0;
-  const skeletonCount = loadingMain ? 36 : Math.max(0, 36 - mainGrid.length);
-  const showSkeletons = loadingMain || ((tab === "all" || tab === "stock") && stockBusy && mainGrid.length < 36);
+  function Tile({ opt }: { opt: OfferOption }) {
+    const on = optionSelected(opt);
+    return (
+      <button
+        type="button"
+        onClick={() => apply(opt)}
+        className={cn(
+          "relative overflow-hidden rounded-xl border text-start transition",
+          on ? "border-navy ring-2 ring-navy/40 ring-offset-2 ring-offset-white" : "border-navy/15 hover:border-navy/40",
+        )}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={opt.src} alt="" className="aspect-square w-full object-cover" referrerPolicy="no-referrer" />
+        {on ? (
+          <span className="absolute start-1.5 top-1.5 inline-flex size-6 items-center justify-center rounded-full bg-navy text-white shadow">
+            <Check className="size-3.5 stroke-[3]" />
+          </span>
+        ) : null}
+        <span className="block truncate bg-white px-2 py-1.5 text-[12px] font-semibold text-navy">
+          {opt.kind === "imagen"
+            ? t("audit.aiStill")
+            : opt.kind === "site"
+              ? t("audit.sitePhoto")
+              : opt.kind === "stock"
+                ? t("audit.tabStock")
+                : opt.label}
+        </span>
+      </button>
+    );
+  }
 
   return (
     <div className="mt-3">
       <div className="flex flex-wrap items-center gap-2">
         <Button type="button" size="sm" onClick={() => setOpen(!open)}>
-          {stockBusy || siteBusy || aiBusy ? <Loader2 className="size-4 animate-spin" /> : <ImagePlus className="size-4" />}
+          {aiBusy || siteBusy ? <Loader2 className="size-4 animate-spin" /> : <ImagePlus className="size-4" />}
           {t("audit.offerPhotos")}
         </Button>
         {hasOffered ? (
@@ -359,130 +310,84 @@ export function ImageOfferPicker({
       {open ? (
         <div className="mt-3 rounded-[22px] border border-navy/10 bg-white p-4 shadow-[0_10px_28px_rgba(27,42,74,0.07)]">
           <p className="text-sm leading-relaxed text-foreground">{t("audit.offerPhotosLead")}</p>
-          {imgError ? <p className="mt-1 text-sm text-omni-red">{imgError}</p> : null}
-
-          <div className="mt-3 flex flex-wrap gap-2">
-            {tabs.map((chip) => (
-              <button
-                key={chip.id}
-                type="button"
-                onClick={() => setTab(chip.id)}
-                className={cn(
-                  "rounded-full border px-3 py-1.5 text-sm font-semibold transition-colors",
-                  tab === chip.id
-                    ? "border-navy bg-navy text-white"
-                    : "border-navy/15 bg-white text-navy hover:border-gold",
-                )}
-              >
-                {chip.label}
-              </button>
-            ))}
-            {hasOffered ? (
-              <button
-                type="button"
-                onClick={clearSelection}
-                className="rounded-full border border-omni-red/30 bg-white px-3 py-1.5 text-sm font-semibold text-omni-red hover:border-omni-red"
-              >
-                {t("audit.clearSelection")}
-              </button>
-            ) : null}
-          </div>
-
-          {loadingMain ? <p className="mt-2 text-[13px] text-muted">{t("audit.loadingStock")}</p> : null}
+          {aiBusy ? (
+            <p className="mt-2 flex items-center gap-2 text-sm font-semibold text-navy">
+              <Loader2 className="size-4 animate-spin" />
+              {making}
+            </p>
+          ) : null}
+          {!aiBusy && imgError ? (
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <p className="text-sm text-navy/80">{vertexBusy}</p>
+              <Button type="button" size="sm" variant="outline" onClick={() => void loadImagen()}>
+                {t("audit.retryImagen")}
+              </Button>
+            </div>
+          ) : null}
 
           <div className="mt-3 max-h-[70vh] overflow-y-auto pe-1">
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-6 lg:grid-cols-8">
-              {mainGrid.map((opt) => {
-                const on = optionSelected(opt);
-                return (
-                  <button
-                    key={opt.id}
-                    type="button"
-                    onClick={() => apply(opt)}
-                    className={cn(
-                      "relative overflow-hidden rounded-xl border text-start transition",
-                      on ? "border-gold ring-2 ring-gold ring-offset-2 ring-offset-white" : "border-navy/15 hover:border-gold",
-                    )}
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={opt.src} alt="" className="aspect-square w-full object-cover" referrerPolicy="no-referrer" />
-                    {on ? (
-                      <span className="absolute start-1.5 top-1.5 inline-flex size-6 items-center justify-center rounded-full bg-gold text-navy shadow">
-                        <Check className="size-3.5 stroke-[3]" />
-                      </span>
-                    ) : null}
-                    <span className="block truncate bg-white px-2 py-1.5 text-[12px] font-bold text-navy">
-                      {opt.kind === "imagen"
-                        ? t("audit.aiStill")
-                        : opt.kind === "site"
-                          ? t("audit.sitePhoto")
-                          : opt.kind === "stock"
-                            ? t("audit.tabStock")
-                            : opt.label}
-                    </span>
-                  </button>
-                );
-              })}
-              {showSkeletons
-                ? Array.from({ length: skeletonCount }).map((_, i) => (
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6">
+              {shown.map((opt) => (
+                <Tile key={opt.id} opt={opt} />
+              ))}
+              {aiBusy
+                ? Array.from({ length: Math.max(0, requested - shown.length) }).map((_, i) => (
                     <div
                       key={`sk-${i}`}
-                      className="aspect-square animate-pulse rounded-xl border border-navy/10 bg-navy/5"
+                      className="aspect-square animate-pulse rounded-xl border border-navy/10 bg-[#F6F1E8]"
                     />
                   ))
                 : null}
             </div>
 
-            {tab === "stock" && !stockBusy && stock.length === 0 ? (
-              <p className="mt-3 text-sm text-muted">{t("audit.stockEmpty")}</p>
-            ) : null}
-
-            {showGraphicRow ? (
+            {site.length ? (
               <div className="mt-4">
-                <p className="mb-2 text-[12px] font-black uppercase tracking-[0.14em] text-gold">
-                  {t("audit.graphicFallback")}
+                <p className="mb-2 text-[12px] font-semibold uppercase tracking-[0.12em] text-navy/60">
+                  {t("audit.tabSite")}
                 </p>
-                <div className="flex gap-2 overflow-x-auto pb-1">
-                  {graphicOpts.map((opt) => {
-                    const on = optionSelected(opt);
-                    return (
-                      <button
-                        key={opt.id}
-                        type="button"
-                        onClick={() => apply(opt)}
-                        className={cn(
-                          "relative w-24 shrink-0 overflow-hidden rounded-xl border text-start",
-                          on ? "border-gold ring-2 ring-gold" : "border-navy/15 hover:border-gold",
-                        )}
-                      >
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={opt.src} alt="" className="aspect-[4/5] w-full object-cover" />
-                        {on ? (
-                          <span className="absolute start-1 top-1 inline-flex size-5 items-center justify-center rounded-full bg-gold text-navy">
-                            <Check className="size-3 stroke-[3]" />
-                          </span>
-                        ) : null}
-                      </button>
-                    );
-                  })}
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 md:grid-cols-6">
+                  {site.map((opt) => (
+                    <Tile key={opt.id} opt={opt} />
+                  ))}
                 </div>
               </div>
             ) : null}
+
+            <Accordion
+              type="single"
+              collapsible
+              className="mt-4"
+              onValueChange={(v) => {
+                if (v && !stockLoaded) void loadFreeStock();
+              }}
+            >
+              <AccordionItem value="free">
+                <AccordionTrigger>{t("audit.freeStock")}</AccordionTrigger>
+                <AccordionContent>
+                  {stockBusy && !stock.length ? (
+                    <p className="text-sm text-muted">{t("audit.loadingStock")}</p>
+                  ) : null}
+                  {stockLoaded && !stock.length && !stockBusy ? (
+                    <p className="text-sm text-muted">{t("audit.stockEmpty")}</p>
+                  ) : null}
+                  {stock.length ? (
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 md:grid-cols-6">
+                      {stock.map((opt) => (
+                        <Tile key={opt.id} opt={opt} />
+                      ))}
+                    </div>
+                  ) : null}
+                  <p className="mt-2 text-[12px] text-muted">{t("audit.stockCredit")}</p>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
           </div>
 
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            {(tab === "all" || tab === "stock") && stockNext ? (
-              <Button type="button" size="sm" variant="outline" disabled={stockBusy} onClick={() => void loadStock(stockPage + 1, true)}>
-                {stockBusy ? <Loader2 className="size-4 animate-spin" /> : null}
-                {t("audit.loadMore")}
-              </Button>
-            ) : null}
-            {(tab === "all" || tab === "ai") && imagen.length < 2 ? (
-              <Button type="button" size="sm" variant="outline" disabled={aiBusy} onClick={() => void moreAi()}>
-                {aiBusy ? <Loader2 className="size-4 animate-spin" /> : null}
-                {t("audit.moreAi")}
-              </Button>
-            ) : null}
+            <Button type="button" size="sm" variant="outline" disabled={aiBusy} onClick={() => void loadImagen()}>
+              {aiBusy ? <Loader2 className="size-4 animate-spin" /> : null}
+              {t("audit.retryImagen")}
+            </Button>
             {hasOffered ? (
               <Button type="button" size="sm" variant="outline" onClick={clearSelection}>
                 <X className="size-4" />
@@ -491,7 +396,6 @@ export function ImageOfferPicker({
             ) : null}
           </div>
           <p className="mt-2 text-[13px] text-muted">{t("audit.pickPhoto")}</p>
-          <p className="mt-1 text-[12px] text-muted">{t("audit.stockCredit")}</p>
         </div>
       ) : null}
     </div>

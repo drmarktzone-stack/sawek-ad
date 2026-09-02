@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Label, Textarea } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { CampaignAdVisual } from "@/components/ad-mockup";
+import { studioStillsForIntake } from "@/lib/studio-stills";
 import { MediaAssetUploader } from "@/components/media-asset-uploader";
 
 export function CreativeDeptView({
@@ -181,18 +182,17 @@ export function CreativeDeptView({
             const ads = pack.variants.filter((v) => v.locale === packLang);
             const v = ads[idx % Math.max(ads.length, 1)];
             return (
-              <article key={s.id} className="overflow-hidden rounded-2xl border border-navy/10 bg-black">
+              <article key={s.id} className="overflow-hidden rounded-2xl border border-navy/10 bg-white">
                 <CampaignAdVisual
                   locale={packLang}
                   palette={s.palette}
                   assets={pack.intake.mediaAssets}
                   index={idx}
-                  className="h-28"
-                >
-                  <p className="text-sm font-black leading-tight text-white drop-shadow">
-                    {v?.headline ?? pack.intake.businessName}
-                  </p>
-                </CampaignAdVisual>
+                  className="h-40"
+                  headline={v?.headline ?? pack.intake.businessName}
+                  cta={v?.cta}
+                  fallbackSrc={studioStillsForIntake(pack.intake)[idx % 8]?.dataUrl}
+                />
                 <div className="space-y-2 bg-white p-3">
                   <div className="flex gap-1" aria-label={t("design.swatch")}>
                     {s.palette.map((c) => (
@@ -215,16 +215,16 @@ export function CreativeDeptView({
           {LAYOUT_THUMBS.map((lay, idx) => {
             const pal = visibleStyles[idx % Math.max(visibleStyles.length, 1)]?.palette ?? ["#111", "#ffe500", "#ff1a1a"];
             return (
-              <article key={lay.id} className="overflow-hidden rounded-xl border border-navy/10 bg-black">
+              <article key={lay.id} className="overflow-hidden rounded-xl border border-navy/10 bg-white">
                 <CampaignAdVisual
                   locale={packLang}
                   palette={pal}
                   assets={pack.intake.mediaAssets}
                   index={idx}
                   className={cn("w-full", lay.aspect, "h-auto min-h-0")}
-                >
-                  <p className="text-sm font-black leading-tight text-white drop-shadow">{pack.intake.businessName}</p>
-                </CampaignAdVisual>
+                  headline={pack.intake.businessName}
+                  fallbackSrc={studioStillsForIntake(pack.intake)[idx % 8]?.dataUrl}
+                />
                 <p className="px-2 py-1.5 text-center text-sm font-bold text-muted">{lay.label[packLang]}</p>
               </article>
             );

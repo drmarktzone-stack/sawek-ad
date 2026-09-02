@@ -1,7 +1,7 @@
 "use client";
 
 import type { Locale, MediaAssetMeta } from "@/lib/types";
-import { pickAsset } from "@/lib/media-assets";
+import { isOfferedAsset, pickAsset, pickHero } from "@/lib/media-assets";
 import { useResolvedAssets } from "@/lib/use-resolved-assets";
 import { sampleLabel } from "@/lib/operating-model";
 import { dirFor } from "@/lib/i18n";
@@ -39,77 +39,29 @@ function isLight(hex: string): boolean {
 }
 
 function inkOn(bg: string): string {
-  return isLight(bg) ? "#111111" : "#f7f7f5";
+  return isLight(bg) ? "#1B2A4A" : "#F7F3EA";
+}
+
+function posterInk(bg: string, onPhoto: boolean): string {
+  if (onPhoto) return "#F7F3EA";
+  return isLight(bg) ? "#1B2A4A" : "#F7F3EA";
 }
 
 function Atmosphere({
   palette,
-  channel,
 }: {
   palette: string[];
   channel?: AdPosterChannel;
 }) {
-  const bg = palette[0] ?? "#111111";
-  const accent = palette[1] ?? "#ffe500";
-  const secondary = palette[2] ?? accent;
+  const bg = palette[0] ?? "#F6F1E8";
+  const accent = palette[1] ?? "#2A6F6A";
+  const secondary = palette[2] ?? "#1B2A4A";
   return (
     <div className="absolute inset-0" aria-hidden style={{ background: bg }}>
       <div
         className="absolute inset-0"
         style={{
-          background: `linear-gradient(165deg, ${bg} 0%, ${bg} 42%, ${accent}22 78%, ${secondary}33 100%)`,
-        }}
-      />
-      <div
-        className="absolute rounded-full blur-3xl"
-        style={{
-          background: accent,
-          opacity: 0.34,
-          width: channel === "facebook" ? "50%" : "64%",
-          height: channel === "tiktok" ? "36%" : "52%",
-          top: "8%",
-          insetInlineEnd: channel === "facebook" ? "-4%" : "-12%",
-        }}
-      />
-      <div
-        className="absolute rounded-full blur-3xl"
-        style={{
-          background: secondary,
-          opacity: 0.28,
-          width: "52%",
-          height: "42%",
-          bottom: "6%",
-          insetInlineStart: "-10%",
-        }}
-      />
-      {/* Inset bars so Magic Resize never clips the accent. */}
-      <div
-        className="absolute inset-x-3 top-2 h-1.5 rounded-full"
-        style={{ background: accent }}
-      />
-      {channel === "facebook" ? (
-        <div
-          className="absolute top-6 bottom-6 w-[3px] rounded-full"
-          style={{ background: accent, insetInlineStart: 10, opacity: 0.85 }}
-        />
-      ) : null}
-      {channel === "instagram" ? (
-        <div
-          className="absolute inset-x-8 top-[12%] h-px"
-          style={{ background: accent, opacity: 0.45 }}
-        />
-      ) : null}
-      {channel === "tiktok" ? (
-        <div
-          className="absolute top-14 h-28 w-1.5 rounded-full"
-          style={{ background: accent, insetInlineStart: 14 }}
-        />
-      ) : null}
-      <div
-        className="absolute inset-0 opacity-[0.07]"
-        style={{
-          backgroundImage:
-            "repeating-linear-gradient(-45deg, transparent, transparent 11px, #fff 11px, #fff 12px)",
+          background: `radial-gradient(80% 55% at 82% 8%, ${accent}33, transparent 68%), radial-gradient(70% 50% at 8% 92%, ${secondary}22, transparent 70%)`,
         }}
       />
     </div>
@@ -140,8 +92,8 @@ function HoursChips({
           )}
           style={{
             color: ink,
-            borderColor: accent,
-            background: "rgba(0,0,0,0.28)",
+            borderColor: isLight(ink) ? "rgba(247,243,234,0.45)" : "rgba(27,42,74,0.25)",
+            background: isLight(ink) ? "rgba(0,0,0,0.35)" : "rgba(255,255,255,0.78)",
           }}
         >
           {c}
@@ -181,18 +133,19 @@ function TypeBlock({
   const tt = channel === "tiktok";
   const wa = channel === "whatsapp";
   const muted = onPhoto ? "rgba(255,255,255,0.92)" : isLight(ink) ? "rgba(247,247,245,0.88)" : "rgba(17,17,17,0.78)";
-  const showKicker = Boolean(kicker) && !fb && !tt;
+  const showKicker = Boolean(kicker) && !fb && !tt && !onPhoto;
   const showCta = Boolean(cta) && !tt;
   return (
     <div
       dir={dir}
       className={cn(
         "relative z-[1] box-border flex h-full min-h-0 w-full flex-col text-start",
-        fb && "justify-between gap-2 px-5 py-3 ps-7",
-        ig && "justify-between gap-2 px-5 py-5",
-        tt && "justify-start gap-2 px-4 pb-[34%] pe-[4.75rem] pt-14",
-        wa && "justify-end gap-2 p-4",
-        !channel && "justify-end gap-2 p-4",
+        tt && "justify-end gap-2 pb-[38%] pl-4 pr-20 pt-12",
+        onPhoto && !tt && "justify-end gap-3 px-6 py-6",
+        !onPhoto && fb && "justify-between gap-2 px-5 py-3 ps-7",
+        !onPhoto && ig && "justify-between gap-2 px-5 py-5",
+        !onPhoto && wa && "justify-end gap-2 p-4",
+        !onPhoto && !channel && "justify-end gap-2 p-4",
       )}
     >
       <div className="min-h-0 overflow-hidden">
@@ -207,17 +160,18 @@ function TypeBlock({
         <h2
           className={cn(
             "font-black tracking-tight break-words",
-            fb && "text-[clamp(15px,3.6vw,20px)] leading-[1.12]",
-            ig && "text-[clamp(18px,4.2vw,26px)] leading-[1.08]",
-            tt && "text-[clamp(18px,5vw,26px)] leading-[1.1]",
-            wa && "text-[18px] leading-[1.12]",
-            !channel && "text-xl leading-tight",
+            onPhoto && "text-[clamp(22px,5.2vw,34px)] leading-[1.08]",
+            !onPhoto && fb && "text-[clamp(15px,3.6vw,20px)] leading-[1.12]",
+            !onPhoto && ig && "text-[clamp(18px,4.2vw,26px)] leading-[1.08]",
+            !onPhoto && tt && "text-[clamp(18px,5vw,26px)] leading-[1.1]",
+            !onPhoto && wa && "text-[18px] leading-[1.12]",
+            !onPhoto && !channel && "text-xl leading-tight",
           )}
           style={{ color: ink, margin: 0, overflowWrap: "anywhere" }}
         >
           {headline}
         </h2>
-        {body && !tt ? (
+        {body && !tt && !onPhoto ? (
           <p
             className={cn(
               "mt-1.5 font-medium break-words",
@@ -231,7 +185,7 @@ function TypeBlock({
             {body}
           </p>
         ) : null}
-        <HoursChips chips={hoursChips} ink={ink} accent={accent} compact={fb} />
+        {onPhoto ? null : <HoursChips chips={hoursChips} ink={ink} accent={accent} compact={fb} />}
       </div>
       {showCta ? (
         <span
@@ -239,7 +193,7 @@ function TypeBlock({
             "inline-flex w-fit max-w-full shrink-0 items-center rounded-full px-3.5 py-1.5 text-[13px] font-black leading-tight",
             "whitespace-normal text-center",
           )}
-          style={{ background: accent, color: ctaColor }}
+          style={{ background: onPhoto ? "#F6F1E8" : accent, color: onPhoto ? "#1B2A4A" : ctaColor }}
         >
           {cta}
         </span>
@@ -257,13 +211,14 @@ export function AdVisual({
   children,
   overrideSrc,
   aiLabel,
-  graphicOnlyLabel,
+  graphicOnlyLabel: _unusedGraphicLabel,
   headline,
   body,
   cta,
   kicker,
   hoursChips,
   channel,
+  fallbackSrc,
 }: {
   locale: Locale;
   palette: string[];
@@ -280,20 +235,22 @@ export function AdVisual({
   kicker?: string;
   hoursChips?: string[];
   channel?: AdPosterChannel;
+  fallbackSrc?: string | null;
 }) {
+  void _unusedGraphicLabel;
   const assetUrl = asset?.publicSrc || (asset ? urls[asset.id] : undefined);
   const fromAsset = Boolean(assetUrl && asset);
-  const fromAi = Boolean(!fromAsset && overrideSrc);
-  const url = fromAsset ? assetUrl : overrideSrc || undefined;
+  const fromAi = Boolean(!fromAsset && (overrideSrc || fallbackSrc));
+  const url = fromAsset ? assetUrl : overrideSrc || fallbackSrc || undefined;
   const sample = sampleLabel(locale);
   const showPhoto = Boolean(url && (!asset || asset.kind === "image" || fromAi));
   const showVideo = Boolean(fromAsset && asset?.kind === "video" && assetUrl);
   const hasPlate = Boolean(showPhoto || showVideo);
   const posterHeadline = (headline ?? "").trim();
   const hasPosterType = Boolean(posterHeadline);
-  const bg = palette[0] ?? "#111111";
-  const accent = palette[1] ?? "#ffe500";
-  const ink = hasPlate ? "#f7f7f5" : inkOn(bg);
+  const bg = palette[0] ?? "#F6F1E8";
+  const accent = palette[1] ?? "#2A6F6A";
+  const ink = posterInk(bg, hasPlate);
   const emptySample = !hasPlate && !hasPosterType && !children;
 
   return (
@@ -329,16 +286,6 @@ export function AdVisual({
           {sample}
         </span>
       ) : null}
-      {!hasPlate && graphicOnlyLabel && !fromAi ? (
-        <span className="absolute start-2 top-2 z-[2] rounded bg-black/70 px-2 py-0.5 text-[13px] font-black uppercase tracking-[0.12em] text-white">
-          {graphicOnlyLabel}
-        </span>
-      ) : null}
-      {fromAi && aiLabel ? (
-        <span className="absolute start-2 top-2 z-[2] rounded bg-black/70 px-2 py-0.5 text-[13px] font-black uppercase tracking-[0.12em] text-omni-yellow">
-          {aiLabel}
-        </span>
-      ) : null}
       {hasPosterType ? (
         <TypeBlock
           locale={locale}
@@ -365,6 +312,9 @@ export function CampaignAdVisual({
   index,
   className,
   children,
+  headline,
+  cta,
+  fallbackSrc,
 }: {
   locale: Locale;
   palette: string[];
@@ -372,12 +322,16 @@ export function CampaignAdVisual({
   index: number;
   className?: string;
   children?: React.ReactNode;
+  headline?: string;
+  cta?: string;
+  fallbackSrc?: string | null;
 }) {
   const urls = useResolvedAssets(assets);
-  const asset = pickAsset(assets, index);
+  const offered = (assets ?? []).find((a) => a.kind === "image" && a.label !== "logo" && isOfferedAsset(a));
+  const asset = offered ?? pickHero(assets) ?? pickAsset(assets, index);
   return (
-    <AdVisual locale={locale} palette={palette} asset={asset} urls={urls} className={className}>
-      {children}
+    <AdVisual locale={locale} palette={palette} asset={asset} urls={urls} className={className} headline={headline} cta={cta} fallbackSrc={fallbackSrc}>
+      {headline ? null : children}
     </AdVisual>
   );
 }

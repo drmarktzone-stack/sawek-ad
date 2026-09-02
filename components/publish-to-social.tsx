@@ -290,7 +290,7 @@ function PublishExactMockup({ pack, locale }: { pack: CampaignPack; locale: Loca
       logoUrl={logoUrl}
       palette={palette}
       generatedSrc={fallback}
-      graphicOnlyLabel={t("end.graphicOnly")}
+      graphicOnlyLabel={undefined}
       sponsored={t("end.sponsored")}
       like={t("end.like")}
       comment={t("end.comment")}

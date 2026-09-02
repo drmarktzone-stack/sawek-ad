@@ -27,7 +27,7 @@ export const DESIGN_STYLES: DesignStyle[] = [
     id: "lifestyle",
     name: L("לייפסטייל", "لايف ستايل", "Lifestyle"),
     description: L("תמונת חיים אמיתית, אור יום, אנשים בסביבה טבעית.", "حياة حقيقية، ضوء نهار، ناس في مكان طبيعي.", "Lived-in daylight scenes with real people in context."),
-    palette: ["#050505", "#ffe500", "#ff1a1a"],
+    palette: ["#F4EFE6", "#3D4A3C", "#C4A574"],
     mood: "warm photo",
     verticals: G,
   },
@@ -35,7 +35,7 @@ export const DESIGN_STYLES: DesignStyle[] = [
     id: "soft-organic",
     name: L("אורגני רך", "عضوي ناعم", "Soft organic"),
     description: L("צורות רכות, ירקות עמומים, תחושת טיפול.", "أشكال ناعمة وألوان ترابية وشعور علاجي.", "Soft shapes, muted greens, a care-taking feel."),
-    palette: ["#1a0a0a", "#ffe500", "#7a1010"],
+    palette: ["#F3EDE3", "#5C7A6A", "#8B6914"],
     mood: "calm organic",
     verticals: G,
   },
@@ -43,7 +43,7 @@ export const DESIGN_STYLES: DesignStyle[] = [
     id: "social-proof",
     name: L("הוכחה חברתית", "إثبات اجتماعي", "Social proof"),
     description: L("מסגרת לציטוט לקוח אמיתי בלבד — בלי דירוגים מומצאים.", "إطار لاقتباس عميل حقيقي فقط — بلا تقييمات مختلقة.", "Frame for a real customer quote only — never invented ratings."),
-    palette: ["#050505", "#ff1a1a", "#ffe500"],
+    palette: ["#EFE6D8", "#44403C", "#57534E"],
     mood: "quote card",
     verticals: G,
   },
@@ -51,7 +51,7 @@ export const DESIGN_STYLES: DesignStyle[] = [
     id: "pastel",
     name: L("פסטל", "باستيل", "Pastel"),
     description: L("רקע בהיר-רך, טיפוגרפיה עדינה, מתאים למשפחות.", "خلفية فاتحة ناعمة وخط هادئ يناسب العائلات.", "Soft light ground and gentle type — family-friendly."),
-    palette: ["#1a1208", "#ffe500", "#ff1a1a"],
+    palette: ["#F5F0FF", "#7C6A9A", "#6A9B8E"],
     mood: "pastel family",
     verticals: G,
   },
@@ -59,7 +59,7 @@ export const DESIGN_STYLES: DesignStyle[] = [
     id: "sketch",
     name: L("סקיצה", "رسم تخطيطي", "Sketch"),
     description: L("קו ידני, שחור-צהוב, תחושת סטודיו.", "خط يدوي وأسود-أصفر وإحساس ستوديو.", "Hand-drawn line, black and yellow, studio energy."),
-    palette: ["#000000", "#ffe500", "#ffffff"],
+    palette: ["#1C1917", "#F5F0E8", "#A8A29E"],
     mood: "ink sketch",
     verticals: G,
   },
@@ -67,7 +67,7 @@ export const DESIGN_STYLES: DesignStyle[] = [
     id: "modern-flat",
     name: L("שטוח מודרני", "مسطح حديث", "Modern flat"),
     description: L("בלוקים גאומטריים, ניגודיות חזקה, מסר אחד.", "كتل هندسية وتباين قوي ورسالة واحدة.", "Geometric blocks, hard contrast, one message."),
-    palette: ["#111111", "#ffe500", "#ff1a1a"],
+    palette: ["#1B2A4A", "#F6F1E8", "#C9A227"],
     mood: "flat geometric",
     verticals: G,
   },
@@ -75,7 +75,7 @@ export const DESIGN_STYLES: DesignStyle[] = [
     id: "editorial-dark",
     name: L("עורכות כהה", "تحرير داكن", "Editorial dark"),
     description: L("מגזין לילי, כותרת גדולה, מעט טקסט.", "مجلة ليلية وعنوان كبير ونص قليل.", "Night-magazine headline, little body copy."),
-    palette: ["#0b0b0b", "#ffe500", "#ff1a1a"],
+    palette: ["#1B2A4A", "#F6F1E8", "#C4B49A"],
     mood: "editorial",
     verticals: G,
   },
@@ -83,7 +83,7 @@ export const DESIGN_STYLES: DesignStyle[] = [
     id: "bold-type",
     name: L("טיפוגרפיה נועזת", "طباعة جريئة", "Bold type"),
     description: L("המילים הן העיצוב. צהוב על שחור.", "الكلمات هي التصميم. أصفر على أسود.", "The words are the design. Yellow on black."),
-    palette: ["#000000", "#ffe500", "#ff1a1a"],
+    palette: ["#1B2A4A", "#F6F1E8", "#2A6F6A"],
     mood: "type poster",
     verticals: G,
   },
@@ -91,7 +91,7 @@ export const DESIGN_STYLES: DesignStyle[] = [
     id: "cinematic",
     name: L("קולנועי", "سينمائي", "Cinematic"),
     description: L("רחבה אופקית, גרדיאנט כהה, כותרת תחתונה.", "عرض سينمائي وتدرّج داكن وعنوان سفلي.", "Widescreen gradient, lower-third headline."),
-    palette: ["#1a0505", "#ffe500", "#8a1010"],
+    palette: ["#1B2A4A", "#E8DCC8", "#2A6F6A"],
     mood: "cinematic still",
     verticals: G,
   },
@@ -99,7 +99,7 @@ export const DESIGN_STYLES: DesignStyle[] = [
     id: "minimal-light",
     name: L("מינימל בהיר", "بسيط فاتح", "Minimal light"),
     description: L("לבן שבור, שורה אחת, הרבה אוויר.", "أبيض مكسور وسطر واحد وكثير من الفراغ.", "Off-white, one line, lots of air."),
-    palette: ["#141414", "#ffe500", "#ff1a1a"],
+    palette: ["#F7F3EA", "#1B2A4A", "#6B6458"],
     mood: "minimal",
     verticals: G,
   },
@@ -107,7 +107,7 @@ export const DESIGN_STYLES: DesignStyle[] = [
     id: "street",
     name: L("רחוב / אורבני", "شارع / حضري", "Street / urban"),
     description: L("גרפיטי רגוע, מסגרת אדומה, אנרגיה מקומית.", "غرافيتي هادئ وإطار أحمر وطاقة محلية.", "Quiet graffiti energy, red frame, local pulse."),
-    palette: ["#0a0a0a", "#ff1a1a", "#ffe500"],
+    palette: ["#1C1917", "#D4C4A8", "#8C4A2F"],
     mood: "urban",
     verticals: G,
   },
@@ -115,7 +115,7 @@ export const DESIGN_STYLES: DesignStyle[] = [
     id: "warm-doc",
     name: L("דוקו חם", "وثائقي دافئ", "Warm documentary"),
     description: L("צבעי סרט ישן, דיוקן, אמינות.", "ألوان فيلم قديم وبورتريه ومصداقية.", "Aged-film tones, portrait, credibility."),
-    palette: ["#140c08", "#ffe500", "#c41212"],
+    palette: ["#F3E6D4", "#6B3F2A", "#1B2A4A"],
     mood: "docu portrait",
     verticals: G,
   },
@@ -123,7 +123,7 @@ export const DESIGN_STYLES: DesignStyle[] = [
     id: "luxe-black-gold",
     name: L("לוקס שחור-זהב", "فخامة أسود-ذهب", "Luxe black-gold"),
     description: L("חלון ראווה לילי, זהב עמום, מותג אופנה.", "واجهة ليلية وذهب خافت وماركة أزياء.", "Night vitrine, muted gold, fashion brand."),
-    palette: ["#0c0a07", "#c6a15b", "#f4e6c3"],
+    palette: ["#2A2A28", "#F4EFE6", "#C6A15B"],
     mood: "luxe retail",
     verticals: RETAIL,
   },
@@ -179,7 +179,7 @@ export const DESIGN_STYLES: DesignStyle[] = [
     id: "street-food-neon",
     name: L("סטריט-פוד ניאון", "أكل شارع نيون", "Street-food neon"),
     description: L("דוכן זוהר, מגנטה על שחור, מהיר.", "كشك نيون وماجنتا على أسود وسريع.", "Neon stall, magenta on black, fast."),
-    palette: ["#0b0214", "#ff2bd6", "#2ee9ff"],
+    palette: ["#F6ECD9", "#C45C26", "#7A3E12"],
     mood: "neon stall",
     verticals: FOOD,
   },
@@ -187,7 +187,7 @@ export const DESIGN_STYLES: DesignStyle[] = [
     id: "aqua-sand",
     name: L("אקווה-חול", "أكوا-رمل", "Aqua sand"),
     description: L("מים בהירים, חול, משפחות בבריכה.", "ماء فاتح ورمل وعائلات بالمسبح.", "Bright water, sand, families at the pool."),
-    palette: ["#e7f6f8", "#2a9d8f", "#e9c46a"],
+    palette: ["#E8F1F0", "#3D6F73", "#C4B49A"],
     mood: "pool day",
     verticals: POOL,
   },
@@ -203,7 +203,7 @@ export const DESIGN_STYLES: DesignStyle[] = [
     id: "family-bright",
     name: L("משפחתי בהיר", "عائلي فاتح", "Family bright"),
     description: L("צהריים, תכלת וקורל, ילדים במים.", "ظهر سماوي ومرجاني وأولاد بالمي.", "Noon, sky-blue and coral, kids in water."),
-    palette: ["#e0f2fe", "#0284c7", "#fb7185"],
+    palette: ["#E8F1F0", "#3D6F73", "#C4A574"],
     mood: "family splash",
     verticals: POOL,
   },
@@ -211,7 +211,7 @@ export const DESIGN_STYLES: DesignStyle[] = [
     id: "calm-teal-cream",
     name: L("טיל-קרם רגוע", "تيل-كريمة هادئ", "Calm teal-cream"),
     description: L("מרפאה שקטה, קרם וטיל, אמון בלי דרמה.", "عيادة هادئة وكريمة وتيل وثقة بلا دراما.", "Quiet clinic, cream and teal, trust without drama."),
-    palette: ["#f4efe6", "#0f766e", "#134e4a"],
+    palette: ["#F6F1E8", "#2A6F6A", "#1B2A4A"],
     mood: "clinic calm",
     verticals: CLINIC,
   },
@@ -219,8 +219,24 @@ export const DESIGN_STYLES: DesignStyle[] = [
     id: "trust-navy-white",
     name: L("נייבי-לבן אמון", "كحلي-أبيض ثقة", "Trust navy-white"),
     description: L("כותרת רפואית נקייה, נייבי על לבן.", "عنوان طبي نظيف وكحلي على أبيض.", "Clean medical headline, navy on white."),
-    palette: ["#f8fafc", "#1e3a5f", "#94a3b8"],
+    palette: ["#F8F6F1", "#1B2A4A", "#2A6F6A"],
     mood: "clinic trust",
+    verticals: CLINIC,
+  },
+  {
+    id: "sand-olive-clinic",
+    name: L("חול-זית", "رمل-زيتون", "Sand olive"),
+    description: L("חול ים תיכוני, זית, מרפאה שקטה.", "رمل متوسطي وزيتون وعيادة هادئة.", "Mediterranean sand, olive, a quiet clinic."),
+    palette: ["#E8DCC8", "#2A6F6A", "#1B2A4A"],
+    mood: "clinic sand",
+    verticals: CLINIC,
+  },
+  {
+    id: "cream-navy-clinic",
+    name: L("קרם-נייבי", "كريمة-كحلي", "Cream navy"),
+    description: L("קרם, נייבי, כותרת אחת גדולה.", "كريمة وكحلي وعنوان واحد كبير.", "Cream, navy, one large headline."),
+    palette: ["#F6F1E8", "#1B2A4A", "#C4B49A"],
+    mood: "clinic editorial",
     verticals: CLINIC,
   },
   {
@@ -285,13 +301,24 @@ function clinicOnly(s: DesignStyle): boolean {
   return s.verticals.length === 1 && s.verticals[0] === "clinic";
 }
 
-/** Styles tagged for this vertical, plus generic. Clinic-only never leaks to retail/food/etc. */
+const NEON_POSTER = /#ffe500|#ff1a1a/i;
+
+export function isNeonPosterHex(hex: string): boolean {
+  return NEON_POSTER.test(hex);
+}
+
+/** Clinic poster default: cream, soft teal, navy. Never neon yellow/red. */
+export const CLINIC_POSTER_PALETTE: [string, string, string] = ["#F6F1E8", "#2A6F6A", "#1B2A4A"];
+
+/** Styles tagged for this vertical first, then generic. Clinic-only never leaks. */
 export function stylesForVertical(v: Vertical): DesignStyle[] {
-  return DESIGN_STYLES.filter((s) => {
-    if (s.verticals.includes(v)) return true;
+  const tagged = DESIGN_STYLES.filter((s) => s.verticals.includes(v));
+  const generic = DESIGN_STYLES.filter((s) => {
+    if (s.verticals.includes(v)) return false;
     if (clinicOnly(s)) return false;
     return s.verticals.includes("generic");
   });
+  return [...tagged, ...generic];
 }
 
 export function styleById(id: string): DesignStyle | undefined {
