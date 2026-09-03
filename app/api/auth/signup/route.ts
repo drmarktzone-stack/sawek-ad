@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { applyAuthCookies, ensureProfile, publicAppBase, supabaseAnonClient, tokensFromSupabaseSession } from "@/lib/auth-server";
+import { applyAuthCookies, classifyAuthError, ensureProfile, publicAppBase, supabaseAnonClient, tokensFromSupabaseSession } from "@/lib/auth-server";
 import { resolvePlan } from "@/lib/plan";
 
 export const runtime = "nodejs";
@@ -22,7 +22,7 @@ export async function POST(req: Request) {
     password,
     options: { emailRedirectTo: `${publicAppBase(req)}/auth/callback` },
   });
-  if (error) return NextResponse.json({ ok: false, error: "auth" }, { status: 400 });
+  if (error) return NextResponse.json({ ok: false, error: classifyAuthError(error) }, { status: 400 });
   if (data.user) await ensureProfile(data.user);
   const tokens = tokensFromSupabaseSession(data.session);
   const res = NextResponse.json({

@@ -84,24 +84,21 @@ function AuthChip() {
     return (
       <LangLink
         href="/login"
-        className="shrink-0 rounded-full border border-navy/15 bg-white px-3 py-1.5 text-sm font-black text-navy hover:border-gold"
+        className="shrink-0 rounded-full bg-navy px-3.5 py-1.5 text-sm font-black text-white hover:bg-[#24365e]"
       >
         {t("nav.login")}
       </LangLink>
     );
   }
-  const letter = (user.email || "?").slice(0, 1).toUpperCase();
   return (
-    <div className="flex items-center gap-1.5">
-      <LangLink
-        href="/pricing"
-        title={user.email}
-        className="flex size-8 items-center justify-center rounded-full bg-navy text-sm font-black text-white"
-      >
-        {letter}
-      </LangLink>
-      <span className="hidden text-xs font-bold text-muted sm:inline">{isPro(plan) ? t("auth.plan.pro") : t("auth.plan.free")}</span>
-      <button type="button" className="text-xs font-semibold text-muted hover:text-navy" onClick={() => void logout()}>
+    <div className="flex max-w-[16rem] items-center gap-1.5">
+      <div className="min-w-0 text-end leading-tight">
+        <p className="truncate text-xs font-black text-navy" title={user.email}>
+          {user.email}
+        </p>
+        <p className="text-xs font-black text-gold">{isPro(plan) ? t("auth.plan.pro") : t("auth.plan.free")}</p>
+      </div>
+      <button type="button" className="shrink-0 text-xs font-semibold text-muted hover:text-navy" onClick={() => void logout()}>
         {t("nav.logout")}
       </button>
     </div>
@@ -208,11 +205,11 @@ export function Header() {
               );
             })}
             <FunctionMenuLinks onPick={() => setOpen(false)} />
-            <LangLink href="/login" onClick={() => setOpen(false)} className="mt-2 rounded-xl px-3 py-2 text-base font-black text-navy hover:bg-navy/5">
-              {t("nav.login")}
-            </LangLink>
-            <LangLink href="/pricing" onClick={() => setOpen(false)} className="rounded-xl px-3 py-2 text-base text-navy hover:bg-navy/5">
-              {t("nav.pricing")}
+            <div className="mt-2 px-3 py-1">
+              <AuthChip />
+            </div>
+            <LangLink href="/pricing" onClick={() => setOpen(false)} className="rounded-xl px-3 py-2 text-base font-black text-navy hover:bg-navy/5">
+              {t("home.cta.pricing")}
             </LangLink>
           </div>
         </div>

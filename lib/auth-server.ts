@@ -251,3 +251,56 @@ export function publicAppBase(req: Request): string {
   const host = (req.headers.get("x-forwarded-host") ?? req.headers.get("host") ?? url.host).split(",")[0]!.trim();
   return `${proto}://${host}`;
 }
+
+
+/** Map a Supabase Auth error to a public code. Never log passwords. */
+export type AuthFailCode =
+  | "invalid_credentials"
+  | "email_not_confirmed"
+  | "already_registered"
+  | "weak_password"
+  | "google"
+  | "no_supabase"
+  | "network"
+  | "invalid"
+  | "auth";
+
+export function classifyAuthError(error: { message?: string | null; code?: string | null } | null | undefined): AuthFailCode {
+  const code = String(error?.code ?? "").toLowerCase();
+  const msg = String(error?.message ?? "").toLowerCase();
+  if (code === "invalid_credentials" || msg.includes("invalid login credentials") || msg.includes("invalid credentials")) {
+    return "invalid_credentials";
+  }
+  if (code === "email_not_confirmed" || msg.includes("email not confirmed") || msg.includes("confirm your account")) {
+    return "email_not_confirmed";
+  }
+  if (
+    code === "user_already_exists" ||
+    msg.includes("already registered") ||
+    msg.includes("already been registered") ||
+    msg.includes("user already exists")
+  ) {
+    return "already_registered";
+  }
+  if (code === "weak_password" || msg.includes("password should be") || msg.includes("weak password")) {
+    return "weak_password";
+  }
+  if (
+    msg.includes("unsupported provider") ||
+    msg.includes("provider is not enabled") ||
+    msg.includes("provider not enabled") ||
+    (msg.includes("google") && (msg.includes("disabled") || msg.includes("unsupported") || msg.includes("not enabled")))
+  ) {
+    return "google";
+  }
+  return "auth";
+}
+
+export function publicAuthErrorDetail(error: { message?: string | null } | null | undefined): string {
+  const raw = String(error?.message ?? "").trim();
+  if (!raw) return "";
+  if (/password|secret|token|apikey|authorization/i.test(raw) && !/weak password|password should be/i.test(raw)) {
+    return "";
+  }
+  return raw.slice(0, 180);
+}

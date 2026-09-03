@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { applyAuthCookies, ensureProfile, supabaseAnonClient, tokensFromSupabaseSession } from "@/lib/auth-server";
+import { applyAuthCookies, classifyAuthError, ensureProfile, supabaseAnonClient, tokensFromSupabaseSession } from "@/lib/auth-server";
 import { resolvePlan } from "@/lib/plan";
 
 export const runtime = "nodejs";
@@ -19,7 +19,7 @@ export async function POST(req: Request) {
   if (!email || !password) return NextResponse.json({ ok: false, error: "invalid" }, { status: 400 });
   const { data, error } = await sb.auth.signInWithPassword({ email, password });
   if (error || !data.user) {
-    return NextResponse.json({ ok: false, error: "auth" }, { status: 401 });
+    return NextResponse.json({ ok: false, error: classifyAuthError(error) }, { status: 401 });
   }
   const profile = await ensureProfile(data.user);
   const tokens = tokensFromSupabaseSession(data.session);

@@ -21,7 +21,7 @@ const cairo = Cairo({
 export const metadata: Metadata = {
   title: "SAWEK AD — سوِّق إعلانك بنفسك / סאווק",
   description:
-    "SAWEK AD: RTL campaign studio with a 4-step wizard, five Gemini agents, and HE/AR/EN copy — OmniAd engine, OptiBrain medical desk. No invented leads or testimonials.",
+    "SAWEK AD: paste a business website, get finished ads for Facebook, Instagram, TikTok and WhatsApp in Hebrew and Arabic, plus a landing page and download. No invented ROAS.",
   manifest: "/manifest.webmanifest",
   applicationName: "SAWEK AD",
   appleWebApp: {

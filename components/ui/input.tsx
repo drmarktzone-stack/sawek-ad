@@ -29,6 +29,6 @@ export function Textarea({ className, ...props }: React.ComponentProps<"textarea
 
 export function Label({ className, ...props }: React.ComponentProps<"label">) {
   return (
-    <label className={cn("mb-1.5 block text-start text-sm font-medium text-navy", className)} {...props} />
+    <label className={cn("mb-1.5 block text-start text-sm font-black text-navy", className)} {...props} />
   );
 }
