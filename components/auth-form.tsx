@@ -10,6 +10,11 @@ import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { withLang } from "@/lib/locale-url";
 
+function looksLikeDump(s: string): boolean {
+  const t = s.trim();
+  return t.startsWith("{") || t.startsWith("[") || /error_code|unsupported provider|provider is not enabled/i.test(t);
+}
+
 export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const { t, locale } = useI18n();
   const { login, signup } = useAuth();
@@ -22,9 +27,10 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const [errorDetail, setErrorDetail] = useState("");
   const [needsEmail, setNeedsEmail] = useState(false);
   const [googleBusy, setGoogleBusy] = useState(false);
-  const [googleDetail, setGoogleDetail] = useState("");
+  const [googleReady, setGoogleReady] = useState<boolean | null>(null);
 
   const qErr = params.get("error");
+  const googleOffQuery = qErr === "google_off" || qErr === "google";
 
   function messageFor(code: string | undefined, fallbackKey: "auth.error" | "auth.signupError"): string {
     switch (code) {
@@ -37,6 +43,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
       case "weak_password":
         return t("auth.error.weak_password");
       case "google":
+      case "google_off":
         return t("auth.googleOff");
       case "no_supabase":
         return t("auth.noSupabase");
@@ -50,27 +57,26 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   }
 
   useEffect(() => {
-    if (qErr === "google") setError(t("auth.googleOff"));
-    else if (qErr === "no_supabase") setError(t("auth.noSupabase"));
+    if (qErr === "no_supabase") setError(t("auth.noSupabase"));
     else if (qErr === "auth") setError(t("auth.error"));
   }, [qErr, t]);
 
   useEffect(() => {
     let cancelled = false;
     fetch("/api/auth/google?json=1", { headers: { Accept: "application/json" }, cache: "no-store" })
-      .then((r) => r.json() as Promise<{ ok?: boolean; error?: string; detail?: string }>)
-      .then((data) => {
-        if (cancelled || data.ok) return;
-        if (data.error === "no_supabase") setGoogleDetail(t("auth.noSupabase"));
-        else setGoogleDetail(t("auth.googleOff"));
+      .then(async (r) => {
+        const data = (await r.json().catch(() => ({}))) as { ok?: boolean; url?: string; error?: string };
+        if (cancelled) return;
+        const on = r.ok && data.ok === true && typeof data.url === "string" && data.url.length > 0;
+        setGoogleReady(on);
       })
       .catch(() => {
-        /* leave Google as clickable; click path reports network */
+        if (!cancelled) setGoogleReady(false);
       });
     return () => {
       cancelled = true;
     };
-  }, [t]);
+  }, []);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -112,9 +118,9 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
         cache: "no-store",
       });
       const data = (await res.json()) as { ok?: boolean; url?: string; error?: string; detail?: string };
-      if (!data.ok || !data.url) {
-        setError(messageFor(data.error || "google", "auth.error"));
-        if (data.detail) setErrorDetail(data.detail);
+      if (!res.ok || !data.ok || !data.url || data.error === "google_off" || data.error === "google") {
+        setGoogleReady(false);
+        setError(t("auth.googleOff"));
         return;
       }
       window.location.href = data.url;
@@ -143,6 +149,10 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
     );
   }
 
+  const showGoogleOff = googleReady === false || googleOffQuery;
+  const formError = error === t("auth.googleOff") ? "" : error;
+  const formDetail = errorDetail && !looksLikeDump(errorDetail) ? errorDetail : "";
+
   return (
     <div className="mx-auto max-w-md px-4 py-12">
       <h1 className="text-3xl font-black text-navy">{t(mode === "login" ? "auth.title.login" : "auth.title.signup")}</h1>
@@ -170,22 +180,25 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
             dir="ltr"
           />
         </div>
-        {error ? <p className="text-sm font-black text-omni-red">{error}</p> : null}
-        {errorDetail ? (
+        {formError ? <p className="text-sm font-black text-omni-red">{formError}</p> : null}
+        {formDetail ? (
           <p className="text-xs text-muted" dir="ltr">
-            {errorDetail}
+            {formDetail}
           </p>
         ) : null}
         <Button type="submit" className="w-full text-base font-black" disabled={busy}>
           {busy ? t("auth.busy") : t(mode === "login" ? "auth.submit.login" : "auth.submit.signup")}
         </Button>
       </form>
-      <p className="my-4 text-center text-sm font-bold uppercase tracking-[0.18em] text-muted">{t("auth.or")}</p>
-      <p className="mb-2 text-center text-xs text-muted">{t("auth.googleSecondary")}</p>
-      <Button type="button" variant="outline" className="w-full" disabled={googleBusy} onClick={() => void onGoogle()}>
-        {googleBusy ? t("auth.busy") : t("auth.google")}
-      </Button>
-      {googleDetail ? <p className="mt-2 text-sm font-semibold text-omni-red">{googleDetail}</p> : null}
+      {googleReady === true ? (
+        <>
+          <p className="my-4 text-center text-sm font-bold uppercase tracking-[0.18em] text-muted">{t("auth.or")}</p>
+          <Button type="button" variant="outline" className="w-full" disabled={googleBusy} onClick={() => void onGoogle()}>
+            {googleBusy ? t("auth.busy") : t("auth.google")}
+          </Button>
+        </>
+      ) : null}
+      {showGoogleOff ? <p className="mt-4 text-sm font-semibold text-omni-red">{t("auth.googleOff")}</p> : null}
       <p className="mt-4 text-center text-sm">
         {mode === "login" ? (
           <LangLink href="/signup" className="font-semibold text-navy underline">
