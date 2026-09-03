@@ -41,7 +41,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [apply]);
 
   useEffect(() => {
-    void refresh();
+    let cancelled = false;
+    void (async () => {
+      if (typeof window !== "undefined") {
+        const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+        const access = hash.get("access_token") || "";
+        const refreshToken = hash.get("refresh_token") || "";
+        if (access && refreshToken) {
+          try {
+            const res = await fetch("/api/auth/oauth-tokens", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              credentials: "include",
+              body: JSON.stringify({ access_token: access, refresh_token: refreshToken }),
+            });
+            const url = new URL(window.location.href);
+            url.hash = "";
+            url.searchParams.delete("error");
+            window.history.replaceState(null, "", url.pathname + url.search);
+            if (res.ok && !cancelled) {
+              await refresh();
+              window.location.replace("/");
+              return;
+            }
+          } catch {
+            /* fall through to session refresh */
+          }
+        }
+      }
+      if (!cancelled) await refresh();
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [refresh]);
 
   const login = useCallback(async (email: string, password: string) => {

@@ -58,12 +58,19 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
 
   useEffect(() => {
     if (qErr === "no_supabase") setError(t("auth.noSupabase"));
-    else if (qErr === "auth") setError(t("auth.error"));
+    else if (qErr === "auth") {
+      // Implicit Google tokens sit in the hash; AuthProvider is exchanging them.
+      if (typeof window !== "undefined") {
+        const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+        if (hash.get("access_token")) return;
+      }
+      setError(t("auth.error"));
+    }
   }, [qErr, t]);
 
   useEffect(() => {
     let cancelled = false;
-    fetch("/api/auth/google?json=1", { headers: { Accept: "application/json" }, cache: "no-store" })
+    fetch("/api/auth/google?json=1&probe=1", { headers: { Accept: "application/json" }, cache: "no-store", credentials: "include" })
       .then(async (r) => {
         const data = (await r.json().catch(() => ({}))) as { ok?: boolean; url?: string; error?: string };
         if (cancelled) return;
@@ -116,9 +123,17 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
       const res = await fetch("/api/auth/google?json=1", {
         headers: { Accept: "application/json" },
         cache: "no-store",
+        credentials: "include",
       });
       const data = (await res.json()) as { ok?: boolean; url?: string; error?: string; detail?: string };
-      if (!res.ok || !data.ok || !data.url || data.error === "google_off" || data.error === "google") {
+      if (
+        !res.ok ||
+        !data.ok ||
+        !data.url ||
+        !/^https?:\/\//i.test(data.url) ||
+        data.error === "google_off" ||
+        data.error === "google"
+      ) {
         setGoogleReady(false);
         setError(t("auth.googleOff"));
         return;

@@ -1,3 +1,4 @@
+import { createHash, randomBytes } from "crypto";
 import { createClient, type Session, type User } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { runtimeEnv } from "./runtime-env";
@@ -5,6 +6,7 @@ import { isOwnerEmail, resolvePlan, type PlanId } from "./plan";
 
 export const ACCESS_COOKIE = "sawek-sb-access";
 export const REFRESH_COOKIE = "sawek-sb-refresh";
+export const PKCE_COOKIE = "sawek-sb-pkce";
 
 export type AuthSession = {
   user: { id: string; email: string };
@@ -96,6 +98,98 @@ export function applyAuthCookies(
   res.cookies.set(ACCESS_COOKIE, tokens.access, { ...base, maxAge: 60 * 60 });
   res.cookies.set(REFRESH_COOKIE, tokens.refresh, { ...base, maxAge: 60 * 60 * 24 * 30 });
   return res;
+}
+
+export function makePkcePair(): { verifier: string; challenge: string } {
+  const verifier = randomBytes(32).toString("base64url");
+  const challenge = createHash("sha256").update(verifier).digest("base64url");
+  return { verifier, challenge };
+}
+
+export function readPkceCookie(req: Request): string {
+  return parseCookieHeader(req.headers.get("cookie") ?? "", PKCE_COOKIE);
+}
+
+export function applyPkceCookie(res: NextResponse, req: Request, verifier: string | null): NextResponse {
+  const secure = cookieSecure(req);
+  const base = { httpOnly: true, sameSite: "lax" as const, path: "/", secure };
+  if (!verifier) {
+    res.cookies.set(PKCE_COOKIE, "", { ...base, maxAge: 0 });
+    return res;
+  }
+  res.cookies.set(PKCE_COOKIE, verifier, { ...base, maxAge: 60 * 15 });
+  return res;
+}
+
+/** Relative path only — OAuth next must not become an open redirect. */
+export function safeInternalPath(next: string | null | undefined): string {
+  const n = String(next || "/").trim() || "/";
+  if (!n.startsWith("/") || n.startsWith("//") || n.includes("\\") || n.includes("://")) return "/";
+  return n;
+}
+
+export function googleAuthorizeUrl(req: Request, challenge: string): string | null {
+  const creds = supabaseAnonCreds();
+  if (!creds) return null;
+  const redirectTo = `${publicAppBase(req)}/auth/callback`;
+  const u = new URL(`${creds.url.replace(/\/$/, "")}/auth/v1/authorize`);
+  u.searchParams.set("provider", "google");
+  u.searchParams.set("redirect_to", redirectTo);
+  u.searchParams.set("code_challenge", challenge);
+  u.searchParams.set("code_challenge_method", "s256");
+  return u.toString();
+}
+
+export async function exchangePkceCode(
+  code: string,
+  verifier: string,
+): Promise<{ user: User | null; tokens: { access: string; refresh: string } | null }> {
+  const creds = supabaseAnonCreds();
+  if (!creds || !code || !verifier) return { user: null, tokens: null };
+  try {
+    const res = await fetch(`${creds.url.replace(/\/$/, "")}/auth/v1/token?grant_type=pkce`, {
+      method: "POST",
+      headers: {
+        apikey: creds.key,
+        Authorization: `Bearer ${creds.key}`,
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({ auth_code: code, code_verifier: verifier }),
+      cache: "no-store",
+    });
+    const data = (await res.json().catch(() => ({}))) as {
+      access_token?: string;
+      refresh_token?: string;
+      user?: User;
+    };
+    if (!res.ok || !data.access_token || !data.refresh_token) return { user: null, tokens: null };
+    let user = data.user ?? null;
+    if (!user) {
+      const sb = supabaseAnonClient();
+      const got = sb ? await sb.auth.getUser(data.access_token) : { data: { user: null } };
+      user = got.data.user;
+    }
+    return { user, tokens: { access: data.access_token, refresh: data.refresh_token } };
+  } catch {
+    return { user: null, tokens: null };
+  }
+}
+
+export async function sessionFromAccessRefresh(
+  access: string,
+  refresh: string,
+): Promise<{ user: User | null; tokens: { access: string; refresh: string } | null }> {
+  if (!access || !refresh) return { user: null, tokens: null };
+  const sb = supabaseAnonClient();
+  if (!sb) return { user: null, tokens: null };
+  try {
+    const got = await sb.auth.getUser(access);
+    if (!got.data.user) return { user: null, tokens: null };
+    return { user: got.data.user, tokens: { access, refresh } };
+  } catch {
+    return { user: null, tokens: null };
+  }
 }
 
 function userEmail(user: User | null): string {
