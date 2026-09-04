@@ -122,7 +122,9 @@ export function extractCssColors(html: string, cap = 5): string[] {
 function absHttp(maybe: string, base: string): string {
   if (!maybe) return "";
   try {
-    const u = new URL(decodeEntities(maybe.trim()), base);
+    let cleaned = decodeEntities(maybe.trim()).split(/\s+/)[0] || "";
+    cleaned = cleaned.replace(/%20type(?:=.*)?$/i, "").replace(/\s+type(?:=.*)?$/i, "");
+    const u = new URL(cleaned, base);
     if (u.protocol !== "http:" && u.protocol !== "https:") return "";
     return u.href;
   } catch {
