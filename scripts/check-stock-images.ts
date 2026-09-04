@@ -1,5 +1,6 @@
 import { detectVertical } from "../lib/vertical";
 import {
+  curatedFallbackStills,
   isJunkStockTitle,
   isOnTopicStock,
   resolveStockVertical,
@@ -60,6 +61,18 @@ const detected = detectVertical({
 if (detected !== "clinic") fail(`detectVertical clinic got ${detected}`);
 if (resolveStockVertical({ category: "طبيب أطفال", q: "عيادة أطفال" }) !== "clinic") {
   fail("resolveStockVertical failed to infer clinic");
+}
+if (resolveStockVertical({ vertical: "pediatrics" }) !== "clinic") {
+  fail(`pediatrics vertical resolved to ${resolveStockVertical({ vertical: "pediatrics" })}`);
+}
+
+const pediCurated = curatedFallbackStills({ vertical: "pediatrics" }, 8);
+if (pediCurated.length < 6) fail(`pediatrics curated ${pediCurated.length} < 6`);
+if (pediCurated.some((i) => !i.full.startsWith("data:image/"))) {
+  fail("curated still missing data url");
+}
+if (pediCurated.some((i) => /politic|council|wikimedia/i.test(i.title + i.attribution))) {
+  fail("curated leaked politics/wikimedia");
 }
 
 if (!isJunkStockTitle("Clalit logo PNG")) fail("junk missed Clalit logo");

@@ -4,7 +4,7 @@ import { runtimeEnv } from "./runtime-env";
 export const DEFAULT_VERTEX_PROJECT = "project-8fd8a005-ae6d-4139-ab4";
 export const DEFAULT_VERTEX_LOCATION = "us-central1";
 
-export const VERTEX_GEMINI_MODELS = ["gemini-2.5-flash", "gemini-3.6-flash"] as const;
+export const VERTEX_GEMINI_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-3.6-flash"] as const;
 
 export type GeminiProvider = "vertex" | "ai_studio" | "none";
 
@@ -225,7 +225,9 @@ export function extractGenerateText(json: unknown): string {
     if (!Array.isArray(parts)) continue;
     for (const part of parts) {
       if (!part || typeof part !== "object") continue;
-      const text = (part as { text?: unknown }).text;
+      const o = part as { text?: unknown; thought?: unknown };
+      if (o.thought === true) continue;
+      const text = o.text;
       if (typeof text === "string" && text.trim()) chunks.push(text);
     }
   }

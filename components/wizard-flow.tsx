@@ -501,7 +501,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
       ) : null}
 
       {phase === "wizard" && (
-        <>
+        <div className="agency-paper mt-4 rounded-[28px] px-4 py-6 sm:px-7 sm:py-8">
           <Stepper step={step} onStep={(n) => setStep(n)} />
           <CoachPanel report={coachReport} onApply={applyCoach} />
           {step > 1 && (
@@ -932,7 +932,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
               </Button>
             )}
           </div>
-        </>
+        </div>
       )}
 
       {phase === "interview" && (

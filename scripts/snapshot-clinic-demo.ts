@@ -16,10 +16,34 @@ import { diagnose } from "../lib/engine/diagnose";
 import { generateStrategy } from "../lib/engine/strategy";
 import { generateMedia } from "../lib/engine/media";
 import { generateOptimizer } from "../lib/engine/optimizer";
-import type { CampaignPack, IngestedDocument } from "../lib/types";
+import type { CampaignPack, IngestedDocument, Intake, MediaAssetMeta } from "../lib/types";
+import { studioStillsForIntake } from "../lib/studio-stills";
+import { demoIntake } from "../lib/demo";
 
 const SOURCE = "https://drsamerped.ai.studio";
 const PACK_ID = "demo-samer-clinic";
+
+function stillsForIntake(intake: Intake): MediaAssetMeta[] {
+  const dir = join(process.cwd(), "public/packs/stills");
+  mkdirSync(dir, { recursive: true });
+  return studioStillsForIntake(intake).slice(0, 8).map((s) => {
+    const encoded = s.dataUrl.split(",")[1] || "";
+    const svg = decodeURIComponent(encoded);
+    const file = `${s.id}.svg`;
+    writeFileSync(join(dir, file), svg, "utf8");
+    return {
+      id: s.id,
+      kind: "image" as const,
+      mime: "image/svg+xml",
+      name: s.name.he || s.name.en,
+      size: svg.length,
+      label: "interior" as const,
+      note: `offer:studio:${s.id}`,
+      createdAt: new Date().toISOString(),
+      publicSrc: `/packs/stills/${file}`,
+    };
+  });
+}
 
 function writePublished(pack: CampaignPack): { outPath: string; ids: string[] } {
   const outDir = join(process.cwd(), "public/packs");
@@ -36,22 +60,24 @@ function writePublished(pack: CampaignPack): { outPath: string; ids: string[] } 
 }
 
 async function main() {
-  const r = await ingestUrl(SOURCE);
-  if (!r.ok) {
-    console.error(r);
-    process.exit(1);
+  let intake = demoIntake("ar");
+  const r = await ingestUrl(SOURCE).catch(() => ({ ok: false as const }));
+  if (r.ok) {
+    const doc: IngestedDocument = {
+      id: "doc-clinic-scan",
+      name: r.url,
+      mime: "text/html",
+      size: (r.text || "").length,
+      kind: "url",
+      tags: ["identity"],
+      excerpt: (r.text || "").slice(0, 800),
+      createdAt: new Date().toISOString(),
+    };
+    intake = applyIngestReview(emptyIntake(), rowsFromExtracted(r.fields, false), doc, []);
+  } else {
+    console.warn("ingest failed — refreshing demo pack from snapshot facts");
   }
-  const doc: IngestedDocument = {
-    id: "doc-clinic-scan",
-    name: r.url,
-    mime: "text/html",
-    size: (r.text || "").length,
-    kind: "url",
-    tags: ["identity"],
-    excerpt: (r.text || "").slice(0, 800),
-    createdAt: new Date().toISOString(),
-  };
-  const intake = applyIngestReview(emptyIntake(), rowsFromExtracted(r.fields, false), doc, []);
+  intake = { ...intake, mediaAssets: stillsForIntake(intake) };
   const snap = {
     businessName: intake.businessName,
     category: intake.category,

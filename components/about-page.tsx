@@ -132,13 +132,17 @@ export function AboutPage() {
           };
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-10">
+    <div className="mx-auto max-w-3xl px-4 py-12 sm:py-16">
+      <p className="mb-2 text-center text-sm font-bold uppercase tracking-[0.32em] text-gold">
+        SAWEK AD
+      </p>
+      <div className="mx-auto mb-6 h-px w-20 bg-gold" />
       <ConquerHeadline subtitle={t("about.title")} />
       <p className="mb-2 text-center text-sm text-muted">
         {locale === "ar" ? t("brand.name") : "SAWEK AD · סאווק · سوِّق إعلانك بنفسك"}
         <span className="mt-1 block text-xs text-muted">{t("brand.tagline")}</span>
       </p>
-      <p className="mb-8 text-center text-base leading-relaxed text-navy">
+      <p className="mb-10 text-center text-lg leading-relaxed text-navy">
         {locale === "he"
           ? "SAWEK AD הופך קישור לאתר לקמפיין מוכן: ביקורת, מודעות, תמונות והורדה — לעסקים מקומיים."
           : locale === "ar"
@@ -161,28 +165,28 @@ export function AboutPage() {
         </Button>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-5">
         {steps.map((b) => (
-          <article key={b.h} className="rounded-2xl border border-navy/10 bg-white p-5">
-            <h2 className="mb-2 text-lg font-black text-omni-yellow">{b.h}</h2>
-            <p className="text-sm leading-relaxed text-muted">{b.p}</p>
+          <article key={b.h} className="agency-paper rounded-[24px] p-6 sm:p-7">
+            <h2 className="mb-3 text-xl font-black text-gold">{b.h}</h2>
+            <p className="text-base leading-relaxed text-navy/80">{b.p}</p>
           </article>
         ))}
 
-        <article className="rounded-2xl border border-navy/10 bg-white p-5">
-          <h2 className="mb-2 text-lg font-black text-omni-yellow">{who.h}</h2>
-          <p className="text-sm leading-relaxed text-muted">{who.p}</p>
+        <article className="agency-paper rounded-[24px] p-6 sm:p-7">
+          <h2 className="mb-3 text-xl font-black text-gold">{who.h}</h2>
+          <p className="text-base leading-relaxed text-navy/80">{who.p}</p>
         </article>
 
-        <article className="rounded-2xl border border-navy/10 bg-white p-5">
-          <h2 className="mb-2 text-lg font-black text-omni-yellow">{plans.h}</h2>
-          <p className="text-sm leading-relaxed text-muted">{plans.free}</p>
-          <p className="mt-2 text-sm leading-relaxed text-muted">{plans.pro}</p>
+        <article className="agency-paper rounded-[24px] p-6 sm:p-7">
+          <h2 className="mb-3 text-xl font-black text-gold">{plans.h}</h2>
+          <p className="text-base leading-relaxed text-navy/80">{plans.free}</p>
+          <p className="mt-3 text-base leading-relaxed text-navy/80">{plans.pro}</p>
         </article>
 
-        <article className="rounded-2xl border border-navy/10 bg-white p-5">
-          <h2 className="mb-2 text-lg font-black text-omni-yellow">{notYet.h}</h2>
-          <ul className="list-disc space-y-2 pe-5 text-sm leading-relaxed text-muted">
+        <article className="agency-paper rounded-[24px] p-6 sm:p-7">
+          <h2 className="mb-3 text-xl font-black text-gold">{notYet.h}</h2>
+          <ul className="list-disc space-y-2 pe-5 text-base leading-relaxed text-navy/80">
             {notYet.items.map((item) => (
               <li key={item}>{item}</li>
             ))}

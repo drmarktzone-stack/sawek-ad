@@ -161,7 +161,7 @@ function TypeBlock({
           className={cn(
             "font-black tracking-tight break-words",
             onPhoto && "text-[clamp(22px,5.2vw,34px)] leading-[1.08]",
-            !onPhoto && fb && "text-[clamp(15px,3.6vw,20px)] leading-[1.12]",
+            !onPhoto && fb && "text-[clamp(18px,4.2vw,24px)] leading-[1.15]",
             !onPhoto && ig && "text-[clamp(18px,4.2vw,26px)] leading-[1.08]",
             !onPhoto && tt && "text-[clamp(18px,5vw,26px)] leading-[1.1]",
             !onPhoto && wa && "text-[18px] leading-[1.12]",
@@ -175,7 +175,7 @@ function TypeBlock({
           <p
             className={cn(
               "mt-1.5 font-medium break-words",
-              fb && "text-[13px] leading-snug",
+              fb && "text-[14px] leading-relaxed",
               ig && "text-[14px] leading-snug",
               wa && "text-[13px] leading-snug",
               !channel && "text-sm leading-snug",

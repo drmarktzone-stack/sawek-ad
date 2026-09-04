@@ -667,20 +667,20 @@ function AdCard({
   return (
     <article
       className={cn(
-        "rounded-2xl border bg-white p-5",
-        featured ? "border-omni-yellow/50" : "border-navy/10",
+        "agency-paper rounded-[24px] p-6 sm:p-7",
+        featured && "border-gold/50",
       )}
     >
-      <div className="mb-2 flex items-center justify-between gap-2">
-        <p className="text-xs font-bold uppercase tracking-wide text-omni-yellow">{label}</p>
+      <div className="mb-3 flex items-center justify-between gap-2">
+        <p className="text-xs font-bold uppercase tracking-[0.16em] text-gold">{label}</p>
         <Button type="button" size="sm" variant="ghost" onClick={onCopy}>
           <Copy className="size-3.5" />
           {copied ? t(locale, "cta.copied") : t(locale, "cta.copy")}
         </Button>
       </div>
-      <h3 className="text-xl font-black text-navy">{headline}</h3>
-      <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-muted">{body}</p>
-      <span className="mt-4 inline-block rounded-lg bg-omni-yellow px-3 py-1 text-xs font-black text-black">
+      <h3 className="text-2xl font-black leading-snug text-navy">{headline}</h3>
+      <p className="mt-3 whitespace-pre-wrap text-base leading-relaxed text-navy/75">{body}</p>
+      <span className="mt-5 inline-block rounded-full bg-gold px-4 py-1.5 text-sm font-black text-navy">
         {cta}
       </span>
     </article>

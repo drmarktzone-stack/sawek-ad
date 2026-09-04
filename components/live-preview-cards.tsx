@@ -167,7 +167,7 @@ export function FacebookFeedCard({
         cta={fields.cta}
         hoursChips={fields.hoursChips}
         channel="facebook"
-        className="aspect-[1.91/1] h-auto min-h-[168px] rounded-none p-0"
+        className="aspect-[1.91/1] h-auto min-h-[220px] rounded-none p-0"
       />
       <div
         className="flex items-center justify-between gap-2 px-3 py-2.5"
@@ -435,7 +435,7 @@ export function WhatsAppPreviewCard({
           cta={fields.cta}
           hoursChips={fields.hoursChips}
           channel="whatsapp"
-          className="mb-2.5 aspect-square h-auto min-h-[160px] rounded-lg p-0"
+          className="mb-2.5 aspect-square h-auto min-h-[200px] rounded-lg p-0"
         />
         <div
           style={{
@@ -596,8 +596,8 @@ export function LivePreviewStrip({
 
       {onPack ? <ImageOfferPicker pack={pack} locale={packLang} onPack={onPack} /> : null}
 
-      <div className="mt-5 grid items-start gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <article className="rounded-[22px] border border-navy/10 bg-white p-4 shadow-[0_10px_28px_rgba(27,42,74,0.07)]">
+      <div className="mt-6 grid items-start gap-6 lg:grid-cols-2">
+        <article className="agency-paper rounded-[24px] p-5">
           <p className="mb-3 text-[13px] font-black uppercase tracking-[0.14em] text-navy/55">
             {t("end.facebook")} · 1.91:1
           </p>
@@ -619,7 +619,7 @@ export function LivePreviewStrip({
           ) : null}
         </article>
 
-        <article className="rounded-[22px] border border-navy/10 bg-white p-4 shadow-[0_10px_28px_rgba(27,42,74,0.07)]">
+        <article className="agency-paper rounded-[24px] p-5">
           <p className="mb-3 text-[13px] font-black uppercase tracking-[0.14em] text-navy/55">
             {t("end.instagram")} · 4:5
           </p>
@@ -638,7 +638,7 @@ export function LivePreviewStrip({
           ) : null}
         </article>
 
-        <article className="rounded-[22px] border border-navy/10 bg-white p-4 shadow-[0_10px_28px_rgba(27,42,74,0.07)]">
+        <article className="agency-paper rounded-[24px] p-5">
           <p className="mb-3 text-[13px] font-black uppercase tracking-[0.14em] text-navy/55">
             {t("end.tiktok")} · 9:16
           </p>
@@ -657,7 +657,7 @@ export function LivePreviewStrip({
           ) : null}
         </article>
 
-        <article className="rounded-[22px] border border-navy/10 bg-white p-4 shadow-[0_10px_28px_rgba(27,42,74,0.07)]">
+        <article className="agency-paper rounded-[24px] p-5">
           <p className="mb-3 text-[13px] font-black uppercase tracking-[0.14em] text-navy/55">
             {t("end.whatsapp")}
           </p>

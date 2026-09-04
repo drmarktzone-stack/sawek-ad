@@ -51,14 +51,15 @@ export function HomeStudio() {
         aria-hidden
         className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(27,42,74,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(27,42,74,0.04)_1px,transparent_1px)] bg-[size:56px_56px] [mask-image:radial-gradient(ellipse_at_center,black_40%,transparent_78%)]"
       />
-      <section className="relative mx-auto max-w-5xl px-4 pb-4 pt-8 sm:pt-12">
-        <p className="mb-3 text-center text-sm font-bold uppercase tracking-[0.28em] text-gold">
+      <section className="relative mx-auto max-w-5xl px-4 pb-6 pt-10 sm:pt-14">
+        <p className="mb-3 text-center text-sm font-bold uppercase tracking-[0.32em] text-gold">
           {t("home.kicker")}
         </p>
-        <h1 className="text-center text-3xl font-black leading-[1.15] tracking-tight text-navy sm:text-5xl">
+        <div className="mx-auto mb-6 h-px w-24 bg-gold" />
+        <h1 className="text-center text-4xl font-black leading-[1.12] tracking-tight text-navy sm:text-6xl">
           {t("home.headline")}
         </h1>
-        <p className="mx-auto mt-5 max-w-2xl text-center text-base font-semibold text-navy sm:text-lg">
+        <p className="mx-auto mt-6 max-w-2xl text-center text-lg font-semibold leading-relaxed text-navy sm:text-xl">
           {t("home.pitch")}
         </p>
         <p className="mx-auto mt-3 max-w-xl rounded-full border border-gold/40 bg-gold/15 px-4 py-2 text-center text-sm font-black text-navy">

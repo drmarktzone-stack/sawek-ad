@@ -157,10 +157,15 @@ export function ImageOfferPicker({
       };
       if (typeof data.imagenRequested === "number") setRequested(data.imagenRequested);
       const imagenHits = data.imagen ?? [];
-      const opts = hitsToOptions(imagenHits, t).filter((o) => o.kind === "imagen");
+      const fallbackHits = (data.images?.length ? data.images : data.curated) ?? [];
+      const vertexOpts = hitsToOptions(imagenHits, t);
+      const fallbackOpts = hitsToOptions(fallbackHits, t);
+      const opts = vertexOpts.length ? vertexOpts : fallbackOpts;
       setImagen(opts);
-      if (!opts.length) {
+      if (!opts.length && !graphicOpts.length) {
         setImgError(data.emptyMessage || t("audit.retryVertex"));
+      } else {
+        setImgError("");
       }
     } catch {
       setImgError(t("audit.retryVertex"));

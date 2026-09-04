@@ -14,7 +14,7 @@ const NAMED_CLINIC =
   /عيادة|מרפאה|\bclinic\b|\bclinics\b|hospital|مستشفى|בית חולים|מרפאת|drsamerped\.ai\.studio/i;
 
 const CLINIC_AS_BUSINESS =
-  /عيادة|מרפאה|\bclinic\b|\bclinics\b|hospital|مستشفى|בית חולים|מרפאת|طبيب أطفال|רופא ילדים|dental|\bdentist\b|שיניים|أسنان|וטרינר|بيطر/i;
+  /عيادة|מרפאה|\bclinic\b|\bclinics\b|hospital|مستشفى|בית חולים|מרפאת|طبيب أطفال|רופא ילדים|dental|\bdentist\b|שיניים|أسنان|וטרינר|بيطر|pedia/i;
 
 /** App / platform / smart-tools product — not a walk-in clinic. */
 const PRODUCT_AS_BUSINESS =

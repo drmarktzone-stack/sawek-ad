@@ -8,7 +8,9 @@
     "start": "next start --hostname 127.0.0.1 --port 43147",
     "lint": "eslint",
     "check:url-ingest": "npx --yes tsx scripts/check-url-ingest.ts",
-    "check:empty-campaign": "npx --yes tsx scripts/check-empty-campaign.ts"
+    "check:empty-campaign": "npx --yes tsx scripts/check-empty-campaign.ts",
+    "check:generate-facts": "npx --yes tsx scripts/check-generate-facts.ts",
+    "check:stock-images": "npx --yes tsx scripts/check-stock-images.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

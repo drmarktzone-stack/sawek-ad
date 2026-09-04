@@ -1,5 +1,7 @@
 import type { Vertical } from "./vertical";
 import { detectVertical } from "./vertical";
+import { graphicPostersForIntake } from "./graphic-posters";
+import { emptyIntake } from "./engine/validate";
 
 export type StockSource = "openverse" | "wikimedia" | "vertex" | "curated";
 
@@ -128,7 +130,14 @@ const NAMED_PORTRAIT = /portrait of (dr|prof|mr|ms|mrs)\b|headshot of\b/i;
 
 function asVertical(v: unknown): Vertical | undefined {
   const s = String(v ?? "").trim().toLowerCase();
-  return VERTICALS.includes(s as Vertical) ? (s as Vertical) : undefined;
+  if (VERTICALS.includes(s as Vertical)) return s as Vertical;
+  if (/pedia|pediatric|pediatrics|ילדים|أطفال|kids|children/.test(s)) return "clinic";
+  if (/hydrotherap|בריכה|مسبح|pool/.test(s)) return "pool";
+  if (/restaurant|מסעדה|مطعم|grill|shawarma/.test(s)) return "restaurant";
+  if (/retail|boutique|אופנה|חנות/.test(s)) return "retail";
+  if (/school|בית ספר|مدرسة/.test(s)) return "school";
+  if (/product|app|platform|smart tools/.test(s)) return "product";
+  return undefined;
 }
 
 function clip(s: string, max: number): string {
@@ -535,32 +544,42 @@ export async function vertexStillsForStock(input: StockSearchInput, max = 10): P
   }
 }
 
-/** Vertical-matched graphic stills when Imagen returns 0 — never dump junk CC. */
-export async function curatedFallbackStills(input: StockSearchInput, max = 8): Promise<StockImage[]> {
-  try {
-    const { graphicPostersForIntake } = await import("./graphic-posters");
-    const { emptyIntake } = await import("./engine/validate");
-    const intake = emptyIntake();
-    intake.businessName = sanitizeStockHint(input.q || "") || "local";
-    intake.category = input.category || input.vertical || "";
-    intake.description = input.description || input.q || "";
-    intake.location = input.location || "";
-    intake.offer = input.offer || "";
-    const posters = graphicPostersForIntake(intake);
-    const vertical = resolveStockVertical(input);
-    return posters.slice(0, Math.max(4, Math.min(12, max))).map((p, i) => ({
-      id: `curated-${p.id || i + 1}`,
+/** Vertical-matched graphic stills when Imagen returns 0 — never dump junk CC. Always ≥6. */
+export function curatedFallbackStills(input: StockSearchInput, max = 8): StockImage[] {
+  const intake = emptyIntake();
+  const vertical = resolveStockVertical(input);
+  intake.businessName = sanitizeStockHint(input.q || "") || "local";
+  intake.category =
+    input.category ||
+    (vertical === "clinic" ? "pediatric clinic" : input.vertical || "");
+  intake.description = input.description || input.q || input.vertical || "pediatric clinic";
+  intake.location = input.location || "";
+  intake.offer = input.offer || "";
+  if (vertical === "clinic" && !/clinic|pedia|מרפא|عيادة|طبيب|ילדים/.test(`${intake.category} ${intake.description}`)) {
+    intake.category = "pediatric clinic";
+    intake.description = `${intake.description} pediatric clinic`.trim();
+  }
+  const posters = graphicPostersForIntake(intake);
+  const needed = Math.max(6, Math.min(12, max || 8));
+  const pool = posters.length
+    ? posters
+    : graphicPostersForIntake({ ...intake, category: "pediatric clinic", description: "pediatric clinic waiting room" });
+  const out: StockImage[] = [];
+  for (let i = 0; i < needed; i++) {
+    const p = pool[i % pool.length];
+    if (!p) continue;
+    out.push({
+      id: `curated-${p.id || i + 1}-${i + 1}`,
       thumb: p.dataUrl,
       full: p.dataUrl,
       title: p.name.he || p.name.en || "Graphic still",
       attribution: "SAWEK graphic",
-      source: "curated" as const,
+      source: "curated",
       license: "curated",
       query: vertical,
-    }));
-  } catch {
-    return [];
+    });
   }
+  return out;
 }
 
 export async function searchStockImages(input: StockSearchInput): Promise<StockSearchResult> {

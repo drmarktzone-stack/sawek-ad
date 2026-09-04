@@ -3,6 +3,7 @@ import {
   curatedFallbackStills,
   searchStockImages,
   vertexStillsForStock,
+  type StockImage,
   type StockSearchInput,
 } from "@/lib/stock-images";
 import { IMAGEN_PICKER_COUNT } from "@/lib/imagen-scenes";
@@ -16,129 +17,122 @@ function read(req: Request, key: string): string {
   return String(url.searchParams.get(key) ?? "").trim();
 }
 
+function neverEmpty(input: StockSearchInput, extra: StockImage[] = []): StockImage[] {
+  if (extra.length >= 6) return extra;
+  const curated = curatedFallbackStills(input, Math.max(8, 6 - extra.length));
+  const seen = new Set(extra.map((i) => i.id));
+  const merged = [...extra];
+  for (const img of curated) {
+    if (seen.has(img.id)) continue;
+    seen.add(img.id);
+    merged.push(img);
+    if (merged.length >= 6) break;
+  }
+  return merged.length >= 6 ? merged : [...merged, ...curated].slice(0, Math.max(6, curated.length));
+}
+
 /**
  * Vertex Imagen stills are the library. When Imagen returns 0, serve vertical
- * curated graphic stills (or empty + Hebrew message) — never junk Openverse politics.
+ * curated graphic stills — never junk Openverse politics, never an empty wall.
  * source=imagen | cc | all.
  */
 export async function GET(req: Request) {
-  try {
-    const source = (read(req, "source") || "imagen").toLowerCase();
-    const input: StockSearchInput = {
-      q: read(req, "q"),
-      vertical: read(req, "vertical"),
-      category: read(req, "category"),
-      location: read(req, "location"),
-      description: read(req, "description"),
-      offer: read(req, "offer"),
-      limit: Number(read(req, "limit") || 48) || 48,
-      page: Number(read(req, "page") || 1) || 1,
-    };
-    const requested = IMAGEN_PICKER_COUNT;
+  const input: StockSearchInput = {
+    q: read(req, "q"),
+    vertical: read(req, "vertical"),
+    category: read(req, "category"),
+    location: read(req, "location"),
+    description: read(req, "description"),
+    offer: read(req, "offer"),
+    limit: Number(read(req, "limit") || 48) || 48,
+    page: Number(read(req, "page") || 1) || 1,
+  };
+  const requested = IMAGEN_PICKER_COUNT;
+  const source = (read(req, "source") || "imagen").toLowerCase();
 
+  try {
     if (source === "cc") {
       const result = await searchStockImages(input);
+      const images = result.images.length >= 6 ? result.images : neverEmpty(input, result.images);
       return NextResponse.json(
         {
           ...result,
+          images,
           imagen: [],
+          curated: images.filter((i) => i.source === "curated"),
           imagenRequested: 0,
           imagenGot: 0,
           emptyMessage:
-            result.emptyMessage ||
-            (result.images.length
+            result.images.length
               ? undefined
-              : "אין תמונות חופשיות רלוונטיות לנושא — נסו כרזות גרפיות או תמונה מהאתר."),
+              : "Vertex Imagen ריק — מציגים כרזות גרפיות לפי התחום.",
         },
         { status: 200 },
       );
     }
 
-    const stillsP = vertexStillsForStock(input, requested).catch(() => []);
+    const stillsP = vertexStillsForStock(input, requested).catch(() => [] as StockImage[]);
     const stills = await Promise.race([
       stillsP,
-      new Promise<Awaited<typeof stillsP>>((resolve) => setTimeout(() => resolve([]), 45000)),
+      new Promise<StockImage[]>((resolve) => setTimeout(() => resolve([]), 45000)),
     ]);
     const imagen = Array.isArray(stills) ? stills : [];
 
     if (source === "imagen") {
-      if (imagen.length) {
-        return NextResponse.json(
-          {
-            ok: true,
-            images: imagen,
-            imagen,
-            page: 1,
-            nextPage: null,
-            queries: [],
-            imagenRequested: requested,
-            imagenGot: imagen.length,
-          },
-          { status: 200 },
-        );
-      }
-      // Imagen empty: vertical curated graphics — not random CC politics.
-      const curated = await curatedFallbackStills(input, Math.min(8, requested));
+      const images = neverEmpty(input, imagen);
       return NextResponse.json(
         {
           ok: true,
-          images: curated,
-          imagen: [],
-          curated,
+          images,
+          imagen,
+          curated: images.filter((i) => i.source === "curated"),
           page: 1,
           nextPage: null,
           queries: [],
           imagenRequested: requested,
-          imagenGot: 0,
-          fallback: curated.length ? "curated" : "empty",
-          emptyMessage: curated.length
-            ? "Vertex Imagen ריק — מציגים כרזות גרפיות לפי התחום."
-            : "אין תמונות AI כרגע — נסו כרזות גרפיות או תמונה מהאתר.",
+          imagenGot: imagen.length,
+          fallback: imagen.length >= 6 ? "imagen" : "curated",
+          emptyMessage:
+            imagen.length >= 6 ? undefined : "Vertex Imagen ריק — מציגים כרזות גרפיות לפי התחום.",
         },
         { status: 200 },
       );
     }
 
-    // source=all: Imagen first; if empty, curated — CC only if still empty and filtered hard.
-    const curated = imagen.length ? [] : await curatedFallbackStills(input, Math.min(8, requested));
-    const primary = imagen.length ? imagen : curated;
-    const result = primary.length
-      ? { ok: true as const, images: [] as Awaited<ReturnType<typeof searchStockImages>>["images"], page: 1, nextPage: null as number | null, queries: [] as string[] }
-      : await searchStockImages(input);
+    const curated = imagen.length >= 6 ? [] : curatedFallbackStills(input, Math.min(8, requested));
+    const primary = neverEmpty(input, imagen.length ? imagen : curated);
     return NextResponse.json(
       {
-        ...result,
+        ok: true,
+        images: primary,
         imagen,
         curated,
-        images: primary.length ? primary : result.images,
+        page: 1,
+        nextPage: null,
+        queries: [],
         imagenRequested: requested,
         imagenGot: imagen.length,
-        fallback: imagen.length ? "imagen" : curated.length ? "curated" : result.images.length ? "cc" : "empty",
+        fallback: imagen.length >= 6 ? "imagen" : "curated",
         emptyMessage:
-          primary.length || result.images.length
-            ? imagen.length
-              ? undefined
-              : curated.length
-                ? "Vertex Imagen ריק — מציגים כרזות גרפיות לפי התחום."
-                : undefined
-            : result.emptyMessage ||
-              "אין תמונות רלוונטיות לנושא — נסו כרזות גרפיות או תמונה מהאתר.",
+          imagen.length >= 6 ? undefined : "Vertex Imagen ריק — מציגים כרזות גרפיות לפי התחום.",
       },
       { status: 200 },
     );
   } catch {
+    const curated = neverEmpty(input, []);
     return NextResponse.json(
       {
-        ok: false,
-        images: [],
+        ok: true,
+        images: curated,
         imagen: [],
+        curated,
         page: 1,
         nextPage: null,
         queries: [],
-        imagenRequested: IMAGEN_PICKER_COUNT,
+        imagenRequested: requested,
         imagenGot: 0,
-        error: "stock_error",
-        emptyMessage: "אין תמונות רלוונטיות לנושא — נסו כרזות גרפיות או תמונה מהאתר.",
+        fallback: "curated",
+        emptyMessage: "Vertex Imagen ריק — מציגים כרזות גרפיות לפי התחום.",
       },
       { status: 200 },
     );

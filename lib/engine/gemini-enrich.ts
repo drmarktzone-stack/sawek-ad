@@ -170,6 +170,7 @@ function payloadFromIntake(
   medical: boolean;
   prompt: string;
   mode: GenerateMode;
+  facts: Record<string, string>;
 } {
   const allLocales = sixHeadlines;
   return {
@@ -179,6 +180,22 @@ function payloadFromIntake(
     medical: isClinicLike(intake),
     prompt: allLocales ? promptAllLocales() : promptFor(language, sixHeadlines),
     mode,
+    facts: {
+      businessName: intake.businessName,
+      phone: intake.whatsapp,
+      city: intake.location,
+      website: intake.website,
+      offer: intake.offer,
+      hours: intake.clinicHours,
+      category: intake.category,
+      description: intake.description,
+      audience: intake.audience,
+      uniqueAdvantage: intake.uniqueAdvantage,
+      biggestProblem: intake.biggestProblem,
+      whatsapp: intake.whatsapp,
+      clinicHours: intake.clinicHours,
+      location: intake.location,
+    },
   };
 }
 
@@ -196,6 +213,7 @@ async function postGenerate(
     medical: boolean;
     prompt: string;
     mode?: GenerateMode;
+    facts?: Record<string, string>;
   },
   abortMs: number = ABORT_MS,
 ): Promise<GeminiResponse | null> {
