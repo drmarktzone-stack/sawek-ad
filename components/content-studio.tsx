@@ -80,7 +80,7 @@ export function ContentStudio({ embedded = false }: { embedded?: boolean }) {
         </>
       )}
       {embedded && (
-        <h2 className="mb-4 mt-8 text-lg font-black text-omni-yellow">{t("studio.title")}</h2>
+        <h2 className="mb-4 mt-8 text-lg font-black text-gold">{t("studio.title")}</h2>
       )}
 
       <div className="rounded-2xl border border-navy/10 bg-white p-5 sm:p-8">
@@ -126,7 +126,7 @@ export function ContentStudio({ embedded = false }: { embedded?: boolean }) {
             type="button"
             onClick={() => setStyleId(s.id)}
             className={`overflow-hidden rounded-xl border text-start ${
-              styleId === s.id ? "border-omni-yellow" : "border-navy/10"
+              styleId === s.id ? "border-gold" : "border-navy/10"
             }`}
           >
             <div
@@ -163,7 +163,7 @@ export function ContentStudio({ embedded = false }: { embedded?: boolean }) {
         )}
         {library.map((p) => (
           <li key={p.id} className="rounded-2xl border border-navy/10 bg-white p-4">
-            <p className="text-xs text-omni-yellow">
+            <p className="text-xs text-gold">
               {kindLabel[p.kind][locale]} · {p.locale}
             </p>
             <p className="mt-1 font-semibold">{p.idea}</p>

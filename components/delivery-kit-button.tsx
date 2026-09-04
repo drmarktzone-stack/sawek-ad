@@ -59,7 +59,7 @@ export function DeliveryKitButton({
         {busy ? t("end.kitBusy") : t("end.kit")}
       </Button>
       {compact ? null : <p className="max-w-[16rem] text-[11px] leading-snug text-muted">{t("end.kitHint")}</p>}
-      {err ? <p className="text-xs text-omni-red">{err}</p> : null}
+      {err ? <p className="text-xs text-danger">{err}</p> : null}
     </div>
   );
 }

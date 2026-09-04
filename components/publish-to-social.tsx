@@ -232,11 +232,11 @@ export function PublishToSocial({ campaignId, pack: packProp, locale: localeProp
         </div>
       )}
 
-      {flash && <p className="text-xs text-omni-yellow">{flash}</p>}
+      {flash && <p className="text-xs text-gold">{flash}</p>}
       {results.length > 0 && (
         <ul className="space-y-1 text-xs">
           {results.map((r) => (
-            <li key={r.platform} className={r.ok ? "text-omni-yellow" : "text-muted"}>
+            <li key={r.platform} className={r.ok ? "text-gold" : "text-muted"}>
               {r.platform}:{" "}
               {r.ok
                 ? r.permalink

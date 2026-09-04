@@ -79,7 +79,7 @@ export default function PublicLandingPage() {
         {t("med.demo")}
       </Button>
       <p className="mt-4">
-        <Link href="/medical" className="text-omni-yellow">
+        <Link href="/medical" className="text-gold">
           {t("nav.medical")}
         </Link>
       </p>

@@ -146,17 +146,17 @@ export function MedicalDesk() {
           {t("med.demo")}
         </Button>
         <div className="flex gap-2 text-xs font-semibold text-muted">
-          <span className={step >= 1 ? "text-omni-yellow" : ""}>1. {t("med.step.specialty")}</span>
-          <span className={step >= 2 ? "text-omni-yellow" : ""}>2. {t("med.step.clinic")}</span>
-          <span className={step >= 3 ? "text-omni-yellow" : ""}>3. {t("med.step.campaign")}</span>
-          <span className={preview ? "text-omni-yellow" : ""}>4. {t("med.step.landing")}</span>
+          <span className={step >= 1 ? "text-gold" : ""}>1. {t("med.step.specialty")}</span>
+          <span className={step >= 2 ? "text-gold" : ""}>2. {t("med.step.clinic")}</span>
+          <span className={step >= 3 ? "text-gold" : ""}>3. {t("med.step.campaign")}</span>
+          <span className={preview ? "text-gold" : ""}>4. {t("med.step.landing")}</span>
         </div>
       </div>
 
       <EthicsBanner locale={locale} />
 
       <section className="mt-6">
-        <h2 className="mb-3 text-sm font-black uppercase tracking-wide text-omni-yellow">{t("med.how.title")}</h2>
+        <h2 className="mb-3 text-sm font-black uppercase tracking-wide text-gold">{t("med.how.title")}</h2>
         <ul className="mb-6 grid gap-3 sm:grid-cols-3">
           {(
             [
@@ -166,7 +166,7 @@ export function MedicalDesk() {
             ] as const
           ).map(([h, b]) => (
             <li key={h} className="rounded-2xl border border-navy/10 bg-white p-4">
-              <p className="font-black text-omni-yellow">{t(h)}</p>
+              <p className="font-black text-gold">{t(h)}</p>
               <p className="mt-2 text-sm text-muted">{t(b)}</p>
             </li>
           ))}
@@ -180,8 +180,8 @@ export function MedicalDesk() {
               "med.how.4",
             ] as const
           ).map((k, i) => (
-            <li key={k} className="rounded-2xl border border-omni-yellow/20 bg-background p-4">
-              <p className="text-xs font-black text-omni-red">0{i + 1}</p>
+            <li key={k} className="rounded-2xl border border-gold/20 bg-background p-4">
+              <p className="text-xs font-black text-danger">0{i + 1}</p>
               <p className="mt-1 text-sm font-semibold text-navy">{t(k)}</p>
             </li>
           ))}
@@ -189,7 +189,7 @@ export function MedicalDesk() {
       </section>
 
       <section className="mt-6">
-        <h2 className="mb-3 text-sm font-black uppercase tracking-wide text-omni-yellow">{t("med.step.specialty")}</h2>
+        <h2 className="mb-3 text-sm font-black uppercase tracking-wide text-gold">{t("med.step.specialty")}</h2>
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
           {SPECIALTIES.map((s) => (
             <button
@@ -198,7 +198,7 @@ export function MedicalDesk() {
               onClick={() => pickSpecialty(s.id)}
               className={cn(
                 "rounded-2xl border p-4 text-start",
-                clinic?.specialty === s.id ? "border-omni-yellow bg-omni-yellow/10" : "border-navy/10 bg-white",
+                clinic?.specialty === s.id ? "border-gold bg-gold/10" : "border-navy/10 bg-white",
               )}
             >
               <p className="font-black text-navy">{s.label[locale]}</p>
@@ -210,9 +210,9 @@ export function MedicalDesk() {
 
       {clinic && (
         <section className="mt-8 rounded-2xl border border-navy/10 bg-white p-5">
-          <h2 className="mb-4 text-sm font-black uppercase tracking-wide text-omni-yellow">{t("med.step.clinic")}</h2>
+          <h2 className="mb-4 text-sm font-black uppercase tracking-wide text-gold">{t("med.step.clinic")}</h2>
           {isFreeService(clinic) && (
-            <p className="mb-4 rounded-xl border border-omni-yellow/30 bg-omni-yellow/5 p-3 text-sm text-foreground">
+            <p className="mb-4 rounded-xl border border-gold/30 bg-gold/5 p-3 text-sm text-foreground">
               {t("details.offerLocked")}
             </p>
           )}
@@ -292,7 +292,7 @@ export function MedicalDesk() {
 
       {clinic && (
         <section className="mt-8 rounded-2xl border border-navy/10 bg-white p-5">
-          <h2 className="mb-4 text-sm font-black uppercase tracking-wide text-omni-yellow">{t("med.step.campaign")}</h2>
+          <h2 className="mb-4 text-sm font-black uppercase tracking-wide text-gold">{t("med.step.campaign")}</h2>
           <p className="mb-3 text-xs text-muted">
             {t("med.library")} · {specialtyLabel(clinic.specialty, locale)}
           </p>
@@ -378,7 +378,7 @@ export function MedicalDesk() {
                 onClick={() => setTemplate(s.id)}
                 className={cn(
                   "rounded-xl border px-3 py-2 text-xs font-semibold",
-                  template === s.id ? "border-omni-yellow" : "border-navy/10",
+                  template === s.id ? "border-gold" : "border-navy/10",
                 )}
                 style={{ background: s.bg, color: s.ink }}
               >
@@ -457,7 +457,7 @@ export function MedicalDesk() {
           <EthicsBanner locale={packLang} />
           <div className="grid gap-3 md:grid-cols-2">
             <article className="rounded-2xl border border-navy/10 bg-white p-4">
-              <p className="text-xs font-black uppercase text-omni-yellow">{t("med.social")}</p>
+              <p className="text-xs font-black uppercase text-gold">{t("med.social")}</p>
               {copy.socialPosts.map((p) => (
                 <pre key={p.platform} className="mt-2 whitespace-pre-wrap font-sans text-sm text-muted">
                   {p.platform}: {p.body}
@@ -465,9 +465,9 @@ export function MedicalDesk() {
               ))}
             </article>
             <article className="rounded-2xl border border-navy/10 bg-white p-4">
-              <p className="text-xs font-black uppercase text-omni-yellow">{t("med.waScript")}</p>
+              <p className="text-xs font-black uppercase text-gold">{t("med.waScript")}</p>
               <p className="mt-2 whitespace-pre-wrap text-sm text-muted">{copy.whatsappScript}</p>
-              <p className="mt-4 text-xs font-black uppercase text-omni-yellow">{t("med.voice")}</p>
+              <p className="mt-4 text-xs font-black uppercase text-gold">{t("med.voice")}</p>
               <p className="mt-2 text-sm text-muted">{copy.voiceScript}</p>
             </article>
           </div>

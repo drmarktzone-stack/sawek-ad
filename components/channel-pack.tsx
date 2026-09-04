@@ -104,7 +104,7 @@ export function ChannelPack({
 
       <div className="mt-5 grid gap-4 lg:grid-cols-2">
         <article className="rounded-2xl border border-navy/10 bg-white p-4">
-          <p className="mb-3 text-[13px] font-black uppercase tracking-[0.14em] text-omni-yellow">
+          <p className="mb-3 text-[13px] font-black uppercase tracking-[0.14em] text-gold">
             {t("end.whatsapp")}
           </p>
           <WhatsAppFrame
@@ -140,7 +140,7 @@ export function ChannelPack({
         </article>
 
         <article className="rounded-2xl border border-navy/10 bg-white p-4">
-          <p className="mb-3 text-[13px] font-black uppercase tracking-[0.14em] text-omni-yellow">
+          <p className="mb-3 text-[13px] font-black uppercase tracking-[0.14em] text-gold">
             {t("end.landing")} · /lp/{pack.id}
           </p>
           <PackLandingCard
@@ -180,12 +180,12 @@ export function ChannelPack({
       <ResizeStrip pack={pack} packLang={packLang} generatedImage={generatedImage} />
       {canUse(plan, "calendar") ? <PostingWeek pack={pack} locale={packLang} /> : <PlanGate feature="calendar" className="mt-4" />}
 
-      <div className="mt-5 rounded-2xl border border-omni-yellow/25 bg-white p-4">
+      <div className="mt-5 rounded-2xl border border-gold/25 bg-white p-4">
         <Button type="button" disabled className="w-full sm:w-auto" title={t("end.publishNeedLogin")}>
           {t("end.publish")}
         </Button>
         <p className="mt-2 text-xs leading-relaxed text-muted">{t("end.publishHint")}</p>
-        <p className="mt-1 text-sm font-bold uppercase tracking-wide text-omni-yellow">
+        <p className="mt-1 text-sm font-bold uppercase tracking-wide text-gold">
           {t("end.publishNeedLogin")}
         </p>
       </div>
@@ -317,7 +317,7 @@ function PackLandingCard({
         overrideSrc={generatedSrc}
         className={compact ? "h-40 p-4" : "min-h-[280px] p-6"}
       >
-        <p className="text-[13px] font-bold uppercase tracking-[0.14em] text-omni-yellow">{fields.pageName}</p>
+        <p className="text-[13px] font-bold uppercase tracking-[0.14em] text-gold">{fields.pageName}</p>
         <h3 className={cn("mt-1 font-black leading-tight text-navy", compact ? "text-xl" : "text-3xl")}>
           {fields.headline}
         </h3>

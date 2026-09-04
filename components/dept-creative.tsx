@@ -55,10 +55,10 @@ export function CreativeDeptView({
           <ul className="space-y-3">
             {(pack.intake.pastCreatives ?? []).map((past) => (
               <li key={past.id} className="rounded-xl border border-navy/10 p-3 text-sm">
-                <p className="text-sm font-black uppercase tracking-widest text-omni-red">past_creative</p>
+                <p className="text-sm font-black uppercase tracking-widest text-danger">past_creative</p>
                 <p className="mt-1 font-semibold text-navy">{past.headline || past.sourceName}</p>
                 {past.body && <pre className="mt-1 whitespace-pre-wrap font-sans text-muted">{past.body}</pre>}
-                {past.cta && <p className="mt-1 text-omni-yellow">CTA: {past.cta}</p>}
+                {past.cta && <p className="mt-1 text-gold">CTA: {past.cta}</p>}
                 <p className="mt-2 text-sm text-muted">{t("ingest.pastTag")}</p>
               </li>
             ))}
@@ -83,7 +83,7 @@ export function CreativeDeptView({
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {c.hooks.map((h) => (
             <article key={h.id} className="rounded-xl border border-navy/10 p-3">
-              <p className="text-xs font-black uppercase text-omni-yellow">{h.angle[l]}</p>
+              <p className="text-xs font-black uppercase text-gold">{h.angle[l]}</p>
               <p className="mt-1 text-sm text-foreground">{h.hook[l]}</p>
             </article>
           ))}
@@ -104,7 +104,7 @@ export function CreativeDeptView({
                 <tr key={i} className="border-t border-navy/10">
                   <td className="p-2 text-foreground">{row.angle[l]}</td>
                   <td className="p-2 text-muted">{row.proof[l]}</td>
-                  <td className="p-2 font-semibold text-omni-yellow">{row.cta[l]}</td>
+                  <td className="p-2 font-semibold text-gold">{row.cta[l]}</td>
                 </tr>
               ))}
             </tbody>
@@ -130,7 +130,7 @@ export function CreativeDeptView({
         <div className="grid gap-3 md:grid-cols-2">
           {pieces.map((p, i) => (
             <article key={`${p.format}-${p.locale}-${i}`} className="rounded-xl border border-navy/10 p-4">
-              <p className="text-xs font-bold uppercase text-omni-yellow">{p.title}</p>
+              <p className="text-xs font-bold uppercase text-gold">{p.title}</p>
               <pre className="mt-2 whitespace-pre-wrap font-sans text-sm text-muted">{p.body}</pre>
             </article>
           ))}

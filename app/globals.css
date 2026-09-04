@@ -1,17 +1,31 @@
 @import "tailwindcss";
 
 :root {
-  --background: #F7F3EA;
-  --foreground: #16140F;
+  /* Paper / cream agency surface */
+  --background: #F6F1E6;
+  --background-deep: #EDE6D6;
+  --foreground: #1B2A4A;
   --muted: #6B6458;
-  --surface: #FFFFFF;
+  --muted-soft: #9A9183;
+  --surface: #FFFCF7;
   --card: #FFFFFF;
   --navy: #1B2A4A;
+  --navy-deep: #121C33;
+  --navy-soft: #2A3D66;
   --gold: #C9A227;
   --gold-soft: #E8D48A;
-  --omni-yellow: #C9A227;
-  --omni-red: #B42318;
-  --omni-black: #16140F;
+  --gold-mist: rgba(201, 162, 39, 0.14);
+  --cream: #F6F1E6;
+  --paper: #FFFcf7;
+  --line: rgba(27, 42, 74, 0.1);
+  --danger: #B42318;
+  --radius-card: 28px;
+  --shadow-card: 0 14px 40px rgba(27, 42, 74, 0.08);
+  --shadow-lift: 0 22px 60px rgba(27, 42, 74, 0.12);
+  /* Legacy aliases → agency tokens (no primitive yellow/black) */
+  --omni-yellow: var(--gold);
+  --omni-red: var(--danger);
+  --omni-black: var(--navy);
 }
 
 @theme inline {
@@ -21,11 +35,16 @@
   --color-surface: var(--surface);
   --color-card: var(--card);
   --color-navy: var(--navy);
+  --color-navy-deep: var(--navy-deep);
+  --color-navy-soft: var(--navy-soft);
   --color-gold: var(--gold);
   --color-gold-soft: var(--gold-soft);
+  --color-cream: var(--cream);
+  --color-paper: var(--paper);
+  --color-danger: var(--danger);
   --color-omni-yellow: var(--gold);
-  --color-omni-red: var(--omni-red);
-  --color-omni-black: var(--omni-black);
+  --color-omni-red: var(--danger);
+  --color-omni-black: var(--navy);
   --color-omni-surface: var(--surface);
   --color-omni-card: var(--card);
   --font-sans: var(--font-heebo), var(--font-cairo), ui-sans-serif, system-ui, sans-serif;
@@ -36,19 +55,24 @@ html {
 }
 
 body {
-  background:
-    radial-gradient(920px 280px at 50% -60px, rgba(201, 162, 39, 0.18) 0%, transparent 72%),
-    var(--background);
+  background-color: var(--background);
+  background-image:
+    radial-gradient(1100px 420px at 12% -8%, rgba(201, 162, 39, 0.22) 0%, transparent 58%),
+    radial-gradient(900px 380px at 92% 0%, rgba(27, 42, 74, 0.08) 0%, transparent 55%),
+    linear-gradient(180deg, #F9F5EC 0%, var(--background) 42%, #F3ECDD 100%);
   color: var(--foreground);
   font-family: var(--font-sans);
-  font-size: 16px;
-  line-height: 1.55;
+  font-size: 17px;
+  line-height: 1.6;
+  letter-spacing: 0.005em;
   min-height: 100%;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 ::selection {
-  background: var(--gold);
-  color: var(--navy);
+  background: var(--gold-soft);
+  color: var(--navy-deep);
 }
 
 @keyframes accordion-down {
@@ -59,8 +83,18 @@ body {
   from { height: var(--radix-accordion-content-height); }
   to { height: 0; }
 }
+@keyframes agency-shimmer {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+@keyframes agency-fade-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .animate-accordion-down { animation: accordion-down 0.2s ease-out; }
 .animate-accordion-up { animation: accordion-up 0.2s ease-out; }
+.agency-fade-up { animation: agency-fade-up 0.55s ease-out both; }
 
 input, textarea, select {
   direction: inherit;
@@ -68,8 +102,72 @@ input, textarea, select {
   unicode-bidi: plaintext;
 }
 
+/* Shared agency surfaces */
 .agency-card,
 .bg-omni-card,
 .bg-omni-surface {
-  box-shadow: 0 10px 32px rgba(27, 42, 74, 0.07);
+  background: var(--card);
+  box-shadow: var(--shadow-card);
+}
+
+.agency-shell {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background:
+    linear-gradient(180deg, rgba(255, 252, 247, 0.96), rgba(255, 255, 255, 0.98)),
+    var(--card);
+  box-shadow: var(--shadow-card);
+}
+
+.agency-hero-glow {
+  background:
+    radial-gradient(680px 240px at 50% 0%, rgba(201, 162, 39, 0.28), transparent 70%),
+    radial-gradient(520px 200px at 80% 20%, rgba(27, 42, 74, 0.08), transparent 65%);
+}
+
+.agency-grain {
+  background-image: url("/textures/paper-grain.svg");
+  background-size: 280px 280px;
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.agency-empty {
+  border: 1px dashed rgba(201, 162, 39, 0.45);
+  background:
+    linear-gradient(145deg, rgba(255, 252, 247, 0.95), rgba(246, 241, 230, 0.9)),
+    radial-gradient(circle at 30% 20%, rgba(201, 162, 39, 0.12), transparent 55%);
+}
+
+.agency-skeleton {
+  background: linear-gradient(
+    110deg,
+    #efe8d8 0%,
+    #f8f3e8 40%,
+    #efe8d8 80%
+  );
+  background-size: 200% 100%;
+  animation: agency-shimmer 1.4s ease-in-out infinite;
+}
+
+.agency-kicker {
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.agency-display {
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 1.12;
+  color: var(--navy);
+}
+
+/* Elegant RTL rhythm */
+[dir="rtl"] .agency-display,
+[dir="rtl"] h1,
+[dir="rtl"] h2 {
+  letter-spacing: 0;
 }

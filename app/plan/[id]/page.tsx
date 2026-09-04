@@ -42,7 +42,7 @@ export default function PlanPage() {
     return (
       <div className="p-10 text-center">
         <p className="text-muted">{t("campaigns.empty")}</p>
-        <LangLink href="/" onClick={() => markEmptyCampaign()} className="mt-4 inline-block text-omni-yellow">
+        <LangLink href="/" onClick={() => markEmptyCampaign()} className="mt-4 inline-block text-gold">
           {t("cta.new")}
         </LangLink>
       </div>

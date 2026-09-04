@@ -19,7 +19,7 @@ export function LeadsDeptView({ pack, packLang }: { pack: CampaignPack; packLang
           <p className="text-sm leading-relaxed text-foreground">{leads.magnet[l]}</p>
         </Card>
         <Card title={t("dept.booking")}>
-          <p className="inline-block rounded-lg bg-omni-yellow px-3 py-1 text-sm font-black text-black">
+          <p className="inline-block rounded-lg bg-gold px-3 py-1 text-sm font-black text-navy">
             {leads.bookingCta[l]}
           </p>
         </Card>
@@ -29,7 +29,7 @@ export function LeadsDeptView({ pack, packLang }: { pack: CampaignPack; packLang
           {leads.formFields.map((f) => (
             <li key={f.field[l]} className="flex items-center justify-between rounded-xl border border-navy/10 px-4 py-2 text-sm">
               <span className="text-foreground">{f.field[l]}</span>
-              <span className="text-xs font-bold text-omni-yellow">
+              <span className="text-xs font-bold text-gold">
                 {f.required ? t("dept.required") : t("dept.optional")}
               </span>
             </li>
@@ -56,7 +56,7 @@ export function LeadsDeptView({ pack, packLang }: { pack: CampaignPack; packLang
         <ol className="space-y-2">
           {leads.cadence.map((c) => (
             <li key={`${c.day}-${c.channel[l]}`} className="flex flex-wrap gap-2 rounded-xl border border-navy/10 p-3 text-sm">
-              <span className="font-black text-omni-yellow">D{c.day}</span>
+              <span className="font-black text-gold">D{c.day}</span>
               <span className="font-semibold text-navy">{c.channel[l]}</span>
               <span className="text-muted">{c.action[l]}</span>
             </li>

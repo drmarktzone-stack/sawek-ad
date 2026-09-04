@@ -84,7 +84,7 @@ export function IngestReviewDialog({
                     />
                     {r.missing && <p className="mt-1 text-sm text-muted">{ingestToComplete(locale)}</p>}
                     {r.needsClaimConfirm && (
-                      <label className="mt-2 flex items-start gap-2 text-sm text-omni-red">
+                      <label className="mt-2 flex items-start gap-2 text-sm text-danger">
                         <input
                           type="checkbox"
                           checked={r.claimsAllowed}
@@ -94,15 +94,15 @@ export function IngestReviewDialog({
                       </label>
                     )}
                   </td>
-                  <td className="p-2 text-xs text-omni-yellow">{STAGE_LABEL[r.targetStage][locale]}</td>
+                  <td className="p-2 text-xs text-gold">{STAGE_LABEL[r.targetStage][locale]}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
         {posts && posts.length > 0 && (
-          <div className="mt-4 rounded-xl border border-omni-yellow/25 bg-background p-3">
-            <p className="text-xs font-black uppercase tracking-wide text-omni-yellow">{t("ingest.pastPosts")}</p>
+          <div className="mt-4 rounded-xl border border-gold/25 bg-background p-3">
+            <p className="text-xs font-black uppercase tracking-wide text-gold">{t("ingest.pastPosts")}</p>
             <ul className="mt-2 space-y-2">
               {posts.map((p) => (
                 <li key={p.id} className="flex items-start gap-2 rounded-lg border border-navy/10 px-2 py-2">
@@ -220,8 +220,8 @@ export function DocumentIngest({
   return (
     <div>
       {variant === "primary" ? (
-        <div className="rounded-2xl border border-dashed border-omni-yellow/40 bg-background p-5">
-          <p className="mb-1 text-sm font-black text-omni-yellow">{t("ingest.title")}</p>
+        <div className="rounded-2xl border border-dashed border-gold/40 bg-background p-5">
+          <p className="mb-1 text-sm font-black text-gold">{t("ingest.title")}</p>
           <p className="mb-3 text-xs text-muted">{t("ingest.hint")}</p>
           {trigger}
           <p className="mt-2 text-sm text-muted">{t("ingest.types")}</p>
@@ -229,7 +229,7 @@ export function DocumentIngest({
       ) : (
         <div className="flex flex-wrap items-center gap-2">{trigger}</div>
       )}
-      {error && <p className="mt-2 text-sm font-semibold text-omni-red">{error}</p>}
+      {error && <p className="mt-2 text-sm font-semibold text-danger">{error}</p>}
 
       <IngestReviewDialog
         open={Boolean(prep)}
@@ -241,7 +241,7 @@ export function DocumentIngest({
         showPastTag={prep?.doc.tags.includes("past_creative")}
         extra={
           prep?.imageNeedsTypedText ? (
-            <div className="mt-4 space-y-2 rounded-xl border border-omni-yellow/30 bg-omni-yellow/5 p-3">
+            <div className="mt-4 space-y-2 rounded-xl border border-gold/30 bg-gold/5 p-3">
               <p className="text-xs text-muted">{t("ingest.imageAsk")}</p>
               <Textarea value={typed} onChange={(e) => setTyped(e.target.value)} placeholder={t("ingest.imageNote")} />
               <Button type="button" size="sm" variant="outline" onClick={useTyped} disabled={!typed.trim()}>

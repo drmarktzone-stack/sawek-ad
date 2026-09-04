@@ -148,8 +148,10 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
 
   if (needsEmail) {
     return (
-      <div className="mx-auto max-w-md px-4 py-12">
-        <div className="rounded-[28px] border border-gold/50 bg-white p-6 text-start shadow-[0_10px_32px_rgba(27,42,74,0.07)]">
+      <div className="relative mx-auto max-w-md overflow-hidden px-4 py-14">
+      <div aria-hidden className="agency-grain absolute inset-0" />
+      <div className="relative">
+        <div className="agency-shell border-gold/45 p-7 text-start">
           <Mail className="size-10 text-gold" />
           <h1 className="mt-3 text-3xl font-black text-navy">{t("auth.checkEmailTitle")}</h1>
           <p className="mt-3 text-base font-semibold leading-relaxed text-navy">{t("auth.checkEmail")}</p>
@@ -161,6 +163,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
           </Button>
         </div>
       </div>
+      </div>
     );
   }
 
@@ -169,11 +172,13 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const formDetail = errorDetail && !looksLikeDump(errorDetail) ? errorDetail : "";
 
   return (
-    <div className="mx-auto max-w-md px-4 py-12">
+    <div className="relative mx-auto max-w-md overflow-hidden px-4 py-14">
+      <div aria-hidden className="agency-grain absolute inset-0" />
+      <div className="relative">
       <h1 className="text-3xl font-black text-navy">{t(mode === "login" ? "auth.title.login" : "auth.title.signup")}</h1>
       <p className="mt-2 text-sm font-semibold text-navy">{t(mode === "login" ? "auth.lead.login" : "auth.lead.signup")}</p>
       <p className="mt-2 text-sm text-muted">{t("plan.freeBanner")}</p>
-      <form onSubmit={(e) => void onSubmit(e)} className="mt-6 space-y-3 rounded-[22px] border border-navy/10 bg-white p-5 shadow-[0_10px_32px_rgba(27,42,74,0.07)]">
+      <form onSubmit={(e) => void onSubmit(e)} className="mt-6 space-y-4 agency-shell p-6">
         <div>
           <Label htmlFor="email" className="text-base font-black text-navy">
             {t("auth.email")}
@@ -195,7 +200,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
             dir="ltr"
           />
         </div>
-        {formError ? <p className="text-sm font-black text-omni-red">{formError}</p> : null}
+        {formError ? <p className="text-sm font-black text-danger">{formError}</p> : null}
         {formDetail ? (
           <p className="text-xs text-muted" dir="ltr">
             {formDetail}
@@ -213,7 +218,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
           </Button>
         </>
       ) : null}
-      {showGoogleOff ? <p className="mt-4 text-sm font-semibold text-omni-red">{t("auth.googleOff")}</p> : null}
+      {showGoogleOff ? <p className="mt-4 text-sm font-semibold text-danger">{t("auth.googleOff")}</p> : null}
       <p className="mt-4 text-center text-sm">
         {mode === "login" ? (
           <LangLink href="/signup" className="font-semibold text-navy underline">
@@ -225,6 +230,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
           </LangLink>
         )}
       </p>
+      </div>
     </div>
   );
 }

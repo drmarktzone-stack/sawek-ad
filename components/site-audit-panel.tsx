@@ -69,8 +69,8 @@ export function SiteAuditPanel({
   return (
     <>
       {(audit.strengths.length || audit.weaknesses.length) ? (
-        <section data-audit="site" className="mb-8 rounded-2xl border border-omni-yellow/25 bg-white p-5">
-          <p className="text-[13px] font-black uppercase tracking-[0.18em] text-omni-yellow">{t("audit.title")}</p>
+        <section data-audit="site" className="mb-8 rounded-2xl border border-gold/25 bg-white p-5">
+          <p className="text-[13px] font-black uppercase tracking-[0.18em] text-gold">{t("audit.title")}</p>
           <p className="mt-1 text-sm leading-relaxed text-muted">{t("audit.lead")}</p>
           <div className="mt-4 grid gap-4 md:grid-cols-2">
             <div>
@@ -78,7 +78,7 @@ export function SiteAuditPanel({
               <AuditList items={audit.strengths} locale={locale} pack={pack} onPack={onPack} />
             </div>
             <div>
-              <p className="text-[13px] font-bold uppercase tracking-wide text-omni-red">{t("audit.weaknesses")}</p>
+              <p className="text-[13px] font-bold uppercase tracking-wide text-danger">{t("audit.weaknesses")}</p>
               <AuditList items={audit.weaknesses} locale={locale} pack={pack} onPack={onPack} />
             </div>
           </div>
@@ -86,8 +86,8 @@ export function SiteAuditPanel({
       ) : null}
 
       {past ? (
-        <section data-audit="past-campaigns" className="mb-8 rounded-2xl border border-omni-yellow/25 bg-white p-5">
-          <p className="text-[13px] font-black uppercase tracking-[0.18em] text-omni-yellow">{t("audit.pastTitle")}</p>
+        <section data-audit="past-campaigns" className="mb-8 rounded-2xl border border-gold/25 bg-white p-5">
+          <p className="text-[13px] font-black uppercase tracking-[0.18em] text-gold">{t("audit.pastTitle")}</p>
           <p className="mt-1 text-sm leading-relaxed text-muted">{t("audit.pastLead")}</p>
           <div className="mt-4 grid gap-4 md:grid-cols-2">
             <div>
@@ -95,21 +95,21 @@ export function SiteAuditPanel({
               <AuditList items={past.strengths} locale={locale} pack={pack} onPack={onPack} />
             </div>
             <div>
-              <p className="text-[13px] font-bold uppercase tracking-wide text-omni-red">{t("audit.weaknesses")}</p>
+              <p className="text-[13px] font-bold uppercase tracking-wide text-danger">{t("audit.weaknesses")}</p>
               <AuditList items={past.weaknesses} locale={locale} pack={pack} onPack={onPack} />
             </div>
           </div>
           <div className="mt-4 grid gap-3 md:grid-cols-3">
             <div className="rounded-xl border border-navy/10 bg-background px-3 py-2">
-              <p className="text-[13px] font-bold uppercase tracking-wide text-omni-yellow">{t("audit.inferredAudience")}</p>
+              <p className="text-[13px] font-bold uppercase tracking-wide text-gold">{t("audit.inferredAudience")}</p>
               <p className="mt-1 text-sm leading-relaxed text-foreground">{past.inferredAudience[locale]}</p>
             </div>
             <div className="rounded-xl border border-navy/10 bg-background px-3 py-2">
-              <p className="text-[13px] font-bold uppercase tracking-wide text-omni-yellow">{t("audit.recommendedAudience")}</p>
+              <p className="text-[13px] font-bold uppercase tracking-wide text-gold">{t("audit.recommendedAudience")}</p>
               <p className="mt-1 text-sm leading-relaxed text-foreground">{past.recommendedAudience[locale]}</p>
             </div>
             <div className="rounded-xl border border-navy/10 bg-background px-3 py-2">
-              <p className="text-[13px] font-bold uppercase tracking-wide text-omni-red">{t("audit.failedWhere")}</p>
+              <p className="text-[13px] font-bold uppercase tracking-wide text-danger">{t("audit.failedWhere")}</p>
               <ul className="mt-1 space-y-1">
                 {past.failedWhere.map((s) => (
                   <li key={s.id} className="text-sm leading-relaxed text-foreground">

@@ -29,17 +29,17 @@ export function CoachPanel({
   return (
     <section
       data-coach="panel"
-      className="mb-6 rounded-2xl border border-omni-yellow/30 bg-white p-4 sm:p-5"
+      className="mb-6 rounded-2xl border border-gold/30 bg-white p-4 sm:p-5"
     >
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <Sparkles className="size-4 text-omni-yellow" />
-          <p className="text-xs font-black uppercase tracking-[0.16em] text-omni-yellow">
+          <Sparkles className="size-4 text-gold" />
+          <p className="text-xs font-black uppercase tracking-[0.16em] text-gold">
             {t("coach.title")}
           </p>
         </div>
         <div className="flex items-baseline gap-2">
-          <p className="text-3xl font-black text-omni-yellow" data-coach="score">
+          <p className="text-3xl font-black text-gold" data-coach="score">
             {report.score}
           </p>
           <p className="text-sm text-muted">/100 · {t("coach.scoreHint")}</p>
@@ -50,7 +50,7 @@ export function CoachPanel({
         <ul className="mb-4 space-y-2">
           {critiques.map((c, i) => (
             <li key={`${c.stage}-${i}`} className="rounded-xl border border-navy/10 bg-background px-3 py-2">
-              <p className="text-sm font-bold uppercase tracking-wide text-omni-yellow">
+              <p className="text-sm font-bold uppercase tracking-wide text-gold">
                 {t(STAGE_KEY[c.stage])}
               </p>
               <p className="mt-1 text-sm text-foreground">{c.finding[locale]}</p>
@@ -62,8 +62,8 @@ export function CoachPanel({
 
       <div className="mb-4 grid gap-2 sm:grid-cols-3">
         {strategies.map((s) => (
-          <article key={s.id} className="rounded-xl border border-omni-yellow/20 bg-background p-3">
-            <p className="text-xs font-black text-omni-yellow">{s.title[locale]}</p>
+          <article key={s.id} className="rounded-xl border border-gold/20 bg-background p-3">
+            <p className="text-xs font-black text-gold">{s.title[locale]}</p>
             <p className="mt-1 text-xs leading-relaxed text-muted">{s.body[locale]}</p>
             <p className="mt-2 text-sm leading-relaxed text-muted">{s.plan7[locale]}</p>
           </article>
@@ -115,12 +115,12 @@ export function CoachImprovedStrip({
   return (
     <div
       data-coach="improved"
-      className="mb-8 rounded-2xl border border-omni-yellow/30 bg-omni-yellow/5 p-5"
+      className="mb-8 rounded-2xl border border-gold/30 bg-gold/5 p-5"
     >
-      <p className="text-xs font-black uppercase tracking-[0.18em] text-omni-yellow">
+      <p className="text-xs font-black uppercase tracking-[0.18em] text-gold">
         {t("coach.improved")}
       </p>
-      <p className="mt-1 text-2xl font-black text-omni-yellow">{report.score}/100</p>
+      <p className="mt-1 text-2xl font-black text-gold">{report.score}/100</p>
       <ul className="mt-3 list-disc space-y-1 ps-5 text-sm text-muted">
         {angles.map((a, i) => (
           <li key={i}>{a[locale]}</li>

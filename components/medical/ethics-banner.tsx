@@ -10,7 +10,7 @@ export function EthicsBanner({ locale, light = false }: { locale: Locale; light?
       className={
         light
           ? "rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800"
-          : "rounded-xl border border-omni-red/50 bg-red-50 px-4 py-3 text-sm text-red-800"
+          : "rounded-xl border border-danger/50 bg-red-50 px-4 py-3 text-sm text-red-800"
       }
     >
       {ETHICS[locale]}
@@ -32,6 +32,6 @@ export function MarkerCount({ n, locale }: { n: number; locale: Locale }) {
           ? `${n} open [TO COMPLETE] markers`
           : "No open TO COMPLETE markers";
   return (
-    <p className={`text-sm font-semibold ${n ? "text-omni-yellow" : "text-muted"}`}>{label}</p>
+    <p className={`text-sm font-semibold ${n ? "text-gold" : "text-muted"}`}>{label}</p>
   );
 }

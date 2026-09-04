@@ -113,12 +113,12 @@ export function Header() {
   if (pathname.startsWith("/lp/")) return null;
 
   return (
-    <header className="sticky top-0 z-40 border-b border-gold/40 bg-white/85 backdrop-blur-md">
+    <header className="sticky top-0 z-40 border-b border-gold/35 bg-[#FFFCF7]/90 backdrop-blur-xl">
       <UrlIngest />
       <div className="h-px w-full bg-gold" />
       <div className="mx-auto flex max-w-[92rem] items-center gap-2 px-3 py-3">
-        <LangLink href="/" className="flex shrink-0 flex-col leading-tight">
-          <span className="text-xl font-black tracking-tight text-navy sm:text-2xl">
+        <LangLink href="/" className="flex shrink-0 flex-col leading-tight pe-1">
+          <span className="text-xl font-black tracking-tight text-navy sm:text-2xl agency-display">
             {t("brand.name")}
           </span>
           <span className="text-sm font-semibold text-gold">{t("brand.scripts")}</span>
@@ -223,7 +223,7 @@ export function Footer() {
   const pathname = usePathname();
   if (pathname.startsWith("/lp/")) return null;
   return (
-    <footer className="mt-auto border-t border-gold/40 bg-white py-8 text-center text-sm text-muted">
+    <footer className="mt-auto border-t border-gold/35 bg-[#FFFCF7] py-10 text-center text-sm text-muted">
       <p className="mb-1 font-black text-navy">{t("brand.name")} · {t("brand.scripts")}</p>
       {t("footer.line")}
     </footer>

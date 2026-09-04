@@ -61,7 +61,7 @@ export function MedicalAppointments() {
         ].map((s) => (
           <div key={s.label} className="rounded-2xl border border-navy/10 bg-white p-4 text-center">
             <p className="text-xs text-muted">{s.label}</p>
-            <p className="mt-1 text-3xl font-black text-omni-yellow">{s.value}</p>
+            <p className="mt-1 text-3xl font-black text-gold">{s.value}</p>
           </div>
         ))}
       </div>
@@ -101,8 +101,8 @@ export function MedicalAppointments() {
             <li key={a.id} className="rounded-2xl border border-navy/10 bg-white p-4">
               <p className="font-black text-navy">{a.name}</p>
               <p className="text-sm text-muted">{a.phone}</p>
-              <p className="mt-1 text-sm text-omni-yellow">{new Date(a.startsAt).toLocaleString()}</p>
-              <p className="mt-1 text-xs font-bold text-omni-red">{statusLabel[a.status ?? "pending"]}</p>
+              <p className="mt-1 text-sm text-gold">{new Date(a.startsAt).toLocaleString()}</p>
+              <p className="mt-1 text-xs font-bold text-danger">{statusLabel[a.status ?? "pending"]}</p>
               <p className="mt-2 text-xs text-muted">{a.reminderPlan}</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {wa && (

@@ -191,7 +191,7 @@ export function Card({
 }) {
   return (
     <section className="rounded-2xl border border-navy/10 bg-white p-5">
-      <h2 className="mb-3 text-sm font-black uppercase tracking-wide text-omni-yellow">{title}</h2>
+      <h2 className="mb-3 text-sm font-black uppercase tracking-wide text-gold">{title}</h2>
       {children}
     </section>
   );

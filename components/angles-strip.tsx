@@ -42,9 +42,9 @@ export function AnglesStrip({
           return (
             <article
               key={id}
-              className="flex flex-col rounded-2xl border border-omni-yellow/25 bg-white p-4"
+              className="flex flex-col rounded-2xl border border-gold/25 bg-white p-4"
             >
-              <p className="text-sm font-black uppercase tracking-[0.18em] text-omni-yellow">
+              <p className="text-sm font-black uppercase tracking-[0.18em] text-gold">
                 {t(KEYS[id])}
               </p>
               {incomplete && id === "social_proof" && (
@@ -52,7 +52,7 @@ export function AnglesStrip({
               )}
               <h3 className="mt-2 text-sm font-black text-navy">{pack?.headline || INCOMPLETE[locale]}</h3>
               <p className="mt-2 flex-1 text-xs leading-relaxed text-muted">{pack?.copy || INCOMPLETE[locale]}</p>
-              <p className="mt-2 text-xs font-bold text-omni-yellow">{pack?.cta || INCOMPLETE[locale]}</p>
+              <p className="mt-2 text-xs font-bold text-gold">{pack?.cta || INCOMPLETE[locale]}</p>
               <Button
                 type="button"
                 size="sm"

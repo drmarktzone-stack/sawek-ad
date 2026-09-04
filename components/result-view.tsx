@@ -180,8 +180,8 @@ export function ResultView({
         <NewCampaignCta other hint className="items-center text-center" />
       </div>
 
-      <div className="mb-6 rounded-2xl border border-omni-yellow/20 bg-white p-4">
-        <p className="mb-3 text-xs font-black uppercase tracking-[0.18em] text-omni-yellow">
+      <div className="mb-6 rounded-2xl border border-gold/20 bg-white p-4">
+        <p className="mb-3 text-xs font-black uppercase tracking-[0.18em] text-gold">
           {tr("agents.title")}
         </p>
         <ul className="grid gap-2 sm:grid-cols-5">
@@ -196,7 +196,7 @@ export function ResultView({
           ).map(([id, key]) => (
             <li key={id} className="rounded-xl border border-navy/10 px-3 py-2">
               <p className="text-[13px] font-semibold text-navy">{tr(key)}</p>
-              <p className="mt-1 text-[13px] font-bold uppercase tracking-wide text-omni-yellow">
+              <p className="mt-1 text-[13px] font-bold uppercase tracking-wide text-gold">
                 {pack.agentStatus[id] === "approved" || pack.agentStatus[id] === "complete"
                   ? tr("status.complete")
                   : tr("status.needs_approval")}
@@ -271,16 +271,16 @@ export function ResultView({
       </div>
 
       <div className="mb-8 grid gap-4 md:grid-cols-2">
-        <div className="rounded-2xl border border-navy/10 bg-white p-5">
+        <div className="rounded-[22px] border border-navy/10 bg-[#FFFCF7] p-5">
           <p className="text-xs font-bold uppercase tracking-wide text-muted">
             {tr("result.score")}
           </p>
-          <p className="mt-1 text-3xl font-black text-omni-yellow">
+          <p className="mt-1 text-3xl font-black text-gold">
             {pack.intakeReport.completeness}/100
           </p>
           <div className="mt-3 h-2 overflow-hidden rounded-full bg-navy/10">
             <div
-              className="h-full bg-omni-yellow"
+              className="h-full bg-gold"
               style={{ width: `${pack.intakeReport.completeness}%` }}
             />
           </div>
@@ -288,7 +288,7 @@ export function ResultView({
             {tr("result.scoreHint")}
           </p>
         </div>
-        <div className="rounded-2xl border border-navy/10 bg-white p-5">
+        <div className="rounded-[22px] border border-navy/10 bg-[#FFFCF7] p-5">
           <p className="text-xs font-bold uppercase tracking-wide text-muted">
             {tr("result.scenario")}
           </p>
@@ -306,12 +306,12 @@ export function ResultView({
       {pack.coach && <CoachImprovedStrip report={pack.coach} locale={packLang} />}
 
       <div className="mb-8 grid gap-4 lg:grid-cols-2">
-        <div className="rounded-2xl border border-omni-yellow/25 bg-white p-5">
-          <p className="text-xs font-bold uppercase tracking-wide text-omni-yellow">{tr("result.mission")}</p>
+        <div className="rounded-2xl border border-gold/25 bg-white p-5">
+          <p className="text-xs font-bold uppercase tracking-wide text-gold">{tr("result.mission")}</p>
           <p className="mt-2 text-sm leading-relaxed text-foreground">{missionOf(pack.intake)[locale]}</p>
         </div>
-        <div className="rounded-2xl border border-navy/10 bg-white p-5">
-          <p className="text-xs font-bold uppercase tracking-wide text-omni-yellow">{tr("result.highlights")}</p>
+        <div className="rounded-[22px] border border-navy/10 bg-[#FFFCF7] p-5">
+          <p className="text-xs font-bold uppercase tracking-wide text-gold">{tr("result.highlights")}</p>
           <ul className="mt-2 list-disc space-y-1 pe-5 text-sm text-muted">
             {highlightsOf(pack).map((h, i) => (
               <li key={i}>{h[locale]}</li>
@@ -332,9 +332,9 @@ export function ResultView({
           <LangLink
             key={card.href}
             href={card.href}
-            className="rounded-2xl border border-navy/10 bg-white p-4 transition hover:border-gold"
+            className="rounded-[22px] border border-navy/10 bg-[#FFFCF7] p-4 transition hover:border-gold"
           >
-            <p className="text-xs font-black uppercase tracking-wide text-omni-yellow">{tr(card.key)}</p>
+            <p className="text-xs font-black uppercase tracking-wide text-gold">{tr(card.key)}</p>
             <p className="mt-2 line-clamp-3 text-sm text-muted">{card.body}</p>
           </LangLink>
         ))}
@@ -344,8 +344,8 @@ export function ResultView({
         <h2 className="mb-3 text-lg font-black">{tr("result.pillars")}</h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {pillarsOf(pack.intake).map((p) => (
-            <div key={p.name} className="rounded-2xl border border-navy/10 bg-white p-4">
-              <p className="text-sm font-black text-omni-yellow">{p.name}</p>
+            <div key={p.name} className="rounded-[22px] border border-navy/10 bg-[#FFFCF7] p-4">
+              <p className="text-sm font-black text-gold">{p.name}</p>
               <p className="mt-2 text-xs leading-relaxed text-muted">{p.body[locale]}</p>
             </div>
           ))}
@@ -353,7 +353,7 @@ export function ResultView({
       </div>
 
       {pack.intakeReport.missing.length > 0 && (
-        <div className="mb-4 rounded-2xl border border-omni-yellow/30 bg-omni-yellow/5 p-4 text-sm text-foreground">
+        <div className="mb-4 rounded-2xl border border-gold/30 bg-gold/5 p-4 text-sm text-foreground">
           {pack.intakeReport.missing.slice(0, 6).map((m) => (
             <p key={m.field}>
               <strong>{m.label[locale]}:</strong> {m.reason[locale]} — {m.impact[locale]}
@@ -362,7 +362,7 @@ export function ResultView({
         </div>
       )}
       {pack.intakeReport.inconsistencies.length > 0 && (
-        <div className="mb-8 rounded-2xl border border-omni-red/40 bg-red-50 p-4 text-sm text-red-800">
+        <div className="mb-8 rounded-2xl border border-danger/40 bg-red-50 p-4 text-sm text-red-800">
           {pack.intakeReport.inconsistencies.map((inc, i) => (
             <p key={i}>
               <strong>{inc.issue[locale]}:</strong> {inc.detail[locale]}
@@ -410,9 +410,9 @@ export function ResultView({
           .map((p) => (
             <article
               key={`${p.format}-${p.locale}`}
-              className="rounded-2xl border border-omni-yellow/25 bg-white p-5"
+              className="rounded-2xl border border-gold/25 bg-white p-5"
             >
-              <p className="text-[13px] font-black uppercase tracking-[0.14em] text-omni-yellow">
+              <p className="text-[13px] font-black uppercase tracking-[0.14em] text-gold">
                 {p.format === "landing" ? tr("end.landing") : tr("end.whatsapp")}
               </p>
               <h3 className="mt-1 font-black text-navy">{p.title}</h3>
@@ -428,7 +428,7 @@ export function ResultView({
                   }
                   target="_blank"
                   rel="noreferrer"
-                  className="mt-3 inline-block text-xs font-bold text-omni-yellow"
+                  className="mt-3 inline-block text-xs font-bold text-gold"
                 >
                   {pack.intake.website}
                 </a>
@@ -437,12 +437,12 @@ export function ResultView({
           ))}
       </div>
 
-      <div className="mt-10 rounded-2xl border border-navy/10 bg-white p-5">
+      <div className="mt-10 rounded-[22px] border border-navy/10 bg-[#FFFCF7] p-5">
         <h2 className="mb-4 text-lg font-black">{tr("media.title")}</h2>
         <div className="grid gap-3 md:grid-cols-3">
           {pack.media.split.map((ch) => (
             <div key={ch.channel} className="rounded-xl border border-navy/10 p-4">
-              <p className="text-sm font-black uppercase text-omni-yellow">{ch.channel}</p>
+              <p className="text-sm font-black uppercase text-gold">{ch.channel}</p>
               <p className="text-2xl font-black">{ch.budgetSharePercent}%</p>
               {ch.monthlyBudget != null && (
                 <p className="text-xs text-muted">{ch.monthlyBudget} ₪ / {ch.dailyBudget} ₪</p>
@@ -460,7 +460,7 @@ export function ResultView({
       </div>
 
       <div className="mt-10">
-        <Accordion type="multiple" className="rounded-2xl border border-navy/10 bg-white px-4">
+        <Accordion type="multiple" className="rounded-[22px] border border-navy/10 bg-[#FFFCF7] px-4">
           {orderedStrategy(pack.strategy).map((block) => {
             const meta = STRATEGY_META.find((s) => s.id === block.id);
             return (
@@ -468,7 +468,7 @@ export function ResultView({
                 <AccordionTrigger>
                   <span className="flex items-center gap-2">
                     {block.id === "marketing_diagnosis" && (
-                      <Lightbulb className="size-4 text-omni-yellow" />
+                      <Lightbulb className="size-4 text-gold" />
                     )}
                     {meta?.label[locale] ?? block.id}
                   </span>
@@ -504,7 +504,7 @@ export function ResultView({
             return (
               <article
                 key={s.id}
-                className="overflow-hidden rounded-2xl border border-navy/10 bg-white shadow-[0_8px_24px_rgba(27,42,74,0.08)]"
+                className="overflow-hidden rounded-[22px] border border-navy/10 bg-[#FFFCF7] shadow-[0_8px_24px_rgba(27,42,74,0.08)]"
               >
                 <CampaignAdVisual
                   locale={locale}
@@ -570,7 +570,7 @@ export function ResultView({
         )}
       </div>
 
-      <div className="mt-10 rounded-2xl border border-navy/10 bg-white p-5">
+      <div className="mt-10 rounded-[22px] border border-navy/10 bg-[#FFFCF7] p-5">
         <h2 className="mb-4 text-lg font-black">{tr("opt.title")}</h2>
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
@@ -610,7 +610,7 @@ export function ResultView({
           ))}
         </ul>
         {pack.optimizerRuns.map((run) => (
-          <div key={run.createdAt} className="mt-3 rounded-xl border border-omni-yellow/20 p-3 text-sm">
+          <div key={run.createdAt} className="mt-3 rounded-xl border border-gold/20 p-3 text-sm">
             {run.advice.map((a, i) => (
               <p key={i}>{a[locale]}</p>
             ))}
@@ -619,7 +619,7 @@ export function ResultView({
       </div>
 
       <div className="mt-10 grid gap-4 md:grid-cols-2">
-        <div className="rounded-2xl border border-navy/10 bg-white p-5">
+        <div className="rounded-[22px] border border-navy/10 bg-[#FFFCF7] p-5">
           <h3 className="mb-3 font-black">{tr("truth.quality")}</h3>
           <ul className="list-disc space-y-1 pe-5 text-sm text-muted">
             <li>{tr("truth.numbers")}</li>
@@ -627,7 +627,7 @@ export function ResultView({
             <li>{tr("truth.worst")}</li>
           </ul>
         </div>
-        <div className="rounded-2xl border border-navy/10 bg-white p-5">
+        <div className="rounded-[22px] border border-navy/10 bg-[#FFFCF7] p-5">
           <h3 className="mb-3 font-black">{tr("truth.layer")}</h3>
           <ul className="list-disc space-y-1 pe-5 text-sm text-muted">
             {pack.intakeReport.refusedGuesses.map((g, i) => (
@@ -668,11 +668,11 @@ function AdCard({
     <article
       className={cn(
         "rounded-2xl border bg-white p-5",
-        featured ? "border-omni-yellow/50" : "border-navy/10",
+        featured ? "border-gold/50" : "border-navy/10",
       )}
     >
       <div className="mb-2 flex items-center justify-between gap-2">
-        <p className="text-xs font-bold uppercase tracking-wide text-omni-yellow">{label}</p>
+        <p className="text-xs font-bold uppercase tracking-wide text-gold">{label}</p>
         <Button type="button" size="sm" variant="ghost" onClick={onCopy}>
           <Copy className="size-3.5" />
           {copied ? t(locale, "cta.copied") : t(locale, "cta.copy")}
@@ -680,7 +680,7 @@ function AdCard({
       </div>
       <h3 className="text-xl font-black text-navy">{headline}</h3>
       <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-muted">{body}</p>
-      <span className="mt-4 inline-block rounded-lg bg-omni-yellow px-3 py-1 text-xs font-black text-black">
+      <span className="mt-4 inline-block rounded-lg bg-gold px-3 py-1 text-xs font-black text-navy">
         {cta}
       </span>
     </article>

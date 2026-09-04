@@ -12,14 +12,14 @@ export function MediaDeptView({ pack, packLang }: { pack: CampaignPack; packLang
   return (
     <div className="space-y-4">
       <ProducedBy agents={extra.producedBy} />
-      <p className="rounded-2xl border border-omni-red/40 bg-red-50 p-4 text-sm text-red-800">
+      <p className="rounded-2xl border border-danger/40 bg-red-50 p-4 text-sm text-red-800">
         {extra.planOnly[l]}
       </p>
       <Card title={t("media.title")}>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {pack.media.split.map((ch) => (
             <article key={ch.channel} className="rounded-xl border border-navy/10 p-4">
-              <p className="text-xs font-black uppercase text-omni-yellow">{ch.channel}</p>
+              <p className="text-xs font-black uppercase text-gold">{ch.channel}</p>
               <p className="text-2xl font-black">{ch.budgetSharePercent}%</p>
               {ch.monthlyBudget != null && (
                 <p className="text-xs text-muted">
@@ -67,7 +67,7 @@ export function MediaDeptView({ pack, packLang }: { pack: CampaignPack; packLang
             <li key={i}>{r[l]}</li>
           ))}
         </ul>
-        <p className="mt-3 text-xs font-bold uppercase text-omni-yellow">{t("dept.scale")}</p>
+        <p className="mt-3 text-xs font-bold uppercase text-gold">{t("dept.scale")}</p>
         <ul className="mt-1 list-disc space-y-1 pe-5 text-sm text-muted">
           {pack.optimizer.scaleRules.map((r, i) => (
             <li key={i}>{r[l]}</li>

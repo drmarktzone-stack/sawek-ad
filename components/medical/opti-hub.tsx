@@ -60,13 +60,13 @@ function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-xl border border-navy/10 bg-background p-3 text-center">
       <p className="text-sm text-muted">{label}</p>
-      <p className="mt-1 text-lg font-black text-omni-yellow">{value}</p>
+      <p className="mt-1 text-lg font-black text-gold">{value}</p>
     </div>
   );
 }
 
 function Meter({ value }: { value: number }) {
-  const color = value < 35 ? "bg-emerald-400" : value < 65 ? "bg-omni-yellow" : "bg-omni-red";
+  const color = value < 35 ? "bg-emerald-400" : value < 65 ? "bg-gold" : "bg-danger";
   return (
     <div className="h-2 w-full overflow-hidden rounded-full bg-navy/10">
       <div className={cn("h-full rounded-full", color)} style={{ width: `${Math.max(0, Math.min(100, value))}%` }} />
@@ -91,7 +91,7 @@ function SelectField({
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="h-11 w-full rounded-xl border border-navy/10 bg-background px-3 text-sm text-navy outline-none focus:border-omni-yellow/70"
+        className="h-11 w-full rounded-xl border border-navy/10 bg-background px-3 text-sm text-navy outline-none focus:border-gold/70"
       >
         {options.map((o) => (
           <option key={o.id} value={o.id} className="bg-white">
@@ -316,7 +316,7 @@ function AuditPanel({ desk, patch, loc }: Panel) {
                   onClick={() => toggle(m.id)}
                   className={cn(
                     "rounded-full px-3 py-1.5 text-xs",
-                    on ? "bg-omni-red/20 text-omni-red ring-1 ring-omni-red/50" : "border border-navy/10 text-muted",
+                    on ? "bg-danger/20 text-danger ring-1 ring-omni-red/50" : "border border-navy/10 text-muted",
                   )}
                 >
                   {pick(m.label, loc)}
@@ -339,7 +339,7 @@ function AuditPanel({ desk, patch, loc }: Panel) {
         </Card>
         <Card>
           <p className="text-sm text-muted">{pick({ he: "מד בריאות שיווקית (מקנסות שסימנתם)", ar: "مؤشر الصحة (من الغرامات التي علّمتموها)", en: "Marketing-health score (from penalties you ticked)" }, loc)}</p>
-          <p className="text-6xl font-black text-omni-yellow">{result.score == null ? "—" : `${result.score}%`}</p>
+          <p className="text-6xl font-black text-gold">{result.score == null ? "—" : `${result.score}%`}</p>
           <p className="mt-3 text-sm text-muted">{pick(result.verdict, loc)}</p>
           <div className="mt-4 grid grid-cols-2 gap-3">
             <Stat
@@ -352,7 +352,7 @@ function AuditPanel({ desk, patch, loc }: Panel) {
         </Card>
       </div>
       <Card>
-        <h3 className="mb-3 text-sm font-black uppercase tracking-wide text-omni-yellow">
+        <h3 className="mb-3 text-sm font-black uppercase tracking-wide text-gold">
           {pick({ he: "למה השיטה הישנה נכשלה", ar: "لماذا فشل الأسلوب القديم", en: "Why the old method failed" }, loc)}
         </h3>
         {result.gaps.length === 0 ? (
@@ -360,10 +360,10 @@ function AuditPanel({ desk, patch, loc }: Panel) {
         ) : (
           <div className="grid gap-3 md:grid-cols-2">
             {result.gaps.map((g) => (
-              <article key={pick(g.title, "en")} className="rounded-xl border border-omni-red/30 bg-omni-red/5 p-4">
+              <article key={pick(g.title, "en")} className="rounded-xl border border-danger/30 bg-danger/5 p-4">
                 <div className="mb-1 flex items-center justify-between gap-2">
                   <p className="font-bold text-red-800">{pick(g.title, loc)}</p>
-                  <span className="rounded-full bg-omni-red/20 px-2 py-0.5 text-sm text-omni-red">{pick(g.severity, loc)}</span>
+                  <span className="rounded-full bg-danger/20 px-2 py-0.5 text-sm text-danger">{pick(g.severity, loc)}</span>
                 </div>
                 <p className="text-sm text-muted">{pick(g.body, loc)}</p>
                 <p className="mt-2 text-sm text-muted">{g.source}</p>
@@ -374,7 +374,7 @@ function AuditPanel({ desk, patch, loc }: Panel) {
       </Card>
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>
-          <h3 className="mb-3 text-sm font-black uppercase tracking-wide text-omni-yellow">
+          <h3 className="mb-3 text-sm font-black uppercase tracking-wide text-gold">
             {pick({ he: "תוכנית חילוץ", ar: "خطة الإنقاذ", en: "Rescue plan" }, loc)}
           </h3>
           <ol className="space-y-3">
@@ -384,7 +384,7 @@ function AuditPanel({ desk, patch, loc }: Panel) {
                   <p className="font-bold text-foreground">
                     {i + 1}. {pick(r.step, loc)}
                   </p>
-                  <span className="rounded-full bg-omni-yellow/15 px-2 py-0.5 text-sm text-omni-yellow">{pick(r.window, loc)}</span>
+                  <span className="rounded-full bg-gold/15 px-2 py-0.5 text-sm text-gold">{pick(r.window, loc)}</span>
                 </div>
                 <p className="mt-1 text-sm text-muted">{pick(r.detail, loc)}</p>
               </li>
@@ -392,7 +392,7 @@ function AuditPanel({ desk, patch, loc }: Panel) {
           </ol>
         </Card>
         <Card>
-          <h3 className="mb-3 text-sm font-black uppercase tracking-wide text-omni-yellow">
+          <h3 className="mb-3 text-sm font-black uppercase tracking-wide text-gold">
             {pick({ he: "מסלול 6 חודשים מהקלטים", ar: "مسار 6 أشهر من المدخلات", en: "6-month path from your inputs" }, loc)}
           </h3>
           {!result.growth ? (
@@ -411,7 +411,7 @@ function AuditPanel({ desk, patch, loc }: Panel) {
                     </div>
                     <div className="flex h-2 gap-1">
                       <div className="h-full rounded-full bg-white/20" style={{ width: `${(g.current / max) * 100}%` }} />
-                      <div className="h-full rounded-full bg-omni-yellow" style={{ width: `${(g.projected / max) * 100}%` }} />
+                      <div className="h-full rounded-full bg-gold" style={{ width: `${(g.projected / max) * 100}%` }} />
                     </div>
                   </li>
                 );
@@ -502,7 +502,7 @@ function ClinicPanel({ desk, patch, loc, isHmo }: Panel & { isHmo: boolean }) {
             <Input value={desk.cpl} onChange={(e) => patch({ cpl: e.target.value })} />
           </div>
         </div>
-        <p className={cn("rounded-xl border p-3 text-sm", isHmo ? "border-omni-yellow/40 text-omni-yellow" : "border-navy/10 text-muted")}>
+        <p className={cn("rounded-xl border p-3 text-sm", isHmo ? "border-gold/40 text-gold" : "border-navy/10 text-muted")}>
           {isHmo
             ? pick(
                 {
@@ -523,7 +523,7 @@ function ClinicPanel({ desk, patch, loc, isHmo }: Panel & { isHmo: boolean }) {
         </p>
       </Card>
       <Card>
-        <h3 className="mb-3 text-sm font-black uppercase tracking-wide text-omni-yellow">
+        <h3 className="mb-3 text-sm font-black uppercase tracking-wide text-gold">
           {pick({ he: "חשבון רכישה מהקלטים", ar: "حساب الاكتساب من المدخلات", en: "Acquisition math from your inputs" }, loc)}
         </h3>
         {!plan ? (
@@ -541,7 +541,7 @@ function ClinicPanel({ desk, patch, loc, isHmo }: Panel & { isHmo: boolean }) {
           </div>
         )}
         {plan?.budgetGap != null && plan.budgetGap > 0 ? (
-          <p className="mt-3 rounded-xl border border-omni-red/40 bg-omni-red/10 p-3 text-sm text-omni-red">
+          <p className="mt-3 rounded-xl border border-danger/40 bg-danger/10 p-3 text-sm text-danger">
             {pick(
               {
                 he: `חסרים ${plan.budgetGap} ₪ בתקציב שהוזן מול היעד — או מעלים תקציב או מורידים יעד או משפרים סגירה שנמדדה.`,
@@ -591,13 +591,13 @@ function SimPanel({ desk, patch, loc }: Panel) {
                 </div>
                 <Meter value={p.friction} />
                 <p className="mt-3 rounded-xl border border-navy/10 bg-background p-3 text-sm">«{pick(p.objection, loc)}»</p>
-                <p className="mt-2 text-sm text-omni-yellow">{pick(p.fix, loc)}</p>
+                <p className="mt-2 text-sm text-gold">{pick(p.fix, loc)}</p>
               </Card>
             ))}
           </div>
           <Card>
             <div className="mb-3 flex items-center justify-between">
-              <h3 className="text-sm font-black uppercase tracking-wide text-omni-yellow">
+              <h3 className="text-sm font-black uppercase tracking-wide text-gold">
                 {pick({ he: "שכתוב שובר התנגדות", ar: "إعادة صياغة كاسحة للاعتراض", en: "Objection-breaking rewrite" }, loc)} · {sim.resistance}%
               </h3>
               <CopyBtn text={pick(sim.rewrite, loc)} label={pick({ he: "העתק", ar: "نسخ", en: "Copy" }, loc)} />
@@ -637,7 +637,7 @@ function HijackPanel({ desk, patch, loc }: Panel) {
               onClick={() => patch({ competitorSignal: pick(s.label, loc), signalConfirmed: false })}
               className={cn(
                 "w-full rounded-xl border px-3 py-2 text-start text-sm",
-                desk.competitorSignal === pick(s.label, loc) ? "border-omni-yellow text-omni-yellow" : "border-navy/10 text-muted",
+                desk.competitorSignal === pick(s.label, loc) ? "border-gold text-gold" : "border-navy/10 text-muted",
               )}
             >
               {pick(s.label, loc)}
@@ -663,12 +663,12 @@ function HijackPanel({ desk, patch, loc }: Panel) {
           <p className="py-12 text-center text-sm text-muted">{pick(hijack.title, loc)}</p>
         ) : (
           <>
-            <h3 className="text-sm font-black uppercase tracking-wide text-omni-yellow">{pick(hijack.title, loc)}</h3>
+            <h3 className="text-sm font-black uppercase tracking-wide text-gold">{pick(hijack.title, loc)}</h3>
             <p className="mt-2 text-sm text-muted">{hijack.signal}</p>
             <ol className="mt-4 space-y-3">
               {hijack.steps.map((s) => (
                 <li key={pick(s.t, "en")} className="rounded-xl border border-navy/10 p-3">
-                  <p className="text-sm font-bold text-omni-yellow">{pick(s.t, loc)}</p>
+                  <p className="text-sm font-bold text-gold">{pick(s.t, loc)}</p>
                   <p className="mt-1 text-sm text-muted">{pick(s.d, loc)}</p>
                 </li>
               ))}
@@ -711,7 +711,7 @@ function RadarPanel({ desk, patch, loc }: Panel) {
         <div className="mt-5">
           <div className="mb-2 flex justify-between text-sm">
             <span>{pick({ he: "מד רוויה", ar: "مؤشر التشبع", en: "Saturation index" }, loc)}</span>
-            <span className="text-omni-yellow">
+            <span className="text-gold">
               {fatigue.score == null ? "—" : `${fatigue.score}%`} — {pick(fatigue.state, loc)}
             </span>
           </div>
@@ -724,12 +724,12 @@ function RadarPanel({ desk, patch, loc }: Panel) {
         </div>
       </Card>
       <Card>
-        <h3 className="text-sm font-black uppercase tracking-wide text-omni-yellow">{pick(creative.headline, loc)}</h3>
+        <h3 className="text-sm font-black uppercase tracking-wide text-gold">{pick(creative.headline, loc)}</h3>
         <p className="mt-2 text-xs text-muted">{pick(creative.action, loc)}</p>
         <div className="mt-4 space-y-3">
           {creative.angles.map((a) => (
             <div key={pick(a.name, "en")} className="rounded-xl border border-navy/10 p-3">
-              <p className="text-xs text-omni-yellow">{pick(a.name, loc)}</p>
+              <p className="text-xs text-gold">{pick(a.name, loc)}</p>
               <p className="mt-1 text-sm font-semibold">{pick(a.hook, loc)}</p>
               <p className="mt-1 text-xs text-muted">{pick(a.body, loc)}</p>
             </div>
@@ -766,7 +766,7 @@ function OffersPanel({ desk, patch, loc, isHmo }: Panel & { isHmo: boolean }) {
           {data.offers.map((o) => (
             <Card key={o.key}>
               <p className="text-lg font-black">{pick(o.title, loc)}</p>
-              <p className="mt-1 text-3xl font-black text-omni-yellow">{o.newPrice} ₪</p>
+              <p className="mt-1 text-3xl font-black text-gold">{o.newPrice} ₪</p>
               <p className="text-xs text-muted">
                 {pick({ he: "מרווח מתוכנן", ar: "هامش مخطّط", en: "Planned margin" }, loc)} {o.newMargin} ₪ · +{o.uplift}%
               </p>
@@ -782,7 +782,7 @@ function OffersPanel({ desk, patch, loc, isHmo }: Panel & { isHmo: boolean }) {
       {data.margin != null && (
         <Card>
           <div className="mb-2 flex justify-between">
-            <h3 className="text-sm font-black uppercase tracking-wide text-omni-yellow">{pick({ he: "סקריפט מכירה", ar: "سكربت البيع", en: "Sales script" }, loc)}</h3>
+            <h3 className="text-sm font-black uppercase tracking-wide text-gold">{pick({ he: "סקריפט מכירה", ar: "سكربت البيع", en: "Sales script" }, loc)}</h3>
             <CopyBtn text={pick(data.script, loc)} label={pick({ he: "העתק", ar: "نسخ", en: "Copy" }, loc)} />
           </div>
           <pre className="whitespace-pre-wrap text-sm text-muted">{pick(data.script, loc)}</pre>
@@ -862,7 +862,7 @@ function NoShowPanel({ desk, patch, loc }: Panel) {
       </Card>
       <Card>
         <p className="text-sm text-muted">{pick({ he: "% אי-הגעה מהקלטים", ar: "% التغيب من المدخلات", en: "No-show % from your inputs" }, loc)}</p>
-        <p className="text-6xl font-black text-omni-red">{rate == null ? "—" : `${rate}%`}</p>
+        <p className="text-6xl font-black text-danger">{rate == null ? "—" : `${rate}%`}</p>
         {nos != null && cold != null ? (
           <p className="mt-3 text-sm text-muted">
             {pick(
@@ -899,7 +899,7 @@ function CompliancePanel({ desk, patch, loc }: Panel) {
       </Card>
       <Card>
         <p className="text-sm text-muted">{pick({ he: "ציון בדיקה מהירה", ar: "درجة الفحص السريع", en: "Quick-scan score" }, loc)}</p>
-        <p className={cn("text-6xl font-black", score != null && score >= 80 ? "text-emerald-700" : "text-omni-red")}>
+        <p className={cn("text-6xl font-black", score != null && score >= 80 ? "text-emerald-700" : "text-danger")}>
           {score == null ? "—" : `${score}%`}
         </p>
         <div className="mt-4 space-y-2">
@@ -911,7 +911,7 @@ function CompliancePanel({ desk, patch, loc }: Panel) {
             </p>
           ) : (
             flags.map((f) => (
-              <p key={f} className="rounded-lg border border-omni-red/40 bg-omni-red/10 px-3 py-2 text-sm text-omni-red">
+              <p key={f} className="rounded-lg border border-danger/40 bg-danger/10 px-3 py-2 text-sm text-danger">
                 {pick({ he: "ביטוי מסוכן", ar: "عبارة خطرة", en: "Risky phrase" }, loc)}: «{f}»
               </p>
             ))
@@ -954,7 +954,7 @@ function ReviewsPanel({ desk, patch, loc }: Panel) {
           <Input value={desk.reviewAuthor} onChange={(e) => patch({ reviewAuthor: e.target.value })} placeholder={pick({ he: "שם הממליץ", ar: "اسم صاحب المراجعة", en: "Reviewer name" }, loc)} />
         </Card>
         <Card>
-          <p className="text-6xl font-black text-omni-yellow">
+          <p className="text-6xl font-black text-gold">
             {parseNumber(desk.rating) == null ? "—" : parseNumber(desk.rating)!.toFixed(1)}
             <span className="text-2xl text-muted"> / 5</span>
           </p>
@@ -1043,7 +1043,7 @@ function RoasPanel({ desk, patch, loc }: Panel) {
                   </span>
                 </div>
                 <div className="h-2 rounded-full bg-navy/10">
-                  <div className="h-full rounded-full bg-omni-yellow" style={{ width: `${(r.s.revenue / maxRev) * 100}%` }} />
+                  <div className="h-full rounded-full bg-gold" style={{ width: `${(r.s.revenue / maxRev) * 100}%` }} />
                 </div>
               </div>
             ))}
@@ -1096,7 +1096,7 @@ function VoicePanel({
           onClick={toggle}
           className={cn(
             "flex h-28 w-28 items-center justify-center rounded-full border text-sm font-bold",
-            listening ? "border-omni-red bg-omni-red/20 text-red-800" : "border-omni-yellow bg-omni-yellow/15 text-omni-yellow",
+            listening ? "border-danger bg-danger/20 text-red-800" : "border-gold bg-gold/15 text-gold",
           )}
         >
           {listening ? pick({ he: "עצור", ar: "إيقاف", en: "Stop" }, loc) : pick({ he: "דבר/י", ar: "تكلّم", en: "Speak" }, loc)}
@@ -1146,7 +1146,7 @@ function DualPanel({ desk, patch, loc }: Panel) {
         {(["he", "ar", "en"] as Locale[]).map((l) => (
           <Card key={l}>
             <div className="mb-2 flex justify-between">
-              <p className="text-xs font-black uppercase text-omni-yellow">{l}</p>
+              <p className="text-xs font-black uppercase text-gold">{l}</p>
               <CopyBtn text={ads[l]} label={pick({ he: "העתק", ar: "نسخ", en: "Copy" }, loc)} />
             </div>
             <pre className="whitespace-pre-wrap text-sm leading-relaxed text-muted" dir={l === "en" ? "ltr" : "rtl"}>
@@ -1199,7 +1199,7 @@ function StudioPanel({ desk, patch, loc, isHmo, clinicName }: Panel & { isHmo: b
               <p className="text-3xl font-black leading-tight text-white drop-shadow-lg">
                 {filled(desk.hook) ? desk.hook : toComplete(loc, loc === "he" ? "הוק" : loc === "ar" ? "خطاف" : "hook")}
               </p>
-              <p className="mt-2 text-sm text-omni-yellow">
+              <p className="mt-2 text-sm text-gold">
                 {filled(desk.city) ? desk.city : clinicName ?? toComplete(loc, loc === "he" ? "עיר" : loc === "ar" ? "مدينة" : "city")}
               </p>
             </div>
@@ -1262,9 +1262,9 @@ function TemplatesPanel({ desk, patch, loc }: Panel) {
               {t.ratio} · {pick(t.layout, loc)}
             </p>
             <p className="mt-1 text-lg font-black">{pick(t.name, loc)}</p>
-            <p className="mt-2 text-sm font-semibold text-omni-yellow">{pick(t.headline, loc)}</p>
+            <p className="mt-2 text-sm font-semibold text-gold">{pick(t.headline, loc)}</p>
             <p className="mt-1 text-sm text-muted">{pick(t.body, loc)}</p>
-            <p className="mt-3 text-xs font-bold uppercase tracking-wide text-omni-red">{pick(t.cta, loc)}</p>
+            <p className="mt-3 text-xs font-bold uppercase tracking-wide text-danger">{pick(t.cta, loc)}</p>
             <p className="mt-2 text-xs text-muted">{pick(t.visual, loc)}</p>
           </Card>
         ))}
@@ -1277,7 +1277,7 @@ function IcebergPanel({ desk, patch, loc }: Panel) {
   return (
     <div className="grid gap-4 lg:grid-cols-2">
       <Card className="space-y-3">
-        <p className="text-sm font-black text-omni-yellow">
+        <p className="text-sm font-black text-gold">
           {pick({ he: "מה מעל המים (רק מה שכתבתם)", ar: "فوق الماء (ما كتبتموه فقط)", en: "Above water (only what you typed)" }, loc)}
         </p>
         <Label>{pick({ he: "הבעיה הגלויה", ar: "المشكلة الظاهرة", en: "Visible problem" }, loc)}</Label>
@@ -1348,7 +1348,7 @@ function VectorPanel({ desk, patch, loc }: Panel) {
         <p className="mt-4 text-lg font-black text-navy">
           {filled(desk.coreMessage) ? desk.coreMessage : toComplete(loc, loc === "he" ? "מסר" : loc === "ar" ? "رسالة" : "message")}
         </p>
-        <ul className="mt-4 space-y-2 text-sm text-omni-yellow">
+        <ul className="mt-4 space-y-2 text-sm text-gold">
           {axes.map((ax) => (
             <li key={ax.a}>
               {ax.a} → {ax.b}

@@ -82,7 +82,7 @@ export function CampaignsList() {
       <DepartmentRail />
 
       {socialFlash && (
-        <p className="mb-4 text-center text-sm text-omni-yellow">{socialFlash}</p>
+        <p className="mb-4 text-center text-sm text-gold">{socialFlash}</p>
       )}
       <SocialConnectStrip className="mb-6" />
 
@@ -110,7 +110,7 @@ export function CampaignsList() {
                 <p className="text-[13px] text-muted">
                   {c.createdAt.slice(0, 16).replace("T", " ")} · {c.intake.type} · {c.intake.depth}
                 </p>
-                <p className="mt-1 text-xs text-omni-yellow">
+                <p className="mt-1 text-xs text-gold">
                   {t("result.score")}: {c.intakeReport.completeness}/100
                 </p>
               </div>

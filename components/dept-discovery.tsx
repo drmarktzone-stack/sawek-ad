@@ -31,7 +31,7 @@ export function DiscoveryDeptView({ pack, packLang }: { pack: CampaignPack; pack
             <article key={p.name[l]} className="rounded-xl border border-navy/10 p-4">
               <p className="font-black text-navy">{p.name[l]}</p>
               <p className="mt-2 text-sm text-muted">
-                <span className="text-omni-yellow">JTBD. </span>
+                <span className="text-gold">JTBD. </span>
                 {p.jtbd[l]}
               </p>
               <p className="mt-2 text-xs text-muted">{p.given[l]}</p>
@@ -51,7 +51,7 @@ export function DiscoveryDeptView({ pack, packLang }: { pack: CampaignPack; pack
             ] as const
           ).map(([k, v]) => (
             <div key={k} className="rounded-xl border border-navy/10 p-4">
-              <p className="text-xs font-black text-omni-yellow">{k}</p>
+              <p className="text-xs font-black text-gold">{k}</p>
               <p className="mt-1 text-sm text-foreground">{v[l]}</p>
             </div>
           ))}
@@ -69,19 +69,19 @@ export function DiscoveryDeptView({ pack, packLang }: { pack: CampaignPack; pack
                 {b.notes && <p className="mt-1 text-xs text-muted">{b.notes}</p>}
                 <ul className="mt-3 space-y-1 text-sm text-muted">
                   <li>
-                    <strong className="text-omni-yellow">S. </strong>
+                    <strong className="text-gold">S. </strong>
                     {b.strength[l]}
                   </li>
                   <li>
-                    <strong className="text-omni-yellow">W. </strong>
+                    <strong className="text-gold">W. </strong>
                     {b.weakness[l]}
                   </li>
                   <li>
-                    <strong className="text-omni-yellow">O. </strong>
+                    <strong className="text-gold">O. </strong>
                     {b.opportunity[l]}
                   </li>
                   <li>
-                    <strong className="text-omni-yellow">T. </strong>
+                    <strong className="text-gold">T. </strong>
                     {b.threat[l]}
                   </li>
                 </ul>

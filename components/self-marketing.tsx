@@ -132,7 +132,7 @@ export function SelfMarketing() {
                     className="mt-1 accent-[#f5c518]"
                   />
                   <span>
-                    <strong className="text-omni-yellow">{d.day[locale]}</strong>
+                    <strong className="text-gold">{d.day[locale]}</strong>
                     <span className="block text-sm text-muted">{d.task[locale]}</span>
                   </span>
                 </label>

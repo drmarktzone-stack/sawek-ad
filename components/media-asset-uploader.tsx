@@ -78,7 +78,7 @@ export function MediaAssetUploader({
         <ImagePlus className="size-4" />
         {t("details.assetsAdd")}
       </Button>
-      {error && <p className="mt-2 text-sm font-semibold text-omni-red">{error}</p>}
+      {error && <p className="mt-2 text-sm font-semibold text-danger">{error}</p>}
       {assets.length === 0 && (
         <p className="mt-3 rounded-xl border border-dashed border-navy/15 bg-background px-3 py-6 text-center text-xs font-bold uppercase tracking-[0.18em] text-muted">
           {sampleLabel(locale)}
@@ -120,7 +120,7 @@ export function MediaAssetUploader({
               />
               <button
                 type="button"
-                className="flex items-center gap-1 text-xs text-muted hover:text-omni-red"
+                className="flex items-center gap-1 text-xs text-muted hover:text-danger"
                 onClick={() => void remove(a.id)}
               >
                 <Trash2 className="size-3.5" />

@@ -526,7 +526,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
                     onClick={() => patch({ type: opt.id as Intake["type"] })}
                     className={`rounded-2xl border p-6 text-start text-xl font-black transition-all ${
                       intake.type === opt.id
-                        ? "border-omni-yellow bg-navy text-white shadow-[0_12px_32px_rgba(27,42,74,0.12)]"
+                        ? "border-gold bg-navy text-white shadow-[0_12px_32px_rgba(27,42,74,0.12)]"
                         : "border-navy/10 bg-white text-navy hover:border-gold hover:shadow-[0_8px_24px_rgba(27,42,74,0.08)]"
                     }`}
                   >
@@ -547,13 +547,13 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
                     onClick={() => setIntake((s) => applyOperatingModel(s, opt.id))}
                     className={`rounded-2xl border p-6 text-start transition-all ${
                       (intake.operatingModel ?? "paid") === opt.id
-                        ? "border-omni-yellow bg-navy text-white shadow-[0_12px_32px_rgba(27,42,74,0.12)]"
+                        ? "border-gold bg-navy text-white shadow-[0_12px_32px_rgba(27,42,74,0.12)]"
                         : "border-navy/10 bg-white text-navy hover:border-gold hover:shadow-[0_8px_24px_rgba(27,42,74,0.08)]"
                     }`}
                   >
                     <span className="block text-xl font-black">{opt.title}</span>
                     <span className={`mt-2 block text-sm font-medium ${
-                      (intake.operatingModel ?? "paid") === opt.id ? "text-black/70" : "text-muted"
+                      (intake.operatingModel ?? "paid") === opt.id ? "text-navy/70" : "text-muted"
                     }`}>{opt.hint}</span>
                   </button>
                 ))}
@@ -821,7 +821,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
           {step === 4 && (
             <section>
               <div className="overflow-hidden rounded-2xl border border-navy/10 bg-white">
-                <div className="border-b border-navy/10 px-5 py-4 text-center text-sm font-bold text-omni-yellow">
+                <div className="border-b border-navy/10 px-5 py-4 text-center text-sm font-bold text-gold">
                   {t("review.heading")}
                 </div>
                 <dl>
@@ -868,7 +868,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
                         </div>
                         <button
                           type="button"
-                          className="text-muted hover:text-omni-red"
+                          className="text-muted hover:text-danger"
                           onClick={() =>
                             patch({ competitors: intake.competitors.filter((x) => x.id !== c.id) })
                           }
@@ -906,7 +906,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
               </Button>
               {!wizardReady(intake) && (
                 <div
-                  className="mt-3 rounded-xl border border-omni-red/40 bg-omni-red/10 px-4 py-3 text-sm text-red-800"
+                  className="mt-3 rounded-xl border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-red-800"
                   dir={locale === "en" ? "ltr" : "rtl"}
                 >
                   <p className="font-bold">{t("wizard.missingHeading")}</p>
@@ -1084,25 +1084,25 @@ function AgentsPanel({
       </ul>
 
       {pack && (
-        <div className="rounded-2xl border border-omni-yellow/30 bg-white p-5">
+        <div className="rounded-2xl border border-gold/30 bg-white p-5">
           <p className="mb-4 text-sm text-muted">{pack.diagnosis.summary[locale]}</p>
           <div className="space-y-3">
             {pack.diagnosis.hypotheses.map((h, i) => (
               <article key={i} className="rounded-xl border border-navy/10 p-4">
                 <div className="mb-2 flex flex-wrap items-center gap-2">
-                  <span className="rounded-full bg-omni-red/20 px-2 py-0.5 text-xs font-bold text-omni-red">
+                  <span className="rounded-full bg-danger/20 px-2 py-0.5 text-xs font-bold text-danger">
                     {AREA_LABEL[h.area][locale]}
                   </span>
                   <span className="text-xs text-muted">{h.confidence}</span>
                 </div>
                 <p className="font-semibold text-navy">{h.finding[locale]}</p>
                 <p className="mt-1 text-sm text-muted">{h.evidence[locale]}</p>
-                <p className="mt-2 text-sm text-omni-yellow">{h.recommendation[locale]}</p>
+                <p className="mt-2 text-sm text-gold">{h.recommendation[locale]}</p>
               </article>
             ))}
           </div>
           {pack.intakeReport.missing.length > 0 && (
-            <div className="mt-4 rounded-xl border border-omni-yellow/30 bg-omni-yellow/5 p-3 text-sm text-foreground">
+            <div className="mt-4 rounded-xl border border-gold/30 bg-gold/5 p-3 text-sm text-foreground">
               {pack.intakeReport.missing.map((m) => (
                 <p key={m.field}>
                   <strong>{m.label[locale]}:</strong> {m.reason[locale]}
@@ -1111,7 +1111,7 @@ function AgentsPanel({
             </div>
           )}
           {pack.intakeReport.inconsistencies.length > 0 && (
-            <div className="mt-3 rounded-xl border border-omni-red/40 bg-omni-red/10 p-3 text-sm text-red-800">
+            <div className="mt-3 rounded-xl border border-danger/40 bg-danger/10 p-3 text-sm text-red-800">
               {pack.intakeReport.inconsistencies.map((inc, i) => (
                 <p key={i}>
                   <strong>{inc.issue[locale]}:</strong> {inc.detail[locale]}
@@ -1152,12 +1152,12 @@ function StatusPill({ status }: { status: AgentStatus }) {
   const key = STATUS_I18N[status];
   const colors: Record<AgentStatus, string> = {
     idle: "bg-navy/10 text-muted",
-    running: "bg-omni-yellow/20 text-omni-yellow animate-pulse",
+    running: "bg-gold/20 text-gold animate-pulse",
     blocked: "bg-navy/5 text-muted",
-    needs_approval: "bg-omni-red/20 text-omni-red",
+    needs_approval: "bg-danger/20 text-danger",
     approved: "bg-navy text-white",
     complete: "bg-navy text-white",
-    refused: "bg-omni-red text-white",
+    refused: "bg-danger text-white",
   };
   return (
     <span className={`rounded-full px-2.5 py-0.5 text-sm font-bold ${colors[status]}`}>

@@ -71,9 +71,9 @@ export function demoIntake(locale: Locale = "he"): Intake {
 }
 
 export const DEMO_LABEL = {
-  he: "הדגמה: מרפאת ילדים",
-  ar: "عرض: عيادة أطفال د. سامر أبو مخ",
-  en: "Demo: pediatrics clinic",
+  he: "הדגמה — קמפיין מוכן",
+  ar: "عرض — حملة جاهزة",
+  en: "Demo — ready campaign",
 } as const;
 
 export function applyPediatricDemoDraft(locale: Locale = "he"): Intake {

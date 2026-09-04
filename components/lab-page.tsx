@@ -291,10 +291,10 @@ export function LabPage() {
       </div>
 
       {failKind === "templates" && (
-        <p className="mb-4 text-center text-sm text-omni-yellow">{t("lab.fallback")}</p>
+        <p className="mb-4 text-center text-sm text-gold">{t("lab.fallback")}</p>
       )}
       {failKind === "gemini" && (
-        <p className="mb-4 text-center text-sm text-omni-yellow">{t("lab.geminiError")}</p>
+        <p className="mb-4 text-center text-sm text-gold">{t("lab.geminiError")}</p>
       )}
 
       {tab === "angles" && (
@@ -327,7 +327,7 @@ export function LabPage() {
               {busy ? t("lab.working") : t("lab.analyze")}
             </Button>
           </div>
-          {fileError && <p className="mt-2 text-sm text-omni-red">{fileError}</p>}
+          {fileError && <p className="mt-2 text-sm text-danger">{fileError}</p>}
           {preview && (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={preview} alt="" className="mt-4 max-h-56 rounded-xl border border-navy/10 object-contain" />
@@ -335,7 +335,7 @@ export function LabPage() {
           {vision && (
             <div className="mt-6 space-y-6">
               <div>
-                <h3 className="mb-2 text-sm font-black text-omni-yellow">{t("lab.elements")}</h3>
+                <h3 className="mb-2 text-sm font-black text-gold">{t("lab.elements")}</h3>
                 <ul className="list-disc space-y-1 pe-5 text-sm text-muted">
                   {vision.elements.map((el, i) => (
                     <li key={i}>{el}</li>
@@ -343,7 +343,7 @@ export function LabPage() {
                 </ul>
               </div>
               <div>
-                <h3 className="mb-2 text-sm font-black text-omni-yellow">{t("lab.fixes")}</h3>
+                <h3 className="mb-2 text-sm font-black text-gold">{t("lab.fixes")}</h3>
                 <ol className="list-decimal space-y-1 pe-5 text-sm text-muted">
                   {vision.visualFixes.slice(0, 3).map((el, i) => (
                     <li key={i}>{el}</li>
@@ -351,7 +351,7 @@ export function LabPage() {
                 </ol>
               </div>
               <div>
-                <h3 className="mb-2 text-sm font-black text-omni-yellow">{t("lab.scripts")}</h3>
+                <h3 className="mb-2 text-sm font-black text-gold">{t("lab.scripts")}</h3>
                 <div className="grid gap-3 md:grid-cols-3">
                   {vision.reels.map((reel, i) => {
                     const pack = reel[locale] ?? reel.he;
@@ -365,7 +365,7 @@ export function LabPage() {
                       .join("\n");
                     return (
                       <article key={`${reel.channel}-${i}`} className="rounded-2xl border border-navy/10 bg-background p-4">
-                        <p className="text-sm font-black uppercase tracking-[0.18em] text-omni-yellow">
+                        <p className="text-sm font-black uppercase tracking-[0.18em] text-gold">
                           {reel.channel}
                         </p>
                         <p className="mt-2 text-sm font-black text-navy">{pack?.headline || INCOMPLETE[locale]}</p>
@@ -413,9 +413,9 @@ export function LabPage() {
           </div>
           {score && (
             <div className="mt-6 space-y-4">
-              <p className="text-3xl font-black text-omni-yellow">{score.score}/100</p>
+              <p className="text-3xl font-black text-gold">{score.score}/100</p>
               <div>
-                <h3 className="mb-2 text-sm font-black text-omni-yellow">{t("lab.weaknesses")}</h3>
+                <h3 className="mb-2 text-sm font-black text-gold">{t("lab.weaknesses")}</h3>
                 <ol className="list-decimal space-y-1 pe-5 text-sm text-muted">
                   {score.weaknesses.slice(0, 3).map((w, i) => (
                     <li key={i}>{w}</li>
@@ -423,7 +423,7 @@ export function LabPage() {
                 </ol>
               </div>
               <div>
-                <h3 className="mb-2 text-sm font-black text-omni-yellow">{t("lab.rewrite")}</h3>
+                <h3 className="mb-2 text-sm font-black text-gold">{t("lab.rewrite")}</h3>
                 <div className="grid gap-3 md:grid-cols-3">
                   {(["he", "ar", "en"] as Locale[]).map((loc) => {
                     const pack = score.rewrite[loc];
@@ -431,10 +431,10 @@ export function LabPage() {
                     const text = [pack.headline, pack.copy, pack.cta].join("\n");
                     return (
                       <article key={loc} className="rounded-2xl border border-navy/10 p-4" dir={loc === "en" ? "ltr" : "rtl"}>
-                        <p className="text-sm font-black uppercase text-omni-yellow">{loc}</p>
+                        <p className="text-sm font-black uppercase text-gold">{loc}</p>
                         <p className="mt-2 text-sm font-black text-navy">{pack.headline}</p>
                         <p className="mt-1 text-xs text-muted">{pack.copy}</p>
-                        <p className="mt-2 text-xs font-bold text-omni-yellow">{pack.cta}</p>
+                        <p className="mt-2 text-xs font-bold text-gold">{pack.cta}</p>
                         <Button
                           type="button"
                           size="sm"

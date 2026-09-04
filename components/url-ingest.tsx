@@ -217,7 +217,7 @@ export function UrlIngest() {
       <p className={cn("mx-auto max-w-[92rem] text-sm text-muted", home ? "mt-1.5" : "mt-1 hidden sm:block")}>
         {t("url.hint")}
       </p>
-      {error && <p className="mx-auto mt-1 max-w-[92rem] whitespace-pre-line text-xs font-semibold text-omni-red">{error}</p>}
+      {error && <p className="mx-auto mt-1 max-w-[92rem] whitespace-pre-line text-xs font-semibold text-danger">{error}</p>}
 
       <IngestReviewDialog
         open={Boolean(doc)}

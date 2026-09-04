@@ -72,16 +72,16 @@ export function AboutPage() {
     locale === "he"
       ? {
           h: "למי זה?",
-          p: "עסקים מקומיים — מרפאות, מסעדות, בוטיקים, בריכות, בתי ספר וחנויות — שרוצים קמפיין מוכן בעברית וערבית בלי סוכנות מלאה.",
+          p: "סוכנויות קטנות ועסקים מקומיים — מרפאות, מסעדות, בוטיקים, בריכות, בתי ספר וחנויות — שרוצים קמפיין מוכן בעברית וערבית בלי צוות קריאייטיב מלא.",
         }
       : locale === "ar"
         ? {
             h: "لمين؟",
-            p: "محلات محلية — عيادات، مطاعم، بوتيكات، مسابح، مدارس ومحلات — بدهم حملة جاهزة بالعبري والعربي بدون وكالة كاملة.",
+            p: "وكالات صغيرة ومحلات محلية — عيادات، مطاعم، بوتيكات، مسابح، مدارس ومحلات — بدهم حملة جاهزة بالعبري والعربي بدون فريق إبداعي كامل.",
           }
         : {
             h: "Who is it for?",
-            p: "Local businesses — clinics, restaurants, boutiques, pools, schools, and shops — that want a ready campaign in Hebrew and Arabic without a full agency.",
+            p: "Boutique agencies and local businesses — clinics, restaurants, boutiques, pools, schools, and shops — that want a ready campaign in Hebrew and Arabic without a full creative team.",
           };
 
   const plans =
@@ -132,62 +132,63 @@ export function AboutPage() {
           };
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-10">
-      <ConquerHeadline subtitle={t("about.title")} />
-      <p className="mb-2 text-center text-sm text-muted">
-        {locale === "ar" ? t("brand.name") : "SAWEK AD · סאווק · سوِّق إعلانك بنفسك"}
-        <span className="mt-1 block text-xs text-muted">{t("brand.tagline")}</span>
-      </p>
-      <p className="mb-8 text-center text-base leading-relaxed text-navy">
-        {locale === "he"
-          ? "SAWEK AD הופך קישור לאתר לקמפיין מוכן: ביקורת, מודעות, תמונות והורדה — לעסקים מקומיים."
-          : locale === "ar"
-            ? "SAWEK AD بحوّل رابط الموقع لحملة جاهزة: تدقيق، إعلانات، صور وتحميل — للمحلات المحلية."
-            : "SAWEK AD turns a website URL into a ready campaign: audit, ads, images, and download — for local businesses."}
-      </p>
+    <div className="relative mx-auto max-w-3xl overflow-hidden px-4 py-12">
+      <div aria-hidden className="agency-grain absolute inset-0" />
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-64 agency-hero-glow" />
+      <div className="relative">
+        <ConquerHeadline subtitle={t("about.title")} />
+        <p className="mb-2 text-center text-sm text-muted">
+          {locale === "ar" ? t("brand.name") : "SAWEK AD · סאווק · سوِّق إعلانك بنفسك"}
+          <span className="mt-1 block text-xs text-muted">{t("brand.tagline")}</span>
+        </p>
+        <p className="mb-9 text-center text-lg leading-relaxed text-navy">
+          {locale === "he"
+            ? "SAWEK AD הופך קישור לאתר לקמפיין מוכן: ביקורת, מודעות, תמונות והורדה — כמו שולחן עבודה של סוכנות שיווק."
+            : locale === "ar"
+              ? "SAWEK AD بحوّل رابط الموقع لحملة جاهزة: تدقيق، إعلانات، صور وتحميل — مثل مكتب وكالة تسويق."
+              : "SAWEK AD turns a website URL into a ready campaign: audit, ads, images, and download — like a marketing-agency desk."}
+        </p>
 
-      <div className="mb-6 flex flex-wrap items-center justify-center gap-3">
-        <Button asChild size="lg">
-          <LangLink href="/">{locale === "he" ? "התחילו בקמפיין" : locale === "ar" ? "ابدأوا حملة" : "Start a campaign"}</LangLink>
-        </Button>
-        <Button asChild size="lg" variant="outline">
-          <LangLink href="/login">{t("nav.login")}</LangLink>
-        </Button>
-        <Button asChild size="lg" variant="gold">
-          <LangLink href="/pricing">{t("home.cta.pricing")}</LangLink>
-        </Button>
-        <Button type="button" size="lg" variant="outline" onClick={() => startPediatricDemoFlow(locale)}>
-          {DEMO_LABEL[locale]}
-        </Button>
-      </div>
+        <div className="mb-8 flex flex-wrap items-center justify-center gap-3">
+          <Button type="button" size="lg" variant="gold" onClick={() => startPediatricDemoFlow(locale)}>
+            {DEMO_LABEL[locale]}
+          </Button>
+          <Button asChild size="lg">
+            <LangLink href="/">{t("cta.new")}</LangLink>
+          </Button>
+          <Button asChild size="lg" variant="outline">
+            <LangLink href="/pricing">{t("home.cta.pricing")}</LangLink>
+          </Button>
+        </div>
 
-      <div className="space-y-4">
-        {steps.map((b) => (
-          <article key={b.h} className="rounded-2xl border border-navy/10 bg-white p-5">
-            <h2 className="mb-2 text-lg font-black text-omni-yellow">{b.h}</h2>
-            <p className="text-sm leading-relaxed text-muted">{b.p}</p>
+        <div className="space-y-4">
+          {steps.map((b) => (
+            <article key={b.h} className="agency-shell p-6">
+              <h2 className="mb-2 text-xl font-black text-gold">{b.h}</h2>
+              <p className="text-base leading-relaxed text-muted">{b.p}</p>
+            </article>
+          ))}
+
+          <article className="agency-shell p-6">
+            <h2 className="mb-2 text-xl font-black text-gold">{who.h}</h2>
+            <p className="text-base leading-relaxed text-muted">{who.p}</p>
           </article>
-        ))}
 
-        <article className="rounded-2xl border border-navy/10 bg-white p-5">
-          <h2 className="mb-2 text-lg font-black text-omni-yellow">{who.h}</h2>
-          <p className="text-sm leading-relaxed text-muted">{who.p}</p>
-        </article>
+          <article className="agency-shell p-6">
+            <h2 className="mb-2 text-xl font-black text-gold">{plans.h}</h2>
+            <p className="text-base leading-relaxed text-muted">{plans.free}</p>
+            <p className="mt-2 text-base leading-relaxed text-muted">{plans.pro}</p>
+          </article>
 
-        <article className="rounded-2xl border border-navy/10 bg-white p-5">
-          <h2 className="mb-2 text-lg font-black text-omni-yellow">{plans.h}</h2>
-          <p className="text-sm leading-relaxed text-muted">{plans.free}</p>
-          <p className="mt-2 text-sm leading-relaxed text-muted">{plans.pro}</p>
-        </article>
-
-        <article className="rounded-2xl border border-navy/10 bg-white p-5">
-          <h2 className="mb-2 text-lg font-black text-omni-yellow">{notYet.h}</h2>
-          <ul className="list-disc space-y-2 pe-5 text-sm leading-relaxed text-muted">
-            {notYet.items.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        </article>
+          <article className="agency-shell p-6">
+            <h2 className="mb-2 text-xl font-black text-gold">{notYet.h}</h2>
+            <ul className="list-disc space-y-2 pe-5 text-base leading-relaxed text-muted">
+              {notYet.items.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </article>
+        </div>
       </div>
     </div>
   );

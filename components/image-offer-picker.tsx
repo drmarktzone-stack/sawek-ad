@@ -314,25 +314,25 @@ export function ImageOfferPicker({
         ) : null}
       </div>
       {open ? (
-        <div className="mt-3 rounded-[22px] border border-navy/10 bg-white p-4 shadow-[0_10px_28px_rgba(27,42,74,0.07)]">
-          <p className="text-sm leading-relaxed text-foreground">{t("audit.offerPhotosLead")}</p>
+        <div className="agency-shell mt-3 p-5">
+          <p className="text-base leading-relaxed text-navy">{t("audit.offerPhotosLead")}</p>
           {aiBusy ? (
-            <p className="mt-2 flex items-center gap-2 text-sm font-semibold text-navy">
-              <Loader2 className="size-4 animate-spin" />
+            <p className="mt-3 flex items-center gap-2 text-sm font-semibold text-navy">
+              <Loader2 className="size-4 animate-spin text-gold" />
               {making}
             </p>
           ) : null}
           {!aiBusy && imgError ? (
-            <div className="mt-2 flex flex-wrap items-center gap-2">
-              <p className="text-sm text-navy/80">{vertexBusy}</p>
+            <div className="agency-empty mt-3 flex flex-wrap items-center gap-3 rounded-2xl p-4">
+              <p className="text-sm font-semibold text-navy/80">{vertexBusy}</p>
               <Button type="button" size="sm" variant="outline" onClick={() => void loadImagen()}>
                 {t("audit.retryImagen")}
               </Button>
             </div>
           ) : null}
 
-          <div className="mt-3 max-h-[70vh] overflow-y-auto pe-1">
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6">
+          <div className="mt-4 max-h-[70vh] overflow-y-auto pe-1">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6">
               {shown.map((opt) => (
                 <Tile key={opt.id} opt={opt} />
               ))}
@@ -340,10 +340,17 @@ export function ImageOfferPicker({
                 ? Array.from({ length: Math.max(0, requested - shown.length) }).map((_, i) => (
                     <div
                       key={`sk-${i}`}
-                      className="aspect-square animate-pulse rounded-xl border border-navy/10 bg-[#F6F1E8]"
+                      className="agency-skeleton aspect-square rounded-2xl border border-gold/20"
                     />
                   ))
                 : null}
+              {!aiBusy && !shown.length && !imgError ? (
+                <div className="agency-empty col-span-full flex min-h-[200px] flex-col items-center justify-center gap-3 rounded-[22px] p-6 text-center">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/textures/empty-frame.svg" alt="" className="h-36 w-36 opacity-90" />
+                  <p className="max-w-sm text-sm font-semibold text-navy/70">{t("audit.retryVertex")}</p>
+                </div>
+              ) : null}
             </div>
 
             {site.length ? (
@@ -371,10 +378,16 @@ export function ImageOfferPicker({
                 <AccordionTrigger>{t("audit.freeStock")}</AccordionTrigger>
                 <AccordionContent>
                   {stockBusy && !stock.length ? (
-                    <p className="text-sm text-muted">{t("audit.loadingStock")}</p>
+                    <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+                      {Array.from({ length: 6 }).map((_, i) => (
+                        <div key={i} className="agency-skeleton aspect-square rounded-xl" />
+                      ))}
+                    </div>
                   ) : null}
                   {stockLoaded && !stock.length && !stockBusy ? (
-                    <p className="text-sm text-muted">{t("audit.stockEmpty")}</p>
+                    <div className="agency-empty rounded-2xl p-5 text-center">
+                      <p className="text-sm font-semibold text-navy/75">{t("audit.stockEmpty")}</p>
+                    </div>
                   ) : null}
                   {stock.length ? (
                     <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 md:grid-cols-6">

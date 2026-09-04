@@ -592,7 +592,7 @@ export function LivePreviewStrip({
           </Button>
         </div>
       </div>
-      {imgError ? <p className="mt-2 text-sm text-omni-red">{imgError}</p> : null}
+      {imgError ? <p className="mt-2 text-sm text-danger">{imgError}</p> : null}
 
       {onPack ? <ImageOfferPicker pack={pack} locale={packLang} onPack={onPack} /> : null}
 

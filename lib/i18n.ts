@@ -10,9 +10,9 @@ export const copy: Dict = {
     en: "سوِّق إعلانك بنفسك · סאווק",
   },
   "brand.tagline": {
-    he: "מקישור לאתר · מודעות מוכנות לעסק מקומי",
-    ar: "من رابط الموقع · إعلانات جاهزة للمحل المحلي",
-    en: "From a site link · finished ads for local business",
+    he: "שולחן עבודה של סוכנות · מודעות מוכנות",
+    ar: "مكتب وكالة · إعلانات جاهزة",
+    en: "Agency desk · finished ads",
   },
   "nav.build": { he: "בניית קמפיין", ar: "بناء حملة", en: "Build campaign" },
   "nav.studio": { he: "סטודיו תוכן", ar: "ستوديو المحتوى", en: "Content studio" },
@@ -38,14 +38,14 @@ export const copy: Dict = {
   "hero.titleSuffix": { he: "היום?", ar: "اليوم؟", en: "today?" },
   "hero.review": { he: "סקירה ובנייה", ar: "مراجعة وبناء", en: "Review and build" },
   "home.kicker": {
-    he: "מקישור לאתר · מודעות מוכנות",
-    ar: "من رابط الموقع · إعلانات جاهزة",
-    en: "Paste a site · finished ads",
+    he: "סוכנות שיווק · Google Cloud",
+    ar: "وكالة تسويق · Google Cloud",
+    en: "Marketing agency · Google Cloud",
   },
   "home.headline": {
-    he: "הדביקו קישור לאתר — קבלו מודעות מוכנות",
-    ar: "لزّقوا رابط الموقع — خدوا إعلانات جاهزة",
-    en: "Paste a website URL — get finished ads",
+    he: "מקישור לאתר — לקמפיין סוכנות מוכן",
+    ar: "من رابط الموقع — لحملة وكالة جاهزة",
+    en: "From a website link — to a finished agency campaign",
   },
   "home.pitch": {
     he: "מה היישום יודע לעשות: מדביקים קישור לאתר — SAWEK שולף עובדות שפורסמו, בונה מודעות בעברית וערבית לערוצים, ומציע תמונות או כרזות. מורידים את החבילה (וב-Pro גם לוח ודף נחיתה). בלי ROAS מומצא ובלי מחירים שלא פרסמתם.",
@@ -251,7 +251,7 @@ export const copy: Dict = {
   "cta.next": { he: "המשך", ar: "متابعة", en: "Continue" },
   "cta.demo": { he: "הדגמה בלי להקליד", ar: "تجربة بدون كتابة", en: "Demo — no typing" },
   "cta.demoShort": { he: "דמו", ar: "تجربة", en: "Demo" },
-  "cta.new": { he: "קמפיין חדש", ar: "حملة جديدة", en: "New campaign" },
+  "cta.new": { he: "קמפיין ריק חדש", ar: "حملة فارغة جديدة", en: "New empty campaign" },
   "cta.newOther": {
     he: "קמפיין חדש לעסק אחר",
     ar: "حملة جديدة لمحل آخر",
@@ -512,7 +512,7 @@ export const copy: Dict = {
   "med.demo": {
     he: "הדגמה: מרפאת ילדים ד״ר סאמר אבו מוך",
     ar: "عرض: عيادة أطفال د. سامر أبو مخ",
-    en: "Demo: Dr. Samer Abu Mokh pediatrics",
+    en: "Demo: ready clinic campaign",
   },
   "med.step.specialty": { he: "התמחות", ar: "التخصص", en: "Specialty" },
   "med.step.clinic": { he: "פרופיל מרפאה", ar: "ملف العيادة", en: "Clinic profile" },

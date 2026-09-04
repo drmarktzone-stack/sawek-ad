@@ -77,16 +77,19 @@ export function PricingPage() {
   const proItems = ["pricing.p1", "pricing.p2", "pricing.p3", "pricing.p4", "pricing.p5"] as const;
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-12">
+    <div className="relative mx-auto max-w-5xl overflow-hidden px-4 py-14">
+      <div aria-hidden className="agency-grain absolute inset-0" />
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-56 agency-hero-glow" />
+      <div className="relative">
       <p className="text-center text-sm font-bold uppercase tracking-[0.28em] text-gold">{t("pricing.kicker")}</p>
-      <h1 className="mt-2 text-center text-4xl font-black text-navy">{t("pricing.title")}</h1>
+      <h1 className="mt-2 agency-display text-center text-4xl sm:text-5xl">{t("pricing.title")}</h1>
       <p className="mx-auto mt-3 max-w-2xl text-center text-muted">{t("pricing.lead")}</p>
       {plan === "pro" ? <p className="mt-3 text-center text-sm font-black text-navy">{t("auth.plan.pro")}</p> : null}
       {flash === "success" ? <p className="mt-3 text-center text-sm font-semibold text-navy">{t("pricing.success")}</p> : null}
       {flash === "cancel" ? <p className="mt-3 text-center text-sm text-muted">{t("pricing.cancel")}</p> : null}
 
       <div className="mt-10 grid gap-6 md:grid-cols-2">
-        <article className="rounded-[28px] border border-navy/10 bg-white p-6 shadow-[0_10px_32px_rgba(27,42,74,0.07)]">
+        <article className="agency-shell p-7">
           <h2 className="text-2xl font-black text-navy">{t("pricing.freeName")}</h2>
           <p className="mt-2 text-4xl font-black text-navy">{t("pricing.freePrice")}</p>
           <p className="text-sm text-muted">{t("pricing.freeForever")}</p>
@@ -100,7 +103,7 @@ export function PricingPage() {
           </Button>
         </article>
 
-        <article className="rounded-[28px] border border-gold/50 bg-white p-6 shadow-[0_10px_32px_rgba(27,42,74,0.07)]">
+        <article className="agency-shell border-gold/50 p-7 ring-1 ring-gold/30">
           <h2 className="text-2xl font-black text-navy">{t("pricing.proName")}</h2>
           <p className="mt-2 text-4xl font-black text-navy">₪{PRICE_MONTHLY_ILS}</p>
           <p className="text-sm text-muted">{t("pricing.month")}</p>
@@ -149,8 +152,9 @@ export function PricingPage() {
           </div>
         </article>
       </div>
-      {err ? <p className="mt-4 text-center text-sm font-semibold text-omni-red">{err}</p> : null}
+      {err ? <p className="mt-4 text-center text-sm font-semibold text-danger">{err}</p> : null}
       {!user ? <p className="mt-4 text-center text-sm text-muted">{t("pricing.needLogin")} <LangLink href="/login" className="font-semibold underline">{t("nav.login")}</LangLink></p> : null}
+      </div>
     </div>
   );
 }
