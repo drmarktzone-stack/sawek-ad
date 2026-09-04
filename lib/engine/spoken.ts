@@ -318,6 +318,14 @@ export function spokenCta(intake: Intake, locale: Locale): string {
   if (isWalkIn(intake)) {
     return visitCta(intake, locale);
   }
+  const vertical = detectVertical(intake);
+  if (vertical === "restaurant" || vertical === "retail" || vertical === "pool" || vertical === "school") {
+    const g0 = (intake.mainGoal || "").toLowerCase();
+    if (vertical === "retail" && (/sale|מכיר|רכיש|buy|shop/.test(g0) || !g0.trim())) {
+      return locale === "he" ? "לפרטים ולרכישה" : locale === "ar" ? "للتفاصيل والشراء" : "See details & buy";
+    }
+    return visitCta(intake, locale);
+  }
   const g = (resolveChipLabel(intake.mainGoal, GOAL_CHIPS, locale) || intake.mainGoal).toLowerCase();
   if (/תור|מועד|book|موعد|حجز/.test(g)) {
     return locale === "he" ? "קבעו תור" : locale === "ar" ? "احجزوا موعد" : "Book an appointment";

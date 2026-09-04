@@ -3,7 +3,6 @@
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import {
-  Brain,
   Coins,
   Compass,
   FlaskConical,
@@ -39,7 +38,6 @@ const NAV = [
   { href: "/studio", key: "nav.studio" as const, icon: Pencil },
   { href: "/media", key: "nav.media" as const, icon: Megaphone },
   { href: "/leads", key: "nav.leads" as const, icon: Users },
-  { href: "/medical/optibrain", key: "nav.medical" as const, icon: Brain },
   { href: "/campaigns", key: "nav.campaigns" as const, icon: Folder },
   { href: "/dashboard", key: "nav.dashboard" as const, icon: LayoutDashboard },
   { href: "/lab", key: "nav.lab" as const, icon: FlaskConical },

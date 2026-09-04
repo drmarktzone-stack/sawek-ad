@@ -13,7 +13,9 @@ import { draftLeaksClinic } from "../lib/clinic-leak";
 import { t } from "../lib/i18n";
 import type { CampaignPack } from "../lib/types";
 import { bodyHasFacts } from "../lib/engine/gemini-generate";
-import { filterCustomerCampaigns, isBannedCustomerSample } from "../lib/sample-packs";
+import { filterCustomerCampaigns, isBannedCustomerSample, isAllowedPublishedDemoId } from "../lib/sample-packs";
+import { readFileSync } from "fs";
+import { join } from "path";
 
 const mem = new Map<string, string>();
 const session = new Map<string, string>();
@@ -184,6 +186,16 @@ const filtered = filterCustomerCampaigns([
 if (filtered.some((p) => p.id === "wine-1")) fail("wine sample still in customer list");
 if (!filtered.some((p) => p.id === "keep-me")) fail("real campaign was filtered");
 if (!filtered.some((p) => p.id === "demo-samer-clinic")) fail("clinic demo filtered from allow-list helper");
+
+const publishedRaw = JSON.parse(readFileSync(join(__dirname, "../public/packs/published.json"), "utf8")) as
+  | { id?: string }[]
+  | { packs?: { id?: string }[] };
+const publishedList = Array.isArray(publishedRaw) ? publishedRaw : publishedRaw.packs ?? [];
+const packIds = publishedList.map((p) => String(p.id ?? ""));
+if (packIds.length !== 1 || packIds[0] !== "demo-samer-clinic") {
+  fail(`published.json must contain only demo-samer-clinic, got ${JSON.stringify(packIds)}`);
+}
+if (!isAllowedPublishedDemoId("demo-samer-clinic")) fail("clinic demo id rejected");
 
 if (bodyHasFacts({})) fail("empty body should not look like facts");
 if (bodyHasFacts({ description: "", audience: "" })) fail("blank description is not facts");

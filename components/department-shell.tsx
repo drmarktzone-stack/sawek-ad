@@ -27,7 +27,6 @@ const DEPT_RAIL = [
   { href: "/studio", key: "nav.studio" as const },
   { href: "/media", key: "nav.media" as const },
   { href: "/leads", key: "nav.leads" as const },
-  { href: "/medical/optibrain", key: "nav.medical" as const },
   { href: "/campaigns", key: "nav.campaigns" as const },
   { href: "/dashboard", key: "nav.dashboard" as const },
   { href: "/lab", key: "nav.lab" as const },

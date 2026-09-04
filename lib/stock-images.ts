@@ -47,15 +47,15 @@ const VERTICALS: Vertical[] = ["clinic", "restaurant", "pool", "school", "produc
 /** English topic queries per vertical. Used for Openverse + wrapped for Wikimedia. */
 const TOPIC_QUERIES: Record<Vertical, string[]> = {
   clinic: [
-    "pediatric clinic waiting room",
-    "children's doctor office interior",
+    "medical clinic waiting room",
+    "doctor office interior",
     "family clinic",
     "warm medical clinic",
-    "kids healthcare waiting room",
-    "Mediterranean clinic facade",
+    "pediatric clinic waiting room",
+    "children's doctor office interior",
     "clinic reception desk",
     "empty clinic corridor",
-    "olive courtyard clinic",
+    "Mediterranean clinic facade",
   ],
   pool: [
     "hydrotherapy pool",
@@ -70,6 +70,8 @@ const TOPIC_QUERIES: Record<Vertical, string[]> = {
     "clothing store display",
     "apparel shop interior",
     "boutique dressing room",
+    "sporting goods store",
+    "sneaker shop interior",
   ],
   restaurant: [
     "grilled food",
@@ -115,7 +117,7 @@ const TOPIC_NEEDLES: Record<Vertical, RegExp> = {
   clinic:
     /clinic|hospital|pediatric|waiting.?room|waiting area|doctor.?office|medical office|exam(ination)? room|family health|outpatient/i,
   pool: /pool|hydrotherap|swim|rehab|therapy water|aquatic/i,
-  retail: /boutique|clothing|apparel|fashion|shop|store|retail|dress|garment|mannequin/i,
+  retail: /boutique|clothing|apparel|fashion|shop|store|retail|dress|garment|mannequin|sneaker|sporting goods|footwear/i,
   restaurant: /grill|food|restaurant|chicken|kebab|shawarma|dining|meal|kitchen|burger|plate/i,
   product: /phone|smartphone|mobile|app|parent|hand|screen|tablet|device/i,
   school: /school|classroom|kindergarten|desk|student|teacher|campus|preschool/i,
@@ -134,7 +136,7 @@ function asVertical(v: unknown): Vertical | undefined {
   if (/pedia|pediatric|pediatrics|ילדים|أطفال|kids|children/.test(s)) return "clinic";
   if (/hydrotherap|בריכה|مسبح|pool/.test(s)) return "pool";
   if (/restaurant|מסעדה|مطعم|grill|shawarma/.test(s)) return "restaurant";
-  if (/retail|boutique|אופנה|חנות/.test(s)) return "retail";
+  if (/retail|boutique|אופנה|חנות|ספורט|sport/.test(s)) return "retail";
   if (/school|בית ספר|مدرسة/.test(s)) return "school";
   if (/product|app|platform|smart tools/.test(s)) return "product";
   return undefined;

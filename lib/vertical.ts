@@ -27,7 +27,7 @@ const FOOD_AS_BUSINESS =
   /restaurant|מסעדה|مطعم|shawarma|شاورما|שוארמה|grill|גריל|غريل|burger|بورجر|برغر|המבורגר|בורגר|همبرغر|dessert|קינוח|حلوي|كباب|kebab|falafel|פלאפל|pizza|פיצה|بيتزا|steak|סטייק|kitchen|مطبخ|cafe|קפה|مقهى|أفندنا|أفندن|افندن|afanden|grill king|مأكول|גלידה|ice cream|حلويات/i;
 
 const RETAIL_AS_BUSINESS =
-  /אופנה|חנות|חנויות|מותגים|עיר המותגים|שופינג|לייף\s*סטייל|fashion|boutique|outlet|\bmall\b|apparel|clothing|retail|lifestyle store|\bshops?\b|brand city|shopping/i;
+  /אופנה|חנות|חנויות|מותגים|עיר המותגים|שופינג|לייף\s*סטייל|fashion|boutique|outlet|\bmall\b|apparel|clothing|retail|lifestyle store|\bshops?\b|brand city|shopping|ספורט|כושר|הנעלה|בגדי ספורט|מכשירי כושר|sporting goods|sportswear|athletic|sneakers|footwear/i;
 
 const SCHOOL_AS_BUSINESS =
   /בית ספר|مدرسة|school|עירייה|بلدية|municipality|עמותה|جمعية|\bngo\b|תחנה לבריאות|محطة صحة|public health|גן ילדים|روضة/i;

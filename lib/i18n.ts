@@ -64,9 +64,9 @@ export const copy: Dict = {
   },
   "home.cta.pricing": { he: "מחירון", ar: "الأسعار", en: "Pricing" },
   "home.atmosphere": {
-    he: "חנויות, מסעדות, סטודיואים — אותו מנוע",
-    ar: "محلات، مطاعم، ستوديوهات — نفس المحرّك",
-    en: "Shops, restaurants, studios — the same engine",
+    he: "חנויות, מסעדות, בריכות, בתי ספר, סטודיואים — אותו מנוע",
+    ar: "محلات، مطاعم، مسابح، مدارس، ستوديوهات — نفس المحرّك",
+    en: "Shops, restaurants, pools, schools, studios — the same engine",
   },
   "home.startEmpty": { he: "התחל קמפיין ריק", ar: "ابدأ حملة فارغة", en: "Start an empty campaign" },
   "home.stat.steps": { he: "4 שלבים", ar: "4 خطوات", en: "4 steps" },

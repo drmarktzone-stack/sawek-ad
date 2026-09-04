@@ -4,6 +4,7 @@
  */
 import { runGeminiGenerate } from "../lib/engine/gemini-generate";
 import { countIncompleteMarkers, templateFillFromFacts } from "../lib/engine/fact-copy";
+import { detectVertical } from "../lib/vertical";
 
 const failures: string[] = [];
 function fail(m: string) {
@@ -40,6 +41,77 @@ if (!/באקה/.test(heBlob) && !/באקה/.test(filled.locales?.he?.copy ?? "")
 if (!/sawek\.example/.test(filled.locales?.he?.copy ?? "")) fail(`HE missing website`);
 if (!/בלי תורים/.test(`${heBlob}\n${filled.locales?.he?.copy}`)) fail(`HE missing offer`);
 if (!/08:00/.test(filled.locales?.he?.copy ?? "")) fail(`HE missing hours`);
+
+function assertAnyBusinessFill(
+  label: string,
+  facts: Record<string, string>,
+  expectVertical: ReturnType<typeof detectVertical>,
+  must: RegExp,
+  mustNot: RegExp,
+) {
+  const filledV = templateFillFromFacts({ facts });
+  if (!filledV.ok) {
+    fail(`${label} templateFill not ok`);
+    return;
+  }
+  const v = detectVertical({
+    businessName: facts.businessName || "",
+    category: facts.category || "",
+    description: facts.description || facts.offer || "",
+  });
+  if (v !== expectVertical) fail(`${label} detectVertical ${v} expected ${expectVertical}`);
+  const blob = ["he", "ar", "en"]
+    .map((loc) => {
+      const b = filledV.locales?.[loc as "he" | "ar" | "en"];
+      return `${b?.headlines.join(" ")}\n${b?.copy}\n${b?.cta}`;
+    })
+    .join("\n");
+  if (countIncompleteMarkers(blob) > 0) fail(`${label} markers: ${blob}`);
+  if (!must.test(blob)) fail(`${label} missing facts: ${blob.slice(0, 280)}`);
+  if (mustNot.test(blob)) fail(`${label} leaked clinic/demo copy: ${blob.slice(0, 280)}`);
+}
+
+assertAnyBusinessFill(
+  "grill",
+  {
+    businessName: "פיקציה גריל",
+    category: "מסעדה",
+    phone: "04-1234567",
+    city: "באקה",
+    offer: "1+1 היום",
+    hours: "12:00–23:00",
+    description: "גריל בשרים בבאקה",
+  },
+  "restaurant",
+  /פיקציה גריל|04-1234567|1\s*\+\s*1/,
+  /מרפאה|כללית|סאמר|הגיעו למרפאה|רופא ילדים/,
+);
+assertAnyBusinessFill(
+  "sport-shop",
+  {
+    businessName: "אלוף ספורט",
+    category: "בגדי ספורט",
+    phone: "08-9336658",
+    city: "באר שבע",
+    description: "הנעלה, בגדי ספורט ומכשירי כושר",
+    website: "https://www.alufsport.co.il/",
+  },
+  "retail",
+  /אלוף ספורט|08-9336658|באר שבע/,
+  /מרפאה|כללית|סאמר|הגיעו למרפאה|רופא ילדים/,
+);
+assertAnyBusinessFill(
+  "school",
+  {
+    businessName: "בית ספר האור",
+    category: "בית ספר",
+    city: "באקה",
+    description: "בית ספר מקומי",
+  },
+  "school",
+  /בית ספר האור/,
+  /מרפאה|כללית|סאמר|הגיעו למרפאה/,
+);
 
 async function main() {
   const result = await runGeminiGenerate({ facts });

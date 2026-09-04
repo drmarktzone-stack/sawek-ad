@@ -47,6 +47,11 @@ if (!poolQs.some((q) => /hydrotherapy pool/i.test(q))) fail(`pool missing hydrot
 
 const retailQs = topicQueriesFor({ vertical: "retail", category: "אופנה", q: "בoutique" });
 if (!retailQs.some((q) => /clothing boutique/i.test(q))) fail(`retail missing boutique: ${retailQs.join(" | ")}`);
+const sportQs = topicQueriesFor({ vertical: "retail", category: "בגדי ספורט", q: "אלוף ספורט" });
+if (!sportQs.some((q) => /sporting goods|sneaker/i.test(q))) fail(`sport retail missing sport stills: ${sportQs.join(" | ")}`);
+if (detectVertical({ businessName: "אלוף ספורט", category: "בגדי ספורט", description: "הנעלה ומכשירי כושר" }) !== "retail") {
+  fail("alufsport should detect as retail");
+}
 
 const foodQs = topicQueriesFor({ vertical: "restaurant", category: "مطعم شاورما", q: "grill" });
 if (!foodQs.some((q) => /grilled food/i.test(q))) fail(`restaurant missing grilled food: ${foodQs.join(" | ")}`);
@@ -125,6 +130,24 @@ const genericStills = studioStillsForIntake({
 if (genericStills.length < 6) fail(`generic stills ${genericStills.length} < 6`);
 if (genericStills.some((s) => /clinic|waiting-sun|play-nook/i.test(s.id))) {
   fail(`generic stills leaked clinic scenes: ${genericStills.map((s) => s.id).join(",")}`);
+}
+const grillStills = studioStillsForIntake({
+  businessName: "פיקציה גריל",
+  category: "מסעדה",
+  description: "גריל בבאקה",
+});
+if (grillStills.length < 6) fail(`restaurant stills ${grillStills.length} < 6`);
+if (grillStills.some((s) => /clinic|waiting-sun|play-nook/i.test(s.id))) {
+  fail(`restaurant stills leaked clinic: ${grillStills.map((s) => s.id).join(",")}`);
+}
+const shopStills = studioStillsForIntake({
+  businessName: "אלוף ספורט",
+  category: "בגדי ספורט",
+  description: "חנות ספורט",
+});
+if (shopStills.length < 6) fail(`retail stills ${shopStills.length} < 6`);
+if (shopStills.some((s) => /clinic|waiting-sun|play-nook/i.test(s.id))) {
+  fail(`retail stills leaked clinic: ${shopStills.map((s) => s.id).join(",")}`);
 }
 
 if (failures.length) {
