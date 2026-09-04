@@ -31,17 +31,20 @@ import {
   type SocialPost,
 } from "./social-page";
 import type { PastCampaignAudit } from "./types";
+import { stripTrackingParams } from "./url-clean";
+export { stripTrackingParams } from "./url-clean";
 
 /** Extra-page per-request timeout. Homepage uses URL_HOMEPAGE_TIMEOUT_MS. */
 export const URL_FETCH_TIMEOUT_MS = 8_000;
 /** Slow WooCommerce homepages (~1.5MB) need more than 8s; extras stay shorter. */
-export const URL_HOMEPAGE_TIMEOUT_MS = 25_000;
+export const URL_HOMEPAGE_TIMEOUT_MS = 35_000;
 /** Wall-clock budget for all extra nav fetches together (parallel). */
 export const URL_EXTRA_PAGES_BUDGET_MS = 14_000;
 /** Abort the body once we have enough HTML to parse (do not wait for the catalog). */
-export const URL_PARSE_BODY_CAP = 512 * 1024;
+/** Large WooCommerce pages put Organization JSON-LD past 512KB; keep under URL_MAX_BODY. */
+export const URL_PARSE_BODY_CAP = 1024 * 1024;
 export const URL_MAX_BODY = Math.floor(1.5 * 1024 * 1024);
-export const URL_MAX_REDIRECTS = 5;
+export const URL_MAX_REDIRECTS = 8;
 export const URL_TEXT_CAP = 20_000;
 export const URL_MAX_EXTRA_PAGES = 12;
 export const URL_MAX_IMAGES = 16;
@@ -49,6 +52,7 @@ export const URL_MAX_IMAGES = 16;
 export type UrlIngestErrorCode =
   | "invalid_url"
   | "blocked"
+  | "site_blocked"
   | "timeout"
   | "non_html"
   | "empty"
@@ -99,6 +103,40 @@ export function socialLoginWallError(): UrlIngestErr {
 }
 
 export type UrlIngestResult = UrlIngestOk | UrlIngestErr;
+
+const SITE_BROWSER_UA =
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36";
+
+function looksLikeBotChallenge(html: string, status: number): boolean {
+  if (status === 403 || status === 401 || status === 429 || status === 503) {
+    const head = String(html || "").slice(0, 8000).toLowerCase();
+    if (/cloudflare|attention required|cf-browser|challenge-platform|just a moment|access denied|bot detection|captcha|אנו מזהים|אימות אבטחה/.test(head)) {
+      return true;
+    }
+    if (status === 403 || status === 429) return true;
+  }
+  const head = String(html || "").slice(0, 12000).toLowerCase();
+  if (/cf-browser-verification|challenge-platform|cdn-cgi\/challenge|just a moment\.\.\.|enable javascript and cookies to continue/.test(head)) {
+    return true;
+  }
+  if (/<title[^>]*>\s*just a moment/i.test(html) || /<title[^>]*>\s*attention required/i.test(html)) {
+    return true;
+  }
+  return false;
+}
+
+function htmlHasUsefulMeta(html: string): boolean {
+  const raw = String(html || "");
+  if (!raw.trim()) return false;
+  if (/property=["']og:title["']/i.test(raw) || /name=["']og:title["']/i.test(raw)) return true;
+  if (/property=["']og:description["']/i.test(raw) || /name=["']description["']/i.test(raw)) return true;
+  if (/property=["']og:site_name["']/i.test(raw)) return true;
+  if (/<title\b[^>]*>[^<]{2,}/i.test(raw)) return true;
+  if (/application\/ld\+json/i.test(raw) && /"name"\s*:/i.test(raw)) return true;
+  if (/href\s*=\s*["']tel:/i.test(raw) || /wa\.me\//i.test(raw)) return true;
+  return false;
+}
+
 
 const GENERIC_SCHEMA = new Set(["localbusiness", "organization", "thing", "place", "webpage", "website"]);
 
@@ -531,6 +569,41 @@ function pageLooksLikeAd(finalUrl: string, text: string): boolean {
   return false;
 }
 
+
+/** SEO titles like "keywords | Brand - Brand" → prefer a short brand segment. */
+function shortNameFromSeoTitle(raw: string): string {
+  const s = clip(String(raw || ""), 200);
+  if (!s) return "";
+  const pipeParts = s.split(/\s*[|｜]\s*/).map((p) => p.trim()).filter(Boolean);
+  const candidates: string[] = [];
+  for (const part of pipeParts.length ? pipeParts : [s]) {
+    for (const dash of part.split(/\s+[-–—]\s+/).map((p) => p.trim()).filter(Boolean)) {
+      if (dash) candidates.push(dash);
+    }
+  }
+  if (!candidates.length) return clip(s, 120);
+  const ranked = [...candidates].sort((a, b) => {
+    const score = (x: string) => {
+      const commas = (x.match(/,/g) || []).length;
+      const lenPenalty = x.length > 40 ? x.length : 0;
+      return commas * 100 + lenPenalty;
+    };
+    return score(a) - score(b) || a.length - b.length;
+  });
+  const best = ranked[0] || "";
+  if (best && best.length <= 60 && (best.match(/,/g) || []).length < 2) return clip(best, 80);
+  return clip(s, 120);
+}
+
+function looksLikeSeoBusinessName(v: string): boolean {
+  const s = String(v || "").replace(/\s+/g, " ").trim();
+  if (!s) return false;
+  if (/[|｜]/.test(s)) return true;
+  if ((s.match(/,/g) || []).length >= 2) return true;
+  if (s.length > 48) return true;
+  return false;
+}
+
 function filenameFromUrl(url: string): string {
   try {
     const u = new URL(url);
@@ -543,8 +616,12 @@ function filenameFromUrl(url: string): string {
 
 function absHttpUrl(maybe: string, base: string): string {
   if (!maybe) return "";
+  // Ecommerce CDNs sometimes emit icon hrefs with a raw space before type="image/...".
+  let cleaned = decodeEntities(String(maybe).trim()).split(/\s+/)[0]?.replace(/[\r\n]+/g, "") || "";
+  if (!cleaned) return "";
+  cleaned = cleaned.replace(/%20type(?:=.*)?$/i, "").replace(/\s+type(?:=.*)?$/i, "");
   try {
-    const u = new URL(maybe, base);
+    const u = new URL(cleaned, base);
     if (u.protocol !== "http:" && u.protocol !== "https:") return "";
     return u.href;
   } catch {
@@ -1074,24 +1151,28 @@ export function parseFetchedHtml(
   let fields = extractFieldsFromText(blob, file);
 
   const siteUrl = submittedUrl || finalUrl;
-  if (/^https?:\/\//i.test(siteUrl)) fields.website = siteUrl.split("#")[0];
+  if (/^https?:\/\//i.test(siteUrl)) fields.website = stripTrackingParams(siteUrl.split("#")[0]) || siteUrl.split("#")[0];
 
   const usableName = (v: string): boolean => {
     const s = clip(v, 120);
     return Boolean(s) && !isJunkUiText(s) && !isCatalogHeading(s);
   };
-  if (!fields.businessName || !usableName(fields.businessName)) {
+  const currentName = String(fields.businessName || "").trim();
+  // Prefer og:site_name / JSON-LD / short title over long ecommerce SEO titles.
+  if (!currentName || !usableName(currentName) || looksLikeSeoBusinessName(currentName)) {
     const fromLd = jsonLdName(nodes);
     const fromSite = jsonLdSiteName(sites);
+    const fromOgShort = shortNameFromSeoTitle(ogTitle || "");
+    const fromTitleShort = shortNameFromSeoTitle(title || "");
     const fromOgTitle = clip(ogTitle || "", 120);
-    const fromOgShort = fromOgTitle.split(/\s+[-–—]\s+/)[0].trim();
-    if (usableName(fromLd)) fields.businessName = clip(fromLd, 120);
-    else if (usableName(ogSiteName)) fields.businessName = clip(ogSiteName, 120);
-    else if (usableName(fromSite)) fields.businessName = clip(fromSite, 120);
+    if (usableName(fromLd) && !looksLikeSeoBusinessName(fromLd)) fields.businessName = clip(fromLd, 80);
+    else if (usableName(ogSiteName) && !looksLikeSeoBusinessName(ogSiteName)) fields.businessName = clip(ogSiteName, 80);
+    else if (usableName(fromSite) && !looksLikeSeoBusinessName(fromSite)) fields.businessName = clip(fromSite, 80);
     else if (usableName(fromOgShort)) fields.businessName = fromOgShort;
-    else if (usableName(fromOgTitle)) fields.businessName = fromOgTitle;
-    else if (usableName(title)) fields.businessName = clip(title, 120);
-    else delete fields.businessName;
+    else if (usableName(fromTitleShort)) fields.businessName = fromTitleShort;
+    else if (usableName(fromOgTitle) && !looksLikeSeoBusinessName(fromOgTitle)) fields.businessName = fromOgTitle;
+    else if (usableName(title) && !looksLikeSeoBusinessName(title)) fields.businessName = clip(title, 120);
+    else if (!currentName || !usableName(currentName)) delete fields.businessName;
   }
   if (ogDescription) {
     const current = String(fields.description || "").trim();
@@ -1135,7 +1216,16 @@ export function parseFetchedHtml(
 
   const text = clip([title && `title: ${title}`, ...labeled, visible, extraCorpus].filter(Boolean).join("\n"), URL_TEXT_CAP);
   if (!text.trim() && !Object.values(fields).some((v) => String(v || "").trim())) {
-    return { ok: false, error: "empty" };
+    // Thin SPA shell: still succeed when og/title/phone meta was captured into fields/title.
+    if (title || ogTitle || ogDescription || fields.businessName || fields.phone || fields.whatsapp) {
+      if (!fields.businessName) {
+        const short = shortNameFromSeoTitle(ogTitle || title || "");
+        if (short) fields.businessName = short;
+      }
+      if (ogDescription && !fields.description) fields.description = clip(ogDescription, 500);
+    } else {
+      return { ok: false, error: "empty" };
+    }
   }
 
   const pageImages = collectPageImages(raw, finalUrl, nodes);
@@ -1295,10 +1385,12 @@ async function fetchHtmlDocument(
                 : opts.accept === "css"
                   ? "text/css,*/*;q=0.1"
                   : "text/html,application/xhtml+xml;q=0.9,*/*;q=0.8",
-            "User-Agent": opts.browserLike
-              ? SOCIAL_BROWSER_UA
-              : "Mozilla/5.0 (compatible; SAWEK-AD-Ingest/0.1)",
-            ...(opts.browserLike ? { "Accept-Language": "he-IL,he;q=0.9,ar;q=0.8,en-US;q=0.7,en;q=0.6" } : {}),
+            "User-Agent": opts.browserLike === false
+              ? "Mozilla/5.0 (compatible; SAWEK-AD-Ingest/0.1)"
+              : SITE_BROWSER_UA,
+            "Accept-Language": "he-IL,he;q=0.9,ar;q=0.8,en-US;q=0.7,en;q=0.6",
+            "Cache-Control": "no-cache",
+            "Upgrade-Insecure-Requests": "1",
           },
         });
       } catch (e) {
@@ -1328,12 +1420,30 @@ async function fetchHtmlDocument(
   }
 
   if (!res) return { ok: false, error: "network" };
-  if (!res.ok) return { ok: false, error: "network" };
 
   const capped = await readCapped(res, URL_PARSE_BODY_CAP);
   if (!capped.ok) return capped;
-  const sniff = new TextDecoder("utf-8", { fatal: false }).decode(capped.buf.slice(0, 512));
+  const html = new TextDecoder("utf-8", { fatal: false }).decode(capped.buf);
+  const sniff = html.slice(0, 512);
   const ct = res.headers.get("content-type");
+
+  if (!res.ok) {
+    if (looksLikeBotChallenge(html, res.status)) return { ok: false, error: "site_blocked" };
+    // Soft-fail: some CDNs return 403/5xx with a usable HTML shell (og meta still present).
+    if ((opts.accept === undefined || opts.accept === "html") && htmlHasUsefulMeta(html) && isHtmlResponse(ct, sniff)) {
+      return { ok: true, html, finalUrl: current.href };
+    }
+    if (res.status === 408 || res.status === 504) return { ok: false, error: "timeout" };
+    if (res.status === 401 || res.status === 403 || res.status === 429 || res.status === 503) {
+      return { ok: false, error: "site_blocked" };
+    }
+    return { ok: false, error: "network" };
+  }
+
+  if (looksLikeBotChallenge(html, res.status) && !htmlHasUsefulMeta(html)) {
+    return { ok: false, error: "site_blocked" };
+  }
+
   if (opts.accept === "script") {
     if (!isScriptResponse(ct, sniff) && !isHtmlResponse(ct, sniff) && !isCssResponse(ct, sniff)) return { ok: false, error: "non_html" };
   } else if (opts.accept === "css") {
@@ -1341,7 +1451,6 @@ async function fetchHtmlDocument(
   } else if (!isHtmlResponse(ct, sniff)) {
     return { ok: false, error: "non_html" };
   }
-  const html = new TextDecoder("utf-8", { fatal: false }).decode(capped.buf);
   return { ok: true, html, finalUrl: current.href };
 }
 
@@ -1699,7 +1808,8 @@ async function ingestSocialUrl(
 }
 
 export async function ingestUrl(raw: string, extraBlockedHosts: string[] = []): Promise<UrlIngestResult> {
-  const submitted = String(raw ?? "").trim().split("#")[0];
+  const submittedRaw = String(raw ?? "").trim().split("#")[0];
+  const submitted = stripTrackingParams(submittedRaw) || submittedRaw;
   const inspected = inspectUrl(submitted, extraBlockedHosts);
   if (!inspected.ok) return inspected;
   const kind = detectSocialKind(inspected.url);
@@ -1707,6 +1817,7 @@ export async function ingestUrl(raw: string, extraBlockedHosts: string[] = []): 
 
   const homeDoc = await fetchHtmlDocument(submitted, extraBlockedHosts, {
     timeoutMs: URL_HOMEPAGE_TIMEOUT_MS,
+    browserLike: true,
   });
   if (!homeDoc.ok) return homeDoc;
 

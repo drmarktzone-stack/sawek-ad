@@ -42,8 +42,10 @@ function selfHosts(req: Request): string[] {
 
 function statusFor(error: UrlIngestErrorCode): number {
   if (error === "invalid_url" || error === "blocked") return 400;
+  if (error === "site_blocked") return 422;
   if (error === "timeout") return 504;
   if (error === "too_large") return 413;
+  if (error === "network") return 502;
   return 422;
 }
 

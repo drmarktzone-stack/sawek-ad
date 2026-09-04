@@ -640,6 +640,11 @@ export const copy: Dict = {
     ar: "العنوان محظور (داخلي / محلي).",
     en: "Address blocked (internal / local).",
   },
+  "url.error.siteBlocked": {
+    he: "האתר חסם את הסריקה (הגנת בוטים / Cloudflare). נסו כתובת אחרת או הדביקו טקסט ידנית.",
+    ar: "الموقع حجب المسح (حماية بوتات / Cloudflare). جرّبوا رابطاً آخر أو الصقوا النص يدوياً.",
+    en: "The site blocked the scan (bot protection / Cloudflare). Try another URL or paste text manually.",
+  },
   "url.error.timeout": { he: "פג הזמן. נסו שוב.", ar: "انتهى الوقت. حاولوا مرة ثانية.", en: "Timed out. Try again." },
   "url.error.nonHtml": { he: "זה לא דף HTML.", ar: "هاد مش صفحة HTML.", en: "That is not an HTML page." },
   "url.error.empty": { he: "אין טקסט בדף לחילוץ.", ar: "ما في نص بالصفحة للاستخراج.", en: "No text on the page to extract." },
