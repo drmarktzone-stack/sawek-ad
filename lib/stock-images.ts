@@ -1,7 +1,7 @@
 import type { Vertical } from "./vertical";
 import { detectVertical } from "./vertical";
 
-export type StockSource = "openverse" | "wikimedia" | "vertex";
+export type StockSource = "openverse" | "wikimedia" | "vertex" | "curated";
 
 export type StockImage = {
   id: string;
@@ -32,6 +32,8 @@ export type StockSearchResult = {
   page: number;
   nextPage: number | null;
   queries: string[];
+  /** Hebrew-first note when CC/Imagen yield nothing on-topic. */
+  emptyMessage?: string;
 };
 
 const UA = "SAWEK-AD/0.1 (https://github.com/drmarktzone-stack/sawek-ad; CC stock search for local ads)";
@@ -119,7 +121,7 @@ const TOPIC_NEEDLES: Record<Vertical, RegExp> = {
 };
 
 const JUNK =
-  /logo|meme|clipart|screenshot|qr.?code|barcode|coat of arms|flag of|infographic|flowchart|diagram|wikidata|watermark|clalit|כללית|كلاليت|kupat holim|facebook|instagram|tiktok|whatsapp|mugshot|passport|selfie|samer abu|أبو مخ|אבו מוך|dr\.?\s*samer|engraving|lithograph|etching|woodcut|caricature|cartoon|comic|wellcome|census|banner\.jpg|aiga |file:.*\.svg|icon set|clip art|photomontage|collage meme|before.?after|star rating|roas|₪|%\s*off|photo contest|oil on canvas|painting|wga\d|manzanar|internment|evacuee|smallpox|relocation center|miner.s children|wife of miner|\bNARA\b|abandoned /i;
+  /logo|meme|clipart|screenshot|qr.?code|barcode|coat of arms|flag of|infographic|flowchart|diagram|wikidata|watermark|clalit|כללית|كلاليت|kupat holim|facebook|instagram|tiktok|whatsapp|mugshot|passport|selfie|samer abu|أبو مخ|אבו מוך|dr\.?\s*samer|engraving|lithograph|etching|woodcut|caricature|cartoon|comic|wellcome|census|banner\.jpg|aiga |file:.*\.svg|icon set|clip art|photomontage|collage meme|before.?after|star rating|roas|₪|%\s*off|photo contest|oil on canvas|painting|wga\d|manzanar|internment|evacuee|smallpox|relocation center|miner.s children|wife of miner|\bNARA\b|abandoned |\brally\b|rallies|protest|demonstration|city council|town council|\bcouncil\b|politic|election|campaign rally|legislative|city hall hearing|nyc council|new york city council|board of supervisors|picket|march against|activis/i;
 
 const HISTORICAL = /\b(17|18|19)\d{2}\b|19th century|18th century|1920s|1930s|blitz|smallpox|engraving/i;
 const NAMED_PORTRAIT = /portrait of (dr|prof|mr|ms|mrs)\b|headshot of\b/i;
@@ -256,13 +258,14 @@ export function isJunkStockTitle(title: string, extra = ""): boolean {
 }
 
 const OFF_TOPIC: Record<Vertical, RegExp | null> = {
-  clinic: /train station|bus station|ferry|airport|railway|metro station|swimsuit|bikini|nude|immigration|behörde|church|cathedral|priest|military|soldier|parking|microscope/i,
-  pool: /hotel luxury|bikini|swimsuit fashion|beach party/i,
-  retail: /weapon|ammo|pharmacy/i,
-  restaurant: /pet food|dog food/i,
-  product: /landline|rotary phone|payphone/i,
-  school: /prison|military academy/i,
-  generic: null,
+  clinic:
+    /train station|bus station|ferry|airport|railway|metro station|swimsuit|bikini|nude|immigration|behörde|church|cathedral|priest|military|soldier|parking|microscope|rally|rallies|protest|demonstration|city council|town council|\bcouncil\b|politic|election|city hall|legislative|activis|picket|union march|news conference|press conference|capitol|parliament/i,
+  pool: /hotel luxury|bikini|swimsuit fashion|beach party|rally|protest|council|politic/i,
+  retail: /weapon|ammo|pharmacy|rally|protest|council|politic/i,
+  restaurant: /pet food|dog food|rally|protest|council|politic/i,
+  product: /landline|rotary phone|payphone|rally|protest|council|politic/i,
+  school: /prison|military academy|rally|protest|council|politic/i,
+  generic: /rally|rallies|protest|demonstration|city council|politic|election campaign/i,
 };
 
 export function stockRelevance(vertical: Vertical, title: string, extra = ""): number {
@@ -532,6 +535,34 @@ export async function vertexStillsForStock(input: StockSearchInput, max = 10): P
   }
 }
 
+/** Vertical-matched graphic stills when Imagen returns 0 — never dump junk CC. */
+export async function curatedFallbackStills(input: StockSearchInput, max = 8): Promise<StockImage[]> {
+  try {
+    const { graphicPostersForIntake } = await import("./graphic-posters");
+    const { emptyIntake } = await import("./engine/validate");
+    const intake = emptyIntake();
+    intake.businessName = sanitizeStockHint(input.q || "") || "local";
+    intake.category = input.category || input.vertical || "";
+    intake.description = input.description || input.q || "";
+    intake.location = input.location || "";
+    intake.offer = input.offer || "";
+    const posters = graphicPostersForIntake(intake);
+    const vertical = resolveStockVertical(input);
+    return posters.slice(0, Math.max(4, Math.min(12, max))).map((p, i) => ({
+      id: `curated-${p.id || i + 1}`,
+      thumb: p.dataUrl,
+      full: p.dataUrl,
+      title: p.name.he || p.name.en || "Graphic still",
+      attribution: "SAWEK graphic",
+      source: "curated" as const,
+      license: "curated",
+      query: vertical,
+    }));
+  } catch {
+    return [];
+  }
+}
+
 export async function searchStockImages(input: StockSearchInput): Promise<StockSearchResult> {
   const vertical = resolveStockVertical(input);
   const queries = topicQueriesFor(input);
@@ -549,12 +580,19 @@ export async function searchStockImages(input: StockSearchInput): Promise<StockS
     mapPool(ovSlice, 2, (q) => openverseSearch(q, page, vertical)),
   ]);
 
-  const merged = dedupe([...wikiHits.flat(), ...catHits.flat(), ...ovHits.flat()]).sort((a, b) => {
-    const sb = stockRelevance(vertical, b.title, b.query);
-    const sa = stockRelevance(vertical, a.title, a.query);
-    return sb - sa;
-  });
+  const merged = dedupe([...wikiHits.flat(), ...catHits.flat(), ...ovHits.flat()])
+    .filter((img) => isOnTopicStock(vertical, img.title, img.attribution))
+    .sort((a, b) => {
+      // Score title+attribution only — never the search query (it always matches needles).
+      const sb = stockRelevance(vertical, b.title, b.attribution);
+      const sa = stockRelevance(vertical, a.title, a.attribution);
+      return sb - sa;
+    });
   const images = merged.slice(0, limit);
   const nextPage = images.length >= 12 && page < 8 ? page + 1 : null;
-  return { ok: true, images, page, nextPage, queries };
+  const emptyMessage =
+    images.length === 0
+      ? "אין תמונות חופשיות רלוונטיות לנושא — נסו כרזות גרפיות או תמונה מהאתר."
+      : undefined;
+  return { ok: true, images, page, nextPage, queries, ...(emptyMessage ? { emptyMessage } : {}) };
 }

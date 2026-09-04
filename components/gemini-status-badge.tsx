@@ -8,6 +8,8 @@ type Status = {
   configured?: boolean;
   provider?: "vertex" | "ai_studio" | "none";
   quota?: boolean;
+  vertexQuota?: boolean;
+  aiStudioFallback?: boolean;
 };
 
 export function GeminiStatusBadge({ className }: { className?: string }) {
@@ -31,16 +33,28 @@ export function GeminiStatusBadge({ className }: { className?: string }) {
 
   if (!status) return null;
   const vertexUp = status.provider === "vertex" && status.configured && !status.quota;
+  const studioUp =
+    status.provider === "ai_studio" && status.configured && !status.quota;
+  const vertexQuotaStudio =
+    Boolean(status.vertexQuota) && Boolean(status.aiStudioFallback) && studioUp;
+  const label = vertexUp
+    ? t("gemini.vertex")
+    : vertexQuotaStudio
+      ? t("gemini.vertexQuotaStudio")
+      : studioUp
+        ? t("gemini.studio")
+        : t("gemini.quota");
+  const ok = vertexUp || studioUp;
   return (
     <span
       className={cn(
-        "hidden max-w-[9.5rem] truncate rounded-full border px-2 py-0.5 text-[11px] font-bold sm:inline-block",
-        vertexUp ? "border-gold/50 bg-gold/15 text-navy" : "border-navy/10 bg-navy/5 text-muted",
+        "hidden max-w-[11rem] truncate rounded-full border px-2 py-0.5 text-[11px] font-bold sm:inline-block",
+        ok ? "border-gold/50 bg-gold/15 text-navy" : "border-navy/10 bg-navy/5 text-muted",
         className,
       )}
-      title={vertexUp ? t("gemini.vertex") : t("gemini.quota")}
+      title={label}
     >
-      {vertexUp ? t("gemini.vertex") : t("gemini.quota")}
+      {label}
     </span>
   );
 }

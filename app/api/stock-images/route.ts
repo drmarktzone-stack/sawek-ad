@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
-import { searchStockImages, vertexStillsForStock, type StockSearchInput } from "@/lib/stock-images";
+import {
+  curatedFallbackStills,
+  searchStockImages,
+  vertexStillsForStock,
+  type StockSearchInput,
+} from "@/lib/stock-images";
 import { IMAGEN_PICKER_COUNT } from "@/lib/imagen-scenes";
 
 export const runtime = "nodejs";
@@ -12,8 +17,9 @@ function read(req: Request, key: string): string {
 }
 
 /**
- * Vertex Imagen stills are the library. Wikimedia/Openverse are optional CC only
- * (never the default wall). source=imagen | cc | all.
+ * Vertex Imagen stills are the library. When Imagen returns 0, serve vertical
+ * curated graphic stills (or empty + Hebrew message) — never junk Openverse politics.
+ * source=imagen | cc | all.
  */
 export async function GET(req: Request) {
   try {
@@ -33,7 +39,17 @@ export async function GET(req: Request) {
     if (source === "cc") {
       const result = await searchStockImages(input);
       return NextResponse.json(
-        { ...result, imagen: [], imagenRequested: 0, imagenGot: 0 },
+        {
+          ...result,
+          imagen: [],
+          imagenRequested: 0,
+          imagenGot: 0,
+          emptyMessage:
+            result.emptyMessage ||
+            (result.images.length
+              ? undefined
+              : "אין תמונות חופשיות רלוונטיות לנושא — נסו כרזות גרפיות או תמונה מהאתר."),
+        },
         { status: 200 },
       );
     }
@@ -46,29 +62,67 @@ export async function GET(req: Request) {
     const imagen = Array.isArray(stills) ? stills : [];
 
     if (source === "imagen") {
+      if (imagen.length) {
+        return NextResponse.json(
+          {
+            ok: true,
+            images: imagen,
+            imagen,
+            page: 1,
+            nextPage: null,
+            queries: [],
+            imagenRequested: requested,
+            imagenGot: imagen.length,
+          },
+          { status: 200 },
+        );
+      }
+      // Imagen empty: vertical curated graphics — not random CC politics.
+      const curated = await curatedFallbackStills(input, Math.min(8, requested));
       return NextResponse.json(
         {
           ok: true,
-          images: imagen,
-          imagen,
+          images: curated,
+          imagen: [],
+          curated,
           page: 1,
           nextPage: null,
           queries: [],
           imagenRequested: requested,
-          imagenGot: imagen.length,
+          imagenGot: 0,
+          fallback: curated.length ? "curated" : "empty",
+          emptyMessage: curated.length
+            ? "Vertex Imagen ריק — מציגים כרזות גרפיות לפי התחום."
+            : "אין תמונות AI כרגע — נסו כרזות גרפיות או תמונה מהאתר.",
         },
         { status: 200 },
       );
     }
 
-    const result = await searchStockImages(input);
+    // source=all: Imagen first; if empty, curated — CC only if still empty and filtered hard.
+    const curated = imagen.length ? [] : await curatedFallbackStills(input, Math.min(8, requested));
+    const primary = imagen.length ? imagen : curated;
+    const result = primary.length
+      ? { ok: true as const, images: [] as Awaited<ReturnType<typeof searchStockImages>>["images"], page: 1, nextPage: null as number | null, queries: [] as string[] }
+      : await searchStockImages(input);
     return NextResponse.json(
       {
         ...result,
         imagen,
-        images: result.images,
+        curated,
+        images: primary.length ? primary : result.images,
         imagenRequested: requested,
         imagenGot: imagen.length,
+        fallback: imagen.length ? "imagen" : curated.length ? "curated" : result.images.length ? "cc" : "empty",
+        emptyMessage:
+          primary.length || result.images.length
+            ? imagen.length
+              ? undefined
+              : curated.length
+                ? "Vertex Imagen ריק — מציגים כרזות גרפיות לפי התחום."
+                : undefined
+            : result.emptyMessage ||
+              "אין תמונות רלוונטיות לנושא — נסו כרזות גרפיות או תמונה מהאתר.",
       },
       { status: 200 },
     );
@@ -84,6 +138,7 @@ export async function GET(req: Request) {
         imagenRequested: IMAGEN_PICKER_COUNT,
         imagenGot: 0,
         error: "stock_error",
+        emptyMessage: "אין תמונות רלוונטיות לנושא — נסו כרזות גרפיות או תמונה מהאתר.",
       },
       { status: 200 },
     );

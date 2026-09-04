@@ -150,14 +150,18 @@ export function ImageOfferPicker({
         ok?: boolean;
         imagen?: StockHit[];
         images?: StockHit[];
+        curated?: StockHit[];
         imagenRequested?: number;
         imagenGot?: number;
+        emptyMessage?: string;
       };
       if (typeof data.imagenRequested === "number") setRequested(data.imagenRequested);
-      const hits = data.imagen ?? data.images ?? [];
-      const opts = hitsToOptions(hits, t).filter((o) => o.kind === "imagen");
+      const imagenHits = data.imagen ?? [];
+      const opts = hitsToOptions(imagenHits, t).filter((o) => o.kind === "imagen");
       setImagen(opts);
-      if (!opts.length) setImgError(t("audit.retryVertex"));
+      if (!opts.length) {
+        setImgError(data.emptyMessage || t("audit.retryVertex"));
+      }
     } catch {
       setImgError(t("audit.retryVertex"));
     } finally {
@@ -227,9 +231,11 @@ export function ImageOfferPicker({
         page: "1",
       });
       const res = await fetch(`/api/stock-images?${params.toString()}`);
-      const data = (await res.json()) as { images?: StockHit[] };
-      setStock(hitsToOptions(data.images ?? [], t).filter((o) => o.kind === "stock"));
+      const data = (await res.json()) as { images?: StockHit[]; emptyMessage?: string };
+      const opts = hitsToOptions(data.images ?? [], t).filter((o) => o.kind === "stock");
+      setStock(opts);
       setStockLoaded(true);
+      if (!opts.length && data.emptyMessage) setImgError(data.emptyMessage);
     } catch {
       setStock([]);
       setStockLoaded(true);

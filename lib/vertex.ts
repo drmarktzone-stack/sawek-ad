@@ -13,6 +13,10 @@ export type GeminiPublicStatus = {
   provider: GeminiProvider;
   quota: boolean;
   model?: string;
+  /** Vertex hit 429 recently; product may still use AI Studio. */
+  vertexQuota?: boolean;
+  /** GEMINI_API_KEY is present as fallback after Vertex quota. */
+  aiStudioFallback?: boolean;
 };
 
 export type LastGeminiOutcome = {
@@ -25,8 +29,12 @@ export type LastGeminiOutcome = {
 let lastOutcome: LastGeminiOutcome = { provider: "none", at: 0 };
 let cachedToken: { token: string; exp: number } | null = null;
 let cachedStatus: { at: number; status: GeminiPublicStatus } | null = null;
+/** After Vertex 429, skip Vertex until this timestamp so AI Studio can serve. */
+let vertexQuotaUntil = 0;
 const STATUS_TTL_MS = 45_000;
 const TOKEN_TTL_MS = 50_000;
+/** Short TTL so Vertex can recover; sticky forever was blocking AI Studio. */
+export const VERTEX_QUOTA_TTL_MS = 3 * 60_000;
 
 export function vertexProject(): string {
   return runtimeEnv("GOOGLE_CLOUD_PROJECT") || DEFAULT_VERTEX_PROJECT;
@@ -43,6 +51,25 @@ export function recordGeminiOutcome(next: Omit<LastGeminiOutcome, "at">) {
 
 export function lastGeminiOutcome(): LastGeminiOutcome {
   return lastOutcome;
+}
+
+export function markVertexQuota(ttlMs: number = VERTEX_QUOTA_TTL_MS) {
+  vertexQuotaUntil = Date.now() + Math.max(30_000, ttlMs);
+  cachedStatus = null;
+}
+
+export function clearVertexQuota() {
+  vertexQuotaUntil = 0;
+  cachedStatus = null;
+}
+
+export function vertexQuotaActive(): boolean {
+  if (vertexQuotaUntil <= 0) return false;
+  if (Date.now() >= vertexQuotaUntil) {
+    vertexQuotaUntil = 0;
+    return false;
+  }
+  return true;
 }
 
 export async function fetchGoogleJson(
@@ -128,30 +155,59 @@ export function geminiApiKeyPresent(): boolean {
 export async function publicGeminiStatus(): Promise<GeminiPublicStatus> {
   if (cachedStatus && Date.now() - cachedStatus.at < STATUS_TTL_MS) return cachedStatus.status;
   const last = lastOutcome;
-  const quota = last.reason === "quota";
-  const token = quota ? null : await vertexAccessToken();
+  const vQuota = vertexQuotaActive();
+  const hasStudio = geminiApiKeyPresent();
+  const studioQuota =
+    last.provider === "ai_studio" &&
+    last.reason === "quota" &&
+    Date.now() - last.at < VERTEX_QUOTA_TTL_MS;
+  // Do not treat Vertex sticky quota as "no Gemini forever" when AI Studio key exists.
+  const token = vQuota ? null : await vertexAccessToken();
   let status: GeminiPublicStatus;
-  if (quota) {
-    status = {
-      configured: false,
-      provider: last.provider === "vertex" ? "vertex" : last.provider,
-      quota: true,
-      model: last.model,
-    };
-  } else if (token) {
+  if (token && !vQuota) {
     status = {
       configured: true,
       provider: "vertex",
       quota: false,
       model: last.model || VERTEX_GEMINI_MODELS[0],
+      vertexQuota: false,
+      aiStudioFallback: hasStudio,
     };
-  } else if (last.provider === "ai_studio" && last.reason === "ok") {
-    status = { configured: true, provider: "ai_studio", quota: false, model: last.model };
-  } else if (geminiApiKeyPresent() && last.reason !== "quota") {
-    // Key exists but may 429. Do not claim Vertex. UI shows אין מכסה until a generate succeeds.
-    status = { configured: false, provider: "none", quota: true };
+  } else if (hasStudio && !studioQuota) {
+    status = {
+      configured: true,
+      provider: "ai_studio",
+      quota: false,
+      model: last.provider === "ai_studio" ? last.model : undefined,
+      vertexQuota: vQuota,
+      aiStudioFallback: true,
+    };
+  } else if (hasStudio && studioQuota) {
+    status = {
+      configured: false,
+      provider: "ai_studio",
+      quota: true,
+      model: last.model,
+      vertexQuota: vQuota,
+      aiStudioFallback: true,
+    };
+  } else if (vQuota) {
+    status = {
+      configured: false,
+      provider: "vertex",
+      quota: true,
+      model: last.model,
+      vertexQuota: true,
+      aiStudioFallback: false,
+    };
   } else {
-    status = { configured: false, provider: "none", quota: true };
+    status = {
+      configured: false,
+      provider: "none",
+      quota: true,
+      vertexQuota: false,
+      aiStudioFallback: false,
+    };
   }
   cachedStatus = { at: Date.now(), status };
   return status;

@@ -58,7 +58,7 @@ export function HomeStudio() {
         <h1 className="text-center text-3xl font-black leading-[1.15] tracking-tight text-navy sm:text-5xl">
           {t("home.headline")}
         </h1>
-        <p className="mx-auto mt-5 max-w-2xl text-center text-base text-muted sm:text-lg">
+        <p className="mx-auto mt-5 max-w-2xl text-center text-base font-semibold text-navy sm:text-lg">
           {t("home.pitch")}
         </p>
         <p className="mx-auto mt-3 max-w-xl rounded-full border border-gold/40 bg-gold/15 px-4 py-2 text-center text-sm font-black text-navy">

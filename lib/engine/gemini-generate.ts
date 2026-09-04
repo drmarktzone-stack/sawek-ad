@@ -3,14 +3,17 @@ import type { AngleCopy, CampaignAngles, Intake } from "../types";
 import { runtimeEnv } from "../runtime-env";
 import {
   classifyVertexHttp,
+  clearVertexQuota,
   extractGenerateText,
   fetchGoogleJson,
   geminiApiKeyPresent,
+  markVertexQuota,
   recordGeminiOutcome,
   VERTEX_GEMINI_MODELS,
   vertexAccessToken,
   vertexLocation,
   vertexProject,
+  vertexQuotaActive,
 } from "../vertex";
 import { inventsForbidden } from "./coach";
 import { emptyIntake } from "./validate";
@@ -522,7 +525,11 @@ async function studioGenerate(
   return last;
 }
 
-/** Vertex first when the GCP project is set and a token exists. Never logs keys. */
+/**
+ * Vertex first when available. After Vertex 429, fall through to AI Studio (GEMINI_API_KEY)
+ * instead of sticky-blocking the product. Vertex is skipped briefly (TTL) then retried.
+ * Never logs keys.
+ */
 export async function completeGemini(opts: {
   parts: GeminiPart[];
   temperature: number;
@@ -531,27 +538,66 @@ export async function completeGemini(opts: {
 }): Promise<CompleteOk | CompleteFail> {
   const timeoutMs = opts.timeoutMs ?? GEMINI_TIMEOUT_MS;
   const system = opts.systemInstruction ?? SYSTEM_INSTRUCTION;
-  const vertex = await vertexGenerate(opts.parts, opts.temperature, timeoutMs, system);
-  if (vertex.ok) {
-    recordGeminiOutcome({ provider: "vertex", reason: "ok", model: vertex.model });
-    return vertex;
+  let vertexReason: "quota" | "no_token" | "vertex_denied" | "gemini_error" | null = null;
+
+  if (!vertexQuotaActive()) {
+    const vertex = await vertexGenerate(opts.parts, opts.temperature, timeoutMs, system);
+    if (vertex.ok) {
+      clearVertexQuota();
+      recordGeminiOutcome({ provider: "vertex", reason: "ok", model: vertex.model });
+      return vertex;
+    }
+    if (vertex.reason === "quota") {
+      markVertexQuota();
+      vertexReason = "quota";
+      // Fall through to AI Studio — do NOT sticky-fail the whole process.
+    } else if (vertex.reason === "no_token") {
+      vertexReason = "no_token";
+    } else if (vertex.reason === "vertex_denied") {
+      vertexReason = "vertex_denied";
+    } else {
+      vertexReason = "gemini_error";
+    }
+  } else {
+    vertexReason = "quota";
   }
-  if (vertex.reason === "quota") {
-    recordGeminiOutcome({ provider: "vertex", reason: "quota" });
-    return vertex;
-  }
+
   const studio = await studioGenerate(opts.parts, opts.temperature, timeoutMs, system);
   if (studio.ok) {
     recordGeminiOutcome({ provider: "ai_studio", reason: "ok", model: studio.model });
     return studio;
   }
+  const noProviders =
+    (vertexReason === "no_token" || vertexReason === "quota") && studio.reason === "no_key";
   recordGeminiOutcome({
-    provider: vertex.reason === "no_token" ? (studio.reason === "no_key" ? "none" : "ai_studio") : "vertex",
-    reason: studio.reason === "no_key" && vertex.reason === "no_token" ? "no_key" : studio.reason === "quota" ? "quota" : "gemini_error",
+    provider:
+      studio.reason === "no_key"
+        ? vertexReason === "quota"
+          ? "vertex"
+          : "none"
+        : "ai_studio",
+    reason: noProviders
+      ? vertexReason === "quota"
+        ? "quota"
+        : "no_key"
+      : studio.reason === "quota"
+        ? "quota"
+        : "gemini_error",
   });
-  if (studio.reason === "no_key" && vertex.reason === "no_token") return { ok: false, reason: "no_key" };
+  if (studio.reason === "no_key" && (vertexReason === "no_token" || !vertexReason)) {
+    return { ok: false, reason: "no_key" };
+  }
+  if (studio.reason === "no_key" && vertexReason === "quota") {
+    return { ok: false, reason: "quota" };
+  }
   if (studio.reason === "quota") return { ok: false, reason: "quota" };
-  return { ok: false, reason: studio.reason === "vertex_denied" || vertex.reason === "vertex_denied" ? "vertex_denied" : "gemini_error" };
+  return {
+    ok: false,
+    reason:
+      studio.reason === "vertex_denied" || vertexReason === "vertex_denied"
+        ? "vertex_denied"
+        : "gemini_error",
+  };
 }
 
 export async function runGeminiGenerate(body: GenerateBody): Promise<GenerateResult> {

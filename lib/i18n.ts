@@ -10,9 +10,9 @@ export const copy: Dict = {
     en: "سوِّق إعلانك بنفسك · סאווק",
   },
   "brand.tagline": {
-    he: "מנוע OmniAd · 5 סוכני Gemini",
-    ar: "محرك OmniAd · 5 وكلاء Gemini",
-    en: "OmniAd engine · 5 Gemini agents",
+    he: "מקישור לאתר · מודעות מוכנות לעסק מקומי",
+    ar: "من رابط الموقع · إعلانات جاهزة للمحل المحلي",
+    en: "From a site link · finished ads for local business",
   },
   "nav.build": { he: "בניית קמפיין", ar: "بناء حملة", en: "Build campaign" },
   "nav.studio": { he: "סטודיו תוכן", ar: "ستوديو المحتوى", en: "Content studio" },
@@ -48,9 +48,9 @@ export const copy: Dict = {
     en: "Paste a website URL — get finished ads",
   },
   "home.pitch": {
-    he: "SAWEK סורק את האתר שלכם ובונה מודעות לפייסבוק, אינסטגרם, טיקטוק ווואטסאפ — בעברית ובערבית — עם דף נחיתה והורדה. בלי ROAS מומצא ובלי מספרי מטופלים או מחירים שלא פרסמתם.",
-    ar: "SAWEK بمسح موقعكم وبيبني إعلانات لفيسبوك وإنستغرام وتيك توك وواتساب — بالعبري والعربي — مع صفحة هبوط وتحميل. بلا عائد مخترع وبلا أعداد مرضى أو أسعار ما نشرتوها.",
-    en: "SAWEK scans your site and builds ads for Facebook, Instagram, TikTok, and WhatsApp — in Hebrew and Arabic — plus a landing page and a download. No invented ROAS, and no patient counts or prices you did not publish.",
+    he: "מה היישום יודע לעשות: מדביקים קישור לאתר — SAWEK שולף עובדות שפורסמו, בונה מודעות בעברית וערבית לערוצים, ומציע תמונות או כרזות. מורידים את החבילה (וב-Pro גם לוח ודף נחיתה). בלי ROAS מומצא ובלי מחירים שלא פרסמתם.",
+    ar: "شو التطبيق بيعرف يعمل: بلزّقوا رابط الموقع — SAWEK بطلع الوقائع المنشورة، بيبني إعلانات بالعبري والعربي للقنوات، وبعرض صور أو ملصقات. بتحمّلوا الحزمة (وبـPro كمان رزنامة وصفحة هبوط). بلا عائد مخترع وبلا أسعار ما نشرتوها.",
+    en: "What the app can do: paste a site URL — SAWEK pulls published facts, builds Hebrew and Arabic channel ads, and offers photos or graphics. You download the kit (and on Pro, a calendar and landing). No invented ROAS, no unpublished prices.",
   },
   "home.truth": {
     he: "רק מה שפורסם באתר נכנס לקמפיין. מספרים חסרים נשארים ריקים. אין ציון ביצועים בדוי.",
@@ -917,7 +917,9 @@ export const copy: Dict = {
   "social.settingsTitle": { he: "רשתות חברתיות", ar: "الشبكات الاجتماعية", en: "Social networks" },
   "social.settingsLead": { he: "התחברות ב-OAuth בלבד. הסיסמה נשארת אצל פייסבוק / לינקדאין. הפרסום רק בלחיצה.", ar: "ربط OAuth بس. كلمة السر بتضل عند فيسبوك / لينكدإن. النشر بس لما تضغطوا.", en: "OAuth sign-in only. Passwords stay with Facebook / LinkedIn. Nothing posts until you click." },
   "gemini.vertex": { he: "Vertex · חבילת קרדיטים", ar: "Vertex · حزمة أرصدة", en: "Vertex · credit pack" },
+  "gemini.studio": { he: "AI Studio · פעיל", ar: "AI Studio · شغّال", en: "AI Studio · on" },
   "gemini.quota": { he: "אין מכסה", ar: "ما في حصّة", en: "No quota" },
+  "gemini.vertexQuotaStudio": { he: "Vertex במכסה · AI Studio זמין", ar: "Vertex بالحصّة · AI Studio متاح", en: "Vertex quota · AI Studio ready" },
   "gemini.waitFacts": {
     he: "המתינו לכתובת או לעובדות. לא נייצר קמפיין מרפאה ריק.",
     ar: "استنوا رابط أو وقائع. مش منولّد حملة عيادة فاضية.",
