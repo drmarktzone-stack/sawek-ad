@@ -151,8 +151,8 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
       <div className="relative mx-auto max-w-md overflow-hidden px-4 py-14">
       <div aria-hidden className="agency-grain absolute inset-0" />
       <div className="relative">
-        <div className="agency-shell border-gold/45 p-7 text-start">
-          <Mail className="size-10 text-gold" />
+        <div className="agency-shell border-teal/35 p-7 text-start">
+          <Mail className="size-10 text-teal" />
           <h1 className="mt-3 text-3xl font-black text-navy">{t("auth.checkEmailTitle")}</h1>
           <p className="mt-3 text-base font-semibold leading-relaxed text-navy">{t("auth.checkEmail")}</p>
           <p className="mt-2 text-sm text-muted" dir="ltr">
@@ -177,7 +177,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
       <div className="relative">
       <h1 className="text-3xl font-black text-navy">{t(mode === "login" ? "auth.title.login" : "auth.title.signup")}</h1>
       <p className="mt-2 text-sm font-semibold text-navy">{t(mode === "login" ? "auth.lead.login" : "auth.lead.signup")}</p>
-      <p className="mt-2 text-sm text-muted">{t("plan.freeBanner")}</p>
+      <p className="mt-2 text-base text-muted">{t("plan.freeBanner")}</p>
       <form onSubmit={(e) => void onSubmit(e)} className="mt-6 space-y-4 agency-shell p-6">
         <div>
           <Label htmlFor="email" className="text-base font-black text-navy">

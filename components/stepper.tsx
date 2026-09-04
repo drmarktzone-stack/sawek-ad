@@ -26,7 +26,7 @@ export function Stepper({
           <li key={key} className="flex flex-1 flex-col items-center gap-2.5">
             <div className="flex w-full items-center">
               {i > 0 && (
-                <div className={cn("h-0.5 flex-1 rounded-full", step >= n ? "bg-gold" : "bg-navy/12")} />
+                <div className={cn("h-0.5 flex-1 rounded-full", step >= n ? "bg-teal" : "bg-navy/12")} />
               )}
               <button
                 type="button"
@@ -38,15 +38,15 @@ export function Stepper({
                   canJump && "cursor-pointer hover:scale-105",
                   !canJump && "cursor-default",
                   active
-                    ? "size-12 bg-navy text-white shadow-[0_10px_28px_rgba(27,42,74,0.22)] ring-4 ring-gold/25"
+                    ? "size-12 bg-navy text-white shadow-[0_10px_28px_rgba(15,39,68,0.22)] ring-4 ring-teal/25"
                     : "size-10",
-                  !active && (done ? "bg-gold text-navy" : "bg-navy/8 text-muted"),
+                  !active && (done ? "bg-teal text-white" : "bg-navy/8 text-muted"),
                 )}
               >
                 {done ? <Check className="size-4" strokeWidth={3} /> : n}
               </button>
               {i < 3 && (
-                <div className={cn("h-0.5 flex-1 rounded-full", step > n ? "bg-gold" : "bg-navy/12")} />
+                <div className={cn("h-0.5 flex-1 rounded-full", step > n ? "bg-teal" : "bg-navy/12")} />
               )}
             </div>
             <span className={cn("text-xs font-bold sm:text-sm", active || done ? "text-navy" : "text-muted")}>
@@ -65,7 +65,7 @@ export function ConquerHeadline({ subtitle }: { subtitle?: string }) {
     <div className="mb-10 text-center">
       <h1 className="agency-display text-4xl sm:text-5xl">
         {t("hero.titlePrefix")}{" "}
-        <span className="relative inline-block rounded-lg bg-gold px-2.5 py-0.5 text-navy">
+        <span className="relative inline-block rounded-lg bg-teal px-2.5 py-0.5 text-white">
           {t("hero.conquer")}
           <span className="absolute inset-x-1.5 -bottom-1 h-1 rounded-full bg-navy/80" />
         </span>{" "}

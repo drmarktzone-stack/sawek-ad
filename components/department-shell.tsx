@@ -66,7 +66,7 @@ export function DepartmentRail() {
 export function ProducedBy({ agents }: { agents: AgentId[] }) {
   const { locale, t } = useI18n();
   return (
-    <p className="mb-4 text-xs text-muted">
+    <p className="mb-4 text-sm text-muted">
       {t("dept.producedBy")}{" "}
       {agents.map((a) => AGENT_LABEL[a][locale]).join(" · ")}
     </p>
@@ -83,7 +83,7 @@ export function PackLangToggle({
   const { t } = useI18n();
   return (
     <div className="flex items-center gap-2">
-      <span className="text-xs text-muted">{t("result.packLang")}</span>
+      <span className="text-sm text-muted">{t("result.packLang")}</span>
       <div className="flex rounded-full border border-navy/10 p-0.5">
         {LOCALES.map((l) => (
           <button
@@ -191,7 +191,7 @@ export function Card({
 }) {
   return (
     <section className="rounded-2xl border border-navy/10 bg-white p-5">
-      <h2 className="mb-3 text-sm font-black uppercase tracking-wide text-gold">{title}</h2>
+      <h2 className="mb-3 text-sm font-black uppercase tracking-wide text-teal">{title}</h2>
       {children}
     </section>
   );

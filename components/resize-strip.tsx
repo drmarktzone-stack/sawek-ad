@@ -52,7 +52,7 @@ export function ResizeStrip({
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {RESIZE_FORMATS.map((fmt) => (
-          <article key={fmt.id} className="rounded-[22px] border border-navy/10 bg-white p-4 shadow-[0_10px_28px_rgba(27,42,74,0.07)]">
+          <article key={fmt.id} className="rounded-[22px] border border-navy/10 bg-white p-4 shadow-[0_10px_28px_rgba(15,39,68,0.07)]">
             <p className="mb-2 text-[13px] font-black uppercase tracking-[0.12em] text-navy/55">
               {fmt.label[packLang]} · {fmt.ratio}
             </p>

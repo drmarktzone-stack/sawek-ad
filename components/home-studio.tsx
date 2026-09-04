@@ -63,7 +63,7 @@ export function HomeStudio() {
         <p className="mx-auto mt-6 max-w-2xl text-center text-lg font-semibold leading-relaxed text-navy/85 sm:text-xl">
           {t("home.pitch")}
         </p>
-        <p className="mx-auto mt-4 max-w-xl rounded-full border border-gold/35 bg-white/70 px-5 py-2.5 text-center text-sm font-black text-navy shadow-[0_8px_24px_rgba(27,42,74,0.06)] backdrop-blur-sm">
+        <p className="mx-auto mt-4 max-w-xl rounded-full border border-teal/30 bg-white/80 px-5 py-2.5 text-center text-base font-black text-navy shadow-[0_8px_24px_rgba(15,39,68,0.06)] backdrop-blur-sm">
           {t("home.vertex")}
         </p>
 
@@ -71,7 +71,7 @@ export function HomeStudio() {
           <Button
             type="button"
             size="lg"
-            variant="gold"
+            variant="coral"
             data-demo="clinic"
             className="h-auto min-h-14 max-w-full whitespace-normal px-8 py-3.5 text-lg font-black"
             onClick={runDemo}
@@ -85,8 +85,8 @@ export function HomeStudio() {
             <LangLink href="/pricing">{t("home.cta.pricing")}</LangLink>
           </Button>
         </div>
-        <p className="mx-auto mt-3 max-w-md text-center text-sm text-muted">{t("cta.newHint")}</p>
-        <p className="mx-auto mt-5 max-w-xl text-center text-sm leading-relaxed text-muted">{t("home.truth")}</p>
+        <p className="mx-auto mt-3 max-w-md text-center text-base text-muted">{t("cta.newHint")}</p>
+        <p className="mx-auto mt-5 max-w-xl text-center text-base leading-relaxed text-muted">{t("home.truth")}</p>
         <div className="mt-4 flex justify-center">
           <Button asChild variant="ghost" size="sm">
             <LangLink href="/login">{t("nav.login")}</LangLink>
@@ -102,9 +102,9 @@ export function HomeStudio() {
           {stats.map((s) => (
             <li
               key={s.label}
-              className="agency-shell flex items-center justify-center gap-2 px-3 py-4 text-center text-sm font-bold text-navy"
+              className="agency-shell flex items-center justify-center gap-2 px-3 py-4 text-center text-base font-bold text-navy"
             >
-              <s.icon className="size-4 shrink-0 text-gold" />
+              <s.icon className="size-4 shrink-0 text-teal" />
               {s.label}
             </li>
           ))}
@@ -123,12 +123,12 @@ export function HomeStudio() {
           const Icon = howIcons[i];
           return (
             <li key={title} className="agency-shell p-5 text-start">
-              <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.22em] text-gold">
+              <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.22em] text-teal">
                 <Icon className="size-3.5" />
                 {t("home.how.title")} · 0{i + 1}
               </p>
               <p className="mt-3 text-xl font-black text-navy">{t(title)}</p>
-              <p className="mt-2 text-sm leading-relaxed text-muted">{t(body)}</p>
+              <p className="mt-2 text-base leading-relaxed text-muted">{t(body)}</p>
             </li>
           );
         })}
@@ -145,8 +145,8 @@ export function HomeStudio() {
             <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">AdCreative · Predis</p>
             <p className="mt-3 text-base text-navy">{t("home.vs.adcreative")}</p>
           </li>
-          <li className="agency-shell border-gold/45 p-5 text-start ring-1 ring-gold/30">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-gold">SAWEK</p>
+          <li className="agency-shell border-teal/40 p-5 text-start ring-1 ring-teal/25">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-teal">SAWEK</p>
             <p className="mt-3 text-base font-semibold text-navy">{t("home.vs.sawek")}</p>
           </li>
         </ul>
@@ -165,7 +165,7 @@ export function HomeStudio() {
               ))}
             </ul>
           </article>
-          <article className="agency-shell border-gold/50 p-6 text-start ring-1 ring-gold/35">
+          <article className="agency-shell border-teal/45 p-6 text-start ring-1 ring-teal/30">
             <p className="agency-kicker">{t("pricing.proName")}</p>
             <p className="mt-2 text-4xl font-black text-navy">
               ₪{PRICE_MONTHLY_ILS}{" "}
@@ -184,8 +184,8 @@ export function HomeStudio() {
       </section>
 
       <div id="studio" className="relative mx-auto mt-12 max-w-4xl px-3 pb-20 sm:px-4">
-        <div className="rounded-[32px] border border-navy/10 bg-white/80 p-[1px] shadow-[0_24px_70px_rgba(27,42,74,0.1)] backdrop-blur-sm">
-          <div className="rounded-[30px] border border-gold/30 bg-[#FFFCF7]">
+        <div className="rounded-[32px] border border-navy/10 bg-white/80 p-[1px] shadow-[0_24px_70px_rgba(15,39,68,0.1)] backdrop-blur-sm">
+          <div className="rounded-[30px] border border-teal/20 bg-sand/40">
             <WizardFlow key={wizardKey} embedded />
           </div>
         </div>

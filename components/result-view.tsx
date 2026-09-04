@@ -271,7 +271,7 @@ export function ResultView({
       </div>
 
       <div className="mb-8 grid gap-4 md:grid-cols-2">
-        <div className="rounded-[22px] border border-navy/10 bg-[#FFFCF7] p-5">
+        <div className="rounded-[22px] border border-navy/10 bg-[#FFFFFF] p-5">
           <p className="text-xs font-bold uppercase tracking-wide text-muted">
             {tr("result.score")}
           </p>
@@ -288,7 +288,7 @@ export function ResultView({
             {tr("result.scoreHint")}
           </p>
         </div>
-        <div className="rounded-[22px] border border-navy/10 bg-[#FFFCF7] p-5">
+        <div className="rounded-[22px] border border-navy/10 bg-[#FFFFFF] p-5">
           <p className="text-xs font-bold uppercase tracking-wide text-muted">
             {tr("result.scenario")}
           </p>
@@ -310,7 +310,7 @@ export function ResultView({
           <p className="text-xs font-bold uppercase tracking-wide text-gold">{tr("result.mission")}</p>
           <p className="mt-2 text-sm leading-relaxed text-foreground">{missionOf(pack.intake)[locale]}</p>
         </div>
-        <div className="rounded-[22px] border border-navy/10 bg-[#FFFCF7] p-5">
+        <div className="rounded-[22px] border border-navy/10 bg-[#FFFFFF] p-5">
           <p className="text-xs font-bold uppercase tracking-wide text-gold">{tr("result.highlights")}</p>
           <ul className="mt-2 list-disc space-y-1 pe-5 text-sm text-muted">
             {highlightsOf(pack).map((h, i) => (
@@ -332,7 +332,7 @@ export function ResultView({
           <LangLink
             key={card.href}
             href={card.href}
-            className="rounded-[22px] border border-navy/10 bg-[#FFFCF7] p-4 transition hover:border-gold"
+            className="rounded-[22px] border border-navy/10 bg-[#FFFFFF] p-4 transition hover:border-gold"
           >
             <p className="text-xs font-black uppercase tracking-wide text-gold">{tr(card.key)}</p>
             <p className="mt-2 line-clamp-3 text-sm text-muted">{card.body}</p>
@@ -344,7 +344,7 @@ export function ResultView({
         <h2 className="mb-3 text-lg font-black">{tr("result.pillars")}</h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {pillarsOf(pack.intake).map((p) => (
-            <div key={p.name} className="rounded-[22px] border border-navy/10 bg-[#FFFCF7] p-4">
+            <div key={p.name} className="rounded-[22px] border border-navy/10 bg-[#FFFFFF] p-4">
               <p className="text-sm font-black text-gold">{p.name}</p>
               <p className="mt-2 text-xs leading-relaxed text-muted">{p.body[locale]}</p>
             </div>
@@ -362,7 +362,7 @@ export function ResultView({
         </div>
       )}
       {pack.intakeReport.inconsistencies.length > 0 && (
-        <div className="mb-8 rounded-2xl border border-danger/40 bg-red-50 p-4 text-sm text-red-800">
+        <div className="mb-8 rounded-2xl border border-danger/40 bg-coral/10 p-4 text-sm text-danger">
           {pack.intakeReport.inconsistencies.map((inc, i) => (
             <p key={i}>
               <strong>{inc.issue[locale]}:</strong> {inc.detail[locale]}
@@ -437,7 +437,7 @@ export function ResultView({
           ))}
       </div>
 
-      <div className="mt-10 rounded-[22px] border border-navy/10 bg-[#FFFCF7] p-5">
+      <div className="mt-10 rounded-[22px] border border-navy/10 bg-[#FFFFFF] p-5">
         <h2 className="mb-4 text-lg font-black">{tr("media.title")}</h2>
         <div className="grid gap-3 md:grid-cols-3">
           {pack.media.split.map((ch) => (
@@ -460,7 +460,7 @@ export function ResultView({
       </div>
 
       <div className="mt-10">
-        <Accordion type="multiple" className="rounded-[22px] border border-navy/10 bg-[#FFFCF7] px-4">
+        <Accordion type="multiple" className="rounded-[22px] border border-navy/10 bg-[#FFFFFF] px-4">
           {orderedStrategy(pack.strategy).map((block) => {
             const meta = STRATEGY_META.find((s) => s.id === block.id);
             return (
@@ -504,7 +504,7 @@ export function ResultView({
             return (
               <article
                 key={s.id}
-                className="overflow-hidden rounded-[22px] border border-navy/10 bg-[#FFFCF7] shadow-[0_8px_24px_rgba(27,42,74,0.08)]"
+                className="overflow-hidden rounded-[22px] border border-navy/10 bg-[#FFFFFF] shadow-[0_8px_24px_rgba(15,39,68,0.08)]"
               >
                 <CampaignAdVisual
                   locale={locale}
@@ -570,7 +570,7 @@ export function ResultView({
         )}
       </div>
 
-      <div className="mt-10 rounded-[22px] border border-navy/10 bg-[#FFFCF7] p-5">
+      <div className="mt-10 rounded-[22px] border border-navy/10 bg-[#FFFFFF] p-5">
         <h2 className="mb-4 text-lg font-black">{tr("opt.title")}</h2>
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
@@ -619,7 +619,7 @@ export function ResultView({
       </div>
 
       <div className="mt-10 grid gap-4 md:grid-cols-2">
-        <div className="rounded-[22px] border border-navy/10 bg-[#FFFCF7] p-5">
+        <div className="rounded-[22px] border border-navy/10 bg-[#FFFFFF] p-5">
           <h3 className="mb-3 font-black">{tr("truth.quality")}</h3>
           <ul className="list-disc space-y-1 pe-5 text-sm text-muted">
             <li>{tr("truth.numbers")}</li>
@@ -627,7 +627,7 @@ export function ResultView({
             <li>{tr("truth.worst")}</li>
           </ul>
         </div>
-        <div className="rounded-[22px] border border-navy/10 bg-[#FFFCF7] p-5">
+        <div className="rounded-[22px] border border-navy/10 bg-[#FFFFFF] p-5">
           <h3 className="mb-3 font-black">{tr("truth.layer")}</h3>
           <ul className="list-disc space-y-1 pe-5 text-sm text-muted">
             {pack.intakeReport.refusedGuesses.map((g, i) => (

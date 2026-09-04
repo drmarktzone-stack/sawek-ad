@@ -27,7 +27,7 @@ export function NewCampaignCta({
           {t(other ? "cta.newOther" : "cta.new")}
         </LangLink>
       </Button>
-      {hint ? <p className="mt-2 max-w-md text-sm text-muted">{t("cta.newHint")}</p> : null}
+      {hint ? <p className="mt-2 max-w-md text-base text-muted">{t("cta.newHint")}</p> : null}
     </div>
   );
 }

@@ -106,7 +106,7 @@ export function FunctionRail({ compact = false }: { compact?: boolean }) {
               <LangLink
                 href={fn.href}
                 className={cn(
-                  "flex h-full flex-col rounded-[22px] border border-navy/10 bg-white p-3 shadow-[0_8px_24px_rgba(27,42,74,0.06)] hover:border-gold hover:bg-gold/10",
+                  "flex h-full flex-col rounded-[22px] border border-navy/10 bg-white p-3 shadow-[0_8px_24px_rgba(15,39,68,0.06)] hover:border-gold hover:bg-gold/10",
                 )}
               >
                 <span className="flex items-center gap-2 text-sm font-black text-navy">

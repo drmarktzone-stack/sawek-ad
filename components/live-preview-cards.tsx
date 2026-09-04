@@ -597,7 +597,7 @@ export function LivePreviewStrip({
       {onPack ? <ImageOfferPicker pack={pack} locale={packLang} onPack={onPack} /> : null}
 
       <div className="mt-5 grid items-start gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <article className="rounded-[22px] border border-navy/10 bg-white p-4 shadow-[0_10px_28px_rgba(27,42,74,0.07)]">
+        <article className="rounded-[22px] border border-navy/10 bg-white p-4 shadow-[0_10px_28px_rgba(15,39,68,0.07)]">
           <p className="mb-3 text-[13px] font-black uppercase tracking-[0.14em] text-navy/55">
             {t("end.facebook")} · 1.91:1
           </p>
@@ -619,7 +619,7 @@ export function LivePreviewStrip({
           ) : null}
         </article>
 
-        <article className="rounded-[22px] border border-navy/10 bg-white p-4 shadow-[0_10px_28px_rgba(27,42,74,0.07)]">
+        <article className="rounded-[22px] border border-navy/10 bg-white p-4 shadow-[0_10px_28px_rgba(15,39,68,0.07)]">
           <p className="mb-3 text-[13px] font-black uppercase tracking-[0.14em] text-navy/55">
             {t("end.instagram")} · 4:5
           </p>
@@ -638,7 +638,7 @@ export function LivePreviewStrip({
           ) : null}
         </article>
 
-        <article className="rounded-[22px] border border-navy/10 bg-white p-4 shadow-[0_10px_28px_rgba(27,42,74,0.07)]">
+        <article className="rounded-[22px] border border-navy/10 bg-white p-4 shadow-[0_10px_28px_rgba(15,39,68,0.07)]">
           <p className="mb-3 text-[13px] font-black uppercase tracking-[0.14em] text-navy/55">
             {t("end.tiktok")} · 9:16
           </p>
@@ -657,7 +657,7 @@ export function LivePreviewStrip({
           ) : null}
         </article>
 
-        <article className="rounded-[22px] border border-navy/10 bg-white p-4 shadow-[0_10px_28px_rgba(27,42,74,0.07)]">
+        <article className="rounded-[22px] border border-navy/10 bg-white p-4 shadow-[0_10px_28px_rgba(15,39,68,0.07)]">
           <p className="mb-3 text-[13px] font-black uppercase tracking-[0.14em] text-navy/55">
             {t("end.whatsapp")}
           </p>

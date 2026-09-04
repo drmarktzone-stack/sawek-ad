@@ -65,7 +65,7 @@ export function LanguageToggle({ compact = false }: { compact?: boolean }) {
           className={cn(
             "rounded-full px-2.5 py-1 text-sm font-semibold transition-colors",
             locale === l.id
-              ? "bg-gold text-navy"
+              ? "bg-teal text-white"
               : "text-muted hover:text-navy",
           )}
         >
@@ -84,7 +84,7 @@ function AuthChip() {
     return (
       <LangLink
         href="/login"
-        className="shrink-0 rounded-full bg-navy px-3.5 py-1.5 text-sm font-black text-white hover:bg-[#24365e]"
+        className="shrink-0 rounded-full bg-navy px-3.5 py-1.5 text-sm font-black text-white hover:bg-navy-soft"
       >
         {t("nav.login")}
       </LangLink>
@@ -96,7 +96,7 @@ function AuthChip() {
         <p className="truncate text-xs font-black text-navy" title={user.email}>
           {user.email}
         </p>
-        <p className="text-xs font-black text-gold">{isPro(plan) ? t("auth.plan.pro") : t("auth.plan.free")}</p>
+        <p className="text-xs font-black text-teal">{isPro(plan) ? t("auth.plan.pro") : t("auth.plan.free")}</p>
       </div>
       <button type="button" className="shrink-0 text-xs font-semibold text-muted hover:text-navy" onClick={() => void logout()}>
         {t("nav.logout")}
@@ -113,15 +113,15 @@ export function Header() {
   if (pathname.startsWith("/lp/")) return null;
 
   return (
-    <header className="sticky top-0 z-40 border-b border-gold/35 bg-[#FFFCF7]/90 backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-navy/10 bg-white/90 backdrop-blur-xl">
       <UrlIngest />
-      <div className="h-px w-full bg-gold" />
+      <div className="h-px w-full bg-gradient-to-r from-transparent via-teal/50 to-transparent" />
       <div className="mx-auto flex max-w-[92rem] items-center gap-2 px-3 py-3">
         <LangLink href="/" className="flex shrink-0 flex-col leading-tight pe-1">
           <span className="text-xl font-black tracking-tight text-navy sm:text-2xl agency-display">
             {t("brand.name")}
           </span>
-          <span className="text-sm font-semibold text-gold">{t("brand.scripts")}</span>
+          <span className="text-sm font-semibold text-teal">{t("brand.scripts")}</span>
           <span className="text-sm text-muted">{t("brand.tagline")}</span>
         </LangLink>
 
@@ -153,7 +153,7 @@ export function Header() {
         <div className="ms-auto flex items-center gap-2">
           <GeminiStatusBadge />
           <AuthChip />
-          <Button asChild size="sm" variant="gold" className="shrink-0">
+          <Button asChild size="sm" variant="coral" className="shrink-0">
             <LangLink href="/" onClick={(e) => beginNewCampaign(e)}>
               {t("cta.new")}
             </LangLink>
@@ -185,7 +185,7 @@ export function Header() {
             <LanguageToggle />
           </div>
           <div className="flex flex-col gap-1">
-            <Button asChild variant="gold" className="mb-2">
+            <Button asChild variant="coral" className="mb-2">
               <LangLink href="/" onClick={(e) => { beginNewCampaign(e); setOpen(false); }}>
                 {t("cta.new")}
               </LangLink>
@@ -199,7 +199,7 @@ export function Header() {
                   onClick={() => setOpen(false)}
                   className="flex items-center gap-2 rounded-xl px-3 py-2 text-base text-navy hover:bg-navy/5"
                 >
-                  <Icon className="size-4 text-gold" />
+                  <Icon className="size-4 text-teal" />
                   {t(item.key)}
                 </LangLink>
               );
@@ -223,7 +223,7 @@ export function Footer() {
   const pathname = usePathname();
   if (pathname.startsWith("/lp/")) return null;
   return (
-    <footer className="mt-auto border-t border-gold/35 bg-[#FFFCF7] py-10 text-center text-sm text-muted">
+    <footer className="mt-auto border-t border-navy/10 bg-sand/50 py-10 text-center text-base text-muted">
       <p className="mb-1 font-black text-navy">{t("brand.name")} · {t("brand.scripts")}</p>
       {t("footer.line")}
     </footer>

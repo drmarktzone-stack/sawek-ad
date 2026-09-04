@@ -12,7 +12,7 @@ export function MediaDeptView({ pack, packLang }: { pack: CampaignPack; packLang
   return (
     <div className="space-y-4">
       <ProducedBy agents={extra.producedBy} />
-      <p className="rounded-2xl border border-danger/40 bg-red-50 p-4 text-sm text-red-800">
+      <p className="rounded-2xl border border-danger/40 bg-coral/10 p-4 text-sm text-danger">
         {extra.planOnly[l]}
       </p>
       <Card title={t("media.title")}>

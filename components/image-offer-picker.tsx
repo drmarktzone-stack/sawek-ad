@@ -318,13 +318,13 @@ export function ImageOfferPicker({
           <p className="text-base leading-relaxed text-navy">{t("audit.offerPhotosLead")}</p>
           {aiBusy ? (
             <p className="mt-3 flex items-center gap-2 text-sm font-semibold text-navy">
-              <Loader2 className="size-4 animate-spin text-gold" />
+              <Loader2 className="size-4 animate-spin text-teal" />
               {making}
             </p>
           ) : null}
           {!aiBusy && imgError ? (
             <div className="agency-empty mt-3 flex flex-wrap items-center gap-3 rounded-2xl p-4">
-              <p className="text-sm font-semibold text-navy/80">{vertexBusy}</p>
+              <p className="text-base font-semibold text-navy/80">{vertexBusy}</p>
               <Button type="button" size="sm" variant="outline" onClick={() => void loadImagen()}>
                 {t("audit.retryImagen")}
               </Button>
@@ -340,7 +340,7 @@ export function ImageOfferPicker({
                 ? Array.from({ length: Math.max(0, requested - shown.length) }).map((_, i) => (
                     <div
                       key={`sk-${i}`}
-                      className="agency-skeleton aspect-square rounded-2xl border border-gold/20"
+                      className="agency-skeleton aspect-square rounded-2xl border border-teal/20"
                     />
                   ))
                 : null}
@@ -348,7 +348,7 @@ export function ImageOfferPicker({
                 <div className="agency-empty col-span-full flex min-h-[200px] flex-col items-center justify-center gap-3 rounded-[22px] p-6 text-center">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src="/textures/empty-frame.svg" alt="" className="h-36 w-36 opacity-90" />
-                  <p className="max-w-sm text-sm font-semibold text-navy/70">{t("audit.retryVertex")}</p>
+                  <p className="max-w-sm text-base font-semibold text-navy/70">{t("audit.retryVertex")}</p>
                 </div>
               ) : null}
             </div>
@@ -386,7 +386,7 @@ export function ImageOfferPicker({
                   ) : null}
                   {stockLoaded && !stock.length && !stockBusy ? (
                     <div className="agency-empty rounded-2xl p-5 text-center">
-                      <p className="text-sm font-semibold text-navy/75">{t("audit.stockEmpty")}</p>
+                      <p className="text-base font-semibold text-navy/75">{t("audit.stockEmpty")}</p>
                     </div>
                   ) : null}
                   {stock.length ? (

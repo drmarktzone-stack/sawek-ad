@@ -141,7 +141,7 @@ export function AboutPage() {
           {locale === "ar" ? t("brand.name") : "SAWEK AD · סאווק · سوِّق إعلانك بنفسك"}
           <span className="mt-1 block text-xs text-muted">{t("brand.tagline")}</span>
         </p>
-        <p className="mb-9 text-center text-lg leading-relaxed text-navy">
+        <p className="mb-9 text-center text-lg leading-relaxed text-navy sm:text-xl">
           {locale === "he"
             ? "SAWEK AD הופך קישור לאתר לקמפיין מוכן: ביקורת, מודעות, תמונות והורדה — כמו שולחן עבודה של סוכנות שיווק."
             : locale === "ar"
@@ -150,7 +150,7 @@ export function AboutPage() {
         </p>
 
         <div className="mb-8 flex flex-wrap items-center justify-center gap-3">
-          <Button type="button" size="lg" variant="gold" onClick={() => startPediatricDemoFlow(locale)}>
+          <Button type="button" size="lg" variant="coral" onClick={() => startPediatricDemoFlow(locale)}>
             {DEMO_LABEL[locale]}
           </Button>
           <Button asChild size="lg">
@@ -164,24 +164,24 @@ export function AboutPage() {
         <div className="space-y-4">
           {steps.map((b) => (
             <article key={b.h} className="agency-shell p-6">
-              <h2 className="mb-2 text-xl font-black text-gold">{b.h}</h2>
+              <h2 className="mb-2 text-xl font-black text-teal">{b.h}</h2>
               <p className="text-base leading-relaxed text-muted">{b.p}</p>
             </article>
           ))}
 
           <article className="agency-shell p-6">
-            <h2 className="mb-2 text-xl font-black text-gold">{who.h}</h2>
+            <h2 className="mb-2 text-xl font-black text-teal">{who.h}</h2>
             <p className="text-base leading-relaxed text-muted">{who.p}</p>
           </article>
 
           <article className="agency-shell p-6">
-            <h2 className="mb-2 text-xl font-black text-gold">{plans.h}</h2>
+            <h2 className="mb-2 text-xl font-black text-teal">{plans.h}</h2>
             <p className="text-base leading-relaxed text-muted">{plans.free}</p>
             <p className="mt-2 text-base leading-relaxed text-muted">{plans.pro}</p>
           </article>
 
           <article className="agency-shell p-6">
-            <h2 className="mb-2 text-xl font-black text-gold">{notYet.h}</h2>
+            <h2 className="mb-2 text-xl font-black text-teal">{notYet.h}</h2>
             <ul className="list-disc space-y-2 pe-5 text-base leading-relaxed text-muted">
               {notYet.items.map((item) => (
                 <li key={item}>{item}</li>

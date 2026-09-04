@@ -36,7 +36,7 @@ export function PwaInstallHint() {
   }
 
   return (
-    <div className="mx-auto mt-4 flex max-w-xl items-center justify-between gap-3 rounded-full border border-navy/10 bg-white px-4 py-2 text-sm text-navy shadow-[0_8px_24px_rgba(27,42,74,0.06)]">
+    <div className="mx-auto mt-4 flex max-w-xl items-center justify-between gap-3 rounded-full border border-navy/10 bg-white px-4 py-2 text-sm text-navy shadow-[0_8px_24px_rgba(15,39,68,0.06)]">
       <p className="font-semibold">{t("pwa.install")}</p>
       <Button type="button" size="sm" variant="ghost" onClick={dismiss}>
         {t("pwa.dismiss")}

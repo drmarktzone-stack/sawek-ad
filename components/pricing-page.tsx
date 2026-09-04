@@ -81,9 +81,9 @@ export function PricingPage() {
       <div aria-hidden className="agency-grain absolute inset-0" />
       <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-56 agency-hero-glow" />
       <div className="relative">
-      <p className="text-center text-sm font-bold uppercase tracking-[0.28em] text-gold">{t("pricing.kicker")}</p>
+      <p className="text-center text-sm font-bold uppercase tracking-[0.28em] text-teal">{t("pricing.kicker")}</p>
       <h1 className="mt-2 agency-display text-center text-4xl sm:text-5xl">{t("pricing.title")}</h1>
-      <p className="mx-auto mt-3 max-w-2xl text-center text-muted">{t("pricing.lead")}</p>
+      <p className="mx-auto mt-3 max-w-2xl text-center text-base text-muted sm:text-lg">{t("pricing.lead")}</p>
       {plan === "pro" ? <p className="mt-3 text-center text-sm font-black text-navy">{t("auth.plan.pro")}</p> : null}
       {flash === "success" ? <p className="mt-3 text-center text-sm font-semibold text-navy">{t("pricing.success")}</p> : null}
       {flash === "cancel" ? <p className="mt-3 text-center text-sm text-muted">{t("pricing.cancel")}</p> : null}
@@ -93,7 +93,7 @@ export function PricingPage() {
           <h2 className="text-2xl font-black text-navy">{t("pricing.freeName")}</h2>
           <p className="mt-2 text-4xl font-black text-navy">{t("pricing.freePrice")}</p>
           <p className="text-sm text-muted">{t("pricing.freeForever")}</p>
-          <ul className="mt-5 space-y-2 text-sm text-navy">
+          <ul className="mt-5 space-y-2 text-base text-navy">
             {freeItems.map((k) => (
               <li key={k}>• {t(k)}</li>
             ))}
@@ -103,13 +103,13 @@ export function PricingPage() {
           </Button>
         </article>
 
-        <article className="agency-shell border-gold/50 p-7 ring-1 ring-gold/30">
+        <article className="agency-shell border-teal/45 p-7 ring-1 ring-teal/30">
           <h2 className="text-2xl font-black text-navy">{t("pricing.proName")}</h2>
           <p className="mt-2 text-4xl font-black text-navy">₪{PRICE_MONTHLY_ILS}</p>
           <p className="text-sm text-muted">{t("pricing.month")}</p>
           <p className="mt-1 text-lg font-black text-navy">₪{PRICE_YEARLY_ILS} · {t("pricing.year")}</p>
           <p className="text-sm text-muted">{t("pricing.yearHint")}</p>
-          <ul className="mt-5 space-y-2 text-sm text-navy">
+          <ul className="mt-5 space-y-2 text-base text-navy">
             {proItems.map((k) => (
               <li key={k}>• {t(k)}</li>
             ))}
@@ -119,7 +119,7 @@ export function PricingPage() {
               <Button type="button" className="w-full" disabled={Boolean(busy)} onClick={() => void checkout("monthly")}>
                 {busy === "card-monthly" ? t("auth.busy") : t("pricing.cta.month")}
               </Button>
-              <Button type="button" variant="gold" className="w-full" disabled={Boolean(busy)} onClick={() => void checkout("yearly")}>
+              <Button type="button" variant="coral" className="w-full" disabled={Boolean(busy)} onClick={() => void checkout("yearly")}>
                 {busy === "card-yearly" ? t("auth.busy") : t("pricing.cta.year")}
               </Button>
             </div>

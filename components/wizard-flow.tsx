@@ -465,6 +465,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
             <Button
               type="button"
               size="lg"
+              variant="coral"
               data-demo="pediatric"
               className="h-auto max-w-full whitespace-normal py-2 text-start font-black"
               onClick={loadDemo}
@@ -475,7 +476,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
               {t("cta.new")}
             </Button>
           </div>
-          <p className="max-w-md text-center text-xs text-muted">{t("cta.newHint")}</p>
+          <p className="max-w-md text-center text-sm text-muted">{t("cta.newHint")}</p>
         </div>
       ) : (
         <div className="mb-6 flex flex-col items-center gap-2">
@@ -483,6 +484,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
             <Button
               type="button"
               size="lg"
+              variant="coral"
               data-demo="pediatric"
               className="h-auto max-w-full whitespace-normal py-2 text-start font-black"
               onClick={loadDemo}
@@ -493,11 +495,11 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
               {t("cta.new")}
             </Button>
           </div>
-          <p className="max-w-md text-center text-xs text-muted">{t("cta.newHint")}</p>
+          <p className="max-w-md text-center text-sm text-muted">{t("cta.newHint")}</p>
         </div>
       )}
       {!intake.businessName.trim() ? (
-        <p className="mb-4 max-w-md mx-auto text-center text-xs text-muted">{t("gemini.waitFacts")}</p>
+        <p className="mb-4 max-w-md mx-auto text-center text-sm text-muted">{t("gemini.waitFacts")}</p>
       ) : null}
 
       {phase === "wizard" && (
@@ -517,7 +519,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
           {step === 1 && (
             <section>
               <h2 className="mb-2 text-center text-lg font-bold">{t("type.prompt")}</h2>
-              <p className="mb-6 text-center text-sm text-muted">{t("type.hint")}</p>
+              <p className="mb-6 text-center text-base text-muted">{t("type.hint")}</p>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {TYPE_OPTIONS.map((opt) => (
                   <button
@@ -526,8 +528,8 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
                     onClick={() => patch({ type: opt.id as Intake["type"] })}
                     className={`rounded-2xl border p-6 text-start text-xl font-black transition-all ${
                       intake.type === opt.id
-                        ? "border-gold bg-navy text-white shadow-[0_12px_32px_rgba(27,42,74,0.12)]"
-                        : "border-navy/10 bg-white text-navy hover:border-gold hover:shadow-[0_8px_24px_rgba(27,42,74,0.08)]"
+                        ? "border-gold bg-navy text-white shadow-[0_12px_32px_rgba(15,39,68,0.12)]"
+                        : "border-navy/10 bg-white text-navy hover:border-gold hover:shadow-[0_8px_24px_rgba(15,39,68,0.08)]"
                     }`}
                   >
                     {opt.label[locale]}
@@ -535,7 +537,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
                 ))}
               </div>
               <h2 className="mb-2 mt-10 text-center text-lg font-bold">{t("model.prompt")}</h2>
-              <p className="mb-6 text-center text-sm text-muted">{t("model.hint")}</p>
+              <p className="mb-6 text-center text-base text-muted">{t("model.hint")}</p>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {([
                   { id: "paid" as const, title: t("model.paid"), hint: t("model.paidHint") },
@@ -547,8 +549,8 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
                     onClick={() => setIntake((s) => applyOperatingModel(s, opt.id))}
                     className={`rounded-2xl border p-6 text-start transition-all ${
                       (intake.operatingModel ?? "paid") === opt.id
-                        ? "border-gold bg-navy text-white shadow-[0_12px_32px_rgba(27,42,74,0.12)]"
-                        : "border-navy/10 bg-white text-navy hover:border-gold hover:shadow-[0_8px_24px_rgba(27,42,74,0.08)]"
+                        ? "border-gold bg-navy text-white shadow-[0_12px_32px_rgba(15,39,68,0.12)]"
+                        : "border-navy/10 bg-white text-navy hover:border-gold hover:shadow-[0_8px_24px_rgba(15,39,68,0.08)]"
                     }`}
                   >
                     <span className="block text-xl font-black">{opt.title}</span>
@@ -821,7 +823,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
           {step === 4 && (
             <section>
               <div className="overflow-hidden rounded-2xl border border-navy/10 bg-white">
-                <div className="border-b border-navy/10 px-5 py-4 text-center text-sm font-bold text-gold">
+                <div className="border-b border-navy/10 px-5 py-4 text-center text-base font-bold text-teal">
                   {t("review.heading")}
                 </div>
                 <dl>
@@ -897,7 +899,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
               <Button
                 type="button"
                 size="lg"
-                className="mt-6 w-full text-base font-black shadow-[0_12px_32px_rgba(27,42,74,0.12)]"
+                className="mt-6 w-full text-base font-black shadow-[0_12px_32px_rgba(15,39,68,0.12)]"
                 disabled={!wizardReady(intake) || running}
                 onClick={startBuild}
               >
@@ -906,7 +908,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
               </Button>
               {!wizardReady(intake) && (
                 <div
-                  className="mt-3 rounded-xl border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-red-800"
+                  className="mt-3 rounded-xl border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-danger"
                   dir={locale === "en" ? "ltr" : "rtl"}
                 >
                   <p className="font-bold">{t("wizard.missingHeading")}</p>
@@ -1111,7 +1113,7 @@ function AgentsPanel({
             </div>
           )}
           {pack.intakeReport.inconsistencies.length > 0 && (
-            <div className="mt-3 rounded-xl border border-danger/40 bg-danger/10 p-3 text-sm text-red-800">
+            <div className="mt-3 rounded-xl border border-danger/40 bg-danger/10 p-3 text-sm text-danger">
               {pack.intakeReport.inconsistencies.map((inc, i) => (
                 <p key={i}>
                   <strong>{inc.issue[locale]}:</strong> {inc.detail[locale]}

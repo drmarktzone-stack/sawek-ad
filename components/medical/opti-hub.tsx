@@ -362,7 +362,7 @@ function AuditPanel({ desk, patch, loc }: Panel) {
             {result.gaps.map((g) => (
               <article key={pick(g.title, "en")} className="rounded-xl border border-danger/30 bg-danger/5 p-4">
                 <div className="mb-1 flex items-center justify-between gap-2">
-                  <p className="font-bold text-red-800">{pick(g.title, loc)}</p>
+                  <p className="font-bold text-danger">{pick(g.title, loc)}</p>
                   <span className="rounded-full bg-danger/20 px-2 py-0.5 text-sm text-danger">{pick(g.severity, loc)}</span>
                 </div>
                 <p className="text-sm text-muted">{pick(g.body, loc)}</p>
@@ -1096,7 +1096,7 @@ function VoicePanel({
           onClick={toggle}
           className={cn(
             "flex h-28 w-28 items-center justify-center rounded-full border text-sm font-bold",
-            listening ? "border-danger bg-danger/20 text-red-800" : "border-gold bg-gold/15 text-gold",
+            listening ? "border-danger bg-danger/20 text-danger" : "border-gold bg-gold/15 text-gold",
           )}
         >
           {listening ? pick({ he: "עצור", ar: "إيقاف", en: "Stop" }, loc) : pick({ he: "דבר/י", ar: "تكلّم", en: "Speak" }, loc)}

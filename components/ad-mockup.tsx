@@ -92,7 +92,7 @@ function HoursChips({
           )}
           style={{
             color: ink,
-            borderColor: isLight(ink) ? "rgba(247,243,234,0.45)" : "rgba(27,42,74,0.25)",
+            borderColor: isLight(ink) ? "rgba(247,243,234,0.45)" : "rgba(15,39,68,0.25)",
             background: isLight(ink) ? "rgba(0,0,0,0.35)" : "rgba(255,255,255,0.78)",
           }}
         >

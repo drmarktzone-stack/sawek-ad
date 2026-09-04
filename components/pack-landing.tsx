@@ -179,7 +179,7 @@ export function PackLandingScreen({ pack, locale }: { pack: CampaignPack; locale
       {(hours || loc) ? (
         <section className="mx-auto grid max-w-5xl gap-6 px-6 pb-16 sm:grid-cols-2 sm:px-10">
           {hours ? (
-            <div className="rounded-[1.5rem] border border-navy/10 bg-white p-6 shadow-[0_8px_24px_rgba(27,42,74,0.06)]">
+            <div className="rounded-[1.5rem] border border-navy/10 bg-white p-6 shadow-[0_8px_24px_rgba(15,39,68,0.06)]">
               <p className="flex items-center gap-2 text-[13px] font-black uppercase tracking-[0.22em]" style={{ color: accent }}>
                 <Clock className="size-4" /> {copy.hours}
               </p>
@@ -193,7 +193,7 @@ export function PackLandingScreen({ pack, locale }: { pack: CampaignPack; locale
             </div>
           ) : null}
           {loc ? (
-            <div className="rounded-[1.5rem] border border-navy/10 bg-white p-6 shadow-[0_8px_24px_rgba(27,42,74,0.06)]">
+            <div className="rounded-[1.5rem] border border-navy/10 bg-white p-6 shadow-[0_8px_24px_rgba(15,39,68,0.06)]">
               <p className="flex items-center gap-2 text-sm font-black uppercase tracking-[0.22em]" style={{ color: accent }}>
                 <MapPin className="size-4" /> {copy.address}
               </p>
