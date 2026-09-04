@@ -7,6 +7,7 @@ import {
   formatIlPhone,
   isCatalogHeading,
   isJunkUiText,
+  isPlausibleIlBusinessPhone,
   type IngestFieldId,
 } from "./document-ingest";
 import { extractCssColors, extractLogoUrl } from "./brand-kit";
@@ -36,9 +37,14 @@ export const URL_FETCH_TIMEOUT_MS = 8_000;
 export const URL_HOMEPAGE_TIMEOUT_MS = 25_000;
 /** Wall-clock budget for all extra nav fetches together (parallel). */
 export const URL_EXTRA_PAGES_BUDGET_MS = 14_000;
-/** Abort the body once we have enough HTML to parse (do not wait for the catalog). */
+/** Extra script/CSS bodies. Homepage HTML uses URL_MAX_BODY so Konimbo JSON-LD/footer survive. */
 export const URL_PARSE_BODY_CAP = 512 * 1024;
 export const URL_MAX_BODY = Math.floor(1.5 * 1024 * 1024);
+const TRACKING_PARAM =
+  /^(?:utm_|utm-|fbclid|gclid|gbraid|wbraid|dclid|msclkid|yclid|mc_cid|mc_eid|igshid|_ga|_gl|si)$/i;
+const PAGE_TITLE_PREFIX =
+  /^(?:צור קשר|צרו קשר|אודות|דף הבית|ראשי|contact(?: us)?|about(?: us)?|home)\s*[-–—|:]\s*/i;
+const FALLBACK_INFO_PATHS = ["/contact", "/about", "/about-us", "/contact-us", "/צור-קשר", "/אודות"];
 export const URL_MAX_REDIRECTS = 5;
 export const URL_TEXT_CAP = 20_000;
 export const URL_MAX_EXTRA_PAGES = 12;
@@ -258,11 +264,48 @@ function hostLooksLikeIpv4(host: string): boolean {
   return /^\d{1,3}(\.\d{1,3}){3}$/.test(host);
 }
 
+export function coerceHttpUrl(raw: string): string {
+  const t = String(raw ?? "").trim();
+  if (!t) return t;
+  if (/^https?:\/\//i.test(t)) return t;
+  if (/^[a-z][a-z0-9+.-]*:/i.test(t)) return t;
+  if (/^(?:www\.)?(?:[\w-]+\.)+[a-z]{2,}(?::\d+)?(?:[/?#].*)?$/i.test(t)) return `https://${t}`;
+  return t;
+}
+
+export function canonicalizePublicUrl(input: URL): URL {
+  const u = new URL(input.href);
+  u.hash = "";
+  const drop: string[] = [];
+  for (const [k] of u.searchParams) {
+    if (TRACKING_PARAM.test(k) || /^utm_/i.test(k)) drop.push(k);
+  }
+  for (const k of drop) u.searchParams.delete(k);
+  return u;
+}
+
+/** Submitted site URL without UTM. Preserve a missing root slash (https://shop.example). */
+export function publicWebsiteHref(raw: string): string {
+  const trimmed = coerceHttpUrl(String(raw || "").trim()).split("#")[0];
+  if (!trimmed) return "";
+  let u: URL;
+  try {
+    u = canonicalizePublicUrl(new URL(trimmed));
+  } catch {
+    return trimmed;
+  }
+  const pathOnly = trimmed.split("?")[0] ?? trimmed;
+  if ((u.pathname === "/" || u.pathname === "") && !u.search) {
+    return /\/$/.test(pathOnly) ? `${u.origin}/` : u.origin;
+  }
+  return u.href;
+}
+
 export function inspectUrl(
   raw: string,
   extraBlockedHosts: string[] = [],
 ): { ok: true; url: URL } | UrlIngestErr {
-  const trimmed = String(raw ?? "").trim();
+  const trimmed = coerceHttpUrl(String(raw ?? "").trim());
   if (!trimmed) return { ok: false, error: "invalid_url" };
   let parsed: URL;
   try {
@@ -270,6 +313,7 @@ export function inspectUrl(
   } catch {
     return { ok: false, error: "invalid_url" };
   }
+  parsed = canonicalizePublicUrl(parsed);
   if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
     return { ok: false, error: "invalid_url" };
   }
@@ -331,7 +375,11 @@ function visibleText(html: string): string {
     .replace(/<\/(p|div|h1|h2|h3|h4|li|tr|section|article|header|footer|blockquote)>/gi, "\n")
     .replace(/<[^>]+>/g, " ");
   const decoded = decodeEntities(stripped);
-  return decoded.replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n").replace(/[ \t]{2,}/g, " ").trim().slice(0, URL_TEXT_CAP);
+  const full = decoded.replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n").replace(/[ \t]{2,}/g, " ").trim();
+  if (full.length <= URL_TEXT_CAP) return full;
+  const tailKeep = 4000;
+  const head = full.slice(0, URL_TEXT_CAP - tailKeep);
+  return `${head}\n${full.slice(-tailKeep)}`;
 }
 
 
@@ -484,6 +532,13 @@ function labeledFromJsonLd(nodes: Record<string, unknown>[]): string[] {
   for (const n of nodes) {
     push("שם העסק", asString(n.name));
     push("טלפון", asString(n.telephone));
+    const points = Array.isArray(n.contactPoint) ? n.contactPoint : n.contactPoint ? [n.contactPoint] : [];
+    for (const p of points) {
+      if (!p || typeof p !== "object") continue;
+      const rec = p as Record<string, unknown>;
+      const tel = asString(rec.telephone);
+      if (tel && isPlausibleIlBusinessPhone(tel)) push("טלפון", formatIlPhone(tel) || tel);
+    }
     push("כתובת", formatAddress(n.address));
     push("אתר", asString(n.url));
     push("שעות", formatHours(n));
@@ -544,10 +599,53 @@ function absHttpUrl(maybe: string, base: string): string {
   try {
     const u = new URL(maybe, base);
     if (u.protocol !== "http:" && u.protocol !== "https:") return "";
-    return u.href;
+    return cleanAssetUrl(u.href);
   } catch {
     return "";
   }
+}
+
+function cleanAssetUrl(href: string): string {
+  try {
+    const u = new URL(href);
+    u.hash = "";
+    const drop: string[] = [];
+    for (const [k, v] of u.searchParams) {
+      if (TRACKING_PARAM.test(k) || /^utm_/i.test(k)) drop.push(k);
+      else if (!String(v || "").trim()) drop.push(k);
+    }
+    for (const k of drop) u.searchParams.delete(k);
+    if (/%20type=?$/i.test(u.search) || /\stype=/i.test(u.href)) {
+      u.search = u.search.replace(/(?:%20|\+|\s)?type=?$/i, "");
+    }
+    return u.href;
+  } catch {
+    return href;
+  }
+}
+
+export function brandFromSeoTitle(title: string): string {
+  const raw = clip(String(title ?? ""), 180);
+  if (!raw) return "";
+  const stripped = raw.replace(PAGE_TITLE_PREFIX, "").trim();
+  const parts = stripped.split(/\s*[|–—]\s*/).map((s) => s.replace(/\s+/g, " ").trim()).filter(Boolean);
+  const pick = (s: string) => {
+    const d = s.replace(/^(.+?)\s*[-–—]\s*\1$/i, "$1").replace(/\s+/g, " ").trim();
+    if (!d || d.length < 2 || d.length > 48) return "";
+    if (isJunkUiText(d) || isCatalogHeading(d)) return "";
+    return d;
+  };
+  if (parts.length >= 2) {
+    const first = parts[0] ?? "";
+    const last = parts[parts.length - 1] ?? "";
+    if (PAGE_TITLE_PREFIX.test(`${first} - `)) return pick(last);
+    if (first.length > 40 && last.length <= 40) return pick(last);
+    if (first.length <= 40 && last.length > 40) return pick(first);
+    const lastPick = pick(last);
+    if (lastPick) return lastPick;
+    return pick(first);
+  }
+  return pick(stripped);
 }
 
 
@@ -602,7 +700,8 @@ function skipNavUrl(u: URL, home: URL): boolean {
   if (path === homePath && !u.search) return true;
   if (/\.(pdf|jpe?g|png|webp|gif|svg|zip|mp4|mp3|css|js)$/i.test(path)) return true;
   if (/\/(login|signin|sign-in|signup|sign-up|register|cart|basket|checkout|account|wp-admin|admin|password-reset|lost-password|forgot-password|my-account|wishlist|wp-login)(\/|$)/i.test(path)) return true;
-  if (/[?&](add-to-cart|login)=/i.test(u.search)) return true;
+  if (/[?&](add-to-cart|login|CancellingTransaction|order|sort|page)=/i.test(u.search)) return true;
+  if (/\/\d{5,}-/.test(path)) return true;
   const inspected = inspectUrl(u.href);
   if (!inspected.ok) return true;
   return false;
@@ -977,7 +1076,7 @@ function isCssResponse(contentType: string | null, sniff: string): boolean {
 
 
 const PAGE_ADDRESS_HINT =
-  /(?:מחלף|רחוב\s+\S|שדרות\s+\S|כביש\s*\d|الشارع|شارع\s+|مجمع|الطابق|קומה|בצד|بجانب|street|avenue|\bfloor\b)/i;
+  /(?:מחלף|רחוב\s+\S|שדרות\s+\S|כביש\s*\d|חיל\s+\S|קניון\s+\S|באר שבע|תל אביב|חיפה|ירושלים|פתח תקווה|ראשון לציון|באקה|باقة|بئر السبع|الشارع|شارع\s+|مجمع|الطابق|קומה|בצד|بجانب|street|avenue|\bfloor\b)/i;
 
 export function parseFetchedHtml(
   html: string,
@@ -1003,7 +1102,10 @@ export function parseFetchedHtml(
   ]
     .map((t) => t.replace(/^\/\//, ""))
     .filter(Boolean);
-  for (const t of tels) labeled.push(`טלפון: ${formatIlPhone(t) || t}`);
+  for (const t of tels) {
+    const formatted = formatIlPhone(t) || t;
+    if (isPlausibleIlBusinessPhone(formatted)) labeled.push(`טלפון: ${formatted}`);
+  }
   const was = [
     ...hrefs(raw, /href\s*=\s*["']https?:\/\/wa\.me\/([^"'?]+)/gi),
     ...hrefs(raw, /href\s*=\s*["']https?:\/\/api\.whatsapp\.com\/send\?[^"']*phone=([^"'&]+)/gi),
@@ -1024,18 +1126,49 @@ export function parseFetchedHtml(
     ];
     for (const w of footWas) labeled.push(`וואטסאפ: ${w}`);
     const footText = decodeEntities(foot.replace(/<[^>]+>/g, " ")).replace(/[ \t]+/g, " ");
-    for (const line of footText.split(/\n/)) {
-      const s = line.replace(/\s+/g, " ").trim();
-      if (s.length < 8 || s.length > 280) continue;
-      if (/אימייל|email|סיסמה|password/i.test(s)) continue;
-      if (PAGE_ADDRESS_HINT.test(s)) {
-        labeled.push(`כתובת: ${s}`);
+    const footLines = decodeEntities(foot.replace(/<br\s*\/?>/gi, "\n").replace(/<[^>]+>/g, "\n"))
+      .split(/\n/)
+      .map((s) => s.replace(/\s+/g, " ").trim())
+      .filter(Boolean);
+    for (const s of footLines.length ? footLines : footText.split(/\n/)) {
+      const line = s.replace(/\s+/g, " ").trim();
+      if (line.length < 8 || line.length > 280) continue;
+      if (/אימייל|email|סיסמה|password/i.test(line)) continue;
+      if (PAGE_ADDRESS_HINT.test(line)) {
+        labeled.push(`כתובת: ${line}`);
         break;
       }
     }
     if (!labeled.some((l) => l.startsWith("כתובת:"))) {
       const m = footText.match(/מחלף כביש\s*\d+\s*,\s*באקה(?:\s+אלגרביה)?/);
       if (m) labeled.push(`כתובת: ${m[0].trim()}`);
+    }
+    for (const line of footLines) {
+      if (/\d{1,2}\s*[:.]\s*\d{2}/.test(line) && /ימים|שעות|ساعات|א['׳]|ראשון|בין/.test(line) && line.length <= 120) {
+        labeled.push(`שעות: ${line}`);
+        break;
+      }
+    }
+  }
+  if (!labeled.some((l) => l.startsWith("כתובת:") && l.length > 10) || !labeled.some((l) => l.startsWith("שעות:"))) {
+    const stripped = decodeEntities(
+      raw
+        .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, " ")
+        .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, " ")
+        .replace(/<br\s*\/?>/gi, "\n")
+        .replace(/<[^>]+>/g, "\n"),
+    );
+    const hoursDirect = stripped.match(
+      /(?:ימים\s+)?[א-ת]['׳]?(?:\s*[-–—ועד]+\s*[א-ת]['׳]?)?\s*(?:בין\s*)?\d{1,2}\s*[:.]\s*\d{2}\s*[-–—]\s*\d{1,2}\s*[:.]\s*\d{2}/,
+    );
+    if (hoursDirect?.[0] && !labeled.some((l) => l.startsWith("שעות:"))) {
+      labeled.push(`שעות: ${hoursDirect[0].replace(/\s+/g, " ").trim()}`);
+    }
+    const addrDirect = stripped.match(
+      /(?:חיל\s+\S+|רחוב\s+\S+|שדרות\s+\S+|קניון\s+\S+)[^\n|]{0,24}\d{1,4}[^\n|]{0,36}(?:באר שבע|תל אביב|חיפה|ירושלים|פתח תקווה|ראשון לציון|באקה|נתניה|אשדוד|חולון)/,
+    );
+    if (addrDirect?.[0] && !labeled.some((l) => l.startsWith("כתובת:"))) {
+      labeled.push(`כתובת: ${addrDirect[0].replace(/\s+/g, " ").trim()}`);
     }
   }
   for (const cta of extractCtaTexts(raw)) labeled.push(`CTA: ${cta}`);
@@ -1072,24 +1205,37 @@ export function parseFetchedHtml(
   let fields = extractFieldsFromText(blob, file);
 
   const siteUrl = submittedUrl || finalUrl;
-  if (/^https?:\/\//i.test(siteUrl)) fields.website = siteUrl.split("#")[0];
+  if (/^https?:\/\//i.test(siteUrl) || /^[\w.-]+\.[a-z]{2,}/i.test(String(siteUrl))) {
+    const website = publicWebsiteHref(siteUrl);
+    if (website) fields.website = website;
+  }
 
   const usableName = (v: string): boolean => {
     const s = clip(v, 120);
     return Boolean(s) && !isJunkUiText(s) && !isCatalogHeading(s);
   };
-  if (!fields.businessName || !usableName(fields.businessName)) {
-    const fromLd = jsonLdName(nodes);
-    const fromSite = jsonLdSiteName(sites);
+  const fromLd = jsonLdName(nodes);
+  const fromSite = jsonLdSiteName(sites);
+  const currentName = String(fields.businessName || "").trim();
+  const seoLong = currentName.length > 48 && /[|–—]/.test(currentName);
+  if (!currentName || !usableName(currentName) || seoLong) {
     const fromOgTitle = clip(ogTitle || "", 120);
+    const fromOgBrand = brandFromSeoTitle(fromOgTitle);
+    const fromTitleBrand = brandFromSeoTitle(title);
     const fromOgShort = fromOgTitle.split(/\s+[-–—]\s+/)[0].trim();
     if (usableName(fromLd)) fields.businessName = clip(fromLd, 120);
     else if (usableName(ogSiteName)) fields.businessName = clip(ogSiteName, 120);
     else if (usableName(fromSite)) fields.businessName = clip(fromSite, 120);
+    else if (usableName(fromOgBrand)) fields.businessName = fromOgBrand;
+    else if (usableName(fromTitleBrand)) fields.businessName = fromTitleBrand;
     else if (usableName(fromOgShort)) fields.businessName = fromOgShort;
     else if (usableName(fromOgTitle)) fields.businessName = fromOgTitle;
     else if (usableName(title)) fields.businessName = clip(title, 120);
-    else delete fields.businessName;
+    else if (seoLong) {
+      const brand = brandFromSeoTitle(currentName);
+      if (usableName(brand)) fields.businessName = brand;
+      else delete fields.businessName;
+    } else delete fields.businessName;
   }
   if (ogDescription) {
     const current = String(fields.description || "").trim();
@@ -1261,10 +1407,41 @@ function mergeAbortSignals(timeoutMs: number, extra?: AbortSignal): AbortSignal 
   return c.signal;
 }
 
+function isCloudflareChallenge(html: string, status = 200): boolean {
+  if (status === 403 || status === 429 || status === 503) {
+    return /cf-browser-verification|just a moment|challenge-platform|cf-challenge|attention required/i.test(html);
+  }
+  return /<title[^>]*>\s*just a moment/i.test(html) && /challenge-platform|cf-browser-verification/i.test(html);
+}
+
+function ingestRequestHeaders(opts: { accept?: "html" | "script" | "css"; browserLike?: boolean }): Record<string, string> {
+  const browser = opts.browserLike !== false;
+  const accept =
+    opts.accept === "script"
+      ? "application/javascript,text/javascript,*/*;q=0.1"
+      : opts.accept === "css"
+        ? "text/css,*/*;q=0.1"
+        : "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8";
+  return {
+    Accept: accept,
+    "User-Agent": browser ? SOCIAL_BROWSER_UA : "Mozilla/5.0 (compatible; SAWEK-AD-Ingest/0.1)",
+    "Accept-Language": "he-IL,he;q=0.9,ar;q=0.8,en-US;q=0.7,en;q=0.6",
+    ...(browser && opts.accept !== "script" && opts.accept !== "css"
+      ? { "Cache-Control": "no-cache", "Upgrade-Insecure-Requests": "1" }
+      : {}),
+  };
+}
+
 async function fetchHtmlDocument(
   raw: string,
   extraBlockedHosts: string[] = [],
-  opts: { timeoutMs?: number; signal?: AbortSignal; accept?: "html" | "script" | "css"; browserLike?: boolean } = {},
+  opts: {
+    timeoutMs?: number;
+    signal?: AbortSignal;
+    accept?: "html" | "script" | "css";
+    browserLike?: boolean;
+    bodyCap?: number;
+  } = {},
 ): Promise<{ ok: true; html: string; finalUrl: string } | UrlIngestErr> {
   const submitted = String(raw ?? "").trim();
   let current: URL;
@@ -1272,6 +1449,7 @@ async function fetchHtmlDocument(
   if (!first.ok) return first;
   current = first.url;
   const timeoutMs = opts.timeoutMs ?? URL_FETCH_TIMEOUT_MS;
+  const bodyCap = opts.bodyCap ?? (opts.accept === "script" || opts.accept === "css" ? URL_PARSE_BODY_CAP : URL_MAX_BODY);
 
   let res: Response | undefined;
   try {
@@ -1285,18 +1463,7 @@ async function fetchHtmlDocument(
           method: "GET",
           redirect: "manual",
           signal: mergeAbortSignals(timeoutMs, opts.signal),
-          headers: {
-            Accept:
-              opts.accept === "script"
-                ? "application/javascript,text/javascript,*/*;q=0.1"
-                : opts.accept === "css"
-                  ? "text/css,*/*;q=0.1"
-                  : "text/html,application/xhtml+xml;q=0.9,*/*;q=0.8",
-            "User-Agent": opts.browserLike
-              ? SOCIAL_BROWSER_UA
-              : "Mozilla/5.0 (compatible; SAWEK-AD-Ingest/0.1)",
-            ...(opts.browserLike ? { "Accept-Language": "he-IL,he;q=0.9,ar;q=0.8,en-US;q=0.7,en;q=0.6" } : {}),
-          },
+          headers: ingestRequestHeaders(opts),
         });
       } catch (e) {
         const name = e instanceof Error ? e.name : "";
@@ -1316,6 +1483,34 @@ async function fetchHtmlDocument(
         current = next;
         continue;
       }
+      if ((res.status === 403 || res.status === 429 || res.status === 503) && hop < URL_MAX_REDIRECTS) {
+        try {
+          res = await fetch(current.href, {
+            method: "GET",
+            redirect: "manual",
+            signal: mergeAbortSignals(timeoutMs, opts.signal),
+            headers: {
+              ...ingestRequestHeaders({ ...opts, browserLike: true }),
+              Referer: `${current.origin}/`,
+            },
+          });
+        } catch (e) {
+          const name = e instanceof Error ? e.name : "";
+          if (name === "TimeoutError" || name === "AbortError") return { ok: false, error: "timeout" };
+          return { ok: false, error: "network" };
+        }
+        if (res.status >= 300 && res.status < 400) {
+          const loc = res.headers.get("location");
+          if (loc) {
+            try {
+              current = new URL(loc, current.href);
+            } catch {
+              return { ok: false, error: "invalid_url" };
+            }
+            continue;
+          }
+        }
+      }
       break;
     }
   } catch (e) {
@@ -1327,7 +1522,7 @@ async function fetchHtmlDocument(
   if (!res) return { ok: false, error: "network" };
   if (!res.ok) return { ok: false, error: "network" };
 
-  const capped = await readCapped(res, URL_PARSE_BODY_CAP);
+  const capped = await readCapped(res, bodyCap);
   if (!capped.ok) return capped;
   const sniff = new TextDecoder("utf-8", { fatal: false }).decode(capped.buf.slice(0, 512));
   const ct = res.headers.get("content-type");
@@ -1339,7 +1534,28 @@ async function fetchHtmlDocument(
     return { ok: false, error: "non_html" };
   }
   const html = new TextDecoder("utf-8", { fatal: false }).decode(capped.buf);
+  if (opts.accept !== "script" && opts.accept !== "css" && isCloudflareChallenge(html, res.status)) {
+    return { ok: false, error: "network" };
+  }
   return { ok: true, html, finalUrl: current.href };
+}
+
+function seedInfoPageUrls(html: string, homeUrl: string): string[] {
+  const found = collectSameOriginNavUrls(html, homeUrl, URL_MAX_EXTRA_PAGES);
+  if (found.some((u) => /\/(?:about|contact|אודות|צור-?קשר)/i.test(u))) return found;
+  let home: URL;
+  try {
+    home = new URL(homeUrl);
+  } catch {
+    return found;
+  }
+  const extras = [...found];
+  for (const path of FALLBACK_INFO_PATHS) {
+    const href = new URL(path, `${home.protocol}//${home.host}`).href;
+    if (!extras.includes(href)) extras.push(href);
+    if (extras.length >= URL_MAX_EXTRA_PAGES) break;
+  }
+  return extras;
 }
 
 async function fetchExtraPages(
@@ -1675,14 +1891,16 @@ async function ingestSocialUrl(
 }
 
 export async function ingestUrl(raw: string, extraBlockedHosts: string[] = []): Promise<UrlIngestResult> {
-  const submitted = String(raw ?? "").trim().split("#")[0];
-  const inspected = inspectUrl(submitted, extraBlockedHosts);
+  const inspected = inspectUrl(String(raw ?? "").trim(), extraBlockedHosts);
   if (!inspected.ok) return inspected;
+  const submitted = inspected.url.href;
   const kind = detectSocialKind(inspected.url);
   if (kind) return ingestSocialUrl(submitted, extraBlockedHosts, kind, inspected.url);
 
   const homeDoc = await fetchHtmlDocument(submitted, extraBlockedHosts, {
     timeoutMs: URL_HOMEPAGE_TIMEOUT_MS,
+    bodyCap: URL_MAX_BODY,
+    browserLike: true,
   });
   if (!homeDoc.ok) return homeDoc;
 
@@ -1707,7 +1925,7 @@ export async function ingestUrl(raw: string, extraBlockedHosts: string[] = []): 
     parsed.images = images.slice(0, URL_MAX_IMAGES);
   }
 
-  const navUrls = collectSameOriginNavUrls(homeDoc.html, homeDoc.finalUrl, URL_MAX_EXTRA_PAGES);
+  const navUrls = seedInfoPageUrls(homeDoc.html, homeDoc.finalUrl);
   if (!navUrls.length) return parsed;
 
   try {

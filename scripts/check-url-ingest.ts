@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from "fs";
 import { join } from "path";
-import { inspectUrl, parseFetchedHtml, ingestUrl, collectSameOriginNavUrls, mergeExtractedFields, extractScriptBundleText } from "../lib/url-ingest";
+import { inspectUrl, parseFetchedHtml, ingestUrl, collectSameOriginNavUrls, mergeExtractedFields, extractScriptBundleText, brandFromSeoTitle, coerceHttpUrl, canonicalizePublicUrl } from "../lib/url-ingest";
 import { detectSocialKind, facebookMbasicUrl, facebookPagePluginUrl, isSocialLoginWall, parseOembedJson, parseSocialPage, socialHasPublicContent } from "../lib/social-page";
 import { SOCIAL_LOGIN_WALL_COPY, socialLoginWallError } from "../lib/url-ingest";
 import { buildPastCampaignAuditFromPosts } from "../lib/engine/past-campaign-audit";
@@ -355,6 +355,28 @@ else if (loop.error !== "blocked") fail(`http://127.0.0.1/ error=${loop.error}, 
 
 const okPublic = inspectUrl("https://fiction.example/");
 if (!okPublic.ok) fail("https://fiction.example/ should pass inspectUrl");
+
+if (coerceHttpUrl("www.alufsport.co.il") !== "https://www.alufsport.co.il") {
+  fail(`coerceHttpUrl www got ${coerceHttpUrl("www.alufsport.co.il")}`);
+}
+const bare = inspectUrl("www.alufsport.co.il/path?utm_source=fb&utm_campaign=x&fbclid=abc");
+if (!bare.ok) fail(`bare host should inspect, got ${"error" in bare ? bare.error : ""}`);
+else {
+  if (bare.url.hostname !== "www.alufsport.co.il") fail(`bare host ${bare.url.hostname}`);
+  if (bare.url.searchParams.has("utm_source") || bare.url.searchParams.has("fbclid")) {
+    fail(`tracking params kept ${bare.url.search}`);
+  }
+  if (bare.url.pathname !== "/path") fail(`bare path ${bare.url.pathname}`);
+}
+const tracked = canonicalizePublicUrl(new URL("https://shop.example/?utm_medium=cpc&gclid=1&keep=yes"));
+if (tracked.searchParams.has("utm_medium") || tracked.searchParams.has("gclid")) fail("canonicalize dropped fail");
+if (tracked.searchParams.get("keep") !== "yes") fail("canonicalize dropped keep");
+if (brandFromSeoTitle("בגדי ספורט, ביגוד | אלוף ספורט - אלוף ספורט") !== "אלוף ספורט") {
+  fail(`brandFromSeoTitle ${JSON.stringify(brandFromSeoTitle("בגדי ספורט, ביגוד | אלוף ספורט - אלוף ספורט"))}`);
+}
+if (brandFromSeoTitle("צור קשר - אלוף ספורט") !== "אלוף ספורט") {
+  fail(`contact title brand ${JSON.stringify(brandFromSeoTitle("צור קשר - אלוף ספורט"))}`);
+}
 
 
 const storeOfferHtml = readFileSync(join(__dirname, "fixtures/url-ingest-store-offer.html"), "utf8");
@@ -713,6 +735,15 @@ if (oembed?.phone || oembed?.whatsapp) fail("oembed invented phone");
 if (!socialHasPublicContent(oembed)) fail("oembed should be public content");
 const oembedErr = parseOembedJson(JSON.stringify({ error: { message: "login required" } }), "facebook");
 if (oembedErr) fail("oembed error object must be ignored");
+const oembedPage = parseOembedJson(JSON.stringify({
+  provider_name: "Facebook",
+  html: '<div class="fb-page" data-href="https://www.facebook.com/AlufSport"><blockquote cite="https://www.facebook.com/AlufSport" class="fb-xfbml-parse-ignore"><a href="https://www.facebook.com/AlufSport">‎אלוף ספורט - Aluf sport‎</a></blockquote></div>',
+  type: "rich",
+}), "facebook");
+if (!oembedPage || oembedPage.loginWall) fail("facebook page widget oembed treated as wall");
+if (!/אלוף ספורט/.test(oembedPage?.name || "")) fail(`facebook page widget name ${JSON.stringify(oembedPage?.name)}`);
+if (oembedPage?.phone || oembedPage?.whatsapp) fail("facebook page widget invented phone");
+if (!socialHasPublicContent(oembedPage)) fail("facebook page widget should be public content");
 
 const wallErr = socialLoginWallError();
 if (wallErr.error !== "social_login_wall") fail("socialLoginWallError code");
@@ -731,6 +762,45 @@ if (!/גריל מקומי/.test(igSocial.description)) fail(`instagram bio ${JSO
 if (/12K Followers/.test(igSocial.description)) fail("instagram kept follower chrome as bio");
 if (/ROAS|25-34/.test(JSON.stringify(igSocial))) fail("instagram invented metrics");
 if (igSocial.posts.length && !igSocial.posts.every((p) => p.text.trim())) fail("instagram empty invented post");
+
+const konimboHtml = readFileSync(join(__dirname, "fixtures/url-ingest-konimbo-store.html"), "utf8");
+const konimboUrl = "https://www.alufsport.co.il/?utm_source=fb&utm_medium=cpc&fbclid=junk";
+const konimbo = parseFetchedHtml(konimboHtml, "https://www.alufsport.co.il/", konimboUrl);
+if (!konimbo.ok) {
+  fail(`konimbo parse failed: ${konimbo.error}`);
+} else {
+  const f = konimbo.fields;
+  if (f.businessName !== "אלוף ספורט") fail(`konimbo name ${JSON.stringify(f.businessName)}`);
+  if (!/08-?9336658/.test(String(f.whatsapp || ""))) fail(`konimbo phone ${JSON.stringify(f.whatsapp)}`);
+  if (/582616587|060/.test(String(f.whatsapp || ""))) fail(`konimbo junk phone ${JSON.stringify(f.whatsapp)}`);
+  if (!/חיל ההנדסה|באר שבע/.test(String(f.location || ""))) fail(`konimbo address ${JSON.stringify(f.location)}`);
+  if (!/9:00|15:00/.test(String(f.clinicHours || ""))) fail(`konimbo hours ${JSON.stringify(f.clinicHours)}`);
+  if (/עדיין לא מצאת|צריכים עזרה/.test(String(f.biggestProblem || ""))) {
+    fail(`konimbo search chrome as problem ${JSON.stringify(f.biggestProblem)}`);
+  }
+  if (/צריכים עזרה/.test(String(f.uniqueAdvantage || ""))) {
+    fail(`konimbo search chrome as advantage ${JSON.stringify(f.uniqueAdvantage)}`);
+  }
+  if (/utm_source|fbclid/.test(String(f.website || ""))) fail(`konimbo website kept tracking ${JSON.stringify(f.website)}`);
+  if (!/[\u0590-\u05FF]/.test(String(f.description || f.businessName || ""))) fail("konimbo lost Hebrew");
+  const konimboNav = collectSameOriginNavUrls(konimboHtml, "https://www.alufsport.co.il/");
+  if (!konimboNav.some((u) => /\/about\b/.test(u))) fail("konimbo nav missing about");
+  if (!konimboNav.some((u) => /\/contact\b/.test(u))) fail("konimbo nav missing contact");
+  if (konimboNav.some((u) => /125974/.test(u))) fail(`konimbo kept product/sale id ${JSON.stringify(konimboNav)}`);
+  const appliedKonimbo = applyIngestReview(
+    demoIntake("he"),
+    rowsFromExtracted(f, false),
+    urlDoc("doc-konimbo", "https://www.alufsport.co.il/"),
+    [],
+  );
+  assertNoClinicLeftover("konimbo-from-clinic", appliedKonimbo, /אלוף ספורט/);
+  if (/סאמר|أبو مخ|052-8885800/.test(`${appliedKonimbo.businessName} ${appliedKonimbo.whatsapp} ${appliedKonimbo.location}`)) {
+    fail("konimbo leftover clinic merge");
+  }
+  if (appliedKonimbo.clinicHours && !/9:00|15:00/.test(appliedKonimbo.clinicHours)) {
+    fail(`konimbo applied hours leftover ${JSON.stringify(appliedKonimbo.clinicHours)}`);
+  }
+}
 
 const liveUrl = "https://grillking.multiscreensite.com/";
 if (process.env.URL_INGEST_LIVE === "1") {

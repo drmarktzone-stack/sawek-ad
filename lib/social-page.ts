@@ -1,4 +1,4 @@
-import { formatIlPhone, isJunkUiText } from "./document-ingest";
+import { formatIlPhone, isJunkUiText, isPlausibleIlBusinessPhone } from "./document-ingest";
 
 export type SocialKind = "facebook" | "instagram";
 
@@ -193,18 +193,43 @@ export function facebookOembedEndpoint(page: URL, accessToken = ""): string {
   return u.href;
 }
 
+function stripBidi(s: string): string {
+  return String(s ?? "").replace(/[\u200e\u200f\u202a-\u202e]/g, "").replace(/\s+/g, " ").trim();
+}
+
+/** Public Facebook oEmbed/plugin name from the blockquote link — not login chrome. */
+export function extractFacebookEmbedName(html: string): string {
+  const raw = String(html ?? "");
+  const pats = [
+    /<blockquote\b[^>]*class=["'][^"']*fb-xfbml-parse-ignore[^"']*["'][^>]*>[\s\S]*?<a\b[^>]*>([\s\S]*?)<\/a>/i,
+    /<div\b[^>]*class=["'][^"']*fb-page[^"']*["'][^>]*>[\s\S]*?<a\b[^>]*href=["']https?:\/\/(?:www\.)?facebook\.com\/[^"']+["'][^>]*>([\s\S]*?)<\/a>/i,
+    /<a\b[^>]*href=["']https?:\/\/(?:www\.)?facebook\.com\/[^"']+["'][^>]*>([\s\S]*?)<\/a>/i,
+  ];
+  for (const re of pats) {
+    const m = raw.match(re);
+    const name = clip(stripBidi(stripTags(m?.[1] || "")), 120);
+    if (name && !LOGIN_TITLE.test(name) && !isJunkUiText(name) && !isLoginChrome(name) && !/^(facebook|instagram)$/i.test(name)) {
+      return name;
+    }
+  }
+  return "";
+}
+
 export function parseOembedJson(raw: string, kind: SocialKind): SocialPageParse | null {
   try {
     const data = JSON.parse(String(raw ?? ""));
     if (!data || typeof data !== "object" || Array.isArray(data)) return null;
     const rec = data as Record<string, unknown>;
     if (rec.error) return null;
-    const name = clip(String(rec.author_name || rec.title || rec.author_url || ""), 120)
+    const html = String(rec.html || "");
+    const name = clip(
+      stripBidi(String(rec.author_name || rec.title || rec.author_url || extractFacebookEmbedName(html) || "")),
+      120,
+    )
       .replace(/\s*[|–—-]\s*(facebook|instagram).*$/i, "")
       .trim();
     if (!name || LOGIN_TITLE.test(name) || isJunkUiText(name) || isLoginChrome(name)) return null;
-    const html = String(rec.html || "");
-    const title = clip(String(rec.title || name), 160);
+    const title = clip(stripBidi(String(rec.title || name)), 160);
     const thumb = String(rec.thumbnail_url || rec.thumbnailUrl || "");
     const ogImage = /^https?:\/\//i.test(thumb) ? thumb : undefined;
     const posts: SocialPost[] = [];
@@ -321,11 +346,12 @@ function extractContact(blob: string): { phone: string; address: string; hours: 
   );
   const waHit = blob.match(/wa\.me\/(\+?\d{8,15})/i)?.[1] || "";
   const formatted = phone ? formatIlPhone(phone) || phone : "";
+  const okPhone = formatted && isPlausibleIlBusinessPhone(formatted) ? formatted : "";
   return {
-    phone: formatted,
-    address: address && /(?:מחלף|רחוב|שדרות|street|avenue|באקה|حي|شارع|קומה)/i.test(address) ? address : address,
+    phone: okPhone,
+    address: address && /(?:מחלף|רחוב|שדרות|חיל|street|avenue|באקה|حي|شارع|קומה)/i.test(address) ? address : address,
     hours,
-    whatsapp: waHit ? formatIlPhone(waHit) || waHit : formatted,
+    whatsapp: waHit && isPlausibleIlBusinessPhone(formatIlPhone(waHit) || waHit) ? formatIlPhone(waHit) || waHit : okPhone,
   };
 }
 
@@ -464,7 +490,13 @@ export function parseSocialPage(html: string, finalUrl: string, kind: SocialKind
   const ogImageRaw = metaContent(raw, "og:image") || metaContent(raw, "twitter:image");
   const ogImage = absHttpUrl(ogImageRaw, finalUrl) || undefined;
   const loginWall = isSocialLoginWall(raw, finalUrl);
-  if (loginWall && !distinctiveTitle(title, ogTitle) && !(kind === "instagram" && instagramName(ogTitle, title))) {
+  const embedName = kind === "facebook" ? extractFacebookEmbedName(raw) : "";
+  if (
+    loginWall &&
+    !distinctiveTitle(title, ogTitle) &&
+    !embedName &&
+    !(kind === "instagram" && instagramName(ogTitle, title))
+  ) {
     return { ...emptyParse(kind), title, loginWall: true };
   }
   const contact = extractContact(raw);
@@ -488,7 +520,7 @@ export function parseSocialPage(html: string, finalUrl: string, kind: SocialKind
     });
   }
 
-  const name = distinctiveTitle(title, ogTitle).replace(/\s*[|–—-]\s*facebook.*$/i, "").trim();
+  const name = (distinctiveTitle(title, ogTitle) || embedName).replace(/\s*[|–—-]\s*facebook.*$/i, "").trim();
   const aboutish = ogDescription && !isLoginChrome(ogDescription) ? clip(ogDescription, 500) : "";
   const posts = extractFacebookPosts(raw, finalUrl);
   const cover = firstImg(raw, finalUrl);

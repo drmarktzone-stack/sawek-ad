@@ -235,6 +235,9 @@ const PROMO_WORD = /מבצע(?:\s+חדש)?|חיסול|הנחה|خصم|تصفية
 const CATALOG_H1 = /חדשים על המדפים|hot sale|קטלוג|catalog|new in|on the shelves/i;
 const JUNK_UI_RE =
   /איפוס סיסמה|שחזור סיסמה|התחבר(?:ות)?|\bהרשם\b|הרשמה|skip to|\bcookie\b|forgot password|\blogin\b|\bcart\b|lost.?password|woocommerce-LostPassword/i;
+/** Store search / help chrome — never a pain, advantage, or name. */
+const STORE_CHROME_RE =
+  /עדיין לא מצאת|לא מצאתם את מה|צריכים עזרה|צריך עזרה|מה תרצו לחפש|חפשו באתר|search for products|need help finding|هل تبحث|لم تجدوا|تحتاجون مساعدة|העגלה שלך ריקה|allow cookies|קבלת עוגיות|פתח תפריט/i;
 const SHIPPING_PROMO = /משלוח(?:ים)? חינם|free shipping/i;
 /** Advantage phrasing (no queues) — never the problem field. */
 const QUEUE_ADVANTAGE =
@@ -284,12 +287,25 @@ export function formatIlPhone(raw: string): string {
   return src.replace(/\s+/g, "-");
 }
 
+/** Real IL mobile / landline — drop SKUs, 060 premium, and leftover 9-digit catalogs. */
+export function isPlausibleIlBusinessPhone(raw: string): boolean {
+  const digits = foldIndicDigits(String(raw ?? "")).replace(/[^\d]/g, "");
+  let local = digits;
+  if (local.startsWith("972")) local = `0${local.slice(3)}`;
+  if (!local.startsWith("0")) return false;
+  if (/^0(?:12|13|14|19|60)/.test(local)) return false;
+  if (/^05\d{8}$/.test(local)) return true;
+  if (/^07[2-8]\d{7}$/.test(local)) return true;
+  if (/^0[2-489]\d{7}$/.test(local)) return true;
+  return false;
+}
 
-/** Login/cart/cookie chrome — never a business name, problem, or advantage. */
+/** Login/cart/cookie/search chrome — never a business name, problem, or advantage. */
 export function isJunkUiText(value: string): boolean {
   const v = value.replace(/\s+/g, " ").trim();
   if (!v) return true;
   const core = v.replace(/[?؟!.]+$/g, "").trim();
+  if (STORE_CHROME_RE.test(core) || STORE_CHROME_RE.test(v)) return true;
   if (core.length <= 48 && JUNK_UI_RE.test(core)) return true;
   if (v.length <= 48 && JUNK_UI_RE.test(v)) return true;
   return false;
@@ -379,7 +395,9 @@ export function distinctPageAdvantage(hay: string, description: string): string 
 
 function extractLooseHours(text: string): string {
   const TIME = /\d{1,2}\s*[:.]\s*\d{2}/;
-  const HEAD = /שעות|ساعات|\bopen(?:ing)?\b|الدوام|קבלה/i;
+  const HEAD = /שעות|ساعات|\bopen(?:ing)?\b|الدوام|קבלה|שירות לקוחות/i;
+  const dayHours = text.match(IL_DAYS_HOURS);
+  if (dayHours?.[0] && dayHours[0].length <= 80) return clip(dayHours[0].replace(/\s+/g, " ").trim(), 280);
   const structured: string[] = [];
   for (const m of text.matchAll(
     /day\s*:\s*["']([^"']{2,40})["']\s*,\s*morning\s*:\s*["']([^"']{0,80})["']\s*,\s*evening\s*:\s*["']([^"']{0,80})["']/gi,
@@ -414,8 +432,12 @@ function extractLooseHours(text: string): string {
   return "";
 }
 
+const IL_CITY =
+  /באר שבע|תל אביב|חיפה|ירושלים|פתח תקווה|ראשון לציון|נתניה|אשדוד|חולון|רחובות|כפר סבא|הרצליה|רמת גן|בת ים|אשקלון|עפולה|נצרת|באקה|טירה|טייבה|קלנסווה|רהט|אילת|כפר קאסם|אום אל|باقة|بئر السبع|تل أبيب|حيفا|القدس|الناصرة/;
 const ADDRESS_HINT =
-  /(?:מחלף|רחוב\s+\S|שדרות\s+\S|כביש\s*\d|الشارع|شارع\s+|مجمع|الطابق|קומה|בצד|بجانب|street|avenue|\bfloor\b)/i;
+  /(?:מחלף|רחוב\s+\S|שדרות\s+\S|כביש\s*\d|חיל\s+\S|קניון\s+\S|الشارع|شارع\s+|مجمع|الطابق|קומה|בצד|بجانب|street|avenue|\bfloor\b)/i;
+const IL_DAYS_HOURS =
+  /(?:ימים\s+)?[א-ת]['׳]?(?:\s*[-–—ועד]+\s*[א-ת]['׳]?)?\s*(?:בין\s*)?\d{1,2}\s*[:.]\s*\d{2}\s*[-–—]\s*\d{1,2}\s*[:.]\s*\d{2}/;
 
 function extractLooseAddress(text: string): string {
   const lines = text.split(/\r?\n/).map((l) => l.replace(/\s+/g, " ").trim());
@@ -423,8 +445,8 @@ function extractLooseAddress(text: string): string {
     if (line.length < 8 || line.length > 280) continue;
     if (/אימייל|email|סיסמה|password|כתובת אימייל|lost.?password/i.test(line)) continue;
     if (/^H1\s*:/i.test(line)) continue;
-    if (/[|]/.test(line) && !ADDRESS_HINT.test(line)) continue;
-    if (ADDRESS_HINT.test(line)) {
+    if (/[|]/.test(line) && !ADDRESS_HINT.test(line) && !IL_CITY.test(line)) continue;
+    if (ADDRESS_HINT.test(line) || (IL_CITY.test(line) && /\d/.test(line))) {
       return clip(line.replace(/^(?:כתובת|מיקום|العنوان|الموقع|عنوان|address|location)\s*[:：]\s*/i, ""), 280);
     }
   }
@@ -833,6 +855,7 @@ function collectPhones(text: string): string {
     if (!f) return;
     const key = phoneDigitKey(f);
     if (key.length < 8) return;
+    if (!isPlausibleIlBusinessPhone(f)) return;
     if (hits.some((h) => phoneDigitKey(h) === key)) return;
     hits.push(f);
   };
