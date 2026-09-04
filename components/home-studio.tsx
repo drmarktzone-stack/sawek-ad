@@ -43,8 +43,8 @@ export function HomeStudio() {
   ];
 
   const howIcons = [Link2, Search, Images, Download] as const;
-  /** Distinct fills — never identical white paper. Label = sand, title/body = white. */
-  const howFills = ["#102A43", "#0D7377", "#C45C45", "#6B4A2F"] as const;
+  /** Distinct fills — never identical white paper. Label = sand-gold, title/body = white. */
+  const howFills = ["#102A43", "#0D7377", "#C45C45", "#1A4F6E"] as const;
   const freeItems = ["pricing.f1", "pricing.f2", "pricing.f3", "pricing.f4", "pricing.f5"] as const;
   const proItems = ["pricing.p1", "pricing.p2", "pricing.p3", "pricing.p4", "pricing.p5"] as const;
 
@@ -126,7 +126,7 @@ export function HomeStudio() {
               className="rounded-[22px] p-5 text-start shadow-[0_16px_36px_rgba(16,42,67,0.16)]"
               style={{ background: howFills[i] }}
             >
-              <p className="flex items-center gap-2 text-sm font-black uppercase tracking-[0.2em] text-sand">
+              <p className="flex items-center gap-2 text-sm font-black uppercase tracking-[0.2em] text-[#F4D35E]">
                 <Icon className="size-3.5 shrink-0" />
                 {t("home.how.title")} · 0{i + 1}
               </p>
