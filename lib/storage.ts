@@ -145,7 +145,7 @@ export function applyIntakeToDraft(intake: Intake, opts?: { resetWizard?: boolea
 }
 
 export function clearDraft() {
-  write(K.draft, { intake: emptyIntake(), step: 1 });
+  write(K.draft, { intake: emptyIntake(), step: 1, phase: "wizard" });
 }
 
 export function loadCampaigns(): CampaignPack[] {

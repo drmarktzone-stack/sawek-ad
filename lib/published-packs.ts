@@ -1,8 +1,16 @@
 import type { CampaignPack } from "./types";
 import { getCampaign, loadCampaigns } from "./storage";
+import { DEMO_ID } from "./demo";
+
+/** Customer-facing published demos: clinic only. */
+const ALLOWED_PUBLISHED_IDS = new Set<string>([DEMO_ID]);
 
 let cache: CampaignPack[] | null = null;
 let inflight: Promise<CampaignPack[]> | null = null;
+
+function onlyClinicDemo(packs: CampaignPack[]): CampaignPack[] {
+  return packs.filter((p) => ALLOWED_PUBLISHED_IDS.has(p.id));
+}
 
 export function cachedPublished(): CampaignPack[] {
   return cache ?? [];
@@ -25,7 +33,8 @@ export async function fetchPublishedPacks(): Promise<CampaignPack[]> {
         return cache;
       }
       const data: unknown = await res.json();
-      cache = Array.isArray(data) ? (data as CampaignPack[]) : [];
+      const raw = Array.isArray(data) ? (data as CampaignPack[]) : [];
+      cache = onlyClinicDemo(raw);
       return cache;
     } catch {
       cache = [];

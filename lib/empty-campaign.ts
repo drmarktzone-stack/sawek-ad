@@ -1,4 +1,4 @@
-import { clearDraft, saveDraft, type DraftState } from "./storage";
+import { saveDraft, type DraftState } from "./storage";
 import { emptyIntake } from "./engine/validate";
 import { intakeIsClinicDemo, isBlockedEmptySessionName } from "./clinic-leak";
 
@@ -33,16 +33,18 @@ function writeEmptyFlag(on: boolean) {
   }
 }
 
-/** New campaign: strip ?demo= FIRST, then wipe the form. Sticky until a new business name. */
+/** New campaign: strip ?demo= FIRST, then wipe every wizard field. Sticky until a new business name. */
 export function markEmptyCampaign() {
   stripDemoFromUrl();
   try {
     sessionStorage.removeItem("sawek-pending-demo");
+    localStorage.removeItem("sawek-pending-demo");
   } catch {
     /* private mode */
   }
-  clearDraft();
   writeEmptyFlag(true);
+  // Persist blank draft so a remount cannot reload clinic leftovers from a stale draft blob.
+  applyEmptyCampaignHydrate();
   if (typeof window !== "undefined") {
     window.dispatchEvent(new Event(EMPTY_CAMPAIGN_EVENT));
   }
