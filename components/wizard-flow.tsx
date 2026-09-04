@@ -566,7 +566,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
           )}
 
           {step === 2 && (
-            <section className="rounded-2xl border border-navy/10 bg-white p-5 sm:p-8">
+            <section className="agency-paper rounded-2xl p-5 sm:p-8">
               <Field label={t("biz.name")}>
                 <Input
                   value={intake.businessName}
@@ -622,7 +622,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
           )}
 
           {step === 3 && (
-            <section className="space-y-8 rounded-2xl border border-navy/10 bg-white p-5 sm:p-8">
+            <section className="space-y-8 agency-paper rounded-2xl p-5 sm:p-8">
               <div>
                 <Label>{t("details.depth")}</Label>
                 <ChipGroup
@@ -937,7 +937,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
       )}
 
       {phase === "interview" && (
-        <section className="rounded-2xl border border-navy/10 bg-white p-5 sm:p-8">
+        <section className="agency-paper rounded-2xl p-5 sm:p-8">
           <CoachPanel report={coachReport} onApply={applyCoach} />
           <div className="mb-4">
             <DocumentIngest intake={intake} onApply={applyIngest} variant="compact" />

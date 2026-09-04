@@ -79,6 +79,7 @@ export function PricingPage() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-12">
       <p className="text-center text-sm font-bold uppercase tracking-[0.28em] text-gold">{t("pricing.kicker")}</p>
+      <div className="agency-rule mb-4 mt-3" />
       <h1 className="mt-2 text-center text-4xl font-black text-navy">{t("pricing.title")}</h1>
       <p className="mx-auto mt-3 max-w-2xl text-center text-muted">{t("pricing.lead")}</p>
       {plan === "pro" ? <p className="mt-3 text-center text-sm font-black text-navy">{t("auth.plan.pro")}</p> : null}
@@ -86,7 +87,7 @@ export function PricingPage() {
       {flash === "cancel" ? <p className="mt-3 text-center text-sm text-muted">{t("pricing.cancel")}</p> : null}
 
       <div className="mt-10 grid gap-6 md:grid-cols-2">
-        <article className="rounded-[28px] border border-navy/10 bg-white p-6 shadow-[0_10px_32px_rgba(27,42,74,0.07)]">
+        <article className="agency-paper rounded-[28px] p-7">
           <h2 className="text-2xl font-black text-navy">{t("pricing.freeName")}</h2>
           <p className="mt-2 text-4xl font-black text-navy">{t("pricing.freePrice")}</p>
           <p className="text-sm text-muted">{t("pricing.freeForever")}</p>
@@ -100,7 +101,7 @@ export function PricingPage() {
           </Button>
         </article>
 
-        <article className="rounded-[28px] border border-gold/50 bg-white p-6 shadow-[0_10px_32px_rgba(27,42,74,0.07)]">
+        <article className="agency-frame p-7">
           <h2 className="text-2xl font-black text-navy">{t("pricing.proName")}</h2>
           <p className="mt-2 text-4xl font-black text-navy">₪{PRICE_MONTHLY_ILS}</p>
           <p className="text-sm text-muted">{t("pricing.month")}</p>

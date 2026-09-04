@@ -326,7 +326,16 @@ const RETAIL_BUILDERS: { key: string; name: Record<Locale, string>; build: Build
   { key: "wait", name: { he: "פנים שקט", ar: "داخل هادئ", en: "Quiet interior" }, build: waitingSun },
 ];
 
-const GENERIC_BUILDERS = CLINIC_BUILDERS.slice(0, 8);
+const GENERIC_BUILDERS: { key: string; name: Record<Locale, string>; build: Builder }[] = [
+  { key: "rail", name: { he: "מתלה בוטיק", ar: "سكة بوتيك", en: "Boutique rail" }, build: boutiqueRail },
+  { key: "facade", name: { he: "חזית רחוב", ar: "واجهة شارع", en: "Street facade" }, build: facade },
+  { key: "desk", name: { he: "שולחן סטודיו", ar: "طاولة ستوديو", en: "Studio desk" }, build: woodDesk },
+  { key: "table", name: { he: "שולחן ערוך", ar: "سفرة", en: "Table setting" }, build: linenWindow },
+  { key: "plated", name: { he: "מנה", ar: "طبق", en: "Plated dish" }, build: plated },
+  { key: "court", name: { he: "חצר", ar: "فناء", en: "Courtyard" }, build: courtyard },
+  { key: "counter", name: { he: "דלפק", ar: "كاونتر", en: "Counter" }, build: reception },
+  { key: "alcove", name: { he: "נישה", ar: "كوة", en: "Alcove" }, build: wellness },
+];
 
 function palettesFor(vertical: Vertical): [string, string, string][] {
   const styles = stylesForVertical(vertical);
@@ -340,6 +349,7 @@ function buildersFor(vertical: Vertical) {
   if (vertical === "restaurant") return FOOD_BUILDERS;
   if (vertical === "pool") return POOL_BUILDERS;
   if (vertical === "retail") return RETAIL_BUILDERS;
+  if (vertical === "school" || vertical === "product" || vertical === "generic") return GENERIC_BUILDERS;
   return GENERIC_BUILDERS;
 }
 

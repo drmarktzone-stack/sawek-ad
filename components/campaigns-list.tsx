@@ -87,22 +87,24 @@ export function CampaignsList() {
       <SocialConnectStrip className="mb-6" />
 
       <div className="mb-6 flex flex-wrap justify-center gap-2">
-        <Button type="button" onClick={loadDemo}>
-          {t("dept.loadDemo")}
-        </Button>
-        <Button asChild variant="dark">
+        <Button asChild>
           <LangLink href="/" onClick={() => markEmptyCampaign()}>{t("cta.new")}</LangLink>
+        </Button>
+        <Button type="button" variant="ghost" onClick={loadDemo}>
+          {t("dept.loadDemo")}
         </Button>
       </div>
 
       {list.length === 0 && (
-        <p className="text-center text-muted">{t("campaigns.empty")}</p>
+        <div className="agency-paper mx-auto max-w-lg rounded-[24px] p-8 text-center">
+          <p className="text-muted">{t("campaigns.empty")}</p>
+        </div>
       )}
       <ul className="space-y-3">
         {list.map((c) => (
           <li
             key={c.id}
-            className="rounded-2xl border border-navy/10 bg-white p-4"
+            className="agency-paper rounded-2xl p-5"
           >
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>

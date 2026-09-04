@@ -136,8 +136,9 @@ export function ResultView({
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <DepartmentRail />
-      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
+      <div className="agency-frame mb-6 flex flex-wrap items-start justify-between gap-4 p-6">
         <div>
+          <p className="mb-2 text-sm font-bold uppercase tracking-[0.22em] text-gold">{tr("brand.name")}</p>
           <h1 className="text-3xl font-black text-navy">{tr("result.ready")}</h1>
           <p className="mt-1 text-muted">{pack.name}</p>
           {canUse(plan, "landing") ? (
@@ -180,7 +181,7 @@ export function ResultView({
         <NewCampaignCta other hint className="items-center text-center" />
       </div>
 
-      <div className="mb-6 rounded-2xl border border-omni-yellow/20 bg-white p-4">
+      <div className="agency-paper mb-6 rounded-2xl p-5">
         <p className="mb-3 text-xs font-black uppercase tracking-[0.18em] text-omni-yellow">
           {tr("agents.title")}
         </p>

@@ -63,6 +63,11 @@ export const copy: Dict = {
     en: "Powered by Google Cloud Vertex (credit pack)",
   },
   "home.cta.pricing": { he: "מחירון", ar: "الأسعار", en: "Pricing" },
+  "home.atmosphere": {
+    he: "חנויות, מסעדות, סטודיואים — אותו מנוע",
+    ar: "محلات، مطاعم، ستوديوهات — نفس المحرّك",
+    en: "Shops, restaurants, studios — the same engine",
+  },
   "home.startEmpty": { he: "התחל קמפיין ריק", ar: "ابدأ حملة فارغة", en: "Start an empty campaign" },
   "home.stat.steps": { he: "4 שלבים", ar: "4 خطوات", en: "4 steps" },
   "home.stat.agents": { he: "פייסבוק · אינסטגרם · טיקטוק · וואטסאפ", ar: "فيسبوك · إنستغرام · تيك توك · واتساب", en: "Facebook · Instagram · TikTok · WhatsApp" },

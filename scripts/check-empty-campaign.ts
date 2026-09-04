@@ -78,6 +78,9 @@ if (/מרפאה|عيادة|clinic campaign/i.test(t("he", "gemini.waitFacts") + 
 if (!/לכל עסק|لكل شغل|any business/i.test(t("he", "home.pitch") + t("ar", "home.pitch") + t("en", "home.pitch"))) {
   fail("home.pitch must say the product is for any business");
 }
+if (!/חנויות|محلات|Shops/.test(t("he", "home.atmosphere") + t("ar", "home.atmosphere") + t("en", "home.atmosphere"))) {
+  fail("home.atmosphere must stay any-business");
+}
 if (!/My Campaigns|form fields will empty/i.test(t("en", "cta.newHint"))) fail(`cta.newHint en=${t("en", "cta.newHint")}`);
 if (!/הקמפיינים שלי/.test(t("he", "cta.newHint"))) fail(`cta.newHint he missing My Campaigns`);
 if (!/Vertex/.test(t("he", "gemini.vertex"))) fail(`gemini.vertex ${t("he", "gemini.vertex")}`);

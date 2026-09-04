@@ -76,6 +76,7 @@ export function ConquerHeadline({ subtitle }: { subtitle?: string }) {
   const { t } = useI18n();
   return (
     <div className="mb-8 text-center">
+      <div className="agency-rule mb-4" />
       <h1 className="text-3xl font-black tracking-tight text-navy sm:text-4xl">
         {t("hero.titlePrefix")}{" "}
         <span className="relative inline-block rounded-md bg-gold px-2 text-navy">

@@ -12,6 +12,9 @@ import { isOfferedAsset, stockToAsset } from "../lib/media-assets";
 import { graphicPostersForIntake, posterToAsset } from "../lib/graphic-posters";
 import { demoIntake } from "../lib/demo";
 import { IMAGEN_PICKER_COUNT, imagenScenesFor } from "../lib/imagen-scenes";
+import { existsSync } from "fs";
+import { studioStillsForIntake } from "../lib/studio-stills";
+import { ATMOSPHERE_STILLS } from "../lib/atmosphere";
 
 const failures: string[] = [];
 function fail(m: string) {
@@ -110,6 +113,19 @@ if (posters.length < 4) fail(`posters ${posters.length}`);
 const posterAsset = posterToAsset(posters[0]!, posters[0]!.name.he);
 if (!isOfferedAsset(posterAsset)) fail("poster not offered");
 if (/clalit|كلاليت|כללית/i.test(posterAsset.note + posterAsset.name)) fail("poster clalit");
+
+for (const still of ATMOSPHERE_STILLS) {
+  if (!existsSync(`public${still.src}`)) fail(`missing atmosphere still ${still.src}`);
+}
+const genericStills = studioStillsForIntake({
+  businessName: "סטודיו נועה",
+  category: "סטודיו עיצוב",
+  description: "סטודיו גרפי מקומי",
+});
+if (genericStills.length < 6) fail(`generic stills ${genericStills.length} < 6`);
+if (genericStills.some((s) => /clinic|waiting-sun|play-nook/i.test(s.id))) {
+  fail(`generic stills leaked clinic scenes: ${genericStills.map((s) => s.id).join(",")}`);
+}
 
 if (failures.length) {
   console.error("FAIL\n" + failures.join("\n"));

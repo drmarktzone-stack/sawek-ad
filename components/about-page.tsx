@@ -6,6 +6,7 @@ import { LangLink } from "@/components/lang-link";
 import { Button } from "@/components/ui/button";
 import { DEMO_LABEL } from "@/lib/demo";
 import { startPediatricDemoFlow } from "@/lib/start-pediatric-demo";
+import { AgencyAtmosphere } from "@/components/agency-atmosphere";
 
 export function AboutPage() {
   const { locale, t } = useI18n();
@@ -136,7 +137,7 @@ export function AboutPage() {
       <p className="mb-2 text-center text-sm font-bold uppercase tracking-[0.32em] text-gold">
         SAWEK AD
       </p>
-      <div className="mx-auto mb-6 h-px w-20 bg-gold" />
+      <div className="agency-rule mb-6" />
       <ConquerHeadline subtitle={t("about.title")} />
       <p className="mb-2 text-center text-sm text-muted">
         {locale === "ar" ? t("brand.name") : "SAWEK AD · סאווק · سوِّق إعلانك بنفسك"}
@@ -160,10 +161,11 @@ export function AboutPage() {
         <Button asChild size="lg" variant="gold">
           <LangLink href="/pricing">{t("home.cta.pricing")}</LangLink>
         </Button>
-        <Button type="button" size="lg" variant="outline" onClick={() => startPediatricDemoFlow(locale)}>
+        <Button type="button" size="lg" variant="ghost" onClick={() => startPediatricDemoFlow(locale)}>
           {DEMO_LABEL[locale]}
         </Button>
       </div>
+      <AgencyAtmosphere className="mb-10" caption={t("home.atmosphere")} />
 
       <div className="space-y-5">
         {steps.map((b) => (

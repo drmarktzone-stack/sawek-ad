@@ -578,7 +578,7 @@ export function LivePreviewStrip({
   };
 
   return (
-    <section data-live-preview="feed" className="mb-10">
+    <section data-live-preview="feed" className="agency-paper mb-10 rounded-[28px] p-5 sm:p-7">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="text-2xl font-black text-navy">{t("end.previewTitle")}</h2>

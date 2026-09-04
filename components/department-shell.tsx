@@ -143,14 +143,14 @@ export function DepartmentShell({
       {!booted && <p className="text-center text-muted">…</p>}
 
       {booted && !pack && (
-        <div className="rounded-2xl border border-navy/10 bg-white p-8 text-center">
+        <div className="agency-paper rounded-2xl p-8 text-center">
           <p className="text-muted">{t("dept.empty")}</p>
           <div className="mt-5 flex flex-wrap justify-center gap-3">
-            <Button type="button" onClick={loadDemo}>
-              {t("dept.loadDemo")}
-            </Button>
-            <Button asChild variant="dark">
+            <Button asChild>
               <LangLink href="/">{t("nav.build")}</LangLink>
+            </Button>
+            <Button type="button" variant="ghost" onClick={loadDemo}>
+              {t("dept.loadDemo")}
             </Button>
           </div>
         </div>
@@ -158,7 +158,7 @@ export function DepartmentShell({
 
       {pack && (
         <>
-          <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-navy/10 bg-white px-4 py-3">
+          <div className="agency-frame mb-6 flex flex-wrap items-center justify-between gap-3 px-4 py-3">
             <div>
               <p className="text-sm font-black text-navy">{pack.name}</p>
               <p className="text-sm text-muted">

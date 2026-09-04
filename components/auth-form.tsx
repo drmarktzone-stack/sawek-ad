@@ -149,7 +149,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   if (needsEmail) {
     return (
       <div className="mx-auto max-w-md px-4 py-12">
-        <div className="rounded-[28px] border border-gold/50 bg-white p-6 text-start shadow-[0_10px_32px_rgba(27,42,74,0.07)]">
+        <div className="agency-frame p-7 text-start">
           <Mail className="size-10 text-gold" />
           <h1 className="mt-3 text-3xl font-black text-navy">{t("auth.checkEmailTitle")}</h1>
           <p className="mt-3 text-base font-semibold leading-relaxed text-navy">{t("auth.checkEmail")}</p>
@@ -170,10 +170,12 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
 
   return (
     <div className="mx-auto max-w-md px-4 py-12">
+      <p className="text-center text-sm font-bold uppercase tracking-[0.28em] text-gold">{t("brand.name")}</p>
+      <div className="agency-rule mb-5 mt-3" />
       <h1 className="text-3xl font-black text-navy">{t(mode === "login" ? "auth.title.login" : "auth.title.signup")}</h1>
       <p className="mt-2 text-sm font-semibold text-navy">{t(mode === "login" ? "auth.lead.login" : "auth.lead.signup")}</p>
       <p className="mt-2 text-sm text-muted">{t("plan.freeBanner")}</p>
-      <form onSubmit={(e) => void onSubmit(e)} className="mt-6 space-y-3 rounded-[22px] border border-navy/10 bg-white p-5 shadow-[0_10px_32px_rgba(27,42,74,0.07)]">
+      <form onSubmit={(e) => void onSubmit(e)} className="agency-paper mt-6 space-y-3 rounded-[22px] p-6">
         <div>
           <Label htmlFor="email" className="text-base font-black text-navy">
             {t("auth.email")}

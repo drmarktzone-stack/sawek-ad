@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" role="img" aria-hidden="true">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="42%">
+      <stop offset="0" stop-color="#FFF8E7"/>
+      <stop offset="1" stop-color="#F3E6C8"/>
+    </radialGradient>
+    <linearGradient id="wood" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#C4A574"/>
+      <stop offset="1" stop-color="#8C6840"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#glow)"/>
+  <rect y="520" width="1600" height="380" fill="url(#wood)"/>
+  <ellipse cx="800" cy="560" rx="520" ry="70" fill="#1B2A4A" fill-opacity="0.08"/>
+  <ellipse cx="800" cy="540" rx="420" ry="48" fill="#E8DCC8"/>
+  <ellipse cx="800" cy="528" rx="210" ry="70" fill="#FFFCF6"/>
+  <ellipse cx="800" cy="520" rx="120" ry="36" fill="#C9A227" fill-opacity="0.55"/>
+  <rect x="250" y="140" width="1100" height="18" rx="8" fill="#C9A227" fill-opacity="0.35"/>
+  <rect x="300" y="200" width="80" height="220" rx="8" fill="#1B2A4A" fill-opacity="0.08"/>
+  <rect x="1220" y="200" width="80" height="220" rx="8" fill="#1B2A4A" fill-opacity="0.08"/>
+  <circle cx="430" cy="610" r="28" fill="#FFFCF6"/>
+  <circle cx="1170" cy="610" r="28" fill="#FFFCF6"/>
+</svg>

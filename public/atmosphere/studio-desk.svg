@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" role="img" aria-hidden="true">
+  <defs>
+    <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F7F3EA"/>
+      <stop offset="1" stop-color="#E8DCC8"/>
+    </linearGradient>
+    <linearGradient id="desk" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#D9C4A0"/>
+      <stop offset="1" stop-color="#B08968"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#wall)"/>
+  <rect x="980" y="80" width="420" height="420" rx="18" fill="#FFFCF6"/>
+  <rect x="1004" y="104" width="372" height="372" rx="8" fill="#F6E7C1" fill-opacity="0.65"/>
+  <ellipse cx="1180" cy="260" rx="280" ry="220" fill="#FFF8E7" fill-opacity="0.55"/>
+  <rect y="560" width="1600" height="340" fill="url(#desk)"/>
+  <rect x="180" y="500" width="720" height="28" rx="6" fill="#1B2A4A" fill-opacity="0.14"/>
+  <rect x="220" y="430" width="280" height="90" rx="12" fill="#FFFCF6"/>
+  <rect x="530" y="450" width="200" height="70" rx="12" fill="#C9A227" fill-opacity="0.35"/>
+  <rect x="220" y="620" width="160" height="10" fill="#1B2A4A" fill-opacity="0.2"/>
+  <rect x="220" y="650" width="240" height="10" fill="#1B2A4A" fill-opacity="0.12"/>
+</svg>
