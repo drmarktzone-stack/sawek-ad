@@ -281,34 +281,41 @@ export function UrlIngest() {
   return (
     <div
       className={cn(
-        "border-b border-gold/30 bg-[#F7F3EA]/80",
-        home ? "px-3 py-3" : "px-3 py-1.5",
+        "border-b border-gold/30 bg-[#F7F3EA]/95 supports-[backdrop-filter]:bg-[#F7F3EA]/85",
+        home ? "px-3 py-3" : "px-3 py-2 sm:py-1.5",
       )}
     >
       <form
         onSubmit={(e) => void scan(e)}
         className={cn(
-          "mx-auto flex max-w-[92rem] flex-col gap-2 sm:flex-row sm:items-center",
+          "mx-auto flex w-full max-w-[92rem] min-w-0 flex-col gap-2 sm:flex-row sm:items-center",
           home ? "gap-2" : "gap-1.5",
         )}
       >
         <div className="flex min-w-0 flex-1 items-center gap-2">
-          <Globe className={cn("shrink-0 text-gold", home ? "size-5" : "size-4")} />
+          <Globe className={cn("shrink-0 text-gold", home ? "size-5" : "size-4")} aria-hidden />
           <input
             dir="ltr"
             className={cn(
-              "w-full rounded-full border border-navy/15 bg-white px-4 text-base text-foreground placeholder:text-muted outline-none focus:border-gold",
-              home ? "h-12" : "h-10 text-sm",
+              "w-full min-w-0 rounded-full border border-navy/15 bg-white px-4 text-[16px] text-foreground placeholder:text-muted outline-none focus:border-gold",
+              home ? "h-12" : "h-11 sm:h-10 sm:text-sm",
             )}
             value={value}
             onChange={(e) => setValue(e.target.value)}
             placeholder={t("url.placeholder")}
             autoComplete="url"
             inputMode="url"
+            enterKeyHint="go"
             name="business-url"
+            aria-label={t("url.placeholder")}
           />
         </div>
-        <Button type="submit" size={home ? "default" : "sm"} disabled={busy} className="shrink-0">
+        <Button
+          type="submit"
+          size={home ? "default" : "sm"}
+          disabled={busy}
+          className={cn("shrink-0", "w-full min-h-12 sm:w-auto sm:min-h-0")}
+        >
           <Link2 className={home ? "size-4" : "size-3.5"} />
           {busy ? t("url.reading") : t("url.scan")}
         </Button>

@@ -1027,7 +1027,10 @@ export const copy: Dict = {
   "bank.marked": { he: "סימנו ששילמתם. הבעלים יאשר ידנית.", ar: "علّمنا إنكم دفعتوا. المالك بيأكد يدوي.", en: "Marked as paid. The owner will confirm by hand." },
   "bank.confirm": { he: "אישור בעלים — זה Pro", ar: "تأكيد المالك — هاد Pro", en: "Owner confirm — grant Pro" },
   "bank.needLogin": { he: "צריך כניסה כדי לסמן תשלום.", ar: "لازم دخول حتى تعلّموا الدفع.", en: "Log in to mark a payment." },
-  "pwa.install": { he: "אפשר להתקין למסך הבית", ar: "فيكن تثبّتوا على الشاشة الرئيسية", en: "You can install this on your home screen" },
+  "pwa.install": { he: "הוסיפו את SAWEK AD למסך הבית (אייפון ואנדרואיד)", ar: "ضيفوا SAWEK AD على الشاشة الرئيسية (آيفون وأندرويد)", en: "Add SAWEK AD to your Home Screen (iPhone & Android)" },
+  "pwa.how.ios": { he: "בספארי: שתפו ← «הוסף למסך הבית». זו אפליקציית ווב (PWA) — לא חנות App Store.", ar: "بسفاري: مشاركة ← «إضافة إلى الشاشة الرئيسية». تطبيق ويب (PWA) — مو من App Store.", en: "In Safari: Share → Add to Home Screen. This is a web app (PWA) — not from the App Store." },
+  "pwa.how.android": { he: "בכרום: תפריט ⋮ ← «הוסף למסך הבית» / «התקן אפליקציה». PWA — לא Google Play.", ar: "بكروم: القائمة ⋮ ← «إضافة إلى الشاشة الرئيسية» / «تثبيت التطبيق». PWA — مو من Google Play.", en: "In Chrome: menu ⋮ → Add to Home screen / Install app. PWA — not from Google Play." },
+  "pwa.how.generic": { he: "בדפדפן הנייד: «הוסף למסך הבית» / Install. תצוגת נייד מלאה + PWA — בלי חנויות אפליקציות.", ar: "بمتصفح الموبايل: «إضافة إلى الشاشة الرئيسية» / Install. عرض موبايل كامل + PWA — بدون متاجر تطبيقات.", en: "In your mobile browser: Add to Home Screen / Install. Full mobile web view + PWA — no app stores." },
   "pwa.dismiss": { he: "הבנתי", ar: "تمام", en: "Got it" },
 };
 

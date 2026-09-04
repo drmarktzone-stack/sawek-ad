@@ -78,33 +78,33 @@ export function HomeStudio() {
       />
       <div aria-hidden className="agency-grain absolute inset-0" />
 
-      <section className="relative mx-auto max-w-5xl px-4 pb-6 pt-10 sm:pt-14">
-        <p className="agency-kicker mb-4 text-center">{t("home.kicker")}</p>
-        <h1 className="agency-display agency-fade-up mx-auto max-w-4xl text-center text-4xl sm:text-6xl">
+      <section className="relative mx-auto max-w-5xl px-4 pb-6 pt-8 sm:pt-14">
+        <p className="agency-kicker mb-3 text-center sm:mb-4">{t("home.kicker")}</p>
+        <h1 className="agency-display agency-fade-up mx-auto max-w-4xl text-center text-[1.85rem] leading-tight sm:text-6xl">
           {t("home.headline")}
         </h1>
-        <p className="mx-auto mt-6 max-w-2xl text-center text-lg font-semibold leading-relaxed text-navy/85 sm:text-xl">
+        <p className="mobile-readable mx-auto mt-5 max-w-2xl text-center text-base font-semibold leading-relaxed text-navy/85 sm:mt-6 sm:text-xl">
           {t("home.pitch")}
         </p>
-        <p className="mx-auto mt-4 max-w-xl rounded-full border border-teal/30 bg-white/80 px-5 py-2.5 text-center text-base font-black text-navy shadow-[0_8px_24px_rgba(15,39,68,0.06)] backdrop-blur-sm">
+        <p className="mx-auto mt-4 max-w-xl rounded-2xl border border-teal/30 bg-white/80 px-4 py-2.5 text-center text-sm font-black text-navy shadow-[0_8px_24px_rgba(15,39,68,0.06)] backdrop-blur-sm sm:rounded-full sm:px-5 sm:text-base">
           {t("home.vertex")}
         </p>
 
-        <div className="mt-9 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+        <div className="mobile-stack mt-8 sm:mt-9">
           <Button
             type="button"
             size="lg"
             variant="coral"
             data-demo="clinic"
-            className="h-auto min-h-14 max-w-full whitespace-normal px-8 py-3.5 text-lg font-black"
+            className="btn-mobile-full h-auto min-h-12 max-w-full whitespace-normal px-6 py-3.5 text-base font-black sm:min-h-14 sm:px-8 sm:text-lg"
             onClick={runDemo}
           >
             {DEMO_LABEL[locale]}
           </Button>
-          <Button type="button" size="lg" className="text-lg font-black" onClick={startEmpty}>
+          <Button type="button" size="lg" className="btn-mobile-full text-base font-black sm:text-lg" onClick={startEmpty}>
             {t("cta.new")}
           </Button>
-          <Button asChild size="lg" variant="outline" className="text-lg font-black">
+          <Button asChild size="lg" variant="outline" className="btn-mobile-full text-base font-black sm:text-lg">
             <LangLink href="/pricing">{t("home.cta.pricing")}</LangLink>
           </Button>
         </div>
@@ -121,20 +121,20 @@ export function HomeStudio() {
       <FunctionRail />
 
       <section className="relative mx-auto max-w-5xl px-4">
-        <ul className="mx-auto mt-6 grid max-w-4xl grid-cols-2 gap-3 sm:grid-cols-4">
+        <ul className="mx-auto mt-6 grid max-w-4xl grid-cols-2 gap-2 sm:gap-3 sm:grid-cols-4">
           {stats.map((s) => (
             <li
               key={s.label}
-              className="agency-shell flex items-center justify-center gap-2 px-3 py-4 text-center text-base font-bold text-navy"
+              className="agency-shell flex min-h-[4.5rem] items-center justify-center gap-2 px-2.5 py-3 text-center text-sm font-bold leading-snug text-navy sm:px-3 sm:py-4 sm:text-base"
             >
               <s.icon className="size-4 shrink-0 text-teal" />
-              {s.label}
+              <span className="min-w-0">{s.label}</span>
             </li>
           ))}
         </ul>
       </section>
 
-      <ol className="relative mx-auto mt-10 grid max-w-5xl gap-4 px-4 sm:grid-cols-2 lg:grid-cols-4">
+      <ol className="relative mx-auto mt-8 grid max-w-5xl gap-3 px-4 sm:mt-10 sm:gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {(
           [
             ["home.how.1", "home.how.1b"],
@@ -212,9 +212,9 @@ export function HomeStudio() {
         </div>
       </section>
 
-      <div id="studio" className="relative mx-auto mt-12 max-w-4xl px-3 pb-20 sm:px-4">
-        <div className="rounded-[32px] border border-navy/10 bg-white/80 p-[1px] shadow-[0_24px_70px_rgba(15,39,68,0.1)] backdrop-blur-sm">
-          <div className="rounded-[30px] border border-teal/20 bg-sand/40">
+      <div id="studio" className="relative mx-auto mt-10 max-w-4xl px-3 pb-24 sm:mt-12 sm:px-4 safe-pb">
+        <div className="overflow-hidden rounded-[22px] border border-navy/10 bg-white/80 p-[1px] shadow-[0_24px_70px_rgba(15,39,68,0.1)] backdrop-blur-sm sm:rounded-[32px]">
+          <div className="rounded-[20px] border border-teal/20 bg-sand/40 sm:rounded-[30px]">
             <WizardFlow key={wizardKey} embedded />
           </div>
         </div>

@@ -457,7 +457,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
   }
 
   return (
-    <div className={embedded ? "mx-auto w-full max-w-3xl px-4 py-6 sm:py-8" : "mx-auto w-full max-w-3xl px-4 py-8 sm:py-12"}>
+    <div className={embedded ? "mx-auto w-full min-w-0 max-w-3xl px-3 py-5 sm:px-4 sm:py-8" : "mx-auto w-full min-w-0 max-w-3xl px-3 py-6 sm:px-4 sm:py-12"}>
       {!embedded && <DepartmentRail />}
       {embedded ? (
         <div className="mb-6 flex flex-col items-center gap-2">

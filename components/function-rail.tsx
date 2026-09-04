@@ -83,7 +83,7 @@ export function FunctionRail({ compact = false }: { compact?: boolean }) {
             <LangLink
               key={fn.id}
               href={fn.href}
-              className="flex shrink-0 items-center gap-1 rounded-full border border-navy/15 px-2.5 py-1 text-sm font-bold text-navy hover:bg-gold/15"
+              className="tap-row flex shrink-0 items-center gap-1 rounded-full border border-navy/15 px-3 py-2 text-sm font-bold text-navy hover:bg-gold/15"
             >
               <Icon className="size-3" />
               {t(fn.key)}
@@ -98,7 +98,7 @@ export function FunctionRail({ compact = false }: { compact?: boolean }) {
       <p className="mb-2 text-center text-sm font-bold uppercase tracking-[0.22em] text-gold">
         {t("fn.title")} · {t("fn.engines")}
       </p>
-      <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-7">
+      <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-7 [&>li]:min-w-0">
         {PRODUCT_FUNCTIONS.map((fn) => {
           const Icon = fn.icon;
           return (
@@ -144,11 +144,11 @@ export function FunctionMenuLinks({ onPick }: { onPick?: () => void }) {
             key={fn.id}
             href={fn.href}
             onClick={onPick}
-            className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-navy hover:bg-navy/5"
+            className="tap-row flex items-center gap-2 rounded-xl px-3 py-3 text-base text-navy hover:bg-navy/5"
           >
-            <Icon className="size-4 text-gold" />
-            {t(fn.key)}
-            <span className="ms-auto text-sm text-muted">{t(fn.hint)}</span>
+            <Icon className="size-4 shrink-0 text-gold" />
+            <span className="min-w-0 flex-1 truncate">{t(fn.key)}</span>
+            <span className="ms-auto hidden max-w-[45%] truncate text-sm text-muted sm:inline">{t(fn.hint)}</span>
           </LangLink>
         );
       })}

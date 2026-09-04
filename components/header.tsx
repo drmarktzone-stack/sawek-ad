@@ -63,7 +63,7 @@ export function LanguageToggle({ compact = false }: { compact?: boolean }) {
           type="button"
           onClick={() => setLocale(l.id)}
           className={cn(
-            "rounded-full px-2.5 py-1 text-sm font-semibold transition-colors",
+            "tap-target inline-flex items-center justify-center rounded-full px-3 py-1.5 text-sm font-semibold transition-colors",
             locale === l.id
               ? "bg-teal text-white"
               : "text-muted hover:text-navy",
@@ -91,14 +91,14 @@ function AuthChip() {
     );
   }
   return (
-    <div className="flex max-w-[16rem] items-center gap-1.5">
+    <div className="flex max-w-[9.5rem] items-center gap-1.5 sm:max-w-[16rem]">
       <div className="min-w-0 text-end leading-tight">
         <p className="truncate text-xs font-black text-navy" title={user.email}>
           {user.email}
         </p>
         <p className="text-xs font-black text-teal">{isPro(plan) ? t("auth.plan.pro") : t("auth.plan.free")}</p>
       </div>
-      <button type="button" className="shrink-0 text-xs font-semibold text-muted hover:text-navy" onClick={() => void logout()}>
+      <button type="button" className="tap-target shrink-0 px-1 text-xs font-semibold text-muted hover:text-navy" onClick={() => void logout()}>
         {t("nav.logout")}
       </button>
     </div>
@@ -113,16 +113,16 @@ export function Header() {
   if (pathname.startsWith("/lp/")) return null;
 
   return (
-    <header className="sticky top-0 z-40 border-b border-navy/10 bg-white/90 backdrop-blur-xl">
+    <header className="scan-sticky safe-pt border-b border-navy/10 bg-white/95 supports-[backdrop-filter]:bg-white/90">
       <UrlIngest />
       <div className="h-px w-full bg-gradient-to-r from-transparent via-teal/50 to-transparent" />
-      <div className="mx-auto flex max-w-[92rem] items-center gap-2 px-3 py-3">
-        <LangLink href="/" className="flex shrink-0 flex-col leading-tight pe-1">
-          <span className="text-xl font-black tracking-tight text-navy sm:text-2xl agency-display">
+      <div className="mx-auto flex max-w-[92rem] min-w-0 items-center gap-2 px-3 py-2.5 sm:py-3">
+        <LangLink href="/" className="flex min-w-0 shrink flex-col leading-tight pe-1">
+          <span className="truncate text-lg font-black tracking-tight text-navy sm:text-2xl">
             {t("brand.name")}
           </span>
-          <span className="text-sm font-semibold text-teal">{t("brand.scripts")}</span>
-          <span className="text-sm text-muted">{t("brand.tagline")}</span>
+          <span className="truncate text-xs font-semibold text-teal sm:text-sm">{t("brand.scripts")}</span>
+          <span className="hidden text-sm text-muted sm:inline">{t("brand.tagline")}</span>
         </LangLink>
 
         <nav className="ms-2 hidden min-w-0 flex-1 items-center gap-1 overflow-x-auto lg:flex">
@@ -153,7 +153,7 @@ export function Header() {
         <div className="ms-auto flex items-center gap-2">
           <GeminiStatusBadge />
           <AuthChip />
-          <Button asChild size="sm" variant="coral" className="shrink-0">
+          <Button asChild size="sm" variant="coral" className="hidden shrink-0 sm:inline-flex">
             <LangLink href="/" onClick={(e) => beginNewCampaign(e)}>
               {t("cta.new")}
             </LangLink>
@@ -163,9 +163,10 @@ export function Header() {
           </div>
           <button
             type="button"
-            className="rounded-lg p-2 text-navy lg:hidden"
+            className="tap-target inline-flex items-center justify-center rounded-xl p-2.5 text-navy lg:hidden"
             onClick={() => setOpen((v) => !v)}
             aria-label={t("menu")}
+            aria-expanded={open}
           >
             {open ? <X className="size-5" /> : <Menu className="size-5" />}
           </button>
@@ -180,12 +181,12 @@ export function Header() {
       </div>
 
       {open && (
-        <div className="border-t border-navy/10 bg-white px-4 py-3 lg:hidden">
+        <div className="safe-pb max-h-[min(80dvh,32rem)] overflow-y-auto border-t border-navy/10 bg-white px-4 py-3 lg:hidden">
           <div className="mb-3 sm:hidden">
             <LanguageToggle />
           </div>
           <div className="flex flex-col gap-1">
-            <Button asChild variant="coral" className="mb-2">
+            <Button asChild variant="coral" className="btn-mobile-full mb-2">
               <LangLink href="/" onClick={(e) => { beginNewCampaign(e); setOpen(false); }}>
                 {t("cta.new")}
               </LangLink>
@@ -197,9 +198,9 @@ export function Header() {
                   key={item.key}
                   href={item.href}
                   onClick={() => setOpen(false)}
-                  className="flex items-center gap-2 rounded-xl px-3 py-2 text-base text-navy hover:bg-navy/5"
+                  className="tap-row flex items-center gap-2 rounded-xl px-3 py-3 text-base text-navy hover:bg-navy/5"
                 >
-                  <Icon className="size-4 text-teal" />
+                  <Icon className="size-4 shrink-0 text-teal" />
                   {t(item.key)}
                 </LangLink>
               );
@@ -208,7 +209,7 @@ export function Header() {
             <div className="mt-2 px-3 py-1">
               <AuthChip />
             </div>
-            <LangLink href="/pricing" onClick={() => setOpen(false)} className="rounded-xl px-3 py-2 text-base font-black text-navy hover:bg-navy/5">
+            <LangLink href="/pricing" onClick={() => setOpen(false)} className="tap-row rounded-xl px-3 py-3 text-base font-black text-navy hover:bg-navy/5">
               {t("home.cta.pricing")}
             </LangLink>
           </div>
@@ -223,7 +224,7 @@ export function Footer() {
   const pathname = usePathname();
   if (pathname.startsWith("/lp/")) return null;
   return (
-    <footer className="mt-auto border-t border-navy/10 bg-sand/50 py-10 text-center text-base text-muted">
+    <footer className="safe-pb mt-auto border-t border-navy/10 bg-sand/50 py-10 text-center text-base text-muted">
       <p className="mb-1 font-black text-navy">{t("brand.name")} · {t("brand.scripts")}</p>
       {t("footer.line")}
     </footer>

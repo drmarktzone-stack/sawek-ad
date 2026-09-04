@@ -11,9 +11,9 @@ export function PostingWeek({ pack, locale }: { pack: CampaignPack; locale: Loca
     <section data-calendar="7day" className="mb-10">
       <h2 className="text-lg font-black text-navy">{t("cal7.title")}</h2>
       <p className="mt-1 text-xs text-muted">{t("cal7.lead")}</p>
-      <ol className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-7">
+      <ol className="mobile-card-grid cols-2 cols-7 mt-4">
         {days.map((d) => (
-          <li key={d.day} className="rounded-2xl border border-navy/10 bg-white p-3">
+          <li key={d.day} className="min-w-0 rounded-2xl border border-navy/10 bg-white p-3.5 sm:p-3">
             <p className="text-sm font-black uppercase tracking-[0.16em] text-gold">
               {t("cal7.day")} {d.day} · {d.channelLabel[locale]}
             </p>

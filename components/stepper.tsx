@@ -49,7 +49,7 @@ export function Stepper({
                 <div className={cn("h-0.5 flex-1 rounded-full", step > n ? "bg-teal" : "bg-navy/12")} />
               )}
             </div>
-            <span className={cn("text-xs font-bold sm:text-sm", active || done ? "text-navy" : "text-muted")}>
+            <span className={cn("max-w-[4.75rem] text-center text-[0.7rem] font-bold leading-tight sm:max-w-none sm:text-sm", active || done ? "text-navy" : "text-muted")}>
               {t(key)}
             </span>
           </li>

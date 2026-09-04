@@ -39,7 +39,13 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#1B2A4A",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#1B2A4A" },
+    { media: "(prefers-color-scheme: dark)", color: "#1B2A4A" },
+  ],
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -55,6 +61,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <meta name="theme-color" content="#1B2A4A" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="format-detection" content="telephone=no" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <script
           dangerouslySetInnerHTML={{
@@ -62,12 +70,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           }}
         />
       </head>
-      <body className="flex min-h-full flex-col font-sans">
+      <body className="flex min-h-dvh flex-col overflow-x-clip font-sans">
         <AuthProvider>
           <I18nProvider>
             <PwaRegister />
             <Header />
-            <main className="flex-1">{children}</main>
+            <main className="flex-1 w-full min-w-0">{children}</main>
             <Footer />
           </I18nProvider>
         </AuthProvider>

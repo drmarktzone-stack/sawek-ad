@@ -8,8 +8,9 @@
   "start_url": "/?lang=he",
   "scope": "/",
   "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#F7F3EA",
+  "orientation": "any",
+  "prefer_related_applications": false,
+  "background_color": "#FAFBFC",
   "theme_color": "#1B2A4A",
   "icons": [
     {

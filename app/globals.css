@@ -202,3 +202,133 @@ input, textarea, select {
 [dir="rtl"] h2 {
   letter-spacing: 0;
 }
+
+
+/* Mobile shell — iPhone + Android (not desktop shrunk) */
+html {
+  overflow-x: clip;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  overflow-x: clip;
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
+/* Safe-area utilities (notch / home indicator) */
+.safe-pt {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+.safe-pb {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.safe-px {
+  padding-left: max(0.75rem, env(safe-area-inset-left, 0px));
+  padding-right: max(0.75rem, env(safe-area-inset-right, 0px));
+}
+.safe-p {
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
+/* Tap targets ≥44px */
+.tap-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+.tap-row {
+  min-height: 44px;
+}
+
+/* Stack cleanly on ~375–430px; no sideways scroll */
+.mobile-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.75rem;
+  width: 100%;
+  min-width: 0;
+}
+
+@media (min-width: 640px) {
+  .mobile-stack {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.btn-mobile-full {
+  width: 100%;
+  min-height: 48px;
+  justify-content: center;
+}
+
+@media (min-width: 640px) {
+  .btn-mobile-full {
+    width: auto;
+  }
+}
+
+/* Sticky scan bar: iOS Safari + Chrome Android */
+.scan-sticky {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  z-index: 45;
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  /* Keep bar painted while rubber-banding on iOS */
+  transform: translateZ(0);
+}
+
+@media (max-width: 639px) {
+  .scan-sticky form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .scan-sticky form button[type="submit"] {
+    width: 100%;
+    min-height: 48px;
+  }
+  h1.agency-display,
+  .agency-display.text-center {
+    font-size: clamp(1.75rem, 7.2vw, 2.35rem);
+    line-height: 1.18;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+  /* Readable Hebrew/Arabic body on phone */
+  .mobile-readable {
+    font-size: 1.05rem;
+    line-height: 1.7;
+  }
+}
+
+/* Cards / grids never force horizontal scroll */
+.mobile-card-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  width: 100%;
+  min-width: 0;
+}
+
+@media (min-width: 640px) {
+  .mobile-card-grid.cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1024px) {
+  .mobile-card-grid.cols-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .mobile-card-grid.cols-7 {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+}
