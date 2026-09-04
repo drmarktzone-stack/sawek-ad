@@ -127,6 +127,40 @@ export async function GET(req: Request) {
       { status: 200 },
     );
   } catch {
+    // Last resort: curated vertical stills so the picker is never empty junk.
+    try {
+      const input: StockSearchInput = {
+        q: read(req, "q"),
+        vertical: read(req, "vertical"),
+        category: read(req, "category"),
+        location: read(req, "location"),
+        description: read(req, "description"),
+        offer: read(req, "offer"),
+        limit: Number(read(req, "limit") || 48) || 48,
+        page: 1,
+      };
+      const curated = await curatedFallbackStills(input, Math.min(8, IMAGEN_PICKER_COUNT));
+      if (curated.length) {
+        return NextResponse.json(
+          {
+            ok: true,
+            images: curated,
+            imagen: [],
+            curated,
+            page: 1,
+            nextPage: null,
+            queries: [],
+            imagenRequested: IMAGEN_PICKER_COUNT,
+            imagenGot: 0,
+            fallback: "curated",
+            emptyMessage: "Vertex Imagen ריק — מציגים כרזות גרפיות לפי התחום.",
+          },
+          { status: 200 },
+        );
+      }
+    } catch {
+      /* fall through */
+    }
     return NextResponse.json(
       {
         ok: false,
@@ -138,6 +172,7 @@ export async function GET(req: Request) {
         imagenRequested: IMAGEN_PICKER_COUNT,
         imagenGot: 0,
         error: "stock_error",
+        fallback: "empty",
         emptyMessage: "אין תמונות רלוונטיות לנושא — נסו כרזות גרפיות או תמונה מהאתר.",
       },
       { status: 200 },

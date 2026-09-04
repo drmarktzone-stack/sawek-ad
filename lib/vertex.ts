@@ -4,7 +4,24 @@ import { runtimeEnv } from "./runtime-env";
 export const DEFAULT_VERTEX_PROJECT = "project-8fd8a005-ae6d-4139-ab4";
 export const DEFAULT_VERTEX_LOCATION = "us-central1";
 
-export const VERTEX_GEMINI_MODELS = ["gemini-2.5-flash", "gemini-3.6-flash"] as const;
+/** Vertex publisher IDs — stable flash first, then newer aliases. */
+export const VERTEX_GEMINI_MODELS = [
+  "gemini-2.5-flash",
+  "gemini-3.5-flash",
+  "gemini-3.6-flash",
+] as const;
+
+/**
+ * AI Studio model IDs. New API keys cannot call gemini-2.5-flash (404 → use 3.5 / flash-latest).
+ * Prefer models that still accept free-tier traffic before quota-exhausted 3.6.
+ */
+export const AI_STUDIO_GEMINI_MODELS = [
+  "gemini-3.5-flash",
+  "gemini-flash-latest",
+  "gemini-3.1-flash-lite",
+  "gemini-flash-lite-latest",
+  "gemini-3.6-flash",
+] as const;
 
 export type GeminiProvider = "vertex" | "ai_studio" | "none";
 

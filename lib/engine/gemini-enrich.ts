@@ -4,8 +4,8 @@ import { inventsForbidden } from "./coach";
 import { isClinicLike } from "../vertical";
 import { overlayAnglesOnVariants, parseCampaignAngles, sanitizeAngles } from "./angles";
 
-const ABORT_MS = 14_000;
-const OVERLAY_ABORT_MS = 18_000;
+const ABORT_MS = 28_000;
+const OVERLAY_ABORT_MS = 32_000;
 const GENERATE_PATH = "/api/generate";
 
 const VARIANT_KINDS = [

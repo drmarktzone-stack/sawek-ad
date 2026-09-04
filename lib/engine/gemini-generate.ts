@@ -2,6 +2,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import type { AngleCopy, CampaignAngles, Intake } from "../types";
 import { runtimeEnv } from "../runtime-env";
 import {
+  AI_STUDIO_GEMINI_MODELS,
   classifyVertexHttp,
   clearVertexQuota,
   extractGenerateText,
@@ -17,7 +18,21 @@ import {
 } from "../vertex";
 import { inventsForbidden } from "./coach";
 import { emptyIntake } from "./validate";
-import { parseCampaignAngles, sanitizeAngles } from "./angles";
+import {
+  ANGLE_IDS,
+  ANGLE_TO_KIND,
+  parseCampaignAngles,
+  sanitizeAngles,
+} from "./angles";
+import { generateVariants } from "./copy";
+import {
+  landingBody,
+  landingH1,
+  spokenBody,
+  spokenCta,
+  spokenHeadline,
+  whatsappScript,
+} from "./spoken";
 import { VISION_MAX_BYTES } from "./gemini-client-caps";
 export { VISION_MAX_BYTES };
 
@@ -74,6 +89,8 @@ export type GenerateOk = {
   channels?: GenerateChannels;
   brand?: GenerateBrand;
   angles?: CampaignAngles;
+  /** gemini = model output; spoken = fact-filled local engine when AI fails/incomplete. */
+  source?: "gemini" | "spoken";
 };
 
 export type GenerateFail = {
@@ -359,6 +376,28 @@ function modeHint(mode: GenerateMode): string {
   return "mode=ads. Fill HE+AR+EN locale packs (6 headlines each), the channels pack, AND angles {pain,benefit,social_proof,story} each with he/ar/en {headline,copy,cta}. Recreate per language — do not translate literally. Social proof: only ratings/reviews/customer counts present in facts; otherwise incomplete markers.";
 }
 
+function factsBlockFromBody(body: GenerateBody): string {
+  const intake = factsToIntake(body);
+  const lines = [
+    intake.businessName && `businessName: ${intake.businessName}`,
+    intake.category && `category: ${intake.category}`,
+    intake.description && `description: ${intake.description}`,
+    intake.location && `location: ${intake.location}`,
+    intake.audience && `audience: ${intake.audience}`,
+    intake.offer && `offer: ${intake.offer}`,
+    intake.uniqueAdvantage && `uniqueAdvantage: ${intake.uniqueAdvantage}`,
+    intake.biggestProblem && `biggestProblem: ${intake.biggestProblem}`,
+    intake.mainGoal && `mainGoal: ${intake.mainGoal}`,
+    intake.website && `website: ${intake.website}`,
+    intake.whatsapp && `whatsapp: ${intake.whatsapp}`,
+    intake.clinicHours && `clinicHours: ${intake.clinicHours}`,
+    intake.brandTone && `brandTone: ${intake.brandTone}`,
+    intake.brandPositioning && `brandPositioning: ${intake.brandPositioning}`,
+    intake.pastResults && `pastResults: ${intake.pastResults}`,
+  ].filter(Boolean);
+  return lines.join("\n");
+}
+
 export function buildUserMessage(body: GenerateBody): string {
   const parts: string[] = [];
   const description = typeof body.description === "string" ? body.description.trim() : "";
@@ -367,15 +406,19 @@ export function buildUserMessage(body: GenerateBody): string {
   const prompt = typeof body.prompt === "string" ? body.prompt.trim() : "";
   const medical = body.medical === true;
   const mode = asMode(body.mode);
+  const factsBlock = factsBlockFromBody(body);
 
-  if (description) parts.push(`Description:\n${description}`);
+  if (factsBlock) parts.push(`Facts (use only these):\n${factsBlock}`);
+  if (description && (!factsBlock || !factsBlock.includes(description.slice(0, 40)))) {
+    parts.push(`Description:\n${description}`);
+  }
   if (audience) parts.push(`Audience:\n${audience}`);
   if (language) parts.push(`Language: ${language} (still return HE+AR+EN packs)`);
   if (medical) parts.push("Medical: true. No clinical decoration.");
   parts.push(modeHint(mode));
   if (prompt) parts.push(prompt);
-  parts.push(`Reply with JSON only, this shape:\n${jsonShapeFor(mode)}\nUse only facts above.`);
-  const max = mode === "scan" ? 8000 : 4000;
+  parts.push(`Reply with JSON only, this shape:\n${jsonShapeFor(mode)}\nUse only facts above. Prefer real businessName / phone / city / offer over incomplete markers when those facts exist.`);
+  const max = mode === "scan" ? 8000 : 5000;
   return parts.join("\n\n").slice(0, max);
 }
 
@@ -487,7 +530,7 @@ async function studioGenerate(
 ): Promise<CompleteOk | CompleteFail> {
   const key = runtimeEnv("GEMINI_API_KEY");
   if (!key) return { ok: false, reason: "no_key" };
-  const models = [...VERTEX_GEMINI_MODELS];
+  const models = [...AI_STUDIO_GEMINI_MODELS];
   let last: CompleteFail = { ok: false, reason: "gemini_error" };
   for (const modelName of models) {
     try {
@@ -600,11 +643,185 @@ export async function completeGemini(opts: {
   };
 }
 
+const VARIANT_KIND_ORDER = [
+  "strong_offer",
+  "very_short",
+  "emotional",
+  "narrative",
+  "direct_sales",
+  "unique_advantage",
+] as const;
+
+const INCOMPLETE_RE = /\[יש להשלים\]|\[يجب الاستكمال\]|\[TO COMPLETE\]/i;
+
+function isIncompleteText(s: string | undefined): boolean {
+  if (!s || !s.trim()) return true;
+  const t = s.trim();
+  if (INCOMPLETE_RE.test(t)) return true;
+  // mostly markers (e.g. repeated incomplete tokens)
+  const cleaned = t.replace(INCOMPLETE_RE, "").replace(/[\s.,;:|\-–—]/g, "");
+  return cleaned.length < 2;
+}
+
+function localeMostlyIncomplete(block: LocaleCopyBlock | undefined): boolean {
+  if (!block) return true;
+  const heads = block.headlines || [];
+  const incompleteHeads = heads.filter((h) => isIncompleteText(h)).length;
+  const headBad = !heads.length || incompleteHeads >= Math.ceil(heads.length * 0.5);
+  const copyBad = isIncompleteText(block.copy);
+  const ctaBad = isIncompleteText(block.cta);
+  return headBad && (copyBad || ctaBad);
+}
+
+export function generateMostlyIncomplete(
+  locales: GenerateLocales | undefined,
+  headlines?: string[],
+  copy?: string,
+  cta?: string,
+): boolean {
+  if (locales && (locales.he || locales.ar || locales.en)) {
+    const blocks = [locales.he, locales.ar, locales.en].filter(Boolean) as LocaleCopyBlock[];
+    if (!blocks.length) return true;
+    const bad = blocks.filter((b) => localeMostlyIncomplete(b)).length;
+    return bad >= Math.ceil(blocks.length * 0.5);
+  }
+  const heads = headlines || [];
+  if (!heads.length && !copy && !cta) return true;
+  const incompleteHeads = heads.filter((h) => isIncompleteText(h)).length;
+  return (
+    (!heads.length || incompleteHeads >= Math.ceil(Math.max(heads.length, 1) * 0.5)) &&
+    isIncompleteText(copy) &&
+    isIncompleteText(cta)
+  );
+}
+
+/** High-quality HE+AR+EN packs from intake facts via spoken/template engine. */
+export function spokenGenerateOk(body: GenerateBody): GenerateOk {
+  const intake = factsToIntake(body);
+  const language = asLang(body.language) || "he";
+  const variants = generateVariants(intake);
+  const locales: GenerateLocales = {};
+  for (const loc of ["he", "ar", "en"] as GenerateLang[]) {
+    const pack = variants.filter((v) => v.locale === loc);
+    const headlines = VARIANT_KIND_ORDER.map(
+      (k) => pack.find((v) => v.kind === k)?.headline || spokenHeadline(k, intake, loc),
+    ).filter((h) => h.trim());
+    const primary =
+      pack.find((v) => v.kind === "strong_offer") ||
+      pack[0] || {
+        headline: spokenHeadline("strong_offer", intake, loc),
+        primaryText: spokenBody("strong_offer", intake, loc),
+        cta: spokenCta(intake, loc),
+      };
+    locales[loc] = {
+      headlines: headlines.length ? headlines.slice(0, 6) : [primary.headline],
+      copy: primary.primaryText || spokenBody("strong_offer", intake, loc),
+      cta: primary.cta || spokenCta(intake, loc),
+    };
+  }
+  const channels: GenerateChannels = {
+    facebook: {
+      he: { headline: locales.he!.headlines[0]!, body: locales.he!.copy, cta: locales.he!.cta },
+      ar: { headline: locales.ar!.headlines[0]!, body: locales.ar!.copy, cta: locales.ar!.cta },
+      en: { headline: locales.en!.headlines[0]!, body: locales.en!.copy, cta: locales.en!.cta },
+    },
+    instagram: {
+      he: { headline: locales.he!.headlines[1] || locales.he!.headlines[0]!, body: locales.he!.copy, cta: locales.he!.cta },
+      ar: { headline: locales.ar!.headlines[1] || locales.ar!.headlines[0]!, body: locales.ar!.copy, cta: locales.ar!.cta },
+      en: { headline: locales.en!.headlines[1] || locales.en!.headlines[0]!, body: locales.en!.copy, cta: locales.en!.cta },
+    },
+    reels: {
+      he: { script: spokenBody("very_short", intake, "he") },
+      ar: { script: spokenBody("very_short", intake, "ar") },
+      en: { script: spokenBody("very_short", intake, "en") },
+    },
+    tiktok: {
+      he: { script: spokenBody("emotional", intake, "he") },
+      ar: { script: spokenBody("emotional", intake, "ar") },
+      en: { script: spokenBody("emotional", intake, "en") },
+    },
+    whatsapp: {
+      he: { script: whatsappScript(intake, "he") },
+      ar: { script: whatsappScript(intake, "ar") },
+      en: { script: whatsappScript(intake, "en") },
+    },
+    landing: {
+      he: { title: landingH1(intake, "he"), body: landingBody(intake, "he") },
+      ar: { title: landingH1(intake, "ar"), body: landingBody(intake, "ar") },
+      en: { title: landingH1(intake, "en"), body: landingBody(intake, "en") },
+    },
+  };
+  const anglesRaw: CampaignAngles = {};
+  for (const id of ANGLE_IDS) {
+    const kind = ANGLE_TO_KIND[id];
+    anglesRaw[id] = {
+      he: {
+        headline: spokenHeadline(kind, intake, "he"),
+        copy: spokenBody(kind, intake, "he"),
+        cta: spokenCta(intake, "he"),
+      },
+      ar: {
+        headline: spokenHeadline(kind, intake, "ar"),
+        copy: spokenBody(kind, intake, "ar"),
+        cta: spokenCta(intake, "ar"),
+      },
+      en: {
+        headline: spokenHeadline(kind, intake, "en"),
+        copy: spokenBody(kind, intake, "en"),
+        cta: spokenCta(intake, "en"),
+      },
+    };
+  }
+  // Keep social_proof incomplete when no proof facts — honesty.
+  const angles = sanitizeAngles(anglesRaw, intake);
+  const compat = compatFrom({ locales, headlines: locales[language]?.headlines, copy: locales[language]?.copy, cta: locales[language]?.cta }, language);
+  const text = JSON.stringify({ he: locales.he, ar: locales.ar, en: locales.en, channels, angles, source: "spoken" });
+  return {
+    ok: true,
+    text,
+    ...compat,
+    locales,
+    channels,
+    ...(angles ? { angles } : {}),
+    source: "spoken",
+  };
+}
+
+function mergeSpokenOverIncomplete(gemini: GenerateOk, spoken: GenerateOk): GenerateOk {
+  const locales: GenerateLocales = { ...(gemini.locales || {}) };
+  for (const loc of ["he", "ar", "en"] as GenerateLang[]) {
+    const g = locales[loc];
+    const s = spoken.locales?.[loc];
+    if (!s) continue;
+    if (localeMostlyIncomplete(g)) {
+      locales[loc] = s;
+    } else if (g) {
+      const headlines = (g.headlines || []).map((h, i) => (isIncompleteText(h) ? s.headlines[i] || s.headlines[0] || h : h));
+      locales[loc] = {
+        headlines: headlines.length ? headlines : s.headlines,
+        copy: isIncompleteText(g.copy) ? s.copy : g.copy,
+        cta: isIncompleteText(g.cta) ? s.cta : g.cta,
+      };
+    }
+  }
+  const language = asLang(undefined) || "he";
+  const compat = compatFrom({ locales }, language);
+  return {
+    ...gemini,
+    ...compat,
+    locales,
+    channels: gemini.channels && Object.keys(gemini.channels).length ? gemini.channels : spoken.channels,
+    angles: gemini.angles || spoken.angles,
+    source: gemini.source || "gemini",
+  };
+}
+
 export async function runGeminiGenerate(body: GenerateBody): Promise<GenerateResult> {
   if (!bodyHasFacts(body)) {
     recordGeminiOutcome({ provider: "none", reason: "no_facts" });
     return { ok: false, reason: "no_facts", useTemplates: true };
   }
+  const spoken = () => spokenGenerateOk(body);
   try {
     const mode = asMode(body.mode);
     const language = asLang(body.language);
@@ -614,9 +831,8 @@ export async function runGeminiGenerate(body: GenerateBody): Promise<GenerateRes
       temperature: body.medical === true ? 0.2 : 0.4,
     });
     if (!completed.ok) {
-      if (completed.reason === "no_key") return noKey();
-      if (completed.reason === "quota") return { ok: false, reason: "quota" };
-      return geminiError();
+      // Never leave the client with empty/broken ads when facts exist.
+      return spoken();
     }
     const text = completed.text;
     const parsed = parseStructured(text);
@@ -624,26 +840,34 @@ export async function runGeminiGenerate(body: GenerateBody): Promise<GenerateRes
     const angles = parsed.angles
       ? sanitizeAngles(parsed.angles, factsToIntake(body))
       : undefined;
-    const out: GenerateOk = {
+    let out: GenerateOk = {
       ok: true,
       text,
       ...compat,
       ...(parsed.locales ? { locales: parsed.locales } : {}),
       ...(parsed.channels ? { channels: parsed.channels } : {}),
       ...(angles ? { angles } : {}),
+      source: "gemini",
     };
     if (mode === "scan" && parsed.brand) {
       out.brand = parsed.brand;
     }
+    if (
+      generateMostlyIncomplete(out.locales, out.headlines, out.copy, out.cta) ||
+      (!out.locales && !out.headlines?.length)
+    ) {
+      out = mergeSpokenOverIncomplete(out, spoken());
+      out.source = "spoken";
+    }
     return out;
   } catch {
-    return geminiError();
+    return spoken();
   }
 }
 
 
-export const GEMINI_MODEL = "gemini-2.5-flash";
-export const GEMINI_MODELS = VERTEX_GEMINI_MODELS;
+export const GEMINI_MODEL = "gemini-3.5-flash";
+export const GEMINI_MODELS = AI_STUDIO_GEMINI_MODELS;
 
 const JSON_SHAPE_VISION = `{
   "elements":["..."],
@@ -685,21 +909,24 @@ export function factsToIntake(body: { description?: unknown; audience?: unknown;
   } else if (facts && typeof facts === "object" && !Array.isArray(facts)) {
     const o = facts as Record<string, unknown>;
     const str = (k: string) => (typeof o[k] === "string" ? (o[k] as string) : "");
-    intake.businessName = str("businessName");
-    intake.category = str("category");
+    intake.businessName = str("businessName") || str("name") || str("clinicName");
+    intake.category = str("category") || str("vertical");
     intake.description = str("description") || str("facts") || intake.description;
-    intake.location = str("location");
+    intake.location = str("location") || str("city") || str("address");
     intake.audience = str("audience");
-    intake.biggestProblem = str("biggestProblem");
-    intake.uniqueAdvantage = str("uniqueAdvantage");
-    intake.mainGoal = str("mainGoal");
+    intake.biggestProblem = str("biggestProblem") || str("problem");
+    intake.uniqueAdvantage = str("uniqueAdvantage") || str("advantage");
+    intake.mainGoal = str("mainGoal") || str("goal");
     intake.offer = str("offer") || intake.offer;
     intake.pastAds = str("pastAds");
     intake.pastResults = str("pastResults");
-    intake.website = str("website");
-    intake.whatsapp = str("whatsapp");
+    intake.website = str("website") || str("url") || str("site");
+    intake.whatsapp = str("whatsapp") || str("phone") || str("tel") || str("mobile");
+    intake.clinicHours = str("clinicHours") || str("hours") || str("openingHours");
     intake.brandTone = str("brandTone");
     intake.brandPositioning = str("brandPositioning");
+    if (str("kupaFileBy")) intake.kupaFileBy = str("kupaFileBy");
+    if (str("kupaMemberFrom")) intake.kupaMemberFrom = str("kupaMemberFrom");
   }
   if (typeof body.description === "string" && body.description.trim()) {
     intake.description = [intake.description, body.description.trim()].filter(Boolean).join("\n");
