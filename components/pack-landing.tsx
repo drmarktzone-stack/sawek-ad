@@ -99,7 +99,7 @@ export function PackLandingScreen({ pack, locale }: { pack: CampaignPack; locale
           <div
             className="absolute inset-0"
             style={{
-              background: `linear-gradient(165deg, #F7F3EA 0%, #F7F3EA 42%, ${accent}33 100%)`,
+              background: `linear-gradient(165deg, #F6F1E8 0%, #F6F1E8 42%, ${accent}33 100%)`,
             }}
           />
         )}

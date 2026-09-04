@@ -57,7 +57,12 @@ export function UrlIngest() {
 
   async function scan(e?: FormEvent) {
     e?.preventDefault();
-    const url = value.trim();
+    const typed = value.trim();
+    const url = /^https?:\/\//i.test(typed)
+      ? typed
+      : /^(?:www\.)?(?:[\w-]+\.)+[a-z]{2,}(?::\d+)?(?:[/?#].*)?$/i.test(typed)
+        ? `https://${typed}`
+        : typed;
     setError("");
     if (!url) {
       setError(t("url.error.invalid"));
@@ -69,8 +74,16 @@ export function UrlIngest() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url }),
+        signal: AbortSignal.timeout(45_000),
       });
-      const data = (await res.json()) as {
+      let data: Record<string, unknown>;
+      try {
+        data = (await res.json()) as Record<string, unknown>;
+      } catch {
+        setError(t(res.status === 504 ? "url.error.timeout" : "url.error.network"));
+        return;
+      }
+      const payload = data as {
         ok?: boolean;
         error?: string;
         messageHe?: string;
@@ -157,8 +170,9 @@ export function UrlIngest() {
       setAssets(extra);
       setRows(nextRows);
       setPosts(extractedPosts);
-    } catch {
-      setError(t("url.error.network"));
+    } catch (err) {
+      const name = err instanceof Error ? err.name : "";
+      setError(t(name === "TimeoutError" || name === "AbortError" ? "url.error.timeout" : "url.error.network"));
     } finally {
       setBusy(false);
     }
@@ -182,7 +196,7 @@ export function UrlIngest() {
   return (
     <div
       className={cn(
-        "border-b border-gold/30 bg-[#F7F3EA]/80",
+        "border-b border-teal/20 bg-sand",
         home ? "px-3 py-3" : "px-3 py-1.5",
       )}
     >
@@ -198,8 +212,8 @@ export function UrlIngest() {
           <input
             dir="ltr"
             className={cn(
-              "w-full rounded-full border border-navy/15 bg-white px-4 text-base text-foreground placeholder:text-muted outline-none focus:border-gold",
-              home ? "h-12" : "h-10 text-sm",
+              "w-full rounded-full border-2 border-navy/20 bg-white px-4 text-base text-navy placeholder:text-muted outline-none focus:border-teal",
+              home ? "h-12" : "h-11 text-sm",
             )}
             value={value}
             onChange={(e) => setValue(e.target.value)}

@@ -50,7 +50,7 @@ export function HomeStudio() {
     <div className="relative overflow-hidden">
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(27,42,74,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(27,42,74,0.04)_1px,transparent_1px)] bg-[size:56px_56px] [mask-image:radial-gradient(ellipse_at_center,black_40%,transparent_78%)]"
+        className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(16,42,67,0.045)_1px,transparent_1px),linear-gradient(90deg,rgba(16,42,67,0.045)_1px,transparent_1px)] bg-[size:56px_56px] [mask-image:radial-gradient(ellipse_at_center,black_40%,transparent_78%)]"
       />
       <section className="relative mx-auto max-w-5xl px-4 pb-6 pt-10 sm:pt-14">
         <AgencyHeroStill className="mb-8" alt="" />

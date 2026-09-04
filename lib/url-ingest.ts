@@ -1415,19 +1415,29 @@ function isCloudflareChallenge(html: string, status = 200): boolean {
 }
 
 function ingestRequestHeaders(opts: { accept?: "html" | "script" | "css"; browserLike?: boolean }): Record<string, string> {
-  const browser = opts.browserLike !== false;
   const accept =
     opts.accept === "script"
       ? "application/javascript,text/javascript,*/*;q=0.1"
       : opts.accept === "css"
         ? "text/css,*/*;q=0.1"
-        : "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8";
+        : "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8";
+  const htmlNav = opts.accept !== "script" && opts.accept !== "css";
   return {
     Accept: accept,
-    "User-Agent": browser ? SOCIAL_BROWSER_UA : "Mozilla/5.0 (compatible; SAWEK-AD-Ingest/0.1)",
+    "User-Agent": SOCIAL_BROWSER_UA,
     "Accept-Language": "he-IL,he;q=0.9,ar;q=0.8,en-US;q=0.7,en;q=0.6",
-    ...(browser && opts.accept !== "script" && opts.accept !== "css"
-      ? { "Cache-Control": "no-cache", "Upgrade-Insecure-Requests": "1" }
+    ...(htmlNav
+      ? {
+          "Cache-Control": "no-cache",
+          "Upgrade-Insecure-Requests": "1",
+          "Sec-Fetch-Dest": "document",
+          "Sec-Fetch-Mode": "navigate",
+          "Sec-Fetch-Site": "none",
+          "Sec-Fetch-User": "?1",
+          "sec-ch-ua": '"Google Chrome";v="139", "Chromium";v="139", "Not:A-Brand";v="24"',
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": '"Windows"',
+        }
       : {}),
   };
 }

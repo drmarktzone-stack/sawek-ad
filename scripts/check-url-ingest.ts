@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "fs";
 import { join } from "path";
 import { inspectUrl, parseFetchedHtml, ingestUrl, collectSameOriginNavUrls, mergeExtractedFields, extractScriptBundleText, brandFromSeoTitle, coerceHttpUrl, canonicalizePublicUrl } from "../lib/url-ingest";
-import { detectSocialKind, facebookMbasicUrl, facebookPagePluginUrl, isSocialLoginWall, parseOembedJson, parseSocialPage, socialHasPublicContent } from "../lib/social-page";
+import { detectSocialKind, facebookMbasicUrl, facebookPagePluginUrl, isSocialLoginWall, parseOembedJson, parseSocialPage, socialHasPublicContent, SOCIAL_BROWSER_UA } from "../lib/social-page";
 import { SOCIAL_LOGIN_WALL_COPY, socialLoginWallError } from "../lib/url-ingest";
 import { buildPastCampaignAuditFromPosts } from "../lib/engine/past-campaign-audit";
 import { extractCssColors, extractLogoUrl, emptyBrandKit } from "../lib/brand-kit";
@@ -367,6 +367,9 @@ else {
     fail(`tracking params kept ${bare.url.search}`);
   }
   if (bare.url.pathname !== "/path") fail(`bare path ${bare.url.pathname}`);
+}
+if (!/Chrome\/13\d/.test(SOCIAL_BROWSER_UA) || /SAWEK-AD-Ingest|compatible;/.test(SOCIAL_BROWSER_UA)) {
+  fail(`ingest UA must look like Chrome, not a bot (${SOCIAL_BROWSER_UA})`);
 }
 const tracked = canonicalizePublicUrl(new URL("https://shop.example/?utm_medium=cpc&gclid=1&keep=yes"));
 if (tracked.searchParams.has("utm_medium") || tracked.searchParams.has("gclid")) fail("canonicalize dropped fail");

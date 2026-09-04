@@ -42,8 +42,8 @@ export function Stepper({
                   "flex shrink-0 items-center justify-center rounded-full text-sm font-black transition-all",
                   canJump && "cursor-pointer hover:scale-105",
                   !canJump && "cursor-default",
-                  active ? "size-12 bg-navy text-white shadow-[0_8px_24px_rgba(27,42,74,0.18)]" : "size-9",
-                  !active && (done ? "bg-gold text-navy" : "bg-navy/10 text-muted"),
+                  active ? "size-12 bg-navy text-white shadow-[0_8px_24px_rgba(16,42,67,0.22)]" : "size-9",
+                  !active && (done ? "bg-teal text-white" : "bg-navy/10 text-muted"),
                 )}
               >
                 {done ? <Check className="size-4" strokeWidth={3} /> : n}
@@ -79,9 +79,9 @@ export function ConquerHeadline({ subtitle }: { subtitle?: string }) {
       <div className="agency-rule mb-4" />
       <h1 className="text-3xl font-black tracking-tight text-navy sm:text-4xl">
         {t("hero.titlePrefix")}{" "}
-        <span className="relative inline-block rounded-md bg-gold px-2 text-navy">
+        <span className="relative inline-block rounded-md bg-teal px-2 text-white">
           {t("hero.conquer")}
-          <span className="absolute inset-x-1 -bottom-1 h-1 rounded-full bg-navy/80" />
+          <span className="absolute inset-x-1 -bottom-1 h-1 rounded-full bg-coral" />
         </span>{" "}
         {t("hero.titleSuffix")}
       </h1>

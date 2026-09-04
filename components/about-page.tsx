@@ -170,25 +170,25 @@ export function AboutPage() {
       <div className="space-y-5">
         {steps.map((b) => (
           <article key={b.h} className="agency-paper rounded-[24px] p-6 sm:p-7">
-            <h2 className="mb-3 text-xl font-black text-gold">{b.h}</h2>
-            <p className="text-base leading-relaxed text-navy/80">{b.p}</p>
+            <h2 className="mb-3 text-xl font-black text-navy">{b.h}</h2>
+            <p className="text-base leading-relaxed text-navy">{b.p}</p>
           </article>
         ))}
 
         <article className="agency-paper rounded-[24px] p-6 sm:p-7">
-          <h2 className="mb-3 text-xl font-black text-gold">{who.h}</h2>
-          <p className="text-base leading-relaxed text-navy/80">{who.p}</p>
+          <h2 className="mb-3 text-xl font-black text-navy">{who.h}</h2>
+          <p className="text-base leading-relaxed text-navy">{who.p}</p>
         </article>
 
         <article className="agency-paper rounded-[24px] p-6 sm:p-7">
-          <h2 className="mb-3 text-xl font-black text-gold">{plans.h}</h2>
-          <p className="text-base leading-relaxed text-navy/80">{plans.free}</p>
-          <p className="mt-3 text-base leading-relaxed text-navy/80">{plans.pro}</p>
+          <h2 className="mb-3 text-xl font-black text-navy">{plans.h}</h2>
+          <p className="text-base leading-relaxed text-navy">{plans.free}</p>
+          <p className="mt-3 text-base leading-relaxed text-navy">{plans.pro}</p>
         </article>
 
         <article className="agency-paper rounded-[24px] p-6 sm:p-7">
-          <h2 className="mb-3 text-xl font-black text-gold">{notYet.h}</h2>
-          <ul className="list-disc space-y-2 pe-5 text-base leading-relaxed text-navy/80">
+          <h2 className="mb-3 text-xl font-black text-navy">{notYet.h}</h2>
+          <ul className="list-disc space-y-2 pe-5 text-base leading-relaxed text-navy">
             {notYet.items.map((item) => (
               <li key={item}>{item}</li>
             ))}

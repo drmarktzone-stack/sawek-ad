@@ -49,7 +49,7 @@ export function GeminiStatusBadge({ className }: { className?: string }) {
     <span
       className={cn(
         "hidden max-w-[11rem] truncate rounded-full border px-2 py-0.5 text-[11px] font-bold sm:inline-block",
-        ok ? "border-gold/50 bg-gold/15 text-navy" : "border-navy/10 bg-navy/5 text-muted",
+        ok ? "border-teal/50 bg-teal/15 text-navy" : "border-navy/15 bg-navy/5 text-muted",
         className,
       )}
       title={label}

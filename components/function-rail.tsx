@@ -83,7 +83,7 @@ export function FunctionRail({ compact = false }: { compact?: boolean }) {
             <LangLink
               key={fn.id}
               href={fn.href}
-              className="flex shrink-0 items-center gap-1 rounded-full border border-navy/15 px-2.5 py-1 text-sm font-bold text-navy hover:bg-gold/15"
+              className="flex min-h-10 shrink-0 items-center gap-1 rounded-full border border-navy/20 bg-white px-2.5 py-1 text-sm font-bold text-navy hover:border-teal hover:bg-teal/10"
             >
               <Icon className="size-3" />
               {t(fn.key)}
@@ -106,7 +106,7 @@ export function FunctionRail({ compact = false }: { compact?: boolean }) {
               <LangLink
                 href={fn.href}
                 className={cn(
-                  "agency-paper flex h-full flex-col rounded-[22px] p-3 hover:border-gold hover:bg-gold/10",
+                  "agency-paper flex h-full flex-col rounded-[22px] p-3 hover:border-teal hover:bg-teal/10",
                 )}
               >
                 <span className="flex items-center gap-2 text-sm font-black text-navy">
@@ -144,7 +144,7 @@ export function FunctionMenuLinks({ onPick }: { onPick?: () => void }) {
             key={fn.id}
             href={fn.href}
             onClick={onPick}
-            className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-navy hover:bg-navy/5"
+            className="flex min-h-12 items-center gap-2 rounded-xl px-3 py-3 text-base text-navy hover:bg-teal/10"
           >
             <Icon className="size-4 text-gold" />
             {t(fn.key)}

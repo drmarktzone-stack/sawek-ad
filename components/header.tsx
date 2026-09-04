@@ -63,8 +63,8 @@ export function LanguageToggle({ compact = false }: { compact?: boolean }) {
           className={cn(
             "rounded-full px-2.5 py-1 text-sm font-semibold transition-colors",
             locale === l.id
-              ? "bg-gold text-navy"
-              : "text-muted hover:text-navy",
+              ? "bg-teal text-white"
+              : "text-navy hover:text-navy",
           )}
         >
           {l.label}
@@ -82,7 +82,7 @@ function AuthChip() {
     return (
       <LangLink
         href="/login"
-        className="shrink-0 rounded-full bg-navy px-3.5 py-1.5 text-sm font-black text-white hover:bg-[#24365e]"
+        className="shrink-0 rounded-full bg-navy px-3.5 py-1.5 text-sm font-black text-white hover:bg-[#16324f]"
       >
         {t("nav.login")}
       </LangLink>
@@ -111,7 +111,7 @@ export function Header() {
   if (pathname.startsWith("/lp/")) return null;
 
   return (
-    <header className="sticky top-0 z-40 border-b border-gold/50 bg-[#FFFcf6]/90 backdrop-blur-md">
+    <header className="sticky top-0 z-40 border-b border-teal/30 bg-white/95 backdrop-blur-md">
       <UrlIngest />
       <div className="h-px w-full bg-gradient-to-l from-transparent via-gold to-transparent" />
       <div className="mx-auto flex max-w-[92rem] items-center gap-2 px-3 py-3.5">
@@ -161,7 +161,7 @@ export function Header() {
           </div>
           <button
             type="button"
-            className="rounded-lg p-2 text-navy lg:hidden"
+            className="min-h-11 min-w-11 rounded-lg p-2 text-navy lg:hidden"
             onClick={() => setOpen((v) => !v)}
             aria-label={t("menu")}
           >
@@ -195,7 +195,7 @@ export function Header() {
                   key={item.key}
                   href={item.href}
                   onClick={() => setOpen(false)}
-                  className="flex items-center gap-2 rounded-xl px-3 py-2 text-base text-navy hover:bg-navy/5"
+                  className="flex min-h-12 items-center gap-2 rounded-xl px-3 py-3 text-base font-semibold text-navy hover:bg-teal/10"
                 >
                   <Icon className="size-4 text-gold" />
                   {t(item.key)}
@@ -206,7 +206,7 @@ export function Header() {
             <div className="mt-2 px-3 py-1">
               <AuthChip />
             </div>
-            <LangLink href="/pricing" onClick={() => setOpen(false)} className="rounded-xl px-3 py-2 text-base font-black text-navy hover:bg-navy/5">
+            <LangLink href="/pricing" onClick={() => setOpen(false)} className="flex min-h-12 items-center rounded-xl px-3 py-3 text-base font-black text-navy hover:bg-teal/10">
               {t("home.cta.pricing")}
             </LangLink>
           </div>
@@ -221,7 +221,7 @@ export function Footer() {
   const pathname = usePathname();
   if (pathname.startsWith("/lp/")) return null;
   return (
-    <footer className="mt-auto border-t border-gold/50 bg-[#FFFcf6] py-10 text-center text-sm text-muted">
+    <footer className="mt-auto border-t border-teal/25 bg-white py-10 text-center text-sm text-muted">
       <div className="agency-rule mb-4" />
       <p className="mb-1 font-black text-navy">{t("brand.name")} · {t("brand.scripts")}</p>
       {t("footer.line")}

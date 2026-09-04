@@ -527,8 +527,8 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
                     onClick={() => patch({ type: opt.id as Intake["type"] })}
                     className={`rounded-2xl border p-6 text-start text-xl font-black transition-all ${
                       intake.type === opt.id
-                        ? "border-omni-yellow bg-navy text-white shadow-[0_12px_32px_rgba(27,42,74,0.12)]"
-                        : "border-navy/10 bg-white text-navy hover:border-gold hover:shadow-[0_8px_24px_rgba(27,42,74,0.08)]"
+                        ? "border-teal bg-navy text-white shadow-[0_12px_32px_rgba(16,42,67,0.16)]"
+                        : "border-navy/15 bg-white text-navy hover:border-teal hover:shadow-[0_8px_24px_rgba(16,42,67,0.08)]"
                     }`}
                   >
                     {opt.label[locale]}
@@ -548,13 +548,13 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
                     onClick={() => setIntake((s) => applyOperatingModel(s, opt.id))}
                     className={`rounded-2xl border p-6 text-start transition-all ${
                       (intake.operatingModel ?? "paid") === opt.id
-                        ? "border-omni-yellow bg-navy text-white shadow-[0_12px_32px_rgba(27,42,74,0.12)]"
-                        : "border-navy/10 bg-white text-navy hover:border-gold hover:shadow-[0_8px_24px_rgba(27,42,74,0.08)]"
+                        ? "border-teal bg-navy text-white shadow-[0_12px_32px_rgba(16,42,67,0.16)]"
+                        : "border-navy/15 bg-white text-navy hover:border-teal hover:shadow-[0_8px_24px_rgba(16,42,67,0.08)]"
                     }`}
                   >
                     <span className="block text-xl font-black">{opt.title}</span>
                     <span className={`mt-2 block text-sm font-medium ${
-                      (intake.operatingModel ?? "paid") === opt.id ? "text-black/70" : "text-muted"
+                      (intake.operatingModel ?? "paid") === opt.id ? "text-white/85" : "text-muted"
                     }`}>{opt.hint}</span>
                   </button>
                 ))}
@@ -1153,7 +1153,7 @@ function StatusPill({ status }: { status: AgentStatus }) {
   const key = STATUS_I18N[status];
   const colors: Record<AgentStatus, string> = {
     idle: "bg-navy/10 text-muted",
-    running: "bg-omni-yellow/20 text-omni-yellow animate-pulse",
+    running: "bg-teal/15 text-teal animate-pulse",
     blocked: "bg-navy/5 text-muted",
     needs_approval: "bg-omni-red/20 text-omni-red",
     approved: "bg-navy text-white",

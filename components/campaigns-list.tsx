@@ -112,7 +112,7 @@ export function CampaignsList() {
                 <p className="text-[13px] text-muted">
                   {c.createdAt.slice(0, 16).replace("T", " ")} · {c.intake.type} · {c.intake.depth}
                 </p>
-                <p className="mt-1 text-xs text-omni-yellow">
+                <p className="mt-1 text-xs font-bold text-teal">
                   {t("result.score")}: {c.intakeReport.completeness}/100
                 </p>
               </div>

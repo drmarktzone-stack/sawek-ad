@@ -144,7 +144,7 @@ export function ResultView({
           {canUse(plan, "landing") ? (
           <LangLink
             href={`/lp/${pack.id}`}
-            className="mt-3 inline-flex items-center gap-2 rounded-full bg-gold px-4 py-2 text-sm font-black text-navy"
+            className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-full bg-coral px-4 py-2 text-sm font-black text-white"
           >
             <ExternalLink className="size-4" />
             {tr("end.clientLanding")}
@@ -681,7 +681,7 @@ function AdCard({
       </div>
       <h3 className="text-2xl font-black leading-snug text-navy">{headline}</h3>
       <p className="mt-3 whitespace-pre-wrap text-base leading-relaxed text-navy/75">{body}</p>
-      <span className="mt-5 inline-block rounded-full bg-gold px-4 py-1.5 text-sm font-black text-navy">
+      <span className="mt-5 inline-block rounded-full bg-coral px-4 py-1.5 text-sm font-black text-white">
         {cta}
       </span>
     </article>
