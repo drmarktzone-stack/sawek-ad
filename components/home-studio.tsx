@@ -42,6 +42,29 @@ export function HomeStudio() {
   ];
 
   const howIcons = [Link2, Search, Images, Download] as const;
+  /** Soft tinted rows — each step a distinct card; guidance kicker stays teal (fixed chrome). */
+  const howStepThemes = [
+    {
+      bg: "bg-[#F3EDE3]",
+      edge: "border-s-[#0F2744]",
+      chip: "bg-[#0F2744]/12 text-[#0F2744]",
+    },
+    {
+      bg: "bg-[#E6F4F1]",
+      edge: "border-s-[#1F7A6B]",
+      chip: "bg-[#1F7A6B]/15 text-[#1F7A6B]",
+    },
+    {
+      bg: "bg-[#EEE8F7]",
+      edge: "border-s-[#6B5B95]",
+      chip: "bg-[#6B5B95]/15 text-[#6B5B95]",
+    },
+    {
+      bg: "bg-[#FCEEE9]",
+      edge: "border-s-[#E07A5F]",
+      chip: "bg-[#E07A5F]/15 text-[#E07A5F]",
+    },
+  ] as const;
   const freeItems = ["pricing.f1", "pricing.f2", "pricing.f3", "pricing.f4", "pricing.f5"] as const;
   const proItems = ["pricing.p1", "pricing.p2", "pricing.p3", "pricing.p4", "pricing.p5"] as const;
 
@@ -121,14 +144,20 @@ export function HomeStudio() {
           ] as const
         ).map(([title, body], i) => {
           const Icon = howIcons[i];
+          const theme = howStepThemes[i];
           return (
-            <li key={title} className="agency-shell p-5 text-start">
-              <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.22em] text-teal">
-                <Icon className="size-3.5" />
+            <li
+              key={title}
+              className={`rounded-[var(--radius-card)] border border-[var(--line)] border-s-4 ${theme.edge} ${theme.bg} p-5 text-start shadow-[var(--shadow-card)]`}
+            >
+              <p className="flex items-center gap-2 text-[0.7rem] font-extrabold uppercase tracking-[0.22em] text-[#1F7A6B] sm:text-xs">
+                <span className={`inline-flex size-7 items-center justify-center rounded-full ${theme.chip}`}>
+                  <Icon className="size-3.5" aria-hidden />
+                </span>
                 {t("home.how.title")} · 0{i + 1}
               </p>
               <p className="mt-3 text-xl font-black text-navy">{t(title)}</p>
-              <p className="mt-2 text-base leading-relaxed text-muted">{t(body)}</p>
+              <p className="mt-2 text-base leading-relaxed text-[#5A6B7D]">{t(body)}</p>
             </li>
           );
         })}

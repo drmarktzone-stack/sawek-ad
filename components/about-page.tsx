@@ -162,27 +162,42 @@ export function AboutPage() {
         </div>
 
         <div className="space-y-4">
-          {steps.map((b) => (
-            <article key={b.h} className="agency-shell p-6">
-              <h2 className="mb-2 text-xl font-black text-teal">{b.h}</h2>
-              <p className="text-base leading-relaxed text-muted">{b.p}</p>
-            </article>
-          ))}
+          {steps.map((b, i) => {
+            const themes = [
+              { bg: "bg-[#F3EDE3]", edge: "border-s-[#0F2744]" },
+              { bg: "bg-[#E6F4F1]", edge: "border-s-[#1F7A6B]" },
+              { bg: "bg-[#EEE8F7]", edge: "border-s-[#6B5B95]" },
+              { bg: "bg-[#FCEEE9]", edge: "border-s-[#E07A5F]" },
+            ] as const;
+            const theme = themes[i % themes.length];
+            return (
+              <article
+                key={b.h}
+                className={`rounded-[var(--radius-card)] border border-[var(--line)] border-s-4 ${theme.edge} ${theme.bg} p-6 shadow-[var(--shadow-card)]`}
+              >
+                <p className="mb-2 text-[0.7rem] font-extrabold uppercase tracking-[0.22em] text-[#1F7A6B] sm:text-xs">
+                  {t("home.how.title")} · 0{i + 1}
+                </p>
+                <h2 className="mb-2 text-xl font-black text-navy">{b.h}</h2>
+                <p className="text-base leading-relaxed text-[#5A6B7D]">{b.p}</p>
+              </article>
+            );
+          })}
 
           <article className="agency-shell p-6">
-            <h2 className="mb-2 text-xl font-black text-teal">{who.h}</h2>
-            <p className="text-base leading-relaxed text-muted">{who.p}</p>
+            <h2 className="mb-2 text-xl font-black text-navy">{who.h}</h2>
+            <p className="text-base leading-relaxed text-[#5A6B7D]">{who.p}</p>
           </article>
 
           <article className="agency-shell p-6">
-            <h2 className="mb-2 text-xl font-black text-teal">{plans.h}</h2>
-            <p className="text-base leading-relaxed text-muted">{plans.free}</p>
-            <p className="mt-2 text-base leading-relaxed text-muted">{plans.pro}</p>
+            <h2 className="mb-2 text-xl font-black text-navy">{plans.h}</h2>
+            <p className="text-base leading-relaxed text-[#5A6B7D]">{plans.free}</p>
+            <p className="mt-2 text-base leading-relaxed text-[#5A6B7D]">{plans.pro}</p>
           </article>
 
           <article className="agency-shell p-6">
-            <h2 className="mb-2 text-xl font-black text-teal">{notYet.h}</h2>
-            <ul className="list-disc space-y-2 pe-5 text-base leading-relaxed text-muted">
+            <h2 className="mb-2 text-xl font-black text-navy">{notYet.h}</h2>
+            <ul className="list-disc space-y-2 pe-5 text-base leading-relaxed text-[#5A6B7D]">
               {notYet.items.map((item) => (
                 <li key={item}>{item}</li>
               ))}

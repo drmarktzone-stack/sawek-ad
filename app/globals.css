@@ -21,6 +21,10 @@
   --gold-mist: var(--teal-mist);
   /* Warm sand + soft coral CTA (sparingly) */
   --sand: #F3EDE3;
+  --mint: #E6F4F1;
+  --lavender: #EEE8F7;
+  --peach: #FCEEE9;
+  --violet: #6B5B95;
   --coral: #E07A5F;
   --coral-soft: #F0A892;
   --coral-mist: rgba(224, 122, 95, 0.14);
@@ -51,6 +55,10 @@
   --color-teal: var(--teal);
   --color-teal-soft: var(--teal-soft);
   --color-sand: var(--sand);
+  --color-mint: var(--mint);
+  --color-lavender: var(--lavender);
+  --color-peach: var(--peach);
+  --color-violet: var(--violet);
   --color-coral: var(--coral);
   --color-coral-soft: var(--coral-soft);
   --color-cream: var(--cream);

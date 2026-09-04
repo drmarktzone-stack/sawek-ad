@@ -179,12 +179,26 @@ export function MedicalDesk() {
               "med.how.3",
               "med.how.4",
             ] as const
-          ).map((k, i) => (
-            <li key={k} className="rounded-2xl border border-gold/20 bg-background p-4">
-              <p className="text-xs font-black text-danger">0{i + 1}</p>
-              <p className="mt-1 text-sm font-semibold text-navy">{t(k)}</p>
-            </li>
-          ))}
+          ).map((k, i) => {
+            const themes = [
+              { bg: "bg-[#F3EDE3]", edge: "border-s-[#0F2744]" },
+              { bg: "bg-[#E6F4F1]", edge: "border-s-[#1F7A6B]" },
+              { bg: "bg-[#EEE8F7]", edge: "border-s-[#6B5B95]" },
+              { bg: "bg-[#FCEEE9]", edge: "border-s-[#E07A5F]" },
+            ] as const;
+            const theme = themes[i];
+            return (
+              <li
+                key={k}
+                className={`rounded-2xl border border-[var(--line)] border-s-4 ${theme.edge} ${theme.bg} p-4`}
+              >
+                <p className="text-[0.7rem] font-extrabold uppercase tracking-[0.22em] text-[#1F7A6B]">
+                  {t("med.how.title")} · 0{i + 1}
+                </p>
+                <p className="mt-2 text-sm font-black text-navy">{t(k)}</p>
+              </li>
+            );
+          })}
         </ol>
       </section>
 
