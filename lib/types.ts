@@ -49,7 +49,7 @@ export interface MediaAssetMeta {
   label: MediaAssetLabel;
   note: string;
   createdAt: string;
-  /** Optional static URL (e.g. /rinan/pool1.jpg) used as <img src> without IndexedDB. */
+  /** Optional static URL (e.g. /packs/stills/studio-clinic-waiting-sun.svg) used as <img src> without IndexedDB. */
   publicSrc?: string;
 }
 

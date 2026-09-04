@@ -72,16 +72,16 @@ export function AboutPage() {
     locale === "he"
       ? {
           h: "למי זה?",
-          p: "עסקים מקומיים — מרפאות, מסעדות, בוטיקים, בריכות, בתי ספר וחנויות — שרוצים קמפיין מוכן בעברית וערבית בלי סוכנות מלאה.",
+          p: "כל עסק מקומי — חנות, מסעדה, סטודיו, שירות, בית ספר או מרפאה — שרוצה קמפיין מוכן בעברית וערבית בלי סוכנות מלאה.",
         }
       : locale === "ar"
         ? {
             h: "لمين؟",
-            p: "محلات محلية — عيادات، مطاعم، بوتيكات، مسابح، مدارس ومحلات — بدهم حملة جاهزة بالعبري والعربي بدون وكالة كاملة.",
+            p: "أي شغل محلي — محل، مطعم، ستوديو، خدمة، مدرسة أو عيادة — بدهم حملة جاهزة بالعبري والعربي بدون وكالة كاملة.",
           }
         : {
             h: "Who is it for?",
-            p: "Local businesses — clinics, restaurants, boutiques, pools, schools, and shops — that want a ready campaign in Hebrew and Arabic without a full agency.",
+            p: "Any local business — a shop, restaurant, studio, service, school, or clinic — that wants a ready campaign in Hebrew and Arabic without a full agency.",
           };
 
   const plans =
@@ -144,10 +144,10 @@ export function AboutPage() {
       </p>
       <p className="mb-10 text-center text-lg leading-relaxed text-navy">
         {locale === "he"
-          ? "SAWEK AD הופך קישור לאתר לקמפיין מוכן: ביקורת, מודעות, תמונות והורדה — לעסקים מקומיים."
+          ? "SAWEK AD הופך קישור לאתר לקמפיין מוכן: ביקורת, מודעות, תמונות והורדה — לכל עסק מקומי."
           : locale === "ar"
-            ? "SAWEK AD بحوّل رابط الموقع لحملة جاهزة: تدقيق، إعلانات، صور وتحميل — للمحلات المحلية."
-            : "SAWEK AD turns a website URL into a ready campaign: audit, ads, images, and download — for local businesses."}
+            ? "SAWEK AD بحوّل رابط الموقع لحملة جاهزة: تدقيق، إعلانات، صور وتحميل — لأي شغل محلي."
+            : "SAWEK AD turns a website URL into a ready campaign: audit, ads, images, and download — for any local business."}
       </p>
 
       <div className="mb-6 flex flex-wrap items-center justify-center gap-3">

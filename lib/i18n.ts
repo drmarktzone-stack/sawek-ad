@@ -48,9 +48,9 @@ export const copy: Dict = {
     en: "Paste a website URL — get finished ads",
   },
   "home.pitch": {
-    he: "מה היישום יודע לעשות: מדביקים קישור לאתר — SAWEK שולף עובדות שפורסמו, בונה מודעות בעברית וערבית לערוצים, ומציע תמונות או כרזות. מורידים את החבילה (וב-Pro גם לוח ודף נחיתה). בלי ROAS מומצא ובלי מחירים שלא פרסמתם.",
-    ar: "شو التطبيق بيعرف يعمل: بلزّقوا رابط الموقع — SAWEK بطلع الوقائع المنشورة، بيبني إعلانات بالعبري والعربي للقنوات، وبعرض صور أو ملصقات. بتحمّلوا الحزمة (وبـPro كمان رزنامة وصفحة هبوط). بلا عائد مخترع وبلا أسعار ما نشرتوها.",
-    en: "What the app can do: paste a site URL — SAWEK pulls published facts, builds Hebrew and Arabic channel ads, and offers photos or graphics. You download the kit (and on Pro, a calendar and landing). No invented ROAS, no unpublished prices.",
+    he: "לכל עסק: מדביקים קישור לאתר — SAWEK שולף עובדות שפורסמו, בונה מודעות בעברית וערבית לערוצים, ומציע תמונות או כרזות. מורידים את החבילה (וב-Pro גם לוח ודף נחיתה). בלי ROAS מומצא ובלי מחירים שלא פרסמתם.",
+    ar: "لكل شغل: بلزّقوا رابط الموقع — SAWEK بطلع الوقائع المنشورة، بيبني إعلانات بالعبري والعربي للقنوات، وبعرض صور أو ملصقات. بتحمّلوا الحزمة (وبـPro كمان رزنامة وصفحة هبوط). بلا عائد مخترع وبلا أسعار ما نشرتوها.",
+    en: "For any business: paste a site URL — SAWEK pulls published facts, builds Hebrew and Arabic channel ads, and offers photos or graphics. You download the kit (and on Pro, a calendar and landing). No invented ROAS, no unpublished prices.",
   },
   "home.truth": {
     he: "רק מה שפורסם באתר נכנס לקמפיין. מספרים חסרים נשארים ריקים. אין ציון ביצועים בדוי.",
@@ -93,9 +93,9 @@ export const copy: Dict = {
     en: "AdCreative and Predis: English-first, with invented performance scores.",
   },
   "home.vs.sawek": {
-    he: "SAWEK: קישור נכנס, קמפיין יוצא — לעסקים מקומיים בעברית וערבית. בלי ציון ROAS בדוי.",
-    ar: "SAWEK: الرابط بيدخل، الحملة بتطلع — لمحلات محلية بالعبري والعربي. بلا علامة عائد مختلقة.",
-    en: "SAWEK: URL in, campaign out — for local Hebrew and Arabic businesses. No fake ROAS score.",
+    he: "SAWEK: קישור נכנס, קמפיין יוצא — לכל עסק מקומי בעברית וערבית. בלי ציון ROAS בדוי.",
+    ar: "SAWEK: الرابط بيدخل، الحملة بتطلع — لأي شغل محلي بالعبري والعربي. بلا علامة عائد مختلقة.",
+    en: "SAWEK: URL in, campaign out — for any local Hebrew and Arabic business. No fake ROAS score.",
   },
   "home.plans.title": { he: "חינם מול Pro", ar: "مجاني مقابل Pro", en: "Free vs Pro" },
   "home.plans.month": { he: "לחודש", ar: "بالشهر", en: "/ month" },
@@ -138,7 +138,7 @@ export const copy: Dict = {
   "model.freeHint": {
     he: "מוסד בלי גבייה מהלקוח: קופה עצמאית, בית ספר, עירייה, עמותה. רק חשיפה / הרשמה / מודעות / ביקור.",
     ar: "مؤسسة بلا جباية من الزبون: صندوق مستقل، مدرسة، بلدية، جمعية. بس تعرّض / تسجيل / وعي / زيارة.",
-    en: "Institution with no charge to the client: independent HMO clinic, school, municipality, NGO. Exposure / enrollment / awareness / visit only.",
+    en: "Institution with no charge to the client: clinic, school, municipality, NGO. Exposure / enrollment / awareness / visit only.",
   },
   "details.assets": { he: "תמונות וסרטונים של העסק", ar: "صور وفيديوهات الشغل", en: "Business photos and videos" },
   "details.assetsHint": {
@@ -172,12 +172,12 @@ export const copy: Dict = {
   "biz.location": { he: "מיקום", ar: "الموقع", en: "Location" },
   "biz.website": { he: "אתר (אופציונלי)", ar: "موقع (اختياري)", en: "Website (optional)" },
   "biz.whatsapp": { he: "וואטסאפ", ar: "واتساب", en: "WhatsApp" },
-  "biz.whatsappPh": { he: "052-8885800", ar: "052-8885800", en: "052-8885800" },
-  "biz.hours": { he: "שעות קבלה / אופן הגעה", ar: "ساعات الدوام / كيف تجوا", en: "Clinic hours / how to arrive" },
+  "biz.whatsappPh": { he: "05X-XXXXXXX", ar: "05X-XXXXXXX", en: "05X-XXXXXXX" },
+  "biz.hours": { he: "שעות פעילות / אופן הגעה", ar: "ساعات العمل / كيف تجوا", en: "Business hours / how to arrive" },
   "biz.hoursPh": {
-    he: "למשל: לפי סדר הגעה, בלי תור מראש",
-    ar: "مثال: جت أولاً بدون مواعيد، مجمع النور طابق 1",
-    en: "e.g. walk-in, first come first served, no appointment",
+    he: "למשל: א׳–ה׳ 09:00–18:00, או לפי סדר הגעה",
+    ar: "مثال: أحد–خميس 09:00–18:00، أو حسب الوصول",
+    en: "e.g. Sun–Thu 09:00–18:00, or walk-in",
   },
   "biz.hoursHint": {
     he: "אם הקבלה לפי סדר הגעה — כתבו במפורש. אל תמציאו שעות שעון שלא פרסמתם.",
@@ -921,9 +921,9 @@ export const copy: Dict = {
   "gemini.quota": { he: "אין מכסה", ar: "ما في حصّة", en: "No quota" },
   "gemini.vertexQuotaStudio": { he: "Vertex במכסה · AI Studio זמין", ar: "Vertex بالحصّة · AI Studio متاح", en: "Vertex quota · AI Studio ready" },
   "gemini.waitFacts": {
-    he: "המתינו לכתובת או לעובדות. לא נייצר קמפיין מרפאה ריק.",
-    ar: "استنوا رابط أو وقائع. مش منولّد حملة عيادة فاضية.",
-    en: "Wait for a URL or typed facts. We will not invent a clinic campaign.",
+    he: "המתינו לכתובת או לעובדות. לא נייצר קמפיין ריק בלי נתונים.",
+    ar: "استنوا رابط أو وقائع. مش منولّد حملة فاضية بلا بيانات.",
+    en: "Wait for a URL or typed facts. We will not invent an empty campaign.",
   },
   "nav.pricing": { he: "מחירים", ar: "الأسعار", en: "Pricing" },
   "nav.login": { he: "כניסה", ar: "دخول", en: "Log in" },

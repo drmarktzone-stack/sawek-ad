@@ -13,8 +13,8 @@ import { syncCampaign } from "@/lib/supabase";
 import { uid } from "@/lib/utils";
 import { MAX_COMPETITORS } from "@/lib/factory-formats";
 import { AREA_LABEL } from "@/lib/i18n";
-import { markEmptyCampaign, wantsEmptyCampaign, clearEmptyCampaign, explicitDemoInUrl, applyEmptyCampaignHydrate, EMPTY_CAMPAIGN_EVENT, releaseEmptyIfTypedName } from "@/lib/empty-campaign";
-import { isBlockedEmptySessionName } from "@/lib/clinic-leak";
+import { markEmptyCampaign, wantsEmptyCampaign, clearEmptyCampaign, explicitDemoInUrl, applyEmptyCampaignHydrate, EMPTY_CAMPAIGN_EVENT, releaseEmptyIfTypedName, hasDemoSession, markDemoSession } from "@/lib/empty-campaign";
+import { isBlockedEmptySessionName, intakeIsClinicDemo } from "@/lib/clinic-leak";
 import { stripDemoParamsPreserveLang, withLang } from "@/lib/locale-url";
 import {
   ADVANTAGE_CHIPS,
@@ -95,6 +95,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
     const urlDemo = !emptyWanted && (explicitDemoInUrl() || consumePendingDemo());
     if (urlDemo) {
       demoConsumed.current = true;
+      markDemoSession();
       const d = demoIntake(locale);
       clearPendingDemo();
       clearEmptyCampaign();
@@ -109,7 +110,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
         offer: false,
       });
       setPhase("wizard");
-    } else if (emptyWanted) {
+    } else if (emptyWanted || (intakeIsClinicDemo(loadDraft().intake) && !hasDemoSession())) {
       const blankState = applyEmptyCampaignHydrate();
       setIntake(blankState.intake);
       setStep(1);

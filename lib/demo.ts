@@ -1,7 +1,7 @@
 import type { Intake, Locale } from "./types";
 import { DEFAULT_OFFER_HE, defaultOfferLabel } from "./chips";
 import { saveDraft } from "./storage";
-import { clearEmptyCampaign } from "./empty-campaign";
+import { clearEmptyCampaign, markDemoSession } from "./empty-campaign";
 import DEMO_SNAPSHOT from "./demo-snapshot.json";
 
 export const DEMO_ID = "demo-samer-clinic";
@@ -78,6 +78,7 @@ export const DEMO_LABEL = {
 
 export function applyPediatricDemoDraft(locale: Locale = "he"): Intake {
   clearEmptyCampaign();
+  markDemoSession();
   const intake = demoIntake(locale);
   saveDraft({ intake, step: 2 });
   try {

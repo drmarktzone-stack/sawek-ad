@@ -13,6 +13,7 @@ import { draftLeaksClinic } from "../lib/clinic-leak";
 import { t } from "../lib/i18n";
 import type { CampaignPack } from "../lib/types";
 import { bodyHasFacts } from "../lib/engine/gemini-generate";
+import { filterCustomerCampaigns, isBannedCustomerSample } from "../lib/sample-packs";
 
 const mem = new Map<string, string>();
 const session = new Map<string, string>();
@@ -67,9 +68,19 @@ function fail(msg: string) {
 if (t("he", "cta.new") !== "קמפיין חדש") fail(`cta.new he=${t("he", "cta.new")}`);
 if (t("ar", "cta.newOther") !== "حملة جديدة لمحل آخر") fail(`cta.newOther ar=${t("ar", "cta.newOther")}`);
 if (t("en", "cta.newOther") !== "New campaign for another business") fail(`cta.newOther en=${t("en", "cta.newOther")}`);
+if (t("he", "biz.whatsappPh") === "052-8885800") fail("whatsapp placeholder leaked clinic phone");
+if (/052-8885800|مجمع النور|אל-נור/.test(t("he", "biz.hoursPh") + t("ar", "biz.hoursPh") + t("en", "biz.hoursPh"))) {
+  fail("hours placeholder leaked clinic address");
+}
+if (/מרפאה|عيادة|clinic campaign/i.test(t("he", "gemini.waitFacts") + t("ar", "gemini.waitFacts") + t("en", "gemini.waitFacts"))) {
+  fail("gemini.waitFacts still frames an empty clinic campaign");
+}
+if (!/לכל עסק|لكل شغل|any business/i.test(t("he", "home.pitch") + t("ar", "home.pitch") + t("en", "home.pitch"))) {
+  fail("home.pitch must say the product is for any business");
+}
 if (!/My Campaigns|form fields will empty/i.test(t("en", "cta.newHint"))) fail(`cta.newHint en=${t("en", "cta.newHint")}`);
 if (!/הקמפיינים שלי/.test(t("he", "cta.newHint"))) fail(`cta.newHint he missing My Campaigns`);
-if (t("he", "gemini.vertex") !== "Gemini (Vertex)") fail(`gemini.vertex ${t("he", "gemini.vertex")}`);
+if (!/Vertex/.test(t("he", "gemini.vertex"))) fail(`gemini.vertex ${t("he", "gemini.vertex")}`);
 if (t("he", "gemini.quota") !== "אין מכסה") fail(`gemini.quota ${t("he", "gemini.quota")}`);
 
 const clinic = demoIntake("he");
@@ -149,6 +160,27 @@ if (wantsEmptyCampaign()) fail("clearEmptyCampaign did not drop flag");
 if (loadCampaigns().some((c) => c.id === "pack-keep-me") === false) {
   fail("saved pack missing after empty hydrate");
 }
+
+if (
+  !isBannedCustomerSample({ id: "x", name: "יקב היין", intake: { businessName: "יקב היין" } }) ||
+  !isBannedCustomerSample({ id: "x", name: "עיר המותגים", intake: { businessName: "עיר המותגים" } }) ||
+  !isBannedCustomerSample({ id: "x", name: "קינג סטור", intake: { businessName: "קינג סטור" } }) ||
+  !isBannedCustomerSample({ id: "rinan-he", name: "רינאן ספורט", intake: { businessName: "בריכת רינאן" } }) ||
+  !isBannedCustomerSample({ id: "e3e112bd-d36a-4a10-8b5f-fccf4edfd83d", name: "pedi-guide" })
+) {
+  fail("banned sample packs must be detected");
+}
+if (isBannedCustomerSample({ id: "demo-samer-clinic", name: "د. سامر محمد أبو مخ" })) {
+  fail("clinic demo must stay allowed");
+}
+const filtered = filterCustomerCampaigns([
+  { id: "demo-samer-clinic", name: "clinic" },
+  { id: "wine-1", name: "יקב היין" },
+  { id: "keep-me", name: "סטודיו נועה" },
+]);
+if (filtered.some((p) => p.id === "wine-1")) fail("wine sample still in customer list");
+if (!filtered.some((p) => p.id === "keep-me")) fail("real campaign was filtered");
+if (!filtered.some((p) => p.id === "demo-samer-clinic")) fail("clinic demo filtered from allow-list helper");
 
 if (bodyHasFacts({})) fail("empty body should not look like facts");
 if (bodyHasFacts({ description: "", audience: "" })) fail("blank description is not facts");

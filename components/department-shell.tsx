@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import { ConquerHeadline } from "@/components/stepper";
 import { cn } from "@/lib/utils";
 import { LangLink } from "@/components/lang-link";
-import { wantsEmptyCampaign } from "@/lib/empty-campaign";
 
 const AGENT_LABEL: Record<AgentId, Record<Locale, string>> = {
   intake: { he: "קליטה", ar: "الاستقبال", en: "Intake" },
@@ -122,9 +121,6 @@ export function DepartmentShell({
   if (client && !booted) {
     const latest = latestPack();
     if (latest) setPack(latest);
-    else if (!wantsEmptyCampaign() && locale !== "ar") {
-      setPack(installDemoPack());
-    }
     setPackLang(locale);
     setBooted(true);
   }

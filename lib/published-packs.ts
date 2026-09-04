@@ -1,16 +1,22 @@
 import type { CampaignPack } from "./types";
 import { getCampaign, loadCampaigns } from "./storage";
+import { filterCustomerCampaigns, isAllowedPublishedDemoId } from "./sample-packs";
 
 let cache: CampaignPack[] | null = null;
 let inflight: Promise<CampaignPack[]> | null = null;
+
+function onlyClinicDemo(packs: CampaignPack[]): CampaignPack[] {
+  return packs.filter((p) => isAllowedPublishedDemoId(p.id));
+}
 
 export function cachedPublished(): CampaignPack[] {
   return cache ?? [];
 }
 
-export function mergeCampaigns(local: CampaignPack[], published: CampaignPack[]): CampaignPack[] {
-  const ids = new Set(local.map((c) => c.id));
-  return [...local, ...published.filter((p) => !ids.has(p.id))];
+export function mergeCampaigns(local: CampaignPack[], _published: CampaignPack[] = []): CampaignPack[] {
+  // Lists stay local-only. Clinic demo is installed on Demo click, not injected from published.json.
+  void _published;
+  return filterCustomerCampaigns(local);
 }
 
 export async function fetchPublishedPacks(): Promise<CampaignPack[]> {
@@ -25,7 +31,8 @@ export async function fetchPublishedPacks(): Promise<CampaignPack[]> {
         return cache;
       }
       const data: unknown = await res.json();
-      cache = Array.isArray(data) ? (data as CampaignPack[]) : [];
+      const raw = Array.isArray(data) ? (data as CampaignPack[]) : [];
+      cache = onlyClinicDemo(raw);
       return cache;
     } catch {
       cache = [];

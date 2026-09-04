@@ -25,7 +25,7 @@ This agent listed that account with the **unauthenticated public GitHub API**. G
 
 Features were therefore merged from a **read-only** listing of Lovable project `1b75b82e-6b26-401e-aa7a-1ce137d0dfa8` (`name: opti-brain`, https://opti-brain.lovable.app). That Lovable project was **not** edited. To clone a private OptiBrain GitHub repo later, authenticate GitHub MCP or add a read-only `GH_TOKEN`.
 
-## Demo — medical (pediatric, no keys)
+## Demo — clinic example only (any-business product; no keys)
 
 1. Open **OptiBrain** (`/medical/optibrain`) for the 15-module desk, or `/medical` for the clinic landing builder.
 2. On the homepage, click **הדגמה: מרפאת ילדים ד״ר סאמר אבו מוך** only when you want the demo. It is a button — it is **not** restored on reload if you chose **התחל קמפיין ריק** / **ابدأ حملة فارغة** or if the UI locale is Arabic. Unknown numbers stay empty / `[יש להשלים]` / `[يجب الاستكمال]`. Offer is **אין מבצע** / **لا يوجد عرض**.

@@ -1,9 +1,10 @@
-import { clearDraft, saveDraft, type DraftState } from "./storage";
+import { saveDraft, type DraftState } from "./storage";
 import { emptyIntake } from "./engine/validate";
 import { intakeIsClinicDemo, isBlockedEmptySessionName } from "./clinic-leak";
 
 export const EMPTY_CAMPAIGN_KEY = "sawek-empty-campaign";
 export const EMPTY_CAMPAIGN_EVENT = "sawek-empty-campaign";
+export const DEMO_SESSION_KEY = "sawek-demo-session";
 
 function stripDemoFromUrl() {
   try {
@@ -33,16 +34,40 @@ function writeEmptyFlag(on: boolean) {
   }
 }
 
-/** New campaign: strip ?demo= FIRST, then wipe the form. Sticky until a new business name. */
-export function markEmptyCampaign() {
-  stripDemoFromUrl();
+export function markDemoSession() {
   try {
-    sessionStorage.removeItem("sawek-pending-demo");
+    sessionStorage.setItem(DEMO_SESSION_KEY, "1");
   } catch {
     /* private mode */
   }
-  clearDraft();
+}
+
+export function hasDemoSession(): boolean {
+  try {
+    if (typeof window === "undefined") return false;
+    if (sessionStorage.getItem(DEMO_SESSION_KEY) === "1") return true;
+    return explicitDemoInUrl();
+  } catch {
+    return false;
+  }
+}
+
+export function clearDemoSession() {
+  try {
+    sessionStorage.removeItem(DEMO_SESSION_KEY);
+    sessionStorage.removeItem("sawek-pending-demo");
+    localStorage.removeItem("sawek-pending-demo");
+  } catch {
+    /* private mode */
+  }
+}
+
+/** New campaign: strip ?demo= FIRST, then wipe every wizard field. Sticky until a new business name. */
+export function markEmptyCampaign() {
+  stripDemoFromUrl();
+  clearDemoSession();
   writeEmptyFlag(true);
+  applyEmptyCampaignHydrate();
   if (typeof window !== "undefined") {
     window.dispatchEvent(new Event(EMPTY_CAMPAIGN_EVENT));
   }

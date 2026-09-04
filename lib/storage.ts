@@ -2,6 +2,7 @@ import type { CampaignPack, CoachReport, Intake, LabRun, Locale, SelfPlan, SelfP
 import { emptyIntake } from "./engine/validate";
 import { coachIntake } from "./engine/coach";
 import { intakeIsClinicDemo, isBlockedEmptySessionName } from "./clinic-leak";
+import { filterCustomerCampaigns } from "./sample-packs";
 import { canSaveAnotherCampaign, clientPlan } from "./plan";
 
 const K = {
@@ -145,11 +146,14 @@ export function applyIntakeToDraft(intake: Intake, opts?: { resetWizard?: boolea
 }
 
 export function clearDraft() {
-  write(K.draft, { intake: emptyIntake(), step: 1 });
+  write(K.draft, { intake: emptyIntake(), step: 1, phase: "wizard" });
 }
 
 export function loadCampaigns(): CampaignPack[] {
-  return read<CampaignPack[]>(K.campaigns, []);
+  const list = read<CampaignPack[]>(K.campaigns, []);
+  const kept = filterCustomerCampaigns(list);
+  if (kept.length !== list.length) write(K.campaigns, kept);
+  return kept;
 }
 
 export function saveCampaigns(list: CampaignPack[]) {

@@ -5,7 +5,6 @@ import type { AgentId, AgentStatus, CampaignPack } from "@/lib/types";
 import { deleteCampaign, loadCampaigns } from "@/lib/storage";
 import { cachedPublished, fetchPublishedPacks, mergeCampaigns } from "@/lib/published-packs";
 import { installDemoPack } from "@/lib/active-pack";
-import { wantsEmptyCampaign } from "@/lib/empty-campaign";
 import { markEmptyCampaign } from "@/lib/empty-campaign";
 import { LangLink } from "@/components/lang-link";
 import { ensureAgency } from "@/lib/engine/agency";
@@ -56,11 +55,7 @@ export function CampaignsList() {
     let cancelled = false;
     (async () => {
       const published = await fetchPublishedPacks();
-      let rows = mergeCampaigns(loadCampaigns().map(ensureAgency), published.map(ensureAgency));
-      if (rows.length === 0 && !wantsEmptyCampaign() && locale !== "ar") {
-        installDemoPack();
-        rows = mergeCampaigns(loadCampaigns().map(ensureAgency), published.map(ensureAgency));
-      }
+      const rows = mergeCampaigns(loadCampaigns().map(ensureAgency), published.map(ensureAgency));
       if (!cancelled) {
         setList(rows);
         setBooted(true);

@@ -2,9 +2,9 @@
  * Dry-run the clinic URL through ingest + applyIngestReview (same path as the UI),
  * then serialize the applied intake into lib/demo-snapshot.json and publish the
  * assembled pack first in public/packs/published.json. Does not hand-write ad copy.
- * Re-run after ingest/engine fixes. Keeps existing Pedi-Guide / Rinan packs.
+ * Re-run after ingest/engine fixes. Publishes ONLY the clinic demo pack.
  */
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
+import { mkdirSync, writeFileSync } from "fs";
 import { join } from "path";
 import { ingestUrl } from "../lib/url-ingest";
 import { applyIngestReview, rowsFromExtracted } from "../lib/document-ingest";
@@ -49,12 +49,7 @@ function writePublished(pack: CampaignPack): { outPath: string; ids: string[] } 
   const outDir = join(process.cwd(), "public/packs");
   mkdirSync(outDir, { recursive: true });
   const outPath = join(outDir, "published.json");
-  let published: CampaignPack[] = [];
-  if (existsSync(outPath)) {
-    const prev = JSON.parse(readFileSync(outPath, "utf8")) as unknown;
-    published = Array.isArray(prev) ? (prev as CampaignPack[]) : [];
-  }
-  const next = [pack, ...published.filter((p) => p.id !== pack.id)];
+  const next = [pack];
   writeFileSync(outPath, JSON.stringify(next, null, 2), "utf8");
   return { outPath, ids: next.map((p) => p.id) };
 }
