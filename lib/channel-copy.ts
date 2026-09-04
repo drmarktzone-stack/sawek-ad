@@ -77,7 +77,20 @@ export function channelFields(pack: CampaignPack, locale: Locale): ChannelFields
   const cta = fieldOrIncomplete(v?.cta, locale);
   const waFromIntake = pack.intake.whatsappTemplates?.trim() ?? "";
   const waRaw = stripHoursWall(waFromIntake || waPiece?.body || "");
-  const waScript = fieldOrIncomplete(waRaw, locale);
+  const waClean = waRaw
+    .replace(/\[יש להשלים\]|\[يجب الاستكمال\]|\[TO COMPLETE\]/g, "")
+    .replace(/\bיש להשלים\b|\bيجب الاستكمال\b|\bTO COMPLETE\b/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  const waHasFacts = Boolean((pack.intake.whatsapp || "").trim() || (pack.intake.businessName || "").trim());
+  const waScript =
+    waRaw && !isIncompleteMarker(waRaw, locale)
+      ? waRaw
+      : waHasFacts && waClean
+        ? waClean
+        : waHasFacts
+          ? fieldOrIncomplete(pack.intake.businessName || pack.intake.whatsapp, locale)
+          : fieldOrIncomplete(waRaw, locale);
   const landingTitle = fieldOrIncomplete(lpPiece?.title || v?.headline, locale);
   const landingBody = fieldOrIncomplete(lpPiece?.body, locale);
   const posterHeadline = clipAtWord(stripHoursWall(headline) || headline, 56);

@@ -64,7 +64,7 @@ function pageIntake(result: UrlIngestOk): Intake {
   i.description = [labeledFields(f), result.text].filter(Boolean).join("\n");
   i.location = f.location ?? "";
   i.website = f.website ?? "";
-  i.whatsapp = f.whatsapp ?? "";
+  i.whatsapp = (f.whatsapp || f.phone || "").trim();
   i.clinicHours = f.clinicHours ?? "";
   i.offer = f.offer ?? i.offer;
   i.audience = f.audience ?? "";

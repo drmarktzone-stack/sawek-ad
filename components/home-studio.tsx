@@ -45,24 +45,24 @@ export function HomeStudio() {
   /** Soft tinted rows — each step a distinct card; guidance kicker stays teal (fixed chrome). */
   const howStepThemes = [
     {
-      bg: "bg-[#F3EDE3]",
+      bg: "bg-[#E6D5B8]",
       edge: "border-s-[#0F2744]",
-      chip: "bg-[#0F2744]/12 text-[#0F2744]",
+      chip: "bg-[#0F2744]/18 text-[#0F2744]",
     },
     {
-      bg: "bg-[#E6F4F1]",
+      bg: "bg-[#BFE6DC]",
       edge: "border-s-[#1F7A6B]",
-      chip: "bg-[#1F7A6B]/15 text-[#1F7A6B]",
+      chip: "bg-[#1F7A6B]/20 text-[#1F7A6B]",
     },
     {
-      bg: "bg-[#EEE8F7]",
+      bg: "bg-[#D4C4F0]",
       edge: "border-s-[#6B5B95]",
-      chip: "bg-[#6B5B95]/15 text-[#6B5B95]",
+      chip: "bg-[#6B5B95]/20 text-[#6B5B95]",
     },
     {
-      bg: "bg-[#FCEEE9]",
+      bg: "bg-[#F5C4B0]",
       edge: "border-s-[#E07A5F]",
-      chip: "bg-[#E07A5F]/15 text-[#E07A5F]",
+      chip: "bg-[#E07A5F]/20 text-[#E07A5F]",
     },
   ] as const;
   const freeItems = ["pricing.f1", "pricing.f2", "pricing.f3", "pricing.f4", "pricing.f5"] as const;
@@ -148,7 +148,7 @@ export function HomeStudio() {
           return (
             <li
               key={title}
-              className={`rounded-[var(--radius-card)] border border-[var(--line)] border-s-4 ${theme.edge} ${theme.bg} p-5 text-start shadow-[var(--shadow-card)]`}
+              className={`rounded-[var(--radius-card)] border border-[var(--line)] border-s-[6px] ${theme.edge} ${theme.bg} p-5 text-start shadow-[var(--shadow-card)]`}
             >
               <p className="flex items-center gap-2 text-[0.7rem] font-extrabold uppercase tracking-[0.22em] text-[#1F7A6B] sm:text-xs">
                 <span className={`inline-flex size-7 items-center justify-center rounded-full ${theme.chip}`}>

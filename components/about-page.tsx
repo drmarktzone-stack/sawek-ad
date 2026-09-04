@@ -164,16 +164,16 @@ export function AboutPage() {
         <div className="space-y-4">
           {steps.map((b, i) => {
             const themes = [
-              { bg: "bg-[#F3EDE3]", edge: "border-s-[#0F2744]" },
-              { bg: "bg-[#E6F4F1]", edge: "border-s-[#1F7A6B]" },
-              { bg: "bg-[#EEE8F7]", edge: "border-s-[#6B5B95]" },
-              { bg: "bg-[#FCEEE9]", edge: "border-s-[#E07A5F]" },
+              { bg: "bg-[#E6D5B8]", edge: "border-s-[#0F2744]" },
+              { bg: "bg-[#BFE6DC]", edge: "border-s-[#1F7A6B]" },
+              { bg: "bg-[#D4C4F0]", edge: "border-s-[#6B5B95]" },
+              { bg: "bg-[#F5C4B0]", edge: "border-s-[#E07A5F]" },
             ] as const;
             const theme = themes[i % themes.length];
             return (
               <article
                 key={b.h}
-                className={`rounded-[var(--radius-card)] border border-[var(--line)] border-s-4 ${theme.edge} ${theme.bg} p-6 shadow-[var(--shadow-card)]`}
+                className={`rounded-[var(--radius-card)] border border-[var(--line)] border-s-[6px] ${theme.edge} ${theme.bg} p-6 shadow-[var(--shadow-card)]`}
               >
                 <p className="mb-2 text-[0.7rem] font-extrabold uppercase tracking-[0.22em] text-[#1F7A6B] sm:text-xs">
                   {t("home.how.title")} · 0{i + 1}

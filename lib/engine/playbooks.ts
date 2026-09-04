@@ -206,31 +206,37 @@ export function playbookFor(intake: Intake): VerticalPlaybook {
   }
 
   if (v === "restaurant") {
+    const hungerHe = painHe || (offerHe ? `${nHe} — רעבים? ${offerHe}` : `${nHe} — רעב, תפריט ומשלוח.`);
+    const hungerAr = painAr || (offerAr ? `${nAr} — جوعانين؟ ${offerAr}` : `${nAr} — جوع، قائمة وتوصيل.`);
+    const hungerEn = painEn || (offerEn ? `${nEn} — hungry? ${offerEn}` : `${nEn} — hunger, menu, delivery.`);
+    const saleOnceHe = sale && offerHe ? `המבצע שסופק: ${offerHe}.` : "אין הנחה באתר — מדברים על התפריט והמשלוח פעם אחת, בלי ספאם.";
+    const saleOnceAr = sale && offerAr ? `العرض المعطى: ${offerAr}.` : "ما في خصم بالموقع — نحكي عن القائمة والتوصيل مرة واحدة، بلا سبام.";
+    const saleOnceEn = sale && offerEn ? `Offer as given: ${offerEn}.` : "No site discount — talk menu and delivery once, no spam.";
     return {
       vertical: v,
-      hookPain: L(
-        painHe || `${nHe} — המטבח המקומי ב${locHe}.`,
-        painAr || `${nAr} — مطبخ الحي في ${locAr}.`,
-        painEn || `${nEn} — the local kitchen in ${locEn}.`,
-      ),
+      hookPain: L(hungerHe, hungerAr, hungerEn),
       proof: L(
-        advHe || `${nHe} — טעם מקומי.`,
-        advAr || `${nAr} — طعم محلي.`,
-        advEn || `${nEn} — local taste.`,
+        [advHe || `${nHe} — טעם, תפריט ומשלוח.`, saleOnceHe].filter(Boolean).join(" "),
+        [advAr || `${nAr} — طعم وقائمة وتوصيل.`, saleOnceAr].filter(Boolean).join(" "),
+        [advEn || `${nEn} — taste, menu, delivery.`, saleOnceEn].filter(Boolean).join(" "),
       ),
       channels: channelCore,
       plan7: L(
-        "ימים 1–2: תמונת מקום אמיתית + הוק על הרעב/היכרות. ימים 3–4: סטורי «בואו היום». ימים 5–7: וואטסאפ למקום + דף נחיתה. PLAN. מטבח, לא מוסד רפואי.",
-        "يوم 1–2: صورة مكان حقيقية + خطاف الجوع/التعارف. يوم 3–4: ستوري «تعوا اليوم». يوم 5–7: واتساب للمكان + هبوط. خطة. مطبخ، مش مؤسسة طبية.",
-        "Days 1–2: a real venue photo + hunger/awareness hook. Days 3–4: story “come today”. Days 5–7: WhatsApp the venue + landing. PLAN. A kitchen, not a medical institution.",
+        "ימים 1–2: תמונת אוכל אמיתית + הוק רעב/משלוח/תפריט מהעובדות. ימים 3–4: סטורי «הזמינו היום». ימים 5–7: טלפון/וואטסאפ + דף נחיתה. PLAN. מטבח, לא מוסד רפואי. בלי «לא מכירים» כשיש שם.",
+        "يوم 1–2: صورة أكل حقيقية + خطاف جوع/توصيل/قائمة من الحقائق. يوم 3–4: ستوري «اطلبوا اليوم». يوم 5–7: هاتف/واتساب + هبوط. خطة. مطبخ، مش مؤسسة طبية. بلا «مش عارفين» إذا في اسم.",
+        "Days 1–2: a real food photo + hunger/delivery/menu hook from facts. Days 3–4: story “order today”. Days 5–7: phone/WhatsApp + landing. PLAN. A kitchen, not a medical institution. Never “don’t know us” when a name exists.",
       ),
       audienceProposed,
-      problemProposed: problemFromDesc,
+      problemProposed: L(
+        clip(hungerHe, 120),
+        clip(hungerAr, 120),
+        clip(hungerEn, 120),
+      ),
       advantageProposed: advantageFromFacts,
       angles: [
-        L("טעם מקומי", "طعم محلي", "local taste"),
-        L(bankCtas("he")[0] || "בואו למסעדה", bankCtas("ar")[0] || "تعوا ع المطعم", bankCtas("en")[0] || "Come dine"),
-        L(bankHooks("he")[0] || nHe, bankHooks("ar")[0] || nAr, bankHooks("en")[0] || nEn),
+        L("רעב ומשלוח", "جوع وتوصيل", "hunger & delivery"),
+        L("תפריט היום", "قائمة اليوم", "today's menu"),
+        L(bankCtas("he")[0] || "הזמינו עכשיו", bankCtas("ar")[0] || "اطلبوا الآن", bankCtas("en")[0] || "Order now"),
       ],
     };
   }

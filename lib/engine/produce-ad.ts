@@ -31,7 +31,7 @@ export function produceAd(intake: Intake, styleId: string, idea: string, locale:
   const site = intake.website?.trim() ?? "";
   const offerBit =
     isFreeService(intake) || isNoOffer(intake.offer)
-      ? clinic
+      ? clinic || vertical === "restaurant"
         ? ""
         : noOfferNote(locale)
       : resolveChipLabel(intake.offer, OFFER_CHIPS, locale) || intake.offer;

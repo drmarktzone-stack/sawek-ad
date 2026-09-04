@@ -21,6 +21,7 @@ import {
   isPediatrics as isPedsVertical,
   painFallback,
   placeNoun,
+  restaurantHungerLine,
   showsKupaFields,
   visitCta,
   waNotEmergencyBit,
@@ -334,7 +335,25 @@ export function spokenCta(intake: Intake, locale: Locale): string {
     }
     return locale === "he" ? "להורדה" : locale === "ar" ? "حمّلوا التطبيق" : "Download the app";
   }
-  return locale === "he" ? "דבرو איתנו" : locale === "ar" ? "احكوا معنا عالواتساب" : "Talk to us";
+  if (detectVertical(intake) === "restaurant") {
+    if (intake.website?.trim()) {
+      return locale === "he" ? "להזמנה באתר" : locale === "ar" ? "للطلب بالموقع" : "Order on the site";
+    }
+    if (waBit(intake)) {
+      return locale === "he" ? "הזמינו בטלפון" : locale === "ar" ? "اطلبوا عالهاتف" : "Order by phone";
+    }
+    return visitCta(intake, locale);
+  }
+  if (detectVertical(intake) === "retail") {
+    return visitCta(intake, locale);
+  }
+  if (intake.website?.trim()) {
+    return locale === "he" ? "לאתר" : locale === "ar" ? "للموقع" : "Visit the site";
+  }
+  if (waBit(intake)) {
+    return locale === "he" ? "וואטסאפ" : locale === "ar" ? "واتساب" : "WhatsApp";
+  }
+  return locale === "he" ? "דברו איתנו" : locale === "ar" ? "احكوا معنا عالواتساب" : "Talk to us";
 }
 
 function placeBit(intake: Intake, locale: Locale): string {
@@ -346,8 +365,31 @@ function placeBit(intake: Intake, locale: Locale): string {
   return city;
 }
 
+/** Prefer intake.whatsapp; else labeled phone/WhatsApp in description. Never invent. */
+export function contactNumber(intake: Intake): string {
+  const direct = intake.whatsapp?.trim() || "";
+  if (direct) return direct;
+  const desc = `${intake.description || ""}\n${intake.channelNotes || ""}`;
+  const labeled =
+    desc.match(/(?:whatsapp|וואטסאפ|واتساب|phone|tel(?:ephone)?|טלפון|هاتف)\s*[:：]\s*([+\d][\d\-–.\s]{6,24}\d)/i) ||
+    desc.match(/\b(1-?700[\d\-]{5,}|0\d[\d\-]{7,14}|\+972[\d\-]{7,14})\b/);
+  return labeled?.[1]?.replace(/\s+/g, " ").trim() || "";
+}
+
 function waBit(intake: Intake): string {
-  return intake.whatsapp?.trim() || "";
+  return contactNumber(intake);
+}
+
+function incompleteContact(locale: Locale): string {
+  return locale === "ar" ? "[يجب الاستكمال]" : locale === "he" ? "[יש להשלים]" : "[TO COMPLETE]";
+}
+
+/** Only when neither name nor phone exist — never TO COMPLETE over a known business. */
+function contactOrEmpty(intake: Intake, locale: Locale): string {
+  const wa = waBit(intake);
+  if (wa) return wa;
+  if (intake.businessName.trim() || intake.website?.trim()) return "";
+  return incompleteContact(locale);
 }
 
 function forbiddenHeadline(s: string): boolean {
@@ -387,7 +429,7 @@ export function whatsappScript(intake: Intake, locale: Locale): string {
       .join(" ");
   }
   const n = shortName(intake, locale);
-  const wa = waBit(intake) || (locale === "ar" ? "[يجب الاستكمال]" : locale === "he" ? "[יש להשלים]" : "[TO COMPLETE]");
+  const wa = contactOrEmpty(intake, locale);
   const hours = hoursLine(intake, locale);
   const kupa = kupaLine(intake, locale);
   const place = placeBit(intake, locale);
@@ -396,49 +438,81 @@ export function whatsappScript(intake: Intake, locale: Locale): string {
       ? "جت أولاً بدون مواعيد — مش منحجز دور من الواتساب."
       : "";
     const h1 = isWalkIn(intake) && isPediatrics(intake) ? `${LOCKED_AR_H1}.` : "";
+    const site = intake.website?.trim() ?? "";
     return [
       h1,
       `أهلا، هون ${n}.`,
       place ? place + "." : "",
-      `واتساب ${wa}.`,
+      wa ? `واتساب ${wa}.` : site ? site : "",
       walk,
       hours,
       kupa,
       emergencyDisclaimer(intake, locale),
+      spokenCta(intake, locale),
     ]
       .filter(Boolean)
       .join(" ");
   }
   if (locale === "he") {
-    const walk = isWalkIn(intake) ? "קבלה לפי סדר הגעה, בלי לקבוע תור בוואטסאפ." : "מתי נוח לתור?";
+    const rest = detectVertical(intake) === "restaurant";
+    const walk = isWalkIn(intake)
+      ? "קבלה לפי סדר הגעה, בלי לקבוע תור בוואטסאפ."
+      : rest
+        ? ""
+        : "מתי נוח לתור?";
+    const site = intake.website?.trim() ?? "";
+    const open = wa
+      ? `שלום, כאן ${n}. וואטסאפ ${wa}.`
+      : site
+        ? `שלום, כאן ${n}. ${site}`
+        : `שלום, כאן ${n}.`;
     return [
-      `שלום, כאן ${n}. וואטסאפ ${wa}.`,
+      open,
       place,
       walk,
       hours,
       kupa,
       emergencyDisclaimer(intake, locale),
+      spokenCta(intake, locale),
     ]
       .filter(Boolean)
       .join(" ");
   }
+  const rest = detectVertical(intake) === "restaurant";
   const walk = isWalkIn(intake)
     ? "Walk-in, first come first served — we do not book slots on WhatsApp."
-    : "When works for a visit?";
+    : rest
+      ? ""
+      : "When works for a visit?";
+  const site = intake.website?.trim() ?? "";
+  const open = wa
+    ? `Hi, this is ${n}. WhatsApp ${wa}.`
+    : site
+      ? `Hi, this is ${n}. ${site}`
+      : `Hi, this is ${n}.`;
   return [
-    `Hi, this is ${n}. WhatsApp ${wa}.`,
+    open,
     place,
     walk,
     hours,
     kupa,
     emergencyDisclaimer(intake, locale),
+    spokenCta(intake, locale),
   ]
     .filter(Boolean)
     .join(" ");
 }
 
-function offerLine(intake: Intake, locale: Locale): string {
+function offerLine(intake: Intake, locale: Locale, allowNoOffer = false): string {
   if (isNoOffer(intake.offer)) {
+    if (!allowNoOffer) return "";
+    if (detectVertical(intake) === "restaurant") {
+      return locale === "he"
+        ? "אין הנחה באתר — מדברים על התפריט והמשלוח."
+        : locale === "ar"
+          ? "ما في خصم بالموقع — نحكي عن القائمة والتوصيل."
+          : "No site discount — talk menu and delivery.";
+    }
     return locale === "he"
       ? "אין מבצע ואין קופון."
       : locale === "ar"
@@ -489,7 +563,12 @@ export function spokenHeadline(kind: VariantKind, intake: Intake, locale: Locale
         h = productH1 || place || n;
         break;
       case "emotional":
-        h = (walk && isPediatrics(intake) ? LOCKED_AR_H1 : null) || productH1 || emotionalWalkHeadline(intake, locale) || painShort(intake, locale);
+        h =
+          (walk && isPediatrics(intake) ? LOCKED_AR_H1 : null) ||
+          productH1 ||
+          emotionalWalkHeadline(intake, locale) ||
+          (detectVertical(intake) === "restaurant" ? restaurantHungerLine(intake, locale) : "") ||
+          (n ? n : painShort(intake, locale));
         break;
       case "narrative":
         h = productH1 || arWalkInH1(intake);
@@ -510,7 +589,11 @@ export function spokenHeadline(kind: VariantKind, intake: Intake, locale: Locale
         h = productH1 || place || n;
         break;
       case "emotional":
-        h = productH1 || emotionalWalkHeadline(intake, locale) || painShort(intake, locale);
+        h =
+          productH1 ||
+          emotionalWalkHeadline(intake, locale) ||
+          (detectVertical(intake) === "restaurant" ? restaurantHungerLine(intake, locale) : "") ||
+          (n ? n : painShort(intake, locale));
         break;
       case "narrative":
         h = productH1 || (place ? `${n} ב${place}` : n);
@@ -531,7 +614,11 @@ export function spokenHeadline(kind: VariantKind, intake: Intake, locale: Locale
         h = productH1 || place || n;
         break;
       case "emotional":
-        h = productH1 || emotionalWalkHeadline(intake, locale) || painShort(intake, locale);
+        h =
+          productH1 ||
+          emotionalWalkHeadline(intake, locale) ||
+          (detectVertical(intake) === "restaurant" ? restaurantHungerLine(intake, locale) : "") ||
+          (n ? n : painShort(intake, locale));
         break;
       case "narrative":
         h = productH1 || (place ? `${n} at ${place}` : n);
@@ -559,7 +646,8 @@ function productSpokenBody(kind: VariantKind, intake: Intake, locale: Locale): s
   const who = audienceWhoLine(intake, locale);
   const cta = spokenCta(intake, locale);
   const site = intake.website?.trim() ?? "";
-  const offer = offerLine(intake, locale);
+  const offerReal = offerLine(intake, locale, false);
+  const offerOnce = offerLine(intake, locale, true);
   const wa = waBit(intake);
   const waLine = wa
     ? locale === "ar"
@@ -570,20 +658,21 @@ function productSpokenBody(kind: VariantKind, intake: Intake, locale: Locale): s
     : "";
   const adv = punctuate(spokenAdvantage(intake, locale));
   const pain = spokenProblem(intake, locale);
-  const facts = [site, offer, waLine].filter(Boolean).join("\n");
+  const factsReal = [site, offerReal, waLine].filter(Boolean).join("\n");
+  const factsOnce = [site, offerOnce, waLine].filter(Boolean).join("\n");
   switch (kind) {
     case "strong_offer":
-      return [adv || punctuate(n), who, facts, cta].filter(Boolean).join("\n\n");
+      return [adv || punctuate(n), who, factsOnce, cta].filter(Boolean).join("\n\n");
     case "very_short":
       return [adv || n, cta].filter(Boolean).join(" ");
     case "emotional":
-      return [pain || emotionalOpen(intake, locale), adv, facts, cta].filter(Boolean).join("\n\n");
+      return [pain || emotionalOpen(intake, locale), adv, factsReal, cta].filter(Boolean).join("\n\n");
     case "narrative":
-      return [pain, adv || punctuate(n), facts, cta].filter(Boolean).join("\n\n");
+      return [pain, adv || punctuate(n), factsReal, cta].filter(Boolean).join("\n\n");
     case "direct_sales":
-      return [adv || punctuate(n), facts, cta].filter(Boolean).join("\n\n");
+      return [adv || punctuate(n), factsReal, cta].filter(Boolean).join("\n\n");
     case "unique_advantage":
-      return [adv || punctuate(edgeShort(intake, locale, 180)), facts, cta].filter(Boolean).join("\n\n");
+      return [adv || punctuate(edgeShort(intake, locale, 180)), factsReal, cta].filter(Boolean).join("\n\n");
   }
 }
 
@@ -596,7 +685,8 @@ export function spokenBody(kind: VariantKind, intake: Intake, locale: Locale): s
   const kupa = kupaLine(intake, locale);
   const wa = waBit(intake);
   const place = placeBit(intake, locale);
-  const offer = offerLine(intake, locale);
+  const offerReal = offerLine(intake, locale, false);
+  const offerOnce = offerLine(intake, locale, true);
   const walk = isWalkIn(intake);
   const site = intake.website?.trim() ?? "";
 
@@ -605,10 +695,11 @@ export function spokenBody(kind: VariantKind, intake: Intake, locale: Locale): s
       ? `${n} ب${shortCity(intake, locale) || place} — جت أولاً بدون مواعيد.`
       : `${n}${place ? " — " + place : ""}.`;
     const waLine = wa ? `واتساب ${wa}${waNotEmergencyBit(intake, locale)}.` : "";
-    const facts = [hours, kupa, waLine, site, offer].filter(Boolean).join("\n");
+    const facts = [hours, kupa, waLine, site, offerReal].filter(Boolean).join("\n");
+    const factsOnce = [hours, kupa, waLine, site, offerOnce].filter(Boolean).join("\n");
     switch (kind) {
       case "strong_offer":
-        return [open, who, facts, cta].filter(Boolean).join("\n\n");
+        return [open, who, factsOnce, cta].filter(Boolean).join("\n\n");
       case "very_short":
         return [open, hours, waLine, cta].filter(Boolean).join(" ");
       case "emotional":
@@ -641,10 +732,11 @@ export function spokenBody(kind: VariantKind, intake: Intake, locale: Locale): s
       ? `${n} — קבלה לפי סדר הגעה, בלי תור מראש.`
       : `${n}${place ? " · " + place : ""}.`;
     const waLine = wa ? `וואטסאפ ${wa}${waNotEmergencyBit(intake, locale)}.` : "";
-    const facts = [hours, kupa, waLine, site, offer].filter(Boolean).join("\n");
+    const facts = [hours, kupa, waLine, site, offerReal].filter(Boolean).join("\n");
+    const factsOnce = [hours, kupa, waLine, site, offerOnce].filter(Boolean).join("\n");
     switch (kind) {
       case "strong_offer":
-        return [open, who, facts, cta].filter(Boolean).join("\n\n");
+        return [open, who, factsOnce, cta].filter(Boolean).join("\n\n");
       case "very_short":
         return [open, hours, waLine, cta].filter(Boolean).join(" ");
       case "emotional":
@@ -667,10 +759,11 @@ export function spokenBody(kind: VariantKind, intake: Intake, locale: Locale): s
     ? `${n} — walk-in, first come first served.`
     : `${n}${place ? " · " + place : ""}.`;
   const waLine = wa ? `WhatsApp ${wa}${waNotEmergencyBit(intake, locale)}.` : "";
-  const facts = [hours, kupa, waLine, site, offer].filter(Boolean).join("\n");
+  const facts = [hours, kupa, waLine, site, offerReal].filter(Boolean).join("\n");
+  const factsOnce = [hours, kupa, waLine, site, offerOnce].filter(Boolean).join("\n");
   switch (kind) {
     case "strong_offer":
-      return [open, who, facts, cta].filter(Boolean).join("\n\n");
+      return [open, who, factsOnce, cta].filter(Boolean).join("\n\n");
     case "very_short":
       return [open, hours, waLine, cta].filter(Boolean).join(" ");
     case "emotional":
@@ -729,7 +822,7 @@ export function landingBody(intake: Intake, locale: Locale): string {
   const n = shortName(intake, locale);
   const product = isProduct(intake);
   const waRaw = waBit(intake);
-  const wa = waRaw || (product ? "" : (locale === "ar" ? "[يجب الاستكمال]" : locale === "he" ? "[יש להשלים]" : "[TO COMPLETE]"));
+  const wa = waRaw || (product ? "" : contactOrEmpty(intake, locale));
   const hours = hoursLine(intake, locale);
   const kupa = kupaLine(intake, locale);
   const place = placeBit(intake, locale);

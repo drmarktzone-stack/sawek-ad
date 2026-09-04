@@ -157,6 +157,34 @@ export function crowdFallback(intake: VerticalFacts, locale: Locale): string {
   return locale === "ar" ? "ناس المنطقة" : locale === "he" ? "אנשים מהאזור" : "people nearby";
 }
 
+/** Hunger / delivery / menu angles from real site facts — never «don't know the restaurant» when a name exists. */
+export function restaurantHungerLine(intake: Intake, locale: Locale): string {
+  const name = intake.businessName.trim();
+  const blob = `${name} ${intake.category} ${intake.description} ${intake.uniqueAdvantage} ${intake.offer}`.toLowerCase();
+  const pizza = /פיצה|pizza|بيتزا|hut/.test(blob);
+  const delivery = /משלוח|delivery|توصيل|order online|הזמנ/.test(blob);
+  const menu = /תפריט|menu|قائمة|מבצע|offer|خصم/.test(blob);
+  if (locale === "he") {
+    if (pizza && delivery) return name ? `${name} — פיצה ומשלוח כשרעבים` : "פיצה ומשלוח כשרעבים";
+    if (pizza) return name ? `${name} — פיצה כשרעבים` : "פיצה כשרעבים";
+    if (delivery) return name ? `${name} — משלוח כשרעבים` : "משלוח כשרעבים";
+    if (menu) return name ? `${name} — מה בתפריט היום` : "מה בתפריט היום";
+    return name ? `${name} — רעבים? בואו היום` : "רעבים? בואו היום";
+  }
+  if (locale === "ar") {
+    if (pizza && delivery) return name ? `${name} — بيتزا وتوصيل لما تجوعوا` : "بيتزا وتوصيل لما تجوعوا";
+    if (pizza) return name ? `${name} — بيتزا لما تجوعوا` : "بيتزا لما تجوعوا";
+    if (delivery) return name ? `${name} — توصيل لما تجوعوا` : "توصيل لما تجوعوا";
+    if (menu) return name ? `${name} — شو بالقائمة اليوم` : "شو بالقائمة اليوم";
+    return name ? `${name} — جوعانين؟ تعوا اليوم` : "جوعانين؟ تعوا اليوم";
+  }
+  if (pizza && delivery) return name ? `${name} — pizza & delivery when hungry` : "Pizza & delivery when hungry";
+  if (pizza) return name ? `${name} — pizza when hungry` : "Pizza when hungry";
+  if (delivery) return name ? `${name} — delivery when hungry` : "Delivery when hungry";
+  if (menu) return name ? `${name} — what's on the menu today` : "What's on the menu today";
+  return name ? `${name} — hungry? come today` : "Hungry? Come today";
+}
+
 export function painFallback(intake: Intake, locale: Locale): string {
   if (isPediatrics(intake)) {
     return locale === "ar"
@@ -165,7 +193,17 @@ export function painFallback(intake: Intake, locale: Locale): string {
         ? "לא ברור לאן לפנות כשהילד חולה"
         : "Not clear where to go when the child is sick";
   }
-  return unknownProblemLabel(detectVertical(intake))[locale];
+  const v = detectVertical(intake);
+  if (v === "restaurant" && intake.businessName.trim()) {
+    return restaurantHungerLine(intake, locale);
+  }
+  if (intake.businessName.trim() && (v === "retail" || v === "generic")) {
+    const n = intake.businessName.trim();
+    if (locale === "he") return `${n} — מה מחפשים היום`;
+    if (locale === "ar") return `${n} — شو بتدوروا اليوم`;
+    return `${n} — what are you looking for today`;
+  }
+  return unknownProblemLabel(v)[locale];
 }
 
 export function emotionalOpen(intake: Intake, locale: Locale): string {
@@ -175,6 +213,11 @@ export function emotionalOpen(intake: Intake, locale: Locale): string {
       : locale === "he"
         ? "כשהילד חולה צריך לדעת לאן הולכים היום."
         : "When a child is sick, families need to know where to go today.";
+  }
+  if (detectVertical(intake) === "restaurant") {
+    const line = restaurantHungerLine(intake, locale);
+    if (locale === "ar") return `${line} — مش إعلان عام.`;
+    return line;
   }
   const pain = painFallback(intake, locale);
   if (locale === "ar") return `${pain} — مش إعلان عام.`;

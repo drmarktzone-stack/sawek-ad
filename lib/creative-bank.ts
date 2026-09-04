@@ -97,9 +97,9 @@ const ANGLES: Record<Vertical, Record<Locale, string[]>> = {
     en: ["brands on the rack", "convenient location", "on-site published offer only", "fashion-seeking audience", "clearance only if published in intake"],
   },
   restaurant: {
-    he: ["טעם מקומי", "הגעה לפי סדר", "מנה שפורסמה", "מטבח היום"],
-    ar: ["طعم محلي", "جت أولاً", "وجبة منشورة", "المطبخ اليوم"],
-    en: ["local taste", "walk-in", "published dish", "kitchen today"],
+    he: ["רעב ומשלוח", "תפריט היום", "פיצה / מנה שפורסמה", "הזמנה עכשיו"],
+    ar: ["جوع وتوصيل", "قائمة اليوم", "بيتزا / وجبة منشورة", "اطلبوا الآن"],
+    en: ["hunger & delivery", "today's menu", "pizza / published dish", "order now"],
   },
   pool: {
     he: ["מים", "משפחה", "טיפול שצוין"],
@@ -135,9 +135,9 @@ const CTAS: Record<Vertical, Record<Locale, string[]>> = {
     en: ["Come to the store", "Open the site", "Ask on WhatsApp"],
   },
   restaurant: {
-    he: ["בואו למסעדה", "וואטסאפ למקום"],
-    ar: ["تعوا ع المطعم", "واتساب للمكان"],
-    en: ["Come dine", "WhatsApp the venue"],
+    he: ["הזמינו עכשיו", "להזמנה באתר", "הזמינו בטלפון"],
+    ar: ["اطلبوا الآن", "للطلب بالموقع", "اطلبوا عالهاتف"],
+    en: ["Order now", "Order on the site", "Order by phone"],
   },
   pool: {
     he: ["בואו לבריכה", "וואטסאפ"],

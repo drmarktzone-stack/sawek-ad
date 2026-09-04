@@ -1,7 +1,7 @@
 import type { AdVariant, Intake, Locale, VariantKind } from "../types";
 import { canonicalDoctorName } from "../demo";
 import { buildSpokenVariant, clipAtWord } from "./spoken";
-import { detectVertical, isPediatrics } from "../vertical";
+import { detectVertical, isPediatrics, restaurantHungerLine, unknownProblemLabel } from "../vertical";
 import { isNoOffer } from "../no-offer";
 import { OFFER_CHIPS, resolveChipLabel } from "../chips";
 import { coachIntake, isUnknownProblem } from "./coach";
@@ -41,8 +41,23 @@ function overlayCoachHeadline(
   let headline = variant.headline;
 
   if (variant.kind === "emotional" && isUnknownProblem(intake)) {
+    const name = intake.businessName.trim();
+    const unknownBits = Object.values(unknownProblemLabel(detectVertical(intake)));
     const p = safe.find((s) => s.field === "biggestProblem");
-    if (p) headline = clipAtWord(p.proposed[locale], 48);
+    const proposed = p?.proposed[locale]?.trim() || "";
+    const looksUnknown = !proposed || unknownBits.some((u) => proposed.startsWith(u) || proposed === u);
+    if (name && (looksUnknown || detectVertical(intake) === "restaurant")) {
+      const offer = !isNoOffer(intake.offer)
+        ? (resolveChipLabel(intake.offer, OFFER_CHIPS, locale) || intake.offer.trim())
+        : "";
+      if (detectVertical(intake) === "restaurant") {
+        headline = clipAtWord(offer ? `${name} — ${offer}` : restaurantHungerLine(intake, locale), 48);
+      } else {
+        headline = clipAtWord(offer ? `${name} — ${offer}` : name, 48);
+      }
+    } else if (p && proposed) {
+      headline = clipAtWord(proposed, 48);
+    }
   } else if (variant.kind === "unique_advantage") {
     const a = safe.find((s) => s.field === "uniqueAdvantage");
     if (a) headline = clipAtWord(a.proposed[locale], 48);
