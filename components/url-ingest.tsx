@@ -55,10 +55,20 @@ export function UrlIngest() {
     setRows((rs) => rs.map((r) => (r.id === id ? { ...r, ...p, missing: !(p.value ?? r.value).trim() } : r)));
   }
 
+  function clearScanState() {
+    setDoc(null);
+    setRows([]);
+    setAssets([]);
+    setPosts([]);
+    setBrandKit({ colors: [], source: "none" });
+  }
+
   async function scan(e?: FormEvent) {
     e?.preventDefault();
     const url = value.trim();
     setError("");
+    // New scan must not keep previous business fields / images.
+    clearScanState();
     if (!url) {
       setError(t("url.error.invalid"));
       return;
@@ -89,6 +99,7 @@ export function UrlIngest() {
         sourceKind?: string;
       };
       if (!data?.ok) {
+        clearScanState();
         const code = typeof data?.error === "string" && isErrorCode(data.error) ? data.error : "network";
         if (code === "social_login_wall") {
           const he = typeof data.messageHe === "string" && data.messageHe.trim() ? data.messageHe.trim() : t("url.error.socialLoginWall");
@@ -158,6 +169,7 @@ export function UrlIngest() {
       setRows(nextRows);
       setPosts(extractedPosts);
     } catch {
+      clearScanState();
       setError(t("url.error.network"));
     } finally {
       setBusy(false);

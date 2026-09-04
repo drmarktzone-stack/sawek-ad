@@ -28,7 +28,22 @@ const BROWSER_UA =
 export const SOCIAL_BROWSER_UA = BROWSER_UA;
 
 const LOGIN_TITLE =
-  /^(facebook|instagram|שגיאה|خطأ|error|log in(?:to)? facebook|log into facebook|log in to instagram)$/i;
+  /^(facebook|instagram|שגיאה|خطأ|error|log in(?:to)? facebook|log into facebook|log in to instagram)(?:\s*[|–—•·-].*)?$/i;
+
+/** Facebook/Instagram error / login chrome titles (HE/AR/EN), including "שגיאה | Facebook". */
+export function isSocialErrorTitle(title: string): boolean {
+  const t = String(title || "")
+    .replace(/[\u200e\u200f\u202a-\u202e]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!t) return false;
+  if (LOGIN_TITLE.test(t)) return true;
+  if (/^(שגיאה|خطأ|error)\b/i.test(t)) return true;
+  if (/\b(facebook|instagram)\b/i.test(t) && /\b(שגיאה|خطأ|error|log\s*in|login)\b/i.test(t) && t.length < 64) {
+    return true;
+  }
+  return false;
+}
 
 const LOGIN_SIGNAL =
   /log in to facebook|log into facebook|you must log in before|you must log in to continue|create new account|create new facebook account|log in to instagram|sign up for instagram/i;
@@ -202,7 +217,7 @@ export function parseOembedJson(raw: string, kind: SocialKind): SocialPageParse 
     const name = clip(String(rec.author_name || rec.title || rec.author_url || ""), 120)
       .replace(/\s*[|–—-]\s*(facebook|instagram).*$/i, "")
       .trim();
-    if (!name || LOGIN_TITLE.test(name) || isJunkUiText(name) || isLoginChrome(name)) return null;
+    if (!name || isSocialErrorTitle(name) || LOGIN_TITLE.test(name) || isJunkUiText(name) || isLoginChrome(name)) return null;
     const html = String(rec.html || "");
     const title = clip(String(rec.title || name), 160);
     const thumb = String(rec.thumbnail_url || rec.thumbnailUrl || "");
@@ -233,7 +248,11 @@ export function socialHasPublicContent(p: SocialPageParse | undefined | null): p
   if (!p) return false;
   if (p.loginWall) return false;
   const name = (p.name || "").trim();
+  const title = (p.title || "").trim();
+  if (isSocialErrorTitle(name) || isSocialErrorTitle(title)) return false;
   if (name && (LOGIN_TITLE.test(name) || isJunkUiText(name) || /^(facebook|instagram)$/i.test(name))) return false;
+  // Error/login shells sometimes leak a generic body line as a "post" — require a real name.
+  if (!name) return false;
   return Boolean(name || (p.description || "").trim() || (p.posts && p.posts.length));
 }
 
@@ -245,8 +264,8 @@ export function stripLoginWallContact(p: SocialPageParse): SocialPageParse {
 function distinctiveTitle(title: string, ogTitle: string): string {
   const og = clip(ogTitle, 160);
   const t = clip(title, 160);
-  if (og && !LOGIN_TITLE.test(og) && !isJunkUiText(og)) return og;
-  if (t && !LOGIN_TITLE.test(t) && !isJunkUiText(t)) return t;
+  if (og && !isSocialErrorTitle(og) && !LOGIN_TITLE.test(og) && !isJunkUiText(og)) return og;
+  if (t && !isSocialErrorTitle(t) && !LOGIN_TITLE.test(t) && !isJunkUiText(t)) return t;
   return "";
 }
 
@@ -254,6 +273,7 @@ export function isSocialLoginWall(html: string, finalUrl = ""): boolean {
   if (/\/login\.php\b|\/accounts\/login\b|\/login\/\?/i.test(finalUrl)) return true;
   const ogTitle = metaContent(html, "og:title");
   const title = tagText(html, "title");
+  if (isSocialErrorTitle(title) || isSocialErrorTitle(ogTitle)) return true;
   const name = distinctiveTitle(title, ogTitle);
   if (name) return false;
   const genericDesc = /see posts, photos and more on facebook|ראה\/ראי פוסטים|انظر المنشورات/i.test(html);

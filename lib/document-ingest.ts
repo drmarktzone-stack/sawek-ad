@@ -23,6 +23,7 @@ export const DOC_MAX_BYTES = IMAGE_MAX_BYTES;
 export type IngestFieldId =
   | "businessName"
   | "location"
+  | "phone"
   | "whatsapp"
   | "clinicHours"
   | "website"
@@ -129,7 +130,8 @@ export const INGEST_FIELD_META: Record<
 > = {
   businessName: { stage: "wizard_business", label: { he: "שם העסק", ar: "اسم العمل", en: "Business name" } },
   location: { stage: "wizard_business", label: { he: "כתובת / מיקום", ar: "عنوان / موقع", en: "Address / location" } },
-  whatsapp: { stage: "wizard_business", label: { he: "טלפון / וואטסאפ", ar: "هاتف / واتساب", en: "Phone / WhatsApp" } },
+  phone: { stage: "wizard_business", label: { he: "טלפון", ar: "هاتف", en: "Phone" } },
+  whatsapp: { stage: "wizard_business", label: { he: "וואטסאפ", ar: "واتساب", en: "WhatsApp" } },
   clinicHours: { stage: "wizard_business", label: { he: "שעות / אופן הגעה", ar: "ساعات / كيف تجوا", en: "Hours / arrival" } },
   website: { stage: "wizard_business", label: { he: "אתר", ar: "موقع", en: "Website" } },
   operatingModel: { stage: "wizard_business", label: { he: "מודל הפעלה", ar: "نموذج التشغيل", en: "Operating model" } },
@@ -825,8 +827,8 @@ function phoneDigitKey(raw: string): string {
   return d;
 }
 
-/** Unique on-page phones (tel + WhatsApp), extract-only. Cap 2. */
-function collectPhones(text: string): string {
+/** Unique on-page numbers for one bucket (phone or WhatsApp). Cap 2. */
+function collectNumberBucket(text: string, labels: string[], alsoLoose: boolean): string {
   const hits: string[] = [];
   const push = (raw: string) => {
     const f = formatIlPhone(raw) || String(raw || "").replace(/\s+/g, " ").trim();
@@ -836,11 +838,35 @@ function collectPhones(text: string): string {
     if (hits.some((h) => phoneDigitKey(h) === key)) return;
     hits.push(f);
   };
-  for (const v of labeledValues(text, ["טלפון", "هاتف", "phone", "נייד", "موبايل", "mobile"])) push(v);
-  for (const v of labeledValues(text, ["וואטסאפ", "واتساب", "whatsapp", "whats app"])) push(v);
-  const extracted = extractPhone(text);
-  if (extracted) push(extracted);
+  for (const v of labeledValues(text, labels)) push(v);
+  if (alsoLoose) {
+    const extracted = extractPhone(text);
+    if (extracted) push(extracted);
+  }
   return hits.slice(0, 2).join(" · ");
+}
+
+/** First usable number from a phone/whatsapp field (may be joined with ·). */
+export function firstContactNumber(raw: string): string {
+  const part = String(raw || "")
+    .split(/\s*[·|,;]\s*/)
+    .map((s) => s.trim())
+    .find(Boolean);
+  if (!part) return "";
+  return formatIlPhone(part) || part;
+}
+
+/** Keep phone + whatsapp aligned: empty phone copies whatsapp (and reverse). */
+export function syncPhoneWhatsappFields<T extends { phone?: string; whatsapp?: string }>(fields: T): T {
+  const phone = String(fields.phone || "").trim();
+  const wa = String(fields.whatsapp || "").trim();
+  if (!phone && wa) {
+    const first = firstContactNumber(wa);
+    if (first) fields.phone = first;
+  } else if (phone && !wa) {
+    fields.whatsapp = phone;
+  }
+  return fields;
 }
 
 /** Full page promo sentence, including the keyword (חיסול / מבצע / خصم). */
@@ -888,8 +914,11 @@ export function extractFieldsFromText(text: string, filename: string): Partial<R
     if (looseA) out.location = looseA;
   }
 
-  const wa = collectPhones(text);
+  const phone = collectNumberBucket(text, ["טלפון", "هاتف", "phone", "נייד", "موبايل", "mobile", "telephone"], false);
+  const wa = collectNumberBucket(text, ["וואטסאפ", "واتساب", "whatsapp", "whats app"], true);
+  if (phone) out.phone = phone;
   if (wa) out.whatsapp = wa;
+  syncPhoneWhatsappFields(out);
 
   const hoursHits = labeledValues(text, [
     "שעות קבלה",
@@ -1078,6 +1107,7 @@ function rowFor(
 const ALWAYS_SHOW: IngestFieldId[] = [
   "businessName",
   "location",
+  "phone",
   "whatsapp",
   "clinicHours",
   "website",
@@ -1256,8 +1286,14 @@ export function applyIngestReview(
   if (name && allowed(name)) next.businessName = name.value.trim();
   const loc = take("location");
   if (loc && allowed(loc)) next.location = loc.value.trim();
+  const phoneRow = take("phone");
   const wa = take("whatsapp");
   if (wa && allowed(wa)) next.whatsapp = wa.value.trim();
+  else if (phoneRow && allowed(phoneRow)) next.whatsapp = phoneRow.value.trim();
+  else if (!next.whatsapp) {
+    const fallback = firstContactNumber(String(phoneRow?.value || wa?.value || ""));
+    if (fallback) next.whatsapp = fallback;
+  }
   const hours = take("clinicHours");
   if (hours && allowed(hours)) next.clinicHours = hours.value.trim();
   const site = take("website");

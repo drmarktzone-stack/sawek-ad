@@ -7,6 +7,7 @@ import {
   formatIlPhone,
   isCatalogHeading,
   isJunkUiText,
+  syncPhoneWhatsappFields,
   type IngestFieldId,
 } from "./document-ingest";
 import { extractCssColors, extractLogoUrl } from "./brand-kit";
@@ -21,6 +22,7 @@ import {
   mergeSocialParses,
   parseOembedJson,
   parseSocialPage,
+  isSocialErrorTitle,
   socialHasPublicContent,
   stripLoginWallContact,
   SOCIAL_BROWSER_UA,
@@ -81,9 +83,9 @@ export interface UrlIngestErr {
 }
 
 export const SOCIAL_LOGIN_WALL_COPY = {
-  he: "הדף פרטי או ש-Meta חסמה את הסריקה. הדביקו כתובת אתר או ייצוא — אל תמלאו שדות מניחוש. לא מבקשים ולא שומרים סיסמת פייסבוק/אינסטגרם.",
-  ar: "الصفحة خاصة أو ميتا حجبَت المسح. الصقوا رابط موقع أو ملف تصدير — لا تملأوا حقولاً من تخمين. ما منطلب وما منِحفظ كلمة سر فيسبوك/إنستغرام.",
-  en: "This page is private or Meta blocked the scrape. Paste a website URL or an export — do not fill fields from guesses. We never ask for or store Facebook/Instagram passwords.",
+  he: "פייסבוק/אינסטגרם חסמו את הסריקה (דף פרטי, התחברות, או שגיאה). הדביקו כתובת אתר עסקי או קובץ ייצוא — אל תמלאו שדות מניחוש. לא מבקשים ולא שומרים סיסמה.",
+  ar: "فيسبوك/إنستغرام حجبوا المسح (صفحة خاصة، تسجيل دخول، أو خطأ). الصقوا رابط موقع العمل أو ملف تصدير — لا تملأوا حقولاً من تخمين. ما منطلب وما منِحفظ كلمة سر.",
+  en: "Facebook/Instagram blocked the scrape (private page, login, or error). Paste a business website URL or an export file — do not fill fields from guesses. We never ask for or store passwords.",
 } as const;
 
 export function socialLoginWallError(): UrlIngestErr {
@@ -1100,6 +1102,7 @@ export function parseFetchedHtml(
     if (cat && !isJunkUiText(cat) && !isCatalogHeading(cat)) fields.category = cat;
   }
   fields = fillEmptyFromPageProse(fields, blob, extraProse);
+  syncPhoneWhatsappFields(fields);
   if (!fields.uniqueAdvantage || fields.uniqueAdvantage === fields.description) {
     const distinct = distinctPageAdvantage([ogDescription, extraProse, blob].filter(Boolean).join("\n"), fields.description || "");
     if (distinct) fields.uniqueAdvantage = distinct;
@@ -1467,8 +1470,11 @@ function applySocialOntoParsed(
     fields.description = clip(social.description, 500);
   }
   if (social.address && !fields.location) fields.location = clip(social.address, 280);
-  if (social.phone && !fields.whatsapp) fields.whatsapp = social.phone;
+  if (social.phone && !fields.phone) fields.phone = social.phone;
   if (social.whatsapp && !fields.whatsapp) fields.whatsapp = social.whatsapp;
+  if (social.phone && !fields.whatsapp) fields.whatsapp = social.phone;
+  if (social.whatsapp && !fields.phone) fields.phone = social.whatsapp;
+  syncPhoneWhatsappFields(fields);
   if (social.hours && !fields.clinicHours) fields.clinicHours = clip(social.hours, 280);
   if (/^https?:\/\//i.test(submitted)) fields.website = submitted.split("#")[0];
   if (!fields.channelNotes) fields.channelNotes = kind;
@@ -1511,8 +1517,10 @@ function socialParseToIngest(social: SocialPageParse, submitted: string, kind: S
   if (social.name) fields.businessName = clip(social.name, 120);
   if (social.description) fields.description = clip(social.description, 500);
   if (social.address) fields.location = clip(social.address, 280);
-  if (social.phone) fields.whatsapp = social.phone;
-  else if (social.whatsapp) fields.whatsapp = social.whatsapp;
+  if (social.phone) fields.phone = social.phone;
+  if (social.whatsapp) fields.whatsapp = social.whatsapp;
+  else if (social.phone) fields.whatsapp = social.phone;
+  syncPhoneWhatsappFields(fields);
   if (social.hours) fields.clinicHours = clip(social.hours, 280);
   fields.website = submitted.split("#")[0];
   fields.channelNotes = kind;
@@ -1661,17 +1669,33 @@ async function ingestSocialUrl(
     const parsed = parseSocialPage(d.html, d.finalUrl, kind);
     return socialHasPublicContent(stripLoginWallContact(parsed));
   });
+  function rejectJunkSocial(result: UrlIngestOk): UrlIngestResult {
+    const title = result.title || "";
+    const name = result.fields.businessName || "";
+    if (isSocialErrorTitle(title) || isSocialErrorTitle(name) || isJunkUiText(title) || isJunkUiText(name)) {
+      return socialLoginWallError();
+    }
+    if (!result.fields.businessName && !(result.posts && result.posts.length) && !result.fields.description) {
+      return socialLoginWallError();
+    }
+    syncPhoneWhatsappFields(result.fields);
+    return result;
+  }
+
   if (publicDoc) {
     const page = parseFetchedHtml(publicDoc.html, publicDoc.finalUrl, submitted);
     if (page.ok) {
       const merged = applySocialOntoParsed(page, social, submitted, kind);
       if (merged.fields.businessName || merged.fields.description || (merged.posts && merged.posts.length)) {
-        if (!social.phone && !social.whatsapp) delete merged.fields.whatsapp;
-        return merged;
+        if (!social.phone && !social.whatsapp) {
+          delete merged.fields.whatsapp;
+          delete merged.fields.phone;
+        }
+        return rejectJunkSocial(merged);
       }
     }
   }
-  return socialParseToIngest(social, submitted, kind);
+  return rejectJunkSocial(socialParseToIngest(social, submitted, kind));
 }
 
 export async function ingestUrl(raw: string, extraBlockedHosts: string[] = []): Promise<UrlIngestResult> {
@@ -1699,6 +1723,7 @@ export async function ingestUrl(raw: string, extraBlockedHosts: string[] = []): 
 
   const parsed = parseFetchedHtml(homeDoc.html, homeDoc.finalUrl, submitted, extraCorpus);
   if (!parsed.ok) return parsed;
+  syncPhoneWhatsappFields(parsed.fields);
   if (bundleImages.length) {
     const images = [...(parsed.images ?? [])];
     for (const u of bundleImages) {

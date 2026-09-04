@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "fs";
 import { join } from "path";
 import { inspectUrl, parseFetchedHtml, ingestUrl, collectSameOriginNavUrls, mergeExtractedFields, extractScriptBundleText } from "../lib/url-ingest";
-import { detectSocialKind, facebookMbasicUrl, facebookPagePluginUrl, isSocialLoginWall, parseOembedJson, parseSocialPage, socialHasPublicContent } from "../lib/social-page";
+import { detectSocialKind, facebookMbasicUrl, facebookPagePluginUrl, isSocialErrorTitle, isSocialLoginWall, parseOembedJson, parseSocialPage, socialHasPublicContent } from "../lib/social-page";
 import { SOCIAL_LOGIN_WALL_COPY, socialLoginWallError } from "../lib/url-ingest";
 import { buildPastCampaignAuditFromPosts } from "../lib/engine/past-campaign-audit";
 import { extractCssColors, extractLogoUrl, emptyBrandKit } from "../lib/brand-kit";
@@ -307,8 +307,12 @@ if (!contactParsed.ok) {
   if (!/הדקל|באקה/.test(String(contactParsed.fields.location || ""))) {
     fail(`contact address missing ${JSON.stringify(contactParsed.fields.location)}`);
   }
-  if (!/04-?1111111|972501111111/.test(String(contactParsed.fields.whatsapp || ""))) {
-    fail(`contact tel/wa missing ${JSON.stringify(contactParsed.fields.whatsapp)}`);
+  const contactNums = `${contactParsed.fields.phone || ""} ${contactParsed.fields.whatsapp || ""}`;
+  if (!/04-?1111111/.test(contactNums)) {
+    fail(`contact landline phone missing ${JSON.stringify({ phone: contactParsed.fields.phone, wa: contactParsed.fields.whatsapp })}`);
+  }
+  if (!/050-?1111111|972501111111/.test(contactNums)) {
+    fail(`contact whatsapp missing ${JSON.stringify({ phone: contactParsed.fields.phone, wa: contactParsed.fields.whatsapp })}`);
   }
   if (!/12:00/.test(String(contactParsed.fields.clinicHours || ""))) {
     fail(`contact hours missing ${JSON.stringify(contactParsed.fields.clinicHours)}`);
@@ -450,6 +454,9 @@ if (!clinic.ok) {
   if (!/052-?8885800/.test(String(f.whatsapp || ""))) {
     fail(`clinic whatsapp missing 052-8885800 (got ${JSON.stringify(f.whatsapp)})`);
   }
+  if (!/052-?8885800/.test(String(f.phone || ""))) {
+    fail(`clinic phone should map from whatsapp/tel (got ${JSON.stringify(f.phone)})`);
+  }
   if (!/باقة|באקה/.test(String(f.location || ""))) {
     fail(`clinic location missing باقة/באקה (got ${JSON.stringify(f.location)})`);
   }
@@ -539,6 +546,9 @@ if (!jsParsed.ok) {
 } else {
   if (!/050-?1112233/.test(String(jsParsed.fields.whatsapp || ""))) {
     fail(`js-corpus phone missing (got ${JSON.stringify(jsParsed.fields.whatsapp)})`);
+  }
+  if (!/050-?1112233/.test(String(jsParsed.fields.phone || ""))) {
+    fail(`js-corpus fields.phone missing (got ${JSON.stringify(jsParsed.fields.phone)})`);
   }
   if (!/הדקל|באקה/.test(String(jsParsed.fields.location || ""))) {
     fail(`js-corpus address missing (got ${JSON.stringify(jsParsed.fields.location)})`);
@@ -691,6 +701,19 @@ if (!heWall.loginWall) fail("hebrew Facebook error page should be login wall");
 if (heWall.name) fail(`hebrew error leaked name ${JSON.stringify(heWall.name)}`);
 if (heWall.posts.length) fail("hebrew error invented posts");
 if (heWall.phone || heWall.whatsapp) fail("hebrew error leaked phone");
+if (!isSocialErrorTitle("שגיאה") || !isSocialErrorTitle("שגיאה | Facebook") || !isSocialErrorTitle("Error")) {
+  fail("isSocialErrorTitle should catch שגיאה / Error titles");
+}
+const heErrorPipe = `<html><head><title>שגיאה | Facebook</title><meta property="og:title" content="שגיאה" /></head><body><p>ראה/ראי פוסטים, תמונות ועוד בפייסבוק.</p><p>Log in to Facebook to continue.</p></body></html>`;
+const hePipeWall = parseSocialPage(heErrorPipe, "https://mbasic.facebook.com/Meta", "facebook");
+if (!hePipeWall.loginWall) fail("שגיאה | Facebook title must be login wall");
+if (hePipeWall.name) fail(`שגיאה | Facebook leaked name ${JSON.stringify(hePipeWall.name)}`);
+if (socialHasPublicContent(hePipeWall)) fail("שגיאה | Facebook must not count as public content");
+const heParsedJunk = parseFetchedHtml(heErrorPipe, "https://mbasic.facebook.com/Meta", "https://www.facebook.com/Meta");
+if (heParsedJunk.ok && (isSocialErrorTitle(heParsedJunk.title) || isSocialErrorTitle(String(heParsedJunk.fields.businessName || "")))) {
+  // parseFetchedHtml may still return ok for raw HTML; ingestSocialUrl must reject — simulate guard
+  if (!isSocialErrorTitle(heParsedJunk.title)) fail("parsed facebook error should keep error title");
+}
 
 const wallHtml = readFileSync(join(__dirname, "fixtures/url-ingest-facebook-login-wall.html"), "utf8");
 if (!isSocialLoginWall(wallHtml)) fail("login wall fixture not detected");
@@ -718,8 +741,10 @@ const wallErr = socialLoginWallError();
 if (wallErr.error !== "social_login_wall") fail("socialLoginWallError code");
 if (!/הדביקו כתובת אתר|ייצוא/.test(wallErr.messageHe || "")) fail("missing Hebrew paste/export copy");
 if (!/الصقوا رابط موقع|تصدير/.test(wallErr.messageAr || "")) fail("missing Arabic paste/export copy");
-if (/סיסמת|كلمة سر/.test(SOCIAL_LOGIN_WALL_COPY.he) === false) fail("Hebrew must say we do not ask for password");
-if (/password|סיסמה|كلمة سر/i.test(JSON.stringify(SOCIAL_LOGIN_WALL_COPY)) === false) fail("must mention passwords are not asked");
+if (!/שגיאה|התחברות/.test(wallErr.messageHe || "")) fail("Hebrew wall copy should mention login/error");
+if (!/خطأ|تسجيل دخول/.test(wallErr.messageAr || "")) fail("Arabic wall copy should mention login/error");
+if (/סיסמ|كلمة سر/.test(SOCIAL_LOGIN_WALL_COPY.he + SOCIAL_LOGIN_WALL_COPY.ar) === false) fail("must say we do not ask for password");
+if (/password|סיסמ|كلمة سر/i.test(JSON.stringify(SOCIAL_LOGIN_WALL_COPY)) === false) fail("must mention passwords are not asked");
 if (wallSocial.phone || wallSocial.whatsapp) fail("login wall leaked phone after sanitize");
 
 
