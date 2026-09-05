@@ -36,6 +36,7 @@ import { ChannelPack } from "@/components/channel-pack";
 import { LivePreviewStrip } from "@/components/live-preview-cards";
 import { AnglesStrip } from "@/components/angles-strip";
 import { CmoIdeasStrip } from "@/components/cmo-ideas-strip";
+import { DiagnosisGaps } from "@/components/diagnosis-gaps";
 import { buildCmoIdeasPack } from "@/lib/engine/cmo-ideas";
 import { CoachImprovedStrip } from "@/components/coach-panel";
 import { PublishToSocial } from "@/components/publish-to-social";
@@ -369,15 +370,12 @@ export function ResultView({
         </div>
       </div>
 
-      {pack.intakeReport.missing.length > 0 && (
-        <div className="mb-4 rounded-2xl border border-gold/30 bg-gold/5 p-4 text-sm text-foreground">
-          {pack.intakeReport.missing.slice(0, 6).map((m) => (
-            <p key={m.field}>
-              <strong>{m.label[locale]}:</strong> {m.reason[locale]} — {m.impact[locale]}
-            </p>
-          ))}
-        </div>
-      )}
+      <DiagnosisGaps
+        report={pack.intakeReport}
+        moves={pack.cmoIdeas?.gapPlan?.moves}
+        locale={locale}
+        compact
+      />
       {pack.intakeReport.inconsistencies.length > 0 && (
         <div className="mb-8 rounded-2xl border border-danger/40 bg-coral/10 p-4 text-sm text-danger">
           {pack.intakeReport.inconsistencies.map((inc, i) => (

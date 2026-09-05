@@ -36,6 +36,11 @@ export function factBlob(intake: Intake): string {
     intake.channelNotes,
     intake.pastAds,
     intake.pastResults,
+    intake.businessModel,
+    intake.avgOrderValue,
+    intake.marginPercent,
+    intake.targetCac,
+    intake.monthlyBudget,
   ]
     .filter(Boolean)
     .join(" ");

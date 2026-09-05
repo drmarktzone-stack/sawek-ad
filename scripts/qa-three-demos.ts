@@ -6,12 +6,13 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync } from "fs";
 import { join } from "path";
 import { generateVariants } from "../lib/engine/copy";
 import { assemblePack } from "../lib/engine/run";
-import { validateIntake } from "../lib/engine/validate";
+import { cmoFieldsMissing, validateIntake } from "../lib/engine/validate";
 import { diagnose } from "../lib/engine/diagnose";
 import { buildPostingCalendar } from "../lib/engine/posting-calendar";
 import { detectVertical } from "../lib/vertical";
 import { spokenCta, whatsappScript } from "../lib/engine/spoken";
 import { PUBLISHED_DEMO_IDS, DEMO_ID, DEMO_OLIVE_ID, DEMO_SAND_ID } from "../lib/demo-catalog";
+import { isDemoCmoComplete } from "../lib/demo-cmo";
 import type { CampaignPack, Locale } from "../lib/types";
 
 type Issue = { packId: string; severity: "fail" | "warn"; msg: string };
@@ -115,6 +116,21 @@ function qaPack(pack: CampaignPack) {
   if (!(pack.intake.mediaAssets ?? []).some((a) => a.kind === "image" && a.publicSrc)) {
     fail(id, "missing image mediaAssets with publicSrc");
   }
+  if (!isDemoCmoComplete(pack.intake)) fail(id, "CMO interview desk incomplete");
+  if (cmoFieldsMissing(pack.intake)) fail(id, "cmoFieldsMissing true on published demo");
+  const missingFields = validateIntake(pack.intake).missing.map((m) => m.field);
+  for (const field of ["businessModel", "monthlyBudget", "pastAds"]) {
+    if (missingFields.includes(field)) fail(id, `diagnosis still flags ${field}`);
+  }
+  if (id !== DEMO_ID) {
+    for (const field of ["avgOrderValue", "marginPercent", "targetCac"]) {
+      if (missingFields.includes(field)) fail(id, `diagnosis still flags ${field}`);
+    }
+  }
+  const realPhotos = (pack.intake.mediaAssets ?? []).filter(
+    (a) => a.kind === "image" && a.publicSrc && !/\.svg$/i.test(a.publicSrc || ""),
+  );
+  if (realPhotos.length < 4) fail(id, `only ${realPhotos.length} non-SVG photos`);
   if (!(pack.demoMeta?.ideaNames?.he?.length)) warn(id, "demoMeta.ideaNames.he empty");
 
   // Pack JSON itself
@@ -181,7 +197,7 @@ function main() {
   }
   lines.push("");
   lines.push("## Notes");
-  lines.push("- All three packs rebuilt via engines with CMO ideas + studio still assets. Clinic uses real snapshot facts only.");
+  lines.push("- All three packs rebuilt with filled CMO interview desks (sample planning inputs, no fake ROAS) + real JPEG photos + studio stills.");
   lines.push("- New Campaign must not auto-load demos (empty-campaign wipe + demo identity blocklist).");
   lines.push("- Demo UI exposes all three as selectable demos.");
   lines.push("");
