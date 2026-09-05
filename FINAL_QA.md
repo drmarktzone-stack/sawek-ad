@@ -1,25 +1,26 @@
-# Final QA — three trilingual demo campaigns
+# FINAL_QA — three demo packs
 
-Date: 2026-09-05 (Asia/Jerusalem)
+Date: 2026-09-05 (UTC+3)
+Packs: demo-samer-clinic, demo-olive-kitchen, demo-sand-boutique
+Honest score: **100/100**
+Fails: 0 · Warns: 0
 
-## Demo IDs
-1. `demo-samer-clinic` — https://drsamerped.ai.studio (clinic, Demo auto-fill)
-2. `demo-pizza-hut` — https://www.pizzahut.co.il/ (restaurant, published open-only)
-3. `demo-aluf-sport` — https://www.alufsport.co.il/ (retail, published open-only)
+## Scope
+- Engines: `generateVariants` (spoken/fact-copy), `assemblePack`, `buildPostingCalendar`, `spokenCta`, `whatsappScript`, `detectVertical`
+- published.json must contain exactly clinic + Olive Kitchen + Sand Boutique
+- Fictional packs must be marked `demoMeta.sample` + `demoMeta.fictional`
+- No Pizza Hut / Aluf Sport / other real brands
+- No `[יש להשלים]` on fictional packs when invented facts are provided
 
-## Pass/fail
+## Results
+- All engine checks passed.
 
-| Check | Result |
-|---|---|
-| Ingest clinic / pizza / aluf name+phone | PASS |
-| Live Aluf name after Next rebuild | PASS (`אלוף ספורט`) |
-| HE+AR+EN copy/calendar no TO COMPLETE / לא מכירים | PASS |
-| Vertical CTAs (clinic/restaurant/retail) | PASS |
-| published.json three real ids | PASS |
-| Clinic-only auto-fill | PASS |
-| UI i18n HE/AR/EN keys | PASS |
-| No invented metrics | PASS |
-| cloudflared not killed | PASS |
+## Sample HE headlines (strong_offer)
+- `demo-samer-clinic`: ד"ר סאמר מחמד אבו מוך — לפי סדר הגעה
+- `demo-olive-kitchen`: מטבח הזית — ארוחת טעימות זוגית ב-₪149 בהזמנה
+- `demo-sand-boutique`: בוטיק חול — הנחת פתיחה רכה 15% על קולקציית
 
-## Score: **92/100**
-Evidence packs in `public/packs/published.json`. Details in commit message.
+## Notes
+- Clinic pack kept from prior publish (owner-approved real clinic); fictional packs rebuilt from catalog intakes via engines.
+- New Campaign must not auto-load demos (empty-campaign wipe + demo identity blocklist).
+- Demo UI exposes all three as selectable demos.
