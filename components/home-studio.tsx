@@ -55,7 +55,10 @@ export function HomeStudio() {
         <div className="relative mx-auto max-w-6xl px-4 pb-16 pt-10 sm:pb-20 sm:pt-16">
           <p className="agency-kicker mb-4 text-center text-[#9FD4C8]">{t("home.kicker")}</p>
           <span className="agency-rule mx-auto mb-6 bg-[#9FD4C8]" />
-          <h1 className="agency-display-cream agency-fade-up mx-auto max-w-5xl text-center text-[2.15rem] leading-[1.12] sm:text-6xl lg:text-7xl">
+          <h1
+            className="agency-display-cream agency-fade-up mx-auto max-w-5xl text-center text-[2.35rem] leading-[1.1] sm:text-6xl lg:text-[4.4rem]"
+            style={{ fontFamily: "var(--font-display-he), ui-serif, Georgia, serif" }}
+          >
             {t("home.headline")}
           </h1>
           <p className="mobile-readable mx-auto mt-6 max-w-2xl text-center text-base font-semibold leading-relaxed text-[#E8E2D4] sm:mt-7 sm:text-xl">

@@ -22,7 +22,7 @@ import {
 import { LOCALES } from "@/lib/i18n";
 import { useI18n } from "./i18n-provider";
 import { LangLink } from "./lang-link";
-import { FunctionMenuLinks, FunctionRail } from "./function-rail";
+import { FunctionMenuLinks } from "./function-rail";
 import { UrlIngest } from "./url-ingest";
 import { cn } from "@/lib/utils";
 import { beginNewCampaign } from "@/lib/empty-campaign";
@@ -145,8 +145,8 @@ export function Header() {
           <span className="hidden text-sm text-[#C9D0D8] sm:inline">{t("brand.tagline")}</span>
         </LangLink>
 
-        <nav className="ms-2 hidden min-w-0 flex-1 items-center gap-1 overflow-x-auto lg:flex">
-          {NAV.map((item) => {
+        <nav className="ms-2 hidden min-w-0 flex-1 items-center gap-0.5 overflow-x-auto xl:flex">
+          {NAV.slice(0, 8).map((item) => {
             const Icon = item.icon;
             const active =
               item.href === "/"
@@ -157,13 +157,13 @@ export function Header() {
                 key={item.key}
                 href={item.href}
                 className={cn(
-                  "flex shrink-0 items-center gap-1 rounded-[10px] px-2.5 py-1.5 text-sm font-semibold transition-colors",
+                  "flex shrink-0 items-center gap-1 rounded-[8px] px-2 py-1.5 text-[13px] font-semibold transition-colors",
                   active
                     ? "bg-white text-ink"
                     : "text-[#C9D0D8] hover:bg-white/8 hover:text-[#F7F3EA]",
                 )}
               >
-                <Icon className="size-3.5" />
+                <Icon className="size-3.5 opacity-70" />
                 {t(item.key)}
               </LangLink>
             );
@@ -192,14 +192,6 @@ export function Header() {
           </button>
         </div>
       </div>
-      <div className="hidden border-t border-white/10 md:block">
-        <div className="mx-auto flex max-w-[92rem] items-center gap-2 overflow-x-auto px-3 py-1.5">
-          <span className="shrink-0 text-sm font-bold uppercase tracking-[0.18em] text-[#9FD4C8]">{t("fn.title")}</span>
-          <FunctionRail compact tone="ink" />
-          <span className="ms-auto shrink-0 text-sm text-[#C9D0D8]">{t("fn.engines")}</span>
-        </div>
-      </div>
-
       {open && (
         <div className="safe-pb max-h-[min(80dvh,32rem)] overflow-y-auto border-t border-white/10 bg-[#0A1524] px-4 py-3 lg:hidden">
           <div className="mb-3 sm:hidden">

@@ -73,7 +73,7 @@
   --color-omni-surface: var(--surface);
   --color-omni-card: var(--card);
   --font-sans: var(--font-heebo), var(--font-cairo), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-display-he), var(--font-display-en), var(--font-heebo), ui-serif, Georgia, serif;
+  --font-display: var(--font-display-he), ui-serif, Georgia, "Times New Roman", serif;
 }
 
 html {
@@ -204,7 +204,7 @@ input, textarea, select {
 }
 
 .agency-display {
-  font-family: var(--font-display);
+  font-family: var(--font-display-he), ui-serif, Georgia, "Times New Roman", serif;
   font-weight: 700;
   letter-spacing: -0.03em;
   line-height: 1.08;
@@ -213,7 +213,7 @@ input, textarea, select {
 
 [lang="en"] .agency-display,
 [dir="ltr"] .agency-display {
-  font-family: var(--font-display-en), var(--font-display-he), var(--font-heebo), ui-serif, Georgia, serif;
+  font-family: var(--font-display-en), var(--font-display-he), ui-serif, Georgia, serif;
 }
 
 [lang="ar"] .agency-display {
@@ -264,7 +264,7 @@ input, textarea, select {
 }
 
 .agency-display-cream {
-  font-family: var(--font-display);
+  font-family: var(--font-display-he), ui-serif, Georgia, "Times New Roman", serif;
   font-weight: 700;
   letter-spacing: -0.03em;
   line-height: 1.08;
@@ -273,7 +273,7 @@ input, textarea, select {
 
 [lang="en"] .agency-display-cream,
 [dir="ltr"] .agency-display-cream {
-  font-family: var(--font-display-en), var(--font-display-he), var(--font-heebo), ui-serif, Georgia, serif;
+  font-family: var(--font-display-en), var(--font-display-he), ui-serif, Georgia, serif;
 }
 
 [lang="ar"] .agency-display-cream {

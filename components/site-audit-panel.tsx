@@ -27,7 +27,7 @@ function AuditList({
         const chips = hours ? hoursChips(pack.intake.clinicHours || "", locale, 3) : [];
         const evidence = hours ? t("audit.hoursFromScan") : clipEvidence(s.evidence[locale]);
         return (
-          <li key={s.id} className="rounded-xl border border-navy/10 bg-background px-3 py-2.5">
+          <li key={s.id} className="rounded-[14px] border border-[rgba(8,17,31,0.1)] bg-white px-3 py-2.5">
             <p className="text-sm leading-relaxed text-foreground">{s.label[locale]}</p>
             {hours && chips.length ? (
               <div className="mt-2 flex flex-wrap gap-1.5">
@@ -66,8 +66,8 @@ export function SiteAuditPanel({
   return (
     <>
       {(audit.strengths.length || audit.weaknesses.length) ? (
-        <section data-audit="site" className="mb-8 rounded-2xl border border-gold/25 bg-white p-5">
-          <p className="text-[13px] font-black uppercase tracking-[0.18em] text-gold">{t("audit.title")}</p>
+        <section data-audit="site" className="agency-board mb-8 p-5">
+          <p className="agency-kicker">{t("audit.title")}</p>
           <p className="mt-1 text-sm leading-relaxed text-muted">{t("audit.lead")}</p>
           {onPack ? (
             <div className="mt-4" data-photo-offer="result">
@@ -88,8 +88,8 @@ export function SiteAuditPanel({
       ) : null}
 
       {past ? (
-        <section data-audit="past-campaigns" className="mb-8 rounded-2xl border border-gold/25 bg-white p-5">
-          <p className="text-[13px] font-black uppercase tracking-[0.18em] text-gold">{t("audit.pastTitle")}</p>
+        <section data-audit="past-campaigns" className="agency-board mb-8 p-5">
+          <p className="agency-kicker">{t("audit.pastTitle")}</p>
           <p className="mt-1 text-sm leading-relaxed text-muted">{t("audit.pastLead")}</p>
           <div className="mt-4 grid gap-4 md:grid-cols-2">
             <div>
@@ -102,15 +102,15 @@ export function SiteAuditPanel({
             </div>
           </div>
           <div className="mt-4 grid gap-3 md:grid-cols-3">
-            <div className="rounded-xl border border-navy/10 bg-background px-3 py-2">
-              <p className="text-[13px] font-bold uppercase tracking-wide text-gold">{t("audit.inferredAudience")}</p>
+            <div className="rounded-[14px] border border-[rgba(8,17,31,0.1)] bg-white px-3 py-2">
+              <p className="text-[13px] font-bold uppercase tracking-wide text-teal">{t("audit.inferredAudience")}</p>
               <p className="mt-1 text-sm leading-relaxed text-foreground">{past.inferredAudience[locale]}</p>
             </div>
-            <div className="rounded-xl border border-navy/10 bg-background px-3 py-2">
-              <p className="text-[13px] font-bold uppercase tracking-wide text-gold">{t("audit.recommendedAudience")}</p>
+            <div className="rounded-[14px] border border-[rgba(8,17,31,0.1)] bg-white px-3 py-2">
+              <p className="text-[13px] font-bold uppercase tracking-wide text-teal">{t("audit.recommendedAudience")}</p>
               <p className="mt-1 text-sm leading-relaxed text-foreground">{past.recommendedAudience[locale]}</p>
             </div>
-            <div className="rounded-xl border border-navy/10 bg-background px-3 py-2">
+            <div className="rounded-[14px] border border-[rgba(8,17,31,0.1)] bg-white px-3 py-2">
               <p className="text-[13px] font-bold uppercase tracking-wide text-danger">{t("audit.failedWhere")}</p>
               <ul className="mt-1 space-y-1">
                 {past.failedWhere.map((s) => (
