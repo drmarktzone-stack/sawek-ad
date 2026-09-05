@@ -5,6 +5,7 @@ import { isOfferedAsset, pickAsset, pickHero } from "@/lib/media-assets";
 import { useResolvedAssets } from "@/lib/use-resolved-assets";
 import { sampleLabel } from "@/lib/operating-model";
 import { dirFor } from "@/lib/i18n";
+import { isRedundantKicker } from "@/lib/channel-copy";
 import { cn } from "@/lib/utils";
 
 export type AdPosterChannel = "facebook" | "instagram" | "tiktok" | "whatsapp";
@@ -133,19 +134,22 @@ function TypeBlock({
   const tt = channel === "tiktok";
   const wa = channel === "whatsapp";
   const muted = onPhoto ? "rgba(255,255,255,0.92)" : isLight(ink) ? "rgba(247,247,245,0.88)" : "rgba(17,17,17,0.78)";
-  const showKicker = Boolean(kicker) && !fb && !tt && !onPhoto;
+  // Never stack a thin accent kicker that repeats the bold headline (e.g. doctor name twice).
+  const showKicker = Boolean(kicker) && !fb && !tt && !onPhoto && !isRedundantKicker(kicker, headline);
   const showCta = Boolean(cta) && !tt;
   return (
     <div
       dir={dir}
+      lang={locale}
       className={cn(
         "relative z-[1] box-border flex h-full min-h-0 w-full flex-col text-start",
-        tt && "justify-end gap-2 pb-[38%] pl-4 pr-20 pt-12",
-        onPhoto && !tt && "justify-end gap-3 px-6 py-6",
-        !onPhoto && fb && "justify-between gap-2 px-5 py-3 ps-7",
-        !onPhoto && ig && "justify-between gap-2 px-5 py-5",
-        !onPhoto && wa && "justify-end gap-2 p-4",
-        !onPhoto && !channel && "justify-end gap-2 p-4",
+        // Safe padding on all four Magic Resize frames (1.91 / 1:1 / 4:5 / 9:16).
+        tt && "justify-end gap-2 pb-[38%] ps-5 pe-[4.75rem] pt-14",
+        onPhoto && !tt && "justify-end gap-3 px-6 py-7",
+        !onPhoto && fb && "justify-between gap-2 px-6 py-4 ps-7",
+        !onPhoto && ig && "justify-between gap-2.5 px-6 py-6",
+        !onPhoto && wa && "justify-end gap-2.5 p-5",
+        !onPhoto && !channel && "justify-end gap-2.5 p-5",
       )}
     >
       <div className="min-h-0 overflow-hidden">
@@ -159,7 +163,7 @@ function TypeBlock({
         ) : null}
         <h2
           className={cn(
-            "font-black tracking-tight break-words",
+            "relative z-[1] font-black tracking-tight break-words",
             onPhoto && "text-[clamp(22px,5.2vw,34px)] leading-[1.08]",
             !onPhoto && fb && "text-[clamp(15px,3.6vw,20px)] leading-[1.12]",
             !onPhoto && ig && "text-[clamp(18px,4.2vw,26px)] leading-[1.08]",
@@ -167,7 +171,7 @@ function TypeBlock({
             !onPhoto && wa && "text-[18px] leading-[1.12]",
             !onPhoto && !channel && "text-xl leading-tight",
           )}
-          style={{ color: ink, margin: 0, overflowWrap: "anywhere" }}
+          style={{ color: ink, margin: 0, overflowWrap: "anywhere", textShadow: "none" }}
         >
           {headline}
         </h2>
@@ -180,7 +184,7 @@ function TypeBlock({
               wa && "text-[13px] leading-snug",
               !channel && "text-sm leading-snug",
             )}
-            style={{ color: muted, margin: 0, overflowWrap: "anywhere" }}
+            style={{ color: muted, margin: 0, overflowWrap: "anywhere", unicodeBidi: "isolate" }}
           >
             {body}
           </p>

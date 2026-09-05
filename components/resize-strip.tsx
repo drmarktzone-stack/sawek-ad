@@ -6,7 +6,7 @@ import type { CampaignPack, Locale } from "@/lib/types";
 import { AdVisual } from "@/components/ad-mockup";
 import { useResolvedAssets } from "@/lib/use-resolved-assets";
 import { pickHero, pickLogo } from "@/lib/media-assets";
-import { channelFields, downloadNodePng } from "@/lib/channel-copy";
+import { channelFields, downloadNodePng, isRedundantKicker } from "@/lib/channel-copy";
 import { RESIZE_FORMATS } from "@/lib/resize-formats";
 import { paletteForIntake } from "@/lib/brand-kit";
 import { useI18n } from "@/components/i18n-provider";
@@ -62,6 +62,9 @@ export function ResizeStrip({
               }}
               data-kit-png={`resize-${fmt.id}`}
               data-kit-width={String(fmt.width)}
+              data-kit-locale={packLang}
+              lang={packLang}
+              dir={packLang === "en" ? "ltr" : "rtl"}
               className="overflow-hidden rounded-xl"
               style={{ aspectRatio: fmt.css }}
             >
@@ -71,7 +74,11 @@ export function ResizeStrip({
                 asset={hero}
                 urls={urls}
                 overrideSrc={generatedImage}
-                kicker={fmt.channel === "facebook" || fmt.channel === "tiktok" ? undefined : fields.pageName}
+                kicker={
+                  fmt.channel === "facebook" || fmt.channel === "tiktok" || isRedundantKicker(fields.pageName, fields.posterHeadline)
+                    ? undefined
+                    : fields.pageName
+                }
                 headline={fields.posterHeadline}
                 body={fields.posterSupport}
                 cta={fmt.channel === "tiktok" ? undefined : fields.cta}

@@ -22,7 +22,7 @@ import { Button } from "@/components/ui/button";
 import { AdVisual } from "@/components/ad-mockup";
 import { pickHero, pickLogo } from "@/lib/media-assets";
 import { useResolvedAssets } from "@/lib/use-resolved-assets";
-import { channelFields, downloadNodePng } from "@/lib/channel-copy";
+import { channelFields, downloadNodePng, isRedundantKicker } from "@/lib/channel-copy";
 import { stylesForVertical } from "@/lib/design-styles";
 import { detectVertical } from "@/lib/vertical";
 import { paletteForIntake } from "@/lib/brand-kit";
@@ -161,7 +161,7 @@ export function FacebookFeedCard({
         overrideSrc={generatedSrc}
         aiLabel={aiLabel}
         graphicOnlyLabel={graphicOnlyLabel}
-        kicker={fields.pageName}
+        kicker={undefined}
         headline={fields.posterHeadline}
         body={fields.posterSupport}
         cta={fields.cta}
@@ -260,7 +260,7 @@ export function InstagramFeedCard({
         overrideSrc={generatedSrc}
         aiLabel={aiLabel}
         graphicOnlyLabel={graphicOnlyLabel}
-        kicker={fields.pageName}
+        kicker={isRedundantKicker(fields.pageName, fields.posterHeadline) ? undefined : fields.pageName}
         headline={fields.posterHeadline}
         body={fields.posterSupport}
         cta={fields.cta}

@@ -49,6 +49,18 @@ if (!he.posterHeadline.trim()) fail("posterHeadline empty");
 if (he.hoursChips.length > 3) fail(`poster hoursChips ${he.hoursChips.length} > 3`);
 if (!he.cta.trim()) fail("cta empty");
 
+const HE_RE = /[\u0590-\u05FF]/;
+const AR_RE = /[\u0600-\u06FF]/;
+for (const loc of ["he", "ar", "en"] as const) {
+  const f = channelFields(pack, loc);
+  const blob = [f.posterHeadline, f.posterSupport, f.shortBody, f.cta, f.pageName].join("\n");
+  if (loc === "he" && AR_RE.test(blob)) fail(`HE poster leaked Arabic: ${blob.slice(0, 160)}`);
+  if (loc === "ar" && HE_RE.test(blob)) fail(`AR poster leaked Hebrew: ${blob.slice(0, 160)}`);
+  if (loc === "en" && (HE_RE.test(blob) || AR_RE.test(blob))) fail(`EN poster leaked HE/AR: ${blob.slice(0, 160)}`);
+  if (loc === "he" && !HE_RE.test(f.posterHeadline)) fail(`HE posterHeadline missing Hebrew`);
+  if (loc === "ar" && !AR_RE.test(f.posterHeadline)) fail(`AR posterHeadline missing Arabic`);
+}
+
 const posters = graphicPostersForIntake(intake);
 if (posters.length < 4) fail(`graphic posters ${posters.length} < 4`);
 for (const p of posters) {
