@@ -845,7 +845,17 @@ export function rsaLines(intake: Intake, locale: Locale): string {
         ? "לפי סדר הגעה"
         : "Walk-in, no appointment"
     : clipAtWord(edgeShort(intake, locale), 30);
-  const h3 = placeBit(intake, locale) || shortCity(intake, locale) || (locale === "ar" ? "الموقع ناقص" : locale === "he" ? "מיקום חסר" : "location missing");
+  const h3 =
+    placeBit(intake, locale) ||
+    shortCity(intake, locale) ||
+    shortName(intake, locale) ||
+    (intake.businessName.trim()
+      ? shortName(intake, locale)
+      : locale === "ar"
+        ? "الموقع ناقص"
+        : locale === "he"
+          ? "מיקום חסר"
+          : "location missing");
   const d1 = hoursLine(intake, locale) || kupaLine(intake, locale) || clipAtWord(painShort(intake, locale), 40);
   const d2 = spokenCta(intake, locale);
   return `H1: ${h1}\nH2: ${h2}\nH3: ${h3}\nD1: ${d1}\nD2: ${d2}`;

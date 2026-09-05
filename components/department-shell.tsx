@@ -50,10 +50,10 @@ export function DepartmentRail() {
             key={item.href}
             href={item.href}
             className={cn(
-              "shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold",
+              "shrink-0 rounded-[10px] px-3 py-1.5 text-xs font-semibold",
               active
-                ? "bg-navy text-white"
-                : "border border-navy/10 text-muted hover:border-gold",
+                ? "bg-ink text-[#F7F3EA]"
+                : "border border-[rgba(8,17,31,0.12)] text-muted hover:border-teal",
             )}
           >
             {t(item.key)}

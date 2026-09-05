@@ -121,10 +121,10 @@ export function coachIntake(intake: Intake): CoachReport {
       stage: "wizard_business",
       finding: L(
         nameEmpty
-          ? "חסר שם עסק — אי אפשר לבנות מודעה ששייכת למישהו."
+          ? "בלי שם — המודעה לא תישמע שייכת לעסק. להשלים שם חוקי/מסחרי לפני פרסום."
           : descEmpty
-            ? "התיאור דל. בלי מה העסק עושה, ההוקים יישארו כלליים."
-            : "חסר מיקום — טירגוט מקומי בלי אזור הוא ניחוש.",
+            ? "התיאור דק. הוסיפו משפט אחד על מה העסק עושה בפועל — ההוקים יתחדדו."
+            : "בלי אזור — לא נקבע רדיוס. לצלם חזית או להוסיף עיר.",
         nameEmpty
           ? "اسم النشاط ناقص — ما في إعلان يخص حدا."
           : descEmpty
@@ -244,7 +244,7 @@ export function coachIntake(intake: Intake): CoachReport {
     critiques.push({
       stage: "creative",
       finding: L(
-        "אין תמונה/מודעה ישנה. המוקאפ יישאר דוגמה — בלי להמציא פנים.",
+        "אין תמונה עדיין — נציע גריד חי לפי הנושא, בלי להמציא פנים.",
         "ما في صورة/إعلان سابق. النموذج رح يبقى عينة — بلا اختراع وجوه.",
         "No photo / past ad. The mockup stays a sample — no invented faces.",
       ),

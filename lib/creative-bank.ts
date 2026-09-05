@@ -330,8 +330,80 @@ const LAYOUTS: LayoutSpec[] = [
   { id: "sale-story", channel: "story", shape: "story", sale: true, name: L("סטורי מבצע", "ستوري عرض", "Sale story") },
 ];
 
+export type ServiceFamily = "salon" | "gym" | "cafe" | "workshop" | "pro" | null;
+
+/** Distinctive generic-service banks — never invent ratings or prices. */
+export function serviceFamily(intake?: Intake): ServiceFamily {
+  if (!intake) return null;
+  const blob = `${intake.businessName} ${intake.category} ${intake.description}`.toLowerCase();
+  if (/salon|ספר|מספרה|حلاق|صالون|barber|שיער|تجميل|יופי|nails|ציפורן/.test(blob)) return "salon";
+  if (/gym|כושר|نادي|fitness|חדר כושר|yoga|יוגה|pilates|פילאטיס/.test(blob)) return "gym";
+  if (/cafe|קפה|مقهى|coffee|espresso|מאפה|مخبز|bakery/.test(blob)) return "cafe";
+  if (/workshop|סדנ|ورشة|studio|סטודיו|נגר|עץ|ceramic|קרמי/.test(blob)) return "workshop";
+  if (/lawyer|עורך דין|محام|accountant|רואה חשבון|محاسب|consult|ייעוץ|استشار/.test(blob)) return "pro";
+  return null;
+}
+
+const SERVICE_HOOKS: Record<Exclude<ServiceFamily, null>, Record<Locale, string[]>> = {
+  salon: {
+    he: ["{name} — כיסא אחד, לא קטלוג תסרוקות מומצא.", "{advantage}", "בואו ל{place} — לראות עבודה, לא באנר."],
+    ar: ["{name} — كرسي واحد، مش كتالوج قصّات مختلق.", "{advantage}", "تعوا ع {place} — تشوفوا شغل، مش بنر."],
+    en: ["{name} — one chair, not a fake hairstyle catalog.", "{advantage}", "Come to {place} — see the work, not a banner."],
+  },
+  gym: {
+    he: ["{name} — רצפה ורזל, לא הבטחת גוף ב-30 יום.", "{advantage}", "שעות אמת: {hours} — בואו להתאמן."],
+    ar: ["{name} — أرضية وحديد، مش وعد جسم بـ 30 يوم.", "{advantage}", "ساعات حقيقية: {hours} — تعوا تتدرّبوا."],
+    en: ["{name} — floor and iron, no 30-day body promise.", "{advantage}", "Real hours: {hours} — come train."],
+  },
+  cafe: {
+    he: ["{name} — כוס ושקט, לא סלוגן «הקפה הכי טוב».", "{advantage}", "בואו ל{place} — שולחן, לא באנר משלוחים."],
+    ar: ["{name} — فنجان وهدوء، مش شعار «أحلى قهوة».", "{advantage}", "تعوا ع {place} — طاولة، مش بنر توصيل."],
+    en: ["{name} — a cup and quiet, not a “best coffee” slogan.", "{advantage}", "Come to {place} — a table, not a delivery banner."],
+  },
+  workshop: {
+    he: ["{name} — יד אחת על החומר, לא קטלוג 40 פריטים.", "{advantage}", "{place} — סדנה אמת, לא «לידכם» ריק."],
+    ar: ["{name} — إيد عالخامة، مش كتالوج 40 قطعة.", "{advantage}", "{place} — ورشة حقيقية، مش «قربكم» فاضي."],
+    en: ["{name} — one hand on the material, not a 40-SKU catalog.", "{advantage}", "{place} — a real workshop, not empty “near you”."],
+  },
+  pro: {
+    he: ["{name} — משפט בהיר, לא סלוגן «הכי מקצועי».", "{advantage}", "שיחה אחת — בלי הבטחת תוצאה שלא נמדדה."],
+    ar: ["{name} — جملة واضحة، مش شعار «الأكثر احتراف».", "{advantage}", "مكالمة واحدة — بلا وعد نتيجة ما انقاست."],
+    en: ["{name} — one clear sentence, not a “most professional” slogan.", "{advantage}", "One call — no unmeasured outcome promise."],
+  },
+};
+
+const SERVICE_ANGLES: Record<Exclude<ServiceFamily, null>, Record<Locale, string[]>> = {
+  salon: {
+    he: ["כיסא אחד מול קטלוג", "קרוס-אפ מספריים/בד", "רחוב כזהות מקום", "תור בוואטסאפ — בלי דירוג"],
+    ar: ["كرسي واحد مقابل كتالوج", "لقطة مقص/قماش", "الشارع كهوية مكان", "دور واتساب — بلا تقييم"],
+    en: ["one chair vs a catalog", "scissors/cloth close-up", "street as place identity", "hold via WhatsApp — no rating"],
+  },
+  gym: {
+    he: ["רצפה כעובדה", "שעות כגיבור", "בלי הבטחת גוף", "וואטסאפ לשעות — לא לנס"],
+    ar: ["الأرضية كحقيقة", "الساعات هي البطل", "بلا وعد جسم", "واتساب للساعات — مش لمعجزة"],
+    en: ["floor as fact", "hours as hero", "no body promise", "WhatsApp for hours — not a miracle"],
+  },
+  cafe: {
+    he: ["כוס כפתיח", "שולחן שקט", "כתובת כגיבור", "בלי «הכי טעים»"],
+    ar: ["الفنجان كافتتاح", "طاولة هادئة", "العنوان كبطل", "بلا «الألذ»"],
+    en: ["cup as open", "quiet table", "address as hero", "no “tastiest”"],
+  },
+  workshop: {
+    he: ["יד על חומר", "סדנה ריקה מצולמת", "תהליך 3 שלבים בלי מדדים", "הזמנה לפני קטלוג"],
+    ar: ["إيد عالخامة", "ورشة فاضية مصوّرة", "مسار 3 خطوات بلا مقاييس", "الحجز قبل الكتالوج"],
+    en: ["hand on material", "empty workshop filmed", "3-step process, no metrics", "book before a catalog"],
+  },
+  pro: {
+    he: ["משפט בהיר", "בלי תיאטרון דירוגים", "שיחה אחת", "מקום/שעות אם סופקו"],
+    ar: ["جملة واضحة", "بلا مسرح تقييمات", "مكالمة واحدة", "مكان/ساعات إن وُجدت"],
+    en: ["one clear sentence", "no ratings theatre", "one call", "place/hours if supplied"],
+  },
+};
+
 export function hooksFor(vertical: Vertical, locale: Locale, intake?: Intake): string[] {
-  const raw = HOOKS[vertical]?.[locale] ?? HOOKS.generic[locale];
+  const cafe = vertical === "restaurant" && intake && foodFamily(intake) === "cafe";
+  const fam = cafe ? "cafe" : (vertical === "generic" || vertical === "product" ? serviceFamily(intake) : null);
+  const raw = fam ? SERVICE_HOOKS[fam][locale] : (HOOKS[vertical]?.[locale] ?? HOOKS.generic[locale]);
   const rows = intake ? raw.map((t) => fill(t, intake, locale)) : raw;
   return rows.filter((s) => s.length > 0 && !/^[\s—–-]+$/.test(s));
 }
@@ -341,7 +413,10 @@ export function anglesFor(vertical: Vertical, locale: Locale, intake?: Intake): 
     const fam = foodFamily(intake);
     if (fam === "mediterranean") return MED_ANGLES[locale];
     if (fam === "grill") return GRILL_ANGLES[locale];
+    if (fam === "cafe") return SERVICE_ANGLES.cafe[locale];
   }
+  const svc = (vertical === "generic" || vertical === "product") ? serviceFamily(intake) : null;
+  if (svc) return SERVICE_ANGLES[svc][locale];
   return ANGLES[vertical]?.[locale] ?? ANGLES.generic[locale];
 }
 

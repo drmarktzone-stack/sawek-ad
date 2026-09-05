@@ -29,17 +29,17 @@ export function CoachPanel({
   return (
     <section
       data-coach="panel"
-      className="mb-6 rounded-2xl border border-gold/30 bg-white p-4 sm:p-5"
+      className="agency-board mb-6 p-4 sm:p-5"
     >
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <Sparkles className="size-4 text-gold" />
-          <p className="text-xs font-black uppercase tracking-[0.16em] text-gold">
+          <Sparkles className="size-4 text-teal" />
+          <p className="agency-kicker">
             {t("coach.title")}
           </p>
         </div>
         <div className="flex items-baseline gap-2">
-          <p className="text-3xl font-black text-gold" data-coach="score">
+          <p className="text-3xl font-black text-ink" data-coach="score">
             {report.score}
           </p>
           <p className="text-sm text-muted">/100 · {t("coach.scoreHint")}</p>
@@ -49,8 +49,8 @@ export function CoachPanel({
       {critiques.length > 0 && (
         <ul className="mb-4 space-y-2">
           {critiques.map((c, i) => (
-            <li key={`${c.stage}-${i}`} className="rounded-xl border border-navy/10 bg-background px-3 py-2">
-              <p className="text-sm font-bold uppercase tracking-wide text-gold">
+            <li key={`${c.stage}-${i}`} className="agency-guidance rounded-[14px] px-3 py-2.5">
+              <p className="text-sm font-bold uppercase tracking-wide text-teal">
                 {t(STAGE_KEY[c.stage])}
               </p>
               <p className="mt-1 text-sm text-foreground">{c.finding[locale]}</p>
@@ -62,8 +62,8 @@ export function CoachPanel({
 
       <div className="mb-4 grid gap-2 sm:grid-cols-3">
         {strategies.map((s) => (
-          <article key={s.id} className="rounded-xl border border-gold/20 bg-background p-3">
-            <p className="text-xs font-black text-gold">{s.title[locale]}</p>
+          <article key={s.id} className="rounded-[14px] border border-[rgba(8,17,31,0.08)] bg-white p-3">
+            <p className="text-xs font-black text-teal">{s.title[locale]}</p>
             <p className="mt-1 text-xs leading-relaxed text-muted">{s.body[locale]}</p>
             <p className="mt-2 text-sm leading-relaxed text-muted">{s.plan7[locale]}</p>
           </article>

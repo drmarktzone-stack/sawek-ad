@@ -55,6 +55,26 @@ export function fieldOrIncomplete(value: string | undefined | null, locale: Loca
   return s ? s : incompleteLabel(locale);
 }
 
+/**
+ * Prefer a real fact (name / phone / site) over an incomplete marker.
+ * Only emit TO COMPLETE when none of those exist.
+ */
+export function fieldOrFact(
+  value: string | undefined | null,
+  locale: Locale,
+  facts?: { name?: string; phone?: string; website?: string },
+): string {
+  const s = (value ?? "").trim();
+  if (s && !isIncompleteMarker(s, locale)) return s;
+  const name = (facts?.name ?? "").trim();
+  const phone = (facts?.phone ?? "").trim();
+  const site = (facts?.website ?? "").trim();
+  if (name) return name;
+  if (phone) return phone;
+  if (site) return site;
+  return incompleteLabel(locale);
+}
+
 export function spokenVariant(pack: CampaignPack, locale: Locale): AdVariant | undefined {
   const ads = pack.variants.filter((v) => v.locale === locale);
   return ads.find((v) => v.kind === "strong_offer") ?? ads[0];
@@ -116,9 +136,14 @@ export function channelFields(pack: CampaignPack, locale: Locale): ChannelFields
   const v = spokenVariant(pack, locale);
   const waPiece = agencyPiece(pack, "whatsapp", locale);
   const lpPiece = agencyPiece(pack, "landing", locale);
-  const headline = fieldOrIncomplete(v?.headline, locale);
-  const body = fieldOrIncomplete(v?.primaryText, locale);
-  const cta = fieldOrIncomplete(v?.cta, locale);
+  const facts = {
+    name: pack.intake.businessName,
+    phone: pack.intake.whatsapp,
+    website: pack.intake.website,
+  };
+  const headline = fieldOrFact(v?.headline, locale, facts);
+  const body = fieldOrFact(v?.primaryText, locale, facts);
+  const cta = fieldOrFact(v?.cta, locale, facts);
   const waFromIntake = pack.intake.whatsappTemplates?.trim() ?? "";
   const waRaw = stripHoursWall(waFromIntake || waPiece?.body || "");
   const waClean = waRaw
@@ -135,10 +160,10 @@ export function channelFields(pack: CampaignPack, locale: Locale): ChannelFields
         : waHasFacts
           ? fieldOrIncomplete(pack.intake.businessName || pack.intake.whatsapp, locale)
           : fieldOrIncomplete(waRaw, locale);
-  const landingTitle = fieldOrIncomplete(lpPiece?.title || v?.headline, locale);
-  const landingBody = fieldOrIncomplete(lpPiece?.body, locale);
+  const landingTitle = fieldOrFact(lpPiece?.title || v?.headline, locale, facts);
+  const landingBody = fieldOrFact(lpPiece?.body, locale, facts);
   const posterHeadline = clipAtWord(
-    sanitizeForLocale(stripHoursWall(headline) || headline, locale) || incompleteLabel(locale),
+    sanitizeForLocale(stripHoursWall(headline) || headline, locale) || fieldOrFact("", locale, facts),
     56,
   );
   const posterSupport = oneSupportLine(pack, locale, posterHeadline);
@@ -148,15 +173,16 @@ export function channelFields(pack: CampaignPack, locale: Locale): ChannelFields
     : "";
   const shortBody = cleanedPrimary
     ? clipAtWord(cleanedPrimary, 90)
-    : posterSupport || incompleteLabel(locale);
+    : posterSupport || fieldOrFact("", locale, facts);
   const primaryText = [v?.headline, v?.primaryText, v?.cta]
     .map((x) => sanitizeForLocale(x ?? "", locale))
     .filter((x) => x.trim())
     .join("\n\n");
-  const caption = primaryText.trim() ? primaryText : incompleteLabel(locale);
-  const pageName = fieldOrIncomplete(
+  const caption = primaryText.trim() ? primaryText : fieldOrFact("", locale, facts);
+  const pageName = fieldOrFact(
     sanitizeForLocale(shortName(pack.intake, locale) || pack.intake.businessName, locale),
     locale,
+    facts,
   );
   const reelsPiece = agencyPiece(pack, "reels", locale);
   const tiktokPiece = agencyPiece(pack, "tiktok", locale);
@@ -167,7 +193,7 @@ export function channelFields(pack: CampaignPack, locale: Locale): ChannelFields
       : [posterHeadline, posterSupport].filter(Boolean).join(" · "),
     90,
   );
-  const tiktokCta = fieldOrIncomplete(sanitizeForLocale(v?.cta || "", locale) || v?.cta, locale);
+  const tiktokCta = fieldOrFact(sanitizeForLocale(v?.cta || "", locale) || v?.cta, locale, facts);
   return {
     headline,
     posterHeadline,
@@ -179,7 +205,7 @@ export function channelFields(pack: CampaignPack, locale: Locale): ChannelFields
     waScript,
     landingTitle,
     landingBody,
-    primaryText: primaryText.trim() ? primaryText : incompleteLabel(locale),
+    primaryText: primaryText.trim() ? primaryText : fieldOrFact("", locale, facts),
     caption,
     pageName,
     tiktokCaption,
