@@ -11,7 +11,7 @@ import { assetsFromPublicUrls, isOfferedAsset, stockToAsset } from "@/lib/media-
 import { buildSiteAudit } from "@/lib/engine/site-audit";
 import { syncCampaign } from "@/lib/supabase";
 import { detectVertical } from "@/lib/vertical";
-import { IMAGEN_PICKER_COUNT, verticalNoun } from "@/lib/imagen-scenes";
+import { IMAGEN_PICKER_COUNT } from "@/lib/imagen-scenes";
 import { cn } from "@/lib/utils";
 
 export type OfferKind = "graphic" | "imagen" | "site" | "stock";
@@ -94,7 +94,6 @@ export function ImageOfferPicker({
 }) {
   const { t } = useI18n();
   const vertical = detectVertical(pack.intake);
-  const noun = verticalNoun(vertical, locale);
   const hasOffered = (pack.intake.mediaAssets ?? []).some((a) => a.kind === "image" && isOfferedAsset(a));
   const [internalOpen, setInternalOpen] = useState(defaultOpen);
   const open = openProp ?? internalOpen;
@@ -103,6 +102,27 @@ export function ImageOfferPicker({
     () => graphicPostersForIntake(pack.intake),
     [pack.intake.category, pack.intake.businessName, pack.intake.operatingModel, pack.intake.description],
   );
+  const existingSite = useMemo(() => {
+    return (pack.intake.mediaAssets ?? [])
+      .filter((a) => {
+        if (a.kind !== "image") return false;
+        if (a.label === "logo") return false;
+        if (isOfferedAsset(a)) return false;
+        const src = a.publicSrc || "";
+        if (!src || /\.svg(\?|$)/i.test(src)) return false;
+        if (/\/icons?\/|apple-touch|favicon|sprite/i.test(src)) return false;
+        return true;
+      })
+      .slice(0, 16)
+      .map((asset, i) => ({
+        id: `pack-site-${asset.id}`,
+        kind: "site" as const,
+        label: `${t("audit.sitePhoto")} ${i + 1}`,
+        src: asset.publicSrc || "",
+        asset: { ...asset, note: asset.note?.startsWith("offer:site:") ? asset.note : `offer:site:${asset.publicSrc || asset.note}` },
+      }));
+  }, [pack.intake.mediaAssets, t]);
+
   const [imagen, setImagen] = useState<OfferOption[]>([]);
   const [site, setSite] = useState<OfferOption[]>([]);
   const [stock, setStock] = useState<OfferOption[]>([]);
@@ -111,7 +131,6 @@ export function ImageOfferPicker({
   const [aiBusy, setAiBusy] = useState(false);
   const [siteBusy, setSiteBusy] = useState(false);
   const [imgError, setImgError] = useState("");
-  const [requested, setRequested] = useState(IMAGEN_PICKER_COUNT);
 
   const graphicOpts: OfferOption[] = posters.map((p) => ({
     id: p.id,
@@ -155,20 +174,10 @@ export function ImageOfferPicker({
         imagenGot?: number;
         emptyMessage?: string;
       };
-      if (typeof data.imagenRequested === "number") setRequested(data.imagenRequested);
       const imagenHits = data.imagen ?? [];
-      const curatedHits = data.curated ?? (!imagenHits.length ? data.images ?? [] : []);
       const opts = hitsToOptions(imagenHits, t).filter((o) => o.kind === "imagen");
       setImagen(opts);
-      // If Vertex returned 0, surface curated/on-topic stills in the stock rail so the picker is never empty of options.
-      if (!opts.length && curatedHits.length) {
-        const curatedOpts = hitsToOptions(curatedHits, t);
-        setStock(curatedOpts);
-        setStockLoaded(true);
-      }
-      if (!opts.length && !curatedHits.length) {
-        setImgError(data.emptyMessage || t("audit.retryVertex"));
-      } else if (!opts.length && data.emptyMessage) {
+      if (!opts.length && data.emptyMessage && !stock.length) {
         setImgError(data.emptyMessage);
       }
     } catch {
@@ -238,14 +247,14 @@ export function ImageOfferPicker({
     setStockBusy(true);
     try {
       const params = new URLSearchParams({
-        source: "cc",
+        source: "live",
         vertical,
         category: pack.intake.category || "",
         location: pack.intake.location || "",
         q: (pack.intake.description || pack.intake.uniqueAdvantage || "").slice(0, 160),
         description: (pack.intake.description || "").slice(0, 160),
         offer: (pack.intake.offer || "").slice(0, 80),
-        limit: "24",
+        limit: "48",
         page: "1",
       });
       const res = await fetch(`/api/stock-images?${params.toString()}`);
@@ -254,6 +263,7 @@ export function ImageOfferPicker({
       setStock(opts);
       setStockLoaded(true);
       if (!opts.length && data.emptyMessage) setImgError(data.emptyMessage);
+      else if (opts.length) setImgError("");
     } catch {
       setStock([]);
       setStockLoaded(true);
@@ -282,11 +292,15 @@ export function ImageOfferPicker({
     void syncCampaign(next);
   }
 
-  const shown = imagen.length
-    ? [...imagen, ...graphicOpts.slice(0, 4), ...stock.slice(0, 4)]
-    : [...graphicOpts, ...stock.slice(0, 6)];
-  const making = t("audit.makingImages").replace("{vertical}", noun);
-  const vertexBusy = t("audit.makingVertex");
+  const siteOpts = site.length ? site : existingSite;
+  const liveCount = siteOpts.length + stock.length;
+  const shown = liveCount
+    ? [...siteOpts, ...stock, ...imagen]
+    : imagen.length
+      ? [...imagen, ...graphicOpts.slice(0, 4)]
+      : graphicOpts;
+  const making = t("audit.loadingStock");
+  const liveBusy = stockBusy || siteBusy;
 
   function Tile({ opt }: { opt: OfferOption }) {
     const on = optionSelected(opt);
@@ -323,7 +337,7 @@ export function ImageOfferPicker({
     <div className="mt-3">
       <div className="flex flex-wrap items-center gap-2">
         <Button type="button" size="sm" onClick={() => setOpen(!open)}>
-          {aiBusy || siteBusy ? <Loader2 className="size-4 animate-spin" /> : <ImagePlus className="size-4" />}
+          {aiBusy || siteBusy || stockBusy ? <Loader2 className="size-4 animate-spin" /> : <ImagePlus className="size-4" />}
           {t("audit.offerPhotos")}
         </Button>
         {hasOffered ? (
@@ -336,17 +350,17 @@ export function ImageOfferPicker({
       {open ? (
         <div className="agency-shell mt-3 p-5">
           <p className="text-base leading-relaxed text-navy">{t("audit.offerPhotosLead")}</p>
-          {aiBusy ? (
+          {liveBusy || aiBusy ? (
             <p className="mt-3 flex items-center gap-2 text-sm font-semibold text-navy">
               <Loader2 className="size-4 animate-spin text-teal" />
               {making}
             </p>
           ) : null}
-          {!aiBusy && imgError ? (
+          {!liveBusy && stockLoaded && !stock.length && imgError ? (
             <div className="agency-empty mt-3 flex flex-wrap items-center gap-3 rounded-2xl p-4">
-              <p className="text-base font-semibold text-navy/80">{vertexBusy}</p>
-              <Button type="button" size="sm" variant="outline" onClick={() => void loadImagen()}>
-                {t("audit.retryImagen")}
+              <p className="text-base font-semibold text-navy/80">{t("audit.stockEmpty")}</p>
+              <Button type="button" size="sm" variant="outline" onClick={() => void loadFreeStock()}>
+                {t("audit.loadMore")}
               </Button>
             </div>
           ) : null}
@@ -356,67 +370,44 @@ export function ImageOfferPicker({
               {shown.map((opt) => (
                 <Tile key={opt.id} opt={opt} />
               ))}
-              {aiBusy
-                ? Array.from({ length: Math.max(0, requested - shown.length) }).map((_, i) => (
+              {liveBusy
+                ? Array.from({ length: Math.max(0, 12 - shown.length) }).map((_, i) => (
                     <div
                       key={`sk-${i}`}
                       className="agency-skeleton aspect-square rounded-2xl border border-teal/20"
                     />
                   ))
                 : null}
-              {!aiBusy && !shown.length && !imgError ? (
+              {!liveBusy && !shown.length ? (
                 <div className="agency-empty col-span-full flex min-h-[200px] flex-col items-center justify-center gap-3 rounded-[22px] p-6 text-center">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src="/textures/empty-frame.svg" alt="" className="h-36 w-36 opacity-90" />
-                  <p className="max-w-sm text-base font-semibold text-navy/70">{t("audit.retryVertex")}</p>
+                  <p className="max-w-sm text-base font-semibold text-navy/70">{t("audit.stockEmpty")}</p>
                 </div>
               ) : null}
             </div>
 
-            {site.length ? (
-              <div className="mt-4">
-                <p className="mb-2 text-[12px] font-semibold uppercase tracking-[0.12em] text-navy/60">
-                  {t("audit.tabSite")}
-                </p>
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 md:grid-cols-6">
-                  {site.map((opt) => (
-                    <Tile key={opt.id} opt={opt} />
-                  ))}
-                </div>
-              </div>
-            ) : null}
+            <p className="mt-3 text-[12px] text-muted">{t("audit.stockCredit")}</p>
 
-            <Accordion
-              type="single"
-              collapsible
-              className="mt-4"
-              onValueChange={(v) => {
-                if (v && !stockLoaded) void loadFreeStock();
-              }}
-            >
-              <AccordionItem value="free">
-                <AccordionTrigger>{t("audit.freeStock")}</AccordionTrigger>
+            <Accordion type="single" collapsible className="mt-2">
+              <AccordionItem value="ai">
+                <AccordionTrigger>{t("audit.moreAi")}</AccordionTrigger>
                 <AccordionContent>
-                  {stockBusy && !stock.length ? (
-                    <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
-                      {Array.from({ length: 6 }).map((_, i) => (
-                        <div key={i} className="agency-skeleton aspect-square rounded-xl" />
-                      ))}
-                    </div>
+                  {aiBusy && !imagen.length ? (
+                    <p className="flex items-center gap-2 text-sm font-semibold text-navy">
+                      <Loader2 className="size-4 animate-spin text-teal" />
+                      {t("audit.makingVertex")}
+                    </p>
                   ) : null}
-                  {stockLoaded && !stock.length && !stockBusy ? (
-                    <div className="agency-empty rounded-2xl p-5 text-center">
-                      <p className="text-base font-semibold text-navy/75">{t("audit.stockEmpty")}</p>
-                    </div>
-                  ) : null}
-                  {stock.length ? (
+                  {imagen.length ? (
                     <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 md:grid-cols-6">
-                      {stock.map((opt) => (
-                        <Tile key={opt.id} opt={opt} />
+                      {imagen.map((opt) => (
+                        <Tile key={`ai-${opt.id}`} opt={opt} />
                       ))}
                     </div>
-                  ) : null}
-                  <p className="mt-2 text-[12px] text-muted">{t("audit.stockCredit")}</p>
+                  ) : (
+                    <p className="text-sm text-navy/70">{t("audit.imagenDown")}</p>
+                  )}
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
