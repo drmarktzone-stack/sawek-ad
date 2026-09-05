@@ -5,6 +5,7 @@ import { remixFromSource, remixNeedTranscript } from "@/lib/engine/viral-content
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 function selfHosts(req: Request): string[] {
   const out: string[] = [];

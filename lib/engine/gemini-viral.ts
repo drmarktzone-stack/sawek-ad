@@ -6,8 +6,10 @@ import type {
   RemixResult,
   TrendPack,
   VideoAnalysis,
+  ViralHookPack,
   ViralScriptPack,
 } from "../types";
+import { runImagenMany } from "../imagen";
 import { inventsForbidden } from "./coach";
 import { completeGemini, factsToIntake, geminiFailFromEnv } from "./gemini-generate";
 import { voiceFactLines, voiceFromIntake } from "./voice";
@@ -15,6 +17,8 @@ import {
   analysisDisclaimer,
   buildBioPack,
   buildCarouselPack,
+  buildHookBank,
+  buildRetentionCurve,
   buildTrendPack,
   buildVideoAnalysis,
   buildViralScripts,
@@ -23,7 +27,7 @@ import {
   viralTextForbidden,
 } from "./viral-content";
 
-export type ViralMode = "scripts" | "remix" | "trends" | "carousel" | "bio" | "analyze";
+export type ViralMode = "scripts" | "hooks" | "remix" | "trends" | "carousel" | "bio" | "analyze";
 
 export type ViralBody = {
   mode?: unknown;
@@ -41,7 +45,13 @@ export type ViralBody = {
 };
 
 const SYSTEM =
-  "You are SAWEK AD. Write short-form marketing copy in Hebrew, Arabic, and English from ONLY the facts given. Never invent prices, discounts, ratings, testimonials, ROAS, CAC, likes, followers, Hook Rate, Avg Watch, or Retention Curve. If a fact is missing, write [יש להשלים] / [يجب الاستكمال] / [TO COMPLETE]. Follow the saved niche / core message / personal voice and dialect. Arabic: recreate in the stated dialect (Levantine / Gulf / MSA) — never a literal translation. Reply with JSON only.";
+  "You are SAWEK AD. Write short-form marketing copy in Hebrew, Arabic, and English from ONLY the facts given. Never invent prices, discounts, ratings, testimonials, ROAS, CAC, likes, or followers. If a fact is missing, write [יש להשלים] / [يجب الاستكمال] / [TO COMPLETE]. Follow the saved niche / core message / personal voice and dialect. Arabic: recreate in the stated dialect (Levantine / Gulf / MSA) — never a literal translation. Reply with JSON only.";
+
+const ANALYZE_SYSTEM =
+  "You are SAWEK AD pre-publish planner. Score THIS script/frame only. Output estimated Hook Rate %, estimated Avg Watch %, and a retention curve as Gemini Pro planning estimates. NEVER claim these are live Meta, TikTok, or YouTube analytics. Never invent ROAS, likes, or followers. Reply with JSON only.";
+
+const TREND_SYSTEM =
+  "You are SAWEK AD. Use Google Search grounding for current public social-content formats relevant to this niche. Cite a public URL when the tool returns one. Label freshness with today's date. Do NOT invent view counts, rankings, charts, likes, or ROAS. If grounding is unavailable, say so. Reply with JSON only.";
 
 function asLocale(v: unknown): Locale {
   if (v === "he" || v === "ar" || v === "en") return v;
@@ -49,7 +59,7 @@ function asLocale(v: unknown): Locale {
 }
 
 function asMode(v: unknown): ViralMode {
-  if (v === "scripts" || v === "remix" || v === "trends" || v === "carousel" || v === "bio" || v === "analyze") return v;
+  if (v === "scripts" || v === "hooks" || v === "remix" || v === "trends" || v === "carousel" || v === "bio" || v === "analyze") return v;
   return "scripts";
 }
 
@@ -140,9 +150,10 @@ function overlayTrends(base: TrendPack, obj: Record<string, unknown>, intake: In
     const why = str(row.why) || a.why;
     const blob = `${title} ${angle} ${hook} ${why}`;
     if (viralTextForbidden(blob) || inventsForbidden(blob, intake)) return a;
-    return { ...a, title, angle, hook, why };
+    const sourceUrl = str(row.sourceUrl || row.source);
+    return { ...a, title, angle, hook, why, ...(sourceUrl.startsWith("http") ? { sourceUrl } : {}) };
   });
-  return { ...base, angles, source: "gemini" };
+  return { ...base, angles, source: "gemini", grounded: true };
 }
 
 function overlayRemix(base: RemixResult, obj: Record<string, unknown>, intake: Intake): RemixResult {
@@ -154,6 +165,18 @@ function overlayRemix(base: RemixResult, obj: Record<string, unknown>, intake: I
   return { ...base, script: { ...base.script, hook, spoken, onScreen: hook.slice(0, 48) }, source: "gemini" };
 }
 
+function overlayHooks(base: ViralHookPack, obj: Record<string, unknown>, intake: Intake): ViralHookPack {
+  const rows = Array.isArray(obj.hooks) ? obj.hooks : [];
+  if (rows.length < 5) return base;
+  const hooks = base.hooks.map((h, i) => {
+    const row = rows[i];
+    const text = typeof row === "string" ? row.trim() : str((row as Record<string, unknown> | undefined)?.text);
+    if (!text || viralTextForbidden(text) || inventsForbidden(text, intake)) return h;
+    return { ...h, text: text.slice(0, 90), seconds: "0-3" as const };
+  });
+  return { ...base, hooks, source: "gemini" };
+}
+
 function overlayAnalysis(base: VideoAnalysis, obj: Record<string, unknown>): VideoAnalysis {
   const n = (k: string, fallback: number) => {
     const v = Number(obj[k]);
@@ -163,16 +186,38 @@ function overlayAnalysis(base: VideoAnalysis, obj: Record<string, unknown>): Vid
   const notesRaw = Array.isArray(obj.notes)
     ? obj.notes.filter((x): x is string => typeof x === "string").map((s) => s.trim()).filter(Boolean)
     : [];
-  const notes = notesRaw.filter((s) => !viralTextForbidden(s)).slice(0, 6);
+  const notes = notesRaw.filter((s) => !/\b(ROAS|likes?|followers?)\b/i.test(s)).slice(0, 6);
+  const estimatedHookRate = n("estimatedHookRate", n("hookRate", base.estimatedHookRate));
+  const estimatedAvgWatch = n("estimatedAvgWatch", n("avgWatch", base.estimatedAvgWatch));
+  const curveRaw = Array.isArray(obj.retentionCurve) ? obj.retentionCurve : [];
+  const retentionCurve =
+    curveRaw.length >= 4
+      ? curveRaw
+          .map((p) => {
+            const o = p && typeof p === "object" ? (p as Record<string, unknown>) : {};
+            const t = Number(o.t);
+            const v = Number(o.v);
+            return {
+              t: Number.isFinite(t) ? Math.max(0, Math.min(30, Math.round(t))) : 0,
+              v: Number.isFinite(v) ? Math.max(1, Math.min(100, Math.round(v))) : 50,
+            };
+          })
+          .slice(0, 12)
+      : buildRetentionCurve(estimatedHookRate, estimatedAvgWatch);
   return {
     ...base,
-    hookPotential: n("hookPotential", base.hookPotential),
+    hookPotential: n("hookPotential", estimatedHookRate),
     clarity: n("clarity", base.clarity),
     ctaClarity: n("ctaClarity", base.ctaClarity),
+    estimatedHookRate,
+    estimatedAvgWatch,
+    retentionCurve,
     notes: notes.length ? [...notes, base.disclaimer] : base.notes,
     source: "gemini",
     disclaimer: analysisDisclaimer(base.locale),
     kind: "planning_heuristic",
+    estimateKind: "gemini_pro_estimate",
+    notLiveMetrics: true,
   };
 }
 
@@ -212,6 +257,7 @@ export async function runViralDesk(body: ViralBody): Promise<{
   locale: Locale;
   source: "gemini" | "template";
   scripts?: ViralScriptPack;
+  hooks?: ViralHookPack;
   carousel?: CarouselPack;
   bios?: BioPack;
   trends?: TrendPack;
@@ -248,6 +294,7 @@ export async function runViralDesk(body: ViralBody): Promise<{
     const base = buildViralScripts(intake, idea, locale);
     const completed = await completeGemini({
       temperature: 0.5,
+      tier: "pro",
       systemInstruction: SYSTEM,
       parts: [
         {
@@ -269,10 +316,36 @@ export async function runViralDesk(body: ViralBody): Promise<{
     return { ok: true, mode, locale, source: parsed ? "gemini" : "template", scripts: parsed ? overlayScripts(base, parsed, intake) : base };
   }
 
+  if (mode === "hooks") {
+    const base = buildHookBank(intake, idea, locale);
+    const completed = await completeGemini({
+      temperature: 0.55,
+      tier: "flash",
+      systemInstruction: SYSTEM,
+      parts: [
+        {
+          text: [
+            `Facts:\n${factsBlock(intake)}`,
+            `Idea: ${idea || "(use core message)"}`,
+            `Locale: ${locale}`,
+            "Write 10 distinct first-3-seconds viral HOOKS (openers only, ready to film). No body. Facts only.",
+            `JSON: {"hooks":["...", "..."]}`,
+          ].join("\n\n"),
+        },
+      ],
+    });
+    if (!completed.ok) {
+      return { ok: true, mode, locale, source: "template", hooks: base, reason: completed.reason };
+    }
+    const parsed = parseJson(completed.text);
+    return { ok: true, mode, locale, source: parsed ? "gemini" : "template", hooks: parsed ? overlayHooks(base, parsed, intake) : base };
+  }
+
   if (mode === "carousel") {
     const base = buildCarouselPack(intake, idea, locale);
     const completed = await completeGemini({
       temperature: 0.45,
+      tier: "pro",
       systemInstruction: SYSTEM,
       parts: [
         {
@@ -290,13 +363,49 @@ export async function runViralDesk(body: ViralBody): Promise<{
       return { ok: true, mode, locale, source: "template", carousel: base, reason: completed.reason };
     }
     const parsed = parseJson(completed.text);
-    return { ok: true, mode, locale, source: parsed ? "gemini" : "template", carousel: parsed ? overlayCarousel(base, parsed, intake) : base };
+    const pack = parsed ? overlayCarousel(base, parsed, intake) : base;
+    const prompts = pack.slides.map(
+      (s, i) =>
+        `Carousel slide ${i + 1} of ${pack.slides.length} for ${intake.businessName || "local business"}. ${s.visual || s.headline}. Tasteful cinematic still, no text, no logos, no faces, no prices.`,
+    );
+    const batch = await runImagenMany(
+      {
+        businessName: intake.businessName,
+        category: intake.category,
+        location: intake.location,
+        description: intake.description,
+        locale,
+        sampleCount: pack.slides.length,
+        prompts,
+      },
+      prompts,
+    );
+    const slides = pack.slides.map((s, i) => {
+      const img = batch.images[i];
+      if (!img) return s;
+      return { ...s, imageUrl: img.publicUrl || `data:${img.mime};base64,${img.imageBase64}`, imageSource: "imagen" as const };
+    });
+    const imagenNote = batch.images.length
+      ? undefined
+      : locale === "ar"
+        ? "Imagen 3 غير متاح الآن — الخطوط جاهزة بلا خلفيات مولَّدة."
+        : locale === "he"
+          ? "Imagen 3 לא זמין כרגע — המתארים מוכנים בלי רקעים שנוצרו."
+          : "Imagen 3 is unavailable right now — slide outlines only, no generated backgrounds.";
+    return {
+      ok: true,
+      mode,
+      locale,
+      source: parsed ? "gemini" : "template",
+      carousel: { ...pack, slides, imagenNote },
+    };
   }
 
   if (mode === "bio") {
     const base = buildBioPack(intake, locale);
     const completed = await completeGemini({
       temperature: 0.4,
+      tier: "flash",
       systemInstruction: SYSTEM,
       parts: [
         {
@@ -321,15 +430,18 @@ export async function runViralDesk(body: ViralBody): Promise<{
     const base = buildTrendPack(intake, locale, asOf);
     const completed = await completeGemini({
       temperature: 0.5,
-      systemInstruction: SYSTEM,
+      tier: "pro",
+      grounding: true,
+      timeoutMs: 32_000,
+      systemInstruction: TREND_SYSTEM,
       parts: [
         {
           text: [
             `Facts:\n${factsBlock(intake)}`,
             `Locale: ${locale}`,
             `Today: ${asOf.slice(0, 10)}`,
-            "Suggest 7 topic ANGLES for this niche. Label them as suggestions as of today's date. Do NOT invent trending charts, view counts, or platform rankings.",
-            `JSON: {"angles":[{"title":"","angle":"","hook":"","why":""}]}`,
+            "Using Search grounding, propose 7 current topic ANGLES for this niche. Include source URL when the tool cites one. Label as suggestions as of today's date. Do NOT invent trending charts, view counts, or platform rankings.",
+            `JSON: {"angles":[{"title":"","angle":"","hook":"","why":"","sourceUrl":""}]}`,
           ].join("\n\n"),
         },
       ],
@@ -355,6 +467,7 @@ export async function runViralDesk(body: ViralBody): Promise<{
     }
     const completed = await completeGemini({
       temperature: 0.5,
+      tier: "pro",
       systemInstruction: SYSTEM,
       parts: [
         {
@@ -388,16 +501,18 @@ export async function runViralDesk(body: ViralBody): Promise<{
       caption || transcript ? `User caption/transcript:\n${(caption || transcript).slice(0, 800)}` : "No caption.",
       Number.isFinite(durationSec) ? `Client-reported duration seconds: ${durationSec}` : "",
       frame ? "A first FRAME image is attached — not a live platform analytics feed." : "No frame attached.",
-      "Score planning/heuristic 1–100 only: hookPotential, clarity, ctaClarity.",
-      "NEVER output Hook Rate, Avg Watch, Retention Curve, likes, followers, or ROAS as if measured.",
-      `JSON: {"hookPotential":1,"clarity":1,"ctaClarity":1,"notes":["..."]}`,
+      "Score estimated Hook Rate % (1–100), estimated Avg Watch % (1–100), and a 7-point retention curve (t seconds 0–15, v %).",
+      "Also hookPotential, clarity, ctaClarity (planning 1–100).",
+      "These are Gemini Pro planning estimates — NEVER live Meta/TikTok/YouTube analytics. No likes, followers, or ROAS.",
+      `JSON: {"estimatedHookRate":1,"estimatedAvgWatch":1,"hookPotential":1,"clarity":1,"ctaClarity":1,"retentionCurve":[{"t":0,"v":100}],"notes":["..."]}`,
     ]
       .filter(Boolean)
       .join("\n\n"),
   });
   const completed = await completeGemini({
     temperature: 0.3,
-    systemInstruction: SYSTEM,
+    tier: "pro",
+    systemInstruction: ANALYZE_SYSTEM,
     parts,
   });
   if (!completed.ok) {

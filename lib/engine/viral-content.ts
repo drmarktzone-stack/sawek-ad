@@ -9,9 +9,11 @@ import type {
   Intake,
   Locale,
   RemixResult,
+  RetentionPoint,
   TrendPack,
   Tri,
   VideoAnalysis,
+  ViralHookPack,
   ViralScript,
   ViralScriptPack,
   ViralScriptStyle,
@@ -458,12 +460,46 @@ function clampScore(n: number): number {
 
 export function analysisDisclaimer(locale: Locale): string {
   if (locale === "ar") {
-    return "تقدير تخطيط / هيوريستي (1–100) — مش Hook Rate ولا Avg Watch ولا Retention Curve من تيك توك/إنستغرام. بلا إعجابات وبلا ROAS.";
+    return "Estimated Hook Rate ٪ و Avg Watch ٪ و Retention Curve هي درجات تخطيط من تحليل Gemini Pro / المحرّك المحلي — مش تحليلات Meta/تيك توك/يوتيوب الحيّة. بلا إعجابات وبلا ROAS.";
   }
   if (locale === "he") {
-    return "הערכת תכנון / היוריסטית (1–100) — לא Hook Rate, לא Avg Watch ולא Retention Curve מטיקטוק/אינסטגרם. בלי לייקים ובלי ROAS.";
+    return "Estimated Hook Rate %, Avg Watch % ו-Retention Curve הם ציוני תכנון מניתוח Gemini Pro / המנוע המקומי — לא אנליטיקס חי של Meta/TikTok/YouTube. בלי לייקים ובלי ROAS.";
   }
-  return "Planning / heuristic estimate (1–100) — not live TikTok/IG Hook Rate, Avg Watch %, or Retention Curve. No likes. No ROAS.";
+  return "Estimated Hook Rate %, Avg Watch %, and Retention Curve are Gemini Pro / planning scores from this script and optional frame — not live Meta, TikTok, or YouTube analytics. No likes. No ROAS.";
+}
+
+export function buildRetentionCurve(hookRate: number, avgWatch: number): RetentionPoint[] {
+  const hook = clampScore(hookRate);
+  const avg = clampScore(avgWatch);
+  const times = [0, 1, 3, 5, 8, 12, 15];
+  return times.map((t) => {
+    if (t === 0) return { t, v: 100 };
+    const drop = (100 - avg) * (t / 15) * (1.12 - hook / 250);
+    return { t, v: clampScore(100 - drop) };
+  });
+}
+
+export function buildHookBank(intake: Intake, idea: string, locale: Locale): ViralHookPack {
+  const pack = buildViralScripts(intake, idea, locale);
+  const extra =
+    locale === "ar"
+      ? ["ما حدا رح يحكيلك هيك —", "ثلاث ثواني: الطاولة فاضية.", "واتساب. اسمك. هلق."]
+      : locale === "he"
+        ? ["אף אחד לא יגיד לכם את זה —", "שלוש שניות: השולחן ריק.", "וואטסאפ. השם. עכשיו."]
+        : ["No one will tell you this —", "Three seconds: the table is empty.", "WhatsApp. Your name. Now."];
+  const hooks = [
+    ...pack.scripts.map((s) => ({
+      id: `hk-${s.id}`,
+      text: clip(s.hook, 72),
+      seconds: "0-3" as const,
+    })),
+    ...extra.map((text, i) => ({
+      id: `hk-x${i + 1}`,
+      text: clip(`${text} ${clip(ideaOf(intake, idea, locale), 36)}`, 80),
+      seconds: "0-3" as const,
+    })),
+  ].slice(0, 10);
+  return { locale, idea: ideaOf(intake, idea, locale), hooks, source: "template" };
 }
 
 export function buildVideoAnalysis(
@@ -553,19 +589,30 @@ export function buildVideoAnalysis(
 
   notes.push(
     locale === "ar"
-      ? " Hook potential / Clarity / CTA — تخطيط 1–100. مش Hook Rate ولا Avg Watch."
+      ? "Hook Rate / Avg Watch / Retention Curve الظاهرة أدناه تقدير تخطيط — مش قياسات منصّة حيّة."
       : locale === "he"
-        ? "Hook potential / Clarity / CTA — תכנון 1–100. לא Hook Rate ולא Avg Watch."
-        : "Hook potential / Clarity / CTA — planning 1–100. Not Hook Rate. Not Avg Watch.",
+        ? "Hook Rate / Avg Watch / Retention Curve שלמטה הם הערכות תכנון — לא מדידות פלטפורמה חיות."
+        : "Hook Rate / Avg Watch / Retention Curve below are planning estimates — not live platform measurements.",
   );
+
+  const hookPotential = clampScore(hook);
+  const clarityScore = clampScore(clarity);
+  const ctaScore = clampScore(cta);
+  const estimatedHookRate = hookPotential;
+  const estimatedAvgWatch = clampScore(Math.round(clarityScore * 0.55 + hookPotential * 0.25 + ctaScore * 0.2));
 
   return {
     kind: "planning_heuristic",
+    estimateKind: "gemini_pro_estimate",
+    notLiveMetrics: true,
     locale,
     disclaimer: analysisDisclaimer(locale),
-    hookPotential: clampScore(hook),
-    clarity: clampScore(clarity),
-    ctaClarity: clampScore(cta),
+    hookPotential,
+    clarity: clarityScore,
+    ctaClarity: ctaScore,
+    estimatedHookRate,
+    estimatedAvgWatch,
+    retentionCurve: buildRetentionCurve(estimatedHookRate, estimatedAvgWatch),
     notes,
     source: opts.source ?? "template",
     usedFrame: hasFrame,
@@ -579,6 +626,7 @@ function voiceIsHint(v: VoiceProfile): boolean {
 
 export function packViralBlob(pack: {
   scripts?: ViralScriptPack;
+  hooks?: ViralHookPack;
   carousel?: CarouselPack;
   bios?: BioPack;
   trends?: TrendPack;
@@ -588,6 +636,9 @@ export function packViralBlob(pack: {
   const parts: string[] = [];
   if (pack.scripts) {
     parts.push(pack.scripts.scripts.map((s) => `${s.hook}\n${s.spoken}\n${s.cta}`).join("\n"));
+  }
+  if (pack.hooks) {
+    parts.push(pack.hooks.hooks.map((h) => h.text).join("\n"));
   }
   if (pack.carousel) {
     parts.push(pack.carousel.caption, pack.carousel.slides.map((s) => `${s.headline} ${s.body}`).join("\n"));

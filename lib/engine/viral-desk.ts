@@ -37,6 +37,8 @@ export type HookRetentionEstimate = {
   notLiveMetrics: true;
   hook: number;
   retention: number;
+  avgWatch: number;
+  retentionCurve: { t: number; v: number }[];
   rationale: Record<Locale, string>;
   model?: string;
 };
@@ -103,6 +105,10 @@ function factsBlock(intake: Intake): string {
     intake.uniqueAdvantage && `uniqueAdvantage: ${intake.uniqueAdvantage}`,
     intake.biggestProblem && `biggestProblem: ${intake.biggestProblem}`,
     intake.brandTone && `brandTone: ${intake.brandTone}`,
+    intake.voice?.niche && `niche: ${intake.voice.niche}`,
+    intake.voice?.coreMessage && `coreMessage: ${intake.voice.coreMessage}`,
+    intake.voice?.personalVoice && `personalVoice: ${intake.voice.personalVoice}`,
+    intake.voice?.dialect && `dialect: ${intake.voice.dialect}`,
   ]
     .filter(Boolean)
     .join("\n");
@@ -199,9 +205,21 @@ async function runTextJob(
     return { ...base, hooks };
   }
   if (job === "predict") {
-    const hook = clampScore(obj.hook);
-    const retention = clampScore(obj.retention);
+    const hook = clampScore(obj.hook ?? obj.estimatedHookRate);
+    const retention = clampScore(obj.retention ?? obj.estimatedAvgWatch);
+    const avgWatch = clampScore(obj.avgWatch ?? obj.estimatedAvgWatch ?? retention);
     const rationale = asTri(obj.rationale) || { he: "", ar: "", en: "" };
+    const curveRaw = Array.isArray(obj.retentionCurve) ? obj.retentionCurve : [];
+    const retentionCurve =
+      curveRaw.length >= 4
+        ? curveRaw.slice(0, 12).map((p, i) => {
+            const o = p && typeof p === "object" ? (p as Record<string, unknown>) : {};
+            return { t: clampScore(o.t ?? i), v: clampScore(o.v) };
+          })
+        : [0, 1, 3, 5, 8, 12, 15].map((t) => ({
+            t,
+            v: t === 0 ? 100 : clampScore(100 - ((100 - avgWatch) * t) / 15),
+          }));
     return {
       ...base,
       predict: {
@@ -209,6 +227,8 @@ async function runTextJob(
         notLiveMetrics: true,
         hook,
         retention,
+        avgWatch,
+        retentionCurve,
         rationale,
         model: completed.model,
       },
@@ -261,7 +281,7 @@ function promptFor(job: Exclude<ViralDeskJob, "carousel">, intake: Intake, scrip
     return `Facts:\n${facts}\n\nProduce 10–16 short hooks. JSON:\n{"hooks":[{"he":"","ar":"","en":""}]}`;
   }
   if (job === "predict") {
-    return `Facts:\n${facts}\n${script ? `Script to score:\n${script}` : ""}\n\nEstimate hook-strength and retention-likelihood from THIS COPY only (1–100 planning scores). These are NOT live views, CTR, ROAS, or platform analytics. JSON:\n{"hook":0,"retention":0,"rationale":{"he":"","ar":"","en":""},"kind":"gemini_pro_estimate"}`;
+    return `Facts:\n${facts}\n${script ? `Script to score:\n${script}` : ""}\n\nEstimate Hook Rate %, Avg Watch %, and a retention curve from THIS COPY only (planning scores 1–100). These are NOT live Meta/TikTok/YouTube analytics, CTR, ROAS, or views. JSON:\n{"hook":0,"retention":0,"avgWatch":0,"estimatedHookRate":0,"estimatedAvgWatch":0,"retentionCurve":[{"t":0,"v":100}],"rationale":{"he":"","ar":"","en":""},"kind":"gemini_pro_estimate"}`;
   }
   if (job === "rewrite") {
     return `Facts:\n${facts}\n\nRewrite this video script (keep facts, improve hook/pacing). Source:\n${script || "(none — write a tight 15s from facts)"}\nJSON:\n{"he":"","ar":"","en":""}`;
