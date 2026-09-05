@@ -13,7 +13,6 @@ import { produceAd } from "@/lib/engine/produce-ad";
 import { geminiAdCopy } from "@/lib/engine/gemini-enrich";
 import { adviseFromResults } from "@/lib/engine/optimizer";
 import { highlightsOf, missionOf, pillarsOf } from "@/lib/engine/brief";
-import { buildCmoIdeasPack } from "@/lib/engine/cmo-ideas";
 import { saveDraft } from "@/lib/storage";
 import { syncCampaign } from "@/lib/supabase";
 import { NewCampaignCta } from "@/components/new-campaign-cta";
@@ -73,11 +72,6 @@ export function ResultView({
     ctr: "",
     notes: "",
   });
-
-  const cmoIdeas = useMemo(
-    () => pack.cmoIdeas ?? buildCmoIdeasPack(pack.intake),
-    [pack.cmoIdeas, pack.intake],
-  );
 
   const ads = useMemo(
     () => pack.variants.filter((v) => v.locale === packLang),
