@@ -21,7 +21,7 @@ export function NewCampaignCta({
   const { t } = useI18n();
   return (
     <div className={cn("flex flex-col", className)}>
-      <Button asChild size={size}>
+      <Button asChild size={size} variant="coral">
         <LangLink href="/" onClick={(e) => beginNewCampaign(e)}>
           <WandSparkles className="size-4" />
           {t(other ? "cta.newOther" : "cta.new")}

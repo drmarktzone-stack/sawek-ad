@@ -13,7 +13,7 @@ import { LangLink } from "@/components/lang-link";
 import { PRICE_MONTHLY_ILS, PRICE_YEARLY_ILS } from "@/lib/plan";
 
 export function HomeStudio() {
-  const { t, locale } = useI18n();
+  const { t } = useI18n();
   const [wizardKey, setWizardKey] = useState(0);
 
   useEffect(() => {
@@ -37,84 +37,65 @@ export function HomeStudio() {
   ];
 
   const howIcons = [Link2, Search, Images, Download] as const;
-  /** Soft tinted rows — each step a distinct card; guidance kicker stays teal (fixed chrome). */
-  const howStepThemes = [
-    {
-      bg: "bg-[#E6D5B8]",
-      edge: "border-s-[#0F2744]",
-      chip: "bg-[#0F2744]/18 text-[#0F2744]",
-    },
-    {
-      bg: "bg-[#BFE6DC]",
-      edge: "border-s-[#1F7A6B]",
-      chip: "bg-[#1F7A6B]/20 text-[#1F7A6B]",
-    },
-    {
-      bg: "bg-[#D4C4F0]",
-      edge: "border-s-[#6B5B95]",
-      chip: "bg-[#6B5B95]/20 text-[#6B5B95]",
-    },
-    {
-      bg: "bg-[#F5C4B0]",
-      edge: "border-s-[#E07A5F]",
-      chip: "bg-[#E07A5F]/20 text-[#E07A5F]",
-    },
-  ] as const;
+  const howAccents = ["#0C7A6B", "#10233F", "#5C4D86", "#E24B3A"] as const;
   const freeItems = ["pricing.f1", "pricing.f2", "pricing.f3", "pricing.f4", "pricing.f5"] as const;
   const proItems = ["pricing.p1", "pricing.p2", "pricing.p3", "pricing.p4", "pricing.p5"] as const;
 
   return (
     <div className="relative overflow-hidden">
-      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[480px] agency-hero-glow" />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-[420px] opacity-80"
-        style={{ backgroundImage: "url(/textures/hero-arc.svg)", backgroundSize: "cover", backgroundPosition: "center top" }}
-      />
-      <div aria-hidden className="agency-grain absolute inset-0" />
+      <section className="relative isolate overflow-hidden agency-hero-glow">
+        <div aria-hidden className="agency-grain absolute inset-0 opacity-20" />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-70"
+          style={{ backgroundImage: "url(/textures/hero-arc.svg)", backgroundSize: "cover", backgroundPosition: "center top" }}
+        />
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-[#F3EFE6]" />
 
-      <section className="relative mx-auto max-w-5xl px-4 pb-6 pt-8 sm:pt-14">
-        <p className="agency-kicker mb-3 text-center sm:mb-4">{t("home.kicker")}</p>
-        <h1 className="agency-display agency-fade-up mx-auto max-w-4xl text-center text-[1.85rem] leading-tight sm:text-6xl">
-          {t("home.headline")}
-        </h1>
-        <p className="mobile-readable mx-auto mt-5 max-w-2xl text-center text-base font-semibold leading-relaxed text-navy/85 sm:mt-6 sm:text-xl">
-          {t("home.pitch")}
-        </p>
-        <p className="mx-auto mt-4 max-w-xl rounded-2xl border border-teal/30 bg-white/80 px-4 py-2.5 text-center text-sm font-black text-navy shadow-[0_8px_24px_rgba(15,39,68,0.06)] backdrop-blur-sm sm:rounded-full sm:px-5 sm:text-base">
-          {t("home.vertex")}
-        </p>
+        <div className="relative mx-auto max-w-6xl px-4 pb-16 pt-10 sm:pb-20 sm:pt-16">
+          <p className="agency-kicker mb-4 text-center text-[#9FD4C8]">{t("home.kicker")}</p>
+          <span className="agency-rule mx-auto mb-6 bg-[#9FD4C8]" />
+          <h1 className="agency-display-cream agency-fade-up mx-auto max-w-5xl text-center text-[2.15rem] leading-[1.12] sm:text-6xl lg:text-7xl">
+            {t("home.headline")}
+          </h1>
+          <p className="mobile-readable mx-auto mt-6 max-w-2xl text-center text-base font-semibold leading-relaxed text-[#E8E2D4] sm:mt-7 sm:text-xl">
+            {t("home.pitch")}
+          </p>
+          <p className="mx-auto mt-5 max-w-xl rounded-[12px] border border-white/12 bg-white/8 px-4 py-2.5 text-center text-sm font-bold text-[#F7F3EA] backdrop-blur-sm sm:px-5 sm:text-base">
+            {t("home.vertex")}
+          </p>
 
-        <div className="mt-8 flex flex-col items-center gap-4 sm:mt-9">
-          <div className="mobile-stack w-full justify-center">
-            <Button type="button" size="lg" className="btn-mobile-full text-base font-black sm:text-lg" onClick={startEmpty}>
-              {t("cta.new")}
-            </Button>
-            <Button asChild size="lg" variant="outline" className="btn-mobile-full text-base font-black sm:text-lg">
-              <LangLink href="/pricing">{t("home.cta.pricing")}</LangLink>
+          <div className="mt-9 flex flex-col items-center gap-5 sm:mt-10">
+            <div className="mobile-stack w-full justify-center">
+              <Button type="button" size="lg" variant="coral" className="btn-mobile-full text-base font-black sm:text-lg" onClick={startEmpty}>
+                {t("cta.new")}
+              </Button>
+              <Button asChild size="lg" variant="outline" className="btn-mobile-full border-white/20 bg-white/8 text-[#F7F3EA] hover:bg-white hover:text-ink text-base font-black sm:text-lg">
+                <LangLink href="/pricing">{t("home.cta.pricing")}</LangLink>
+              </Button>
+            </div>
+            <p className="max-w-lg text-center text-sm font-semibold text-[#C9D0D8]">{t("home.demos.secondary")}</p>
+            <DemoPicker tone="ink" />
+          </div>
+          <p className="mx-auto mt-4 max-w-md text-center text-base text-[#C9D0D8]">{t("cta.newHint")}</p>
+          <p className="mx-auto mt-5 max-w-xl text-center text-base leading-relaxed text-[#C9B896]">{t("home.truth")}</p>
+          <div className="mt-4 flex justify-center">
+            <Button asChild variant="ghost" size="sm" className="text-[#C9D0D8] hover:bg-white/8 hover:text-[#F7F3EA]">
+              <LangLink href="/login">{t("nav.login")}</LangLink>
             </Button>
           </div>
-          <p className="max-w-lg text-center text-sm font-semibold text-navy/70">{t("home.demos.secondary")}</p>
-          <DemoPicker />
+          <PwaInstallHint />
         </div>
-        <p className="mx-auto mt-3 max-w-md text-center text-base text-muted">{t("cta.newHint")}</p>
-        <p className="mx-auto mt-5 max-w-xl text-center text-base leading-relaxed text-muted">{t("home.truth")}</p>
-        <div className="mt-4 flex justify-center">
-          <Button asChild variant="ghost" size="sm">
-            <LangLink href="/login">{t("nav.login")}</LangLink>
-          </Button>
-        </div>
-        <PwaInstallHint />
       </section>
 
       <FunctionRail />
 
       <section className="relative mx-auto max-w-5xl px-4">
-        <ul className="mx-auto mt-6 grid max-w-4xl grid-cols-2 gap-2 sm:gap-3 sm:grid-cols-4">
+        <ul className="mx-auto mt-2 grid max-w-4xl grid-cols-2 gap-2 sm:gap-3 sm:grid-cols-4">
           {stats.map((s) => (
             <li
               key={s.label}
-              className="agency-shell flex min-h-[4.5rem] items-center justify-center gap-2 px-2.5 py-3 text-center text-sm font-bold leading-snug text-navy sm:px-3 sm:py-4 sm:text-base"
+              className="agency-board flex min-h-[4.75rem] items-center justify-center gap-2 px-2.5 py-3 text-center text-sm font-bold leading-snug text-navy sm:px-3 sm:py-4 sm:text-base"
             >
               <s.icon className="size-4 shrink-0 text-teal" />
               <span className="min-w-0">{s.label}</span>
@@ -123,7 +104,7 @@ export function HomeStudio() {
         </ul>
       </section>
 
-      <ol className="relative mx-auto mt-8 grid max-w-5xl gap-3 px-4 sm:mt-10 sm:gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <ol className="relative mx-auto mt-10 grid max-w-5xl gap-3 px-4 sm:mt-12 sm:gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {(
           [
             ["home.how.1", "home.how.1b"],
@@ -133,48 +114,45 @@ export function HomeStudio() {
           ] as const
         ).map(([title, body], i) => {
           const Icon = howIcons[i];
-          const theme = howStepThemes[i];
           return (
-            <li
-              key={title}
-              className={`rounded-[var(--radius-card)] border border-[var(--line)] border-s-[6px] ${theme.edge} ${theme.bg} p-5 text-start shadow-[var(--shadow-card)]`}
-            >
-              <p className="flex items-center gap-2 text-[0.7rem] font-extrabold uppercase tracking-[0.22em] text-[#1F7A6B] sm:text-xs">
-                <span className={`inline-flex size-7 items-center justify-center rounded-full ${theme.chip}`}>
+            <li key={title} className="agency-board p-5 text-start">
+              <p className="flex items-center gap-2 text-[0.7rem] font-extrabold uppercase tracking-[0.22em] text-teal sm:text-xs">
+                <span
+                  className="inline-flex size-8 items-center justify-center rounded-[10px] text-white"
+                  style={{ background: howAccents[i] }}
+                >
                   <Icon className="size-3.5" aria-hidden />
                 </span>
                 {t("home.how.title")} · 0{i + 1}
               </p>
-              <p className="mt-3 text-xl font-black text-navy">{t(title)}</p>
-              <p className="mt-2 text-base leading-relaxed text-[#5A6B7D]">{t(body)}</p>
+              <p className="agency-display mt-4 text-2xl">{t(title)}</p>
+              <p className="mt-2 text-base leading-relaxed text-muted">{t(body)}</p>
             </li>
           );
         })}
       </ol>
 
-      <section className="relative mx-auto mt-12 max-w-5xl px-4">
-        <h2 className="agency-display text-center text-3xl sm:text-4xl">{t("home.vs.title")}</h2>
-        <ul className="mt-6 grid gap-4 md:grid-cols-3">
-          <li className="agency-shell p-5 text-start">
+      <section className="relative mx-auto mt-14 max-w-5xl px-4">
+        <h2 className="agency-display text-center text-3xl sm:text-5xl">{t("home.vs.title")}</h2>
+        <span className="agency-rule mx-auto mt-4" />
+        <div className="mt-8 grid gap-4 md:grid-cols-2">
+          <article className="rounded-[20px] border border-[rgba(8,17,31,0.1)] bg-white p-6 text-start shadow-[var(--shadow-card)]">
             <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">{t("home.vs.ordinaryName")}</p>
-            <p className="mt-3 text-base text-navy">{t("home.vs.ordinary")}</p>
-          </li>
-          <li className="agency-shell p-5 text-start">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">{t("home.vs.toolsName")}</p>
-            <p className="mt-3 text-base text-navy">{t("home.vs.canva")}</p>
-          </li>
-          <li className="agency-shell border-teal/40 p-5 text-start ring-1 ring-teal/25">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-teal">SAWEK</p>
-            <p className="mt-3 text-base font-semibold text-navy">{t("home.vs.sawek")}</p>
-          </li>
-        </ul>
-        <div className="agency-shell mt-6 overflow-hidden p-0">
+            <p className="mt-3 text-lg leading-relaxed text-navy/80">{t("home.vs.ordinary")}</p>
+            <p className="mt-4 text-sm leading-relaxed text-muted">{t("home.vs.canva")}</p>
+          </article>
+          <article className="agency-ink rounded-[20px] p-6 text-start shadow-[var(--shadow-lift)]">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-[#9FD4C8]">SAWEK · CMO</p>
+            <p className="mt-3 text-lg font-semibold leading-relaxed text-[#F7F3EA]">{t("home.vs.sawek")}</p>
+          </article>
+        </div>
+        <div className="agency-board mt-6 overflow-hidden p-0">
           <table className="w-full text-start text-sm">
             <thead>
-              <tr className="border-b border-navy/10 bg-[#F7F3EA] text-[11px] font-black uppercase tracking-wide text-navy/70">
-                <th className="px-4 py-3" />
-                <th className="px-4 py-3">{t("home.vs.ordinaryName")}</th>
-                <th className="px-4 py-3 text-teal">SAWEK</th>
+              <tr className="border-b border-[rgba(8,17,31,0.08)] bg-[#08111F] text-[11px] font-black uppercase tracking-wide text-[#C9D0D8]">
+                <th className="px-4 py-3.5" />
+                <th className="px-4 py-3.5">{t("home.vs.ordinaryName")}</th>
+                <th className="px-4 py-3.5 text-[#9FD4C8]">SAWEK</th>
               </tr>
             </thead>
             <tbody className="text-navy">
@@ -186,10 +164,10 @@ export function HomeStudio() {
                   ["home.vs.rowLang", "home.vs.rowOrdinaryLang", "home.vs.rowSawekLang"],
                 ] as const
               ).map(([row, ordinary, sawek]) => (
-                <tr key={row} className="border-b border-navy/8 last:border-0">
-                  <td className="px-4 py-3 font-black">{t(row)}</td>
-                  <td className="px-4 py-3 text-navy/75">{t(ordinary)}</td>
-                  <td className="px-4 py-3 font-semibold">{t(sawek)}</td>
+                <tr key={row} className="border-b border-[rgba(8,17,31,0.06)] last:border-0">
+                  <td className="px-4 py-3.5 font-black">{t(row)}</td>
+                  <td className="px-4 py-3.5 text-navy/65">{t(ordinary)}</td>
+                  <td className="px-4 py-3.5 font-semibold">{t(sawek)}</td>
                 </tr>
               ))}
             </tbody>
@@ -197,42 +175,46 @@ export function HomeStudio() {
         </div>
       </section>
 
-      <section className="relative mx-auto mt-12 max-w-5xl px-4">
-        <h2 className="agency-display text-center text-3xl sm:text-4xl">{t("home.plans.title")}</h2>
-        <div className="mt-6 grid gap-5 md:grid-cols-2">
-          <article className="agency-shell p-6 text-start">
+      <section className="relative mx-auto mt-14 max-w-5xl px-4">
+        <h2 className="agency-display text-center text-3xl sm:text-5xl">{t("home.plans.title")}</h2>
+        <div className="mt-8 grid gap-5 md:grid-cols-2">
+          <article className="agency-board p-7 text-start">
             <p className="agency-kicker">{t("pricing.freeName")}</p>
-            <p className="mt-2 text-4xl font-black text-navy">{t("pricing.freePrice")}</p>
+            <p className="agency-display mt-3 text-5xl">{t("pricing.freePrice")}</p>
             <p className="text-sm text-muted">{t("pricing.freeForever")}</p>
-            <ul className="mt-5 space-y-2 text-base text-navy">
+            <ul className="mt-6 space-y-2.5 text-base text-navy">
               {freeItems.map((k) => (
-                <li key={k}>• {t(k)}</li>
+                <li key={k} className="flex gap-2">
+                  <span className="mt-2 size-1.5 shrink-0 rounded-full bg-teal" />
+                  {t(k)}
+                </li>
               ))}
             </ul>
           </article>
-          <article className="agency-shell border-teal/45 p-6 text-start ring-1 ring-teal/30">
-            <p className="agency-kicker">{t("pricing.proName")}</p>
-            <p className="mt-2 text-4xl font-black text-navy">
+          <article className="agency-ink p-7 text-start shadow-[var(--shadow-lift)]">
+            <p className="text-xs font-black uppercase tracking-[0.26em] text-[#9FD4C8]">{t("pricing.proName")}</p>
+            <p className="agency-display-cream mt-3 text-5xl">
               ₪{PRICE_MONTHLY_ILS}{" "}
-              <span className="text-base font-bold text-muted">{t("home.plans.month")}</span>
+              <span className="text-base font-bold text-[#C9D0D8]">{t("home.plans.month")}</span>
             </p>
-            <p className="text-xl font-black text-navy">
-              ₪{PRICE_YEARLY_ILS} <span className="text-sm font-bold text-muted">{t("home.plans.year")}</span>
+            <p className="text-xl font-black text-[#F7F3EA]">
+              ₪{PRICE_YEARLY_ILS} <span className="text-sm font-bold text-[#C9D0D8]">{t("home.plans.year")}</span>
             </p>
-            <ul className="mt-5 space-y-2 text-base text-navy">
+            <ul className="mt-6 space-y-2.5 text-base text-[#E8E2D4]">
               {proItems.map((k) => (
-                <li key={k}>• {t(k)}</li>
+                <li key={k} className="flex gap-2">
+                  <span className="mt-2 size-1.5 shrink-0 rounded-full bg-[#E24B3A]" />
+                  {t(k)}
+                </li>
               ))}
             </ul>
           </article>
         </div>
       </section>
 
-      <div id="studio" className="relative mx-auto mt-10 max-w-4xl px-3 pb-24 sm:mt-12 sm:px-4 safe-pb">
-        <div className="overflow-hidden rounded-[22px] border border-navy/10 bg-white/80 p-[1px] shadow-[0_24px_70px_rgba(15,39,68,0.1)] backdrop-blur-sm sm:rounded-[32px]">
-          <div className="rounded-[20px] border border-teal/20 bg-sand/40 sm:rounded-[30px]">
-            <WizardFlow key={wizardKey} embedded />
-          </div>
+      <div id="studio" className="relative mx-auto mt-12 max-w-4xl px-3 pb-24 sm:mt-16 sm:px-4 safe-pb">
+        <div className="agency-board overflow-hidden p-0">
+          <WizardFlow key={wizardKey} embedded />
         </div>
       </div>
     </div>

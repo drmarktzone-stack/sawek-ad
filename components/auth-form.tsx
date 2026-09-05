@@ -151,11 +151,11 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
       <div className="relative mx-auto max-w-md overflow-hidden px-4 py-14">
       <div aria-hidden className="agency-grain absolute inset-0" />
       <div className="relative">
-        <div className="agency-shell border-teal/35 p-7 text-start">
-          <Mail className="size-10 text-teal" />
-          <h1 className="mt-3 text-3xl font-black text-navy">{t("auth.checkEmailTitle")}</h1>
-          <p className="mt-3 text-base font-semibold leading-relaxed text-navy">{t("auth.checkEmail")}</p>
-          <p className="mt-2 text-sm text-muted" dir="ltr">
+        <div className="agency-ink p-8 text-start">
+          <Mail className="size-10 text-[#9FD4C8]" />
+          <h1 className="agency-display-cream mt-3 text-3xl">{t("auth.checkEmailTitle")}</h1>
+          <p className="mt-3 text-base font-semibold leading-relaxed text-[#E8E2D4]">{t("auth.checkEmail")}</p>
+          <p className="mt-2 text-sm text-[#C9D0D8]" dir="ltr">
             {email}
           </p>
           <Button asChild className="mt-6 w-full">
@@ -175,10 +175,13 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
     <div className="relative mx-auto max-w-md overflow-hidden px-4 py-14">
       <div aria-hidden className="agency-grain absolute inset-0" />
       <div className="relative">
-      <h1 className="text-3xl font-black text-navy">{t(mode === "login" ? "auth.title.login" : "auth.title.signup")}</h1>
-      <p className="mt-2 text-sm font-semibold text-navy">{t(mode === "login" ? "auth.lead.login" : "auth.lead.signup")}</p>
-      <p className="mt-2 text-base text-muted">{t("plan.freeBanner")}</p>
-      <form onSubmit={(e) => void onSubmit(e)} className="mt-6 space-y-4 agency-shell p-6">
+      <div className="agency-ink mb-6 p-6">
+        <p className="text-[12px] font-black uppercase tracking-[0.22em] text-[#9FD4C8]">SAWEK AD</p>
+        <h1 className="agency-display-cream mt-2 text-3xl">{t(mode === "login" ? "auth.title.login" : "auth.title.signup")}</h1>
+        <p className="mt-2 text-sm font-semibold text-[#E8E2D4]">{t(mode === "login" ? "auth.lead.login" : "auth.lead.signup")}</p>
+        <p className="mt-2 text-base text-[#C9D0D8]">{t("plan.freeBanner")}</p>
+      </div>
+      <form onSubmit={(e) => void onSubmit(e)} className="mt-0 space-y-4 agency-board p-6">
         <div>
           <Label htmlFor="email" className="text-base font-black text-navy">
             {t("auth.email")}

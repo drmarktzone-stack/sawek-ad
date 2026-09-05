@@ -72,7 +72,7 @@ export const PRODUCT_FUNCTIONS = [
   },
 ] as const;
 
-export function FunctionRail({ compact = false }: { compact?: boolean }) {
+export function FunctionRail({ compact = false, tone = "light" }: { compact?: boolean; tone?: "light" | "ink" }) {
   const { t } = useI18n();
   if (compact) {
     return (
@@ -83,7 +83,12 @@ export function FunctionRail({ compact = false }: { compact?: boolean }) {
             <LangLink
               key={fn.id}
               href={fn.href}
-              className="tap-row flex shrink-0 items-center gap-1 rounded-full border border-navy/15 px-3 py-2 text-sm font-bold text-navy hover:bg-gold/15"
+              className={cn(
+                "tap-row flex shrink-0 items-center gap-1 rounded-[10px] border px-3 py-2 text-sm font-bold",
+                tone === "ink"
+                  ? "border-white/15 text-[#F7F3EA] hover:bg-white/10"
+                  : "border-navy/15 text-navy hover:bg-teal/10",
+              )}
             >
               <Icon className="size-3" />
               {t(fn.key)}
@@ -95,7 +100,7 @@ export function FunctionRail({ compact = false }: { compact?: boolean }) {
   }
   return (
     <section className="mx-auto max-w-5xl px-4 pb-2">
-      <p className="mb-2 text-center text-sm font-bold uppercase tracking-[0.22em] text-gold">
+      <p className="agency-kicker mb-3 text-center">
         {t("fn.title")} · {t("fn.engines")}
       </p>
       <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-7 [&>li]:min-w-0">
@@ -106,11 +111,11 @@ export function FunctionRail({ compact = false }: { compact?: boolean }) {
               <LangLink
                 href={fn.href}
                 className={cn(
-                  "flex h-full flex-col rounded-[22px] border border-navy/10 bg-white p-3 shadow-[0_8px_24px_rgba(15,39,68,0.06)] hover:border-gold hover:bg-gold/10",
+                  "flex h-full flex-col rounded-[20px] border border-[rgba(8,17,31,0.1)] bg-white p-3.5 shadow-[var(--shadow-card)] transition hover:-translate-y-0.5 hover:border-teal/40",
                 )}
               >
                 <span className="flex items-center gap-2 text-sm font-black text-navy">
-                  <Icon className="size-4 text-gold" />
+                  <Icon className="size-4 text-teal" />
                   {t(fn.key)}
                 </span>
                 <span className="mt-1 text-sm text-muted">{t(fn.hint)}</span>
@@ -132,11 +137,14 @@ export function FunctionRail({ compact = false }: { compact?: boolean }) {
   );
 }
 
-export function FunctionMenuLinks({ onPick }: { onPick?: () => void }) {
+export function FunctionMenuLinks({ onPick, tone = "light" }: { onPick?: () => void; tone?: "light" | "ink" }) {
   const { t } = useI18n();
+  const ink = tone === "ink";
   return (
-    <div className="mt-2 border-t border-navy/10 pt-2">
-      <p className="mb-1 px-3 text-sm font-bold uppercase tracking-[0.18em] text-navy">{t("fn.title")}</p>
+    <div className={cn("mt-2 border-t pt-2", ink ? "border-white/10" : "border-navy/10")}>
+      <p className={cn("mb-1 px-3 text-sm font-bold uppercase tracking-[0.18em]", ink ? "text-[#9FD4C8]" : "text-navy")}>
+        {t("fn.title")}
+      </p>
       {PRODUCT_FUNCTIONS.map((fn) => {
         const Icon = fn.icon;
         return (
@@ -144,11 +152,16 @@ export function FunctionMenuLinks({ onPick }: { onPick?: () => void }) {
             key={fn.id}
             href={fn.href}
             onClick={onPick}
-            className="tap-row flex items-center gap-2 rounded-xl px-3 py-3 text-base text-navy hover:bg-navy/5"
+            className={cn(
+              "tap-row flex items-center gap-2 rounded-[12px] px-3 py-3 text-base",
+              ink ? "text-[#F7F3EA] hover:bg-white/8" : "text-navy hover:bg-navy/5",
+            )}
           >
-            <Icon className="size-4 shrink-0 text-gold" />
+            <Icon className={cn("size-4 shrink-0", ink ? "text-[#9FD4C8]" : "text-teal")} />
             <span className="min-w-0 flex-1 truncate">{t(fn.key)}</span>
-            <span className="ms-auto hidden max-w-[45%] truncate text-sm text-muted sm:inline">{t(fn.hint)}</span>
+            <span className={cn("ms-auto hidden max-w-[45%] truncate text-sm sm:inline", ink ? "text-[#C9D0D8]" : "text-muted")}>
+              {t(fn.hint)}
+            </span>
           </LangLink>
         );
       })}

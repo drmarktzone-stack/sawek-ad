@@ -150,23 +150,25 @@ export function ResultView({
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <DepartmentRail />
-      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-black text-navy">{tr("result.ready")}</h1>
-          <p className="mt-1 text-muted">{pack.name}</p>
-          {canUse(plan, "landing") ? (
-          <LangLink
-            href={`/lp/${pack.id}`}
-            className="mt-3 inline-flex items-center gap-2 rounded-full bg-gold px-4 py-2 text-sm font-black text-navy"
-          >
-            <ExternalLink className="size-4" />
-            {tr("end.clientLanding")}
-          </LangLink>
-          ) : (
-            <PlanGate feature="landing" className="mt-3" />
-          )}
+      <div className="agency-ink mb-8 overflow-hidden p-6 sm:p-8">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <p className="text-[12px] font-black uppercase tracking-[0.22em] text-[#9FD4C8]">{tr("result.ready")}</p>
+            <h1 className="agency-display-cream mt-2 text-3xl sm:text-5xl">{pack.name}</h1>
+            {canUse(plan, "landing") ? (
+            <LangLink
+              href={`/lp/${pack.id}`}
+              className="mt-4 inline-flex items-center gap-2 rounded-[12px] bg-coral px-4 py-2 text-sm font-black text-white"
+            >
+              <ExternalLink className="size-4" />
+              {tr("end.clientLanding")}
+            </LangLink>
+            ) : (
+              <PlanGate feature="landing" className="mt-3" />
+            )}
+          </div>
+          <NewCampaignCta other hint className="items-end text-end [&_p]:text-[#C9D0D8]" />
         </div>
-        <NewCampaignCta other hint className="items-end text-end" />
       </div>
 
       <SiteAuditPanel pack={pack} locale={packLang} onPack={onChange} />
@@ -196,8 +198,8 @@ export function ResultView({
         <NewCampaignCta other hint className="items-center text-center" />
       </div>
 
-      <div className="mb-6 rounded-2xl border border-gold/20 bg-white p-4">
-        <p className="mb-3 text-xs font-black uppercase tracking-[0.18em] text-gold">
+      <div className="agency-board mb-6 p-5">
+        <p className="agency-kicker mb-4">
           {tr("agents.title")}
         </p>
         <ul className="grid gap-2 sm:grid-cols-5">
@@ -210,9 +212,9 @@ export function ResultView({
               ["optimizer", "agents.optimizer"],
             ] as const
           ).map(([id, key]) => (
-            <li key={id} className="rounded-xl border border-navy/10 px-3 py-2">
+            <li key={id} className="rounded-[14px] border border-[rgba(8,17,31,0.08)] bg-ivory px-3 py-3">
               <p className="text-[13px] font-semibold text-navy">{tr(key)}</p>
-              <p className="mt-1 text-[13px] font-bold uppercase tracking-wide text-gold">
+              <p className="mt-1 text-[13px] font-bold uppercase tracking-wide text-teal">
                 {pack.agentStatus[id] === "approved" || pack.agentStatus[id] === "complete"
                   ? tr("status.complete")
                   : tr("status.needs_approval")}
@@ -287,25 +289,26 @@ export function ResultView({
       </div>
 
       <div className="mb-8 grid gap-4 md:grid-cols-2">
-        <div className="rounded-[22px] border border-navy/10 bg-[#FFFFFF] p-5">
-          <p className="text-xs font-bold uppercase tracking-wide text-muted">
+        <div className="agency-ink p-6">
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#9FD4C8]">
             {tr("result.score")}
           </p>
-          <p className="mt-1 text-3xl font-black text-gold">
-            {pack.intakeReport.completeness}/100
+          <p className="agency-display-cream mt-2 text-5xl">
+            {pack.intakeReport.completeness}
+            <span className="text-2xl text-[#C9D0D8]">/100</span>
           </p>
-          <div className="mt-3 h-2 overflow-hidden rounded-full bg-navy/10">
+          <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10">
             <div
-              className="h-full bg-gold"
+              className="h-full bg-teal"
               style={{ width: `${pack.intakeReport.completeness}%` }}
             />
           </div>
-          <p className="mt-2 text-xs text-muted">
+          <p className="mt-3 text-sm text-[#C9D0D8]">
             {tr("result.scoreHint")}
           </p>
         </div>
-        <div className="rounded-[22px] border border-navy/10 bg-[#FFFFFF] p-5">
-          <p className="text-xs font-bold uppercase tracking-wide text-muted">
+        <div className="agency-board p-6">
+          <p className="agency-kicker">
             {tr("result.scenario")}
           </p>
           {pack.media.scenarioFromUserNumbers ? (
@@ -322,12 +325,12 @@ export function ResultView({
       {pack.coach && <CoachImprovedStrip report={pack.coach} locale={packLang} />}
 
       <div className="mb-8 grid gap-4 lg:grid-cols-2">
-        <div className="rounded-2xl border border-gold/25 bg-white p-5">
-          <p className="text-xs font-bold uppercase tracking-wide text-gold">{tr("result.mission")}</p>
-          <p className="mt-2 text-sm leading-relaxed text-foreground">{missionOf(pack.intake)[locale]}</p>
+        <div className="agency-board p-6">
+          <p className="agency-kicker">{tr("result.mission")}</p>
+          <p className="mt-3 text-base leading-relaxed text-foreground">{missionOf(pack.intake)[locale]}</p>
         </div>
-        <div className="rounded-[22px] border border-navy/10 bg-[#FFFFFF] p-5">
-          <p className="text-xs font-bold uppercase tracking-wide text-gold">{tr("result.highlights")}</p>
+        <div className="agency-board p-6">
+          <p className="agency-kicker">{tr("result.highlights")}</p>
           <ul className="mt-2 list-disc space-y-1 pe-5 text-sm text-muted">
             {highlightsOf(pack).map((h, i) => (
               <li key={i}>{h[locale]}</li>
@@ -348,20 +351,20 @@ export function ResultView({
           <LangLink
             key={card.href}
             href={card.href}
-            className="rounded-[22px] border border-navy/10 bg-[#FFFFFF] p-4 transition hover:border-gold"
+            className="agency-board p-4 transition hover:-translate-y-0.5 hover:border-teal/40"
           >
-            <p className="text-xs font-black uppercase tracking-wide text-gold">{tr(card.key)}</p>
+            <p className="agency-kicker">{tr(card.key)}</p>
             <p className="mt-2 line-clamp-3 text-sm text-muted">{card.body}</p>
           </LangLink>
         ))}
       </div>
 
       <div className="mb-8">
-        <h2 className="mb-3 text-lg font-black">{tr("result.pillars")}</h2>
+        <h2 className="agency-display mb-4 text-2xl">{tr("result.pillars")}</h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {pillarsOf(pack.intake).map((p) => (
-            <div key={p.name} className="rounded-[22px] border border-navy/10 bg-[#FFFFFF] p-4">
-              <p className="text-sm font-black text-gold">{p.name}</p>
+            <div key={p.name} className="agency-board p-4">
+              <p className="text-sm font-black text-teal">{p.name}</p>
               <p className="mt-2 text-xs leading-relaxed text-muted">{p.body[locale]}</p>
             </div>
           ))}
@@ -384,7 +387,7 @@ export function ResultView({
         </div>
       )}
 
-      <h2 className="mb-4 text-xl font-black">{tr("result.adsReady")}</h2>
+      <h2 className="agency-display mb-4 text-3xl">{tr("result.adsReady")}</h2>
       {featured && (
         <AdCard
           featured
@@ -423,9 +426,9 @@ export function ResultView({
           .map((p) => (
             <article
               key={`${p.format}-${p.locale}`}
-              className="rounded-2xl border border-gold/25 bg-white p-5"
+              className="agency-board p-5"
             >
-              <p className="text-[13px] font-black uppercase tracking-[0.14em] text-gold">
+              <p className="agency-kicker">
                 {p.format === "landing" ? tr("end.landing") : tr("end.whatsapp")}
               </p>
               <h3 className="mt-1 font-black text-navy">{p.title}</h3>
@@ -450,7 +453,7 @@ export function ResultView({
           ))}
       </div>
 
-      <div className="mt-10 rounded-[22px] border border-navy/10 bg-[#FFFFFF] p-5">
+      <div className="agency-board mt-10 p-5">
         <h2 className="mb-4 text-lg font-black">{tr("media.title")}</h2>
         <div className="grid gap-3 md:grid-cols-3">
           {pack.media.split.map((ch) => (
@@ -473,7 +476,7 @@ export function ResultView({
       </div>
 
       <div className="mt-10">
-        <Accordion type="multiple" className="rounded-[22px] border border-navy/10 bg-[#FFFFFF] px-4">
+        <Accordion type="multiple" className="agency-board px-4">
           {orderedStrategy(pack.strategy).map((block) => {
             const meta = STRATEGY_META.find((s) => s.id === block.id);
             return (
@@ -517,7 +520,7 @@ export function ResultView({
             return (
               <article
                 key={s.id}
-                className="overflow-hidden rounded-[22px] border border-navy/10 bg-[#FFFFFF] shadow-[0_8px_24px_rgba(15,39,68,0.08)]"
+                className="agency-board overflow-hidden"
               >
                 <CampaignAdVisual
                   locale={locale}
@@ -583,7 +586,7 @@ export function ResultView({
         )}
       </div>
 
-      <div className="mt-10 rounded-[22px] border border-navy/10 bg-[#FFFFFF] p-5">
+      <div className="agency-board mt-10 p-5">
         <h2 className="mb-4 text-lg font-black">{tr("opt.title")}</h2>
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
@@ -632,7 +635,7 @@ export function ResultView({
       </div>
 
       <div className="mt-10 grid gap-4 md:grid-cols-2">
-        <div className="rounded-[22px] border border-navy/10 bg-[#FFFFFF] p-5">
+        <div className="agency-board p-5">
           <h3 className="mb-3 font-black">{tr("truth.quality")}</h3>
           <ul className="list-disc space-y-1 pe-5 text-sm text-muted">
             <li>{tr("truth.numbers")}</li>
@@ -640,7 +643,7 @@ export function ResultView({
             <li>{tr("truth.worst")}</li>
           </ul>
         </div>
-        <div className="rounded-[22px] border border-navy/10 bg-[#FFFFFF] p-5">
+        <div className="agency-board p-5">
           <h3 className="mb-3 font-black">{tr("truth.layer")}</h3>
           <ul className="list-disc space-y-1 pe-5 text-sm text-muted">
             {pack.intakeReport.refusedGuesses.map((g, i) => (
@@ -680,20 +683,20 @@ function AdCard({
   return (
     <article
       className={cn(
-        "rounded-2xl border bg-white p-5",
-        featured ? "border-gold/50" : "border-navy/10",
+        "p-6",
+        featured ? "agency-ink" : "agency-board",
       )}
     >
-      <div className="mb-2 flex items-center justify-between gap-2">
-        <p className="text-xs font-bold uppercase tracking-wide text-gold">{label}</p>
-        <Button type="button" size="sm" variant="ghost" onClick={onCopy}>
+      <div className="mb-3 flex items-center justify-between gap-2">
+        <p className={cn("text-xs font-bold uppercase tracking-[0.16em]", featured ? "text-[#9FD4C8]" : "text-teal")}>{label}</p>
+        <Button type="button" size="sm" variant={featured ? "outline" : "ghost"} onClick={onCopy} className={featured ? "border-white/20 bg-white/8 text-[#F7F3EA] hover:bg-white hover:text-ink" : undefined}>
           <Copy className="size-3.5" />
           {copied ? t(locale, "cta.copied") : t(locale, "cta.copy")}
         </Button>
       </div>
-      <h3 className="text-xl font-black text-navy">{headline}</h3>
-      <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-muted">{body}</p>
-      <span className="mt-4 inline-block rounded-lg bg-gold px-3 py-1 text-xs font-black text-navy">
+      <h3 className={cn("text-2xl font-black", featured ? "agency-display-cream" : "agency-display")}>{headline}</h3>
+      <p className={cn("mt-3 whitespace-pre-wrap text-base leading-relaxed", featured ? "text-[#E8E2D4]" : "text-muted")}>{body}</p>
+      <span className={cn("mt-5 inline-block rounded-[10px] px-3 py-1.5 text-xs font-black", featured ? "bg-coral text-white" : "bg-ink text-[#F7F3EA]")}>
         {cta}
       </span>
     </article>

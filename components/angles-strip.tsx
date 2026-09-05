@@ -33,7 +33,7 @@ export function AnglesStrip({
 
   return (
     <section className="mb-8">
-      <h2 className="mb-3 text-lg font-black text-navy">{t("result.angles")}</h2>
+      <h2 className="agency-display mb-4 text-2xl">{t("result.angles")}</h2>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {ANGLE_IDS.map((id) => {
           const pack = angles[id]?.[locale] ?? angles[id]?.he;
@@ -42,9 +42,9 @@ export function AnglesStrip({
           return (
             <article
               key={id}
-              className="flex flex-col rounded-2xl border border-gold/25 bg-white p-4"
+              className="agency-board flex flex-col p-4"
             >
-              <p className="text-sm font-black uppercase tracking-[0.18em] text-gold">
+              <p className="agency-kicker">
                 {t(KEYS[id])}
               </p>
               {incomplete && id === "social_proof" && (
@@ -52,7 +52,7 @@ export function AnglesStrip({
               )}
               <h3 className="mt-2 text-sm font-black text-navy">{pack?.headline || INCOMPLETE[locale]}</h3>
               <p className="mt-2 flex-1 text-xs leading-relaxed text-muted">{pack?.copy || INCOMPLETE[locale]}</p>
-              <p className="mt-2 text-xs font-bold text-gold">{pack?.cta || INCOMPLETE[locale]}</p>
+              <p className="mt-2 text-xs font-bold text-teal">{pack?.cta || INCOMPLETE[locale]}</p>
               <Button
                 type="button"
                 size="sm"

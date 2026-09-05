@@ -41,26 +41,26 @@ export function DiagnosisGaps({ report, moves, locale, compact }: Props) {
   return (
     <div className="mt-4 space-y-3" data-diagnosis="gaps">
       {now.length > 0 ? (
-        <div className="rounded-2xl border border-teal/35 bg-gradient-to-br from-teal/12 via-white to-mint/40 p-4 text-sm text-navy">
-          <p className="mb-2 text-xs font-black uppercase tracking-wide text-teal">{t("diagnosis.gapsFirst")}</p>
-          <ul className="space-y-2.5">
+        <div className="agency-board p-5 text-sm text-navy">
+          <p className="agency-kicker mb-4">{t("diagnosis.gapsFirst")}</p>
+          <ul className="space-y-3">
             {now.map((m) => (
-              <li key={m.missingField} className="leading-relaxed">
-                <span className="inline-flex rounded-full bg-teal px-2 py-0.5 text-[11px] font-black text-white">
+              <li key={m.missingField} className="agency-guidance rounded-[14px] px-3 py-3 leading-relaxed">
+                <span className="inline-flex rounded-[8px] bg-ink px-2 py-0.5 text-[11px] font-black text-[#F7F3EA]">
                   {FIELD[m.missingField]?.[locale] ?? m.missingField}
                 </span>
-                <span className="mt-1 block font-semibold text-navy/90">{m.move[locale] || m.move.he}</span>
+                <span className="mt-1.5 block font-semibold text-navy">{m.move[locale] || m.move.he}</span>
               </li>
             ))}
           </ul>
         </div>
       ) : null}
       {later.length > 0 ? (
-        <details className="rounded-xl border border-navy/10 bg-white p-3 text-sm text-navy">
+        <details className="agency-board p-4 text-sm text-navy">
           <summary className="cursor-pointer text-xs font-black uppercase tracking-wide text-navy/55">
             {t("diagnosis.laterOptional")} · {later.length}
           </summary>
-          <ul className="mt-2 space-y-2 text-navy/80">
+          <ul className="mt-3 space-y-2 text-navy/80">
             {later.map((m) => (
               <li key={m.missingField} className="leading-relaxed">
                 <span className="font-black">{FIELD[m.missingField]?.[locale] ?? m.missingField}</span>
@@ -72,11 +72,11 @@ export function DiagnosisGaps({ report, moves, locale, compact }: Props) {
         </details>
       ) : null}
       {missing.length > 0 ? (
-        <details className="rounded-xl border border-navy/10 bg-[#F7F3EA] p-3 text-sm text-navy" open={now.length === 0 && later.length === 0}>
+        <details className="agency-board p-4 text-sm text-navy" open={now.length === 0 && later.length === 0}>
           <summary className="cursor-pointer text-xs font-black uppercase tracking-wide text-navy/70">
             {t("diagnosis.missingCompact")} · {missing.length}
           </summary>
-          <div className="mt-2 space-y-1.5">
+          <div className="mt-3 space-y-1.5">
             {(compact ? missing.slice(0, 6) : missing).map((m) => (
               <p key={m.field}>
                 <strong>{m.label[locale]}:</strong> {m.reason[locale]}

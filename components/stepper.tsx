@@ -16,7 +16,7 @@ export function Stepper({
 }) {
   const { t } = useI18n();
   return (
-    <ol className="mx-auto flex max-w-2xl items-start justify-between gap-1 px-2">
+    <ol className="mx-auto mb-8 flex max-w-2xl items-start justify-between gap-1 px-2">
       {KEYS.map((key, i) => {
         const n = (i + 1) as WizardStep;
         const done = step > n;
@@ -34,11 +34,11 @@ export function Stepper({
                 onClick={() => canJump && onStep?.(n)}
                 aria-current={active ? "step" : undefined}
                 className={cn(
-                  "flex shrink-0 items-center justify-center rounded-full text-sm font-black transition-all",
+                  "flex shrink-0 items-center justify-center rounded-[12px] text-sm font-black transition-all",
                   canJump && "cursor-pointer hover:scale-105",
                   !canJump && "cursor-default",
                   active
-                    ? "size-12 bg-navy text-white shadow-[0_10px_28px_rgba(15,39,68,0.22)] ring-4 ring-teal/25"
+                    ? "size-12 bg-ink text-[#F7F3EA] shadow-[0_12px_28px_rgba(8,17,31,0.22)] ring-4 ring-teal/20"
                     : "size-10",
                   !active && (done ? "bg-teal text-white" : "bg-navy/8 text-muted"),
                 )}
@@ -49,7 +49,7 @@ export function Stepper({
                 <div className={cn("h-0.5 flex-1 rounded-full", step > n ? "bg-teal" : "bg-navy/12")} />
               )}
             </div>
-            <span className={cn("max-w-[4.75rem] text-center text-[0.7rem] font-bold leading-tight sm:max-w-none sm:text-sm", active || done ? "text-navy" : "text-muted")}>
+            <span className={cn("max-w-[4.75rem] text-center text-[0.75rem] font-bold leading-tight sm:max-w-none sm:text-sm", active || done ? "text-navy" : "text-muted")}>
               {t(key)}
             </span>
           </li>
@@ -65,9 +65,9 @@ export function ConquerHeadline({ subtitle }: { subtitle?: string }) {
     <div className="mb-10 text-center">
       <h1 className="agency-display text-4xl sm:text-5xl">
         {t("hero.titlePrefix")}{" "}
-        <span className="relative inline-block rounded-lg bg-teal px-2.5 py-0.5 text-white">
+        <span className="relative inline-block rounded-[10px] bg-teal px-2.5 py-0.5 text-white">
           {t("hero.conquer")}
-          <span className="absolute inset-x-1.5 -bottom-1 h-1 rounded-full bg-navy/80" />
+          <span className="absolute inset-x-1.5 -bottom-1 h-1 rounded-full bg-ink/80" />
         </span>{" "}
         {t("hero.titleSuffix")}
       </h1>

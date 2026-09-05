@@ -67,10 +67,10 @@ function Field({
   children: React.ReactNode;
 }) {
   return (
-    <div className="mb-4">
+    <div className="mb-5">
       <Label className={filled ? "text-teal" : "text-navy"}>{label}</Label>
-      {hint ? <p className="mb-2 text-xs font-semibold text-navy/55">{hint}</p> : null}
-      {children}
+      {hint ? <p className="mb-2 text-sm font-medium text-muted">{hint}</p> : null}
+      <div className={filled ? "agency-field-wrap-filled" : undefined}>{children}</div>
     </div>
   );
 }
@@ -491,7 +491,11 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
         </div>
       )}
       {!intake.businessName.trim() ? (
-        <p className="mb-4 max-w-md mx-auto text-center text-sm text-muted">{t("gemini.waitFacts")}</p>
+        <div className="agency-empty mb-6 rounded-[20px] px-5 py-6 text-center">
+          <p className="agency-kicker">{t("cta.new")}</p>
+          <p className="agency-display mt-2 text-2xl">{t("gemini.waitFacts")}</p>
+          <p className="mx-auto mt-2 max-w-md text-sm font-medium text-muted">{t("cta.newHint")}</p>
+        </div>
       ) : null}
 
       {phase === "wizard" && (
@@ -518,10 +522,10 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
                     key={opt.id}
                     type="button"
                     onClick={() => patch({ type: opt.id as Intake["type"] })}
-                    className={`rounded-2xl border p-6 text-start text-xl font-black transition-all ${
+                    className={`rounded-[20px] border p-6 text-start text-xl font-black transition-all ${
                       intake.type === opt.id
-                        ? "border-gold bg-navy text-white shadow-[0_12px_32px_rgba(15,39,68,0.12)]"
-                        : "border-navy/10 bg-white text-navy hover:border-gold hover:shadow-[0_8px_24px_rgba(15,39,68,0.08)]"
+                        ? "border-ink bg-ink text-[#F7F3EA] shadow-[var(--shadow-lift)]"
+                        : "border-[rgba(8,17,31,0.1)] bg-white text-navy hover:border-teal hover:shadow-[var(--shadow-card)]"
                     }`}
                   >
                     {opt.label[locale]}
@@ -539,15 +543,15 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
                     key={opt.id}
                     type="button"
                     onClick={() => setIntake((s) => applyOperatingModel(s, opt.id))}
-                    className={`rounded-2xl border p-6 text-start transition-all ${
+                    className={`rounded-[20px] border p-6 text-start transition-all ${
                       (intake.operatingModel ?? "paid") === opt.id
-                        ? "border-gold bg-navy text-white shadow-[0_12px_32px_rgba(15,39,68,0.12)]"
-                        : "border-navy/10 bg-white text-navy hover:border-gold hover:shadow-[0_8px_24px_rgba(15,39,68,0.08)]"
+                        ? "border-ink bg-ink text-[#F7F3EA] shadow-[var(--shadow-lift)]"
+                        : "border-[rgba(8,17,31,0.1)] bg-white text-navy hover:border-teal hover:shadow-[var(--shadow-card)]"
                     }`}
                   >
                     <span className="block text-xl font-black">{opt.title}</span>
                     <span className={`mt-2 block text-sm font-medium ${
-                      (intake.operatingModel ?? "paid") === opt.id ? "text-navy/70" : "text-muted"
+                      (intake.operatingModel ?? "paid") === opt.id ? "text-[#C9D0D8]" : "text-muted"
                     }`}>{opt.hint}</span>
                   </button>
                 ))}
@@ -559,8 +563,8 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
           )}
 
           {step === 2 && (
-            <section className="rounded-2xl border border-navy/10 bg-white p-5 sm:p-8">
-              <div className="mb-5 rounded-2xl border border-teal/25 bg-gradient-to-br from-mint/50 to-lavender/30 px-4 py-3 text-sm font-semibold text-navy">
+            <section className="agency-board p-5 sm:p-8">
+              <div className="agency-guidance mb-6 rounded-[14px] px-4 py-3 text-sm font-semibold">
                 {t("wizard.formHint")}
               </div>
               <Field label={t("biz.name")} filled={Boolean(intake.businessName.trim())}>
@@ -570,35 +574,35 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
                   onChange={(e) => patch({ businessName: e.target.value })}
                 />
               </Field>
-              <Field label={t("biz.category")}>
+              <Field label={t("biz.category")} filled={Boolean(intake.category.trim())}>
                 <Input
                   value={intake.category}
                   placeholder={t("biz.categoryPh")}
                   onChange={(e) => patch({ category: e.target.value })}
                 />
               </Field>
-              <Field label={t("biz.description")}>
+              <Field label={t("biz.description")} filled={Boolean(intake.description.trim())}>
                 <Textarea
                   value={intake.description}
                   placeholder={t("biz.descPh")}
                   onChange={(e) => patch({ description: e.target.value })}
                 />
               </Field>
-              <Field label={t("biz.location")}>
+              <Field label={t("biz.location")} filled={Boolean(intake.location.trim())}>
                 <Input
                   value={intake.location}
                   placeholder={t("biz.locationPh")}
                   onChange={(e) => patch({ location: e.target.value })}
                 />
               </Field>
-              <Field label={t("biz.website")}>
+              <Field label={t("biz.website")} filled={Boolean(intake.website.trim())}>
                 <Input
                   value={intake.website}
                   placeholder="https://"
                   onChange={(e) => patch({ website: e.target.value })}
                 />
               </Field>
-              <Field label={t("biz.whatsapp")}>
+              <Field label={t("biz.whatsapp")} filled={Boolean((intake.whatsapp ?? "").trim())}>
                 <Input
                   value={intake.whatsapp ?? ""}
                   placeholder={t("biz.whatsappPh")}
@@ -606,7 +610,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
                   inputMode="tel"
                 />
               </Field>
-              <Field label={t("biz.hours")}>
+              <Field label={t("biz.hours")} filled={Boolean((intake.clinicHours ?? "").trim())}>
                 <p className="mb-2 text-xs text-muted">{t("biz.hoursHint")}</p>
                 <Textarea
                   value={intake.clinicHours ?? ""}
@@ -618,8 +622,8 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
           )}
 
           {step === 3 && (
-            <section className="space-y-8 rounded-2xl border border-navy/10 bg-white p-5 sm:p-8">
-              <div className="rounded-2xl border border-peach/50 bg-gradient-to-br from-peach/35 to-sand/40 px-4 py-3 text-sm font-semibold text-navy">
+            <section className="agency-board space-y-8 p-5 sm:p-8">
+              <div className="agency-guidance rounded-[14px] px-4 py-3 text-sm font-semibold">
                 {t("wizard.formHint")}
               </div>
               <div>
@@ -794,27 +798,27 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
                 intake={intake}
                 onChange={(mediaAssets) => patch({ mediaAssets })}
               />
-              <div className="rounded-2xl border border-teal/20 bg-white p-4">
+              <div className="agency-board p-4">
                 <p className="mb-3 text-sm font-black text-navy">{t("interview.title")}</p>
-                <Field label={isFreeService(intake) ? t("interview.modelFree") : t("interview.model")}>
-                  <Textarea className={intake.businessModel ? "bg-white border-teal/25" : undefined} value={intake.businessModel} onChange={(e) => patch({ businessModel: e.target.value })} />
+                <Field label={isFreeService(intake) ? t("interview.modelFree") : t("interview.model")} filled={Boolean(intake.businessModel.trim())}>
+                  <Textarea value={intake.businessModel} onChange={(e) => patch({ businessModel: e.target.value })} />
                 </Field>
                 <div className="grid gap-4 sm:grid-cols-2">
                   {!isFreeService(intake) && (
                     <>
-                      <Field label={t("interview.aov")}>
-                        <Input className={intake.avgOrderValue ? "bg-white border-teal/25" : undefined} value={intake.avgOrderValue} onChange={(e) => patch({ avgOrderValue: e.target.value })} />
+                      <Field label={t("interview.aov")} filled={Boolean(intake.avgOrderValue.trim())}>
+                        <Input value={intake.avgOrderValue} onChange={(e) => patch({ avgOrderValue: e.target.value })} />
                       </Field>
-                      <Field label={t("interview.margin")}>
-                        <Input className={intake.marginPercent ? "bg-white border-teal/25" : undefined} value={intake.marginPercent} onChange={(e) => patch({ marginPercent: e.target.value })} />
+                      <Field label={t("interview.margin")} filled={Boolean(intake.marginPercent.trim())}>
+                        <Input value={intake.marginPercent} onChange={(e) => patch({ marginPercent: e.target.value })} />
                       </Field>
-                      <Field label={t("interview.cac")}>
-                        <Input className={intake.targetCac ? "bg-white border-teal/25" : undefined} value={intake.targetCac} onChange={(e) => patch({ targetCac: e.target.value })} />
+                      <Field label={t("interview.cac")} filled={Boolean(intake.targetCac.trim())}>
+                        <Input value={intake.targetCac} onChange={(e) => patch({ targetCac: e.target.value })} />
                       </Field>
                     </>
                   )}
-                  <Field label={t("interview.budget")}>
-                    <Input className={intake.monthlyBudget ? "bg-white border-teal/25" : undefined} value={intake.monthlyBudget} onChange={(e) => patch({ monthlyBudget: e.target.value })} />
+                  <Field label={t("interview.budget")} filled={Boolean(intake.monthlyBudget.trim())}>
+                    <Input value={intake.monthlyBudget} onChange={(e) => patch({ monthlyBudget: e.target.value })} />
                   </Field>
                 </div>
               </div>
@@ -960,26 +964,25 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
       )}
 
       {phase === "interview" && (
-        <section className="rounded-2xl border border-navy/10 bg-white p-5 sm:p-8">
+        <section className="agency-board p-5 sm:p-8">
           <CoachPanel report={coachReport} onApply={applyCoach} />
           <div className="mb-4">
             <DocumentIngest intake={intake} onApply={applyIngest} variant="compact" />
           </div>
-          <div className="mb-5 rounded-2xl border border-lavender/60 bg-gradient-to-br from-lavender/40 via-white to-peach/30 px-4 py-3 text-sm font-semibold text-navy">
+          <div className="agency-guidance mb-6 rounded-[14px] px-4 py-3 text-sm font-semibold">
             {t("interview.guidance")}
           </div>
-          <h2 className="mb-2 text-2xl font-black">{t("interview.title")}</h2>
+          <h2 className="agency-display mb-2 text-3xl">{t("interview.title")}</h2>
           {isAnyDemoIntake(intake) && !cmoFieldsMissing(intake) ? (
-            <p className="mb-3 inline-flex rounded-full bg-teal/15 px-3 py-1 text-xs font-black uppercase tracking-wide text-teal">
+            <p className="mb-3 inline-flex rounded-[10px] bg-teal/15 px-3 py-1 text-xs font-black uppercase tracking-wide text-teal">
               {t("interview.demoBadge")}
             </p>
           ) : null}
           <p className="mb-6 text-sm text-muted">
             {cmoFieldsMissing(intake) ? t("interview.lead") : t("interview.leadFilled")}
           </p>
-          <Field label={isFreeService(intake) ? t("interview.modelFree") : t("interview.model")}>
+          <Field label={isFreeService(intake) ? t("interview.modelFree") : t("interview.model")} filled={Boolean(intake.businessModel.trim())}>
             <Textarea
-              className={intake.businessModel ? "bg-white border-teal/25" : undefined}
               value={intake.businessModel}
               onChange={(e) => patch({ businessModel: e.target.value })}
             />
@@ -987,29 +990,29 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
           <div className="grid gap-4 sm:grid-cols-2">
             {!isFreeService(intake) && (
               <>
-                <Field label={t("interview.aov")}>
-                  <Input className={intake.avgOrderValue ? "bg-white border-teal/25" : undefined} value={intake.avgOrderValue} onChange={(e) => patch({ avgOrderValue: e.target.value })} />
+                <Field label={t("interview.aov")} filled={Boolean(intake.avgOrderValue.trim())}>
+                  <Input value={intake.avgOrderValue} onChange={(e) => patch({ avgOrderValue: e.target.value })} />
                 </Field>
-                <Field label={t("interview.margin")}>
-                  <Input className={intake.marginPercent ? "bg-white border-teal/25" : undefined} value={intake.marginPercent} onChange={(e) => patch({ marginPercent: e.target.value })} />
+                <Field label={t("interview.margin")} filled={Boolean(intake.marginPercent.trim())}>
+                  <Input value={intake.marginPercent} onChange={(e) => patch({ marginPercent: e.target.value })} />
                 </Field>
-                <Field label={t("interview.cac")}>
-                  <Input className={intake.targetCac ? "bg-white border-teal/25" : undefined} value={intake.targetCac} onChange={(e) => patch({ targetCac: e.target.value })} />
+                <Field label={t("interview.cac")} filled={Boolean(intake.targetCac.trim())}>
+                  <Input value={intake.targetCac} onChange={(e) => patch({ targetCac: e.target.value })} />
                 </Field>
               </>
             )}
-            <Field label={t("interview.budget")}>
-              <Input className={intake.monthlyBudget ? "bg-white border-teal/25" : undefined} value={intake.monthlyBudget} onChange={(e) => patch({ monthlyBudget: e.target.value })} />
+            <Field label={t("interview.budget")} filled={Boolean(intake.monthlyBudget.trim())}>
+              <Input value={intake.monthlyBudget} onChange={(e) => patch({ monthlyBudget: e.target.value })} />
             </Field>
           </div>
-          <Field label={t("interview.past")}>
-            <Textarea className={intake.pastAds ? "bg-white border-teal/25" : undefined} value={intake.pastAds} onChange={(e) => patch({ pastAds: e.target.value })} />
+          <Field label={t("interview.past")} filled={Boolean(intake.pastAds.trim())}>
+            <Textarea value={intake.pastAds} onChange={(e) => patch({ pastAds: e.target.value })} />
           </Field>
-          <Field label={t("interview.results")}>
-            <Textarea className={intake.pastResults ? "bg-white border-teal/25" : undefined} value={intake.pastResults} onChange={(e) => patch({ pastResults: e.target.value })} />
+          <Field label={t("interview.results")} filled={Boolean(intake.pastResults.trim())}>
+            <Textarea value={intake.pastResults} onChange={(e) => patch({ pastResults: e.target.value })} />
           </Field>
-          <Field label={t("interview.failed")}>
-            <Textarea className={intake.whatFailed ? "bg-white border-teal/25" : undefined} value={intake.whatFailed} onChange={(e) => patch({ whatFailed: e.target.value })} />
+          <Field label={t("interview.failed")} filled={Boolean(intake.whatFailed.trim())}>
+            <Textarea value={intake.whatFailed} onChange={(e) => patch({ whatFailed: e.target.value })} />
           </Field>
           <div className="mt-2">
             <MediaAssetUploader
@@ -1118,13 +1121,13 @@ function AgentsPanel({
   const { t, locale } = useI18n();
   return (
     <section>
-      <h2 className="mb-2 text-center text-2xl font-black">{t("agents.title")}</h2>
+      <h2 className="agency-display mb-2 text-center text-3xl">{t("agents.title")}</h2>
       <p className="mb-6 text-center text-sm text-muted">{t("agents.hitl")}</p>
       <ul className="mb-8 space-y-2">
         {AGENT_KEYS.map((a, i) => (
           <li
             key={a.id}
-            className="flex items-center justify-between rounded-xl border border-navy/10 bg-white px-4 py-3"
+            className="agency-board flex items-center justify-between px-4 py-3"
           >
             <span className="text-sm font-semibold">
               {i + 1}. {t(a.key)}
@@ -1135,7 +1138,7 @@ function AgentsPanel({
       </ul>
 
       {pack && (
-        <div className="rounded-2xl border border-gold/30 bg-white p-5">
+        <div className="agency-board p-5 sm:p-7">
           <DiagnosisCmoStrip cmoIdeas={pack.cmoIdeas} locale={locale} />
           <DiagnosisGaps
             report={pack.intakeReport}
@@ -1162,7 +1165,7 @@ function AgentsPanel({
           <p className="mb-4 text-sm text-muted">{pack.diagnosis.summary[locale]}</p>
           <div className="space-y-3">
             {pack.diagnosis.hypotheses.map((h, i) => (
-              <article key={i} className="rounded-xl border border-teal/20 bg-teal/5 p-4">
+              <article key={i} className="agency-guidance rounded-[14px] p-4">
                 <div className="mb-2 flex flex-wrap items-center gap-2">
                   <span className="rounded-full bg-navy px-2 py-0.5 text-xs font-bold text-white">
                     {AREA_LABEL[h.area][locale]}

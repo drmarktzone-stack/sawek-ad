@@ -29,12 +29,12 @@ export function CoachPanel({
   return (
     <section
       data-coach="panel"
-      className="mb-6 rounded-2xl border border-gold/30 bg-white p-4 sm:p-5"
+      className="agency-board mb-6 p-4 sm:p-5"
     >
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <Sparkles className="size-4 text-gold" />
-          <p className="text-xs font-black uppercase tracking-[0.16em] text-gold">
+          <Sparkles className="size-4 text-teal" />
+          <p className="agency-kicker">
             {t("coach.title")}
           </p>
         </div>
