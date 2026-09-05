@@ -43,9 +43,6 @@ function AuditList({
             ) : (
               <p className="mt-1.5 text-sm leading-relaxed text-foreground">{evidence}</p>
             )}
-            {s.id === "no-photos" && onPack ? (
-              <ImageOfferPicker pack={pack} locale={locale} onPack={onPack} defaultOpen />
-            ) : null}
           </li>
         );
       })}
@@ -72,6 +69,11 @@ export function SiteAuditPanel({
         <section data-audit="site" className="mb-8 rounded-2xl border border-gold/25 bg-white p-5">
           <p className="text-[13px] font-black uppercase tracking-[0.18em] text-gold">{t("audit.title")}</p>
           <p className="mt-1 text-sm leading-relaxed text-muted">{t("audit.lead")}</p>
+          {onPack ? (
+            <div className="mt-4" data-photo-offer="result">
+              <ImageOfferPicker pack={pack} locale={locale} onPack={onPack} defaultOpen />
+            </div>
+          ) : null}
           <div className="mt-4 grid gap-4 md:grid-cols-2">
             <div>
               <p className="text-[13px] font-bold uppercase tracking-wide text-emerald-700">{t("audit.strengths")}</p>

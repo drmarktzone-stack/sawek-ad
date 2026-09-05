@@ -439,6 +439,8 @@ export interface CmoScoreDimension {
 export interface CmoGapMove {
   missingField: string;
   move: Tri;
+  /** now = shoot/write this week; later = optional numbers, never a shame wall */
+  priority?: "now" | "later";
 }
 
 export interface CmoGapPlan {

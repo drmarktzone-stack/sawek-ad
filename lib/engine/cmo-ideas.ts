@@ -24,6 +24,7 @@ export type {
 } from "../types";
 import { filled } from "../utils";
 import { detectVertical, foodFamily, type Vertical } from "../vertical";
+import { serviceFamily } from "../creative-bank";
 import { isNoOffer } from "../no-offer";
 import { isFreeService } from "../operating-model";
 
@@ -570,6 +571,63 @@ const PRODUCT_PLATFORMS: PlatformSeed[] = [
   },
 ];
 
+const CAFE_PLATFORMS: PlatformSeed[] = [
+  {
+    id: "cup_and_quiet",
+    name: L("כוס ושקט", "فنجان وهدوء", "Cup and quiet"),
+    hook: L("לא «הקפה הכי טוב» — כוס ושולחן שקט", "مش «أحلى قهوة» — فنجان وطاولة هادئة", "Not “best coffee” — a cup and a quiet table"),
+    arc: L("רעש רחוב → כוס → ישיבה", "ضوضاء شارع → فنجان → جلسة", "Street noise → cup → sit"),
+    platform: L("פלטפורמת שולחן-שקט", "منصة طاولة هادئة", "Quiet-table platform"),
+    why: L("שוברת סלוגני קפה גנריים בלי דירוג מומצא", "تكسر شعارات قهوة عامة بلا تقييم مختلق", "Breaks generic coffee slogans without invented ratings"),
+    needs: ["advantage", "place"],
+  },
+  {
+    id: "neighbor_stool",
+    name: L("שכן על הבר", "جار عالبار", "Neighbor on the stool"),
+    hook: L("כתובת השכונה = זהות, לא «לידכם» ריק", "عنوان الحي = هوية، مش «قربكم» فاضي", "Neighborhood address = identity, not empty “near you”"),
+    arc: L("רחוב → דלת → בר", "شارع → باب → بار", "Street → door → bar"),
+    platform: L("פלטפורמת שכנות-קפה", "منصة جيرة قهوة", "Cafe-neighbor platform"),
+    why: L("הופכת מיקום לסיפור שכונתי חד", "تحوّل الموقع لقصة حي حادة", "Turns place into a sharp neighborhood story"),
+    needs: ["place", "audience"],
+  },
+  {
+    id: "hours_as_brew",
+    name: L("שעות כקלייה", "الساعات كتحميص", "Hours as brew"),
+    hook: L("שעות אמת כהוק — לא «רק היום» מזויף", "ساعات حقيقية كخطاف — بلا «اليوم فقط» مزيف", "Real hours as the hook — no fake “today only”"),
+    arc: L("שעות → כוס → ביקור", "ساعات → فنجان → زيارة", "Hours → cup → visit"),
+    platform: L("פלטפורמת דופק-שעות", "منصة نبض الساعات", "Hours-pulse platform"),
+    why: L("דחיפות משעות אמת מהקליטה", "إلحاح من ساعات حقيقية", "Urgency from real intake hours"),
+    needs: ["hours"],
+  },
+  {
+    id: "empty_table_film",
+    name: L("שולחן ריק", "طاولة فاضية", "Empty table film"),
+    hook: L("לצלם כוס/שולחן ריק — לא פני לקוחות", "صوروا فنجان/طاولة فاضية — مش وجوه زبائن", "Film a cup/empty table — never customer faces"),
+    arc: L("פריים כוס → עובדה → CTA", "فريمة فنجان → حقيقة → CTA", "Cup frame → fact → CTA"),
+    platform: L("פלטפורמת ויז'ואל-קפה", "منصة بصري قهوة", "Cafe-visual platform"),
+    why: L("סוגרת פערי תמונה בלי לייקים", "تسد فجوة الصورة بلا إعجابات", "Closes photo gaps without likes"),
+    needs: ["place"],
+  },
+  {
+    id: "wa_table_soft",
+    name: L("וואטסאפ שולחן רך", "واتساب طاولة لطيف", "Soft table WhatsApp"),
+    hook: L("שאלה אחת על שעות — לא הזמנת משלוחים מדומה", "سؤال واحد عن الساعات — مش طلب توصيل مختلق", "One question on hours — not a fake delivery order"),
+    arc: L("הוק → מספר → שאלה", "خطاف → رقم → سؤال", "Hook → number → question"),
+    platform: L("פלטפורמת מסלול-הודעה", "منصة مسار رسالة", "Message-lane platform"),
+    why: L("מיישרת CTA עם מספר שסופק", "توائم CTA مع رقم معطى", "Aligns CTA with a supplied number"),
+    needs: ["whatsapp"],
+  },
+  {
+    id: "no_best_coffee",
+    name: L("בלי «הכי טוב»", "بلا «الأفضل»", "No “best coffee”"),
+    hook: L("אין דירוגים בקליטה? אין כוכבים בקריאייטיב", "ما في تقييمات؟ بلا نجوم بالإبداع", "No ratings in intake? Then no stars in creative"),
+    arc: L("יושרה → כוס → ביקור", "صدق → فنجان → زيارة", "Integrity → cup → visit"),
+    platform: L("פלטפורמת אנטי-סלוגן", "منصة ضد الشعار", "Anti-slogan platform"),
+    why: L("מסמנת פערי הוכחה במקום לייקים מזויפים", "تُظهر فجوات الإثبات بدل إعجابات مزيفة", "Names proof gaps instead of fake likes"),
+    needs: ["problem"],
+  },
+];
+
 const GENERIC_PLATFORMS: PlatformSeed[] = [
   {
     id: "fact_first_spine",
@@ -642,13 +700,17 @@ const GENERIC_PLATFORMS: PlatformSeed[] = [
   },
 ];
 
-function platformsFor(v: Vertical): PlatformSeed[] {
+function platformsFor(v: Vertical, intake?: Intake): PlatformSeed[] {
   if (v === "clinic") return CLINIC_PLATFORMS;
-  if (v === "restaurant") return RESTAURANT_PLATFORMS;
+  if (v === "restaurant") {
+    if (intake && foodFamily(intake) === "cafe") return CAFE_PLATFORMS;
+    return RESTAURANT_PLATFORMS;
+  }
   if (v === "retail") return RETAIL_PLATFORMS;
   if (v === "pool") return POOL_PLATFORMS;
   if (v === "school") return SCHOOL_PLATFORMS;
   if (v === "product") return PRODUCT_PLATFORMS;
+  if (intake && serviceFamily(intake)) return GENERIC_PLATFORMS;
   return GENERIC_PLATFORMS;
 }
 
@@ -657,6 +719,9 @@ function cuisineBias(seed: PlatformSeed, intake: Intake): number {
   const fam = foodFamily(intake);
   const olive = /olive|hummus|ceramic|table_ritual|mediterranean|square_neighbor|two_cover|tasting/.test(seed.id);
   const grill = /grill|steam|queue/.test(seed.id);
+  const cafe = /cup|quiet|stool|brew|empty_table|no_best|wa_table/.test(seed.id);
+  if (fam === "cafe" && cafe) return 30;
+  if (fam === "cafe" && (olive || grill)) return -40;
   if (fam === "mediterranean" && olive) return 28;
   if (fam === "mediterranean" && grill) return -8;
   if (fam === "grill" && grill) return 22;
@@ -795,6 +860,8 @@ function seedFit(seed: PlatformSeed, flags: ReturnType<typeof factFlags>): numbe
   return Math.round((hit / seed.needs.length) * 100);
 }
 
+const GAP_LATER = new Set(["monthlyBudget", "targetCac", "competitors"]);
+
 /** Missing fields + concrete development moves — never invent numbers. */
 export function gapCompensation(intake: Intake): CmoGapPlan {
   const missing: string[] = [];
@@ -803,7 +870,11 @@ export function gapCompensation(intake: Intake): CmoGapPlan {
 
   const push = (field: string, move: Tri) => {
     missing.push(field);
-    moves.push({ missingField: field, move });
+    moves.push({
+      missingField: field,
+      move,
+      priority: GAP_LATER.has(field) ? "later" : "now",
+    });
   };
 
   if (!filled(intake.businessName)) {
@@ -941,7 +1012,14 @@ export function gapCompensation(intake: Intake): CmoGapPlan {
     );
   }
 
-  return { missing, moves };
+  const now = moves.filter((m) => m.priority !== "later");
+  const later = moves.filter((m) => m.priority === "later");
+  const photoFirst = (a: CmoGapMove, b: CmoGapMove) => {
+    const rank = (m: CmoGapMove) =>
+      m.missingField === "mediaAssets" ? 0 : m.missingField === "location" ? 1 : m.missingField === "clinicHours" ? 2 : 3;
+    return rank(a) - rank(b);
+  };
+  return { missing, moves: [...now.sort(photoFirst), ...later] };
 }
 
 function toIdea(intake: Intake, seed: PlatformSeed): CmoIdea {
@@ -964,7 +1042,7 @@ function toIdea(intake: Intake, seed: PlatformSeed): CmoIdea {
  */
 export function pickIdeas(intake: Intake, _locale: Locale = "he"): CmoIdea[] {
   const v = detectVertical(intake);
-  const seeds = platformsFor(v);
+  const seeds = platformsFor(v, intake);
   const flags = factFlags(intake);
   const ranked = [...seeds]
     .map((s) => ({ s, fit: seedFit(s, flags) + cuisineBias(s, intake), salt: hashSalt(s.id + (intake.businessName || "")) }))

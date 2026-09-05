@@ -171,8 +171,6 @@ export function ResultView({
 
       <SiteAuditPanel pack={pack} locale={packLang} onPack={onChange} />
 
-      <CmoIdeasStrip cmoIdeas={cmoIdeas} locale={packLang} />
-
       <LivePreviewStrip
         pack={pack}
         packLang={packLang}

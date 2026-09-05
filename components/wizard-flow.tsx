@@ -49,21 +49,27 @@ import { ConquerHeadline, Stepper } from "@/components/stepper";
 import { DepartmentRail } from "@/components/department-shell";
 import { useI18n } from "@/components/i18n-provider";
 import { CoachPanel } from "@/components/coach-panel";
-import { DiagnosisGaps } from "@/components/diagnosis-gaps";
+import { DiagnosisCmoStrip, DiagnosisGaps } from "@/components/diagnosis-gaps";
+import { ImageOfferPicker } from "@/components/image-offer-picker";
 import { coachIntake } from "@/lib/engine/coach";
 import { useIsClient } from "@/lib/use-is-client";
 import { cn } from "@/lib/utils";
 
 function Field({
   label,
+  hint,
+  filled,
   children,
 }: {
   label: string;
+  hint?: string;
+  filled?: boolean;
   children: React.ReactNode;
 }) {
   return (
     <div className="mb-4">
-      <Label>{label}</Label>
+      <Label className={filled ? "text-teal" : "text-navy"}>{label}</Label>
+      {hint ? <p className="mb-2 text-xs font-semibold text-navy/55">{hint}</p> : null}
       {children}
     </div>
   );
@@ -554,7 +560,10 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
 
           {step === 2 && (
             <section className="rounded-2xl border border-navy/10 bg-white p-5 sm:p-8">
-              <Field label={t("biz.name")}>
+              <div className="mb-5 rounded-2xl border border-teal/25 bg-gradient-to-br from-mint/50 to-lavender/30 px-4 py-3 text-sm font-semibold text-navy">
+                {t("wizard.formHint")}
+              </div>
+              <Field label={t("biz.name")} filled={Boolean(intake.businessName.trim())}>
                 <Input
                   value={intake.businessName}
                   placeholder={t("biz.namePh")}
@@ -610,6 +619,9 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
 
           {step === 3 && (
             <section className="space-y-8 rounded-2xl border border-navy/10 bg-white p-5 sm:p-8">
+              <div className="rounded-2xl border border-peach/50 bg-gradient-to-br from-peach/35 to-sand/40 px-4 py-3 text-sm font-semibold text-navy">
+                {t("wizard.formHint")}
+              </div>
               <div>
                 <Label>{t("details.depth")}</Label>
                 <ChipGroup
@@ -953,6 +965,9 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
           <div className="mb-4">
             <DocumentIngest intake={intake} onApply={applyIngest} variant="compact" />
           </div>
+          <div className="mb-5 rounded-2xl border border-lavender/60 bg-gradient-to-br from-lavender/40 via-white to-peach/30 px-4 py-3 text-sm font-semibold text-navy">
+            {t("interview.guidance")}
+          </div>
           <h2 className="mb-2 text-2xl font-black">{t("interview.title")}</h2>
           {isAnyDemoIntake(intake) && !cmoFieldsMissing(intake) ? (
             <p className="mb-3 inline-flex rounded-full bg-teal/15 px-3 py-1 text-xs font-black uppercase tracking-wide text-teal">
@@ -1028,6 +1043,10 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
             setStep(4);
           }}
           onNewCampaign={newCampaign}
+          onPack={(next) => {
+            setPack(next);
+            setAgentStatus(next.agentStatus);
+          }}
         />
       )}
 
@@ -1086,6 +1105,7 @@ function AgentsPanel({
   onApprove,
   onBack,
   onNewCampaign,
+  onPack,
 }: {
   pack: CampaignPack | null;
   agentStatus: Record<AgentId, AgentStatus>;
@@ -1093,6 +1113,7 @@ function AgentsPanel({
   onApprove: () => void;
   onBack: () => void;
   onNewCampaign: () => void;
+  onPack?: (p: CampaignPack) => void;
 }) {
   const { t, locale } = useI18n();
   return (
@@ -1115,8 +1136,20 @@ function AgentsPanel({
 
       {pack && (
         <div className="rounded-2xl border border-gold/30 bg-white p-5">
+          <DiagnosisCmoStrip cmoIdeas={pack.cmoIdeas} locale={locale} />
+          <DiagnosisGaps
+            report={pack.intakeReport}
+            moves={pack.cmoIdeas?.gapPlan?.moves}
+            locale={locale}
+          />
+          {onPack ? (
+            <div className="mt-4" data-photo-offer="diagnosis">
+              <p className="mb-2 text-sm font-black text-teal">{t("diagnosis.photoOffer")}</p>
+              <ImageOfferPicker pack={pack} locale={locale} onPack={onPack} defaultOpen />
+            </div>
+          ) : null}
           {(pack.intake.mediaAssets ?? []).filter((a) => a.kind === "image" && a.publicSrc).length > 0 ? (
-            <div className="mb-4 grid grid-cols-3 gap-2 sm:grid-cols-6">
+            <div className="mb-4 mt-4 grid grid-cols-3 gap-2 sm:grid-cols-6">
               {(pack.intake.mediaAssets ?? [])
                 .filter((a) => a.kind === "image" && a.publicSrc && !/\.svg$/i.test(a.publicSrc))
                 .slice(0, 6)
@@ -1129,24 +1162,19 @@ function AgentsPanel({
           <p className="mb-4 text-sm text-muted">{pack.diagnosis.summary[locale]}</p>
           <div className="space-y-3">
             {pack.diagnosis.hypotheses.map((h, i) => (
-              <article key={i} className="rounded-xl border border-navy/10 p-4">
+              <article key={i} className="rounded-xl border border-teal/20 bg-teal/5 p-4">
                 <div className="mb-2 flex flex-wrap items-center gap-2">
-                  <span className="rounded-full bg-danger/20 px-2 py-0.5 text-xs font-bold text-danger">
+                  <span className="rounded-full bg-navy px-2 py-0.5 text-xs font-bold text-white">
                     {AREA_LABEL[h.area][locale]}
                   </span>
                   <span className="text-xs text-muted">{h.confidence}</span>
                 </div>
                 <p className="font-semibold text-navy">{h.finding[locale]}</p>
                 <p className="mt-1 text-sm text-muted">{h.evidence[locale]}</p>
-                <p className="mt-2 text-sm text-gold">{h.recommendation[locale]}</p>
+                <p className="mt-2 text-sm font-semibold text-teal">{h.recommendation[locale]}</p>
               </article>
             ))}
           </div>
-          <DiagnosisGaps
-            report={pack.intakeReport}
-            moves={pack.cmoIdeas?.gapPlan?.moves}
-            locale={locale}
-          />
           {pack.intakeReport.inconsistencies.length > 0 && (
             <div className="mt-3 rounded-xl border border-danger/40 bg-danger/10 p-3 text-sm text-danger">
               {pack.intakeReport.inconsistencies.map((inc, i) => (

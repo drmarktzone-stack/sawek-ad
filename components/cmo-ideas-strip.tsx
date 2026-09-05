@@ -7,6 +7,7 @@ type Props = {
   cmoIdeas?: CmoIdeasPack;
   locale: Locale;
   className?: string;
+  compact?: boolean;
 };
 
 const TITLE: Record<Locale, string> = {
@@ -76,24 +77,27 @@ function barColor(score: number): string {
   return "bg-coral";
 }
 
-export function CmoIdeasStrip({ cmoIdeas, locale, className }: Props) {
+export function CmoIdeasStrip({ cmoIdeas, locale, className, compact }: Props) {
   if (!cmoIdeas?.selected?.length) return null;
-  const moves = cmoIdeas.gapPlan?.moves ?? [];
+  const moves = (cmoIdeas.gapPlan?.moves ?? []).filter((m) => m.priority !== "later");
 
   return (
     <section
       data-cmo-ideas="platforms"
-      className={cn("mb-8 rounded-2xl border border-gold/35 bg-white p-5", className)}
+      className={cn(
+        "mb-8 rounded-2xl border border-teal/30 bg-gradient-to-br from-white via-white to-mint/30 p-4 sm:p-5",
+        className,
+      )}
     >
-      <p className="text-[13px] font-black uppercase tracking-[0.18em] text-gold">{TITLE[locale]}</p>
-      <h2 className="mt-1 text-xl font-black text-navy">{LEAD[locale]}</h2>
+      <p className="text-[13px] font-black uppercase tracking-[0.18em] text-teal">{TITLE[locale]}</p>
+      <h2 className="mt-1 text-xl font-black text-navy sm:text-2xl">{LEAD[locale]}</h2>
       <p className="mt-2 text-xs font-semibold text-navy/60">
         {cmoIdeas.planningDisclaimer[locale] || cmoIdeas.planningDisclaimer.en}
       </p>
 
-      <div className="mt-4 grid gap-3 lg:grid-cols-2">
+      <div className={cn("mt-4 grid gap-3", compact ? "grid-cols-1" : "lg:grid-cols-2")}>
         {cmoIdeas.selected.map((idea) => (
-          <article key={idea.id} className="rounded-xl border border-gold/25 bg-cream/40 p-4">
+          <article key={idea.id} className="rounded-xl border border-teal/20 bg-white p-4 shadow-[0_8px_24px_rgba(15,39,68,0.06)]">
             <p className="inline-flex rounded-full border border-navy/15 bg-navy px-2.5 py-0.5 text-[11px] font-black uppercase tracking-wide text-white">
               {PLATFORM[locale]} · {idea.platform[locale] || idea.platform.he}
             </p>
@@ -129,7 +133,7 @@ export function CmoIdeasStrip({ cmoIdeas, locale, className }: Props) {
         ))}
       </div>
 
-      {moves.length > 0 ? <GapPlan locale={locale} moves={moves} /> : null}
+      {!compact && moves.length > 0 ? <GapPlan locale={locale} moves={moves} /> : null}
     </section>
   );
 }

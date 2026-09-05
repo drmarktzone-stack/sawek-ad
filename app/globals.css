@@ -196,6 +196,20 @@ input, textarea, select {
   color: var(--navy);
 }
 
+/* Guidance (tinted) vs editable content (white) */
+.agency-guidance {
+  border: 1px solid rgba(31, 122, 107, 0.28);
+  background:
+    linear-gradient(145deg, rgba(191, 230, 220, 0.45), rgba(212, 196, 240, 0.28)),
+    #fff;
+  color: var(--navy);
+}
+
+.agency-field-filled {
+  border-color: rgba(31, 122, 107, 0.45) !important;
+  background: #fff !important;
+}
+
 /* Elegant RTL rhythm */
 [dir="rtl"] .agency-display,
 [dir="rtl"] h1,

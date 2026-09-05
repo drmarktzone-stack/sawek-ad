@@ -594,7 +594,7 @@ export function LivePreviewStrip({
       </div>
       {imgError ? <p className="mt-2 text-sm text-danger">{imgError}</p> : null}
 
-      {onPack ? <ImageOfferPicker pack={pack} locale={packLang} onPack={onPack} /> : null}
+      {onPack ? <ImageOfferPicker pack={pack} locale={packLang} onPack={onPack} defaultOpen /> : null}
 
       <div className="mt-5 grid items-start gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <article className="rounded-[22px] border border-navy/10 bg-white p-4 shadow-[0_10px_28px_rgba(15,39,68,0.07)]">
