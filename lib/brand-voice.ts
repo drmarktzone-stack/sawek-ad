@@ -13,6 +13,10 @@ export type BrandVoice = {
   dont: string[];
   locales: Partial<Record<Locale, { sample: string }>>;
   updatedAt: string;
+  niche?: string;
+  coreMessage?: string;
+  personalVoice?: string;
+  dialect?: string;
 };
 
 export interface BrandVoiceStore {

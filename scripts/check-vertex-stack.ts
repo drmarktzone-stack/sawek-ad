@@ -63,6 +63,7 @@ const requiredFiles = [
   "lib/engine/viral-desk.ts",
   "lib/brand-voice.ts",
   "app/api/generate/viral/route.ts",
+  "app/api/brand-voice/route.ts",
 ];
 for (const f of requiredFiles) {
   try {
@@ -123,6 +124,13 @@ if (!generateSrc.includes("grounding")) fail("completeGemini missing grounding o
 const viral = readFileSync(join(root, "lib/engine/viral-desk.ts"), "utf8");
 if (!viral.includes("notLiveMetrics")) fail("predictor must flag notLiveMetrics");
 if (!viral.includes("gemini_pro_estimate")) fail("predictor must be labeled estimate");
+if (!viral.includes("retentionCurve")) fail("predictor must return a retention curve");
+
+const viralUi = readFileSync(join(root, "lib/engine/gemini-viral.ts"), "utf8");
+if (!viralUi.includes("grounding: true")) fail("UI viral trends must use Search Grounding");
+if (!viralUi.includes("runImagenMany")) fail("UI viral carousel must call Imagen 3");
+if (!viralUi.includes('tier: "pro"')) fail("UI viral scripts/predict must use Pro");
+if (!viralUi.includes('tier: "flash"')) fail("UI viral hooks must use Flash");
 
 if (failures.length) {
   console.error("FAIL vertex stack\n" + failures.join("\n"));

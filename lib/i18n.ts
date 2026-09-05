@@ -1202,7 +1202,7 @@ export const copy: Dict = {
   "viral.step2b": {
     he: "רעיון אחד → 7 סקריפטים. גם קרוסלה, ביו, טרנדים, רימיקס, ניתוח לפני פרסום.",
     ar: "فكرة واحدة → 7 سكربتات. كمان كاروسيل وبايو وترندات وريمكس وتحليل قبل النشر.",
-    en: "One idea → 7 scripts. Also carousel, bio, trends, remix, pre-publish analysis.",
+    en: "One idea → 7 scripts + first-3-second hooks. Also carousel, bio, trends, remix, pre-publish estimates.",
   },
   "viral.step3": { he: "העתיקו ופרסמו", ar: "انسخوا وانشروا", en: "Copy and publish" },
   "viral.step3b": {
@@ -1223,6 +1223,7 @@ export const copy: Dict = {
   "viral.idea": { he: "רעיון אחד", ar: "فكرة واحدة", en: "One idea" },
   "viral.ideaPh": { he: "מה לצלם היום?", ar: "شو تصوّروا اليوم؟", en: "What should we film today?" },
   "viral.make7": { he: "7 סקריפטים", ar: "7 سكربتات", en: "7 scripts" },
+  "viral.makeHooks": { he: "הוקים 0–3 שנ׳", ar: "هوكات 0–3 ث", en: "Hooks 0–3s" },
   "viral.carousel": { he: "חבילת קרוסלה", ar: "حزمة كاروسيل", en: "Carousel pack" },
   "viral.bio": { he: "ביו לפלטפורמות", ar: "بايو للمنصّات", en: "Platform bios" },
   "viral.trends": { he: "זוויות נושא", ar: "زوايا موضوع", en: "Topic angles" },
@@ -1244,10 +1245,16 @@ export const copy: Dict = {
   "viral.remixGo": { he: "נסחו מחדש בסגנון שלי", ar: "أعيدوا الصياغة بأسلوبي", en: "Rewrite in my voice" },
   "viral.needTranscript": { he: "צריך תמלול", ar: "لازم تفريغ", en: "Transcript needed" },
   "viral.upload": { he: "העלו סרטון (אופציונלי)", ar: "ارفعوا فيديو (اختياري)", en: "Upload a video (optional)" },
-  "viral.analyzeGo": { he: "הערכה היוריסטית", ar: "تقدير هيوريستي", en: "Heuristic estimate" },
+  "viral.analyzeGo": { he: "הערכת תכנון (Gemini Pro)", ar: "تقدير تخطيط (Gemini Pro)", en: "Planning estimate (Gemini Pro)" },
   "viral.hookPotential": { he: "פוטנציאל הוק (תכנון 1–100)", ar: "إمكانية الخطاف (تخطيط 1–100)", en: "Hook potential (planning 1–100)" },
+  "viral.estHookRate": { he: "Estimated Hook Rate % (תכנון AI — לא חי)", ar: "Estimated Hook Rate ٪ (تخطيط AI — مش حيّ)", en: "Estimated Hook Rate % (AI planning — not live)" },
+  "viral.estAvgWatch": { he: "Estimated Avg Watch % (תכנון AI — לא חי)", ar: "Estimated Avg Watch ٪ (تخطيط AI — مش حيّ)", en: "Estimated Avg Watch % (AI planning — not live)" },
+  "viral.estCurve": { he: "Estimated Retention Curve (תכנון AI — לא חי)", ar: "Estimated Retention Curve (تخطيط AI — مش حيّ)", en: "Estimated Retention Curve (AI planning — not live)" },
   "viral.clarity": { he: "בהירות (תכנון 1–100)", ar: "وضوح (تخطيط 1–100)", en: "Clarity (planning 1–100)" },
   "viral.ctaScore": { he: "בהירות CTA (תכנון 1–100)", ar: "وضوح النداء (تخطيط 1–100)", en: "CTA clarity (planning 1–100)" },
+  "viral.imagenPending": { he: "Imagen 3 לא זמין — מתאר בלבד", ar: "Imagen 3 غير متاح — الخط فقط", en: "Imagen 3 unavailable — outline only" },
+  "viral.calendarGo": { he: "בנו רשת 30 יום", ar: "ابنوا شبكة 30 يوماً", en: "Build 30-day grid" },
+  "viral.tabHooks": { he: "הוקים", ar: "هوكات", en: "Hooks" },
   "viral.sourceTemplate": { he: "מנוע מקומי (בלי Gemini)", ar: "محرّك محلي (بلا Gemini)", en: "Local engine (no Gemini)" },
   "viral.sourceGemini": { he: "הועשר ב-Gemini", ar: "أغناه Gemini", en: "Enriched with Gemini" },
   "viral.calendar": { he: "רצועת 30 יום", ar: "شريط 30 يوماً", en: "30-day strip" },
@@ -1261,7 +1268,7 @@ export const copy: Dict = {
   "dept.viralLead": {
     he: "נישה → 7 סקריפטים → קרוסלה / ביו / יומן 30 יום. בלי Hook Rate מדומה.",
     ar: "تخصّص → 7 سكربتات → كاروسيل / بايو / رزنامة 30 يوماً. بلا Hook Rate مختلق.",
-    en: "Niche → 7 scripts → carousel / bio / 30-day calendar. No fake Hook Rate.",
+    en: "Niche → 7 scripts + hooks → carousel / bio / 30-day grid. Estimated Hook Rate labeled as AI planning — never live Meta/TikTok.",
   },
 };
 

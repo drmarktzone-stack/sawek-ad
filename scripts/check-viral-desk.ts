@@ -1,7 +1,8 @@
 /**
  * Viral desk: voice, 7 scripts, carousel, bios, 30-day calendar,
  * honest remix fallback, heuristic video analysis.
- * No fake ROAS / likes / Hook Rate / Avg Watch / Retention Curve.
+ * No fake ROAS / likes. Predictor may show estimated Hook Rate / Avg Watch /
+ * Retention Curve only when labeled as AI planning — never live platform APIs.
  */
 import { oliveKitchenIntake, sandBoutiqueIntake, DEMO_ID, DEMO_OLIVE_ID, DEMO_SAND_ID } from "../lib/demo-catalog";
 import { demoIntake } from "../lib/demo";
@@ -15,6 +16,7 @@ import {
   analysisDisclaimer,
   buildBioPack,
   buildCarouselPack,
+  buildHookBank,
   buildTrendPack,
   buildVideoAnalysis,
   buildViralScripts,
@@ -85,6 +87,11 @@ for (const s of scripts.scripts) {
 const scriptBlob = packViralBlob({ scripts });
 if (FAKE.test(scriptBlob) || viralTextForbidden(scriptBlob)) fail("scripts leaked fake metrics");
 
+const hooks = buildHookBank(olive, idea, "en");
+if (hooks.hooks.length < 7) fail(`hooks ${hooks.hooks.length}`);
+if (hooks.hooks.some((h) => h.seconds !== "0-3" || !h.text.trim())) fail("thin hook");
+if (FAKE.test(hooks.hooks.map((h) => h.text).join("\n"))) fail("hooks leaked fake metrics");
+
 const arScripts = buildViralScripts(clinic, "وصول حسب الدور", "ar");
 if (arScripts.scripts.length !== 7) fail("ar scripts");
 if (!/باقة|أطفال|دور|واتساب/.test(packViralBlob({ scripts: arScripts }))) fail("clinic AR scripts missing facts");
@@ -136,11 +143,14 @@ const analysis = buildVideoAnalysis(olive, "en", {
   hasFrame: true,
 });
 if (analysis.kind !== "planning_heuristic") fail("analysis kind");
+if (analysis.estimateKind !== "gemini_pro_estimate" || analysis.notLiveMetrics !== true) fail("analysis estimate kind");
 if (analysis.hookPotential < 1 || analysis.hookPotential > 100) fail("hook score range");
-if (!/planning \/ heuristic/i.test(analysis.disclaimer)) fail("analysis missing heuristic label");
-if (!/not live TikTok\/IG Hook Rate/i.test(analysis.disclaimer)) fail("analysis must name-and-reject platform metrics");
-if (/\b\d{2,3}%\s*(Hook Rate|Avg Watch)\b/i.test(analysis.notes.join(" "))) {
-  fail("analysis used platform metric names as if live");
+if (analysis.estimatedHookRate < 1 || analysis.estimatedAvgWatch < 1) fail("estimated percents");
+if (!analysis.retentionCurve || analysis.retentionCurve.length < 5) fail("retention curve points");
+if (!/Estimated Hook Rate/i.test(analysis.disclaimer)) fail("analysis must show estimated Hook Rate label");
+if (!/not live Meta/i.test(analysis.disclaimer)) fail("analysis must reject live Meta/TikTok analytics");
+if (!/planning estimates — not live platform/i.test(analysis.notes.join(" "))) {
+  fail("analysis notes must say planning estimates not live");
 }
 const noCaption = buildVideoAnalysis(emptyIntake(), "he", {});
 if (noCaption.usedCaption) fail("empty analysis should not mark caption used");
@@ -172,6 +182,8 @@ for (const [id, intake] of [
   if (month[0].channel !== "facebook" || month[1].channel !== "instagram") fail(`${id} week1 order`);
   if (!month.some((d) => d.kind === "carousel")) fail(`${id} missing carousel days`);
   if (!month.some((d) => d.kind === "script")) fail(`${id} missing script days`);
+  if (!month.some((d) => d.kind === "campaign")) fail(`${id} missing campaign days`);
+  if (!month.some((d) => d.kind === "ad")) fail(`${id} missing scheduled-ad days`);
   const blob = month.map((d) => `${d.headline} ${d.body} ${d.cta}`).join("\n");
   if (FAKE.test(blob) && /ROAS|Hook Rate/.test(blob)) fail(`${id} calendar fake metrics`);
   if (/best time|שעה הכי|أفضل وقت/i.test(blob)) fail(`${id} invented best-time`);
@@ -188,4 +200,5 @@ console.log("PASS viral desk");
 console.log("scripts", scripts.scripts.map((s) => s.id).join(","));
 console.log("carousel slides", carousel.slides.length);
 console.log("calendar days", 30);
-console.log("analysis", analysis.hookPotential, analysis.clarity, analysis.ctaClarity);
+console.log("hooks", hooks.hooks.length);
+console.log("analysis", analysis.estimatedHookRate, analysis.estimatedAvgWatch, analysis.retentionCurve.length);

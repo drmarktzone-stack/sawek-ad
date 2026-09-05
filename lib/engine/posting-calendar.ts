@@ -4,7 +4,7 @@ import { pickIdeas } from "./cmo-ideas";
 import { buildCarouselPack, buildViralScripts } from "./viral-content";
 
 export type PostingChannel = "facebook" | "instagram" | "tiktok" | "whatsapp" | "landing";
-export type PostingKind = "post" | "script" | "carousel";
+export type PostingKind = "post" | "script" | "carousel" | "campaign" | "ad";
 
 export interface PostingDay {
   day: number;
@@ -34,6 +34,8 @@ const KIND_LABEL: Record<PostingKind, Record<Locale, string>> = {
   post: { he: "פוסט", ar: "منشور", en: "Post" },
   script: { he: "סקריפט", ar: "سكربت", en: "Script" },
   carousel: { he: "קרוסלה", ar: "كاروسيل", en: "Carousel" },
+  campaign: { he: "קמפיין", ar: "حملة", en: "Campaign" },
+  ad: { he: "מודעה מתוזמנת", ar: "إعلان مجدول", en: "Scheduled ad" },
 };
 
 export function postingKindLabel(kind: PostingKind | undefined, locale: Locale): string {
@@ -109,6 +111,8 @@ export function buildPostingCalendar(pack: CampaignPack, locale: Locale, days = 
       const slide = carousel.slides[2] ?? carousel.slides[0];
       return { headline: slide?.headline || fields.headline, body: `${slide?.body || ""} ${carousel.cta}`.trim(), cta: carousel.cta };
     } },
+    { channel: "facebook", formatId: "campaign", formatLabel: { he: "קמפיין שבועי", ar: "حملة أسبوعية", en: "Weekly campaign" }, kind: "campaign", src: () => piece(edge) },
+    { channel: "instagram", formatId: "ad", formatLabel: { he: "מודעה מתוזמנת", ar: "إعلان مجدول", en: "Scheduled ad" }, kind: "ad", src: () => piece(short) },
   ];
 
   const target = Math.max(7, Math.min(90, days));

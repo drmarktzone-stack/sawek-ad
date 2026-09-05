@@ -492,6 +492,9 @@ export interface CarouselSlide {
   headline: string;
   body: string;
   visual: string;
+  /** Imagen 3 still when Vertex returns real bytes — never a fake SVG. */
+  imageUrl?: string;
+  imageSource?: "imagen";
 }
 
 export interface CarouselPack {
@@ -500,6 +503,7 @@ export interface CarouselPack {
   cta: string;
   slides: CarouselSlide[];
   source: "template" | "gemini";
+  imagenNote?: string;
 }
 
 export interface BioPack {
@@ -518,6 +522,7 @@ export interface TrendAngle {
   angle: string;
   hook: string;
   why: string;
+  sourceUrl?: string;
 }
 
 export interface TrendPack {
@@ -526,6 +531,7 @@ export interface TrendPack {
   disclaimer: string;
   angles: TrendAngle[];
   source: "template" | "gemini";
+  grounded?: boolean;
 }
 
 export interface RemixResult {
@@ -538,28 +544,54 @@ export interface RemixResult {
   source: "template" | "gemini" | "public_text";
 }
 
+export interface RetentionPoint {
+  t: number;
+  v: number;
+}
+
 export interface VideoAnalysis {
   kind: "planning_heuristic";
+  estimateKind: "gemini_pro_estimate";
+  notLiveMetrics: true;
   locale: Locale;
   disclaimer: string;
   hookPotential: number;
   clarity: number;
   ctaClarity: number;
+  /** Estimated Hook Rate % — AI planning, not live Meta/TikTok. */
+  estimatedHookRate: number;
+  /** Estimated Avg Watch % — AI planning, not live platform watch time. */
+  estimatedAvgWatch: number;
+  /** Estimated retention curve points (seconds → %). Not a live API curve. */
+  retentionCurve: RetentionPoint[];
   notes: string[];
   source: "template" | "gemini";
   usedFrame: boolean;
   usedCaption: boolean;
 }
 
+export interface ViralHookLine {
+  id: string;
+  text: string;
+  seconds: "0-3";
+}
+
+export interface ViralHookPack {
+  locale: Locale;
+  idea: string;
+  hooks: ViralHookLine[];
+  source: "template" | "gemini";
+}
+
 export interface ViralDeskState {
   idea: string;
   scripts?: ViralScriptPack;
+  hooks?: ViralHookPack;
   carousel?: CarouselPack;
   bios?: BioPack;
   trends?: TrendPack;
   remix?: RemixResult;
   analysis?: VideoAnalysis;
-
 }
 
 export type Tri = Record<Locale, string>;

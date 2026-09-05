@@ -12,6 +12,7 @@ import type {
   TrendPack,
   VideoAnalysis,
   ViralDeskState,
+  ViralHookPack,
   ViralScriptPack,
   VoiceProfile,
 } from "@/lib/types";
@@ -19,6 +20,7 @@ import { applyVoiceToIntake, voiceFromIntake, voiceIsSaved } from "@/lib/engine/
 import {
   buildBioPack,
   buildCarouselPack,
+  buildHookBank,
   buildTrendPack,
   buildVideoAnalysis,
   buildViralScripts,
@@ -33,7 +35,7 @@ import { Input, Label, Textarea } from "@/components/ui/input";
 import { VoiceFields } from "@/components/voice-fields";
 import { cn } from "@/lib/utils";
 
-type Tab = "scripts" | "carousel" | "bio" | "trends" | "remix" | "analyze";
+type Tab = "scripts" | "hooks" | "carousel" | "bio" | "trends" | "remix" | "analyze";
 
 function factsPayload(intake: Intake) {
   return {
@@ -111,7 +113,9 @@ export function ViralDesk({
   const [busy, setBusy] = useState<Tab | "voice" | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
   const [scripts, setScripts] = useState<ViralScriptPack | undefined>(pack?.viral?.scripts);
+  const [hooks, setHooks] = useState<ViralHookPack | undefined>(pack?.viral?.hooks);
   const [carousel, setCarousel] = useState<CarouselPack | undefined>(pack?.viral?.carousel);
+  const [calendarOn, setCalendarOn] = useState(Boolean(pack));
   const [bios, setBios] = useState<BioPack | undefined>(pack?.viral?.bios);
   const [trends, setTrends] = useState<TrendPack | undefined>(pack?.viral?.trends);
   const [remix, setRemix] = useState<RemixResult | undefined>(pack?.viral?.remix);
@@ -139,6 +143,37 @@ export function ViralDesk({
     if (pack && onPack) {
       onPack({ ...pack, intake: nextIntake, updatedAt: new Date().toISOString() });
     }
+    const voiceId = nextIntake.businessName.trim() || pack?.id || "draft";
+    try {
+      localStorage.setItem(
+        "omniad-brand-voice",
+        JSON.stringify({
+          id: voiceId,
+          businessName: nextIntake.businessName,
+          niche: voice.niche,
+          coreMessage: voice.coreMessage,
+          personalVoice: voice.personalVoice,
+          dialect: voice.dialect,
+          tone: voice.personalVoice,
+          updatedAt: new Date().toISOString(),
+        }),
+      );
+    } catch {
+      /* ignore quota */
+    }
+    void fetch("/api/brand-voice", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id: voiceId,
+        businessName: nextIntake.businessName,
+        niche: voice.niche,
+        coreMessage: voice.coreMessage,
+        personalVoice: voice.personalVoice,
+        dialect: voice.dialect,
+        tone: voice.personalVoice,
+      }),
+    });
     setSaveHint(t("viral.voiceSaved"));
     setSavedFlash(true);
     setTimeout(() => setSavedFlash(false), 1600);
@@ -149,6 +184,7 @@ export function ViralDesk({
     const viral: ViralDeskState = {
       idea,
       scripts,
+      hooks,
       carousel,
       bios,
       trends,
@@ -175,6 +211,7 @@ export function ViralDesk({
       });
       const data = (await res.json()) as {
         scripts?: ViralScriptPack;
+        hooks?: ViralHookPack;
         carousel?: CarouselPack;
         bios?: BioPack;
         trends?: TrendPack;
@@ -186,6 +223,11 @@ export function ViralDesk({
         setScripts(next);
         setTab("scripts");
         commitViral({ idea, scripts: next });
+      } else if (mode === "hooks") {
+        const next = data.hooks ?? buildHookBank(currentIntake, idea, lang);
+        setHooks(next);
+        setTab("hooks");
+        commitViral({ idea, hooks: next });
       } else if (mode === "carousel") {
         const next = data.carousel ?? buildCarouselPack(currentIntake, idea, lang);
         setCarousel(next);
@@ -262,6 +304,7 @@ export function ViralDesk({
   const days = pack ? buildPostingCalendar(pack, lang, 30) : [];
   const tabs: { id: Tab; key: `viral.tab${string}` }[] = [
     { id: "scripts", key: "viral.tabScripts" },
+    { id: "hooks", key: "viral.tabHooks" },
     { id: "carousel", key: "viral.tabCarousel" },
     { id: "bio", key: "viral.tabBio" },
     { id: "trends", key: "viral.tabTrends" },
@@ -333,6 +376,9 @@ export function ViralDesk({
             {busy === "scripts" ? <Loader2 className="size-4 animate-spin" /> : null}
             {t("viral.make7")}
           </Button>
+          <Button type="button" data-testid="viral-make-hooks" variant="outline" disabled={busy !== null} onClick={() => void callViral("hooks")}>
+            {t("viral.makeHooks")}
+          </Button>
           <Button type="button" variant="outline" disabled={busy !== null} onClick={() => void callViral("carousel")}>
             {t("viral.carousel")}
           </Button>
@@ -341,6 +387,15 @@ export function ViralDesk({
           </Button>
           <Button type="button" variant="outline" disabled={busy !== null} onClick={() => void callViral("trends")}>
             {t("viral.trends")}
+          </Button>
+          <Button
+            type="button"
+            data-testid="viral-calendar-go"
+            variant="outline"
+            disabled={!pack}
+            onClick={() => setCalendarOn(true)}
+          >
+            {t("viral.calendarGo")}
           </Button>
         </div>
       </div>
@@ -363,6 +418,24 @@ export function ViralDesk({
             </button>
           ))}
         </div>
+
+        {tab === "hooks" && (
+          <div className="mt-4 space-y-2" data-testid="viral-hooks">
+            {!hooks ? <p className="text-sm text-muted">{t("viral.makeHooks")}</p> : null}
+            {hooks ? <p className="text-xs text-muted">{hooks.source === "gemini" ? t("viral.sourceGemini") : t("viral.sourceTemplate")}</p> : null}
+            {hooks?.hooks.map((h) => (
+              <article key={h.id} className="flex items-start justify-between gap-3 rounded-[16px] border border-[rgba(8,17,31,0.08)] bg-ivory p-3">
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-teal">{h.seconds}s</p>
+                  <p className="mt-1 font-black text-navy">{h.text}</p>
+                </div>
+                <Button type="button" size="sm" variant="outline" onClick={() => void copyText(h.id, h.text)}>
+                  {copied === h.id ? t("viral.copied") : t("viral.copy")}
+                </Button>
+              </article>
+            ))}
+          </div>
+        )}
 
         {tab === "scripts" && (
           <div className="mt-4 space-y-3" data-testid="viral-scripts">
@@ -407,6 +480,12 @@ export function ViralDesk({
                       <p className="mt-1 font-black text-navy">{slide.headline}</p>
                       <p className="mt-1 text-sm text-muted">{slide.body}</p>
                       <p className="mt-2 text-xs text-muted">{slide.visual}</p>
+                      {slide.imageUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={slide.imageUrl} alt="" className="mt-2 aspect-square w-full rounded-[12px] object-cover" />
+                      ) : (
+                        <p className="mt-2 text-xs text-muted">{carousel.imagenNote || t("viral.imagenPending")}</p>
+                      )}
                     </li>
                   ))}
                 </ol>
@@ -454,6 +533,9 @@ export function ViralDesk({
                       <p className="font-black text-navy">{a.title}</p>
                       <p className="mt-1 text-sm text-foreground">{a.hook}</p>
                       <p className="mt-1 text-xs text-muted">{a.why}</p>
+                      {a.sourceUrl ? (
+                        <p className="mt-1 truncate text-xs text-teal">{a.sourceUrl}</p>
+                      ) : null}
                     </li>
                   ))}
                 </ul>
@@ -524,18 +606,41 @@ export function ViralDesk({
                 <p className="text-xs font-bold text-navy">{analysis.disclaimer}</p>
                 <dl className="mt-3 grid gap-2 sm:grid-cols-3">
                   <div>
-                    <dt className="text-xs text-muted">{t("viral.hookPotential")}</dt>
-                    <dd className="text-2xl font-black text-navy" data-testid="viral-score-hook">{analysis.hookPotential}</dd>
+                    <dt className="text-xs text-muted">{t("viral.estHookRate")}</dt>
+                    <dd className="text-2xl font-black text-navy" data-testid="viral-score-hook">
+                      {analysis.estimatedHookRate}%
+                    </dd>
                   </div>
                   <div>
-                    <dt className="text-xs text-muted">{t("viral.clarity")}</dt>
-                    <dd className="text-2xl font-black text-navy">{analysis.clarity}</dd>
+                    <dt className="text-xs text-muted">{t("viral.estAvgWatch")}</dt>
+                    <dd className="text-2xl font-black text-navy" data-testid="viral-score-watch">
+                      {analysis.estimatedAvgWatch}%
+                    </dd>
                   </div>
                   <div>
                     <dt className="text-xs text-muted">{t("viral.ctaScore")}</dt>
                     <dd className="text-2xl font-black text-navy">{analysis.ctaClarity}</dd>
                   </div>
                 </dl>
+                <p className="mt-4 text-xs font-bold text-navy">{t("viral.estCurve")}</p>
+                <svg viewBox="0 0 160 56" className="mt-1 h-16 w-full text-teal" aria-label={t("viral.estCurve")}>
+                  <polyline
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    points={analysis.retentionCurve
+                      .map((p) => {
+                        const maxT = Math.max(...analysis.retentionCurve.map((x) => x.t), 15);
+                        const x = 4 + (p.t / maxT) * 152;
+                        const y = 50 - (p.v / 100) * 44;
+                        return `${x},${y}`;
+                      })
+                      .join(" ")}
+                  />
+                </svg>
+                <p className="text-[10px] text-muted">
+                  {analysis.estimateKind} · not live Meta/TikTok
+                </p>
                 <ul className="mt-3 list-disc space-y-1 pe-4 text-sm text-muted">
                   {analysis.notes.map((n) => (
                     <li key={n}>{n}</li>
@@ -547,7 +652,7 @@ export function ViralDesk({
         )}
       </div>
 
-      {days.length >= 30 ? (
+      {calendarOn && days.length >= 30 ? (
         <section data-testid="viral-calendar-30" className="mt-6">
           <h3 className="text-lg font-black text-navy">{t("viral.calendar")}</h3>
           <ol className="mobile-card-grid cols-2 mt-3 sm:grid-cols-3 lg:grid-cols-5">
