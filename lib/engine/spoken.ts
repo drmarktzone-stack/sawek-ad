@@ -27,6 +27,7 @@ import {
   waNotEmergencyBit,
   waPlaceHeadline,
 } from "../vertical";
+import { ideaFramingLine } from "./cmo-ideas";
 
 /** Cut on a word boundary. Never slice mid-word (Arabic «وساعات م»). */
 export function clipAtWord(text: string, max: number): string {
@@ -676,7 +677,7 @@ function productSpokenBody(kind: VariantKind, intake: Intake, locale: Locale): s
     case "emotional":
       return [pain || emotionalOpen(intake, locale), adv, factsReal, cta].filter(Boolean).join("\n\n");
     case "narrative":
-      return [pain, adv || punctuate(n), factsReal, cta].filter(Boolean).join("\n\n");
+      return [ideaFramingLine(intake, locale), pain, adv || punctuate(n), factsReal, cta].filter(Boolean).join("\n\n");
     case "direct_sales":
       return [adv || punctuate(n), factsReal, cta].filter(Boolean).join("\n\n");
     case "unique_advantage":
@@ -718,6 +719,7 @@ export function spokenBody(kind: VariantKind, intake: Intake, locale: Locale): s
         ].filter(Boolean).join("\n\n");
       case "narrative":
         return [
+          ideaFramingLine(intake, locale),
           open,
           place ? `المكان: ${place}.` : "",
           languageLine(intake, locale),
@@ -750,7 +752,7 @@ export function spokenBody(kind: VariantKind, intake: Intake, locale: Locale): s
       case "emotional":
         return [emotionalOpen(intake, locale), open, facts].filter(Boolean).join("\n\n");
       case "narrative":
-        return [open, place ? `מקום: ${place}.` : "", languageLine(intake, locale), facts].filter(Boolean).join("\n\n");
+        return [ideaFramingLine(intake, locale), open, place ? `מקום: ${place}.` : "", languageLine(intake, locale), facts].filter(Boolean).join("\n\n");
       case "direct_sales":
         return [open, facts, `אם זה רלוונטי — ${cta}.`].filter(Boolean).join("\n\n");
       case "unique_advantage":
@@ -777,7 +779,7 @@ export function spokenBody(kind: VariantKind, intake: Intake, locale: Locale): s
     case "emotional":
       return [emotionalOpen(intake, locale), open, facts].filter(Boolean).join("\n\n");
     case "narrative":
-      return [open, place ? `Place: ${place}.` : "", languageLine(intake, locale), facts].filter(Boolean).join("\n\n");
+      return [ideaFramingLine(intake, locale), open, place ? `Place: ${place}.` : "", languageLine(intake, locale), facts].filter(Boolean).join("\n\n");
     case "direct_sales":
       return [open, facts, `If this is you — ${cta}.`].filter(Boolean).join("\n\n");
     case "unique_advantage":

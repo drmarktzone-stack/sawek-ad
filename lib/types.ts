@@ -412,10 +412,57 @@ export interface CampaignPack {
     kind: "clinic" | "restaurant" | "retail" | string;
     labels?: Record<Locale, string>;
     note?: Record<Locale, string>;
+    /** Featured CMO idea names (HE/AR/EN) for demo picker */
+    ideaNames?: Partial<Record<Locale, string[]>>;
   };
+  /** CMO planning ideas + scorecard (never performance ROAS). */
+  cmoIdeas?: CmoIdeasPack;
 }
 
 export type Tri = Record<Locale, string>;
+
+export type CmoScoreDimensionId =
+  | "message_clarity"
+  | "offer_clarity"
+  | "proof_gaps"
+  | "channel_fit"
+  | "creative_variety";
+
+export interface CmoScoreDimension {
+  id: CmoScoreDimensionId;
+  label: Tri;
+  /** Planning score 1–100 — NEVER performance ROAS */
+  score: number;
+  note: Tri;
+}
+
+export interface CmoGapMove {
+  missingField: string;
+  move: Tri;
+}
+
+export interface CmoGapPlan {
+  missing: string[];
+  moves: CmoGapMove[];
+}
+
+export interface CmoIdea {
+  id: string;
+  name: Tri;
+  whyItWins: Tri;
+  hook: Tri;
+  narrativeArc: Tri;
+  platform: Tri;
+  scorecard: CmoScoreDimension[];
+  planningScore: number;
+}
+
+export interface CmoIdeasPack {
+  selected: CmoIdea[];
+  gapPlan: CmoGapPlan;
+  planningDisclaimer: Tri;
+}
+
 
 export interface Persona {
   name: Tri;

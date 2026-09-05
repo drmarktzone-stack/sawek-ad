@@ -14,6 +14,7 @@ import { buildPastCampaignAudit, overlayPastCampaignAudit, creativesToPosts } fr
 import { demoIntake, DEMO_ID } from "../demo";
 import { catalogIntake, demoEntry, demoMetaFor, type DemoPackId, DEMO_OLIVE_ID, DEMO_SAND_ID } from "../demo-catalog";
 import { loadLocale } from "../storage";
+import { buildCmoIdeasPack, ideaNamesForLocale } from "./cmo-ideas";
 
 export const AGENT_ORDER: AgentId[] = [
   "intake",
@@ -172,6 +173,7 @@ export function assemblePack(
 ): CampaignPack {
   const now = new Date().toISOString();
   const pastCampaignAudit = buildPastCampaignAudit(intake);
+  const cmoIdeas = buildCmoIdeasPack(intake, "he");
   const base: CampaignPack = {
     id: partial.id ?? uid("camp"),
     createdAt: now,
@@ -191,6 +193,7 @@ export function assemblePack(
     planActivated: false,
     coach: partial.coach ?? coachIntake(intake),
     siteAudit: buildSiteAudit(intake),
+    cmoIdeas,
     ...(pastCampaignAudit ? { pastCampaignAudit } : {}),
     ...(partial.angles ? { angles: partial.angles } : {}),
     featureType: "campaign",
@@ -235,11 +238,19 @@ export function buildDemoPack(idOrSlug: string = DEMO_ID): CampaignPack {
     },
     id: packId,
   });
+  const meta = demoMetaFor(packId);
   return {
     ...pack,
     saved: true,
     planActivated: true,
     name: intake.businessName,
-    demoMeta: demoMetaFor(packId),
+    demoMeta: {
+      ...meta,
+      ideaNames: {
+        he: ideaNamesForLocale(intake, "he"),
+        ar: ideaNamesForLocale(intake, "ar"),
+        en: ideaNamesForLocale(intake, "en"),
+      },
+    },
   };
 }

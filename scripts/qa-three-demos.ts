@@ -95,6 +95,28 @@ function qaPack(pack: CampaignPack) {
     if (!/בוטיק חול|050-8112233/.test(he)) fail(id, "HE missing sand name/phone");
   }
 
+
+  // CMO idea engine
+  if (!pack.cmoIdeas?.selected?.length) fail(id, "missing cmoIdeas.selected");
+  else {
+    if (pack.cmoIdeas.selected.length < 3) fail(id, `cmo ideas ${pack.cmoIdeas.selected.length} < 3`);
+    for (const idea of pack.cmoIdeas.selected) {
+      if (!idea.scorecard?.length) fail(id, `idea ${idea.id} missing scorecard`);
+      for (const d of idea.scorecard ?? []) {
+        if (d.score < 1 || d.score > 100) fail(id, `score out of range ${d.id}=${d.score}`);
+        if (!/תכנון|تخطيط|planning/i.test(d.label.he + d.label.ar + d.label.en)) {
+          fail(id, `score label not marked planning: ${d.id}`);
+        }
+      }
+    }
+    const cmoBlob = JSON.stringify(pack.cmoIdeas);
+    if (/ROAS\s*[:=]\s*\d|likes?\s*[:=]\s*\d/i.test(cmoBlob)) fail(id, "fake ROAS/likes in cmoIdeas");
+  }
+  if (!(pack.intake.mediaAssets ?? []).some((a) => a.kind === "image" && a.publicSrc)) {
+    fail(id, "missing image mediaAssets with publicSrc");
+  }
+  if (!(pack.demoMeta?.ideaNames?.he?.length)) warn(id, "demoMeta.ideaNames.he empty");
+
   // Pack JSON itself
   const packBlob = JSON.stringify(pack);
   if (BANNED_BRAND.test(packBlob)) fail(id, "banned brand inside pack JSON");
@@ -131,7 +153,7 @@ function main() {
   lines.push(`Fails: ${fails.length} · Warns: ${warns.length}`);
   lines.push("");
   lines.push("## Scope");
-  lines.push("- Engines: `generateVariants` (spoken/fact-copy), `assemblePack`, `buildPostingCalendar`, `spokenCta`, `whatsappScript`, `detectVertical`");
+  lines.push("- Engines: `generateVariants`, `assemblePack`, `buildPostingCalendar`, `cmo-ideas` (planning scorecards), `spokenCta`, `whatsappScript`, `detectVertical`");
   lines.push("- published.json must contain exactly clinic + Olive Kitchen + Sand Boutique");
   lines.push("- Fictional packs must be marked `demoMeta.sample` + `demoMeta.fictional`");
   lines.push("- No Pizza Hut / Aluf Sport / other real brands");
@@ -152,8 +174,14 @@ function main() {
     lines.push(`- \`${pack.id}\`: ${he?.headline || "(missing)"}`);
   }
   lines.push("");
+  lines.push("## CMO idea names (HE, top 3)");
+  for (const pack of packs) {
+    const names = pack.demoMeta?.ideaNames?.he?.slice(0, 3) ?? pack.cmoIdeas?.selected.slice(0, 3).map((i) => i.name.he) ?? [];
+    lines.push(`- \`${pack.id}\`: ${names.join(" · ") || "(missing)"}`);
+  }
+  lines.push("");
   lines.push("## Notes");
-  lines.push("- Clinic pack kept from prior publish (owner-approved real clinic); fictional packs rebuilt from catalog intakes via engines.");
+  lines.push("- All three packs rebuilt via engines with CMO ideas + studio still assets. Clinic uses real snapshot facts only.");
   lines.push("- New Campaign must not auto-load demos (empty-campaign wipe + demo identity blocklist).");
   lines.push("- Demo UI exposes all three as selectable demos.");
   lines.push("");

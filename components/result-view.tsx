@@ -35,6 +35,7 @@ import { studioStillsForIntake } from "@/lib/studio-stills";
 import { ChannelPack } from "@/components/channel-pack";
 import { LivePreviewStrip } from "@/components/live-preview-cards";
 import { AnglesStrip } from "@/components/angles-strip";
+import { CmoIdeasStrip } from "@/components/cmo-ideas-strip";
 import { CoachImprovedStrip } from "@/components/coach-panel";
 import { PublishToSocial } from "@/components/publish-to-social";
 import { SiteAuditPanel } from "@/components/site-audit-panel";
@@ -173,6 +174,8 @@ export function ResultView({
         onPack={onChange}
         skipLivePreview
       />
+
+      <CmoIdeasStrip cmoIdeas={pack.cmoIdeas} locale={packLang} />
 
       <AnglesStrip angles={pack.angles} locale={packLang} />
 

@@ -1,12 +1,13 @@
 /**
- * Rebuild published.json with exactly 3 demos:
- * 1) demo-samer-clinic — keep existing real clinic pack (or rebuild from snapshot)
- * 2) demo-olive-kitchen — fictional Mediterranean restaurant
- * 3) demo-sand-boutique — fictional clothing boutique
+ * Rebuild published.json with exactly 3 demos built by app engines:
+ * 1) demo-samer-clinic — real clinic facts/snapshot + studio stills
+ * 2) demo-olive-kitchen — rich fictional intake → HE/AR/EN + calendar + images
+ * 3) demo-sand-boutique — rich fictional intake → HE/AR/EN + calendar + images
  *
- * Copy via spoken/fact engines (generateVariants + assemblePack). No Gemini required.
+ * Attaches CMO idea packs (planning scorecards — never ROAS).
+ * Writes SVG studio stills under public/packs/assets/.
  */
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from "fs";
+import { writeFileSync, mkdirSync, existsSync } from "fs";
 import { join } from "path";
 import { assemblePack } from "../lib/engine/run";
 import { generateVariants } from "../lib/engine/copy";
@@ -16,6 +17,7 @@ import { generateStrategy } from "../lib/engine/strategy";
 import { generateMedia } from "../lib/engine/media";
 import { generateOptimizer } from "../lib/engine/optimizer";
 import { buildPostingCalendar } from "../lib/engine/posting-calendar";
+import { buildCmoIdeasPack, ideaNamesForLocale, platformCount } from "../lib/engine/cmo-ideas";
 import { demoIntake, DEMO_ID } from "../lib/demo";
 import {
   catalogIntake,
@@ -23,26 +25,84 @@ import {
   DEMO_OLIVE_ID,
   DEMO_SAND_ID,
   PUBLISHED_DEMO_IDS,
+  oliveKitchenIntake,
+  sandBoutiqueIntake,
   type DemoPackId,
 } from "../lib/demo-catalog";
-import type { CampaignPack, Intake, Locale } from "../lib/types";
+import { studioStillsForIntake } from "../lib/studio-stills";
+import type { CampaignPack, Intake, Locale, MediaAssetMeta } from "../lib/types";
+import { detectVertical } from "../lib/vertical";
+import { uid } from "../lib/utils";
+
+function enrichFictional(intake: Intake, kind: "olive" | "sand"): Intake {
+  if (kind === "olive") {
+    return {
+      ...intake,
+      brandTone:
+        intake.brandTone ||
+        "חם, ביתי, ים-תיכוני — בלי סלוגני רשת. שמן זית, קרמיקה, ישיבה בחוץ.",
+      brandPositioning:
+        intake.brandPositioning ||
+        "מסעדת שכונה משפחתית בנווה שקד — טקס שולחן רגוע, לא משלוחים מהירים.",
+      depth: "deep",
+    };
+  }
+  return {
+    ...intake,
+    brandTone:
+      intake.brandTone ||
+      "רגוע, פשתן, חול — ייעוץ אישי בלי רעש קניון. אלגנטיות יומיומית.",
+    brandPositioning:
+      intake.brandPositioning ||
+      "בוטיק נשי שקט בעין ברק — מתלה אחד מדויק עדיף על קטלוג מנופח.",
+    depth: "deep",
+  };
+}
+
+function attachStudioAssets(intake: Intake, packId: DemoPackId): Intake {
+  const stills = studioStillsForIntake(intake).slice(0, 4);
+  const outDir = join(process.cwd(), "public/packs/assets", packId);
+  mkdirSync(outDir, { recursive: true });
+  const assets: MediaAssetMeta[] = stills.map((still, idx) => {
+    const file = `still-${idx + 1}.svg`;
+    const abs = join(outDir, file);
+    // dataUrl is data:image/svg+xml;charset=utf-8,ENCODED
+    const raw = still.dataUrl.replace(/^data:image\/svg\+xml;charset=utf-8,/, "");
+    const svg = decodeURIComponent(raw);
+    writeFileSync(abs, svg, "utf8");
+    const publicSrc = `/packs/assets/${packId}/${file}`;
+    return {
+      id: uid("asset"),
+      kind: "image",
+      mime: "image/svg+xml",
+      name: still.name.en,
+      size: svg.length,
+      label: idx === 0 ? "exterior" : "interior",
+      note: `offer:studio:${still.id}`,
+      createdAt: new Date().toISOString(),
+      publicSrc,
+    };
+  });
+  return { ...intake, mediaAssets: [...(intake.mediaAssets ?? []), ...assets] };
+}
 
 function buildFromIntake(intake: Intake, id: DemoPackId): CampaignPack {
-  const report = validateIntake(intake);
+  const withAssets = attachStudioAssets(intake, id);
+  const report = validateIntake(withAssets);
   const diagnosis = {
-    ...diagnose(intake, report),
+    ...diagnose(withAssets, report),
     approved: true,
     approvedAt: new Date().toISOString(),
   };
-  const variants = generateVariants(intake);
-  const media = generateMedia(intake);
-  const pack = assemblePack(intake, {
+  const variants = generateVariants(withAssets);
+  const media = generateMedia(withAssets);
+  const pack = assemblePack(withAssets, {
     report,
     diagnosis,
     variants,
-    strategy: generateStrategy(intake, diagnosis),
+    strategy: generateStrategy(withAssets, diagnosis),
     media,
-    optimizer: generateOptimizer(intake, media),
+    optimizer: generateOptimizer(withAssets, media),
     agentStatus: {
       intake: "complete",
       diagnostic: "approved",
@@ -52,45 +112,64 @@ function buildFromIntake(intake: Intake, id: DemoPackId): CampaignPack {
     },
     id,
   });
+  const cmo = pack.cmoIdeas ?? buildCmoIdeasPack(withAssets, "he");
+  const meta = demoMetaFor(id);
   return {
     ...pack,
     id,
     saved: true,
     planActivated: true,
-    name: intake.businessName || pack.name,
-    demoMeta: demoMetaFor(id),
+    name: withAssets.businessName || pack.name,
+    cmoIdeas: cmo,
+    demoMeta: {
+      ...meta,
+      ideaNames: {
+        he: ideaNamesForLocale(withAssets, "he"),
+        ar: ideaNamesForLocale(withAssets, "ar"),
+        en: ideaNamesForLocale(withAssets, "en"),
+      },
+    },
   };
 }
 
-function loadExistingClinic(): CampaignPack | null {
-  const path = join(process.cwd(), "public/packs/published.json");
-  if (!existsSync(path)) return null;
-  try {
-    const raw = JSON.parse(readFileSync(path, "utf8")) as CampaignPack[];
-    const clinic = Array.isArray(raw) ? raw.find((p) => p.id === DEMO_ID) : null;
-    return clinic ?? null;
-  } catch {
-    return null;
-  }
-}
-
 function incompleteCount(pack: CampaignPack): number {
-  const blob = JSON.stringify(pack.variants) + JSON.stringify(pack.agency ?? {});
+  const blob = JSON.stringify(pack.variants) + JSON.stringify(pack.agency ?? {}) + JSON.stringify(pack.cmoIdeas ?? {});
   return (blob.match(/\[יש להשלים\]|\[يجب الاستكمال\]|\[TO COMPLETE\]/g) || []).length;
 }
 
-function main() {
-  const existing = loadExistingClinic();
-  const clinic: CampaignPack = existing
-    ? {
-        ...existing,
-        id: DEMO_ID,
-        demoMeta: demoMetaFor(DEMO_ID),
-      }
-    : buildFromIntake(demoIntake("he"), DEMO_ID);
+function assertNoFakePerf(pack: CampaignPack) {
+  const blob = JSON.stringify(pack.cmoIdeas ?? {});
+  if (/\bROAS\s*[:=]\s*\d/i.test(blob)) {
+    throw new Error(`${pack.id}: fake ROAS number in cmoIdeas`);
+  }
+  // Labels may mention "not ROAS" — that is fine. Ban performance claims.
+  if (/ROAS\s+\d|CAC\s*=\s*\d|likes?\s*[:=]\s*\d/i.test(blob)) {
+    throw new Error(`${pack.id}: performance metric invented in cmoIdeas`);
+  }
+}
 
-  const olive = buildFromIntake(catalogIntake(DEMO_OLIVE_ID, "he")!, DEMO_OLIVE_ID);
-  const sand = buildFromIntake(catalogIntake(DEMO_SAND_ID, "he")!, DEMO_SAND_ID);
+function main() {
+  // Platform catalog sanity
+  for (const v of ["clinic", "restaurant", "retail"] as const) {
+    const n = platformCount(v);
+    if (n < 8 || n > 12) {
+      console.error("platform count out of range", v, n);
+      process.exit(1);
+    }
+  }
+
+  const clinicIntake = demoIntake("he"); // real facts only
+  const oliveIntake = enrichFictional(oliveKitchenIntake("he"), "olive");
+  const sandIntake = enrichFictional(sandBoutiqueIntake("he"), "sand");
+
+  // Also ensure AR/EN name variants exist via generateVariants from HE intake
+  // (spoken engine localizes). Catalog intakes are locale-specific for display fields;
+  // engines produce all three locales from whichever intake language is primary.
+  void catalogIntake; // keep import used for API symmetry
+
+  const clinic = buildFromIntake(clinicIntake, DEMO_ID);
+  const olive = buildFromIntake(oliveIntake, DEMO_OLIVE_ID);
+  const sand = buildFromIntake(sandIntake, DEMO_SAND_ID);
 
   const packs = [clinic, olive, sand];
   const ids = packs.map((p) => p.id);
@@ -99,20 +178,59 @@ function main() {
     process.exit(1);
   }
 
-  // Calendar sample smoke (engines) — not stored separately; agency has 13-week calendar.
   for (const pack of packs) {
+    if (detectVertical(pack.intake) === "restaurant" && pack.id !== DEMO_OLIVE_ID) {
+      console.error("unexpected restaurant", pack.id);
+      process.exit(1);
+    }
     for (const loc of ["he", "ar", "en"] as Locale[]) {
       const week = buildPostingCalendar(pack, loc);
       if (week.length !== 7) {
         console.error("calendar length", pack.id, loc, week.length);
         process.exit(1);
       }
+      if (!week.every((d) => d.ideaName)) {
+        console.error("calendar missing ideaName", pack.id, loc);
+        process.exit(1);
+      }
     }
     const n = incompleteCount(pack);
-    console.log("PACK", pack.id, "variants", pack.variants.length, "incompleteMarkers", n, "fictional", pack.demoMeta?.fictional);
+    if (pack.id !== DEMO_ID && n > 0) {
+      console.error("incomplete markers on fictional", pack.id, n);
+      process.exit(1);
+    }
+    assertNoFakePerf(pack);
+    if (!pack.cmoIdeas?.selected?.length) {
+      console.error("missing cmo ideas", pack.id);
+      process.exit(1);
+    }
+    if (!(pack.intake.mediaAssets ?? []).length) {
+      console.error("missing media assets", pack.id);
+      process.exit(1);
+    }
+    const heIdeas = pack.demoMeta?.ideaNames?.he ?? [];
+    console.log(
+      "PACK",
+      pack.id,
+      "variants",
+      pack.variants.length,
+      "incompleteMarkers",
+      n,
+      "ideas",
+      heIdeas.slice(0, 3).join(" | "),
+      "assets",
+      (pack.intake.mediaAssets ?? []).length,
+    );
     const he = pack.variants.find((v) => v.locale === "he" && v.kind === "strong_offer");
     console.log("  HE headline:", he?.headline);
     console.log("  HE cta:", he?.cta);
+  }
+
+  const banned = /Pizza\s*Hut|פיצה האט|Aluf\s*Sport|אלוף ספורט/i;
+  const all = JSON.stringify(packs);
+  if (banned.test(all)) {
+    console.error("banned brand leaked into packs");
+    process.exit(1);
   }
 
   const outDir = join(process.cwd(), "public/packs");
@@ -120,6 +238,14 @@ function main() {
   const outPath = join(outDir, "published.json");
   writeFileSync(outPath, JSON.stringify(packs, null, 2), "utf8");
   console.log("WROTE", outPath, "ids=" + ids.join(","));
+  // confirm asset files exist
+  for (const id of ids) {
+    const dir = join(outDir, "assets", id);
+    if (!existsSync(dir)) {
+      console.error("missing assets dir", dir);
+      process.exit(1);
+    }
+  }
 }
 
 main();

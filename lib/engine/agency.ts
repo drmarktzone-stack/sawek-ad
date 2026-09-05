@@ -21,6 +21,7 @@ import { canonicalDoctorName } from "../demo";
 import { coverageFactLine, isClalitCoverageFact, isFreeService, problemChipsFor } from "../operating-model";
 import { bofWalkLine, landingVisualLine, smsWalkLine } from "../vertical";
 import { brandNote, paletteForIntake } from "../brand-kit";
+import { buildCmoIdeasPack } from "./cmo-ideas";
 
 const L = (he: string, ar: string, en: string): Tri => ({ he, ar, en });
 
@@ -64,6 +65,7 @@ export function buildAgency(pack: Pick<CampaignPack, "intake" | "intakeReport" |
   if (!filled(i.targetCac)) unknowns.push("cac");
   if (!i.competitors.length) unknowns.push("competitors");
 
+  const cmoIdeasEarly = buildCmoIdeasPack(i, "he");
   const personas = [
     {
       name: L("פרסונה א׳ — ליבה", "شخصية أ — النواة", "Persona A — core"),
@@ -256,24 +258,54 @@ export function buildAgency(pack: Pick<CampaignPack, "intake" | "intakeReport" |
           )
         : L(`BOF: CTA ל${goalHe}. וואטסאפ/תור — לא טופס של 12 שדות.`, `BOF: CTA لـ ${goalAr}.`, `BOF: CTA to ${goalEn}. WhatsApp/booking — not a 12-field form.`),
     },
-    calendar: Array.from({ length: 13 }, (_, w) => ({
-      week: w + 1,
-      theme: w < 2
-        ? L("למידה — 2–3 קריאייטיבים", "تعلّم — 2–3 إبداعات", "Learn — 2–3 creatives")
-        : w < 6
-          ? L("זווית אחת מנצחת לפי פניות", "زاوية واحدة وفق الطلبات", "One winning angle by enquiries")
-          : w < 10
-            ? L("תוכן אורגני + רימרקטינג זהיר", "محتوى عضوي + إعادة استهداف حذرة", "Organic + careful remarketing")
-            : L("סיכום מספרים שמדדתם בפועל", "تلخيص أرقام قستمها", "Recap numbers you actually measured"),
-      action: L(
-        `שבוע ${w + 1}: ${name} · ${goal}. בלי «חודש ויראלי» כתחזית.`,
-        `أسبوع ${w + 1}: ${name} · ${goalAr}.`,
-        `Week ${w + 1}: ${name} · ${goalEn}. No “viral month” forecast.`,
-      ),
-    })),
+    calendar: Array.from({ length: 13 }, (_, w) => {
+      const idea = cmoIdeasEarly.selected[w % Math.max(1, cmoIdeasEarly.selected.length)];
+      const ideaTheme = idea
+        ? L(
+            `רעיון: ${idea.name.he} (תכנון ${idea.planningScore}/100)`,
+            `فكرة: ${idea.name.ar} (تخطيط ${idea.planningScore}/100)`,
+            `Idea: ${idea.name.en} (planning ${idea.planningScore}/100)`,
+          )
+        : L("למידה", "تعلّم", "Learn");
+      const phase =
+        w < 2
+          ? L("למידה — 2–3 קריאייטיבים", "تعلّم — 2–3 إبداعات", "Learn — 2–3 creatives")
+          : w < 6
+            ? L("זווית אחת מנצחת לפי פניות", "زاوية واحدة وفق الطلبات", "One winning angle by enquiries")
+            : w < 10
+              ? L("תוכן אורגני + רימרקטינג זהיר", "محتوى عضوي + إعادة استهداف حذرة", "Organic + careful remarketing")
+              : L("סיכום מספרים שמדדתם בפועל", "تلخيص أرقام قستمها", "Recap numbers you actually measured");
+      return {
+        week: w + 1,
+        theme: L(
+          `${phase.he} · ${ideaTheme.he}`,
+          `${phase.ar} · ${ideaTheme.ar}`,
+          `${phase.en} · ${ideaTheme.en}`,
+        ),
+        action: L(
+          `שבוע ${w + 1}: ${name} · ${goal}. ${idea ? idea.whyItWins.he : ""} בלי «חודש ויראלי» כתחזית. לא ROAS.`,
+          `أسبوع ${w + 1}: ${name} · ${goalAr}. ${idea ? idea.whyItWins.ar : ""} بلا ROAS.`,
+          `Week ${w + 1}: ${name} · ${goalEn}. ${idea ? idea.whyItWins.en : ""} No “viral month” forecast. Not ROAS.`,
+        ),
+      };
+    }),
   };
 
+  const ideaHooks = cmoIdeasEarly.selected.slice(0, 3).map((idea) => ({
+    id: `cmo-${idea.id}`,
+    angle: L(
+      `רעיון CMO: ${idea.name.he}`,
+      `فكرة CMO: ${idea.name.ar}`,
+      `CMO idea: ${idea.name.en}`,
+    ),
+    hook: L(
+      `${idea.hook.he} · למה זה מנצח: ${idea.whyItWins.he} · תכנון ${idea.planningScore}/100 (לא ROAS)`,
+      `${idea.hook.ar} · لماذا تفوز: ${idea.whyItWins.ar} · تخطيط ${idea.planningScore}/100 (ليس ROAS)`,
+      `${idea.hook.en} · Why it wins: ${idea.whyItWins.en} · planning ${idea.planningScore}/100 (not ROAS)`,
+    ),
+  }));
   const hooks = [
+    ...ideaHooks,
     { id: "pain", angle: L("בעיה", "مشكلة", "Problem"), hook: L(landingH1(i, "he"), landingH1(i, "ar"), landingH1(i, "en")) },
     { id: "edge", angle: L("יתרון", "ميزة", "Advantage"), hook: L(advHe, advAr, advEn) },
     { id: "place", angle: L("מקום", "مكان", "Place"), hook: L(loc || "מיקום חסר — לא «לידכם».", loc || "الموقع ناقص.", loc || "Location missing — not “near you”.") },

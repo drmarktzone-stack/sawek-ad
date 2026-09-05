@@ -6,7 +6,7 @@ Honest score: **100/100**
 Fails: 0 · Warns: 0
 
 ## Scope
-- Engines: `generateVariants` (spoken/fact-copy), `assemblePack`, `buildPostingCalendar`, `spokenCta`, `whatsappScript`, `detectVertical`
+- Engines: `generateVariants`, `assemblePack`, `buildPostingCalendar`, `cmo-ideas` (planning scorecards), `spokenCta`, `whatsappScript`, `detectVertical`
 - published.json must contain exactly clinic + Olive Kitchen + Sand Boutique
 - Fictional packs must be marked `demoMeta.sample` + `demoMeta.fictional`
 - No Pizza Hut / Aluf Sport / other real brands
@@ -20,7 +20,12 @@ Fails: 0 · Warns: 0
 - `demo-olive-kitchen`: מטבח הזית — ארוחת טעימות זוגית ב-₪149 בהזמנה
 - `demo-sand-boutique`: בוטיק חול — הנחת פתיחה רכה 15% על קולקציית
 
+## CMO idea names (HE, top 3)
+- `demo-samer-clinic`: וואטסאפ רך · שקט באותו יום · מפת בוקר
+- `demo-olive-kitchen`: טעימות לשניים · טקס שולחן הזית · ים-תיכון בלי תור
+- `demo-sand-boutique`: סיפור מתלה אחד · אלגנטיות יומיומית · שמירה בוואטסאפ
+
 ## Notes
-- Clinic pack kept from prior publish (owner-approved real clinic); fictional packs rebuilt from catalog intakes via engines.
+- All three packs rebuilt via engines with CMO ideas + studio still assets. Clinic uses real snapshot facts only.
 - New Campaign must not auto-load demos (empty-campaign wipe + demo identity blocklist).
 - Demo UI exposes all three as selectable demos.

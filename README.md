@@ -35,6 +35,8 @@ Homepage / wizard / campaigns expose all three as selectable demos. **New empty 
 
 `public/packs/published.json` contains only these three ids. Rebuild with `npx tsx scripts/publish-three-demos.ts` and QA with `npx tsx scripts/qa-three-demos.ts`.
 
+Each pack is built by the app engines with a **CMO idea pack**: distinctive platforms/hooks, planning scorecards (1–100 — never ROAS/CAC/likes), gap-compensation moves, studio still SVGs under `public/packs/assets/`, and idea names on the demo picker.
+
 General 5-agent OmniAd flow is unchanged on `/`.
 
 Hebrew, Arabic, and English are equal first-class languages. Visual identity is dark **black + red + neon yellow**.
