@@ -51,6 +51,8 @@ import { useI18n } from "@/components/i18n-provider";
 import { CoachPanel } from "@/components/coach-panel";
 import { DiagnosisCmoStrip, DiagnosisGaps } from "@/components/diagnosis-gaps";
 import { ImageOfferPicker } from "@/components/image-offer-picker";
+import { VoiceFields } from "@/components/voice-fields";
+import { emptyVoice, voiceFromIntake } from "@/lib/engine/voice";
 import { coachIntake } from "@/lib/engine/coach";
 import { useIsClient } from "@/lib/use-is-client";
 import { cn } from "@/lib/utils";
@@ -301,6 +303,9 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
       [t("details.depth"), DEPTH_OPTIONS.find((o) => o.id === intake.depth)?.label[locale] ?? intake.depth],
       [t("biz.category"), intake.category],
       [t("biz.description"), intake.description],
+      [t("viral.niche"), voiceFromIntake(intake).niche],
+      [t("viral.core"), voiceFromIntake(intake).coreMessage],
+      [t("viral.voice"), voiceFromIntake(intake).personalVoice],
       [t("details.audience"), resolveChipLabel(intake.audience, audienceChipsFor(intake), locale)],
       [t("details.problem"), resolveChipLabel(intake.biggestProblem, problemChipsFor(intake), locale)],
       [t("details.advantage"), resolveChipLabel(intake.uniqueAdvantage, ADVANTAGE_CHIPS, locale)],
@@ -588,6 +593,16 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
                   onChange={(e) => patch({ description: e.target.value })}
                 />
               </Field>
+              <div className="mb-6 rounded-[16px] border border-[rgba(8,17,31,0.08)] bg-ivory p-4">
+                <p className="agency-kicker">{t("viral.step1")}</p>
+                <p className="mt-2 text-sm text-muted">{t("viral.step1b")}</p>
+                <div className="mt-4">
+                  <VoiceFields
+                    value={intake.voice ?? emptyVoice()}
+                    onChange={(voice) => patch({ voice, brandTone: voice.personalVoice || intake.brandTone })}
+                  />
+                </div>
+              </div>
               <Field label={t("biz.location")} filled={Boolean(intake.location.trim())}>
                 <Input
                   value={intake.location}

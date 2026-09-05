@@ -14,7 +14,8 @@
     "check:demo-cmo": "npx --yes tsx scripts/check-demo-cmo.ts",
     "check:cmo-product": "npx --yes tsx scripts/check-cmo-product.ts",
     "check:product-path": "npx --yes tsx scripts/check-product-path.ts",
-    "check:vertex-stack": "npx --yes tsx scripts/check-vertex-stack.ts"
+    "check:vertex-stack": "npx --yes tsx scripts/check-vertex-stack.ts",
+    "check:viral-desk": "npx --yes tsx scripts/check-viral-desk.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

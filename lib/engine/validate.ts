@@ -141,6 +141,7 @@ export function emptyIntake(): Intake {
     whatsappTemplates: "",
     landingLines: "",
     brandKit: { colors: [], source: "none" },
+    voice: { niche: "", coreMessage: "", personalVoice: "", dialect: "" },
   };
 }
 

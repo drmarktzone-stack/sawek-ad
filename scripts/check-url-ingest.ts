@@ -638,7 +638,7 @@ const siteAudit = pack.siteAudit;
 if (!siteAudit) fail("assemblePack missing siteAudit");
 else if (!siteAudit.strengths.length) fail("pack siteAudit strengths empty");
 const week = buildPostingCalendar(pack, "he");
-if (week.length !== 7) fail(`calendar days ${week.length}`);
+if (week.length !== 30) fail(`calendar days ${week.length}`);
 if (week[0].channel !== "facebook") fail("day 1 should be facebook");
 if (week[1].channel !== "instagram") fail("day 2 should be instagram");
 if (week.some((d) => /best time|שעה הכי|أفضل وقت/i.test(`${d.headline} ${d.body}`))) fail("calendar invented best-time science");

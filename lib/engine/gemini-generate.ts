@@ -472,6 +472,10 @@ function factsBlockFromBody(body: GenerateBody): string {
     intake.clinicHours && `clinicHours: ${intake.clinicHours}`,
     intake.brandTone && `brandTone: ${intake.brandTone}`,
     intake.brandPositioning && `brandPositioning: ${intake.brandPositioning}`,
+    intake.voice?.niche && `coreNiche: ${intake.voice.niche}`,
+    intake.voice?.coreMessage && `coreMessage: ${intake.voice.coreMessage}`,
+    intake.voice?.personalVoice && `personalVoice: ${intake.voice.personalVoice}`,
+    intake.voice?.dialect && `voiceDialect: ${intake.voice.dialect}`,
     intake.pastResults && `pastResults: ${intake.pastResults}`,
   ].filter(Boolean);
   return lines.join("\n");
@@ -1025,10 +1029,40 @@ export function factsToIntake(body: { description?: unknown; audience?: unknown;
     intake.website = str("website") || str("url") || str("site");
     intake.whatsapp = str("whatsapp") || str("phone") || str("tel") || str("mobile");
     intake.clinicHours = str("clinicHours") || str("hours") || str("openingHours");
-    intake.brandTone = str("brandTone");
+    intake.brandTone = str("brandTone") || str("personalVoice");
     intake.brandPositioning = str("brandPositioning");
     if (str("kupaFileBy")) intake.kupaFileBy = str("kupaFileBy");
     if (str("kupaMemberFrom")) intake.kupaMemberFrom = str("kupaMemberFrom");
+    const dialect = str("voiceDialect") || str("dialect");
+    const niche = str("coreNiche") || str("niche");
+    const coreMessage = str("coreMessage");
+    const personalVoice = str("personalVoice") || intake.brandTone;
+    if (niche || coreMessage || personalVoice || dialect) {
+      intake.voice = {
+        niche,
+        coreMessage,
+        personalVoice,
+        dialect:
+          dialect === "he" ||
+          dialect === "ar-levant" ||
+          dialect === "ar-gulf" ||
+          dialect === "ar-msa" ||
+          dialect === "en"
+            ? dialect
+            : "",
+      };
+    }
+    if (o.voice && typeof o.voice === "object" && !Array.isArray(o.voice)) {
+      const v = o.voice as Record<string, unknown>;
+      const d = typeof v.dialect === "string" ? v.dialect : "";
+      intake.voice = {
+        niche: typeof v.niche === "string" ? v.niche : niche,
+        coreMessage: typeof v.coreMessage === "string" ? v.coreMessage : coreMessage,
+        personalVoice: typeof v.personalVoice === "string" ? v.personalVoice : personalVoice,
+        dialect:
+          d === "he" || d === "ar-levant" || d === "ar-gulf" || d === "ar-msa" || d === "en" ? d : intake.voice?.dialect || "",
+      };
+    }
   }
   if (typeof body.description === "string" && body.description.trim()) {
     intake.description = [intake.description, body.description.trim()].filter(Boolean).join("\n");

@@ -26,6 +26,7 @@ const DEPT_RAIL = [
   { href: "/discovery", key: "nav.discovery" as const },
   { href: "/strategy", key: "nav.strategy" as const },
   { href: "/studio", key: "nav.studio" as const },
+  { href: "/viral", key: "nav.viral" as const },
   { href: "/media", key: "nav.media" as const },
   { href: "/leads", key: "nav.leads" as const },
   { href: "/medical/optibrain", key: "nav.medical" as const },
@@ -131,7 +132,7 @@ export function DepartmentShell({
   }, [locale]);
 
   function loadDemo(idOrSlug: string = "samer") {
-    const next = installDemoPack(idOrSlug);
+    const next = installDemoPack(idOrSlug, packLang);
     setPack(next);
   }
 

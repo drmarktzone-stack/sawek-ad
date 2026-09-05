@@ -36,6 +36,7 @@ import { ChannelPack } from "@/components/channel-pack";
 import { LivePreviewStrip } from "@/components/live-preview-cards";
 import { AnglesStrip } from "@/components/angles-strip";
 import { CmoIdeasStrip } from "@/components/cmo-ideas-strip";
+import { ViralDesk } from "@/components/viral-desk";
 import { DiagnosisGaps } from "@/components/diagnosis-gaps";
 import { buildCmoIdeasPack } from "@/lib/engine/cmo-ideas";
 import { CoachImprovedStrip } from "@/components/coach-panel";
@@ -183,6 +184,8 @@ export function ResultView({
       />
 
       <CmoIdeasStrip cmoIdeas={cmoIdeas} locale={packLang} />
+
+      <ViralDesk key={`${pack.id}-${packLang}`} pack={pack} packLang={packLang} onPack={onChange} embedded />
 
       <ChannelPack
         pack={pack}

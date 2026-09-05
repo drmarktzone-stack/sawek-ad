@@ -81,6 +81,26 @@ export function loadDraft(): DraftState {
       pastCreatives: Array.isArray(d.intake?.pastCreatives) ? d.intake.pastCreatives : [],
       brandTone: typeof d.intake?.brandTone === "string" ? d.intake.brandTone : "",
       brandPositioning: typeof d.intake?.brandPositioning === "string" ? d.intake.brandPositioning : "",
+      voice: (() => {
+        const v = d.intake?.voice;
+        if (!v || typeof v !== "object") {
+          return { niche: "", coreMessage: "", personalVoice: "", dialect: "" as const };
+        }
+        const dialect = v.dialect;
+        return {
+          niche: typeof v.niche === "string" ? v.niche : "",
+          coreMessage: typeof v.coreMessage === "string" ? v.coreMessage : "",
+          personalVoice: typeof v.personalVoice === "string" ? v.personalVoice : "",
+          dialect:
+            dialect === "he" ||
+            dialect === "ar-levant" ||
+            dialect === "ar-gulf" ||
+            dialect === "ar-msa" ||
+            dialect === "en"
+              ? dialect
+              : "",
+        };
+      })(),
       channelNotes: typeof d.intake?.channelNotes === "string" ? d.intake.channelNotes : "",
       whatsappTemplates: typeof d.intake?.whatsappTemplates === "string" ? d.intake.whatsappTemplates : "",
       landingLines: typeof d.intake?.landingLines === "string" ? d.intake.landingLines : "",

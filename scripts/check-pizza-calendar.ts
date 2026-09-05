@@ -64,7 +64,11 @@ const pack = assemblePack(pizza, {
   },
 });
 const week = buildPostingCalendar(pack, "he");
-if (week.length !== 7) fail(`calendar days ${week.length}`);
+if (week.length !== 30) fail(`calendar days ${week.length}`);
+if (week[0].channel !== "facebook") fail("day 1 should stay facebook");
+if (week[1].channel !== "instagram") fail("day 2 should stay instagram");
+if (!week.some((d) => d.kind === "carousel")) fail("30-day calendar missing carousel days");
+if (!week.some((d) => d.kind === "script")) fail("30-day calendar missing script days");
 const weekBlob = week.map((d) => `D${d.day}: ${d.headline}\n${d.body}\n${d.cta}`).join("\n\n");
 if (!/פיצה|Pizza Hut|פיצה האט/i.test(weekBlob)) fail("calendar missing פיצה / Pizza Hut");
 if (/לא מכירים/.test(weekBlob)) fail("calendar has לא מכירים");

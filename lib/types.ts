@@ -175,6 +175,8 @@ export interface Intake {
   whatsappTemplates: string;
   landingLines: string;
   brandKit?: ClientBrandKit;
+  /** Niche / core message / personal voice — define once; copy follows. */
+  voice?: VoiceProfile;
 }
 
 export interface MissingFlag {
@@ -445,6 +447,119 @@ export interface CampaignPack {
     localized?: boolean;
     translationDown?: boolean;
   };
+  /** Short-form viral desk (scripts, carousel, bio, trends, remix, analysis). */
+  viral?: ViralDeskState;
+}
+
+export type VoiceDialect = "he" | "ar-levant" | "ar-gulf" | "ar-msa" | "en";
+
+export interface VoiceProfile {
+  niche: string;
+  coreMessage: string;
+  personalVoice: string;
+  dialect: VoiceDialect | "";
+}
+
+export type ViralScriptStyle =
+  | "quiet_catalyst"
+  | "data"
+  | "trend"
+  | "story"
+  | "contrast"
+  | "proof"
+  | "direct";
+
+export interface ViralScript {
+  id: ViralScriptStyle;
+  style: Tri;
+  hook: string;
+  spoken: string;
+  onScreen: string;
+  cta: string;
+  beats: string[];
+}
+
+export interface ViralScriptPack {
+  idea: string;
+  locale: Locale;
+  voice: VoiceProfile;
+  scripts: ViralScript[];
+  source: "template" | "gemini";
+}
+
+export interface CarouselSlide {
+  index: number;
+  headline: string;
+  body: string;
+  visual: string;
+}
+
+export interface CarouselPack {
+  locale: Locale;
+  caption: string;
+  cta: string;
+  slides: CarouselSlide[];
+  source: "template" | "gemini";
+}
+
+export interface BioPack {
+  locale: Locale;
+  instagram: string;
+  tiktok: string;
+  facebook: string;
+  linkedin: string;
+  whatsapp: string;
+  source: "template" | "gemini";
+}
+
+export interface TrendAngle {
+  id: string;
+  title: string;
+  angle: string;
+  hook: string;
+  why: string;
+}
+
+export interface TrendPack {
+  locale: Locale;
+  asOf: string;
+  disclaimer: string;
+  angles: TrendAngle[];
+  source: "template" | "gemini";
+}
+
+export interface RemixResult {
+  status: "ok" | "need_transcript";
+  locale: Locale;
+  publicText?: string;
+  sourceUrl?: string;
+  note: string;
+  script?: ViralScript;
+  source: "template" | "gemini" | "public_text";
+}
+
+export interface VideoAnalysis {
+  kind: "planning_heuristic";
+  locale: Locale;
+  disclaimer: string;
+  hookPotential: number;
+  clarity: number;
+  ctaClarity: number;
+  notes: string[];
+  source: "template" | "gemini";
+  usedFrame: boolean;
+  usedCaption: boolean;
+}
+
+export interface ViralDeskState {
+  idea: string;
+  scripts?: ViralScriptPack;
+  carousel?: CarouselPack;
+  bios?: BioPack;
+  trends?: TrendPack;
+  remix?: RemixResult;
+  analysis?: VideoAnalysis;
+
 }
 
 export type Tri = Record<Locale, string>;

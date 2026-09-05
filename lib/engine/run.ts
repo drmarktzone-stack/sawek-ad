@@ -1,4 +1,4 @@
-import type { AgentId, AgentStatus, CampaignAngles, CampaignPack, Diagnosis, Intake } from "../types";
+import type { AgentId, AgentStatus, CampaignAngles, CampaignPack, Diagnosis, Intake, Locale } from "../types";
 import { uid, sleep } from "../utils";
 import { validateIntake } from "./validate";
 import { diagnose } from "./diagnose";
@@ -255,8 +255,7 @@ export function assemblePack(
 }
 
 /** Build any of the three published demos (clinic or fictional samples). */
-export function buildDemoPack(idOrSlug: string = DEMO_ID): CampaignPack {
-  const locale = typeof window !== "undefined" ? loadLocale() : "he";
+export function buildDemoPack(idOrSlug: string = DEMO_ID, locale: Locale = typeof window !== "undefined" ? loadLocale() : "he"): CampaignPack {
   const entry = demoEntry(idOrSlug) ?? demoEntry(DEMO_ID)!;
   const packId = entry.id as DemoPackId;
   const intake =

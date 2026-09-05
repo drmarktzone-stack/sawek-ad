@@ -189,7 +189,7 @@ function main() {
     }
     for (const loc of ["he", "ar", "en"] as Locale[]) {
       const week = buildPostingCalendar(pack, loc);
-      if (week.length !== 7) {
+      if (week.length !== 30) {
         console.error("calendar length", pack.id, loc, week.length);
         process.exit(1);
       }

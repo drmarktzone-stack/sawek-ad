@@ -1,4 +1,4 @@
-import type { CampaignPack } from "./types";
+import type { CampaignPack, Locale } from "./types";
 import { ensureAgency } from "./engine/agency";
 import { buildDemoPack } from "./engine/run";
 import { loadCampaigns, upsertCampaign } from "./storage";
@@ -14,8 +14,8 @@ export function packById(id: string): CampaignPack | null {
   return found ? ensureAgency(found) : null;
 }
 
-export function installDemoPack(idOrSlug: string = DEMO_ID): CampaignPack {
-  const pack = buildDemoPack(idOrSlug);
+export function installDemoPack(idOrSlug: string = DEMO_ID, locale?: Locale): CampaignPack {
+  const pack = buildDemoPack(idOrSlug, locale);
   upsertCampaign(pack);
   return pack;
 }

@@ -15,6 +15,7 @@ export type DemoCmoDesk = Pick<
   | "whatFailed"
   | "brandTone"
   | "brandPositioning"
+  | "voice"
 >;
 
 const SAMPLE = {
@@ -37,6 +38,12 @@ function clinicDesk(locale: Locale): DemoCmoDesk {
       whatFailed: "المنشورات وصفت المكان لكن نسيت أن تطلب اسماً في واتساب أو أن تكرر ساعة الوصول التالية.",
       brandTone: "هادئ، أبوي، عربي-عبري محلي. بلا ادّعاء تجميلي وبلا خصم.",
       brandPositioning: "عيادة أطفال حقيقية في باقة — وصول حسب الدور لمؤمني كلاليت، ليس براند شبكة.",
+      voice: {
+        niche: "عيادة أطفال في باقة — كلاليت، وصول حسب الدور",
+        coreMessage: "لما الولد مريض — بتجوا حسب الدور. واتساب باسم الولد. بلا وعود طبية.",
+        personalVoice: "هادئ، أبوي، عربي-عبري محلي. بلا ادّعاء تجميلي وبلا خصم.",
+        dialect: "ar-levant",
+      },
     };
   }
   if (locale === "en") {
@@ -52,6 +59,12 @@ function clinicDesk(locale: Locale): DemoCmoDesk {
       whatFailed: "Posts described the place but forgot to ask for a name on WhatsApp or to repeat the next arrival window.",
       brandTone: "Calm, parental, local Arabic–Hebrew. No cosmetic claim, no discount.",
       brandPositioning: "A real pediatric clinic in Baqa — arrival-order access for Clalit members, not a chain brand.",
+      voice: {
+        niche: "Pediatric clinic in Baqa — Clalit, arrival-order access",
+        coreMessage: "When the child is sick — arrive by order. WhatsApp with the child’s name. No medical promises.",
+        personalVoice: "Calm, parental, local Arabic–Hebrew. No cosmetic claim, no discount.",
+        dialect: "en",
+      },
     };
   }
   return {
@@ -66,6 +79,12 @@ function clinicDesk(locale: Locale): DemoCmoDesk {
     whatFailed: "הפוסטים תיארו את המקום אבל שכחו לבקש שם בוואטסאפ או לחזור על חלון ההגעה הבא.",
     brandTone: "רגוע, הורי, ערבית-עברית מקומית. בלי טענה קוסמטית ובלי הנחה.",
     brandPositioning: "מרפאת ילדים אמיתית בבאקה — קבלה לפי סדר למבוטחי כללית, לא מותג רשת.",
+    voice: {
+      niche: "מרפאת ילדים בבאקה — כללית, קבלה לפי סדר",
+      coreMessage: "כשהילד חולה — מגיעים לפי סדר. וואטסאפ עם שם הילד. בלי הבטחות רפואיות.",
+      personalVoice: "רגוע, הורי, ערבית-עברית מקומית. בלי טענה קוסמטית ובלי הנחה.",
+      dialect: "he",
+    },
   };
 }
 
@@ -83,6 +102,12 @@ function oliveDesk(locale: Locale): DemoCmoDesk {
       whatFailed: "الصور كانت شهية لكن بلا CTA حجز وبلا ساعة المطبخ التالية — الناس شاهدوا ولم يكتبوا.",
       brandTone: "دافئ، بيتي، متوسطي — بلا شعارات سلسلة. زيت زيتون، سيراميك، جلسة خارج.",
       brandPositioning: "مطعم حيّ في نوڤيه شاקד الخيالية — طقس مائدة هادئ، ليس توصيلاً سريعاً.",
+      voice: {
+        niche: "مطعم متوسطي عائلي في نوڤيه شاكد الخيالية",
+        coreMessage: "طاولة هادئة — زيت زيتون وحمّص — احجزوا واتساب. مش توصيل سريع.",
+        personalVoice: "دافئ، بيتي، متوسطي — بلا شعارات سلسلة.",
+        dialect: "ar-levant",
+      },
     };
   }
   if (locale === "en") {
@@ -98,6 +123,12 @@ function oliveDesk(locale: Locale): DemoCmoDesk {
       whatFailed: "The food looked warm but there was no booking CTA and no next kitchen hour — people watched and did not write.",
       brandTone: "Warm, homey, Mediterranean — no chain slogans. Olive oil, ceramic, outdoor seating.",
       brandPositioning: "A neighborhood table in fictional Neve Shaked — a calm table ritual, not fast delivery.",
+      voice: {
+        niche: "Family Mediterranean restaurant in fictional Neve Shaked",
+        coreMessage: "A calm table — olive oil and hummus — book on WhatsApp. Not fast delivery.",
+        personalVoice: "Warm, homey, Mediterranean — no chain slogans.",
+        dialect: "en",
+      },
     };
   }
   return {
@@ -112,6 +143,12 @@ function oliveDesk(locale: Locale): DemoCmoDesk {
     whatFailed: "האוכל נראה חם אבל לא היה CTA להזמנה ולא שעת מטבח הבאה — ראו ולא כתבו.",
     brandTone: "חם, ביתי, ים-תיכוני — בלי סלוגני רשת. שמן זית, קרמיקה, ישיבה בחוץ.",
     brandPositioning: "שולחן שכונתי בנווה שקד הבדיונית — טקס שולחן רגוע, לא משלוחים מהירים.",
+    voice: {
+      niche: "מסעדה ים-תיכונית משפחתית בנווה שקד הבדיונית",
+      coreMessage: "שולחן רגוע — שמן זית וחומוס — הזמנה בוואטסאפ. לא משלוח מהיר.",
+      personalVoice: "חם, ביתי, ים-תיכוני — בלי סלוגני רשת.",
+      dialect: "he",
+    },
   };
 }
 
@@ -129,6 +166,12 @@ function sandDesk(locale: Locale): DemoCmoDesk {
       whatFailed: "الصور كانت هادئة لكن بلا «تعالَين جرّبن» وبلا ساعة الدكان — أعجبت ولم تُحجز قطعة.",
       brandTone: "هادئ، كتان، رمل — استشارة شخصية بلا ضجيج مول. أناقة يومية.",
       brandPositioning: "بوتيك نسائي هادئ في عين براك الخيالية — علّاقة واحدة دقيقة أفضل من كتالوج منفوخ.",
+      voice: {
+        niche: "بوتيك أزياء نسائية هادئ في عين براك الخيالية",
+        coreMessage: "علّاقة واحدة دقيقة + تجربة هادئة. تعالَين جرّبن — واتساب لحجز قطعة.",
+        personalVoice: "هادئ، كتان، رمل — استشارة شخصية بلا ضجيج مول.",
+        dialect: "ar-levant",
+      },
     };
   }
   if (locale === "en") {
@@ -144,6 +187,12 @@ function sandDesk(locale: Locale): DemoCmoDesk {
       whatFailed: "The stills were calm but there was no “come try it on” and no next shop hour — people liked the mood and did not hold a piece.",
       brandTone: "Calm, linen, sand — personal styling without mall noise. Everyday elegance.",
       brandPositioning: "A quiet women’s boutique in fictional Ein Barak — one precise rack beats a padded catalog.",
+      voice: {
+        niche: "Quiet women’s fashion boutique in fictional Ein Barak",
+        coreMessage: "One precise rack + a calm fitting. Come try it on — WhatsApp to hold a piece.",
+        personalVoice: "Calm, linen, sand — personal styling without mall noise.",
+        dialect: "en",
+      },
     };
   }
   return {
@@ -158,6 +207,12 @@ function sandDesk(locale: Locale): DemoCmoDesk {
     whatFailed: "התמונות היו רגועות אבל לא היה «בואו למדידה» ולא שעת החנות הבאה — אהבו את האווירה ולא שמרו פריט.",
     brandTone: "רגוע, פשתן, חול — ייעוץ אישי בלי רעש קניון. אלגנטיות יומיומית.",
     brandPositioning: "בוטיק נשי שקט בעין ברק הבדיונית — מתלה אחד מדויק עדיף על קטלוג מנופח.",
+    voice: {
+      niche: "בוטיק אופנה נשית שקט בעין ברק הבדיונית",
+      coreMessage: "מתלה אחד מדויק + מדידה רגועה. בואו למדידה — וואטסאפ לשמירת פריט.",
+      personalVoice: "רגוע, פשתן, חול — ייעוץ אישי בלי רעש קניון.",
+      dialect: "he",
+    },
   };
 }
 

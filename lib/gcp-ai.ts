@@ -32,9 +32,12 @@ export {
   tierForGenerateMode,
   factsToIntake,
   bodyHasFacts,
+  geminiFailFromEnv,
   type GenerateBody,
   type GenerateMode,
 } from "./engine/gemini-generate";
+
+export { runViralDesk, type ViralBody, type ViralMode } from "./engine/gemini-viral";
 
 export { runFlashVariations, type VariationsResult } from "./engine/gemini-variations";
 export { runProDesk, type ProDeskInsights } from "./engine/gemini-pro-jobs";
