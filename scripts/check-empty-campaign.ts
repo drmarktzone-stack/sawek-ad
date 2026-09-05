@@ -64,12 +64,12 @@ function fail(msg: string) {
   failures.push(msg);
 }
 
-if (t("he", "cta.new") !== "קמפיין חדש") fail(`cta.new he=${t("he", "cta.new")}`);
+if (t("he", "cta.new") !== "קמפיין ריק חדש") fail(`cta.new he=${t("he", "cta.new")}`);
 if (t("ar", "cta.newOther") !== "حملة جديدة لمحل آخر") fail(`cta.newOther ar=${t("ar", "cta.newOther")}`);
 if (t("en", "cta.newOther") !== "New campaign for another business") fail(`cta.newOther en=${t("en", "cta.newOther")}`);
 if (!/My Campaigns|form fields will empty/i.test(t("en", "cta.newHint"))) fail(`cta.newHint en=${t("en", "cta.newHint")}`);
 if (!/הקמפיינים שלי/.test(t("he", "cta.newHint"))) fail(`cta.newHint he missing My Campaigns`);
-if (t("he", "gemini.vertex") !== "Gemini (Vertex)") fail(`gemini.vertex ${t("he", "gemini.vertex")}`);
+if (t("he", "gemini.vertex") !== "Vertex · חבילת קרדיטים") fail(`gemini.vertex ${t("he", "gemini.vertex")}`);
 if (t("he", "gemini.quota") !== "אין מכסה") fail(`gemini.quota ${t("he", "gemini.quota")}`);
 
 const clinic = demoIntake("he");

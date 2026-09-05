@@ -135,7 +135,7 @@ export function localizeFactBlob(raw: string, locale: Locale): string {
 }
 
 function mentionsReceptionLanguages(intake: Intake): boolean {
-  const blob = `${intake.description} ${intake.uniqueAdvantage} ${intake.brandTone} ${intake.brandPositioning} ${intake.landingLines}`;
+  const blob = `${intake.description} ${intake.uniqueAdvantage} ${intake.brandTone} ${intake.brandPositioning} ${intake.landingLines} ${intake.voice?.niche ?? ""} ${intake.voice?.coreMessage ?? ""} ${intake.voice?.personalVoice ?? ""}`;
   return /עברית\s*[,\/ו]?\s*ערבית|ערבית.*אנגלית|عبري.*إنجليز|hebrew.*arabic.*english|שירות בעברית|خدمة عبري/i.test(blob);
 }
 

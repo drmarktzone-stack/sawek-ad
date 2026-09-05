@@ -65,7 +65,7 @@ function qaPack(pack: CampaignPack) {
 
   for (const loc of ["he", "ar", "en"] as Locale[]) {
     const week = buildPostingCalendar(rebuilt, loc);
-    if (week.length !== 7) fail(id, `calendar ${loc} days=${week.length}`);
+    if (week.length !== 30) fail(id, `calendar ${loc} days=${week.length}`);
     const blob = week.map((d) => `${d.headline}\n${d.body}\n${d.cta}`).join("\n");
     if (INCOMPLETE.test(blob)) fail(id, `calendar ${loc} has incomplete markers`);
     if (BANNED_BRAND.test(blob)) fail(id, `calendar ${loc} has banned real brand`);
