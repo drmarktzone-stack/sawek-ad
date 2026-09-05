@@ -280,7 +280,8 @@ export async function overlayPastCampaignAudit(
     const completed = await completeGemini({
       parts: [{ text: prompt }],
       temperature: 0.2,
-      timeoutMs: 8_000,
+      timeoutMs: 12_000,
+      tier: "pro",
       systemInstruction:
         "You are a senior performance-marketing auditor. Use ONLY the provided post texts. Never invent prices, likes, reach, ROAS, follower counts, reviews, or age/gender demographics (no 'women 25-34') unless those exact words appear in the posts. Missing audience → [יש להשלים] / [يجب الاستكمال] / [to complete]. Reply JSON only.",
     });

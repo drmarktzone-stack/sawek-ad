@@ -227,6 +227,11 @@ export function Footer() {
     <footer className="safe-pb mt-auto border-t border-navy/10 bg-sand/50 py-10 text-center text-base text-muted">
       <p className="mb-1 font-black text-navy">{t("brand.name")} · {t("brand.scripts")}</p>
       {t("footer.line")}
+      <p className="mt-2">
+        <LangLink href="/status" className="font-semibold text-teal hover:underline">
+          {t("nav.status")}
+        </LangLink>
+      </p>
     </footer>
   );
 }

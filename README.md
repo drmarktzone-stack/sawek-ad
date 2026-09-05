@@ -57,10 +57,14 @@ Open [http://127.0.0.1:43147](http://127.0.0.1:43147).
 Zero API keys required. Copy is generated from intake with templates. Optional:
 
 ```
-GEMINI_API_KEY=                 # enrich /api/generate only
+GOOGLE_CLOUD_PROJECT=project-8fd8a005-ae6d-4139-ab4   # Vertex Pro/Flash + Imagen 3 + Translation
+VERTEX_LOCATION=us-central1
+GEMINI_API_KEY=                 # optional AI Studio fallback after Vertex
 NEXT_PUBLIC_SUPABASE_URL=       # optional campaign sync
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 ```
+
+Gemini 1.5 Pro/Flash are retired on Vertex — the app maps them to **gemini-2.5-pro** / **gemini-2.5-flash**. Status: `/status` and `GET /api/gemini-status`. Check routing with `npm run check:vertex-stack`.
 
 Copy `.env.example` if you want those. The app runs the same without them (localStorage).
 

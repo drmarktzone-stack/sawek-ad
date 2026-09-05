@@ -2,14 +2,17 @@
 
 import { useEffect, useState } from "react";
 import { useI18n } from "@/components/i18n-provider";
+import { LangLink } from "@/components/lang-link";
 import { cn } from "@/lib/utils";
 
+type Service = { id?: string; live?: boolean };
 type Status = {
   configured?: boolean;
   provider?: "vertex" | "ai_studio" | "none";
   quota?: boolean;
   vertexQuota?: boolean;
   aiStudioFallback?: boolean;
+  services?: Service[];
 };
 
 export function GeminiStatusBadge({ className }: { className?: string }) {
@@ -37,6 +40,7 @@ export function GeminiStatusBadge({ className }: { className?: string }) {
     status.provider === "ai_studio" && status.configured && !status.quota;
   const vertexQuotaStudio =
     Boolean(status.vertexQuota) && Boolean(status.aiStudioFallback) && studioUp;
+  const anyDown = (status.services ?? []).some((s) => s.live === false);
   const label = vertexUp
     ? t("gemini.vertex")
     : vertexQuotaStudio
@@ -46,15 +50,16 @@ export function GeminiStatusBadge({ className }: { className?: string }) {
         : t("gemini.quota");
   const ok = vertexUp || studioUp;
   return (
-    <span
+    <LangLink
+      href="/status"
       className={cn(
         "hidden max-w-[11rem] truncate rounded-full border px-2 py-0.5 text-[11px] font-bold sm:inline-block",
-        ok ? "border-gold/50 bg-gold/15 text-navy" : "border-navy/10 bg-navy/5 text-muted",
+        ok && !anyDown ? "border-gold/50 bg-gold/15 text-navy" : "border-gold/40 bg-gold/10 text-navy",
         className,
       )}
-      title={label}
+      title={anyDown ? t("gcp.note.down") : label}
     >
-      {label}
-    </span>
+      {anyDown ? t("gcp.badge.partial") : label}
+    </LangLink>
   );
 }

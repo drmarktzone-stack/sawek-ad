@@ -512,15 +512,27 @@ export function LivePreviewStrip({
           locale: packLang,
         }),
       });
-      const data = (await res.json()) as { ok?: boolean; mime?: string; imageBase64?: string; reason?: string };
-      if (!data?.ok || !data.imageBase64) {
+      const data = (await res.json()) as {
+        ok?: boolean;
+        mime?: string;
+        imageBase64?: string;
+        publicUrl?: string;
+        reason?: string;
+      };
+      if (!data?.ok || (!data.imageBase64 && !data.publicUrl)) {
         setImgError(imagenFailCopy(data?.reason));
         return;
       }
       const mime = data.mime && data.mime.startsWith("image/") ? data.mime : "image/png";
-      const dataUrl = `data:${mime};base64,${data.imageBase64}`;
-      setLocalImg(dataUrl);
-      onGeneratedImage?.(dataUrl);
+      const src =
+        data.publicUrl ||
+        (data.imageBase64 ? `data:${mime};base64,${data.imageBase64}` : "");
+      if (!src) {
+        setImgError(imagenFailCopy(data?.reason));
+        return;
+      }
+      setLocalImg(src);
+      onGeneratedImage?.(src);
     } catch {
       setImgError(t("end.imagenError"));
     } finally {

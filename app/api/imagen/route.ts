@@ -30,7 +30,14 @@ export async function POST(req: Request) {
       const first = batch.images[0];
       if (first) {
         return NextResponse.json(
-          { ok: true, mime: first.mime, imageBase64: first.imageBase64, images: batch.images },
+          {
+            ok: true,
+            mime: first.mime,
+            imageBase64: first.imageBase64,
+            publicUrl: first.publicUrl,
+            model: first.model,
+            images: batch.images,
+          },
           { status: 200 },
         );
       }

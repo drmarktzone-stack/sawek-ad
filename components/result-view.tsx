@@ -41,6 +41,7 @@ import { buildCmoIdeasPack } from "@/lib/engine/cmo-ideas";
 import { CoachImprovedStrip } from "@/components/coach-panel";
 import { PublishToSocial } from "@/components/publish-to-social";
 import { SiteAuditPanel } from "@/components/site-audit-panel";
+import { VariationsPanel } from "@/components/variations-panel";
 import { DeliveryKitButton } from "@/components/delivery-kit-button";
 import { useAuth } from "@/components/auth-provider";
 import { PlanGate } from "@/components/plan-gate";
@@ -191,6 +192,8 @@ export function ResultView({
         onPack={onChange}
         skipLivePreview
       />
+
+      <VariationsPanel pack={pack} locale={packLang} onPack={onChange} />
 
       <AnglesStrip angles={pack.angles} locale={packLang} />
 

@@ -11,7 +11,8 @@
     "check:empty-campaign": "npx --yes tsx scripts/check-empty-campaign.ts",
     "check:stock-images": "npx --yes tsx scripts/check-stock-images.ts",
     "check:stock-images-live": "npx --yes tsx scripts/check-stock-images-live.ts",
-    "check:demo-cmo": "npx --yes tsx scripts/check-demo-cmo.ts"
+    "check:demo-cmo": "npx --yes tsx scripts/check-demo-cmo.ts",
+    "check:vertex-stack": "npx --yes tsx scripts/check-vertex-stack.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

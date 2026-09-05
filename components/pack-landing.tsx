@@ -73,10 +73,10 @@ export function PackLandingScreen({ pack, locale }: { pack: CampaignPack; locale
             locale,
           }),
         });
-        const data = (await res.json()) as { ok?: boolean; mime?: string; imageBase64?: string };
-        if (cancelled || !data?.ok || !data.imageBase64) return;
+        const data = (await res.json()) as { ok?: boolean; mime?: string; imageBase64?: string; publicUrl?: string };
+        if (cancelled || !data?.ok || (!data.imageBase64 && !data.publicUrl)) return;
         const mime = data.mime && data.mime.startsWith("image/") ? data.mime : "image/png";
-        setAiHero(`data:${mime};base64,${data.imageBase64}`);
+        setAiHero(data.publicUrl || `data:${mime};base64,${data.imageBase64}`);
       } catch {
         /* quota / error — still ship type + scanned photos */
       }
