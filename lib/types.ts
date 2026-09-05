@@ -417,6 +417,34 @@ export interface CampaignPack {
   };
   /** CMO planning ideas + scorecard (never performance ROAS). */
   cmoIdeas?: CmoIdeasPack;
+  /** Vertex Gemini Pro desk — strategy / audit / calendar / scripts. */
+  proDesk?: {
+    audience?: Record<Locale, string>;
+    strategy?: Record<Locale, string>;
+    psychology?: Record<Locale, string>;
+    audit?: Record<Locale, string>[];
+    calendarWeeks?: Array<{ week: number; theme: Record<Locale, string>; action: Record<Locale, string> }>;
+    scripts?: Array<{ channel: string; he: string; ar: string; en: string }>;
+    model?: string;
+    provider?: "vertex" | "ai_studio";
+    tier: "pro";
+    down?: boolean;
+    reason?: string;
+  };
+  /** Vertex Gemini Flash burst variations (Meta / Google / WhatsApp / story). */
+  flashVariations?: {
+    variations: Array<{
+      id: string;
+      channel: "meta" | "google" | "whatsapp" | "story";
+      kind: string;
+      he?: { headline: string; body: string; cta: string };
+      ar?: { headline: string; body: string; cta: string };
+      en?: { headline: string; body: string; cta: string };
+    }>;
+    model?: string;
+    localized?: boolean;
+    translationDown?: boolean;
+  };
 }
 
 export type Tri = Record<Locale, string>;

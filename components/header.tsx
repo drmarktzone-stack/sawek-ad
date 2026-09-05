@@ -241,6 +241,11 @@ export function Footer() {
         {t("brand.name")} · {t("brand.scripts")}
       </p>
       {t("footer.line")}
+      <p className="mt-2">
+        <LangLink href="/status" className="font-semibold text-teal hover:underline">
+          {t("nav.status")}
+        </LangLink>
+      </p>
     </footer>
   );
 }

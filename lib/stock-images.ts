@@ -764,13 +764,14 @@ export async function vertexStillsForStock(input: StockSearchInput, max = 10): P
     return images.map((hit, i) => {
       const mime = hit.mime && hit.mime.startsWith("image/") ? hit.mime : "image/png";
       const dataUrl = `data:${mime};base64,${hit.imageBase64}`;
+      const src = hit.publicUrl || dataUrl;
       const scene = scenes[i];
       return {
         id: `vertex-still-${scene?.id || i + 1}`,
-        thumb: dataUrl,
-        full: dataUrl,
-        title: scene?.title || "Vertex Imagen still",
-        attribution: "Vertex Imagen",
+        thumb: src,
+        full: src,
+        title: scene?.title || "Vertex Imagen 3 still",
+        attribution: hit.model ? `Vertex ${hit.model}` : "Vertex Imagen 3",
         source: "vertex" as const,
         license: "generated",
         query: scene?.id || topic || "vertex",

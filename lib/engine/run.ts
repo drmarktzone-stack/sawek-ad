@@ -4,6 +4,7 @@ import { validateIntake } from "./validate";
 import { diagnose } from "./diagnose";
 import { generateVariants } from "./copy";
 import { enrichVariantsWithGemini, overlayAgencyPieces } from "./gemini-enrich";
+import { overlayProOnAgency, type ProDeskInsights } from "./pro-desk-overlay";
 import { generateStrategy } from "./strategy";
 import { generateMedia } from "./media";
 import { generateOptimizer } from "./optimizer";
@@ -124,23 +125,75 @@ export async function runFullPipeline(
 }
 
 
+function proDeskUrl(): string {
+  if (typeof window !== "undefined") return "/api/generate/pro-desk";
+  const base = process.env.NEXT_PUBLIC_BASE_URL?.trim() || "http://127.0.0.1:43147";
+  return `${base.replace(/\/$/, "")}/api/generate/pro-desk`;
+}
+
+function factsFromIntake(intake: Intake): string {
+  return [
+    intake.businessName && `businessName: ${intake.businessName}`,
+    intake.category && `category: ${intake.category}`,
+    intake.description && `description: ${intake.description}`,
+    intake.audience && `audience: ${intake.audience}`,
+    intake.uniqueAdvantage && `uniqueAdvantage: ${intake.uniqueAdvantage}`,
+    intake.biggestProblem && `biggestProblem: ${intake.biggestProblem}`,
+    intake.offer && `offer: ${intake.offer}`,
+    intake.location && `location: ${intake.location}`,
+    intake.website && `website: ${intake.website}`,
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
+async function fetchProDesk(intake: Intake): Promise<ProDeskInsights> {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 28_000);
+  try {
+    const res = await fetch(proDeskUrl(), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        description: factsFromIntake(intake),
+        audience: intake.audience,
+        mode: "strategy",
+        facts: factsFromIntake(intake),
+      }),
+      signal: ctrl.signal,
+    });
+    if (!res.ok) return { tier: "pro", down: true, reason: "gemini_error" };
+    const data = (await res.json()) as ProDeskInsights;
+    if (!data || data.tier !== "pro") return { tier: "pro", down: true, reason: "gemini_error" };
+    return data;
+  } catch {
+    return { tier: "pro", down: true, reason: "gemini_error" };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 /** Overlay Gemini channel copy onto agency creative pieces (he+ar+en). No-op if Gemini unavailable. */
 export async function overlayPackAgency(pack: CampaignPack): Promise<CampaignPack> {
   let next = pack;
-  if (pack.agency?.creative.pieces.length) {
+  const flashOverlay = (async () => {
+    if (!pack.agency?.creative.pieces.length) return pack;
     try {
       const pieces = await overlayAgencyPieces(pack.intake, pack.agency.creative.pieces);
-      next = {
-        ...next,
+      return {
+        ...pack,
         agency: {
           ...pack.agency,
           creative: { ...pack.agency.creative, pieces },
         },
       };
     } catch {
-      /* keep heuristic agency */
+      return pack;
     }
-  }
+  })();
+  const proOverlay = fetchProDesk(pack.intake);
+  const [flashed, desk] = await Promise.all([flashOverlay, proOverlay]);
+  next = overlayProOnAgency(flashed, desk);
   const audit = next.pastCampaignAudit ?? buildPastCampaignAudit(next.intake);
   if (audit) {
     try {

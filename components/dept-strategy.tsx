@@ -16,9 +16,22 @@ export function StrategyDeptView({ pack, packLang }: { pack: CampaignPack; packL
     ["stack.continuity", s.offerStack.continuity],
   ] as const;
 
+  const desk = pack.proDesk;
+
   return (
     <div className="space-y-4">
       <ProducedBy agents={s.producedBy} />
+      {desk?.down ? (
+        <p className="rounded-xl border border-gold/30 bg-gold/10 px-3 py-2 text-sm font-semibold text-navy">{t("gcp.proDown")}</p>
+      ) : null}
+      {desk && !desk.down && (desk.strategy || desk.audience || desk.psychology) ? (
+        <Card title={t("prodesk.title")}>
+          {desk.audience ? <p className="mb-3 text-sm leading-relaxed text-foreground">{desk.audience[l]}</p> : null}
+          {desk.strategy ? <p className="mb-3 text-sm leading-relaxed text-foreground">{desk.strategy[l]}</p> : null}
+          {desk.psychology ? <p className="text-sm leading-relaxed text-foreground">{desk.psychology[l]}</p> : null}
+          {desk.model ? <p className="mt-2 text-[12px] text-muted">Pro · {desk.model}</p> : null}
+        </Card>
+      ) : null}
       <div className="grid gap-4 md:grid-cols-2">
         <Card title={t("dept.positioning")}>
           <p className="text-sm leading-relaxed text-foreground">{s.positioning[l]}</p>

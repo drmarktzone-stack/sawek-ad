@@ -3,24 +3,27 @@ import { runtimeEnv } from "./runtime-env";
 import type { Locale } from "./types";
 import {
   fetchGoogleJson,
+  recordImagenOutcome,
+  VERTEX_IMAGEN_MODELS,
   vertexAccessToken,
   vertexLocation,
   vertexProject,
 } from "./vertex";
 import { IMAGEN_PICKER_COUNT, imagenScenesFor } from "./imagen-scenes";
+import { storeImagenImage } from "./imagen-store";
 
 export { IMAGEN_PICKER_COUNT, imagenScenesFor } from "./imagen-scenes";
 export const CLOUD_RUN_ORIGIN = "https://sawek-ad-308665814452.me-west1.run.app";
 
 export type ImagenFailReason = "not_configured" | "imagen_error" | "quota" | "vertex_denied";
-export type ImagenOk = { ok: true; mime: string; imageBase64: string };
+export type ImagenOk = { ok: true; mime: string; imageBase64: string; publicUrl?: string; model?: string };
 export type ImagenFail = { ok: false; reason: ImagenFailReason };
 export type ImagenResult = ImagenOk | ImagenFail;
 
 type AttemptReason = ImagenFailReason | "not_found";
 type Attempt = ImagenOk | { ok: false; reason: AttemptReason };
 
-const VERTEX_MODELS = ["imagen-3.0-generate-001", "imagen-3.0-fast-generate-001"] as const;
+const VERTEX_MODELS = VERTEX_IMAGEN_MODELS;
 const GOOGLE_AI_MODELS = ["imagen-3.0-generate-001", "imagen-3.0-fast-generate-001"] as const;
 const GEMINI_IMAGE_MODELS = [
   "gemini-2.5-flash-image",
@@ -234,7 +237,7 @@ async function vertexPredict(
     );
     if (status >= 200 && status < 300) {
       const img = extractImage(json);
-      return img ? { ok: true, ...img } : { ok: false, reason: "imagen_error" };
+      return img ? { ok: true, ...img, model } : { ok: false, reason: "imagen_error" };
     }
     return { ok: false, reason: classifyHttp(status, json, "vertex") };
   } catch {
@@ -427,7 +430,11 @@ async function runImagenAttempt(facts: ImagenFacts, prompt: string): Promise<Ima
     for (const model of VERTEX_MODELS) {
       try {
         const hit = await vertexPredict(token, project, location, model, prompt, sampleCount);
-        if (hit.ok) return hit;
+        if (hit.ok) {
+          const stored = attachStore(hit);
+          recordImagenOutcome({ reason: "ok", model: stored.model || model });
+          return stored;
+        }
         folded = foldReason(folded, hit.reason);
       } catch {
         folded = foldReason(folded, "imagen_error");
@@ -439,7 +446,11 @@ async function runImagenAttempt(facts: ImagenFacts, prompt: string): Promise<Ima
     for (const model of GOOGLE_AI_MODELS) {
       try {
         const hit = await googleAiPredict(geminiKey, model, prompt);
-        if (hit.ok) return hit;
+        if (hit.ok) {
+          const stored = attachStore({ ...hit, model });
+          recordImagenOutcome({ reason: "ok", model });
+          return stored;
+        }
         folded = foldReason(folded, hit.reason);
       } catch {
         folded = foldReason(folded, "imagen_error");
@@ -448,7 +459,11 @@ async function runImagenAttempt(facts: ImagenFacts, prompt: string): Promise<Ima
     for (const model of GEMINI_IMAGE_MODELS) {
       try {
         const hit = await geminiNativeImage(geminiKey, model, prompt);
-        if (hit.ok) return hit;
+        if (hit.ok) {
+          const stored = attachStore({ ...hit, model });
+          recordImagenOutcome({ reason: "ok", model });
+          return stored;
+        }
         folded = foldReason(folded, hit.reason);
       } catch {
         folded = foldReason(folded, "imagen_error");
@@ -457,13 +472,29 @@ async function runImagenAttempt(facts: ImagenFacts, prompt: string): Promise<Ima
   }
 
   const remote = await cloudRunImagen({ ...facts, scene: prompt, headline: asText(prompt, 140) });
-  if (remote.ok) return remote;
+  if (remote.ok) {
+    const stored = attachStore(remote);
+    recordImagenOutcome({ reason: "ok", model: stored.model });
+    return stored;
+  }
   folded = foldReason(folded, remote.reason);
 
   if (!token && !geminiKey && remote.reason === "not_configured") {
+    recordImagenOutcome({ reason: "not_configured" });
     return { ok: false, reason: "not_configured" };
   }
-  return { ok: false, reason: folded ?? remote.reason };
+  const fail = { ok: false as const, reason: folded ?? remote.reason };
+  recordImagenOutcome({ reason: fail.reason });
+  return fail;
+}
+
+function attachStore(hit: ImagenOk): ImagenOk {
+  try {
+    const stored = storeImagenImage(hit.imageBase64, hit.mime, hit.model);
+    return { ...hit, publicUrl: stored.publicUrl };
+  } catch {
+    return hit;
+  }
 }
 
 function promptList(facts: ImagenFacts): string[] {

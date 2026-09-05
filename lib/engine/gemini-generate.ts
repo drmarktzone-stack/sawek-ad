@@ -9,8 +9,9 @@ import {
   fetchGoogleJson,
   geminiApiKeyPresent,
   markVertexQuota,
+  modelsForTier,
   recordGeminiOutcome,
-  VERTEX_GEMINI_MODELS,
+  type GeminiTier,
   vertexAccessToken,
   vertexLocation,
   vertexProject,
@@ -36,7 +37,22 @@ import {
 import { VISION_MAX_BYTES } from "./gemini-client-caps";
 export { VISION_MAX_BYTES };
 
-export type GenerateMode = "ads" | "scan" | "channels" | "angles";
+export type GenerateMode =
+  | "ads"
+  | "scan"
+  | "channels"
+  | "angles"
+  | "variations"
+  | "strategy"
+  | "audit"
+  | "calendar"
+  | "scripts";
+
+/** Pro = deep agency jobs. Flash = burst variations and short channel copy. */
+export function tierForGenerateMode(mode: GenerateMode): GeminiTier {
+  if (mode === "variations" || mode === "channels" || mode === "angles") return "flash";
+  return "pro";
+}
 export type GenerateLang = "he" | "ar" | "en";
 
 export type LocaleCopyBlock = {
@@ -91,6 +107,9 @@ export type GenerateOk = {
   angles?: CampaignAngles;
   /** gemini = model output; spoken = fact-filled local engine when AI fails/incomplete. */
   source?: "gemini" | "spoken";
+  model?: string;
+  provider?: "vertex" | "ai_studio";
+  tier?: GeminiTier;
 };
 
 export type GenerateFail = {
@@ -348,7 +367,19 @@ function parseStructured(text: string): {
 }
 
 function asMode(v: unknown): GenerateMode {
-  if (v === "scan" || v === "channels" || v === "ads" || v === "angles") return v;
+  if (
+    v === "scan" ||
+    v === "channels" ||
+    v === "ads" ||
+    v === "angles" ||
+    v === "variations" ||
+    v === "strategy" ||
+    v === "audit" ||
+    v === "calendar" ||
+    v === "scripts"
+  ) {
+    return v;
+  }
   return "ads";
 }
 
@@ -357,9 +388,42 @@ function asLang(v: unknown): GenerateLang | "" {
   return "";
 }
 
+const JSON_SHAPE_VARIATIONS = `{
+  "variations":[
+    {"channel":"meta","kind":"headline","he":{"headline":"","body":"","cta":""},"ar":{"headline":"","body":"","cta":""},"en":{"headline":"","body":"","cta":""}}
+  ]
+}`;
+
+const JSON_SHAPE_STRATEGY = `{
+  "audience":{"he":"","ar":"","en":""},
+  "strategy":{"he":"","ar":"","en":""},
+  "psychology":{"he":"","ar":"","en":""}
+}`;
+
+const JSON_SHAPE_AUDIT = `{
+  "insights":[{"he":"","ar":"","en":""},{"he":"","ar":"","en":""},{"he":"","ar":"","en":""}]
+}`;
+
+const JSON_SHAPE_CALENDAR = `{
+  "weeks":[{"week":1,"theme":{"he":"","ar":"","en":""},"action":{"he":"","ar":"","en":""}}]
+}`;
+
+const JSON_SHAPE_SCRIPTS = `{
+  "scripts":[
+    {"channel":"reels","he":"","ar":"","en":""},
+    {"channel":"whatsapp","he":"","ar":"","en":""},
+    {"channel":"tiktok","he":"","ar":"","en":""}
+  ]
+}`;
+
 function jsonShapeFor(mode: GenerateMode): string {
   if (mode === "scan") return JSON_SHAPE_SCAN;
   if (mode === "angles") return JSON_SHAPE_ANGLES;
+  if (mode === "variations") return JSON_SHAPE_VARIATIONS;
+  if (mode === "strategy") return JSON_SHAPE_STRATEGY;
+  if (mode === "audit") return JSON_SHAPE_AUDIT;
+  if (mode === "calendar") return JSON_SHAPE_CALENDAR;
+  if (mode === "scripts") return JSON_SHAPE_SCRIPTS;
   return JSON_SHAPE_ADS;
 }
 
@@ -372,6 +436,21 @@ function modeHint(mode: GenerateMode): string {
   }
   if (mode === "angles") {
     return "mode=angles. Fill angles {pain,benefit,social_proof,story} each with he/ar/en {headline,copy,cta}. Recreate per language — do not translate literally. Social proof: only ratings/reviews/customer counts present in facts; otherwise [יש להשלים] / [يجب الاستكمال] / [TO COMPLETE].";
+  }
+  if (mode === "variations") {
+    return "mode=variations. FLASH path. Produce 12–18 SHORT ad variations across channels meta, google, whatsapp, story. Each variation needs he/ar/en {headline,body,cta}. Headlines ≤ 40 chars. Bodies ≤ 90 chars for Meta/Google, ≤ 300 for WhatsApp. Recreate per language — do not literal-translate. No invented prices, ROAS, ratings.";
+  }
+  if (mode === "strategy") {
+    return "mode=strategy. PRO path. Deep CMO strategy psychologically tuned to the audience in the facts. Fill audience / strategy / psychology in HE+AR+EN. Use only facts. Never invent ROAS, CAC, lead counts, or competitors.";
+  }
+  if (mode === "audit") {
+    return "mode=audit. PRO path. Site-audit insights from provided facts only. 3 insight lines HE+AR+EN. No invented metrics.";
+  }
+  if (mode === "calendar") {
+    return "mode=calendar. PRO path. 8–13 week campaign calendar from facts. theme + action per week in HE+AR+EN. Planning only — no fake ROAS.";
+  }
+  if (mode === "scripts") {
+    return "mode=scripts. PRO path. Script pack for reels, tiktok, whatsapp in HE+AR+EN. 15s structure 0-3 / 3-12 / 12-15 for video. Facts only.";
   }
   return "mode=ads. Fill HE+AR+EN locale packs (6 headlines each), the channels pack, AND angles {pain,benefit,social_proof,story} each with he/ar/en {headline,copy,cta}. Recreate per language — do not translate literally. Social proof: only ratings/reviews/customer counts present in facts; otherwise incomplete markers.";
 }
@@ -470,6 +549,8 @@ async function vertexGenerate(
   temperature: number,
   timeoutMs: number,
   systemInstruction: string = SYSTEM_INSTRUCTION,
+  tier: GeminiTier = "flash",
+  grounding = false,
 ): Promise<CompleteOk | CompleteFail | { ok: false; reason: "no_token" }> {
   const project = vertexProject();
   if (!project) return { ok: false, reason: "no_token" };
@@ -477,7 +558,7 @@ async function vertexGenerate(
   if (!token) return { ok: false, reason: "no_token" };
   const location = vertexLocation();
   let last: CompleteFail = { ok: false, reason: "gemini_error" };
-  for (const model of VERTEX_GEMINI_MODELS) {
+  for (const model of modelsForTier(tier, "vertex")) {
     try {
       const url = `https://${location}-aiplatform.googleapis.com/v1/projects/${encodeURIComponent(project)}/locations/${encodeURIComponent(location)}/publishers/google/models/${encodeURIComponent(model)}:generateContent`;
       const { status, json } = await fetchGoogleJson(
@@ -492,6 +573,7 @@ async function vertexGenerate(
             contents: [{ role: "user", parts }],
             systemInstruction: { parts: [{ text: systemInstruction }] },
             generationConfig: { temperature, maxOutputTokens: 8192 },
+            ...(grounding ? { tools: [{ googleSearch: {} }] } : {}),
           }),
         },
         timeoutMs,
@@ -527,10 +609,12 @@ async function studioGenerate(
   temperature: number,
   timeoutMs: number,
   systemInstruction: string = SYSTEM_INSTRUCTION,
+  tier: GeminiTier = "flash",
 ): Promise<CompleteOk | CompleteFail> {
   const key = runtimeEnv("GEMINI_API_KEY");
   if (!key) return { ok: false, reason: "no_key" };
-  const models = [...AI_STUDIO_GEMINI_MODELS];
+  const models = [...modelsForTier(tier, "ai_studio")];
+  if (tier === "pro") models.push(...AI_STUDIO_GEMINI_MODELS);
   let last: CompleteFail = { ok: false, reason: "gemini_error" };
   for (const modelName of models) {
     try {
@@ -578,16 +662,28 @@ export async function completeGemini(opts: {
   temperature: number;
   timeoutMs?: number;
   systemInstruction?: string;
+  /** pro = CMO/strategy/audit/calendar/scripts; flash = burst variations. Default flash. */
+  tier?: GeminiTier;
+  /** Vertex Google Search grounding — trends only. Never invent live platform metrics. */
+  grounding?: boolean;
 }): Promise<CompleteOk | CompleteFail> {
   const timeoutMs = opts.timeoutMs ?? GEMINI_TIMEOUT_MS;
   const system = opts.systemInstruction ?? SYSTEM_INSTRUCTION;
+  const tier = opts.tier ?? "flash";
   let vertexReason: "quota" | "no_token" | "vertex_denied" | "gemini_error" | null = null;
 
   if (!vertexQuotaActive()) {
-    const vertex = await vertexGenerate(opts.parts, opts.temperature, timeoutMs, system);
+    const vertex = await vertexGenerate(
+      opts.parts,
+      opts.temperature,
+      timeoutMs,
+      system,
+      tier,
+      opts.grounding === true,
+    );
     if (vertex.ok) {
       clearVertexQuota();
-      recordGeminiOutcome({ provider: "vertex", reason: "ok", model: vertex.model });
+      recordGeminiOutcome({ provider: "vertex", reason: "ok", model: vertex.model, tier });
       return vertex;
     }
     if (vertex.reason === "quota") {
@@ -605,9 +701,9 @@ export async function completeGemini(opts: {
     vertexReason = "quota";
   }
 
-  const studio = await studioGenerate(opts.parts, opts.temperature, timeoutMs, system);
+  const studio = await studioGenerate(opts.parts, opts.temperature, timeoutMs, system, tier);
   if (studio.ok) {
-    recordGeminiOutcome({ provider: "ai_studio", reason: "ok", model: studio.model });
+    recordGeminiOutcome({ provider: "ai_studio", reason: "ok", model: studio.model, tier });
     return studio;
   }
   const noProviders =
@@ -626,6 +722,7 @@ export async function completeGemini(opts: {
       : studio.reason === "quota"
         ? "quota"
         : "gemini_error",
+    tier,
   });
   if (studio.reason === "no_key" && (vertexReason === "no_token" || !vertexReason)) {
     return { ok: false, reason: "no_key" };
@@ -829,6 +926,8 @@ export async function runGeminiGenerate(body: GenerateBody): Promise<GenerateRes
     const completed = await completeGemini({
       parts: [{ text: userMessage }],
       temperature: body.medical === true ? 0.2 : 0.4,
+      tier: tierForGenerateMode(mode),
+      timeoutMs: tierForGenerateMode(mode) === "pro" ? 28_000 : GEMINI_TIMEOUT_MS,
     });
     if (!completed.ok) {
       // Never leave the client with empty/broken ads when facts exist.
@@ -848,6 +947,9 @@ export async function runGeminiGenerate(body: GenerateBody): Promise<GenerateRes
       ...(parsed.channels ? { channels: parsed.channels } : {}),
       ...(angles ? { angles } : {}),
       source: "gemini",
+      model: completed.model,
+      provider: completed.provider,
+      tier: tierForGenerateMode(mode),
     };
     if (mode === "scan" && parsed.brand) {
       out.brand = parsed.brand;
@@ -1092,6 +1194,7 @@ export async function runGeminiVision(body: VisionBody, image: { mime: string; d
         { text: prompt },
       ],
       temperature: body.medical === true ? 0.2 : 0.4,
+      tier: "pro",
     });
     if (!completed.ok) {
       if (completed.reason === "no_key") return noKey();
@@ -1200,6 +1303,7 @@ export async function runGeminiScore(body: ScoreBody): Promise<ScoreResult> {
     const completed = await completeGemini({
       parts: [{ text: prompt }],
       temperature: body.medical === true ? 0.2 : 0.4,
+      tier: "pro",
     });
     if (!completed.ok) {
       if (completed.reason === "no_key") return noKey();
