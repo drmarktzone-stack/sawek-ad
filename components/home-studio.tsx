@@ -86,7 +86,6 @@ export function HomeStudio() {
         </p>
 
         <div className="mt-8 flex flex-col items-center gap-4 sm:mt-9">
-          <DemoPicker />
           <div className="mobile-stack w-full justify-center">
             <Button type="button" size="lg" className="btn-mobile-full text-base font-black sm:text-lg" onClick={startEmpty}>
               {t("cta.new")}
@@ -95,6 +94,8 @@ export function HomeStudio() {
               <LangLink href="/pricing">{t("home.cta.pricing")}</LangLink>
             </Button>
           </div>
+          <p className="max-w-lg text-center text-sm font-semibold text-navy/70">{t("home.demos.secondary")}</p>
+          <DemoPicker />
         </div>
         <p className="mx-auto mt-3 max-w-md text-center text-base text-muted">{t("cta.newHint")}</p>
         <p className="mx-auto mt-5 max-w-xl text-center text-base leading-relaxed text-muted">{t("home.truth")}</p>

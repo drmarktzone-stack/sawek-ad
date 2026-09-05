@@ -157,10 +157,19 @@ export function ImageOfferPicker({
       };
       if (typeof data.imagenRequested === "number") setRequested(data.imagenRequested);
       const imagenHits = data.imagen ?? [];
+      const curatedHits = data.curated ?? (!imagenHits.length ? data.images ?? [] : []);
       const opts = hitsToOptions(imagenHits, t).filter((o) => o.kind === "imagen");
       setImagen(opts);
-      if (!opts.length) {
+      // If Vertex returned 0, surface curated/on-topic stills in the stock rail so the picker is never empty of options.
+      if (!opts.length && curatedHits.length) {
+        const curatedOpts = hitsToOptions(curatedHits, t);
+        setStock(curatedOpts);
+        setStockLoaded(true);
+      }
+      if (!opts.length && !curatedHits.length) {
         setImgError(data.emptyMessage || t("audit.retryVertex"));
+      } else if (!opts.length && data.emptyMessage) {
+        setImgError(data.emptyMessage);
       }
     } catch {
       setImgError(t("audit.retryVertex"));

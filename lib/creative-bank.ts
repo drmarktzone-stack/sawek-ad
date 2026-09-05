@@ -64,9 +64,27 @@ const HOOKS: Record<Vertical, Record<Locale, string[]>> = {
     en: ["{name} — the local kitchen.", "{problem}", "{advantage}", "Come to the restaurant today.", "{offer}"],
   },
   pool: {
-    he: ["{name} — מים וטיפול, בלי הבטחות רפואיות שלא נאמרו.", "{problem}", "{advantage}", "בואו לבריכה."],
-    ar: ["{name} — مي وعلاج، بلا وعود طبية ما انقالت.", "{problem}", "{advantage}", "تعوا ع المسبح."],
-    en: ["{name} — water and care, no unstated medical promises.", "{problem}", "{advantage}", "Visit the pool."],
+    he: [
+      "{name} — מים רגועים, בלי הבטחה רפואית שלא נאמרה.",
+      "{problem}",
+      "{advantage}",
+      "שעות אמת + ביקור — לא «טיפול קסם».",
+      "בואו לבריכה. לצלם מים ריקים, לא פנים.",
+    ],
+    ar: [
+      "{name} — مي هادئة، بلا وعد طبي ما انقال.",
+      "{problem}",
+      "{advantage}",
+      "ساعات حقيقية + زيارة — مش «علاج سحري».",
+      "تعوا ع المسبح. صوروا مي فاضية، مش وجوه.",
+    ],
+    en: [
+      "{name} — calm water, no unstated medical promise.",
+      "{problem}",
+      "{advantage}",
+      "Real hours + visit — not “magic therapy”.",
+      "Visit the pool. Film empty water, not faces.",
+    ],
   },
   clinic: {
     he: ["{name}", "{problem}", "{advantage}", "הגיעו למרפאה."],
@@ -79,9 +97,27 @@ const HOOKS: Record<Vertical, Record<Locale, string[]>> = {
     en: ["{name}", "{problem}", "{advantage}", "Join the tools — no unpublished price."],
   },
   school: {
-    he: ["{name}", "{problem}", "{advantage}", "הרשמה — בלי מבצע לימודים מומצא."],
-    ar: ["{name}", "{problem}", "{advantage}", "تسجيل — بلا عرض دراسي مختلق."],
-    en: ["{name}", "{problem}", "{advantage}", "Enrollment — no invented tuition offer."],
+    he: [
+      "{name} — הרשמה כסיפור קהילה, לא קופון שכר לימוד.",
+      "{problem}",
+      "{advantage}",
+      "הורים רוצים בהירות — לא סלוגן «הכי טוב».",
+      "לצלם חצר/אולם ריקים — בלי פני תלמידים.",
+    ],
+    ar: [
+      "{name} — تسجيل كقصة مجتمع، مش كوبون أقساط.",
+      "{problem}",
+      "{advantage}",
+      "الأهل بدهم وضوح — مش شعار «الأفضل».",
+      "صوروا ساحة/قاعة فاضية — بلا وجوه طلاب.",
+    ],
+    en: [
+      "{name} — enrollment as community story, not a tuition coupon.",
+      "{problem}",
+      "{advantage}",
+      "Parents want clarity — not a “best school” slogan.",
+      "Film empty yard/hall — no student faces.",
+    ],
   },
   generic: {
     he: ["{name}", "{problem}", "{advantage}", "{offer}"],

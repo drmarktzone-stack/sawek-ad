@@ -277,24 +277,28 @@ export function playbookFor(intake: Intake): VerticalPlaybook {
   if (v === "pool") {
     return {
       vertical: v,
-      hookPain: L(painHe || unknown.he, painAr || unknown.ar, painEn || unknown.en),
+      hookPain: L(
+        painHe || `${nHe} — מחפשים מקום מים רגוע, לא הבטחה רפואית שלא נאמרה.`,
+        painAr || `${nAr} — بدهم مكان مي هادئ، مش وعد طبي ما انقال.`,
+        painEn || `${nEn} — looking for calm water, not an unstated medical promise.`,
+      ),
       proof: L(
-        advHe || `${nHe} — מים וטיפול שצוין, בלי הבטחה רפואית שלא נאמרה.`,
-        advAr || `${nAr} — مي وعلاج مذكور، بلا وعد طبي ما انقال.`,
-        advEn || `${nEn} — water and stated care, no unstated medical promise.`,
+        advHe || `${nHe} — מים וטיפול שצוין, בלי אחוזי הצלחה מומצאים.`,
+        advAr || `${nAr} — مي وعلاج مذكور، بلا نسب نجاح مختلقة.`,
+        advEn || `${nEn} — water and stated care, no invented success rates.`,
       ),
       channels: channelCore,
       plan7: L(
-        "ימים 1–2: מים + משפחה. ימים 3–4: יתרון שסופק. ימים 5–7: בואו לבריכה / וואטסאפ. PLAN.",
-        "يوم 1–2: مي + عائلة. يوم 3–4: الميزة المعطاة. يوم 5–7: تعوا ع المسبح / واتساب. خطة.",
-        "Days 1–2: water + family. Days 3–4: stated advantage. Days 5–7: visit the pool / WhatsApp. PLAN.",
+        "ימים 1–2: פריים מים ריקים + הוק משפחה/שעות. ימים 3–4: יתרון שסופק (בלי נס רפואי). ימים 5–7: בואו לבריכה / וואטסאפ. PLAN. בלי דירוגים.",
+        "يوم 1–2: فريمة مي فاضية + خطاف عيلة/ساعات. يوم 3–4: الميزة المعطاة (بلا معجزة طبية). يوم 5–7: تعوا ع المسبح / واتساب. خطة. بلا تقييمات.",
+        "Days 1–2: empty-water frame + family/hours hook. Days 3–4: stated advantage (no medical miracle). Days 5–7: visit the pool / WhatsApp. PLAN. No ratings.",
       ),
       audienceProposed,
       problemProposed: problemFromDesc,
       advantageProposed: advantageFromFacts,
       angles: [
-        L("מים", "مي", "water"),
-        L("משפחה", "عائلة", "family"),
+        L("מים רגועים", "مي هادئة", "calm water"),
+        L("שעות משפחה", "ساعات العيلة", "family hours"),
         L(bankCtas("he")[0] || "בואו לבריכה", bankCtas("ar")[0] || "تعوا ع المسبح", bankCtas("en")[0] || "Visit the pool"),
       ],
     };
@@ -329,7 +333,11 @@ export function playbookFor(intake: Intake): VerticalPlaybook {
   if (v === "school") {
     return {
       vertical: v,
-      hookPain: L(painHe || unknown.he, painAr || unknown.ar, painEn || unknown.en),
+      hookPain: L(
+        painHe || `${nHe} — הורים רוצים בהירות בהרשמה, לא סלוגן «הכי טוב».`,
+        painAr || `${nAr} — الأهل بدهم وضوح بالتسجيل، مش شعار «الأفضل».`,
+        painEn || `${nEn} — parents want enrollment clarity, not a “best school” slogan.`,
+      ),
       proof: L(
         advHe || `${nHe} — קהילה והרשמה, לא מבצע לימודים מומצא.`,
         advAr || `${nAr} — مجتمع وتسجيل، بلا عرض دراسي مختلق.`,
@@ -337,17 +345,17 @@ export function playbookFor(intake: Intake): VerticalPlaybook {
       ),
       channels: channelCore,
       plan7: L(
-        "ימים 1–2: חשיפה לקהילה. ימים 3–4: יתרון שסופק. ימים 5–7: הרשמה / צרו קשר. PLAN. בלי קופון שכר לימוד.",
-        "يوم 1–2: تعرّض للمجتمع. يوم 3–4: الميزة المعطاة. يوم 5–7: تسجيل / تواصلوا. خطة. بلا كوبون أقساط.",
-        "Days 1–2: community exposure. Days 3–4: stated advantage. Days 5–7: enroll / get in touch. PLAN. No tuition coupon.",
+        "ימים 1–2: חשיפה לקהילה + מקום. ימים 3–4: יתרון שסופק כמנגנון. ימים 5–7: הרשמה / וואטסאפ. PLAN. בלי קופון שכר לימוד ובלי דירוגים.",
+        "يوم 1–2: تعرّض للمجتمع + مكان. يوم 3–4: الميزة كآلية. يوم 5–7: تسجيل / واتساب. خطة. بلا كوبون أقساط وبلا تقييمات.",
+        "Days 1–2: community exposure + place. Days 3–4: advantage as mechanism. Days 5–7: enroll / WhatsApp. PLAN. No tuition coupon, no ratings.",
       ),
       audienceProposed,
       problemProposed: problemFromDesc,
       advantageProposed: advantageFromFacts,
       angles: [
-        L("הרשמה", "تسجيل", "enrollment"),
-        L("קהילה", "مجتمع", "community"),
-        L("חשיפה", "تعرّض", "exposure"),
+        L("חלון הרשמה", "نافذة تسجيل", "enrollment window"),
+        L("אמון הורים", "ثقة أهل", "parent trust"),
+        L(bankCtas("he")[0] || "הרשמה", bankCtas("ar")[0] || "تسجيل", bankCtas("en")[0] || "Enroll"),
       ],
     };
   }

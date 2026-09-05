@@ -38,17 +38,35 @@ export async function GET(req: Request) {
 
     if (source === "cc") {
       const result = await searchStockImages(input);
+      if (result.images.length) {
+        return NextResponse.json(
+          {
+            ...result,
+            imagen: [],
+            imagenRequested: 0,
+            imagenGot: 0,
+          },
+          { status: 200 },
+        );
+      }
+      // Always offer on-topic options after any scan — curated vertical graphics when CC is empty.
+      const curated = await curatedFallbackStills(input, Math.min(8, Math.max(4, Number(input.limit) || 8)));
       return NextResponse.json(
         {
-          ...result,
+          ok: true,
+          images: curated,
+          curated,
           imagen: [],
+          page: 1,
+          nextPage: null,
+          queries: result.queries ?? [],
           imagenRequested: 0,
           imagenGot: 0,
-          emptyMessage:
-            result.emptyMessage ||
-            (result.images.length
-              ? undefined
-              : "אין תמונות חופשיות רלוונטיות לנושא — נסו כרזות גרפיות או תמונה מהאתר."),
+          fallback: curated.length ? "curated" : "empty",
+          emptyMessage: curated.length
+            ? "אין תמונות CC רלוונטיות — מציגים כרזות גרפיות לפי התחום."
+            : result.emptyMessage ||
+              "אין תמונות חופשיות רלוונטיות לנושא — נסו כרזות גרפיות או תמונה מהאתר.",
         },
         { status: 200 },
       );

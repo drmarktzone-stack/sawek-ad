@@ -291,7 +291,7 @@ export function buildAgency(pack: Pick<CampaignPack, "intake" | "intakeReport" |
     }),
   };
 
-  const ideaHooks = cmoIdeasEarly.selected.slice(0, 3).map((idea) => ({
+  const ideaHooks = cmoIdeasEarly.selected.slice(0, 5).map((idea) => ({
     id: `cmo-${idea.id}`,
     angle: L(
       `רעיון CMO: ${idea.name.he}`,
@@ -304,12 +304,22 @@ export function buildAgency(pack: Pick<CampaignPack, "intake" | "intakeReport" |
       `${idea.hook.en} · Why it wins: ${idea.whyItWins.en} · planning ${idea.planningScore}/100 (not ROAS)`,
     ),
   }));
+  const gapHooks = cmoIdeasEarly.gapPlan.moves.slice(0, 3).map((m, idx) => ({
+    id: `gap-${m.missingField}-${idx}`,
+    angle: L(
+      `פיצוי פער: ${m.missingField}`,
+      `تعويض فجوة: ${m.missingField}`,
+      `Gap compensate: ${m.missingField}`,
+    ),
+    hook: L(m.move.he, m.move.ar, m.move.en),
+  }));
   const hooks = [
     ...ideaHooks,
+    ...gapHooks,
     { id: "pain", angle: L("בעיה", "مشكلة", "Problem"), hook: L(landingH1(i, "he"), landingH1(i, "ar"), landingH1(i, "en")) },
     { id: "edge", angle: L("יתרון", "ميزة", "Advantage"), hook: L(advHe, advAr, advEn) },
     { id: "place", angle: L("מקום", "مكان", "Place"), hook: L(loc || "מיקום חסר — לא «לידכם».", loc || "الموقع ناقص.", loc || "Location missing — not “near you”.") },
-    { id: "no-fake", angle: L("יושרה", "صدق", "Integrity"), hook: L(noOffer ? "בלי קופון מלאכותי." : i.offer, noOffer ? "بلا كوبون." : i.offer, noOffer ? "No manufactured coupon." : i.offer) },
+    { id: "no-fake", angle: L("יושרה", "صدق", "Integrity"), hook: L(noOffer ? (advHe !== "—" ? `מובילים ביתרון: ${advHe}` : "בלי מחיר/קופון מומצא — רק עובדות שסופקו.") : i.offer, noOffer ? (advAr !== "—" ? `نقود بالميزة: ${advAr}` : "بلا سعر/كوبون مختلق — فقط حقائق معطاة.") : i.offer, noOffer ? (advEn !== "—" ? `Lead with advantage: ${advEn}` : "No invented price/coupon — only supplied facts.") : i.offer) },
     { id: "lang", angle: L("שפה", "لغة", "Language"), hook: L("עברית וערבית כשפות שוות.", "العبرية والعربية متساويتان.", "Hebrew and Arabic as equal languages.") },
     { id: "cta", angle: L("CTA", "CTA", "CTA"), hook: L(ctaHe, ctaAr, ctaEn) },
   ];

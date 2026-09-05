@@ -36,6 +36,7 @@ import { ChannelPack } from "@/components/channel-pack";
 import { LivePreviewStrip } from "@/components/live-preview-cards";
 import { AnglesStrip } from "@/components/angles-strip";
 import { CmoIdeasStrip } from "@/components/cmo-ideas-strip";
+import { buildCmoIdeasPack } from "@/lib/engine/cmo-ideas";
 import { CoachImprovedStrip } from "@/components/coach-panel";
 import { PublishToSocial } from "@/components/publish-to-social";
 import { SiteAuditPanel } from "@/components/site-audit-panel";
@@ -76,6 +77,17 @@ export function ResultView({
     () => pack.variants.filter((v) => v.locale === packLang),
     [pack.variants, packLang],
   );
+  /** Every campaign result gets CMO platforms + planning scorecard + gap plan — rebuild if an old pack lacks them. */
+  const cmoIdeas = useMemo(
+    () => (pack.cmoIdeas?.selected?.length ? pack.cmoIdeas : buildCmoIdeasPack(pack.intake, packLang)),
+    [pack.cmoIdeas, pack.intake, packLang],
+  );
+  useEffect(() => {
+    if (pack.cmoIdeas?.selected?.length) return;
+    if (!cmoIdeas.selected.length) return;
+    onChange({ ...pack, cmoIdeas, updatedAt: new Date().toISOString() });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pack.id]);
   const featured = ads.find((a) => a.kind === "strong_offer");
   const rest = ads.filter((a) => a.kind !== "strong_offer");
 
@@ -166,6 +178,8 @@ export function ResultView({
         onPack={onChange}
       />
 
+      <CmoIdeasStrip cmoIdeas={cmoIdeas} locale={packLang} />
+
       <ChannelPack
         pack={pack}
         packLang={packLang}
@@ -174,8 +188,6 @@ export function ResultView({
         onPack={onChange}
         skipLivePreview
       />
-
-      <CmoIdeasStrip cmoIdeas={pack.cmoIdeas} locale={packLang} />
 
       <AnglesStrip angles={pack.angles} locale={packLang} />
 
@@ -327,7 +339,7 @@ export function ResultView({
         {[
           { href: "/discovery", key: "nav.discovery" as const, body: pack.agency?.discovery.icp[locale] },
           { href: "/strategy", key: "nav.strategy" as const, body: pack.agency?.strategy.positioning[locale] },
-          { href: "/studio", key: "nav.studio" as const, body: pack.agency?.creative.hooks[0]?.hook[locale] },
+          { href: "/studio", key: "nav.studio" as const, body: cmoIdeas.selected[0] ? `${cmoIdeas.selected[0].name[locale] || cmoIdeas.selected[0].name.he} — ${cmoIdeas.selected[0].whyItWins[locale] || cmoIdeas.selected[0].whyItWins.he}` : pack.agency?.creative.hooks[0]?.hook[locale] },
           { href: "/media", key: "nav.media" as const, body: pack.agency?.mediaExtra.planOnly[locale] },
           { href: "/leads", key: "nav.leads" as const, body: pack.agency?.leads.magnet[locale] },
           { href: "/campaigns", key: "nav.campaigns" as const, body: tr("dept.opsLead") },

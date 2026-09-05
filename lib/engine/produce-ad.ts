@@ -16,10 +16,25 @@ function pastRefNote(intake: Intake, locale: Locale): string {
   return ` ${n} past ads tagged past_creative — structure reference only; do not copy unconfirmed VIP/100%/prices.`;
 }
 
-function noOfferNote(locale: Locale): string {
-  if (locale === "he") return "אין מבצע ואין קופון.";
-  if (locale === "ar") return "ما في عرض وما في كوبون.";
-  return "No offer and no coupon.";
+/** Fact-based fill when no offer — never spam «אין מבצע ואין קופון». */
+function factAngleNote(intake: Intake, locale: Locale, adv: string): string {
+  if (adv) return adv;
+  const hours = hoursLine(intake, locale);
+  if (hours) return hours;
+  const v = detectVertical(intake);
+  if (v === "restaurant") {
+    return locale === "he" ? "תפריט ומשלוח מהעובדות." : locale === "ar" ? "قائمة وتوصيل من الحقائق." : "Menu and delivery from facts.";
+  }
+  if (v === "school") {
+    return locale === "he" ? "הרשמה וקהילה — בלי קופון שכר לימוד." : locale === "ar" ? "تسجيل ومجتمع — بلا كوبون أقساط." : "Enrollment and community — no tuition coupon.";
+  }
+  if (v === "pool") {
+    return locale === "he" ? "מים ומקום — בלי הבטחה רפואית שלא נאמרה." : locale === "ar" ? "مي ومكان — بلا وعد طبي ما انقال." : "Water and place — no unstated medical promise.";
+  }
+  if (v === "retail") {
+    return locale === "he" ? "מדף ומותגים — בלי הנחה מומצאת." : locale === "ar" ? "رف وماركات — بلا خصم مختلق." : "Rack and brands — no invented discount.";
+  }
+  return ""; // prefer silence over coupon spam
 }
 
 export function produceAd(intake: Intake, styleId: string, idea: string, locale: Locale): ProducedAd {
@@ -31,9 +46,10 @@ export function produceAd(intake: Intake, styleId: string, idea: string, locale:
   const site = intake.website?.trim() ?? "";
   const offerBit =
     isFreeService(intake) || isNoOffer(intake.offer)
-      ? clinic || vertical === "restaurant"
-        ? ""
-        : noOfferNote(locale)
+      ? // Prefer silence / facts already in `adv` — never spam «אין מבצע ואין קופון».
+        adv || clinic || vertical === "restaurant" || vertical === "pool" || vertical === "school"
+          ? ""
+          : factAngleNote(intake, locale, "")
       : resolveChipLabel(intake.offer, OFFER_CHIPS, locale) || intake.offer;
 
   const bodyParts = clinic

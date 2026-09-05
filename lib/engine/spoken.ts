@@ -512,23 +512,55 @@ export function whatsappScript(intake: Intake, locale: Locale): string {
     .join(" ");
 }
 
+/** Prefer fact-based angles over bland «no offer / no coupon» spam. */
 function offerLine(intake: Intake, locale: Locale, allowNoOffer = false): string {
-  if (isNoOffer(intake.offer)) {
-    if (!allowNoOffer) return "";
-    if (detectVertical(intake) === "restaurant") {
-      return locale === "he"
-        ? "אין הנחה באתר — מדברים על התפריט והמשלוח."
-        : locale === "ar"
-          ? "ما في خصم بالموقع — نحكي عن القائمة والتوصيل."
-          : "No site discount — talk menu and delivery.";
-    }
-    return locale === "he"
-      ? "אין מבצע ואין קופון."
-      : locale === "ar"
-        ? "ما في عرض وما في كوبون."
-        : "No offer and no coupon.";
+  if (!isNoOffer(intake.offer)) {
+    return resolveChipLabel(intake.offer, OFFER_CHIPS, locale) || intake.offer;
   }
-  return resolveChipLabel(intake.offer, OFFER_CHIPS, locale) || intake.offer;
+  if (!allowNoOffer) return "";
+  const adv = spokenAdvantage(intake, locale);
+  const hours = hoursLine(intake, locale);
+  const place = placeBit(intake, locale);
+  const pain = spokenProblem(intake, locale);
+  const v = detectVertical(intake);
+  if (adv) return adv;
+  if (hours) return hours;
+  if (place) return place;
+  if (pain) return pain;
+  if (v === "restaurant") {
+    return locale === "he"
+      ? "אין הנחה באתר — מדברים על התפריט והמשלוח."
+      : locale === "ar"
+        ? "ما في خصم بالموقع — نحكي عن القائمة والتوصيل."
+        : "No site discount — talk menu and delivery.";
+  }
+  if (v === "clinic" || v === "pool") {
+    return locale === "he"
+      ? "בלי מבצע מומצא — מובילים בשעות, מקום ויתרון שסופקו."
+      : locale === "ar"
+        ? "بلا عرض مختلق — منقود بالساعات والمكان والميزة المعطاة."
+        : "No invented promo — lead with stated hours, place, and advantage.";
+  }
+  if (v === "school") {
+    return locale === "he"
+      ? "בלי קופון שכר לימוד — מובילים בהרשמה ובקהילה."
+      : locale === "ar"
+        ? "بلا كوبون أقساط — منقود بالتسجيل والمجتمع."
+        : "No tuition coupon — lead with enrollment and community.";
+  }
+  if (v === "retail") {
+    return locale === "he"
+      ? "בלי הנחה מומצאת — מדברים על המדף והמותגים."
+      : locale === "ar"
+        ? "بلا خصم مختلق — نحكي عن الرف والماركات."
+        : "No invented discount — talk rack and brands.";
+  }
+  // Last resort: once only, and never the spammy twin «אין מבצע ואין קופון» when facts exist above.
+  return locale === "he"
+    ? "בלי מחיר שלא סופק — מובילים בעובדות מהעסק."
+    : locale === "ar"
+      ? "بلا سعر ما انعطى — منقود بحقائق المحل."
+      : "No unpublished price — lead with business facts.";
 }
 
 function edgeShort(intake: Intake, locale: Locale, max = 48): string {
