@@ -34,3 +34,34 @@ Required IAM on the Cloud Run SA (same $300 pack):
 ## Honest downtime
 
 Hebrew / Arabic / English copy in `lib/i18n.ts` (`gcp.note.*`, `gcp.flashDown`, `gcp.proDown`, `audit.imagenDown`) tells the user when a Google API is down. Templates stay intake-driven. No fake ROAS.
+
+## Viral-desk callbook (Mohtawak-style — next PR)
+
+Import **only** from `@/lib/gcp-ai`. Do not reach into `lib/vertex.ts` internals.
+
+```ts
+import {
+  completeGemini,          // Pro / Flash (+ optional Search Grounding)
+  runFlashVariations,      // Flash burst
+  runProDesk,              // Pro CMO overlay
+  runImagen, runImagenMany,// Imagen 3 stills / carousels
+  translateTexts,          // Cloud Translation HE↔AR↔EN
+  runViralDeskJob,         // typed Mohtawak jobs
+  loadBrandVoice, saveBrandVoice, FIRESTORE_BRAND_VOICE_COLLECTION,
+} from "@/lib/gcp-ai";
+```
+
+| Job | Call | Tier | Notes |
+|---|---|---|---|
+| 7 viral scripts | `runViralDeskJob("scripts", body)` or `POST /api/generate/viral` | Pro | HE/AR/EN, facts only |
+| Hooks | `runViralDeskJob("hooks", body)` | Flash | Short openers |
+| Hook / retention predictor | `runViralDeskJob("predict", body)` | Pro | `{ kind: "gemini_pro_estimate", notLiveMetrics: true }` — **not** live views/CTR/ROAS |
+| Video rewrite | `runViralDeskJob("rewrite", { …, script })` | Pro | |
+| Imagen carousel | `runViralDeskJob("carousel", { …, slides: 5 })` | Imagen 3 | Real bytes; no empty SVG |
+| 30-day calendar | `runViralDeskJob("calendar30", body)` | Pro | Planning only |
+| Trends | `runViralDeskJob("trends", body)` | Pro + `completeGemini({ grounding: true })` | Search Grounding; cite URLs; no invented views |
+| Brand voice | `saveBrandVoice` / `loadBrandVoice` | store | In-memory now. Next PR: Firestore collection `brand_voices` via `setBrandVoiceStore` |
+
+`completeGemini({ grounding: true })` sends Vertex `tools: [{ googleSearch: {} }]`. Use it only for trends.
+
+**Forbidden in the viral-desk UI:** fake ROAS, invented likes/views/watch-time, live Meta/TikTok/YouTube API numbers. Predictor scores stay labeled as Gemini Pro estimates.

@@ -550,6 +550,7 @@ async function vertexGenerate(
   timeoutMs: number,
   systemInstruction: string = SYSTEM_INSTRUCTION,
   tier: GeminiTier = "flash",
+  grounding = false,
 ): Promise<CompleteOk | CompleteFail | { ok: false; reason: "no_token" }> {
   const project = vertexProject();
   if (!project) return { ok: false, reason: "no_token" };
@@ -572,6 +573,7 @@ async function vertexGenerate(
             contents: [{ role: "user", parts }],
             systemInstruction: { parts: [{ text: systemInstruction }] },
             generationConfig: { temperature, maxOutputTokens: 8192 },
+            ...(grounding ? { tools: [{ googleSearch: {} }] } : {}),
           }),
         },
         timeoutMs,
@@ -662,6 +664,8 @@ export async function completeGemini(opts: {
   systemInstruction?: string;
   /** pro = CMO/strategy/audit/calendar/scripts; flash = burst variations. Default flash. */
   tier?: GeminiTier;
+  /** Vertex Google Search grounding — trends only. Never invent live platform metrics. */
+  grounding?: boolean;
 }): Promise<CompleteOk | CompleteFail> {
   const timeoutMs = opts.timeoutMs ?? GEMINI_TIMEOUT_MS;
   const system = opts.systemInstruction ?? SYSTEM_INSTRUCTION;
@@ -669,7 +673,14 @@ export async function completeGemini(opts: {
   let vertexReason: "quota" | "no_token" | "vertex_denied" | "gemini_error" | null = null;
 
   if (!vertexQuotaActive()) {
-    const vertex = await vertexGenerate(opts.parts, opts.temperature, timeoutMs, system, tier);
+    const vertex = await vertexGenerate(
+      opts.parts,
+      opts.temperature,
+      timeoutMs,
+      system,
+      tier,
+      opts.grounding === true,
+    );
     if (vertex.ok) {
       clearVertexQuota();
       recordGeminiOutcome({ provider: "vertex", reason: "ok", model: vertex.model, tier });

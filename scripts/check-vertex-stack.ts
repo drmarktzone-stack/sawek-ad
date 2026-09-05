@@ -13,6 +13,8 @@ import {
   modelsForTier,
 } from "../lib/vertex";
 import { tierForGenerateMode } from "../lib/engine/gemini-generate";
+import { VIRAL_DESK_JOBS } from "../lib/engine/viral-desk";
+import { FIRESTORE_BRAND_VOICE_COLLECTION } from "../lib/brand-voice";
 
 const root = process.cwd();
 const failures: string[] = [];
@@ -57,6 +59,10 @@ const requiredFiles = [
   "app/api/imagen/[id]/route.ts",
   "app/status/page.tsx",
   "docs/VERTEX_STACK.md",
+  "lib/gcp-ai.ts",
+  "lib/engine/viral-desk.ts",
+  "lib/brand-voice.ts",
+  "app/api/generate/viral/route.ts",
 ];
 for (const f of requiredFiles) {
   try {
@@ -93,8 +99,33 @@ if (!i18n.includes("gcp.flashDown")) fail("Hebrew Flash-down copy");
 if (!i18n.includes("gcp.proDown")) fail("Hebrew Pro-down copy");
 if (!i18n.includes("gcp.translationDown")) fail("Hebrew Translation-down copy");
 
+if (VIRAL_DESK_JOBS.scripts.tier !== "pro") fail("viral scripts must be Pro");
+if (VIRAL_DESK_JOBS.hooks.tier !== "flash") fail("viral hooks must be Flash");
+if (VIRAL_DESK_JOBS.predict.tier !== "pro") fail("hook/retention predictor must be Pro");
+if (VIRAL_DESK_JOBS.rewrite.tier !== "pro") fail("video rewrite must be Pro");
+if (VIRAL_DESK_JOBS.carousel.tier !== "imagen") fail("carousel must be Imagen");
+if (VIRAL_DESK_JOBS.calendar30.tier !== "pro") fail("30-day calendar must be Pro");
+if (VIRAL_DESK_JOBS.trends.tier !== "pro" || !VIRAL_DESK_JOBS.trends.grounding) {
+  fail("trends must be Pro + Search Grounding");
+}
+if (FIRESTORE_BRAND_VOICE_COLLECTION !== "brand_voices") fail("Firestore brand_voices collection id");
+
+const gcpAi = readFileSync(join(root, "lib/gcp-ai.ts"), "utf8");
+if (!gcpAi.includes("runViralDeskJob")) fail("gcp-ai must export runViralDeskJob");
+if (!gcpAi.includes("completeGemini")) fail("gcp-ai must export completeGemini");
+if (!gcpAi.includes("runImagen")) fail("gcp-ai must export runImagen");
+if (!gcpAi.includes("translateTexts")) fail("gcp-ai must export translateTexts");
+
+const generateSrc = readFileSync(join(root, "lib/engine/gemini-generate.ts"), "utf8");
+if (!generateSrc.includes("googleSearch")) fail("completeGemini must support Search Grounding");
+if (!generateSrc.includes("grounding")) fail("completeGemini missing grounding option");
+
+const viral = readFileSync(join(root, "lib/engine/viral-desk.ts"), "utf8");
+if (!viral.includes("notLiveMetrics")) fail("predictor must flag notLiveMetrics");
+if (!viral.includes("gemini_pro_estimate")) fail("predictor must be labeled estimate");
+
 if (failures.length) {
   console.error("FAIL vertex stack\n" + failures.join("\n"));
   process.exit(1);
 }
-console.log("PASS vertex stack: Pro/Flash/Imagen/Translation routing + 1.5→2.5 mapping");
+console.log("PASS vertex stack: Pro/Flash/Imagen/Translation routing + 1.5→2.5 mapping + viral-desk callbook");
