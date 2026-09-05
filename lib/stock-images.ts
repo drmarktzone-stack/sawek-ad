@@ -1,7 +1,8 @@
 import type { Vertical } from "./vertical";
 import { detectVertical, foodFamily, type FoodFamily } from "./vertical";
+import { runtimeEnv } from "./runtime-env";
 
-export type StockSource = "openverse" | "wikimedia" | "vertex" | "curated";
+export type StockSource = "openverse" | "wikimedia" | "google" | "vertex" | "curated";
 
 export type StockImage = {
   id: string;
@@ -41,6 +42,20 @@ const OPENVERSE = "https://api.openverse.org/v1/images/";
 const WIKI = "https://commons.wikimedia.org/w/api.php";
 
 const VERTICALS: Vertical[] = ["clinic", "restaurant", "pool", "school", "product", "retail", "generic"];
+
+/**
+ * Short photographic queries first — long cinematic phrases return 0 from
+ * Openverse / Wikimedia Commons (verified). Keep longer phrases as secondary.
+ */
+const SHORT_QUERIES: Record<Vertical, string[]> = {
+  clinic: ["waiting room", "clinic interior", "medical clinic", "doctor office", "clinic reception"],
+  pool: ["hydrotherapy pool", "indoor pool", "therapy pool", "swimming pool interior"],
+  retail: ["clothing boutique", "fashion boutique", "boutique interior", "clothing store"],
+  restaurant: ["restaurant interior", "restaurant table", "plated food", "dining table"],
+  product: ["smartphone in hand", "mobile phone", "person using phone"],
+  school: ["classroom", "kindergarten classroom", "school building"],
+  generic: ["storefront", "shop interior", "service counter"],
+};
 
 /** English topic queries per vertical. Used for Openverse + wrapped for Wikimedia. */
 const TOPIC_QUERIES: Record<Vertical, string[]> = {
@@ -105,7 +120,8 @@ const WIKI_CATEGORIES: Record<Vertical, string[]> = {
   clinic: ["Waiting rooms", "Clinics", "Pediatrics"],
   pool: ["Hydrotherapy", "Indoor swimming pools", "Physical therapy"],
   retail: ["Clothing shops", "Boutiques"],
-  restaurant: ["Restaurants", "Meze", "Grilled food"],
+  // "Meze" is the French commune on Commons — do not use it.
+  restaurant: ["Hummus", "Olive oil", "Arab cuisine"],
   product: ["Smartphones", "Mobile phones"],
   school: ["Classrooms", "Kindergartens"],
   generic: ["Shop interiors", "Storefronts"],
@@ -113,17 +129,18 @@ const WIKI_CATEGORIES: Record<Vertical, string[]> = {
 
 const TOPIC_NEEDLES: Record<Vertical, RegExp> = {
   clinic:
-    /clinic|hospital|pediatric|waiting.?room|waiting area|doctor.?office|medical office|exam(ination)? room|family health|outpatient/i,
+    /clinic|hospital|pediatric|waiting.?room|waiting area|doctor.?office|medical office|exam(ination)? room|family health|outpatient|reception desk|clinic interior|medical clinic/i,
   pool: /pool|hydrotherap|swim|rehab|therapy water|aquatic/i,
   retail: /boutique|clothing|apparel|fashion|shop|store|retail|dress|garment|mannequin/i,
-  restaurant: /grill|food|restaurant|chicken|kebab|shawarma|dining|meal|kitchen|burger|plate|hummus|mezze|olive|mediterranean|levant|terrace|ceramic|table/i,
+  restaurant:
+    /grill|food|restaurant|chicken|kebab|shawarma|dining|meal|kitchen|burger|plate|hummus|mezz?e|olive|mediterranean|levant|terrace|ceramic|table|pita|falafel|mezze/i,
   product: /phone|smartphone|mobile|app|parent|hand|screen|tablet|device/i,
   school: /school|classroom|kindergarten|desk|student|teacher|campus|preschool/i,
   generic: /shop|store|storefront|counter|interior|business|reception|office/i,
 };
 
 const JUNK =
-  /logo|meme|clipart|screenshot|qr.?code|barcode|coat of arms|flag of|infographic|flowchart|diagram|wikidata|watermark|clalit|כללית|كلاليت|kupat holim|facebook|instagram|tiktok|whatsapp|mugshot|passport|selfie|samer abu|أبو مخ|אבו מוך|dr\.?\s*samer|engraving|lithograph|etching|woodcut|caricature|cartoon|comic|wellcome|census|banner\.jpg|aiga |file:.*\.svg|icon set|clip art|photomontage|collage meme|before.?after|star rating|roas|₪|%\s*off|photo contest|oil on canvas|painting|wga\d|manzanar|internment|evacuee|smallpox|relocation center|miner.s children|wife of miner|\bNARA\b|abandoned |\brally\b|rallies|protest|demonstration|city council|town council|\bcouncil\b|politic|election|campaign rally|legislative|city hall hearing|nyc council|new york city council|board of supervisors|picket|march against|activis/i;
+  /logo|meme|clipart|screenshot|qr.?code|barcode|coat of arms|flag of|infographic|flowchart|diagram|wikidata|watermark|clalit|כללית|كلاليت|kupat holim|facebook|instagram|tiktok|whatsapp|mugshot|passport|selfie|samer abu|أبو مخ|אבו מוך|dr\.?\s*samer|engraving|lithograph|etching|woodcut|caricature|cartoon|comic|wellcome|census|banner\.jpg|aiga |file:.*\.svg|icon set|clip art|photomontage|collage meme|before.?after|star rating|roas|₪|%\s*off|photo contest|oil on canvas|painting|wga\d|manzanar|internment|evacuee|smallpox|relocation center|miner.s children|wife of miner|\bNARA\b|abandoned |\brally\b|rallies|protest|demonstration|city council|town council|\bcouncil\b|politic|election|campaign rally|legislative|city hall hearing|nyc council|new york city council|board of supervisors|picket|march against|activis|soap factory|mezzanine|stadium|menu board|price list|pdf scan|floor plan|minusma|unicef|who clinic|field hospital/i;
 
 const HISTORICAL = /\b(17|18|19)\d{2}\b|19th century|18th century|1920s|1930s|blitz|smallpox|engraving/i;
 const NAMED_PORTRAIT = /portrait of (dr|prof|mr|ms|mrs)\b|headshot of\b/i;
@@ -165,6 +182,14 @@ export function resolveStockVertical(input: StockSearchInput): Vertical {
   });
 }
 
+const RESTAURANT_SHORT: Record<FoodFamily, string[]> = {
+  mediterranean: ["hummus", "mezze platter", "olive oil", "mediterranean food", "restaurant terrace"],
+  grill: ["grilled food", "shawarma", "restaurant grill", "kebab plate"],
+  pizza: ["neapolitan pizza", "pizza oven", "wood fired pizza"],
+  cafe: ["cafe interior", "coffee shop", "pastry counter"],
+  generic: ["restaurant interior", "plated food", "dining table"],
+};
+
 const RESTAURANT_QUERIES: Record<FoodFamily, string[]> = {
   mediterranean: [
     "Mediterranean mezze platter",
@@ -200,6 +225,32 @@ const RESTAURANT_QUERIES: Record<FoodFamily, string[]> = {
     "grilled food",
   ],
 };
+
+/** HE / AR / EN campaign facts → short English photo queries. */
+const HINT_LEXICON: Array<{ re: RegExp; add: string[] }> = [
+  { re: /חומוס|حمص|hummus/i, add: ["hummus", "mezze platter"] },
+  { re: /זית|olive|زيتون|שמן זית|زيت زيتون/i, add: ["olive oil", "mediterranean food"] },
+  { re: /מזה|mezze|meze|مزة|مقبلات/i, add: ["mezze platter", "levantine food"] },
+  { re: /ים-?תיכון|mediterranean|levant|متوسط/i, add: ["mediterranean food", "restaurant terrace"] },
+  { re: /ישיבה בחוץ|outdoor seating|terrace|تراس|شرفة|שקיעה|dusk/i, add: ["restaurant terrace", "outdoor dining"] },
+  { re: /ילדים|أطفال|pedia|pediatric|kids|ילד/i, add: ["pediatric clinic", "waiting room"] },
+  { re: /מרפאה|عيادة|clinic|רופא|طبيب/i, add: ["clinic interior", "waiting room"] },
+  { re: /שיניים|أسنان|dent/i, add: ["dental clinic"] },
+  { re: /המתנה|انتظار|waiting/i, add: ["waiting room"] },
+  { re: /בוטיק|boutique|אופנה|fashion|أزياء/i, add: ["fashion boutique", "clothing boutique"] },
+  { re: /הידרותרפ|hydrotherap|علاج مائي|בריכה/i, add: ["hydrotherapy pool", "indoor pool"] },
+  { re: /shawarma|شاورما|שוארמה/i, add: ["shawarma", "grilled food"] },
+  { re: /פיצה|pizza|بيتزا/i, add: ["neapolitan pizza", "pizza oven"] },
+];
+
+export function lexiconQueriesFrom(blob: string): string[] {
+  const out: string[] = [];
+  const text = String(blob ?? "");
+  for (const row of HINT_LEXICON) {
+    if (row.re.test(text)) out.push(...row.add);
+  }
+  return out;
+}
 
 function resolveFoodFamily(input: StockSearchInput): FoodFamily {
   return foodFamily({
@@ -240,31 +291,44 @@ function locationBoosts(location: string, vertical: Vertical): string[] {
   return [];
 }
 
-/** Public: the English queries we send (Openverse) / wrap (Wikimedia). */
-export function topicQueriesFor(input: StockSearchInput): string[] {
-  const vertical = resolveStockVertical(input);
-  const fam = vertical === "restaurant" ? resolveFoodFamily(input) : "generic";
-  const base =
-    vertical === "restaurant" ? RESTAURANT_QUERIES[fam] : TOPIC_QUERIES[vertical];
-  const out: string[] = [...base];
-  out.push(...categoryBoosts(input.category ?? "", vertical));
-  out.push(...locationBoosts(input.location ?? "", vertical));
-  const hint = sanitizeStockHint(input.q ?? "");
-  const latin = latinWords(hint);
-  if (latin.length >= 6) out.push(latin);
+function uniqueQueries(items: string[], max = 16): string[] {
   const seen = new Set<string>();
   const unique: string[] = [];
-  for (const q of out) {
+  for (const q of items) {
     const key = q.toLowerCase().trim();
     if (!key || seen.has(key)) continue;
     seen.add(key);
     unique.push(q.trim());
   }
-  return unique.slice(0, 12);
+  return unique.slice(0, max);
 }
 
+/** Public: the English queries we send (Openverse / Wikimedia / Google). Short first. */
+export function topicQueriesFor(input: StockSearchInput): string[] {
+  const vertical = resolveStockVertical(input);
+  const fam = vertical === "restaurant" ? resolveFoodFamily(input) : "generic";
+  const short = vertical === "restaurant" ? RESTAURANT_SHORT[fam] : SHORT_QUERIES[vertical];
+  const long = vertical === "restaurant" ? RESTAURANT_QUERIES[fam] : TOPIC_QUERIES[vertical];
+  const facts = `${input.q ?? ""} ${input.category ?? ""} ${input.description ?? ""} ${input.offer ?? ""}`;
+  const out: string[] = [
+    ...short,
+    ...lexiconQueriesFrom(facts),
+    ...long,
+    ...categoryBoosts(input.category ?? "", vertical),
+    ...locationBoosts(input.location ?? "", vertical),
+  ];
+  const hint = sanitizeStockHint(input.q ?? "");
+  const latin = latinWords(hint);
+  if (latin.length >= 6 && latin.split(" ").length <= 6) out.push(latin);
+  if (vertical === "restaurant" && fam === "mediterranean") {
+    return uniqueQueries(out.filter((q) => !/pizza|pepperoni|\bhut\b/i.test(q)), 16);
+  }
+  return uniqueQueries(out, 16);
+}
+
+/** Prefer JPEG photos; keep the query short so Commons Cirrus actually hits. */
 export function wikiSearchQuery(topic: string): string {
-  return `filemime:image/jpeg filew:>700 ${topic} -engraving -wellcome -logo -meme -svg -painting -contest -smallpox`;
+  return `filemime:image/jpeg ${clip(topic, 80)} -svg -logo -engraving -painting`;
 }
 
 function isHttps(url: string): boolean {
@@ -315,30 +379,60 @@ export function isJunkStockTitle(title: string, extra = ""): boolean {
 
 const OFF_TOPIC: Record<Vertical, RegExp | null> = {
   clinic:
-    /train station|bus station|ferry|airport|railway|metro station|swimsuit|bikini|nude|immigration|behörde|church|cathedral|priest|military|soldier|parking|microscope|rally|rallies|protest|demonstration|city council|town council|\bcouncil\b|politic|election|city hall|legislative|activis|picket|union march|news conference|press conference|capitol|parliament/i,
+    /train station|bus station|ferry|airport|railway|metro station|\bamtrak\b|geograph\.org|swimsuit|bikini|nude|immigration|behörde|church|cathedral|priest|military|soldier|parking|microscope|rally|rallies|protest|demonstration|city council|town council|\bcouncil\b|politic|election|city hall|legislative|activis|picket|union march|news conference|press conference|capitol|parliament/i,
   pool: /hotel luxury|bikini|swimsuit fashion|beach party|rally|protest|council|politic/i,
   retail: /weapon|ammo|pharmacy|rally|protest|council|politic/i,
-  restaurant: /pet food|dog food|rally|protest|council|politic|pizza hut|pepperoni factory/i,
+  restaurant: /pet food|dog food|rally|protest|council|politic|pizza hut|pepperoni factory|soap factory|mezze maniche|étang|etang de thau|\bmèze\b/i,
   product: /landline|rotary phone|payphone|rally|protest|council|politic/i,
   school: /prison|military academy|rally|protest|council|politic/i,
   generic: /rally|rallies|protest|demonstration|city council|politic|election campaign/i,
 };
 
-export function stockRelevance(vertical: Vertical, title: string, extra = "", cuisine?: FoodFamily): number {
+export function stockRelevance(
+  vertical: Vertical,
+  title: string,
+  extra = "",
+  cuisine?: FoodFamily,
+  query = "",
+): number {
   const blob = `${title} ${extra}`;
   if (isJunkStockTitle(title, extra)) return -1;
   if (OFF_TOPIC[vertical]?.test(blob)) return -1;
+  if (
+    vertical === "clinic" &&
+    /\b(station|amtrak|railway|metro|airport|platform|terminus)\b/i.test(blob) &&
+    !/clinic|doctor|medical|hospital|pediatric|urgent care|waiting room at a medical/i.test(blob)
+  ) {
+    return -1;
+  }
   if (vertical === "restaurant" && cuisine === "mediterranean" && /pizza|pepperoni|\bhut\b/i.test(blob)) return -1;
-  if (!TOPIC_NEEDLES[vertical].test(blob)) return 0;
-  let score = 1;
-  if (/waiting.?room|clinic interior|doctor.?office|stethoscope|boutique interior|hydrotherapy|grilled|classroom/i.test(blob)) score += 4;
-  if (/pediatric|family clinic|family health|medical clinic|kids health/i.test(blob)) score += 2;
+  let score = 0;
+  if (TOPIC_NEEDLES[vertical].test(blob)) score = 1;
+  // Trust a short on-topic search: Commons/Openverse titles are often IMG_ / DSC_.
+  if (!score && query && TOPIC_NEEDLES[vertical].test(query) && !isJunkStockTitle(query)) score = 1;
+  if (!score) return 0;
+  if (/waiting.?room|clinic interior|doctor.?office|boutique interior|hydrotherapy|grilled|classroom|hummus|mezz?e|olive oil/i.test(blob)) {
+    score += 4;
+  }
+  if (/pediatric|family clinic|family health|medical clinic|kids health|mediterranean|levantine/i.test(blob)) score += 2;
   if (/naval|military|vaccination|historical|black and white/i.test(blob)) score -= 2;
   return score;
 }
 
-export function isOnTopicStock(vertical: Vertical, title: string, extra = "", cuisine?: FoodFamily): boolean {
-  return stockRelevance(vertical, title, extra, cuisine) > 0;
+export function isOnTopicStock(
+  vertical: Vertical,
+  title: string,
+  extra = "",
+  cuisine?: FoodFamily,
+  query = "",
+): boolean {
+  return stockRelevance(vertical, title, extra, cuisine, query) > 0;
+}
+
+export function googleCseConfigured(): boolean {
+  const cx = runtimeEnv("GOOGLE_CSE_ID") || runtimeEnv("GOOGLE_CSE_CX");
+  const key = runtimeEnv("GOOGLE_CSE_API_KEY") || runtimeEnv("GOOGLE_API_KEY");
+  return Boolean(cx && key);
 }
 
 async function fetchJson(url: string, timeoutMs: number): Promise<unknown | null> {
@@ -407,7 +501,7 @@ function fromWikiPage(page: WikiPage, query: string, vertical: Vertical, cuisine
   if ((info.width ?? 0) > 0 && (info.width ?? 0) < 600) return null;
   const title = String(page.title ?? "").replace(/^File:/i, "");
   const desc = stripHtml(String(info.extmetadata?.ImageDescription?.value ?? ""));
-  if (stockRelevance(vertical, title, desc, cuisine) <= 0) return null;
+  if (stockRelevance(vertical, title, desc, cuisine, query) <= 0) return null;
   const { attribution, license } = wikiAttribution(info);
   const id = `wiki-${page.pageid || normUrl(full).slice(-24)}`;
   return {
@@ -486,20 +580,7 @@ type OvHit = {
   tags?: Array<{ name?: string } | string>;
 };
 
-async function openverseSearch(topic: string, page: number, vertical: Vertical, cuisine?: FoodFamily): Promise<StockImage[]> {
-  const params = new URLSearchParams({
-    q: clip(topic, 180),
-    page: String(Math.max(1, page)),
-    page_size: "20",
-    category: "photograph",
-    mature: "false",
-    extension: "jpg,png",
-  });
-  const json = await fetchJson(`${OPENVERSE}?${params.toString()}`, 7000);
-  if (!json || typeof json !== "object") return [];
-  const results = Array.isArray((json as { results?: unknown }).results)
-    ? ((json as { results: OvHit[] }).results)
-    : [];
+function parseOpenverseHits(results: OvHit[], topic: string, vertical: Vertical, cuisine?: FoodFamily): StockImage[] {
   const out: StockImage[] = [];
   for (const row of results) {
     const full = toHttps(String(row.url ?? ""));
@@ -510,7 +591,7 @@ async function openverseSearch(topic: string, page: number, vertical: Vertical, 
       .map((t) => (typeof t === "string" ? t : String(t?.name ?? "")))
       .join(" ");
     const extra = `${row.category ?? ""} ${tags} ${row.creator ?? ""}`;
-    if (!isOnTopicStock(vertical, title, extra, cuisine)) continue;
+    if (!isOnTopicStock(vertical, title, extra, cuisine, topic)) continue;
     const license = clip(String(row.license ?? "CC"), 40);
     const creator = clip(String(row.creator ?? "Openverse"), 80);
     out.push({
@@ -528,6 +609,82 @@ async function openverseSearch(topic: string, page: number, vertical: Vertical, 
   return out;
 }
 
+async function openverseSearch(topic: string, page: number, vertical: Vertical, cuisine?: FoodFamily): Promise<StockImage[]> {
+  const base = {
+    q: clip(topic, 80),
+    page: String(Math.max(1, page)),
+    page_size: "20",
+    mature: "false",
+    extension: "jpg,png",
+  };
+  const photoParams = new URLSearchParams({ ...base, category: "photograph" });
+  let json = await fetchJson(`${OPENVERSE}?${photoParams.toString()}`, 7000);
+  let results = Array.isArray((json as { results?: unknown } | null)?.results)
+    ? ((json as { results: OvHit[] }).results)
+    : [];
+  let out = parseOpenverseHits(results, topic, vertical, cuisine);
+  if (out.length) return out;
+  // Photograph category is often empty for short food/clinic queries — retry uncategorized.
+  const loose = new URLSearchParams(base);
+  json = await fetchJson(`${OPENVERSE}?${loose.toString()}`, 7000);
+  results = Array.isArray((json as { results?: unknown } | null)?.results)
+    ? ((json as { results: OvHit[] }).results)
+    : [];
+  return parseOpenverseHits(results, topic, vertical, cuisine);
+}
+
+type GCseItem = {
+  title?: string;
+  link?: string;
+  displayLink?: string;
+  image?: { thumbnailLink?: string; contextLink?: string; width?: number; height?: number };
+  snippet?: string;
+};
+
+async function googleCseSearch(topic: string, vertical: Vertical, cuisine?: FoodFamily): Promise<StockImage[]> {
+  const cx = runtimeEnv("GOOGLE_CSE_ID") || runtimeEnv("GOOGLE_CSE_CX");
+  const key = runtimeEnv("GOOGLE_CSE_API_KEY") || runtimeEnv("GOOGLE_API_KEY");
+  if (!cx || !key) return [];
+  const params = new URLSearchParams({
+    key,
+    cx,
+    q: clip(topic, 80),
+    searchType: "image",
+    num: "10",
+    safe: "active",
+    imgType: "photo",
+    fileType: "jpg",
+  });
+  const json = await fetchJson(`https://www.googleapis.com/customsearch/v1?${params.toString()}`, 8000);
+  if (!json || typeof json !== "object") return [];
+  const items = Array.isArray((json as { items?: unknown }).items)
+    ? ((json as { items: GCseItem[] }).items)
+    : [];
+  const out: StockImage[] = [];
+  for (const row of items) {
+    const full = toHttps(String(row.link ?? ""));
+    const thumb = toHttps(String(row.image?.thumbnailLink || row.link || ""));
+    if (!isHttps(full) || !isHttps(thumb)) continue;
+    if (/\.svg(\?|$)/i.test(full)) continue;
+    const title = String(row.title ?? "");
+    const extra = `${row.snippet ?? ""} ${row.displayLink ?? ""}`;
+    if (!isOnTopicStock(vertical, title, extra, cuisine, topic)) continue;
+    const host = clip(String(row.displayLink ?? "Google"), 60);
+    out.push({
+      id: `gcs-${normUrl(full).slice(-28)}`,
+      thumb,
+      full,
+      title: clip(title || topic, 140),
+      attribution: clip(`Google · ${host}`, 160),
+      source: "google",
+      license: "source-link",
+      landingUrl: toHttps(String(row.image?.contextLink ?? "")) || full,
+      query: topic,
+    });
+  }
+  return out;
+}
+
 function dedupe(images: StockImage[]): StockImage[] {
   const seen = new Set<string>();
   const out: StockImage[] = [];
@@ -537,6 +694,38 @@ function dedupe(images: StockImage[]): StockImage[] {
     seen.add(key);
     seen.add(img.id);
     out.push(img);
+  }
+  return out;
+}
+
+/** Interleave by search query so the grid is hummus + terrace + mezze, not 24 hummus. */
+function diversifyByQuery(images: StockImage[], limit: number): StockImage[] {
+  const buckets = new Map<string, StockImage[]>();
+  for (const img of images) {
+    const key = (img.query || img.source || "_").toLowerCase();
+    const arr = buckets.get(key) ?? [];
+    arr.push(img);
+    buckets.set(key, arr);
+  }
+  const queues = [...buckets.values()];
+  const out: StockImage[] = [];
+  const seen = new Set<string>();
+  let progressed = true;
+  while (out.length < limit && progressed) {
+    progressed = false;
+    for (const q of queues) {
+      while (q.length) {
+        const img = q.shift()!;
+        const key = normUrl(img.full) || img.id;
+        if (!key || seen.has(key) || seen.has(img.id)) continue;
+        seen.add(key);
+        seen.add(img.id);
+        out.push(img);
+        progressed = true;
+        break;
+      }
+      if (out.length >= limit) break;
+    }
   }
   return out;
 }
@@ -626,31 +815,34 @@ export async function searchStockImages(input: StockSearchInput): Promise<StockS
   const queries = topicQueriesFor(input);
   const page = Math.max(1, Math.min(8, Math.floor(Number(input.page) || 1)));
   const limit = Math.max(24, Math.min(60, Math.floor(Number(input.limit) || 48)));
-  const offset = (page - 1) * 12;
+  const offset = (page - 1) * 10;
 
-  const searchSlice = page === 1 ? queries.slice(0, 8) : queries.slice(0, 6);
+  const searchSlice = page === 1 ? queries.slice(0, 10) : queries.slice(0, 6);
   const catSlice = page === 1 ? (WIKI_CATEGORIES[vertical] ?? []).slice(0, 3) : [];
-  const ovSlice = queries.slice(0, page === 1 ? 4 : 2);
+  const ovSlice = queries.slice(0, page === 1 ? 8 : 4);
+  const gcsSlice = googleCseConfigured() ? queries.slice(0, page === 1 ? 5 : 2) : [];
 
-  const [wikiHits, catHits, ovHits] = await Promise.all([
-    mapPool(searchSlice, 4, (q) => wikiSearch(q, 16, offset, vertical, cuisine)),
+  const [wikiHits, catHits, ovHits, gcsHits] = await Promise.all([
+    mapPool(searchSlice, 5, (q) => wikiSearch(q, 16, offset, vertical, cuisine)),
     mapPool(catSlice, 3, (c) => wikiCategory(c, 12, vertical, cuisine)),
-    mapPool(ovSlice, 2, (q) => openverseSearch(q, page, vertical, cuisine)),
+    mapPool(ovSlice, 3, (q) => openverseSearch(q, page, vertical, cuisine)),
+    mapPool(gcsSlice, 2, (q) => googleCseSearch(q, vertical, cuisine)),
   ]);
 
-  const merged = dedupe([...wikiHits.flat(), ...catHits.flat(), ...ovHits.flat()])
-    .filter((img) => isOnTopicStock(vertical, img.title, img.attribution, cuisine))
+  const merged = dedupe([...gcsHits.flat(), ...wikiHits.flat(), ...ovHits.flat(), ...catHits.flat()])
+    .filter((img) => isOnTopicStock(vertical, img.title, img.attribution, cuisine, img.query))
     .sort((a, b) => {
-      // Score title+attribution only — never the search query (it always matches needles).
-      const sb = stockRelevance(vertical, b.title, b.attribution, cuisine);
-      const sa = stockRelevance(vertical, a.title, a.attribution, cuisine);
-      return sb - sa;
+      const sb = stockRelevance(vertical, b.title, b.attribution, cuisine, b.query);
+      const sa = stockRelevance(vertical, a.title, a.attribution, cuisine, a.query);
+      if (sb !== sa) return sb - sa;
+      const srcRank = (s: StockSource) => (s === "google" ? 3 : s === "wikimedia" ? 2 : s === "openverse" ? 1 : 0);
+      return srcRank(b.source) - srcRank(a.source);
     });
-  const images = merged.slice(0, limit);
+  const images = diversifyByQuery(merged, limit);
   const nextPage = images.length >= 12 && page < 8 ? page + 1 : null;
   const emptyMessage =
     images.length === 0
-      ? "אין תמונות חופשיות רלוונטיות לנושא — נסו כרזות גרפיות או תמונה מהאתר."
+      ? "אין תמונות חיות רלוונטיות לנושא כרגע — נסו כרזות גרפיות או תמונה מהאתר."
       : undefined;
   return { ok: true, images, page, nextPage, queries, ...(emptyMessage ? { emptyMessage } : {}) };
 }

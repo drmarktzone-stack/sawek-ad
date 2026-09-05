@@ -142,14 +142,14 @@ export function buildSiteAudit(intake: Intake): SiteAudit {
       kind: "weakness",
       label: L(
         photos.length
-          ? "יש לוגו בלבד — חסרה תמונת מקום/מוצר לנושא. מציעים כרזות או תמונת AI לפי התחום."
-          : "אין תמונות מהאתר — אפשר להציע כרזות גרפיות או תמונת AI",
+          ? "יש לוגו בלבד — מציעים תמונות חיות טבעיות לפי נושא הקמפיין לבחירה."
+          : "אין תמונות מהאתר — מציעים תמונות חיות לפי הנושא לבחירה",
         photos.length
-          ? "في شعار بس — ناقصة صورة مكان/منتج للموضوع. منقترح ملصقات أو صورة ذكاء حسب المجال."
-          : "ما في صور من الموقع — فينا نقترح ملصقات غرافيك أو صورة ذكاء اصطناعي",
+          ? "في شعار بس — منقترح صور حيّة طبيعية حسب موضوع الحملة للاختيار."
+          : "ما في صور من الموقع — منقترح صور حيّة حسب الموضوع للاختيار",
         photos.length
-          ? "Logo only — missing an on-topic place/product photo. Offering graphics or an AI still for the vertical."
-          : "No photos from the site — offer graphic posters or an AI still",
+          ? "Logo only — offering live natural photos matching the campaign topic to pick from."
+          : "No photos from the site — offering live on-topic photos to pick from",
       ),
       evidence: ev("mediaAssets", String(heroPhotos.length)),
     });

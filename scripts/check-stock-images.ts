@@ -1,7 +1,9 @@
 import { detectVertical } from "../lib/vertical";
 import {
+  googleCseConfigured,
   isJunkStockTitle,
   isOnTopicStock,
+  lexiconQueriesFrom,
   resolveStockVertical,
   sanitizeStockHint,
   topicQueriesFor,
@@ -37,6 +39,15 @@ for (const need of [
 if (clinicQs.some((q) => /clalit|كلاليت|כללית|samer|سامر|סאמר/i.test(q))) {
   fail(`clinic queries leaked brand/person: ${clinicQs.join(" | ")}`);
 }
+if (!clinicQs.some((q) => /^waiting room$/i.test(q))) {
+  fail(`clinic missing short photographic query "waiting room": ${clinicQs.join(" | ")}`);
+}
+if (!clinicQs.some((q) => /clinic interior/i.test(q))) {
+  fail(`clinic missing short "clinic interior": ${clinicQs.join(" | ")}`);
+}
+if (clinicQs[0] && clinicQs[0].split(" ").length > 4) {
+  fail(`clinic first query should be short, got: ${clinicQs[0]}`);
+}
 
 const poolQs = topicQueriesFor({ vertical: "pool", category: "הידרותרפיה", location: "רנאן" });
 if (!poolQs.some((q) => /hydrotherapy pool/i.test(q))) fail(`pool missing hydrotherapy: ${poolQs.join(" | ")}`);
@@ -57,11 +68,21 @@ if (!oliveQs.some((q) => /hummus|mezze|olive|mediterranean/i.test(q))) {
   fail(`olive kitchen missing mediterranean queries: ${oliveQs.join(" | ")}`);
 }
 if (oliveQs.some((q) => /pizza/i.test(q))) fail(`olive kitchen leaked pizza query: ${oliveQs.join(" | ")}`);
+if (!oliveQs.some((q) => /^hummus$/i.test(q))) fail(`olive missing short hummus query: ${oliveQs.join(" | ")}`);
 if (isOnTopicStock("restaurant", "Pepperoni pizza hut menu", "", "mediterranean")) {
   fail("pizza marked on-topic for mediterranean cuisine");
 }
 if (!isOnTopicStock("restaurant", "Hummus olive oil bowl", "", "mediterranean")) {
   fail("hummus not on-topic for mediterranean");
+}
+if (!isOnTopicStock("restaurant", "Meze in Beirut", "", "mediterranean")) {
+  fail("meze platter title not on-topic for mediterranean");
+}
+if (!isOnTopicStock("clinic", "DSC_0123", "", undefined, "waiting room")) {
+  fail("generic camera title from waiting-room query should be accepted");
+}
+if (isOnTopicStock("clinic", "City council rally", "", undefined, "waiting room")) {
+  fail("junk politics accepted via query trust");
 }
 
 const productQs = topicQueriesFor({ vertical: "product", category: "smart tools", q: "health app" });
@@ -88,6 +109,15 @@ if (!isJunkStockTitle("vaccinated for smallpox")) fail("junk missed smallpox");
 if (isJunkStockTitle("A waiting room at a medical healthcare clinic")) fail("waiting room marked junk");
 if (!isOnTopicStock("clinic", "Pediatric clinic waiting room")) fail("clinic waiting room not on-topic");
 if (isOnTopicStock("clinic", "Bikini swimming pool party")) fail("bikini pool marked clinic-topic");
+if (isOnTopicStock("clinic", "Restored waiting room at Bruce Grove station")) {
+  fail("train-station waiting room marked clinic-topic");
+}
+if (isOnTopicStock("clinic", "Amtrak Peachtree station waiting room")) {
+  fail("Amtrak waiting room marked clinic-topic");
+}
+if (!isOnTopicStock("clinic", "A waiting room at a medical healthcare clinic")) {
+  fail("medical clinic waiting room not on-topic");
+}
 if (!isOnTopicStock("pool", "Indoor hydrotherapy pool")) fail("hydro pool not on-topic");
 if (!isOnTopicStock("retail", "Fashion boutique interior")) fail("boutique not on-topic");
 if (!isOnTopicStock("restaurant", "Grilled chicken restaurant")) fail("grill not on-topic");
@@ -95,6 +125,13 @@ if (!isOnTopicStock("restaurant", "Grilled chicken restaurant")) fail("grill not
 const wikiQ = wikiSearchQuery("pediatric clinic waiting room");
 if (!/filemime:image\/jpeg/.test(wikiQ)) fail("wiki wrapper missing jpeg");
 if (/clalit/i.test(wikiQ)) fail("wiki wrapper has clalit");
+if (/filew:>/.test(wikiQ)) fail("wiki wrapper still uses filew which empties Commons hits");
+
+const heLex = lexiconQueriesFrom("מנות ביתיות, שמן זית, חומוס, ישיבה בחוץ");
+if (!heLex.some((q) => /hummus|olive oil|mezze/i.test(q))) {
+  fail(`Hebrew lexicon missed food queries: ${heLex.join(" | ")}`);
+}
+if (typeof googleCseConfigured() !== "boolean") fail("googleCseConfigured not boolean");
 
 const hint = sanitizeStockHint("د. سامر أبو مخ · كلاليت · ROAS 12% · ₪50");
 if (/samer|كلاليت|clalit|roas|₪50/i.test(hint)) fail(`sanitize leaked ${hint}`);

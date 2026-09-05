@@ -17,13 +17,13 @@ function read(req: Request, key: string): string {
 }
 
 /**
- * Vertex Imagen stills are the library. When Imagen returns 0, serve vertical
- * curated graphic stills (or empty + Hebrew message) — never junk Openverse politics.
- * source=imagen | cc | all.
+ * Live topic photos (Wikimedia / Openverse / optional Google CSE) are the library.
+ * Vertex Imagen is optional extra. Curated graphics only when live photos are empty.
+ * source=live | cc | imagen | all.
  */
 export async function GET(req: Request) {
   try {
-    const source = (read(req, "source") || "imagen").toLowerCase();
+    const source = (read(req, "source") || "live").toLowerCase();
     const input: StockSearchInput = {
       q: read(req, "q"),
       vertical: read(req, "vertical"),
@@ -36,7 +36,7 @@ export async function GET(req: Request) {
     };
     const requested = IMAGEN_PICKER_COUNT;
 
-    if (source === "cc") {
+    if (source === "cc" || source === "live") {
       const result = await searchStockImages(input);
       if (result.images.length) {
         return NextResponse.json(
@@ -45,11 +45,12 @@ export async function GET(req: Request) {
             imagen: [],
             imagenRequested: 0,
             imagenGot: 0,
+            fallback: "live",
           },
           { status: 200 },
         );
       }
-      // Always offer on-topic options after any scan — curated vertical graphics when CC is empty.
+      // Always offer on-topic options after any scan — curated vertical graphics when live is empty.
       const curated = await curatedFallbackStills(input, Math.min(8, Math.max(4, Number(input.limit) || 8)));
       return NextResponse.json(
         {
@@ -64,9 +65,9 @@ export async function GET(req: Request) {
           imagenGot: 0,
           fallback: curated.length ? "curated" : "empty",
           emptyMessage: curated.length
-            ? "אין תמונות CC רלוונטיות — מציגים כרזות גרפיות לפי התחום."
+            ? "אין תמונות חיות רלוונטיות — מציגים כרזות גרפיות לפי התחום."
             : result.emptyMessage ||
-              "אין תמונות חופשיות רלוונטיות לנושא — נסו כרזות גרפיות או תמונה מהאתר.",
+              "אין תמונות חיות רלוונטיות לנושא — נסו כרזות גרפיות או תמונה מהאתר.",
         },
         { status: 200 },
       );
@@ -117,28 +118,27 @@ export async function GET(req: Request) {
       );
     }
 
-    // source=all: Imagen first; if empty, curated — CC only if still empty and filtered hard.
-    const curated = imagen.length ? [] : await curatedFallbackStills(input, Math.min(8, requested));
-    const primary = imagen.length ? imagen : curated;
-    const result = primary.length
-      ? { ok: true as const, images: [] as Awaited<ReturnType<typeof searchStockImages>>["images"], page: 1, nextPage: null as number | null, queries: [] as string[] }
-      : await searchStockImages(input);
+    // source=all: live topic photos first, then Imagen, then curated graphics.
+    const result = await searchStockImages(input);
+    const live = result.images;
+    const curated = live.length || imagen.length ? [] : await curatedFallbackStills(input, Math.min(8, requested));
+    const images = live.length ? [...live, ...imagen] : imagen.length ? imagen : curated;
     return NextResponse.json(
       {
         ...result,
         imagen,
         curated,
-        images: primary.length ? primary : result.images,
+        images,
         imagenRequested: requested,
         imagenGot: imagen.length,
-        fallback: imagen.length ? "imagen" : curated.length ? "curated" : result.images.length ? "cc" : "empty",
+        fallback: live.length ? "live" : imagen.length ? "imagen" : curated.length ? "curated" : "empty",
         emptyMessage:
-          primary.length || result.images.length
-            ? imagen.length
+          images.length
+            ? live.length
               ? undefined
-              : curated.length
-                ? "Vertex Imagen ריק — מציגים כרזות גרפיות לפי התחום."
-                : undefined
+              : imagen.length
+                ? undefined
+                : "אין תמונות חיות רלוונטיות — מציגים כרזות גרפיות לפי התחום."
             : result.emptyMessage ||
               "אין תמונות רלוונטיות לנושא — נסו כרזות גרפיות או תמונה מהאתר.",
       },
