@@ -41,10 +41,10 @@ export function ChipGroup({
               type="button"
               onClick={() => onChange(label, opt)}
               className={cn(
-                "rounded-full border px-3 py-1.5 text-sm font-medium transition-colors",
+                "rounded-[12px] border px-3.5 py-2 text-sm font-semibold transition-colors",
                 selected
-                  ? "border-navy bg-navy text-white"
-                  : "border-navy/15 bg-white text-navy hover:border-gold",
+                  ? "border-ink bg-ink text-[#F7F3EA]"
+                  : "border-[rgba(8,17,31,0.14)] bg-white text-navy hover:border-teal",
               )}
             >
               {label}
@@ -54,7 +54,7 @@ export function ChipGroup({
       </div>
       {showCustomField && (
         <input
-          className="mt-3 h-11 w-full rounded-full border border-gold/40 bg-white px-4 text-base text-foreground outline-none"
+          className="mt-3 h-12 w-full rounded-[12px] border border-teal/45 bg-white px-4 text-base text-ink outline-none focus:border-teal focus:shadow-[0_0_0_4px_rgba(12,122,107,0.16)]"
           placeholder={t("details.writeOwn")}
           value={customValue ?? value}
           onChange={(e) => onCustom?.(e.target.value)}

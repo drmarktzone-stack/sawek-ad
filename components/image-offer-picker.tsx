@@ -309,8 +309,8 @@ export function ImageOfferPicker({
         type="button"
         onClick={() => apply(opt)}
         className={cn(
-          "relative overflow-hidden rounded-xl border text-start transition",
-          on ? "border-navy ring-2 ring-navy/40 ring-offset-2 ring-offset-white" : "border-navy/15 hover:border-navy/40",
+          "relative overflow-hidden rounded-[14px] border text-start transition",
+          on ? "border-ink ring-2 ring-teal/40 ring-offset-2 ring-offset-white" : "border-[rgba(8,17,31,0.12)] hover:border-teal/50",
         )}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -348,7 +348,7 @@ export function ImageOfferPicker({
         ) : null}
       </div>
       {open ? (
-        <div className="agency-shell mt-3 p-5">
+        <div className="agency-board mt-3 p-5">
           <p className="text-base leading-relaxed text-navy">{t("audit.offerPhotosLead")}</p>
           {liveBusy || aiBusy ? (
             <p className="mt-3 flex items-center gap-2 text-sm font-semibold text-navy">

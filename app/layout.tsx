@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Cairo, Heebo } from "next/font/google";
+import { Amiri, Cairo, Fraunces, Frank_Ruhl_Libre, Heebo } from "next/font/google";
 import { I18nProvider } from "@/components/i18n-provider";
 import { Footer, Header } from "@/components/header";
 import { AuthProvider } from "@/components/auth-provider";
@@ -15,6 +15,25 @@ const heebo = Heebo({
 const cairo = Cairo({
   subsets: ["latin", "arabic"],
   variable: "--font-cairo",
+  display: "swap",
+});
+
+const frankRuhl = Frank_Ruhl_Libre({
+  subsets: ["latin", "hebrew"],
+  variable: "--font-display-he",
+  display: "swap",
+});
+
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  variable: "--font-display-en",
+  display: "swap",
+});
+
+const amiri = Amiri({
+  subsets: ["latin", "arabic"],
+  weight: ["400", "700"],
+  variable: "--font-display-ar",
   display: "swap",
 });
 
@@ -40,8 +59,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#1B2A4A" },
-    { media: "(prefers-color-scheme: dark)", color: "#1B2A4A" },
+    { media: "(prefers-color-scheme: light)", color: "#08111F" },
+    { media: "(prefers-color-scheme: dark)", color: "#08111F" },
   ],
   width: "device-width",
   initialScale: 1,
@@ -54,11 +73,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="he"
       dir="rtl"
       suppressHydrationWarning
-      className={`${heebo.variable} ${cairo.variable} h-full antialiased`}
+      className={`${heebo.variable} ${cairo.variable} ${frankRuhl.variable} ${fraunces.variable} ${amiri.variable} h-full antialiased`}
     >
       <head>
         <link rel="manifest" href="/manifest.webmanifest" />
-        <meta name="theme-color" content="#1B2A4A" />
+        <meta name="theme-color" content="#08111F" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />

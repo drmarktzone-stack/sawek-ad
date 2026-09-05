@@ -58,18 +58,18 @@ export function PwaInstallHint() {
   return (
     <div
       role="status"
-      className="mx-auto mt-5 flex w-full max-w-xl flex-col gap-3 rounded-2xl border border-teal/25 bg-white px-4 py-3.5 text-start text-navy shadow-[0_8px_24px_rgba(15,39,68,0.06)] sm:flex-row sm:items-center sm:justify-between"
+      className="mx-auto mt-5 flex w-full max-w-xl flex-col gap-3 rounded-[16px] border border-white/15 bg-white/10 px-4 py-3.5 text-start text-[#F7F3EA] backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between"
     >
       <div className="flex min-w-0 items-start gap-3">
-        <span className="mt-0.5 inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-teal/10 text-teal">
+        <span className="mt-0.5 inline-flex size-10 shrink-0 items-center justify-center rounded-[12px] bg-white/10 text-[#9FD4C8]">
           <Smartphone className="size-5" aria-hidden />
         </span>
         <div className="min-w-0">
           <p className="text-base font-black leading-snug">{t("pwa.install")}</p>
-          <p className="mt-1 text-sm leading-relaxed text-muted">{how}</p>
+          <p className="mt-1 text-sm leading-relaxed text-[#C9D0D8]">{how}</p>
         </div>
       </div>
-      <Button type="button" size="sm" variant="ghost" className="tap-target shrink-0 self-stretch sm:self-center" onClick={dismiss}>
+      <Button type="button" size="sm" variant="ghost" className="tap-target shrink-0 self-stretch text-[#F7F3EA] hover:bg-white/10 hover:text-white sm:self-center" onClick={dismiss}>
         {t("pwa.dismiss")}
       </Button>
     </div>

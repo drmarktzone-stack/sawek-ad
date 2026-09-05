@@ -43,16 +43,17 @@ export function ResizeStrip({
   }
 
   return (
-    <section data-resize="magic" className="mb-10">
-      <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
+    <section data-resize="magic" className="agency-ink mb-10 p-5 sm:p-6">
+      <div className="mb-5 flex flex-wrap items-end justify-between gap-2">
         <div>
-          <h2 className="text-lg font-black text-navy">{t("resize.title")}</h2>
-          <p className="mt-1 text-sm leading-relaxed text-muted">{t("resize.lead")}</p>
+          <p className="text-[12px] font-black uppercase tracking-[0.2em] text-[#9FD4C8]">Magic Resize</p>
+          <h2 className="agency-display-cream mt-1 text-2xl">{t("resize.title")}</h2>
+          <p className="mt-2 text-sm leading-relaxed text-[#C9D0D8]">{t("resize.lead")}</p>
         </div>
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {RESIZE_FORMATS.map((fmt) => (
-          <article key={fmt.id} className="rounded-[22px] border border-navy/10 bg-white p-4 shadow-[0_10px_28px_rgba(15,39,68,0.07)]">
+          <article key={fmt.id} className="rounded-[18px] border border-white/10 bg-white p-3.5">
             <p className="mb-2 text-[13px] font-black uppercase tracking-[0.12em] text-navy/55">
               {fmt.label[packLang]} · {fmt.ratio}
             </p>

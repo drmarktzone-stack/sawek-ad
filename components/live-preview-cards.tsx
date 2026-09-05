@@ -581,8 +581,8 @@ export function LivePreviewStrip({
     <section data-live-preview="feed" className="mb-10">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="text-2xl font-black text-navy">{t("end.previewTitle")}</h2>
-          <p className="mt-1 text-sm text-muted">{t("end.previewLead")}</p>
+          <h2 className="agency-display text-3xl">{t("end.previewTitle")}</h2>
+          <p className="mt-2 text-base text-muted">{t("end.previewLead")}</p>
         </div>
         <div className="flex flex-wrap items-start gap-2">
           <DeliveryKitButton pack={pack} />
@@ -594,11 +594,11 @@ export function LivePreviewStrip({
       </div>
       {imgError ? <p className="mt-2 text-sm text-danger">{imgError}</p> : null}
 
-      {onPack ? <ImageOfferPicker pack={pack} locale={packLang} onPack={onPack} /> : null}
+      {onPack ? <ImageOfferPicker pack={pack} locale={packLang} onPack={onPack} defaultOpen /> : null}
 
       <div className="mt-5 grid items-start gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <article className="rounded-[22px] border border-navy/10 bg-white p-4 shadow-[0_10px_28px_rgba(15,39,68,0.07)]">
-          <p className="mb-3 text-[13px] font-black uppercase tracking-[0.14em] text-navy/55">
+        <article className="agency-mock-frame">
+          <p className="mb-3 text-[13px] font-black uppercase tracking-[0.14em] text-[#C9D0D8]">
             {t("end.facebook")} · 1.91:1
           </p>
           <FacebookFeedCard
@@ -619,8 +619,8 @@ export function LivePreviewStrip({
           ) : null}
         </article>
 
-        <article className="rounded-[22px] border border-navy/10 bg-white p-4 shadow-[0_10px_28px_rgba(15,39,68,0.07)]">
-          <p className="mb-3 text-[13px] font-black uppercase tracking-[0.14em] text-navy/55">
+        <article className="agency-mock-frame">
+          <p className="mb-3 text-[13px] font-black uppercase tracking-[0.14em] text-[#C9D0D8]">
             {t("end.instagram")} · 4:5
           </p>
           <InstagramFeedCard
@@ -638,8 +638,8 @@ export function LivePreviewStrip({
           ) : null}
         </article>
 
-        <article className="rounded-[22px] border border-navy/10 bg-white p-4 shadow-[0_10px_28px_rgba(15,39,68,0.07)]">
-          <p className="mb-3 text-[13px] font-black uppercase tracking-[0.14em] text-navy/55">
+        <article className="agency-mock-frame">
+          <p className="mb-3 text-[13px] font-black uppercase tracking-[0.14em] text-[#C9D0D8]">
             {t("end.tiktok")} · 9:16
           </p>
           <TikTokFeedCard
@@ -657,8 +657,8 @@ export function LivePreviewStrip({
           ) : null}
         </article>
 
-        <article className="rounded-[22px] border border-navy/10 bg-white p-4 shadow-[0_10px_28px_rgba(15,39,68,0.07)]">
-          <p className="mb-3 text-[13px] font-black uppercase tracking-[0.14em] text-navy/55">
+        <article className="agency-mock-frame">
+          <p className="mb-3 text-[13px] font-black uppercase tracking-[0.14em] text-[#C9D0D8]">
             {t("end.whatsapp")}
           </p>
           <WhatsAppPreviewCard

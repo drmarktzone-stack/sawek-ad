@@ -338,9 +338,9 @@ export const copy: Dict = {
   "empty.dash": { he: "— לא סופק —", ar: "— غير متوفر —", en: "— not provided —" },
   "interview.title": { he: "ראיון CMO — לפני שמייצרים", ar: "مقابلة CMO — قبل التوليد", en: "CMO interview — before generating" },
   "interview.lead": {
-    he: "חסרים מספרים או הקשר. הסוכן לא ינחש. מלא מה שיש — השאר ריק אם אין.",
-    ar: "تنقص أرقام أو سياق. الوكيل لن يخمن. املأ ما تعرفه واترك الباقي فارغاً.",
-    en: "Numbers or context are missing. The agent will not guess. Fill what you have — leave blank if you don’t.",
+    he: "מספרים אופציונליים. הסוכן לא ינחש — מלאו מה שיש, השאירו ריק אם אין.",
+    ar: "أرقام اختيارية. الوكيل لن يخمن — عبّوا الموجود واتركوا الفاضي.",
+    en: "Numbers are optional. The agent will not guess — fill what you have, leave blank if you don’t.",
   },
   "interview.leadFilled": {
     he: "שולחן CMO נטען. המספרים מסומנים כדוגמת תכנון — לא כ־ROAS ולא כתוצאות מדידה. אפשר לערוך.",
@@ -353,14 +353,34 @@ export const copy: Dict = {
     en: "Complete demo — fields + photos",
   },
   "diagnosis.gapsFirst": {
-    he: "איך מפצים על מה שחסר — במקום לקלל את השדות",
-    ar: "كيف نعوّض الناقص — بدل توبيخ الحقول",
-    en: "How to compensate for gaps — not a shaming wall",
+    he: "איך מפצים — רשימת צילום וניסוח, לא קיר «חסר»",
+    ar: "كيف نعوّض — قائمة تصوير وصياغة، مش جدار «ناقص»",
+    en: "How to compensate — a shoot and wording list, not a “missing” wall",
   },
   "diagnosis.missingCompact": {
     he: "שדות שטרם מולאו (סריקה דקה)",
     ar: "حقول لم تُملأ بعد (مسح رقيق)",
     en: "Fields still empty (thin scan)",
+  },
+  "diagnosis.laterOptional": {
+    he: "מספרים אופציונליים — בלי ניחוש ROAS",
+    ar: "أرقام اختيارية — بلا تخمين ROAS",
+    en: "Optional numbers — no ROAS guessing",
+  },
+  "diagnosis.photoOffer": {
+    he: "בחרו תמונות חיות לפי הנושא — לפני אישור האבחון",
+    ar: "اختاروا صور حيّة حسب الموضوع — قبل اعتماد التشخيص",
+    en: "Pick live on-topic photos — before approving diagnosis",
+  },
+  "interview.guidance": {
+    he: "השדות הצבעוניים הם הדרכה. הלבנים ניתנים לעריכה. מספרים ריקים = לא ננחש.",
+    ar: "الحقول الملوّنة إرشاد. البيضاء قابلة للتعديل. الأرقام الفاضية = مش رح نخمن.",
+    en: "Tinted cards are guidance. White fields are editable. Empty numbers = we will not guess.",
+  },
+  "wizard.formHint": {
+    he: "הקלידו מה שנסרק או מה שאתם יודעים. ריק זה בסדר — נפצה ברעיונות, לא במספרים.",
+    ar: "اكتبوا اللي انمسح أو اللي بتعرفوه. الفاضي تمام — نعوّض بأفكار مش بأرقام.",
+    en: "Type what was scanned or what you know. Empty is fine — we compensate with ideas, not numbers.",
   },
   "interview.model": { he: "מודל עסקי (איך מרוויחים, מה נחשב ליד)", ar: "نموذج العمل", en: "Business model (how you earn, what a lead is)" },
   "interview.aov": { he: "ערך הזמנה / ביקור ממוצע (₪)", ar: "متوسط قيمة الطلب (₪)", en: "Average order / visit value (₪)" },

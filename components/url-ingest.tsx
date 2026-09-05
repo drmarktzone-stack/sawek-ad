@@ -281,7 +281,7 @@ export function UrlIngest() {
   return (
     <div
       className={cn(
-        "border-b border-gold/30 bg-[#F7F3EA]/95 supports-[backdrop-filter]:bg-[#F7F3EA]/85",
+        "border-b border-white/10 bg-[#08111F]",
         home ? "px-3 py-3" : "px-3 py-2 sm:py-1.5",
       )}
     >
@@ -293,11 +293,11 @@ export function UrlIngest() {
         )}
       >
         <div className="flex min-w-0 flex-1 items-center gap-2">
-          <Globe className={cn("shrink-0 text-gold", home ? "size-5" : "size-4")} aria-hidden />
+          <Globe className={cn("shrink-0 text-[#9FD4C8]", home ? "size-5" : "size-4")} aria-hidden />
           <input
             dir="ltr"
             className={cn(
-              "w-full min-w-0 rounded-full border border-navy/15 bg-white px-4 text-[16px] text-foreground placeholder:text-muted outline-none focus:border-gold",
+              "w-full min-w-0 rounded-[12px] border border-white/15 bg-white px-4 text-[16px] text-ink placeholder:text-[#8794A3] outline-none focus:border-teal focus:shadow-[0_0_0_4px_rgba(12,122,107,0.22)]",
               home ? "h-12" : "h-11 sm:h-10 sm:text-sm",
             )}
             value={value}
@@ -312,6 +312,7 @@ export function UrlIngest() {
         </div>
         <Button
           type="submit"
+          variant="coral"
           size={home ? "default" : "sm"}
           disabled={busy}
           className={cn("shrink-0", "w-full min-h-12 sm:w-auto sm:min-h-0")}
@@ -320,7 +321,7 @@ export function UrlIngest() {
           {busy ? t("url.reading") : t("url.scan")}
         </Button>
       </form>
-      <p className={cn("mx-auto max-w-[92rem] text-sm text-muted", home ? "mt-1.5" : "mt-1 hidden sm:block")}>
+      <p className={cn("mx-auto max-w-[92rem] text-sm text-[#C9D0D8]", home ? "mt-1.5" : "mt-1 hidden sm:block")}>
         {t("url.hint")}
       </p>
       {error && <p className="mx-auto mt-1 max-w-[92rem] whitespace-pre-line text-xs font-semibold text-danger">{error}</p>}

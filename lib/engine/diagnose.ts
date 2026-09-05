@@ -7,6 +7,11 @@ import { coachIntake, stageToDiagnosisArea } from "./coach";
 
 const L = (he: string, ar: string, en: string): Record<Locale, string> => ({ he, ar, en });
 
+/** Empty-field shame is handled by gap compensation — do not repeat it as a diagnosis wall. */
+function isAbsenceCritique(he: string): boolean {
+  return /חסר שם|התיאור דל|חסר מיקום|ערוצים לא סומנו|אין תמונה/.test(he);
+}
+
 export function diagnose(intake: Intake, report: IntakeReport): Diagnosis {
   const hypotheses: DiagnosisHypothesis[] = [];
   const pastCreativeBlob = (intake.pastCreatives ?? [])
@@ -90,15 +95,15 @@ export function diagnose(intake: Intake, report: IntakeReport): Diagnosis {
       area: "targeting",
       confidence: "high",
       finding: L(
-        "חסר מיקום — טירגוט מקומי בלי אזור הוא ניחוש, ולכן לא ייקבע רדיוס.",
-        "الموقع ناقص — استهداف محلي بلا منطقة تخمين، لذلك لن يُحدد نطاق.",
-        "Location is missing — local targeting without an area is a guess, so no radius will be set.",
+        "בלי כתובת — מובילים בזווית מקום כשאלה, לא ברדיוס בדוי.",
+        "بلا عنوان — نقود بزاوية مكان كسؤال، مش بنطاق مختلق.",
+        "No address — lead with a place-angle question, never a fake radius.",
       ),
-      evidence: L("שדה מיקום ריק.", "حقل الموقع فارغ.", "Location field is empty."),
+      evidence: L("שדה מיקום ריק — לא יומצא רדיוס.", "حقل الموقع فارغ — لن يُخترع نطاق.", "Location field is empty — no radius will be invented."),
       recommendation: L(
-        "הוסיפו עיר / אשכול יישובים לפני קניית מדיה.",
-        "أضيفوا مدينة / مجموعة بلدات قبل شراء الميديا.",
-        "Add a city / cluster of towns before any media buy.",
+        "לצלם חזית/רחוב (בלי פנים) או להוסיף עיר לפני קניית מדיה.",
+        "صوّروا الواجهة/الشارع (بلا وجوه) أو أضيفوا بلدة قبل شراء الميديا.",
+        "Film facade/street (no faces) or add a town before any media buy.",
       ),
     });
   }
@@ -108,15 +113,15 @@ export function diagnose(intake: Intake, report: IntakeReport): Diagnosis {
       area: "creative",
       confidence: "low",
       finding: L(
-        "אין היסטוריית מודעות — אי אפשר לדעת מה נכשל. האבחון הוא כיוון עבודה, לא פסק דין.",
-        "لا تاريخ إعلانات — لا يمكن معرفة ما فشل. التشخيص اتجاه عمل لا حكم.",
-        "No ad history — we cannot know what failed. This diagnosis is a working direction, not a verdict.",
+        "אין היסטוריית מודעות — נבנה מכאן עם עובדות שיש, לא עם פסק דין.",
+        "لا تاريخ إعلانات — نبني من الحقائق الموجودة، مش حكم.",
+        "No ad history — we build from facts you have, not a verdict.",
       ),
-      evidence: L("מודעות קודמות לא מולאו.", "الإعلانات السابقة غير مملوءة.", "Past ads were not filled in."),
+      evidence: L("מודעות קודמות לא מולאו — זה תקין לסריקה ראשונה.", "الإعلانات السابقة غير مملوءة — سليم لمسح أول.", "Past ads were not filled in — fine for a first scan."),
       recommendation: L(
-        "שמרו צילומי מודעות הבאים (טקסט, קהל, הוצאה, תוצאה) כדי שהאבחון הבא יהיה מבוסס.",
-        "احفظوا لقطات الإعلانات القادمة (نص، جمهور، إنفاق، نتيجة).",
-        "Keep screenshots of the next ads (copy, audience, spend, result) so the next diagnosis is grounded.",
+        "לצלם מקום/מוצר השבוע; לשמור צילומי המודעות הבאות (טקסט, קהל, הוצאה, תוצאה).",
+        "صوّروا مكان/منتج هالأسبوع؛ احفظوا لقطات الإعلانات الجاية.",
+        "Photograph place/product this week; keep screenshots of the next ads (copy, audience, spend, result).",
       ),
     });
   } else if (/לא נמדד|not measured|لم يُقس|אין מספר/.test(past)) {
@@ -190,6 +195,8 @@ export function diagnose(intake: Intake, report: IntakeReport): Diagnosis {
 
   const coach = coachIntake(intake);
   for (const c of coach.critiques) {
+    // Gap compensation + photo offer already cover empty-field shame. Keep quality critiques only.
+    if (isAbsenceCritique(c.finding.he)) continue;
     hypotheses.push({
       area: stageToDiagnosisArea(c.stage),
       confidence: "medium",
@@ -204,15 +211,15 @@ export function diagnose(intake: Intake, report: IntakeReport): Diagnosis {
       area: "funnel",
       confidence: "low",
       finding: L(
-        "אין מספיק ראיות לכישלון ספציפי. נבנה קמפיין מהנתונים שכן ניתנו, ונסמן חוסרים.",
-        "لا أدلة كافية على فشل محدد. سنبني من المعطيات المتوفرة ونؤشر النواقص.",
-        "Not enough evidence of a specific failure. We will build from what was given and flag gaps.",
+        "אין ראיות לכישלון ספציפי — נבנה מהעובדות שיש, עם רשימת צילום במקום ניחוש מדדים.",
+        "لا أدلة على فشل محدد — نبني من الحقائق الموجودة، مع قائمة تصوير بدل تخمين مقاييس.",
+        "No evidence of a specific failure — we build from facts you have, with a shoot list instead of guessed metrics.",
       ),
-      evidence: L("שדות היסטוריה דלים.", "حقول التاريخ ضعيفة.", "History fields are thin."),
+      evidence: L("סריקה דקה — זה בסיס עבודה, לא פסק דין.", "مسح رقيق — أساس عمل لا حكم.", "Thin scan — a working base, not a verdict."),
       recommendation: L(
-        "אשרו את האבחון הזה כבסיס עבודה, לא כעובדה.",
-        "اعتمدوا هذا التشخيص كأساس عمل لا كحقيقة.",
-        "Approve this diagnosis as a working base, not as fact.",
+        "אשרו כבסיס עבודה. התחילו בתמונות מקום/מוצר ובמשפט יתרון אחד.",
+        "اعتمدوا كأساس عمل. ابدأوا بصور مكان/منتج وجملة ميزة واحدة.",
+        "Approve as a working base. Start with place/product photos and one advantage line.",
       ),
     });
   }

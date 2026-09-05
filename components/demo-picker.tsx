@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { useI18n } from "@/components/i18n-provider";
 import { DEMO_CATALOG, catalogIntake, DEMO_ID } from "@/lib/demo-catalog";
 import { demoIntake } from "@/lib/demo";
@@ -13,10 +12,18 @@ type Props = {
   onSelect?: (idOrSlug: string) => void;
   className?: string;
   size?: "default" | "lg" | "sm";
+  tone?: "light" | "ink";
 };
 
-export function DemoPicker({ onSelect, className, size = "lg" }: Props) {
+const TILE: Record<string, { wash: string; mark: string }> = {
+  clinic: { wash: "from-[#0C7A6B] via-[#0A4F4A] to-[#08111F]", mark: "מרפאה" },
+  restaurant: { wash: "from-[#C9B896] via-[#6B5A3A] to-[#1A1610]", mark: "מטבח" },
+  retail: { wash: "from-[#E24B3A] via-[#8A2E26] to-[#140A09]", mark: "בוטיק" },
+};
+
+export function DemoPicker({ onSelect, className, tone = "light" }: Props) {
   const { locale } = useI18n();
+  const ink = tone === "ink";
 
   const ideaNamesById = useMemo(() => {
     const map: Record<string, string[]> = {};
@@ -31,45 +38,52 @@ export function DemoPicker({ onSelect, className, size = "lg" }: Props) {
   }, [locale]);
 
   return (
-    <div className={cn("flex w-full max-w-3xl flex-col items-stretch gap-2 sm:items-center", className)}>
-      <p className="text-center text-sm font-bold text-navy/70">
+    <div className={cn("flex w-full max-w-4xl flex-col items-stretch gap-3", className)}>
+      <p className={cn("text-center text-sm font-bold", ink ? "text-[#C9D0D8]" : "text-navy/70")}>
         {locale === "he" ? "בחרו הדגמה" : locale === "ar" ? "اختاروا عرضاً" : "Choose a demo"}
       </p>
-      <div className="flex flex-wrap items-center justify-center gap-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         {DEMO_CATALOG.map((d) => {
           const ideas = ideaNamesById[d.id] ?? [];
+          const theme = TILE[d.kind] ?? TILE.clinic;
           return (
-            <Button
+            <button
               key={d.id}
               type="button"
-              size={size}
-              variant={d.fictional ? "outline" : "coral"}
               data-demo={d.slug}
-              className="h-auto max-w-full whitespace-normal px-4 py-2.5 text-start text-sm font-black sm:text-base"
               onClick={() => {
                 if (onSelect) onSelect(d.id);
                 else startDemoFlow(d.id, locale);
               }}
               title={d.labels[locale]}
+              className={cn(
+                "group relative overflow-hidden rounded-[20px] border p-0 text-start shadow-[var(--shadow-card)] transition hover:-translate-y-1 hover:shadow-[var(--shadow-lift)]",
+                ink ? "border-white/12" : "border-[rgba(8,17,31,0.1)]",
+              )}
             >
-              <span className="flex flex-col gap-0.5">
-                <span>{d.shortLabels[locale]}</span>
-                {d.fictional ? (
-                  <span className="text-[11px] font-semibold opacity-70">
-                    {locale === "he" ? "בדיוני · לדוגמה" : locale === "ar" ? "خيالي · للعرض" : "Fictional · sample"}
-                  </span>
-                ) : (
-                  <span className="text-[11px] font-semibold opacity-70">
-                    {locale === "he" ? "מרפאה אמיתית" : locale === "ar" ? "عيادة حقيقية" : "Real clinic"}
-                  </span>
-                )}
+              <div className={cn("relative min-h-[11.5rem] bg-gradient-to-br px-4 py-4 text-[#F7F3EA]", theme.wash)}>
+                <p className="text-[0.68rem] font-black uppercase tracking-[0.22em] text-white/70">
+                  {d.fictional
+                    ? locale === "he"
+                      ? "בדיוני · לדוגמה"
+                      : locale === "ar"
+                        ? "خيالي · للعرض"
+                        : "Fictional · sample"
+                    : locale === "he"
+                      ? "מרפאה אמיתית"
+                      : locale === "ar"
+                        ? "عيادة حقيقية"
+                        : "Real clinic"}
+                </p>
+                <p className="agency-display-cream mt-3 text-2xl leading-tight">{d.shortLabels[locale]}</p>
                 {ideas.length > 0 ? (
-                  <span className="mt-1 text-[11px] font-semibold leading-snug opacity-80">
-                    {ideas.join(" · ")}
-                  </span>
+                  <p className="mt-3 text-[13px] font-semibold leading-snug text-white/80">{ideas.join(" · ")}</p>
                 ) : null}
-              </span>
-            </Button>
+                <span className="absolute bottom-3 end-3 text-[11px] font-black uppercase tracking-[0.16em] text-white/45">
+                  SAWEK
+                </span>
+              </div>
+            </button>
           );
         })}
       </div>
