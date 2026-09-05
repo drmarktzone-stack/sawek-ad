@@ -4,8 +4,7 @@ import { useI18n } from "@/components/i18n-provider";
 import { ConquerHeadline } from "@/components/stepper";
 import { LangLink } from "@/components/lang-link";
 import { Button } from "@/components/ui/button";
-import { DEMO_LABEL } from "@/lib/demo";
-import { startPediatricDemoFlow } from "@/lib/start-pediatric-demo";
+import { DemoPicker } from "@/components/demo-picker";
 
 export function AboutPage() {
   const { locale, t } = useI18n();
@@ -150,9 +149,7 @@ export function AboutPage() {
         </p>
 
         <div className="mb-8 flex flex-wrap items-center justify-center gap-3">
-          <Button type="button" size="lg" variant="coral" onClick={() => startPediatricDemoFlow(locale)}>
-            {DEMO_LABEL[locale]}
-          </Button>
+          <DemoPicker />
           <Button asChild size="lg">
             <LangLink href="/">{t("cta.new")}</LangLink>
           </Button>

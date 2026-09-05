@@ -12,6 +12,7 @@ import { coachIntake } from "./coach";
 import { buildSiteAudit } from "./site-audit";
 import { buildPastCampaignAudit, overlayPastCampaignAudit, creativesToPosts } from "./past-campaign-audit";
 import { demoIntake, DEMO_ID } from "../demo";
+import { demoMetaFor } from "../demo-catalog";
 import { loadLocale } from "../storage";
 
 export const AGENT_ORDER: AgentId[] = [
@@ -197,8 +198,10 @@ export function assemblePack(
   return { ...base, agency: buildAgency(base) };
 }
 
-export function buildDemoPack(): CampaignPack {
-  const intake = demoIntake(typeof window !== "undefined" ? loadLocale() : "he");
+/** Clinic Demo-button pack only. Pizza / Aluf live in public/packs/published.json. */
+export function buildDemoPack(_idOrSlug: string = DEMO_ID): CampaignPack {
+  const locale = typeof window !== "undefined" ? loadLocale() : "he";
+  const intake = demoIntake(locale);
   const report = validateIntake(intake);
   const diagnosis: Diagnosis = {
     ...diagnose(intake, report),
@@ -225,5 +228,11 @@ export function buildDemoPack(): CampaignPack {
     },
     id: DEMO_ID,
   });
-  return { ...pack, saved: true, planActivated: true, name: intake.businessName };
+  return {
+    ...pack,
+    saved: true,
+    planActivated: true,
+    name: intake.businessName,
+    demoMeta: demoMetaFor(DEMO_ID),
+  };
 }

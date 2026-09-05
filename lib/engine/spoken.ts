@@ -319,8 +319,24 @@ export function spokenCta(intake: Intake, locale: Locale): string {
   if (isWalkIn(intake)) {
     return visitCta(intake, locale);
   }
+  // Restaurant / retail before "bookings" goal — chip id "bookings" matches /book/ and wrongly became "Book an appointment".
+  if (detectVertical(intake) === "restaurant") {
+    if (intake.website?.trim()) {
+      return locale === "he" ? "להזמנה באתר" : locale === "ar" ? "للطلب بالموقع" : "Order on the site";
+    }
+    if (waBit(intake)) {
+      return locale === "he" ? "הזמינו בטלפון" : locale === "ar" ? "اطلبوا عالهاتف" : "Order by phone";
+    }
+    return visitCta(intake, locale);
+  }
+  if (detectVertical(intake) === "retail") {
+    if (intake.website?.trim()) {
+      return locale === "he" ? "לקנייה באתר" : locale === "ar" ? "للشراء بالموقع" : "Shop on the site";
+    }
+    return visitCta(intake, locale);
+  }
   const g = (resolveChipLabel(intake.mainGoal, GOAL_CHIPS, locale) || intake.mainGoal).toLowerCase();
-  if (/תור|מועד|book|موعد|حجز/.test(g)) {
+  if ((/(?:^|\s)(?:תור|מועד|موعد|حجز)(?:\s|$)|\bbook(?:ing|ings)?\b|\bappointment\b/.test(g)) && detectVertical(intake) === "clinic") {
     return locale === "he" ? "קבעו תור" : locale === "ar" ? "احجزوا موعد" : "Book an appointment";
   }
   if (/הורד|install|تنزي/.test(g)) {
@@ -334,18 +350,6 @@ export function spokenCta(intake: Intake, locale: Locale): string {
       return locale === "he" ? "לאתר" : locale === "ar" ? "للموقع" : "Visit the site";
     }
     return locale === "he" ? "להורדה" : locale === "ar" ? "حمّلوا التطبيق" : "Download the app";
-  }
-  if (detectVertical(intake) === "restaurant") {
-    if (intake.website?.trim()) {
-      return locale === "he" ? "להזמנה באתר" : locale === "ar" ? "للطلب بالموقع" : "Order on the site";
-    }
-    if (waBit(intake)) {
-      return locale === "he" ? "הזמינו בטלפון" : locale === "ar" ? "اطلبوا عالهاتف" : "Order by phone";
-    }
-    return visitCta(intake, locale);
-  }
-  if (detectVertical(intake) === "retail") {
-    return visitCta(intake, locale);
   }
   if (intake.website?.trim()) {
     return locale === "he" ? "לאתר" : locale === "ar" ? "للموقع" : "Visit the site";
@@ -368,7 +372,11 @@ function placeBit(intake: Intake, locale: Locale): string {
 /** Prefer intake.whatsapp; else labeled phone/WhatsApp in description. Never invent. */
 export function contactNumber(intake: Intake): string {
   const direct = intake.whatsapp?.trim() || "";
-  if (direct) return direct;
+  if (direct) {
+    // Ingest may join several numbers with · — ads/WhatsApp use the first usable one.
+    const first = direct.split(/\s*[·|,;]\s*/).map((s) => s.trim()).find((s) => /\d{7,}/.test(s));
+    return first || direct;
+  }
   const desc = `${intake.description || ""}\n${intake.channelNotes || ""}`;
   const labeled =
     desc.match(/(?:whatsapp|וואטסאפ|واتساب|phone|tel(?:ephone)?|טלפון|هاتف)\s*[:：]\s*([+\d][\d\-–.\s]{6,24}\d)/i) ||

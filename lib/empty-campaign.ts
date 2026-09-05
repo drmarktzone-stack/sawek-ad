@@ -1,6 +1,7 @@
 import { saveDraft, type DraftState } from "./storage";
 import { emptyIntake } from "./engine/validate";
-import { intakeIsClinicDemo, isBlockedEmptySessionName } from "./clinic-leak";
+import { intakeIsClinicDemo, intakeIsDemoBusiness, isBlockedEmptySessionName } from "./clinic-leak";
+import { demoEntry } from "./demo-catalog";
 
 export const EMPTY_CAMPAIGN_KEY = "sawek-empty-campaign";
 export const EMPTY_CAMPAIGN_EVENT = "sawek-empty-campaign";
@@ -92,14 +93,26 @@ export function applyEmptyCampaignHydrate(): DraftState {
   return draft;
 }
 
-/** Explicit demo click: `?demo=samer` in the URL. Session leftovers do not count. */
+/** Explicit demo click: `?demo=samer|olive|sand`. Session leftovers do not count. */
 export function explicitDemoInUrl(): boolean {
   try {
     if (typeof window === "undefined") return false;
     const q = new URLSearchParams(window.location.search).get("demo");
-    return q === "samer" || q === "peds";
+    return Boolean(demoEntry(q));
   } catch {
     return false;
+  }
+}
+
+/** Active demo slug/id from URL, if any. */
+export function demoParamFromUrl(): string | null {
+  try {
+    if (typeof window === "undefined") return null;
+    const q = new URLSearchParams(window.location.search).get("demo");
+    const entry = demoEntry(q);
+    return entry ? entry.slug : null;
+  } catch {
+    return null;
   }
 }
 
@@ -107,7 +120,7 @@ export function shouldSaveEmptyOnly(intake: { businessName?: string; website?: s
   if (!wantsEmptyCampaign()) return false;
   const name = String(intake.businessName ?? "").trim();
   if (!name) return true;
-  return intakeIsClinicDemo(intake as never) || isBlockedEmptySessionName(name);
+  return intakeIsDemoBusiness(intake as never) || isBlockedEmptySessionName(name);
 }
 
-export { intakeIsClinicDemo, isBlockedEmptySessionName };
+export { intakeIsClinicDemo, intakeIsDemoBusiness, isBlockedEmptySessionName };

@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import type { AgentId, CampaignPack, Locale } from "@/lib/types";
 import { installDemoPack, latestPack } from "@/lib/active-pack";
+import { DemoPicker } from "@/components/demo-picker";
 import { LOCALES } from "@/lib/i18n";
 import { useI18n } from "@/components/i18n-provider";
 import { useIsClient } from "@/lib/use-is-client";
@@ -129,8 +130,8 @@ export function DepartmentShell({
     setPackLang(locale);
   }, [locale]);
 
-  function loadDemo() {
-    const next = installDemoPack();
+  function loadDemo(idOrSlug: string = "samer") {
+    const next = installDemoPack(idOrSlug);
     setPack(next);
   }
 
@@ -145,10 +146,8 @@ export function DepartmentShell({
       {booted && !pack && (
         <div className="rounded-2xl border border-navy/10 bg-white p-8 text-center">
           <p className="text-muted">{t("dept.empty")}</p>
-          <div className="mt-5 flex flex-wrap justify-center gap-3">
-            <Button type="button" onClick={loadDemo}>
-              {t("dept.loadDemo")}
-            </Button>
+          <div className="mt-5 flex flex-col items-center gap-3">
+            <DemoPicker onSelect={(id) => loadDemo(id)} size="default" />
             <Button asChild variant="dark">
               <LangLink href="/">{t("nav.build")}</LangLink>
             </Button>
@@ -167,7 +166,7 @@ export function DepartmentShell({
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <PackLangToggle value={packLang} onChange={setPackLang} />
-              <Button type="button" size="sm" variant="dark" onClick={loadDemo}>
+              <Button type="button" size="sm" variant="dark" onClick={() => loadDemo()}>
                 {t("dept.loadDemo")}
               </Button>
               <Button asChild size="sm" variant="outline">

@@ -4,8 +4,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Trash2, WandSparkles } from "lucide-react";
 import type { AgentId, AgentStatus, CampaignPack, Competitor, Intake, WizardStep } from "@/lib/types";
-import { demoIntake, DEMO_LABEL, consumePendingDemo, clearPendingDemo, applyPediatricDemoDraft, isPediatricDemo, relocalizePediatricIntake, canonicalDoctorName } from "@/lib/demo";
+import { demoIntake, consumePendingDemo, clearPendingDemo, applyPediatricDemoDraft, applyCatalogDemoDraft, isPediatricDemo, relocalizePediatricIntake, relocalizeCatalogIntake, canonicalDoctorName, resolvePendingDemoId } from "@/lib/demo";
 import { installDemoPack } from "@/lib/active-pack";
+import { DemoPicker } from "@/components/demo-picker";
 import { cmoFieldsMissing, emptyIntake, wizardMissingFields, wizardReady } from "@/lib/engine/validate";
 import { assemblePack, idleStatus, overlayPackAgency, runIntakeAndDiagnosis, runMedia, runOptimizerStage, runStrategic } from "@/lib/engine/run";
 import { loadDraft, saveDraft, getCampaign, INGEST_APPLIED_EVENT } from "@/lib/storage";
@@ -13,7 +14,7 @@ import { syncCampaign } from "@/lib/supabase";
 import { uid } from "@/lib/utils";
 import { MAX_COMPETITORS } from "@/lib/factory-formats";
 import { AREA_LABEL } from "@/lib/i18n";
-import { markEmptyCampaign, wantsEmptyCampaign, clearEmptyCampaign, explicitDemoInUrl, applyEmptyCampaignHydrate, EMPTY_CAMPAIGN_EVENT, releaseEmptyIfTypedName } from "@/lib/empty-campaign";
+import { markEmptyCampaign, wantsEmptyCampaign, clearEmptyCampaign, explicitDemoInUrl, demoParamFromUrl, applyEmptyCampaignHydrate, EMPTY_CAMPAIGN_EVENT, releaseEmptyIfTypedName } from "@/lib/empty-campaign";
 import { isBlockedEmptySessionName } from "@/lib/clinic-leak";
 import { stripDemoParamsPreserveLang, withLang } from "@/lib/locale-url";
 import {
@@ -95,7 +96,10 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
     const urlDemo = !emptyWanted && (explicitDemoInUrl() || consumePendingDemo());
     if (urlDemo) {
       demoConsumed.current = true;
-      const d = demoIntake(locale);
+      const demoId = resolvePendingDemoId() || demoParamFromUrl() || "samer";
+      const d =
+        applyCatalogDemoDraft(demoId, locale) ||
+        demoIntake(locale);
       clearPendingDemo();
       clearEmptyCampaign();
       saveDraft({ intake: d, step: 2, phase: "wizard" });
@@ -106,7 +110,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
         problem: true,
         advantage: true,
         goal: false,
-        offer: false,
+        offer: d.offerCustom,
       });
       setPhase("wizard");
     } else if (emptyWanted) {
@@ -124,7 +128,10 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
         ? d.intake
         : isPediatricDemo(d.intake)
           ? relocalizePediatricIntake(d.intake, locale)
-          : { ...d.intake, businessName: canonicalDoctorName(d.intake.businessName) };
+          : relocalizeCatalogIntake(
+              { ...d.intake, businessName: canonicalDoctorName(d.intake.businessName) },
+              locale,
+            );
       setIntake(intake);
       setStep(d.step);
       setCustom({
@@ -305,7 +312,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
     [intake, locale, t],
   );
 
-  function applyDemo() {
+  function applyDemo(_idOrSlug: string = "samer") {
     clearEmptyCampaign();
     const d = applyPediatricDemoDraft(locale);
     installDemoPack();
@@ -325,7 +332,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
   }
 
   function loadDemo() {
-    applyDemo();
+    applyDemo("samer");
   }
 
   function newCampaign() {
@@ -460,41 +467,19 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
     <div className={embedded ? "mx-auto w-full min-w-0 max-w-3xl px-3 py-5 sm:px-4 sm:py-8" : "mx-auto w-full min-w-0 max-w-3xl px-3 py-6 sm:px-4 sm:py-12"}>
       {!embedded && <DepartmentRail />}
       {embedded ? (
-        <div className="mb-6 flex flex-col items-center gap-2">
-          <div className="flex flex-wrap items-center justify-center gap-2">
-            <Button
-              type="button"
-              size="lg"
-              variant="coral"
-              data-demo="pediatric"
-              className="h-auto max-w-full whitespace-normal py-2 text-start font-black"
-              onClick={loadDemo}
-            >
-              {DEMO_LABEL[locale]}
-            </Button>
-            <Button type="button" size="lg" onClick={newCampaign}>
-              {t("cta.new")}
-            </Button>
-          </div>
+        <div className="mb-6 flex flex-col items-center gap-3">
+          <DemoPicker onSelect={(id) => applyDemo(id)} />
+          <Button type="button" size="lg" onClick={newCampaign}>
+            {t("cta.new")}
+          </Button>
           <p className="max-w-md text-center text-sm text-muted">{t("cta.newHint")}</p>
         </div>
       ) : (
-        <div className="mb-6 flex flex-col items-center gap-2">
-          <div className="flex flex-wrap items-center justify-center gap-2">
-            <Button
-              type="button"
-              size="lg"
-              variant="coral"
-              data-demo="pediatric"
-              className="h-auto max-w-full whitespace-normal py-2 text-start font-black"
-              onClick={loadDemo}
-            >
-              {DEMO_LABEL[locale]}
-            </Button>
-            <Button type="button" size="lg" onClick={newCampaign}>
-              {t("cta.new")}
-            </Button>
-          </div>
+        <div className="mb-6 flex flex-col items-center gap-3">
+          <DemoPicker onSelect={(id) => applyDemo(id)} />
+          <Button type="button" size="lg" onClick={newCampaign}>
+            {t("cta.new")}
+          </Button>
           <p className="max-w-md text-center text-sm text-muted">{t("cta.newHint")}</p>
         </div>
       )}

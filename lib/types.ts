@@ -405,6 +405,14 @@ export interface CampaignPack {
   featureType?: LabFeatureType;
   lab?: LabRun[];
   clientId?: string;
+  /** Product demo / sample pack markers (clinic real; others fictional samples). */
+  demoMeta?: {
+    sample: true;
+    fictional: boolean;
+    kind: "clinic" | "restaurant" | "retail" | string;
+    labels?: Record<Locale, string>;
+    note?: Record<Locale, string>;
+  };
 }
 
 export type Tri = Record<Locale, string>;

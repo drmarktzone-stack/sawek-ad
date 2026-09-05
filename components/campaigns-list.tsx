@@ -6,6 +6,7 @@ import { deleteCampaign, loadCampaigns } from "@/lib/storage";
 import { cachedPublished, fetchPublishedPacks, mergeCampaigns } from "@/lib/published-packs";
 import { installDemoPack } from "@/lib/active-pack";
 import { markEmptyCampaign } from "@/lib/empty-campaign";
+import { DemoPicker } from "@/components/demo-picker";
 import { LangLink } from "@/components/lang-link";
 import { ensureAgency } from "@/lib/engine/agency";
 import { printBible, printPdf } from "@/lib/export";
@@ -66,8 +67,8 @@ export function CampaignsList() {
     };
   }, [locale]);
 
-  function loadDemo() {
-    installDemoPack();
+  function loadDemo(idOrSlug: string = "samer") {
+    installDemoPack(idOrSlug);
     setList(mergedList());
   }
 
@@ -86,10 +87,8 @@ export function CampaignsList() {
       )}
       <SocialConnectStrip className="mb-6" />
 
-      <div className="mb-6 flex flex-wrap justify-center gap-2">
-        <Button type="button" onClick={loadDemo}>
-          {t("dept.loadDemo")}
-        </Button>
+      <div className="mb-6 flex flex-col items-center gap-3">
+        <DemoPicker onSelect={(id) => loadDemo(id)} />
         <Button asChild variant="dark">
           <LangLink href="/" onClick={() => markEmptyCampaign()}>{t("cta.new")}</LangLink>
         </Button>

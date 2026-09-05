@@ -1236,6 +1236,18 @@ export function parseFetchedHtml(
   const logo = extractLogoUrl(raw, finalUrl) || undefined;
   const colors = extractCssColors(raw, 5);
 
+  // Final pass: never leave ecommerce SEO titles as the business name.
+  if (fields.businessName && looksLikeSeoBusinessName(fields.businessName)) {
+    const shortened =
+      shortNameFromSeoTitle(fields.businessName) ||
+      shortNameFromSeoTitle(ogTitle || "") ||
+      shortNameFromSeoTitle(title || "") ||
+      (usableName(ogSiteName) && !looksLikeSeoBusinessName(ogSiteName) ? clip(ogSiteName, 80) : "");
+    if (shortened && usableName(shortened) && !looksLikeSeoBusinessName(shortened)) {
+      fields.businessName = shortened;
+    }
+  }
+
   const out: UrlIngestOk = {
     ok: true,
     url: siteUrl.split("#")[0],

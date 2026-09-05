@@ -4,9 +4,8 @@ import { useEffect, useState } from "react";
 import { Download, Images, Languages, Link2, Search, ShieldAlert, Sparkles, Workflow } from "lucide-react";
 import { WizardFlow } from "@/components/wizard-flow";
 import { useI18n } from "@/components/i18n-provider";
-import { DEMO_LABEL } from "@/lib/demo";
-import { startPediatricDemoFlow } from "@/lib/start-pediatric-demo";
 import { markEmptyCampaign, EMPTY_CAMPAIGN_EVENT } from "@/lib/empty-campaign";
+import { DemoPicker } from "@/components/demo-picker";
 import { Button } from "@/components/ui/button";
 import { PwaInstallHint } from "@/components/pwa-install-hint";
 import { FunctionRail } from "@/components/function-rail";
@@ -22,10 +21,6 @@ export function HomeStudio() {
     window.addEventListener(EMPTY_CAMPAIGN_EVENT, onEmpty);
     return () => window.removeEventListener(EMPTY_CAMPAIGN_EVENT, onEmpty);
   }, []);
-
-  function runDemo() {
-    startPediatricDemoFlow(locale);
-  }
 
   function startEmpty() {
     markEmptyCampaign();
@@ -90,23 +85,16 @@ export function HomeStudio() {
           {t("home.vertex")}
         </p>
 
-        <div className="mobile-stack mt-8 sm:mt-9">
-          <Button
-            type="button"
-            size="lg"
-            variant="coral"
-            data-demo="clinic"
-            className="btn-mobile-full h-auto min-h-12 max-w-full whitespace-normal px-6 py-3.5 text-base font-black sm:min-h-14 sm:px-8 sm:text-lg"
-            onClick={runDemo}
-          >
-            {DEMO_LABEL[locale]}
-          </Button>
-          <Button type="button" size="lg" className="btn-mobile-full text-base font-black sm:text-lg" onClick={startEmpty}>
-            {t("cta.new")}
-          </Button>
-          <Button asChild size="lg" variant="outline" className="btn-mobile-full text-base font-black sm:text-lg">
-            <LangLink href="/pricing">{t("home.cta.pricing")}</LangLink>
-          </Button>
+        <div className="mt-8 flex flex-col items-center gap-4 sm:mt-9">
+          <DemoPicker />
+          <div className="mobile-stack w-full justify-center">
+            <Button type="button" size="lg" className="btn-mobile-full text-base font-black sm:text-lg" onClick={startEmpty}>
+              {t("cta.new")}
+            </Button>
+            <Button asChild size="lg" variant="outline" className="btn-mobile-full text-base font-black sm:text-lg">
+              <LangLink href="/pricing">{t("home.cta.pricing")}</LangLink>
+            </Button>
+          </div>
         </div>
         <p className="mx-auto mt-3 max-w-md text-center text-base text-muted">{t("cta.newHint")}</p>
         <p className="mx-auto mt-5 max-w-xl text-center text-base leading-relaxed text-muted">{t("home.truth")}</p>

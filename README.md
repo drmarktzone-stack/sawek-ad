@@ -25,11 +25,15 @@ This agent listed that account with the **unauthenticated public GitHub API**. G
 
 Features were therefore merged from a **read-only** listing of Lovable project `1b75b82e-6b26-401e-aa7a-1ce137d0dfa8` (`name: opti-brain`, https://opti-brain.lovable.app). That Lovable project was **not** edited. To clone a private OptiBrain GitHub repo later, authenticate GitHub MCP or add a read-only `GH_TOKEN`.
 
-## Demo — clinic example only (any-business product; no keys)
+## Demo pack set (exactly 3)
 
-1. Open **OptiBrain** (`/medical/optibrain`) for the 15-module desk, or `/medical` for the clinic landing builder.
-2. On the homepage, click **הדגמה: מרפאת ילדים ד״ר סאמר אבו מוך** only when you want the demo. It is a button — it is **not** restored on reload if you chose **התחל קמפיין ריק** / **ابدأ حملة فارغة** or if the UI locale is Arabic. Unknown numbers stay empty / `[יש להשלים]` / `[يجب الاستكمال]`. Offer is **אין מבצע** / **لا يوجد عرض**.
-3. Advance Type → Business → Details → Review, then **בנה לי קמפיין מלא**. Approve the three HITL gates (diagnosis, strategy, media). Empty price/tech/success rate become markers. Ethics banner stays on copy and on `/lp/:slug`.
+1. **demo-samer-clinic** — real pediatric clinic (owner-approved).
+2. **demo-olive-kitchen** — fictional Mediterranean restaurant «מטבח הזית» / «مطبخ الزيتون» / Olive Kitchen in fictional **נווה שקד** (not a real brand).
+3. **demo-sand-boutique** — fictional clothing boutique «בוטיק חול» / «بوتيك الرمل» / Sand Boutique in fictional **עין ברק** (not a real brand).
+
+Homepage / wizard / campaigns expose all three as selectable demos. **New empty campaign** never auto-loads any demo. Only the clinic may be a real business demo — do not ship Pizza Hut, Aluf Sport, or other real brands without permission.
+
+`public/packs/published.json` contains only these three ids. Rebuild with `npx tsx scripts/publish-three-demos.ts` and QA with `npx tsx scripts/qa-three-demos.ts`.
 
 General 5-agent OmniAd flow is unchanged on `/`.
 

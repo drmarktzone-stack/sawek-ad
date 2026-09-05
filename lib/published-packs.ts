@@ -1,16 +1,14 @@
 import type { CampaignPack } from "./types";
 import { getCampaign, loadCampaigns } from "./storage";
-import { DEMO_ID } from "./demo";
+import { PUBLISHED_DEMO_ID_SET } from "./demo-catalog";
 
-/** Customer-facing published demos: clinic only. */
-const ALLOWED_PUBLISHED_IDS = new Set<string>([DEMO_ID]);
+/** Customer-facing published demos: clinic + two fictional sample businesses. */
+function onlyAllowedDemos(packs: CampaignPack[]): CampaignPack[] {
+  return packs.filter((p) => PUBLISHED_DEMO_ID_SET.has(p.id));
+}
 
 let cache: CampaignPack[] | null = null;
 let inflight: Promise<CampaignPack[]> | null = null;
-
-function onlyClinicDemo(packs: CampaignPack[]): CampaignPack[] {
-  return packs.filter((p) => ALLOWED_PUBLISHED_IDS.has(p.id));
-}
 
 export function cachedPublished(): CampaignPack[] {
   return cache ?? [];
@@ -34,7 +32,7 @@ export async function fetchPublishedPacks(): Promise<CampaignPack[]> {
       }
       const data: unknown = await res.json();
       const raw = Array.isArray(data) ? (data as CampaignPack[]) : [];
-      cache = onlyClinicDemo(raw);
+      cache = onlyAllowedDemos(raw);
       return cache;
     } catch {
       cache = [];
@@ -58,3 +56,4 @@ export async function getCampaignMerged(id: string): Promise<CampaignPack | unde
   const published = await fetchPublishedPacks();
   return published.find((c) => c.id === id);
 }
+

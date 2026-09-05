@@ -3,11 +3,13 @@ import { DEFAULT_OFFER_HE, defaultOfferLabel } from "./chips";
 import { saveDraft } from "./storage";
 import { clearEmptyCampaign } from "./empty-campaign";
 import DEMO_SNAPSHOT from "./demo-snapshot.json";
+import { demoEntry, DEMO_ID, DEMO_PIZZA_ID, DEMO_ALUF_ID, type DemoPackId } from "./demo-catalog";
 
-export const DEMO_ID = "demo-samer-clinic";
+export { DEMO_ID, DEMO_PIZZA_ID, DEMO_ALUF_ID } from "./demo-catalog";
+export type { DemoPackId } from "./demo-catalog";
+
 export const PENDING_DEMO_KEY = "sawek-pending-demo";
 
-/** Locked Arabic family name is أبو مخ — never أبو موخ. */
 export function canonicalDoctorName(name: string): string {
   return name.replaceAll("أبو موخ", "أبو مخ");
 }
@@ -23,7 +25,6 @@ function demoName(locale: Locale): string {
   return canonicalDoctorName(DEMO_SNAPSHOT.businessName);
 }
 
-/** Public facts only. No invented CAC, budget, patient counts, or ROAS. */
 export function demoIntake(locale: Locale = "he"): Intake {
   const s = DEMO_SNAPSHOT;
   return {
@@ -92,11 +93,31 @@ export function consumePendingDemo(): boolean {
   try {
     if (typeof window === "undefined") return false;
     const q = new URLSearchParams(window.location.search).get("demo");
-    if (q === "samer" || q === "peds") return true;
-    return false;
+    return Boolean(demoEntry(q)?.autoFill);
   } catch {
     return false;
   }
+}
+
+export function resolvePendingDemoId(): DemoPackId | null {
+  try {
+    if (typeof window === "undefined") return null;
+    const q = new URLSearchParams(window.location.search).get("demo");
+    const fromUrl = demoEntry(q);
+    if (fromUrl?.autoFill) return fromUrl.id;
+    const pending = sessionStorage.getItem(PENDING_DEMO_KEY);
+    const fromPending = demoEntry(pending);
+    return fromPending?.autoFill ? fromPending.id : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Auto-fill draft only for clinic. Pizza/Aluf are published packs only. */
+export function applyCatalogDemoDraft(idOrSlug: string, locale: Locale = "he"): Intake | null {
+  const entry = demoEntry(idOrSlug);
+  if (!entry?.autoFill) return null;
+  return applyPediatricDemoDraft(locale);
 }
 
 export function clearPendingDemo() {
@@ -118,12 +139,16 @@ export function isPediatricDemo(intake: Intake): boolean {
   );
 }
 
-/** If the draft is still the stock pediatric demo, swap the locale-facing name. Facts stay the scan snapshot. */
 export function relocalizePediatricIntake(intake: Intake, locale: Locale): Intake {
   if (!isPediatricDemo(intake)) {
     return { ...intake, businessName: canonicalDoctorName(intake.businessName) };
   }
-  const out: Intake = { ...demoIntake(locale), mediaAssets: intake.mediaAssets ?? [], ingestedDocs: intake.ingestedDocs ?? [], pastCreatives: intake.pastCreatives ?? [] };
+  const out: Intake = {
+    ...demoIntake(locale),
+    mediaAssets: intake.mediaAssets ?? [],
+    ingestedDocs: intake.ingestedDocs ?? [],
+    pastCreatives: intake.pastCreatives ?? [],
+  };
   out.businessName = canonicalDoctorName(demoName(locale));
   if (
     !intake.offer ||
@@ -137,4 +162,9 @@ export function relocalizePediatricIntake(intake: Intake, locale: Locale): Intak
     out.offer = intake.offer;
   }
   return out;
+}
+
+export function relocalizeCatalogIntake(intake: Intake, locale: Locale): Intake {
+  if (isPediatricDemo(intake)) return relocalizePediatricIntake(intake, locale);
+  return intake;
 }

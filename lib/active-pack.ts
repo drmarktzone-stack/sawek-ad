@@ -2,6 +2,7 @@ import type { CampaignPack } from "./types";
 import { ensureAgency } from "./engine/agency";
 import { buildDemoPack } from "./engine/run";
 import { loadCampaigns, upsertCampaign } from "./storage";
+import { DEMO_ID } from "./demo-catalog";
 
 export function latestPack(): CampaignPack | null {
   const list = loadCampaigns();
@@ -13,8 +14,8 @@ export function packById(id: string): CampaignPack | null {
   return found ? ensureAgency(found) : null;
 }
 
-export function installDemoPack(): CampaignPack {
-  const pack = buildDemoPack();
+export function installDemoPack(idOrSlug: string = DEMO_ID): CampaignPack {
+  const pack = buildDemoPack(idOrSlug);
   upsertCampaign(pack);
   return pack;
 }
