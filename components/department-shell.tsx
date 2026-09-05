@@ -132,7 +132,7 @@ export function DepartmentShell({
   }, [locale]);
 
   function loadDemo(idOrSlug: string = "samer") {
-    const next = installDemoPack(idOrSlug);
+    const next = installDemoPack(idOrSlug, packLang);
     setPack(next);
   }
 

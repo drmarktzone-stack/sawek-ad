@@ -7,7 +7,7 @@ import { oliveKitchenIntake, sandBoutiqueIntake, DEMO_ID, DEMO_OLIVE_ID, DEMO_SA
 import { demoIntake } from "../lib/demo";
 import { emptyIntake, validateIntake } from "../lib/engine/validate";
 import { generateVariants } from "../lib/engine/copy";
-import { assemblePack } from "../lib/engine/run";
+import { assemblePack, buildDemoPack } from "../lib/engine/run";
 import { diagnose } from "../lib/engine/diagnose";
 import { buildPostingCalendar } from "../lib/engine/posting-calendar";
 import { applyVoiceToIntake, voiceFromIntake, voiceIsSaved } from "../lib/engine/voice";
@@ -42,6 +42,16 @@ if (!voiceIsSaved(voiceFromIntake(clinic))) fail("clinic demo voice not saved");
 if (olive.voice?.dialect !== "he") fail(`olive he dialect ${olive.voice?.dialect}`);
 if (sand.voice?.dialect !== "en") fail(`sand en dialect ${sand.voice?.dialect}`);
 if (clinic.voice?.dialect !== "ar-levant") fail(`clinic ar dialect ${clinic.voice?.dialect}`);
+const oliveEn = oliveKitchenIntake("en");
+if (!/Mediterranean|Neve Shaked/i.test(oliveEn.voice?.niche ?? "")) {
+  fail(`olive EN voice not English: ${oliveEn.voice?.niche}`);
+}
+const oliveEnPack = buildDemoPack("olive", "en");
+if (!/Mediterranean|Neve Shaked/i.test(oliveEnPack.intake.voice?.niche ?? "")) {
+  fail(`buildDemoPack(olive, en) ignored locale: ${oliveEnPack.intake.voice?.niche}`);
+}
+const oliveArVoice = `${oliveKitchenIntake("ar").voice?.niche ?? ""} ${oliveKitchenIntake("ar").voice?.coreMessage ?? ""}`;
+if (!/متوسط|زيتون|حم/.test(oliveArVoice)) fail(`olive AR voice missing Arabic facts: ${oliveArVoice.slice(0, 80)}`);
 
 const blank = emptyIntake();
 if (voiceIsSaved(voiceFromIntake(blank))) fail("empty intake should not have a saved voice");

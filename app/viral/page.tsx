@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { CampaignPack, Locale } from "@/lib/types";
 import { latestPack } from "@/lib/active-pack";
 import { installDemoPack } from "@/lib/active-pack";
+import { isPublishedDemoId } from "@/lib/demo-catalog";
 import { DepartmentRail } from "@/components/department-shell";
 import { ViralDesk } from "@/components/viral-desk";
 import { DemoPicker } from "@/components/demo-picker";
@@ -13,7 +14,7 @@ import { useIsClient } from "@/lib/use-is-client";
 import { Button } from "@/components/ui/button";
 
 export default function ViralPage() {
-  const { t, locale } = useI18n();
+  const { t, locale, setLocale } = useI18n();
   const client = useIsClient();
   const [pack, setPack] = useState<CampaignPack | null>(null);
   const [booted, setBooted] = useState(false);
@@ -26,6 +27,14 @@ export default function ViralPage() {
     setBooted(true);
   }
 
+  function applyLang(l: Locale) {
+    setPackLang(l);
+    setLocale(l);
+    if (pack && isPublishedDemoId(pack.id)) {
+      setPack(installDemoPack(pack.id, l));
+    }
+  }
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <ConquerHeadline subtitle={t("nav.viral")} />
@@ -33,7 +42,7 @@ export default function ViralPage() {
       <DepartmentRail />
       <div className="mb-6 flex flex-col items-center gap-3">
         <p className="text-sm text-muted">{t("home.demos.secondary")}</p>
-        <DemoPicker onSelect={(id) => setPack(installDemoPack(id))} size="default" />
+        <DemoPicker onSelect={(id) => setPack(installDemoPack(id, packLang))} size="default" />
         {pack ? (
           <p className="text-sm font-bold text-navy">
             {pack.name} · {t("result.score")}: {pack.intakeReport.completeness}/100
@@ -44,7 +53,7 @@ export default function ViralPage() {
             <button
               key={l}
               type="button"
-              onClick={() => setPackLang(l)}
+              onClick={() => applyLang(l)}
               className={`rounded-full px-3 py-1 text-sm font-bold ${packLang === l ? "bg-navy text-white" : "text-muted"}`}
             >
               {l.toUpperCase()}
@@ -55,7 +64,7 @@ export default function ViralPage() {
           {t("cta.new")}
         </Button>
       </div>
-      <ViralDesk key={pack?.id ?? "draft"} pack={pack} packLang={packLang} onPack={setPack} />
+      <ViralDesk key={`${pack?.id ?? "draft"}-${packLang}`} pack={pack} packLang={packLang} onPack={setPack} />
     </div>
   );
 }

@@ -184,7 +184,7 @@ export function ResultView({
 
       <CmoIdeasStrip cmoIdeas={cmoIdeas} locale={packLang} />
 
-      <ViralDesk key={pack.id} pack={pack} packLang={packLang} onPack={onChange} embedded />
+      <ViralDesk key={`${pack.id}-${packLang}`} pack={pack} packLang={packLang} onPack={onChange} embedded />
 
       <ChannelPack
         pack={pack}
