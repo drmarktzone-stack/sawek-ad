@@ -1,4 +1,4 @@
-import { applyCatalogDemoDraft, applyPediatricDemoDraft } from "./demo";
+import { applyPediatricDemoDraft } from "./demo";
 import { installDemoPack } from "./active-pack";
 import { buildPediatricDemoCampaign, demoPediatricOpti } from "./medical/demo";
 import { demoPediatricDesk } from "./medical/opti-state";
@@ -10,7 +10,7 @@ import type { Locale } from "./types";
 
 function seedClinicMedical(locale: Locale) {
   applyPediatricDemoDraft(locale);
-  installDemoPack(DEMO_ID);
+  installDemoPack();
   const { clinic, campaign } = buildPediatricDemoCampaign();
   saveClinic(clinic);
   upsertMedCampaign(campaign);
@@ -21,19 +21,14 @@ function seedClinicMedical(locale: Locale) {
 export function seedDemo(idOrSlug: string, locale?: Locale) {
   const loc = locale ?? loadLocale();
   const entry = demoEntry(idOrSlug);
-  if (!entry) return;
-  if (entry.id === DEMO_ID) {
-    try {
-      seedClinicMedical(loc);
-    } catch (err) {
-      console.error("pediatric medical pack failed; wizard will still start", err);
-      applyPediatricDemoDraft(loc);
-      installDemoPack(DEMO_ID);
-    }
-    return;
+  if (!entry?.autoFill) return;
+  try {
+    seedClinicMedical(loc);
+  } catch (err) {
+    console.error("pediatric medical pack failed; wizard will still start", err);
+    applyPediatricDemoDraft(loc);
+    installDemoPack();
   }
-  applyCatalogDemoDraft(entry.id, loc);
-  installDemoPack(entry.id);
 }
 
 export function startDemoFlow(idOrSlug: string, locale?: Locale) {
@@ -41,8 +36,12 @@ export function startDemoFlow(idOrSlug: string, locale?: Locale) {
   const loc = locale ?? loadLocale();
   const entry = demoEntry(idOrSlug);
   if (!entry) return;
-  seedDemo(entry.id, loc);
-  window.location.assign(withLang(`/?demo=${entry.slug}`, loc));
+  if (entry.autoFill) {
+    seedDemo(entry.id, loc);
+    window.location.assign(withLang(`/?demo=${entry.slug}`, loc));
+    return;
+  }
+  window.location.assign(withLang(`/campaigns/${entry.id}`, loc));
 }
 
 export function startPediatricDemoFlow(locale?: Locale) {

@@ -3,16 +3,9 @@ import { DEFAULT_OFFER_HE, defaultOfferLabel } from "./chips";
 import { saveDraft } from "./storage";
 import { clearEmptyCampaign } from "./empty-campaign";
 import DEMO_SNAPSHOT from "./demo-snapshot.json";
-import {
-  catalogIntake,
-  demoEntry,
-  DEMO_ID,
-  DEMO_OLIVE_ID,
-  DEMO_SAND_ID,
-  type DemoPackId,
-} from "./demo-catalog";
+import { demoEntry, DEMO_ID, DEMO_PIZZA_ID, DEMO_ALUF_ID, type DemoPackId } from "./demo-catalog";
 
-export { DEMO_ID, DEMO_OLIVE_ID, DEMO_SAND_ID } from "./demo-catalog";
+export { DEMO_ID, DEMO_PIZZA_ID, DEMO_ALUF_ID } from "./demo-catalog";
 export type { DemoPackId } from "./demo-catalog";
 
 export const PENDING_DEMO_KEY = "sawek-pending-demo";
@@ -100,9 +93,7 @@ export function consumePendingDemo(): boolean {
   try {
     if (typeof window === "undefined") return false;
     const q = new URLSearchParams(window.location.search).get("demo");
-    if (demoEntry(q)) return true;
-    const pending = sessionStorage.getItem(PENDING_DEMO_KEY);
-    return Boolean(demoEntry(pending));
+    return Boolean(demoEntry(q)?.autoFill);
   } catch {
     return false;
   }
@@ -113,28 +104,20 @@ export function resolvePendingDemoId(): DemoPackId | null {
     if (typeof window === "undefined") return null;
     const q = new URLSearchParams(window.location.search).get("demo");
     const fromUrl = demoEntry(q);
-    if (fromUrl) return fromUrl.id;
+    if (fromUrl?.autoFill) return fromUrl.id;
     const pending = sessionStorage.getItem(PENDING_DEMO_KEY);
-    return demoEntry(pending)?.id ?? null;
+    const fromPending = demoEntry(pending);
+    return fromPending?.autoFill ? fromPending.id : null;
   } catch {
     return null;
   }
 }
 
+/** Auto-fill draft only for clinic. Pizza/Aluf are published packs only. */
 export function applyCatalogDemoDraft(idOrSlug: string, locale: Locale = "he"): Intake | null {
   const entry = demoEntry(idOrSlug);
-  if (!entry) return null;
-  if (entry.id === DEMO_ID) return applyPediatricDemoDraft(locale);
-  clearEmptyCampaign();
-  const intake = catalogIntake(entry.id, locale);
-  if (!intake) return null;
-  saveDraft({ intake, step: 2 });
-  try {
-    sessionStorage.setItem(PENDING_DEMO_KEY, entry.slug);
-  } catch {
-    /* private mode */
-  }
-  return intake;
+  if (!entry?.autoFill) return null;
+  return applyPediatricDemoDraft(locale);
 }
 
 export function clearPendingDemo() {
@@ -181,37 +164,7 @@ export function relocalizePediatricIntake(intake: Intake, locale: Locale): Intak
   return out;
 }
 
-export function isOliveKitchenDemo(intake: Intake): boolean {
-  const blob = `${intake.businessName}\n${intake.whatsapp}\n${intake.description}\n${intake.location}`;
-  return /052-?7001234|מטבח הזית|مطبخ الزيتون|Olive Kitchen|נווה שקד/i.test(blob);
-}
-
-export function isSandBoutiqueDemo(intake: Intake): boolean {
-  const blob = `${intake.businessName}\n${intake.whatsapp}\n${intake.description}\n${intake.location}`;
-  return /050-?8112233|בוטיק חול|بوتيك الرمل|Sand Boutique|עין ברק/i.test(blob);
-}
-
 export function relocalizeCatalogIntake(intake: Intake, locale: Locale): Intake {
   if (isPediatricDemo(intake)) return relocalizePediatricIntake(intake, locale);
-  if (isOliveKitchenDemo(intake)) {
-    const base = catalogIntake(DEMO_OLIVE_ID, locale)!;
-    return {
-      ...base,
-      mediaAssets: intake.mediaAssets ?? [],
-      ingestedDocs: intake.ingestedDocs ?? [],
-      pastCreatives: intake.pastCreatives ?? [],
-      offer: intake.offerCustom ? intake.offer : base.offer,
-    };
-  }
-  if (isSandBoutiqueDemo(intake)) {
-    const base = catalogIntake(DEMO_SAND_ID, locale)!;
-    return {
-      ...base,
-      mediaAssets: intake.mediaAssets ?? [],
-      ingestedDocs: intake.ingestedDocs ?? [],
-      pastCreatives: intake.pastCreatives ?? [],
-      offer: intake.offerCustom ? intake.offer : base.offer,
-    };
-  }
   return intake;
 }
