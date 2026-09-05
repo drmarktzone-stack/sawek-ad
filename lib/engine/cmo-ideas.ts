@@ -23,7 +23,7 @@ export type {
   CmoIdeasPack,
 } from "../types";
 import { filled } from "../utils";
-import { detectVertical, type Vertical } from "../vertical";
+import { detectVertical, foodFamily, type Vertical } from "../vertical";
 import { isNoOffer } from "../no-offer";
 import { isFreeService } from "../operating-model";
 
@@ -347,6 +347,229 @@ const RETAIL_PLATFORMS: PlatformSeed[] = [
   },
 ];
 
+const POOL_PLATFORMS: PlatformSeed[] = [
+  {
+    id: "warm_water_lane",
+    name: L("נתיב מים חמים", "مسار مي دافية", "Warm-water lane"),
+    hook: L("מים חמים שצוינו — לא הבטחת ריפוי", "مي دافية مذكورة — بلا وعد شفاء", "Stated warm water — never a cure claim"),
+    arc: L("כאב יומיומי → מים → ביקור", "ألم يومي → مي → زيارة", "Daily ache → water → visit"),
+    platform: L("פלטפורמת מים-כעובדה", "منصة المي كحقيقة", "Water-as-fact platform"),
+    why: L("מדברת על המתקן שסופק, בלי אבחנות או ROAS", "تحكي عن المنشأة المعطاة بلا تشخيص وبلا ROAS", "Talks about the stated facility — no diagnoses, no ROAS"),
+    needs: ["advantage", "place"],
+  },
+  {
+    id: "empty_deck_film",
+    name: L("סיפון ריק", "سطح فاضي", "Empty deck film"),
+    hook: L("לצלם מים ואריחים — לא גופות בטיפול", "صوروا مي وبلاط — مش أجسام بعلاج", "Film water and tiles — never bodies in therapy"),
+    arc: L("פריים מים → עובדה → CTA", "فريمة مي → حقيقة → CTA", "Water frame → fact → CTA"),
+    platform: L("פלטפורמת ויז'ואל-בריכה", "منصة بصري المسبح", "Pool-visual platform"),
+    why: L("סוגרת פערי הוכחה בלי עדויות מזויפות", "تسد فجوة الإثبات بلا شهادات مزيفة", "Closes proof gaps without fake testimonials"),
+    needs: ["place"],
+  },
+  {
+    id: "family_slot",
+    name: L("חלון משפחה", "نافذة عيلة", "Family slot"),
+    hook: L("קהל משפחות שסופק — בלי גילאים בדויים", "جمهور عائلات معطى — بلا أعمار مختلقة", "Stated family audience — no invented ages"),
+    arc: L("משפחה → שעות → הגעה", "عيلة → ساعات → وصول", "Family → hours → arrive"),
+    platform: L("פלטפורמת חלון-משפחה", "منصة نافذة العيلة", "Family-window platform"),
+    why: L("מיישרת קהל עם שעות אמת", "توائم الجمهور مع ساعات حقيقية", "Aligns audience with real hours"),
+    needs: ["audience", "hours"],
+  },
+  {
+    id: "hours_steam",
+    name: L("אדים לפי שעות", "بخار حسب الساعات", "Steam by the hour"),
+    hook: L("שעות הפתיחה הן הקצב — לא «רק היום»", "ساعات الفتح هي الإيقاع — مش «اليوم فقط»", "Opening hours are the rhythm — not “today only”"),
+    arc: L("שעות → מים → ביקור", "ساعات → مي → زيارة", "Hours → water → visit"),
+    platform: L("פלטפורמת דופק-שעות", "منصة نبض الساعات", "Hours-pulse platform"),
+    why: L("דחיפות משעות אמת בלבד", "إلحاح من ساعات حقيقية فقط", "Urgency from real hours only"),
+    needs: ["hours"],
+  },
+  {
+    id: "wa_pool_soft",
+    name: L("וואטסאפ בריכה", "واتساب المسبح", "Pool WhatsApp"),
+    hook: L("שאלה אחת על שעות/הגעה — לא טופס רפואי", "سؤال واحد عن ساعات/وصول — مش فورم طبي", "One question on hours/arrival — not a medical form"),
+    arc: L("הוק → מספר → שאלה", "خطاف → رقم → سؤال", "Hook → number → question"),
+    platform: L("פלטפורמת מסלול-הודעה", "منصة مسار رسالة", "Message-lane platform"),
+    why: L("כשיש מספר — מסלול ברור בלי SLA בדוי", "لما في رقم — مسار واضح بلا SLA مختلق", "When a number exists, a clear lane — no invented SLA"),
+    needs: ["whatsapp"],
+  },
+  {
+    id: "stated_care_only",
+    name: L("טיפול שצוין בלבד", "علاج مذكور فقط", "Stated care only"),
+    hook: L("רק מה שנכתב בקליטה — בלי הבטחה קלינית", "بس المكتوب بالكِليطة — بلا وعد سريري", "Only what intake wrote — no clinical promise"),
+    arc: L("עובדה → משמעות → ביקור", "حقيقة → معنى → زيارة", "Fact → meaning → visit"),
+    platform: L("פלטפורמת יושרה-טיפולית", "منصة صدق علاجي", "Care-integrity platform"),
+    why: L("מונעת המצאת אינדיקציות רפואיות", "تمنع اختراع استطبابات طبية", "Blocks invented medical indications"),
+    needs: ["advantage"],
+  },
+  {
+    id: "place_aqua",
+    name: L("מקום המים", "مكان المي", "Place of water"),
+    hook: L("הכתובת היא הגיבור — לא «הכי טובה בעיר»", "العنوان هو البطل — مش «الأفضل بالمدينة»", "The address is the hero — never “best in town”"),
+    arc: L("מקום → מים → ביקור", "مكان → مي → زيارة", "Place → water → visit"),
+    platform: L("פלטפורמת מקום-גיבור", "منصة مكان بطل", "Place-hero platform"),
+    why: L("זהות מקומית מכתובת אמת", "هوية محلية من عنوان حقيقي", "Local identity from a real address"),
+    needs: ["place"],
+  },
+  {
+    id: "no_star_pool",
+    name: L("בלי כוכבי ספא", "بلا نجوم سبا", "No spa stars"),
+    hook: L("אין דירוגים בקליטה? אין כוכבים בקריאייטיב", "ما في تقييمات؟ بلا نجوم بالإبداع", "No ratings in intake? No stars in creative"),
+    arc: L("יושרה → עובדה → פעולה", "صدق → حقيقة → فعل", "Integrity → fact → action"),
+    platform: L("פלטפורמת אנטי-כוכבים", "منصة ضد النجوم", "Anti-stars platform"),
+    why: L("מסמנת פערי הוכחה במקום לייקים", "تُظهر فجوات الإثبات بدل الإعجابات", "Names proof gaps instead of likes"),
+    needs: ["problem"],
+  },
+];
+
+const SCHOOL_PLATFORMS: PlatformSeed[] = [
+  {
+    id: "enrollment_plain",
+    name: L("הרשמה בפרוזה", "تسجيل بالنثر", "Enrollment in prose"),
+    hook: L("הרשמה כעובדה — לא מבצע שכר לימוד", "التسجيل كحقيقة — مش عرض أقساط", "Enrollment as a fact — not a tuition sale"),
+    arc: L("קהילה → הרשמה → צעד אחד", "مجتمع → تسجيل → خطوة", "Community → enroll → one step"),
+    platform: L("פלטפורמת הרשמה-כנה", "منصة تسجيل صادقة", "Honest-enrollment platform"),
+    why: L("מכבדת מוסד חינם/ציבורי בלי קופון", "تحترم مؤسسة مجانية/عامة بلا كوبون", "Respects a free/public institution — no coupon"),
+    needs: ["advantage", "audience"],
+  },
+  {
+    id: "empty_yard",
+    name: L("חצר ריקה", "ساحة فاضية", "Empty yard"),
+    hook: L("לצלם חצר/כיתה ריקה — לא פני ילדים", "صوروا ساحة/صف فاضي — مش وجوه أطفال", "Film empty yard/classroom — never children’s faces"),
+    arc: L("מקום → עובדה → הרשמה", "مكان → حقيقة → تسجيل", "Place → fact → enroll"),
+    platform: L("פלטפורמת מקום-שקט", "منصة مكان هادئ", "Quiet-place platform"),
+    why: L("הוכחה במקום, לא בעדויות מזויפות", "إثبات بالمكان لا بشهادات مزيفة", "Proof from place, not fake testimonials"),
+    needs: ["place"],
+  },
+  {
+    id: "hours_gate",
+    name: L("שער השעות", "بوابة الساعات", "Hours gate"),
+    hook: L("מתי באמת פתוחים — זו הכותרת", "متى فعلاً مفتوحين — هذا العنوان", "When you are actually open — that is the headline"),
+    arc: L("שעות → מקום → הגעה", "ساعات → مكان → وصول", "Hours → place → arrive"),
+    platform: L("פלטפורמת לוח-שעות", "منصة جدول ساعات", "Hours-board platform"),
+    why: L("שעות אמת כנכס, לא פוטר", "ساعات حقيقية كأصل مش تذييل", "Real hours as the asset, not a footer"),
+    needs: ["hours", "place"],
+  },
+  {
+    id: "community_circle",
+    name: L("מעגל קהילה", "دائرة مجتمع", "Community circle"),
+    hook: L("קהל מקומי שסופק — בלי דמוגרפיה בדויה", "جمهور محلي معطى — بلا ديموغرافيا مختلقة", "Stated local audience — no invented demographics"),
+    arc: L("קהילה → יתרון → הרשמה", "مجتمع → ميزة → تسجيل", "Community → advantage → enroll"),
+    platform: L("פלטפורמת קהילה-כנה", "منصة مجتمع صادق", "Honest-community platform"),
+    why: L("מדברת למי שסופק בלי «הורים 25–34»", "تحكي للمعطى بلا «أهل 25–34»", "Speaks to the stated audience — never “parents 25–34”"),
+    needs: ["audience", "problem"],
+  },
+  {
+    id: "wa_enroll",
+    name: L("הרשמה בהודעה", "تسجيل برسالة", "Enroll by message"),
+    hook: L("שאלה אחת בוואטסאפ — לא טופס 12 שדות", "سؤال واحد واتساب — مش فورم 12 حقل", "One WhatsApp question — not a 12-field form"),
+    arc: L("הוק → מספר → הרשמה", "خطاف → رقم → تسجيل", "Hook → number → enroll"),
+    platform: L("פלטפורמת מסלול-הרשמה", "منصة مسار تسجيل", "Enrollment-lane platform"),
+    why: L("מיישרת CTA עם מספר אמת", "توائم CTA مع رقم حقيقي", "Aligns CTA with a real number"),
+    needs: ["whatsapp"],
+  },
+  {
+    id: "no_tuition_theatre",
+    name: L("בלי תיאטרון שכר", "بلا مسرح أقساط", "No tuition theatre"),
+    hook: L("אין מחיר בקליטה? אין ₪ בקריאייטיב", "ما في سعر بالكِليطة؟ بلا ₪ بالإبداع", "No price in intake? No ₪ in creative"),
+    arc: L("יושרה → עובדה → פעולה", "صدق → حقيقة → فعل", "Integrity → fact → action"),
+    platform: L("פלטפורמת אנטי-מחיר", "منصة ضد السعر المختلق", "Anti-invented-price platform"),
+    why: L("מונעת המצאת הנחות לימודים", "تمنع اختراع خصومات دراسية", "Prevents invented tuition discounts"),
+    needs: ["problem"],
+  },
+  {
+    id: "two_lang_school",
+    name: L("שתי שפות בבית הספר", "لغتان بالمدرسة", "Two school languages"),
+    hook: L("עברית וערבית שוות — לא תרגום משני", "عبري وعربي متساويان — مش ترجمة ثانوية", "Hebrew and Arabic equal — not afterthought translation"),
+    arc: L("אותו מבנה → אותו CTA", "نفس البنية → نفس CTA", "Same structure → same CTA"),
+    platform: L("פלטפורמת דו-לשוניות", "منصة ثنائية", "Bilingual platform"),
+    why: L("מחברת קהל מקומי בלי דמוגרפיה בדויה", "تربط الجمهور المحلي بلا ديموغرافيا مختلقة", "Connects the local audience without invented demographics"),
+    needs: ["audience"],
+  },
+  {
+    id: "fact_gate",
+    name: L("שער עובדות", "بوابة حقائق", "Fact gate"),
+    hook: L("כל פריים = עובדה מהקליטה", "كل فريمة = حقيقة من البيانات", "Every frame = an intake fact"),
+    arc: L("עובדה → משמעות → הרשמה", "حقيقة → معنى → تسجيل", "Fact → meaning → enroll"),
+    platform: L("פלטפורמת עובדה-ראשונה", "منصة الحقيقة أولاً", "Fact-first platform"),
+    why: L("חוסמת ססמאות מוסדיות ריקות", "تمنع شعارات مؤسسية فارغة", "Blocks empty institutional slogans"),
+    needs: ["advantage"],
+  },
+];
+
+const PRODUCT_PLATFORMS: PlatformSeed[] = [
+  {
+    id: "pain_from_page",
+    name: L("כאב מהדף", "ألم من الصفحة", "Pain from the page"),
+    hook: L("רק הכאב שחולץ מהאתר — לא כאב סוכנות", "بس الألم المستخرج من الموقع — مش ألم وكالة", "Only pain extracted from the site — not agency pain"),
+    arc: L("כאב → מנגנון → CTA", "ألم → آلية → CTA", "Pain → mechanism → CTA"),
+    platform: L("פלטפורמת כאב-חולץ", "منصة ألم مستخرج", "Extracted-pain platform"),
+    why: L("שומרת על חדות בלי תבניות SaaS גנריות", "تحافظ على الحدة بلا قوالب SaaS عامة", "Keeps sharpness without generic SaaS templates"),
+    needs: ["problem"],
+  },
+  {
+    id: "mechanism_not_slogan",
+    name: L("מנגנון לא סלוגן", "آلية مش شعار", "Mechanism, not slogan"),
+    hook: L("היתרון שחולץ הוא המנגנון", "الميزة المستخرجة هي الآلية", "The extracted advantage is the mechanism"),
+    arc: L("מנגנון → משמעות → אתר", "آلية → معنى → موقع", "Mechanism → meaning → site"),
+    platform: L("פלטפורמת מנגנון", "منصة آلية", "Mechanism platform"),
+    why: L("מחדדת בידול ממה שסופק בלבד", "توضّح التميّز مما أُعطي فقط", "Sharpens differentiation from supplied facts only"),
+    needs: ["advantage"],
+  },
+  {
+    id: "no_price_theatre",
+    name: L("בלי תיאטרון מחיר", "بلا مسرح سعر", "No price theatre"),
+    hook: L("אין מחיר באתר? אין ₪ במודעה", "ما في سعر بالموقع؟ بلا ₪ بالإعلان", "No price on the site? No ₪ in the ad"),
+    arc: L("יושרה → יתרון → CTA", "صدق → ميزة → CTA", "Integrity → advantage → CTA"),
+    platform: L("פלטפורמת הצעה-או-יושרה", "منصة عرض أو صدق", "Offer-or-integrity platform"),
+    why: L("מונעת המצאת תמחור", "تمنع اختراع تسعير", "Prevents invented pricing"),
+  },
+  {
+    id: "device_still",
+    name: L("פריים מכשיר", "فريمة جهاز", "Device still"),
+    hook: L("לצלם מכשיר/שולחן — לא פנים מזוהות", "صوروا جهاز/مكتب — مش وجوه معروفة", "Film a device/desk — never identifiable faces"),
+    arc: L("פריים → כאב → CTA", "فريمة → ألم → CTA", "Frame → pain → CTA"),
+    platform: L("פלטפורמת ויז'ואל-מוצר", "منصة بصري المنتج", "Product-visual platform"),
+    why: L("מגשרת על פערי תמונה בלי לייקים", "تسد فجوة الصورة بلا إعجابات", "Bridges photo gaps without likes"),
+    needs: ["advantage"],
+  },
+  {
+    id: "site_as_cta",
+    name: L("האתר כ-CTA", "الموقع هو النداء", "Site as CTA"),
+    hook: L("הערוץ שסופק הוא האתר — לא טיקטוק מדומה", "القناة المعطاة هي الموقع — مش تيك توك مختلق", "The stated channel is the site — no invented TikTok"),
+    arc: L("הוק → יתרון → אתר", "خطاف → ميزة → موقع", "Hook → advantage → site"),
+    platform: L("פלטפורמת ערוץ-מוצהר", "منصة قناة مصرّح بها", "Declared-channel platform"),
+    why: L("מיישרת מדיה לערוץ שצוין", "توائم الميديا مع القناة المذكورة", "Fits media to the named channel"),
+    needs: ["advantage"],
+  },
+  {
+    id: "audience_as_written",
+    name: L("קהל כמו שנכתב", "جمهور كما كُتب", "Audience as written"),
+    hook: L("בלי «25–34» אם לא נכתב", "بلا «25–34» إن ما انكتب", "No “25–34” unless written"),
+    arc: L("קהל → כאב → פעולה", "جمهور → ألم → فعل", "Audience → pain → action"),
+    platform: L("פלטפורמת קהל-כנה", "منصة جمهور صادق", "Honest-audience platform"),
+    why: L("מכבדת קליטה בלי פרסונות בדויות", "تحترم البيانات بلا شخصيات مختلقة", "Respects intake without invented personas"),
+    needs: ["audience", "problem"],
+  },
+  {
+    id: "gap_as_brief_product",
+    name: L("הפער כבריף מוצר", "الفجوة كملخص منتج", "Gap as product brief"),
+    hook: L("מה שחסר = רשימת צילום, לא ניחוש מדדים", "الناقص = قائمة تصوير، مش تخمين مقاييس", "What’s missing = a shoot list, not metric guessing"),
+    arc: L("פער → מה לצלם → זווית", "فجوة → ماذا تصوّروا → زاوية", "Gap → what to film → angle"),
+    platform: L("פלטפורמת בריף-פערים", "منصة ملخص الفجوات", "Gap-brief platform"),
+    why: L("הופכת חוסרים לפעולות הפקה", "تحوّل النواقص لأفعال إنتاج", "Turns gaps into production moves"),
+  },
+  {
+    id: "no_roas_product",
+    name: L("בלי תיאטרון ROAS", "بلا مسرح ROAS", "No ROAS theatre"),
+    hook: L("אין תקציב/CAC? אין תחזית", "ما في ميزانية/CAC؟ بلا توقّع", "No budget/CAC? No forecast"),
+    arc: L("יושרה → מסר → CTA", "صدق → رسالة → CTA", "Integrity → message → CTA"),
+    platform: L("פלטפורמת אנטי-מדדים", "منصة ضد المقاييس المختلقة", "Anti-invented-metrics platform"),
+    why: L("כרטיס תכנון במקום ROAS בדוי", "بطاقة تخطيط بدل ROAS مختلق", "A planning card instead of fake ROAS"),
+    needs: ["problem"],
+  },
+];
+
 const GENERIC_PLATFORMS: PlatformSeed[] = [
   {
     id: "fact_first_spine",
@@ -423,7 +646,24 @@ function platformsFor(v: Vertical): PlatformSeed[] {
   if (v === "clinic") return CLINIC_PLATFORMS;
   if (v === "restaurant") return RESTAURANT_PLATFORMS;
   if (v === "retail") return RETAIL_PLATFORMS;
+  if (v === "pool") return POOL_PLATFORMS;
+  if (v === "school") return SCHOOL_PLATFORMS;
+  if (v === "product") return PRODUCT_PLATFORMS;
   return GENERIC_PLATFORMS;
+}
+
+function cuisineBias(seed: PlatformSeed, intake: Intake): number {
+  if (detectVertical(intake) !== "restaurant") return 0;
+  const fam = foodFamily(intake);
+  const olive = /olive|hummus|ceramic|table_ritual|mediterranean|square_neighbor|two_cover|tasting/.test(seed.id);
+  const grill = /grill|steam|queue/.test(seed.id);
+  if (fam === "mediterranean" && olive) return 28;
+  if (fam === "mediterranean" && grill) return -8;
+  if (fam === "grill" && grill) return 22;
+  if (fam === "grill" && olive) return -12;
+  if (fam === "pizza" && olive) return -30;
+  if (fam === "pizza" && /grill|booking|steam/.test(seed.id)) return 18;
+  return 0;
 }
 
 function hasOffer(intake: Intake): boolean {
@@ -727,7 +967,11 @@ export function pickIdeas(intake: Intake, _locale: Locale = "he"): CmoIdea[] {
   const seeds = platformsFor(v);
   const flags = factFlags(intake);
   const ranked = [...seeds]
-    .map((s) => ({ s, fit: seedFit(s, flags), salt: hashSalt(s.id + (intake.businessName || "")) }))
+    .map((s) => ({
+      s,
+      fit: seedFit(s, flags) + cuisineBias(s, intake),
+      salt: hashSalt(s.id + (intake.businessName || "")),
+    }))
     .sort((a, b) => b.fit - a.fit || a.salt - b.salt);
 
   const picked: PlatformSeed[] = [];

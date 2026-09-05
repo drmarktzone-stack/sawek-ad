@@ -142,10 +142,10 @@ export function AboutPage() {
         </p>
         <p className="mb-9 text-center text-lg leading-relaxed text-navy sm:text-xl">
           {locale === "he"
-            ? "SAWEK AD הופך קישור לאתר לקמפיין מוכן: ביקורת, מודעות, תמונות והורדה — כמו שולחן עבודה של סוכנות שיווק."
+            ? "SAWEK AD הוא שולחן CMO, לא משווק רגיל: קישור נכנס — פלטפורמות רעיון, כרטיס תכנון (לא ROAS), פיצוי פערי צילום, ומודעות בעברית וערבית."
             : locale === "ar"
-              ? "SAWEK AD بحوّل رابط الموقع لحملة جاهزة: تدقيق، إعلانات، صور وتحميل — مثل مكتب وكالة تسويق."
-              : "SAWEK AD turns a website URL into a ready campaign: audit, ads, images, and download — like a marketing-agency desk."}
+              ? "SAWEK AD مكتب CMO، مش مسوّق عادي: الرابط بيدخل — منصات فكرة، بطاقة تخطيط (مش ROAS)، تعويض فجوات تصوير، وإعلانات بالعبري والعربي."
+              : "SAWEK AD is a CMO desk, not an ordinary marketer: URL in — idea platforms, a planning scorecard (never ROAS), gap compensation, and Hebrew + Arabic ads."}
         </p>
 
         <div className="mb-8 flex flex-wrap items-center justify-center gap-3">

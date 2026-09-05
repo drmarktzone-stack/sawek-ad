@@ -150,7 +150,7 @@ export function playbookFor(intake: Intake): VerticalPlaybook {
     ),
   );
 
-  const bankAngles = (locale: Locale) => anglesFor(v, locale);
+  const bankAngles = (locale: Locale) => anglesFor(v, locale, intake);
   const bankCtas = (locale: Locale) => ctasFor(v, locale);
   const bankHooks = (locale: Locale) => hooksFor(v, locale, intake);
 
@@ -234,9 +234,9 @@ export function playbookFor(intake: Intake): VerticalPlaybook {
       ),
       advantageProposed: advantageFromFacts,
       angles: [
-        L("רעב ומשלוח", "جوع وتوصيل", "hunger & delivery"),
-        L("תפריט היום", "قائمة اليوم", "today's menu"),
-        L(bankCtas("he")[0] || "הזמינו עכשיו", bankCtas("ar")[0] || "اطلبوا الآن", bankCtas("en")[0] || "Order now"),
+        L(bankAngles("he")[0] || "טקס שולחן", bankAngles("ar")[0] || "طقس طاولة", bankAngles("en")[0] || "table ritual"),
+        L(bankAngles("he")[1] || bankHooks("he")[0] || nHe, bankAngles("ar")[1] || bankHooks("ar")[0] || nAr, bankAngles("en")[1] || bankHooks("en")[0] || nEn),
+        L(bankCtas("he")[0] || "הזמינו שולחן", bankCtas("ar")[0] || "احجزوا طاولة", bankCtas("en")[0] || "Book a table"),
       ],
     };
   }

@@ -454,6 +454,11 @@ export function buildAgency(pack: Pick<CampaignPack, "intake" | "intakeReport" |
   return { discovery, strategy, creative, mediaExtra, leads };
 }
 
+/** Hydrate agency + CMO idea platforms for every saved/scanned pack — not demos only. */
 export function ensureAgency(pack: CampaignPack): CampaignPack {
-  return { ...pack, agency: pack.agency ?? buildAgency(pack) };
+  return {
+    ...pack,
+    agency: pack.agency ?? buildAgency(pack),
+    cmoIdeas: pack.cmoIdeas ?? buildCmoIdeasPack(pack.intake),
+  };
 }

@@ -1,6 +1,6 @@
 import type { Intake, Locale } from "./types";
 import type { Vertical } from "./vertical";
-import { detectVertical } from "./vertical";
+import { detectVertical, foodFamily } from "./vertical";
 import { isNoOffer } from "./no-offer";
 
 export type CreativeChannel = "facebook" | "instagram" | "whatsapp" | "landing" | "story" | "reels" | "flyer";
@@ -24,11 +24,15 @@ function fill(template: string, intake: Intake, locale: Locale): string {
   const problem = (intake.biggestProblem || "").trim();
   const advantage = (intake.uniqueAdvantage || "").trim();
   const offer = isNoOffer(intake.offer) ? "" : (intake.offer || "").trim();
+  const place = (intake.location || "").trim();
+  const hours = (intake.clinicHours || "").trim();
   return template
     .replaceAll("{name}", name)
     .replaceAll("{problem}", problem)
     .replaceAll("{advantage}", advantage)
     .replaceAll("{offer}", offer)
+    .replaceAll("{place}", place)
+    .replaceAll("{hours}", hours)
     .replace(/\s{2,}/g, " ")
     .replace(/\s+([.,!?])/g, "$1")
     .trim();
@@ -37,112 +41,259 @@ function fill(template: string, intake: Intake, locale: Locale): string {
 const HOOKS: Record<Vertical, Record<Locale, string[]>> = {
   retail: {
     he: [
-      "{name} — אופנה במקום, בלי סיפור מומצא.",
-      "{problem} {name} למי שמחפש מותגים אמיתיים.",
+      "{name} — מתלה אחד מורכב, לא קטלוג של 40 פריטים מומצאים.",
+      "{problem} {name} בלי רעש קניון.",
       "{advantage}",
-      "{offer} {name}",
-      "בואו לחנות. מה שעל המדף — מה שכתוב.",
+      "{offer} {name} — רק אם זה באמת על הדלת.",
+      "חלון ראווה ב{place} — בואו לראות בד, לא באנר.",
     ],
     ar: [
-      "{name} — أزياء بالمحل، بلا قصة مختلقة.",
-      "{problem} {name} للي بدهم ماركات حقيقية.",
+      "{name} — سكة واحدة متقنة، مش كتالوج 40 قطعة مختلقة.",
+      "{problem} {name} بلا ضوضاء مول.",
       "{advantage}",
-      "{offer} {name}",
-      "تعوا ع المحل. اللي عالرف هو المكتوب.",
+      "{offer} {name} — فقط إذا مكتوب عالباب.",
+      "واجهة ب{place} — تعوا تشوفوا قماش، مش بنر.",
     ],
     en: [
-      "{name} — fashion in-store, no invented story.",
-      "{problem} {name} for people hunting real brands.",
+      "{name} — one well-built rack, not a fake 40-SKU catalog.",
+      "{problem} {name} without mall noise.",
       "{advantage}",
-      "{offer} {name}",
-      "Come to the store. What's on the rack is what's written.",
+      "{offer} {name} — only if it is actually on the door.",
+      "Vitrine in {place} — come see fabric, not a banner.",
     ],
   },
   restaurant: {
-    he: ["{name} — המטבח המקומי.", "{problem}", "{advantage}", "בואו למסעדה היום.", "{offer}"],
-    ar: ["{name} — مطبخ الحي.", "{problem}", "{advantage}", "تعوا ع المطعم اليوم.", "{offer}"],
-    en: ["{name} — the local kitchen.", "{problem}", "{advantage}", "Come to the restaurant today.", "{offer}"],
+    he: [
+      "{name} — שולחן, לא סלוגן «אוכל טעים».",
+      "{problem}",
+      "{advantage}",
+      "{offer} — ההצעה היא הסיפור, לא הנחה גנרית.",
+      "בואו ל{place} — טקס ישיבה, לא באנר משלוחים.",
+    ],
+    ar: [
+      "{name} — طاولة، مش شعار «أكل طيب».",
+      "{problem}",
+      "{advantage}",
+      "{offer} — العرض هو القصة، مش خصم عام.",
+      "تعوا ع {place} — طقس جلسة، مش بنر توصيل.",
+    ],
+    en: [
+      "{name} — a table, not a “tasty food” slogan.",
+      "{problem}",
+      "{advantage}",
+      "{offer} — the offer is the story, not a generic discount.",
+      "Come to {place} — a seating ritual, not a delivery banner.",
+    ],
   },
   pool: {
-    he: ["{name} — מים וטיפול, בלי הבטחות רפואיות שלא נאמרו.", "{problem}", "{advantage}", "בואו לבריכה."],
-    ar: ["{name} — مي وعلاج، بلا وعود طبية ما انقالت.", "{problem}", "{advantage}", "تعوا ع المسبح."],
-    en: ["{name} — water and care, no unstated medical promises.", "{problem}", "{advantage}", "Visit the pool."],
+    he: [
+      "{name} — מים שצוינו, בלי הבטחת ריפוי.",
+      "{problem}",
+      "{advantage}",
+      "שעות אמת: {hours} — בואו לבריכה, לא לספא מדומה.",
+    ],
+    ar: [
+      "{name} — مي مذكورة، بلا وعد شفاء.",
+      "{problem}",
+      "{advantage}",
+      "ساعات حقيقية: {hours} — تعوا ع المسبح، مش سبا مختلق.",
+    ],
+    en: [
+      "{name} — stated water, no cure claim.",
+      "{problem}",
+      "{advantage}",
+      "Real hours: {hours} — visit the pool, not an invented spa.",
+    ],
   },
   clinic: {
-    he: ["{name}", "{problem}", "{advantage}", "הגיעו למרפאה."],
-    ar: ["{name}", "{problem}", "{advantage}", "تعوا عالعيادة."],
-    en: ["{name}", "{problem}", "{advantage}", "Come to the clinic."],
+    he: [
+      "{name} — כשהילד חולה, לא סלוגן רפואי.",
+      "{problem}",
+      "{advantage}",
+      "שעות: {hours} — לפי סדר הגעה, בלי תור מדומה.",
+      "{place} — שם + עיר, בלי «הכי טוב בעיר».",
+    ],
+    ar: [
+      "{name} — لما الولد مريض، مش شعار طبي.",
+      "{problem}",
+      "{advantage}",
+      "الساعات: {hours} — جت أولاً، بلا دور مختلق.",
+      "{place} — اسم + بلدة، بلا «الأفضل بالمدينة».",
+    ],
+    en: [
+      "{name} — when the child is sick, not a medical slogan.",
+      "{problem}",
+      "{advantage}",
+      "Hours: {hours} — walk-in order, no invented queue.",
+      "{place} — name + town, never “best in town”.",
+    ],
   },
   product: {
-    he: ["{name}", "{problem}", "{advantage}", "הצטרפו לכלים — בלי מחיר שלא פורסם."],
-    ar: ["{name}", "{problem}", "{advantage}", "انضموا للأدوات — بلا سعر غير منشور."],
-    en: ["{name}", "{problem}", "{advantage}", "Join the tools — no unpublished price."],
+    he: [
+      "{name} — הכאב שחולץ מהדף, לא כאב סוכנות.",
+      "{problem}",
+      "{advantage}",
+      "הצטרפו לכלים — בלי מחיר שלא פורסם ובלי ROAS.",
+    ],
+    ar: [
+      "{name} — الألم المستخرج من الصفحة، مش ألم وكالة.",
+      "{problem}",
+      "{advantage}",
+      "انضموا للأدوات — بلا سعر غير منشور وبلا ROAS.",
+    ],
+    en: [
+      "{name} — pain extracted from the page, not agency pain.",
+      "{problem}",
+      "{advantage}",
+      "Join the tools — no unpublished price, no ROAS.",
+    ],
   },
   school: {
-    he: ["{name}", "{problem}", "{advantage}", "הרשמה — בלי מבצע לימודים מומצא."],
-    ar: ["{name}", "{problem}", "{advantage}", "تسجيل — بلا عرض دراسي مختلق."],
-    en: ["{name}", "{problem}", "{advantage}", "Enrollment — no invented tuition offer."],
+    he: [
+      "{name} — הרשמה לקהילה, לא מבצע שכר לימוד.",
+      "{problem}",
+      "{advantage}",
+      "שעות: {hours} — בואו בשער, בלי קופון לימודים.",
+    ],
+    ar: [
+      "{name} — تسجيل للمجتمع، مش عرض أقساط.",
+      "{problem}",
+      "{advantage}",
+      "الساعات: {hours} — تعوا عالبوابة، بلا كوبون دراسي.",
+    ],
+    en: [
+      "{name} — enrollment into a community, not a tuition sale.",
+      "{problem}",
+      "{advantage}",
+      "Hours: {hours} — come to the gate, no tuition coupon.",
+    ],
   },
   generic: {
-    he: ["{name}", "{problem}", "{advantage}", "{offer}"],
-    ar: ["{name}", "{problem}", "{advantage}", "{offer}"],
-    en: ["{name}", "{problem}", "{advantage}", "{offer}"],
+    he: [
+      "{name} — כל פריים = עובדה מהקליטה.",
+      "{problem}",
+      "{advantage}",
+      "{offer}",
+      "{place} — מקום אמת, לא «לידכם» ריק.",
+    ],
+    ar: [
+      "{name} — كل فريمة = حقيقة من البيانات.",
+      "{problem}",
+      "{advantage}",
+      "{offer}",
+      "{place} — مكان حقيقي، مش «قربكم» فاضي.",
+    ],
+    en: [
+      "{name} — every frame = an intake fact.",
+      "{problem}",
+      "{advantage}",
+      "{offer}",
+      "{place} — a real place, not empty “near you”.",
+    ],
   },
 };
 
 const ANGLES: Record<Vertical, Record<Locale, string[]>> = {
   retail: {
-    he: ["מותגים על המדף", "מיקום נוח", "מבצע שפורסם באתר בלבד", "קהל שאוהב אופנה", "חיסול רק אם פורסם בקליטה"],
-    ar: ["ماركات عالرف", "موقع مريح", "عرض منشور بالموقع فقط", "جمهور بحب الأزياء", "تصفية فقط إذا انذكرت بالكِليطة"],
-    en: ["brands on the rack", "convenient location", "on-site published offer only", "fashion-seeking audience", "clearance only if published in intake"],
+    he: [
+      "הלבשה שקטה מול קניון",
+      "קרוס-אפ בד בלי פני דוגמנית",
+      "חלון ראווה כזהות מקום",
+      "שמירת פריט בוואטסאפ — בלי עגלה מדומה",
+      "הנחה רק אם פורסמה בקליטה",
+    ],
+    ar: [
+      "تجربة قياس هادئة مقابل المول",
+      "لقطة قماش بلا وجه عارضة",
+      "واجهة العرض كهوية مكان",
+      "حجز قطعة واتساب — بلا سلة وهمية",
+      "خصم فقط إذا نُشر بالكِليطة",
+    ],
+    en: [
+      "quiet fitting vs the mall",
+      "fabric close-up, no model face",
+      "vitrine as place identity",
+      "hold via WhatsApp — no fake cart",
+      "discount only if published in intake",
+    ],
   },
   restaurant: {
-    he: ["רעב ומשלוח", "תפריט היום", "פיצה / מנה שפורסמה", "הזמנה עכשיו"],
-    ar: ["جوع وتوصيل", "قائمة اليوم", "بيتزا / وجبة منشورة", "اطلبوا الآن"],
-    en: ["hunger & delivery", "today's menu", "pizza / published dish", "order now"],
+    he: [
+      "טקס שולחן, לא באנר משלוחים",
+      "ההצעה כסיפור מחיר אמת",
+      "אדים/קרמיקה — בלי פני לקוחות",
+      "שכן הכיכר / כתובת כגיבור",
+      "דחיפות משעות אמת, לא «רק היום»",
+    ],
+    ar: [
+      "طقس طاولة، مش بنر توصيل",
+      "العرض كقصة سعر حقيقي",
+      "بخار/صحون — بلا وجوه زبائن",
+      "جار الساحة / العنوان كبطل",
+      "إلحاح من ساعات حقيقية، مش «اليوم فقط»",
+    ],
+    en: [
+      "table ritual, not a delivery banner",
+      "the offer as a real-price story",
+      "steam/ceramics — no customer faces",
+      "square neighbor / address as hero",
+      "urgency from real hours, not “today only”",
+    ],
   },
   pool: {
-    he: ["מים", "משפחה", "טיפול שצוין"],
-    ar: ["مي", "عائلة", "علاج مذكور"],
-    en: ["water", "family", "stated care"],
+    he: ["מים כעובדה", "סיפון ריק", "חלון משפחה משעות אמת", "בלי הבטחת ריפוי"],
+    ar: ["المي كحقيقة", "سطح فاضي", "نافذة عيلة من ساعات حقيقية", "بلا وعد شفاء"],
+    en: ["water as fact", "empty deck", "family window from real hours", "no cure claim"],
   },
   clinic: {
-    he: ["אמון", "הגעה", "שעות שסופקו"],
-    ar: ["ثقة", "وصول", "ساعات معطاة"],
-    en: ["trust", "arrival", "hours you supplied"],
+    he: ["שקט באותו יום", "שעות כגיבור", "וואטסאפ רך (לא חירום)", "כיסא ריק — בלי פני ילדים", "בלי תיאטרון כוכבים"],
+    ar: ["هدوء بنفس اليوم", "الساعات هي البطل", "واتساب لطيف (مش طوارئ)", "كرسي فاضي — بلا وجوه أطفال", "بلا مسرح نجوم"],
+    en: ["same-day calm", "hours as hero", "soft WhatsApp (not ER)", "empty chair — no children’s faces", "no star theatre"],
   },
   product: {
-    he: ["כאב שחולץ", "יתרון שחולץ", "בלי ROAS"],
-    ar: ["ألم مستخرج", "ميزة مستخرجة", "بلا ROAS"],
-    en: ["extracted pain", "extracted advantage", "no ROAS"],
+    he: ["כאב שחולץ מהדף", "מנגנון יתרון, לא סלוגן", "בלי מחיר שלא פורסם", "בלי ROAS"],
+    ar: ["ألم مستخرج من الصفحة", "آلية الميزة، مش شعار", "بلا سعر غير منشور", "بلا ROAS"],
+    en: ["pain extracted from the page", "advantage as mechanism, not slogan", "no unpublished price", "no ROAS"],
   },
   school: {
-    he: ["הרשמה", "קהילה", "חשיפה"],
-    ar: ["تسجيل", "مجتمع", "تعرّض"],
-    en: ["enrollment", "community", "exposure"],
+    he: ["הרשמה בפרוזה", "חצר ריקה", "מעגל קהילה בלי דמוגרפיה", "בלי קופון שכר לימוד"],
+    ar: ["تسجيل بالنثر", "ساحة فاضية", "دائرة مجتمع بلا ديموغرافيا", "بلا كوبون أقساط"],
+    en: ["enrollment in prose", "empty yard", "community circle without demographics", "no tuition coupon"],
   },
   generic: {
-    he: ["היכרות", "יתרון שסופק", "CTA ישר"],
-    ar: ["تعارف", "ميزة معطاة", "نداء مباشر"],
-    en: ["awareness", "stated advantage", "direct CTA"],
+    he: ["עמוד שדרה של עובדות", "הפער כבריף צילום", "מקום כגיבור", "הצעה או יושרה"],
+    ar: ["عمود حقائق", "الفجوة كملخص تصوير", "المكان كبطل", "عرض أو صدق"],
+    en: ["fact-first spine", "gap as shoot brief", "place as hero", "offer or integrity"],
   },
+};
+
+const MED_ANGLES: Record<Locale, string[]> = {
+  he: ["טקס שולחן ים-תיכון", "טעימות לשניים במחיר שסופק", "חומוס/שמן זית כפתיח ויזואלי", "שולחן בחוץ בשקיעה"],
+  ar: ["طقس طاولة متوسطية", "تذوّق لاثنين بالسعر المعطى", "حمص/زيت زيتون كافتتاح بصري", "طاولة برا وقت الغروب"],
+  en: ["Mediterranean table ritual", "two-cover tasting at the stated price", "hummus/olive oil as visual open", "outdoor table at dusk"],
+};
+
+const GRILL_ANGLES: Record<Locale, string[]> = {
+  he: ["אדים מעל הגריל", "רעב וצלחת, לא באנר קופון", "תחנת גחלים בלי פנים", "הזמנה לפני צלחת"],
+  ar: ["بخار فوق الغريل", "جوع وصحن، مش بنر كوبون", "محطة فحم بلا وجوه", "الحجز قبل الصحن"],
+  en: ["steam over the grill", "hunger and a plate, not a coupon banner", "ember station, no faces", "book before the plate"],
 };
 
 const CTAS: Record<Vertical, Record<Locale, string[]>> = {
   retail: {
-    he: ["בואו לחנות", "פתחו את האתר", "שאלו בוואטסאפ"],
-    ar: ["تعوا ع المحل", "افتحوا الموقع", "اسألوا بالواتساب"],
-    en: ["Come to the store", "Open the site", "Ask on WhatsApp"],
+    he: ["בואו לחנות", "שמרו פריט בוואטסאפ", "פתחו את האתר"],
+    ar: ["تعوا ع المحل", "احجزوا قطعة واتساب", "افتحوا الموقع"],
+    en: ["Come to the store", "Hold an item on WhatsApp", "Open the site"],
   },
   restaurant: {
-    he: ["הזמינו עכשיו", "להזמנה באתר", "הזמינו בטלפון"],
-    ar: ["اطلبوا الآن", "للطلب بالموقع", "اطلبوا عالهاتف"],
-    en: ["Order now", "Order on the site", "Order by phone"],
+    he: ["הזמינו שולחן", "כתבו בוואטסאפ", "בואו לשולחן"],
+    ar: ["احجزوا طاولة", "اكتبوا واتساب", "تعوا عالطاولة"],
+    en: ["Book a table", "Write on WhatsApp", "Come to the table"],
   },
   pool: {
-    he: ["בואו לבריכה", "וואטסאפ"],
-    ar: ["تعوا ع المسبح", "واتساب"],
-    en: ["Visit the pool", "WhatsApp"],
+    he: ["בואו לבריכה", "שאלו בוואטסאפ על שעות"],
+    ar: ["تعوا ع المسبح", "اسألوا واتساب عن الساعات"],
+    en: ["Visit the pool", "Ask hours on WhatsApp"],
   },
   clinic: {
     he: ["הגיעו למרפאה", "וואטסאפ (לא לחירום)"],
@@ -182,10 +333,15 @@ const LAYOUTS: LayoutSpec[] = [
 export function hooksFor(vertical: Vertical, locale: Locale, intake?: Intake): string[] {
   const raw = HOOKS[vertical]?.[locale] ?? HOOKS.generic[locale];
   const rows = intake ? raw.map((t) => fill(t, intake, locale)) : raw;
-  return rows.filter((s) => s.length > 0);
+  return rows.filter((s) => s.length > 0 && !/^[\s—–-]+$/.test(s));
 }
 
-export function anglesFor(vertical: Vertical, locale: Locale): string[] {
+export function anglesFor(vertical: Vertical, locale: Locale, intake?: Intake): string[] {
+  if (vertical === "restaurant" && intake) {
+    const fam = foodFamily(intake);
+    if (fam === "mediterranean") return MED_ANGLES[locale];
+    if (fam === "grill") return GRILL_ANGLES[locale];
+  }
   return ANGLES[vertical]?.[locale] ?? ANGLES.generic[locale];
 }
 
@@ -217,8 +373,15 @@ export function bankForIntake(intake: Intake, locale: Locale) {
   return {
     vertical: v,
     hooks: hooksFor(v, locale, intake),
-    angles: anglesFor(v, locale),
+    angles: anglesFor(v, locale, intake),
     ctas: ctasFor(v, locale),
     layouts: layoutsFor(v, undefined, offer),
   };
+}
+
+/** Spoken angle line for narrative / calendar — never generic “trust / hunger”. */
+export function spokenBankAngle(intake: Intake, locale: Locale, index = 0): string {
+  const v = detectVertical(intake);
+  const list = anglesFor(v, locale, intake);
+  return list[index % Math.max(1, list.length)] ?? "";
 }
