@@ -12,7 +12,7 @@ import { coachIntake } from "./coach";
 import { buildSiteAudit } from "./site-audit";
 import { buildPastCampaignAudit, overlayPastCampaignAudit, creativesToPosts } from "./past-campaign-audit";
 import { demoIntake, DEMO_ID } from "../demo";
-import { demoMetaFor } from "../demo-catalog";
+import { catalogIntake, demoEntry, demoMetaFor, type DemoPackId, DEMO_OLIVE_ID, DEMO_SAND_ID } from "../demo-catalog";
 import { loadLocale } from "../storage";
 
 export const AGENT_ORDER: AgentId[] = [
@@ -198,10 +198,17 @@ export function assemblePack(
   return { ...base, agency: buildAgency(base) };
 }
 
-/** Clinic Demo-button pack only. Pizza / Aluf live in public/packs/published.json. */
-export function buildDemoPack(_idOrSlug: string = DEMO_ID): CampaignPack {
+/** Build any of the three published demos (clinic or fictional samples). */
+export function buildDemoPack(idOrSlug: string = DEMO_ID): CampaignPack {
   const locale = typeof window !== "undefined" ? loadLocale() : "he";
-  const intake = demoIntake(locale);
+  const entry = demoEntry(idOrSlug) ?? demoEntry(DEMO_ID)!;
+  const packId = entry.id as DemoPackId;
+  const intake =
+    packId === DEMO_ID
+      ? demoIntake(locale)
+      : packId === DEMO_OLIVE_ID
+        ? catalogIntake(DEMO_OLIVE_ID, locale)!
+        : catalogIntake(DEMO_SAND_ID, locale)!;
   const report = validateIntake(intake);
   const diagnosis: Diagnosis = {
     ...diagnose(intake, report),
@@ -226,13 +233,13 @@ export function buildDemoPack(_idOrSlug: string = DEMO_ID): CampaignPack {
       media: "approved",
       optimizer: "complete",
     },
-    id: DEMO_ID,
+    id: packId,
   });
   return {
     ...pack,
     saved: true,
     planActivated: true,
     name: intake.businessName,
-    demoMeta: demoMetaFor(DEMO_ID),
+    demoMeta: demoMetaFor(packId),
   };
 }
