@@ -1,8 +1,8 @@
 [
   {
     "id": "demo-samer-clinic",
-    "createdAt": "2026-09-05T08:21:17.248Z",
-    "updatedAt": "2026-09-05T08:21:17.248Z",
+    "createdAt": "2026-09-05T13:28:26.890Z",
+    "updatedAt": "2026-09-05T13:28:26.890Z",
     "name": "ד\"ר סאמר מחמד אבו מוך",
     "intake": {
       "type": "business",
@@ -28,64 +28,130 @@
       "offer": "אין מבצע",
       "offerCustom": false,
       "competitors": [],
-      "businessModel": "",
+      "businessModel": "דוגמת תכנון (לא מדידה). מרפאת כללית — המשפחה לא משלמת בדלפק. המרה = הגעה לפי סדר / וואטסאפ עם שם הילד. זו לא מכירה. תקציב תכנון לדוגמה ₪1800 (חשיפה/ביקור — לא CPA).",
       "avgOrderValue": "",
       "marginPercent": "",
       "targetCac": "",
-      "monthlyBudget": "",
-      "pastAds": "",
-      "pastResults": "",
-      "whatFailed": "",
+      "monthlyBudget": "1800",
+      "pastAds": "פוסטים אורגניים בפייסבוק: «בלי תורים» + שעות המרפאה + וואטסאפ 052-8885800. סטוריז של חזית המתחם הריקה. לא רץ קמפיין ממומן מדוד.",
+      "pastResults": "דוגמת תכנון (לא מדידה). אין ROAS, אין דירוג כוכבים ואין לייקים — קמפיין ממומן לא נמדד.",
+      "whatFailed": "הפוסטים תיארו את המקום אבל שכחו לבקש שם בוואטסאפ או לחזור על חלון ההגעה הבא.",
       "mediaAssets": [
         {
-          "id": "e1b49e5f-89d1-402e-97b7-e715c57bd5ff",
+          "id": "demo-samer-clinic-photo-1",
+          "kind": "image",
+          "mime": "image/jpeg",
+          "name": "Sunlit waiting room",
+          "size": 1,
+          "label": "waiting_room",
+          "note": "offer:photo:clinic-waiting",
+          "createdAt": "2026-09-05T12:00:00.000Z",
+          "publicSrc": "/packs/assets/demo-samer-clinic/photo-1.jpg"
+        },
+        {
+          "id": "demo-samer-clinic-photo-2",
+          "kind": "image",
+          "mime": "image/jpeg",
+          "name": "Mediterranean clinic facade",
+          "size": 1,
+          "label": "exterior",
+          "note": "offer:photo:clinic-facade",
+          "createdAt": "2026-09-05T12:00:00.000Z",
+          "publicSrc": "/packs/assets/demo-samer-clinic/photo-2.jpg"
+        },
+        {
+          "id": "demo-samer-clinic-photo-3",
+          "kind": "image",
+          "mime": "image/jpeg",
+          "name": "Warm empty reception",
+          "size": 1,
+          "label": "interior",
+          "note": "offer:photo:clinic-reception",
+          "createdAt": "2026-09-05T12:00:00.000Z",
+          "publicSrc": "/packs/assets/demo-samer-clinic/photo-3.jpg"
+        },
+        {
+          "id": "demo-samer-clinic-photo-4",
+          "kind": "image",
+          "mime": "image/jpeg",
+          "name": "Olive courtyard bench",
+          "size": 1,
+          "label": "exterior",
+          "note": "offer:photo:clinic-courtyard",
+          "createdAt": "2026-09-05T12:00:00.000Z",
+          "publicSrc": "/packs/assets/demo-samer-clinic/photo-4.jpg"
+        },
+        {
+          "id": "demo-samer-clinic-photo-5",
+          "kind": "image",
+          "mime": "image/jpeg",
+          "name": "Play-nook shelf, no children",
+          "size": 1,
+          "label": "interior",
+          "note": "offer:photo:clinic-nook",
+          "createdAt": "2026-09-05T12:00:00.000Z",
+          "publicSrc": "/packs/assets/demo-samer-clinic/photo-5.jpg"
+        },
+        {
+          "id": "demo-samer-clinic-photo-6",
+          "kind": "image",
+          "mime": "image/jpeg",
+          "name": "Linen window light",
+          "size": 1,
+          "label": "interior",
+          "note": "offer:photo:clinic-linen",
+          "createdAt": "2026-09-05T12:00:00.000Z",
+          "publicSrc": "/packs/assets/demo-samer-clinic/photo-6.jpg"
+        },
+        {
+          "id": "592f4e7a-828d-4a06-8b4d-cd429a3b7fdb",
           "kind": "image",
           "mime": "image/svg+xml",
           "name": "Sunlit waiting room",
           "size": 2118,
           "label": "exterior",
           "note": "offer:studio:studio-clinic-waiting-sun",
-          "createdAt": "2026-09-05T08:21:17.239Z",
+          "createdAt": "2026-09-05T13:28:26.879Z",
           "publicSrc": "/packs/assets/demo-samer-clinic/still-1.svg"
         },
         {
-          "id": "515b5df9-8f30-4eff-b291-5021bee2d4cf",
+          "id": "720f34d9-1676-4c92-8afb-2ddb0cd47bbc",
           "kind": "image",
           "mime": "image/svg+xml",
           "name": "Mediterranean facade",
           "size": 1115,
           "label": "interior",
           "note": "offer:studio:studio-clinic-facade",
-          "createdAt": "2026-09-05T08:21:17.239Z",
+          "createdAt": "2026-09-05T13:28:26.879Z",
           "publicSrc": "/packs/assets/demo-samer-clinic/still-2.svg"
         },
         {
-          "id": "6de8967b-f343-4164-8503-90fe7bb787fd",
+          "id": "8e22d1d2-1d99-43cd-a2c3-b07a0dc9146e",
           "kind": "image",
           "mime": "image/svg+xml",
           "name": "Olive courtyard",
           "size": 789,
           "label": "interior",
           "note": "offer:studio:studio-clinic-courtyard",
-          "createdAt": "2026-09-05T08:21:17.239Z",
+          "createdAt": "2026-09-05T13:28:26.879Z",
           "publicSrc": "/packs/assets/demo-samer-clinic/still-3.svg"
         },
         {
-          "id": "7d1043bf-1369-406c-993a-9431338fa04c",
+          "id": "8faeefb3-3e09-4d50-b70f-e42dd9563b08",
           "kind": "image",
           "mime": "image/svg+xml",
           "name": "Warm reception",
           "size": 1036,
           "label": "interior",
           "note": "offer:studio:studio-clinic-reception",
-          "createdAt": "2026-09-05T08:21:17.239Z",
+          "createdAt": "2026-09-05T13:28:26.879Z",
           "publicSrc": "/packs/assets/demo-samer-clinic/still-4.svg"
         }
       ],
       "ingestedDocs": [],
       "pastCreatives": [],
-      "brandTone": "",
-      "brandPositioning": "",
+      "brandTone": "רגוע, הורי, ערבית-עברית מקומית. בלי טענה קוסמטית ובלי הנחה.",
+      "brandPositioning": "מרפאת ילדים אמיתית בבאקה — קבלה לפי סדר למבוטחי כללית, לא מותג רשת.",
       "channelNotes": "facebook, instagram, TikTok, whatsapp",
       "whatsappTemplates": "",
       "landingLines": "سجل طفلك اليوم واضمن له الرعاية الطبية الأرقى في باقة 📲",
@@ -95,63 +161,8 @@
       }
     },
     "intakeReport": {
-      "completeness": 78,
-      "missing": [
-        {
-          "field": "businessModel",
-          "label": {
-            "he": "מודל עסקי",
-            "ar": "نموذج العمل",
-            "en": "Business model"
-          },
-          "reason": {
-            "he": "בלי לדעת מה נחשב המרה, אי אפשר לתכנן באדג'ט.",
-            "ar": "بدون معرفة التحويل لا خطة ميزانية.",
-            "en": "Without the conversion event, budget planning is guesswork."
-          },
-          "impact": {
-            "he": "סוכן המדיה יסרב לנחש CPA.",
-            "ar": "وكيل الميديا سيرفض تخمين CPA.",
-            "en": "The media agent will refuse to guess CPA."
-          }
-        },
-        {
-          "field": "monthlyBudget",
-          "label": {
-            "he": "תקציב",
-            "ar": "الميزانية",
-            "en": "Budget"
-          },
-          "reason": {
-            "he": "בלי תקציב אין פיצול ערוצים מספרי.",
-            "ar": "بدون ميزانية لا تقسيم قنوات رقمياً.",
-            "en": "No budget means no numeric channel split."
-          },
-          "impact": {
-            "he": "לא יוצג מד לידים.",
-            "ar": "لن يُعرض مقياس عملاء.",
-            "en": "No lead gauge will be shown."
-          }
-        },
-        {
-          "field": "pastAds",
-          "label": {
-            "he": "מודעות קודמות",
-            "ar": "إعلانات سابقة",
-            "en": "Past ads"
-          },
-          "reason": {
-            "he": "בלי היסטוריה האבחון הוא השערה.",
-            "ar": "بدون تاريخ التشخيص افتراض.",
-            "en": "Without history the diagnosis is a hypothesis."
-          },
-          "impact": {
-            "he": "ביטחון האבחון יהיה נמוך.",
-            "ar": "ثقة التشخيص ستكون منخفضة.",
-            "en": "Diagnosis confidence will be low."
-          }
-        }
-      ],
+      "completeness": 100,
+      "missing": [],
       "inconsistencies": [],
       "refusedGuesses": [
         {
@@ -185,7 +196,7 @@
       "hypotheses": [
         {
           "area": "offer",
-          "confidence": "low",
+          "confidence": "medium",
           "finding": {
             "he": "אין מבצע — זה תקין. הערך חייב לבוא מהשירות ומהיתרון, לא מהנחה מומצאת.",
             "ar": "لا يوجد عرض — وهذا سليم. القيمة يجب أن تأتي من الخدمة والميزة.",
@@ -204,7 +215,7 @@
         },
         {
           "area": "hook",
-          "confidence": "low",
+          "confidence": "medium",
           "finding": {
             "he": "ההוק צריך לפתוח בבעיה של הקהל, לא בשם העסק.",
             "ar": "يجب أن يبدأ الخطاف بمشكلة الجمهور لا باسم النشاط.",
@@ -222,22 +233,22 @@
           }
         },
         {
-          "area": "creative",
-          "confidence": "low",
+          "area": "funnel",
+          "confidence": "medium",
           "finding": {
-            "he": "אין היסטוריית מודעות — אי אפשר לדעת מה נכשל. האבחון הוא כיוון עבודה, לא פסק דין.",
-            "ar": "لا تاريخ إعلانات — لا يمكن معرفة ما فشل. التشخيص اتجاه عمل لا حكم.",
-            "en": "No ad history — we cannot know what failed. This diagnosis is a working direction, not a verdict."
+            "he": "המדידה חסרה — בלי ליד מוגדר אי אפשר לדבר על כישלון קריאייטיב מול כישלון מעקב.",
+            "ar": "القياس ناقص — بلا تعريف للعميل المحتمل لا نفرّق فشل الإبداع عن فشل التتبع.",
+            "en": "Measurement is missing — without a defined lead we cannot separate creative failure from tracking failure."
           },
           "evidence": {
-            "he": "מודעות קודמות לא מולאו.",
-            "ar": "الإعلانات السابقة غير مملوءة.",
-            "en": "Past ads were not filled in."
+            "he": "דוגמת תכנון (לא מדידה). אין ROAS, אין דירוג כוכבים ואין לייקים — קמפיין ממומן לא נמדד.",
+            "ar": "דוגמת תכנון (לא מדידה). אין ROAS, אין דירוג כוכבים ואין לייקים — קמפיין ממומן לא נמדד.",
+            "en": "דוגמת תכנון (לא מדידה). אין ROAS, אין דירוג כוכבים ואין לייקים — קמפיין ממומן לא נמדד."
           },
           "recommendation": {
-            "he": "שמרו צילומי מודעות הבאים (טקסט, קהל, הוצאה, תוצאה) כדי שהאבחון הבא יהיה מבוסס.",
-            "ar": "احفظوا لقطات الإعلانات القادمة (نص، جمهور، إنفاق، نتيجة).",
-            "en": "Keep screenshots of the next ads (copy, audience, spend, result) so the next diagnosis is grounded."
+            "he": "הגדירו המרה אחת (תור / וואטסאפ עם שם) לפני הסקייל.",
+            "ar": "عرّفوا تحويلاً واحداً (موعد / واتساب باسم) قبل التوسيع.",
+            "en": "Define one conversion (booking / WhatsApp with a name) before any scale."
           }
         },
         {
@@ -280,7 +291,7 @@
         }
       ],
       "approved": true,
-      "approvedAt": "2026-09-05T08:21:17.242Z"
+      "approvedAt": "2026-09-05T13:28:26.882Z"
     },
     "variants": [
       {
@@ -288,7 +299,7 @@
         "locale": "he",
         "cta": "הגיעו למרפאה",
         "headline": "ד\"ר סאמר מחמד אבו מוך — לפי סדר הגעה",
-        "primaryText": "ד\"ר סאמר מחמד אבו מוך — קבלה לפי סדר הגעה, בלי תור מראש.\n\nלמשפחות באקה שמחפשות רופא ילדים בכללית.\n\nשעות: ראשון 08:00 - 13:00 / 16:00 - 19:30 · שני 08:00 - 13:00 / 16:00 - 19:30 · שלישי 08:00 - 13:30 / סגור (ייעוץ וואטסאפ) · רביעי 08:00 - 13:00 / 16:00 - 19:30 · חמישי 08:00 - 13:00 / 16:00 - 19:30 · שישי 08:00 - 12:30 / סופ״ש · שבת חירום ובירורים טלפוניים לרשומים / סגור\nוואטסאפ 052-8885800 (לא לחירום).\nhttps://drsamerped.ai.studio\nאין מבצע ואין קופון.\n\nהגיעו למרפאה"
+        "primaryText": "ד\"ר סאמר מחמד אבו מוך — קבלה לפי סדר הגעה, בלי תור מראש.\n\nלמשפחות באקה שמחפשות רופא ילדים בכללית.\n\nשעות: ראשון 08:00 - 13:00 / 16:00 - 19:30 · שני 08:00 - 13:00 / 16:00 - 19:30 · שלישי 08:00 - 13:30 / סגור (ייעוץ וואטסאפ) · רביעי 08:00 - 13:00 / 16:00 - 19:30 · חמישי 08:00 - 13:00 / 16:00 - 19:30 · שישי 08:00 - 12:30 / סופ״ש · שבת חירום ובירורים טלפוניים לרשומים / סגור\nוואטסאפ 052-8885800 (לא לחירום).\nhttps://drsamerped.ai.studio\nבלי תורים · בלי המתנה · 100% למבוטחי כללית\n\nהגיעו למרפאה"
       },
       {
         "kind": "very_short",
@@ -330,7 +341,7 @@
         "locale": "ar",
         "cta": "جيبوه عالعيادة",
         "headline": "الولد مريض، جيبوه عالعيادة",
-        "primaryText": "ד\"ר סאמר מחמד אבו מוך بباقة — جت أولاً بدون مواعيد.\n\nلأهل باقة اللي بدهم طبيب أطفال كلاليت قريب.\n\nالدوام: الأحد 08:00 - 13:00 / 16:00 - 19:30 · الإثنين 08:00 - 13:00 / 16:00 - 19:30 · الثلاثاء 08:00 - 13:30 / مغلق (استشارات واتساب) · الأربعاء 08:00 - 13:00 / 16:00 - 19:30 · الخميس 08:00 - 13:00 / 16:00 - 19:30 · الجمعة 08:00 - 12:30 / عطلة نهاية الأسبوع · السبت طوارئ واستفسارات هاتفية للمسجلين / مغلق\nواتساب 052-8885800 (مش للطوارئ).\nhttps://drsamerped.ai.studio\nما في عرض وما في كوبون.\n\nجيبوه عالعيادة"
+        "primaryText": "ד\"ר סאמר מחמד אבו מוך بباقة — جت أولاً بدون مواعيد.\n\nلأهل باقة اللي بدهم طبيب أطفال كلاليت قريب.\n\nالدوام: الأحد 08:00 - 13:00 / 16:00 - 19:30 · الإثنين 08:00 - 13:00 / 16:00 - 19:30 · الثلاثاء 08:00 - 13:30 / مغلق (استشارات واتساب) · الأربعاء 08:00 - 13:00 / 16:00 - 19:30 · الخميس 08:00 - 13:00 / 16:00 - 19:30 · الجمعة 08:00 - 12:30 / عطلة نهاية الأسبوع · السبت طوارئ واستفسارات هاتفية للمسجلين / مغلق\nواتساب 052-8885800 (مش للطوارئ).\nhttps://drsamerped.ai.studio\nبدون طوابير + بدون انتظار + 100% لمؤمني كلاليت\n\nجيبوه عالعيادة"
       },
       {
         "kind": "very_short",
@@ -372,7 +383,7 @@
         "locale": "en",
         "cta": "Come to the clinic",
         "headline": "Dr. Samer Abu Mokh — walk-in",
-        "primaryText": "Dr. Samer Abu Mokh — walk-in, first come first served.\n\nFor Parents.\n\nHours: Sun 08:00 - 13:00 / 16:00 - 19:30 · Mon 08:00 - 13:00 / 16:00 - 19:30 · Tue 08:00 - 13:30 / closed (WhatsApp consults) · Wed 08:00 - 13:00 / 16:00 - 19:30 · Thu 08:00 - 13:00 / 16:00 - 19:30 · Fri 08:00 - 12:30 / weekend · Sat emergency / phone questions for registered families / closed\nWhatsApp 052-8885800 (not for emergencies).\nhttps://drsamerped.ai.studio\nNo offer and no coupon.\n\nCome to the clinic"
+        "primaryText": "Dr. Samer Abu Mokh — walk-in, first come first served.\n\nFor Parents.\n\nHours: Sun 08:00 - 13:00 / 16:00 - 19:30 · Mon 08:00 - 13:00 / 16:00 - 19:30 · Tue 08:00 - 13:30 / closed (WhatsApp consults) · Wed 08:00 - 13:00 / 16:00 - 19:30 · Thu 08:00 - 13:00 / 16:00 - 19:30 · Fri 08:00 - 12:30 / weekend · Sat emergency / phone questions for registered families / closed\nWhatsApp 052-8885800 (not for emergencies).\nhttps://drsamerped.ai.studio\nno queues · no long wait · 100% for Clalit members\n\nCome to the clinic"
       },
       {
         "kind": "very_short",
@@ -633,14 +644,14 @@
           },
           {
             "title": {
-              "he": "creative",
-              "ar": "creative",
-              "en": "creative"
+              "he": "funnel",
+              "ar": "funnel",
+              "en": "funnel"
             },
             "body": {
-              "he": "אין היסטוריית מודעות — אי אפשר לדעת מה נכשל. האבחון הוא כיוון עבודה, לא פסק דין.\nשמרו צילומי מודעות הבאים (טקסט, קהל, הוצאה, תוצאה) כדי שהאבחון הבא יהיה מבוסס.",
-              "ar": "لا تاريخ إعلانات — لا يمكن معرفة ما فشل. التشخيص اتجاه عمل لا حكم.\nاحفظوا لقطات الإعلانات القادمة (نص، جمهور، إنفاق، نتيجة).",
-              "en": "No ad history — we cannot know what failed. This diagnosis is a working direction, not a verdict.\nKeep screenshots of the next ads (copy, audience, spend, result) so the next diagnosis is grounded."
+              "he": "המדידה חסרה — בלי ליד מוגדר אי אפשר לדבר על כישלון קריאייטיב מול כישלון מעקב.\nהגדירו המרה אחת (תור / וואטסאפ עם שם) לפני הסקייל.",
+              "ar": "القياس ناقص — بلا تعريف للعميل المحتمل لا نفرّق فشل الإبداع عن فشل التتبع.\nعرّفوا تحويلاً واحداً (موعد / واتساب باسم) قبل التوسيع.",
+              "en": "Measurement is missing — without a defined lead we cannot separate creative failure from tracking failure.\nDefine one conversion (booking / WhatsApp with a name) before any scale."
             }
           },
           {
@@ -727,9 +738,9 @@
               "en": "Model"
             },
             "body": {
-              "he": "שירות חינם — חשיפה/הרשמה/ביקור בלבד. לא ננחש מחיר.",
-              "ar": "خدمة مجانية — تعرّض/تسجيل/زيارة فقط. مش منخمن سعر.",
-              "en": "Free service — exposure/enrollment/visit only. Price will not be guessed."
+              "he": "דוגמת תכנון (לא מדידה). מרפאת כללית — המשפחה לא משלמת בדלפק. המרה = הגעה לפי סדר / וואטסאפ עם שם הילד. זו לא מכירה. תקציב תכנון לדוגמה ₪1800 (חשיפה/ביקור — לא CPA).",
+              "ar": "דוגמת תכנון (לא מדידה). מרפאת כללית — המשפחה לא משלמת בדלפק. המרה = הגעה לפי סדר / וואטסאפ עם שם הילד. זו לא מכירה. תקציב תכנון לדוגמה ₪1800 (חשיפה/ביקור — לא CPA).",
+              "en": "דוגמת תכנון (לא מדידה). מרפאת כללית — המשפחה לא משלמת בדלפק. המרה = הגעה לפי סדר / וואטסאפ עם שם הילד. זו לא מכירה. תקציב תכנון לדוגמה ₪1800 (חשיפה/ביקור — לא CPA)."
             }
           },
           {
@@ -971,9 +982,9 @@
               "en": "Budget"
             },
             "body": {
-              "he": "תקציב לא סופק — אין פיצול מספרי ולא מד לידים.",
-              "ar": "الميزانية غير معطاة — لا تقسيم رقمي.",
-              "en": "Budget not supplied — no numeric split and no lead gauge."
+              "he": "תקציב שסיפקת: 1800 ₪ לחודש. פיצול בכרטיס המדיה.",
+              "ar": "الميزانية التي أعطيتها: 1800 ₪ شهرياً.",
+              "en": "Budget you supplied: 1800 ₪ / month. Split is on the media card."
             }
           }
         ]
@@ -995,18 +1006,6 @@
           },
           {
             "title": {
-              "he": "מה רץ בעבר?",
-              "ar": "ماذا اشتغل سابقاً؟",
-              "en": "What ran before?"
-            },
-            "body": {
-              "he": "בלי צילום מודעה קודמת האבחון נשאר ברמת ביטחון נמוכה.",
-              "ar": "بدون لقطة إعلان سابق يبقى التشخيص منخفض الثقة.",
-              "en": "Without a past-ad snapshot diagnosis stays low-confidence."
-            }
-          },
-          {
-            "title": {
               "he": "מתחרים",
               "ar": "المنافسون",
               "en": "Competitors"
@@ -1021,6 +1020,7 @@
       }
     ],
     "media": {
+      "monthlyBudget": 1800,
       "split": [
         {
           "channel": "meta",
@@ -1030,6 +1030,8 @@
             "en": "Reach / traffic — not purchase conversion"
           },
           "budgetSharePercent": 50,
+          "monthlyBudget": 900,
+          "dailyBudget": 30,
           "targeting": {
             "geos": [
               "باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات)"
@@ -1058,6 +1060,8 @@
             "en": "Awareness search — people looking up the institution"
           },
           "budgetSharePercent": 25,
+          "monthlyBudget": 450,
+          "dailyBudget": 15,
           "targeting": {
             "geos": [
               "باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات)"
@@ -1088,6 +1092,8 @@
             "en": "Raw video — only if real footage exists"
           },
           "budgetSharePercent": 10,
+          "monthlyBudget": 180,
+          "dailyBudget": 6,
           "targeting": {
             "geos": [
               "باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات)"
@@ -1114,6 +1120,8 @@
             "en": "Video proof — consideration, not a cheap lead"
           },
           "budgetSharePercent": 15,
+          "monthlyBudget": 270,
+          "dailyBudget": 9,
           "targeting": {
             "geos": [
               "باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات)"
@@ -1154,13 +1162,7 @@
           "en": "Channels confirmed from the document: facebook, instagram, TikTok, whatsapp. PLAN only — no live publish."
         }
       ],
-      "missingForLiveBuy": [
-        {
-          "he": "תקציב חודשי",
-          "ar": "ميزانية شهرية",
-          "en": "Monthly budget"
-        }
-      ],
+      "missingForLiveBuy": [],
       "worstCase": {
         "he": "אין תרחיש מספרי — חסר תקציב או CAC. לא יוצג מד 32–68 לידים.",
         "ar": "لا سيناريو رقمي — تنقص الميزانية أو CAC. لن يُعرض مقياس 32–68.",
@@ -1397,14 +1399,14 @@
           "id": "photos",
           "kind": "strength",
           "label": {
-            "he": "יש 4 תמונות מהאתר — אפשר לשים במודעה ובנחיתה",
-            "ar": "في 4 صور من الموقع — منستعملها بالإعلان والهبوط",
-            "en": "4 photos from the site — usable in ads and the landing"
+            "he": "יש 10 תמונות מהאתר — אפשר לשים במודעה ובנחיתה",
+            "ar": "في 10 صور من الموقع — منستعملها بالإعلان والهبوط",
+            "en": "10 photos from the site — usable in ads and the landing"
           },
           "evidence": {
-            "he": "ראיה · mediaAssets: 4",
-            "ar": "دليل · mediaAssets: 4",
-            "en": "Evidence · mediaAssets: 4"
+            "he": "ראיה · mediaAssets: 10",
+            "ar": "دليل · mediaAssets: 10",
+            "en": "Evidence · mediaAssets: 10"
           }
         },
         {
@@ -1533,9 +1535,9 @@
               },
               "score": 92,
               "note": {
-                "he": "יש 4 נכסי תמונה — עדיין בלי דירוגים מומצאים.",
-                "ar": "هناك 4 أصول صورة — بلا تقييمات مختلقة.",
-                "en": "4 image assets — still no invented ratings."
+                "he": "יש 10 נכסי תמונה — עדיין בלי דירוגים מומצאים.",
+                "ar": "هناك 10 أصول صورة — بلا تقييمات مختلقة.",
+                "en": "10 image assets — still no invented ratings."
               }
             },
             {
@@ -1559,7 +1561,7 @@
                 "ar": "تنوّع الإبداع (تخطيط 1–100)",
                 "en": "Creative variety (planning 1–100)"
               },
-              "score": 84,
+              "score": 85,
               "note": {
                 "he": "גיוון מתוכנן לפי זוויות הרעיון — לא לפי ROAS מדומה.",
                 "ar": "تنوّع مخطّط حسب زوايا الفكرة — لا حسب ROAS مختلق.",
@@ -1634,9 +1636,9 @@
               },
               "score": 92,
               "note": {
-                "he": "יש 4 נכסי תמונה — עדיין בלי דירוגים מומצאים.",
-                "ar": "هناك 4 أصول صورة — بلا تقييمات مختلقة.",
-                "en": "4 image assets — still no invented ratings."
+                "he": "יש 10 נכסי תמונה — עדיין בלי דירוגים מומצאים.",
+                "ar": "هناك 10 أصول صورة — بلا تقييمات مختلقة.",
+                "en": "10 image assets — still no invented ratings."
               }
             },
             {
@@ -1660,7 +1662,7 @@
                 "ar": "تنوّع الإبداع (تخطيط 1–100)",
                 "en": "Creative variety (planning 1–100)"
               },
-              "score": 84,
+              "score": 85,
               "note": {
                 "he": "גיוון מתוכנן לפי זוויות הרעיון — לא לפי ROAS מדומה.",
                 "ar": "تنوّع مخطّط حسب زوايا الفكرة — لا حسب ROAS مختلق.",
@@ -1735,9 +1737,9 @@
               },
               "score": 92,
               "note": {
-                "he": "יש 4 נכסי תמונה — עדיין בלי דירוגים מומצאים.",
-                "ar": "هناك 4 أصول صورة — بلا تقييمات مختلقة.",
-                "en": "4 image assets — still no invented ratings."
+                "he": "יש 10 נכסי תמונה — עדיין בלי דירוגים מומצאים.",
+                "ar": "هناك 10 أصول صورة — بلا تقييمات مختلقة.",
+                "en": "10 image assets — still no invented ratings."
               }
             },
             {
@@ -1761,7 +1763,7 @@
                 "ar": "تنوّع الإبداع (تخطيط 1–100)",
                 "en": "Creative variety (planning 1–100)"
               },
-              "score": 84,
+              "score": 85,
               "note": {
                 "he": "גיוון מתוכנן לפי זוויות הרעיון — לא לפי ROAS מדומה.",
                 "ar": "تنوّع مخطّط حسب زوايا الفكرة — لا حسب ROAS مختلق.",
@@ -1836,9 +1838,9 @@
               },
               "score": 92,
               "note": {
-                "he": "יש 4 נכסי תמונה — עדיין בלי דירוגים מומצאים.",
-                "ar": "هناك 4 أصول صورة — بلا تقييمات مختلقة.",
-                "en": "4 image assets — still no invented ratings."
+                "he": "יש 10 נכסי תמונה — עדיין בלי דירוגים מומצאים.",
+                "ar": "هناك 10 أصول صورة — بلا تقييمات مختلقة.",
+                "en": "10 image assets — still no invented ratings."
               }
             },
             {
@@ -1862,7 +1864,7 @@
                 "ar": "تنوّع الإبداع (تخطيط 1–100)",
                 "en": "Creative variety (planning 1–100)"
               },
-              "score": 84,
+              "score": 85,
               "note": {
                 "he": "גיוון מתוכנן לפי זוויות הרעיון — לא לפי ROAS מדומה.",
                 "ar": "تنوّع مخطّط حسب زوايا الفكرة — لا حسب ROAS مختلق.",
@@ -1937,9 +1939,9 @@
               },
               "score": 92,
               "note": {
-                "he": "יש 4 נכסי תמונה — עדיין בלי דירוגים מומצאים.",
-                "ar": "هناك 4 أصول صورة — بلا تقييمات مختلقة.",
-                "en": "4 image assets — still no invented ratings."
+                "he": "יש 10 נכסי תמונה — עדיין בלי דירוגים מומצאים.",
+                "ar": "هناك 10 أصول صورة — بلا تقييمات مختلقة.",
+                "en": "10 image assets — still no invented ratings."
               }
             },
             {
@@ -1963,7 +1965,7 @@
                 "ar": "تنوّع الإبداع (تخطيط 1–100)",
                 "en": "Creative variety (planning 1–100)"
               },
-              "score": 92,
+              "score": 93,
               "note": {
                 "he": "גיוון מתוכנן לפי זוויות הרעיון — לא לפי ROAS מדומה.",
                 "ar": "تنوّع مخطّط حسب زوايا الفكرة — لا حسب ROAS مختلق.",
@@ -1976,19 +1978,10 @@
       ],
       "gapPlan": {
         "missing": [
-          "monthlyBudget",
           "targetCac",
           "competitors"
         ],
         "moves": [
-          {
-            "missingField": "monthlyBudget",
-            "move": {
-              "he": "תקציב חסר — לתכנן 2–3 קריאייטיבים לומדים, בלי לחזות ROAS.",
-              "ar": "الميزانية ناقصة — خطّطوا 2–3 إبداعات تعلّم بلا توقّع ROAS.",
-              "en": "Budget missing — plan 2–3 learning creatives; never forecast ROAS."
-            }
-          },
           {
             "missingField": "targetCac",
             "move": {
@@ -2028,9 +2021,9 @@
               "en": "Model"
             },
             "body": {
-              "he": "שירות חינם — חשיפה בלבד. אין סגירת כסף מהלקוח.",
-              "ar": "خدمة مجانية — تعرّض فقط. ما في إغلاق فلوس من الزبون.",
-              "en": "Free service — exposure only. No money closes from the client."
+              "he": "דוגמת תכנון (לא מדידה). מרפאת כללית — המשפחה לא משלמת בדלפק. המרה = הגעה לפי סדר / וואטסאפ עם שם הילד. זו לא מכירה. תקציב תכנון לדוגמה ₪1800 (חשיפה/ביקור — לא CPA).",
+              "ar": "דוגמת תכנון (לא מדידה). מרפאת כללית — המשפחה לא משלמת בדלפק. המרה = הגעה לפי סדר / וואטסאפ עם שם הילד. זו לא מכירה. תקציב תכנון לדוגמה ₪1800 (חשיפה/ביקור — לא CPA).",
+              "en": "דוגמת תכנון (לא מדידה). מרפאת כללית — המשפחה לא משלמת בדלפק. המרה = הגעה לפי סדר / וואטסאפ עם שם הילד. זו לא מכירה. תקציב תכנון לדוגמה ₪1800 (חשיפה/ביקור — לא CPA)."
             }
           },
           {
@@ -2040,9 +2033,9 @@
               "en": "Unit economics"
             },
             "body": {
-              "he": "AOV חסר · מרווח חסר% · CAC יעד חסר · תקציב חסר.",
-              "ar": "AOV ناقص · هامش ناقص · CAC ناقص · ميزانية ناقص.",
-              "en": "AOV missing · margin missing% · target CAC missing · budget missing."
+              "he": "AOV חסר · מרווח חסר% · CAC יעד חסר · תקציב 1800.",
+              "ar": "AOV ناقص · هامش ناقص · CAC ناقص · ميزانية 1800.",
+              "en": "AOV missing · margin missing% · target CAC missing · budget 1800."
             }
           },
           {
@@ -2052,9 +2045,9 @@
               "en": "History"
             },
             "body": {
-              "he": "אין מודעות קודמות בקליטה.",
-              "ar": "لا إعلانات سابقة.",
-              "en": "No past ads in intake."
+              "he": "פוסטים אורגניים בפייסבוק: «בלי תורים» + שעות המרפאה + וואטסאפ 052-8885800. סטוריז של חזית המתחם הריקה. לא רץ קמפיין ממומן מדוד.",
+              "ar": "פוסטים אורגניים בפייסבוק: «בלי תורים» + שעות המרפאה + וואטסאפ 052-8885800. סטוריז של חזית המתחם הריקה. לא רץ קמפיין ממומן מדוד.",
+              "en": "פוסטים אורגניים בפייסבוק: «בלי תורים» + שעות המרפאה + וואטסאפ 052-8885800. סטוריז של חזית המתחם הריקה. לא רץ קמפיין ממומן מדוד."
             }
           },
           {
@@ -2093,9 +2086,9 @@
               "en": "From intake: Parents. باقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات)"
             },
             "unknown": {
-              "he": "חסר: budget, cac, competitors — לא הומצא.",
-              "ar": "ناقص: budget, cac, competitors.",
-              "en": "Missing: budget, cac, competitors — not invented."
+              "he": "חסר: cac, competitors — לא הומצא.",
+              "ar": "ناقص: cac, competitors.",
+              "en": "Missing: cac, competitors — not invented."
             }
           },
           {
@@ -2151,9 +2144,9 @@
             "en": "Stated strength: بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت"
           },
           "weakness": {
-            "he": "חולשה תפעולית לא סופקה — לא נכתוב «אין נוכחות דיגיטלית» סתם.",
-            "ar": "ضعف تشغيلي غير مذكور.",
-            "en": "Operational weakness not supplied — will not write “no digital presence” for flavor."
+            "he": "הפוסטים תיארו את המקום אבל שכחו לבקש שם בוואטסאפ או לחזור על חלון ההגעה הבא.",
+            "ar": "הפוסטים תיארו את המקום אבל שכחו לבקש שם בוואטסאפ או לחזור על חלון ההגעה הבא.",
+            "en": "הפוסטים תיארו את המקום אבל שכחו לבקש שם בוואטסאפ או לחזור על חלון ההגעה הבא."
           },
           "opportunity": {
             "he": "קהל הורים בباقة الغربية، الشارع الرئيسي (بجانب الدوار المركزي)، مجمع النور الطبي، الطابق الأول (مع مصعد وموقف سيارات خاص ومريح للعائلات). מטרה: ביקור לפי סדר הגעה (בלי תור).",
@@ -2177,9 +2170,9 @@
           "strategic"
         ],
         "positioning": {
-          "he": "ד\"ר סאמר מחמד אבו מוך להורים: بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت. לא «הכי טוב בשוק».",
-          "ar": "ד\"ר סאמר מחמד אבו מוך لـ أهل: بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت.",
-          "en": "ד\"ר סאמר מחמד אבו מוך for Parents: بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت. Not “best in market”."
+          "he": "מרפאת ילדים אמיתית בבאקה — קבלה לפי סדר למבוטחי כללית, לא מותג רשת.",
+          "ar": "מרפאת ילדים אמיתית בבאקה — קבלה לפי סדר למבוטחי כללית, לא מותג רשת.",
+          "en": "מרפאת ילדים אמיתית בבאקה — קבלה לפי סדר למבוטחי כללית, לא מותג רשת."
         },
         "uniqueMechanism": {
           "he": "כיסוי כללית הוא עובדה למבוטחים — לא מבצע ולא קופון. המנגנון שסופק: بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت. בלי למכור את הקופה כמבצע.",
@@ -2508,6 +2501,58 @@
             }
           },
           {
+            "id": "cmo-two_lang_equal",
+            "angle": {
+              "he": "רעיון CMO: שתי שפות שוות",
+              "ar": "فكرة CMO: لغتان متساويتان",
+              "en": "CMO idea: Two equal languages"
+            },
+            "hook": {
+              "he": "עברית וערבית כשפות ראשונות — לא תרגום משני · למה זה מנצח: מחברת קהל מקומי בלי להמציא דמוגרפיה · תכנון 87/100 (לא ROAS)",
+              "ar": "العبرية والعربية أوليتان — مش ترجمة ثانوية · لماذا تفوز: تربط الجمهور المحلي بلا اختراع ديموغرافيا · تخطيط 87/100 (ليس ROAS)",
+              "en": "Hebrew and Arabic as first languages — not afterthought translation · Why it wins: Connects the local audience without inventing demographics · planning 87/100 (not ROAS)"
+            }
+          },
+          {
+            "id": "cmo-coverage_plain",
+            "angle": {
+              "he": "רעיון CMO: כיסוי בפרוזה",
+              "ar": "فكرة CMO: تغطية بالنثر",
+              "en": "CMO idea: Coverage in plain prose"
+            },
+            "hook": {
+              "he": "אם יש עובדת קופה — אומרים אותה בלי למכור אותה כמבצע · למה זה מנצח: מכבדת מודל שירות חינם — בלי ROAS ובלי קופון · תכנון 89/100 (לא ROAS)",
+              "ar": "إن وُجدت حقيقة صندوق — تُقال بلا بيعها كعرض · لماذا تفوز: تحترم نموذج خدمة مجانية — بلا ROAS وبلا كوبون · تخطيط 89/100 (ليس ROAS)",
+              "en": "If an HMO fact exists — state it; never sell it as a promo · Why it wins: Respects free-service — no ROAS framing, no coupon · planning 89/100 (not ROAS)"
+            }
+          },
+          {
+            "id": "gap-targetCac-0",
+            "angle": {
+              "he": "פיצוי פער: targetCac",
+              "ar": "تعويض فجوة: targetCac",
+              "en": "Gap compensate: targetCac"
+            },
+            "hook": {
+              "he": "CAC יעד חסר — לא יומצא; מדדי תכנון = בהירות מסר/הצעה בלבד.",
+              "ar": "CAC المستهدف ناقص — لن يُخترع؛ مقاييس التخطيط = وضوح الرسالة/العرض فقط.",
+              "en": "Target CAC missing — will not invent; planning metrics = message/offer clarity only."
+            }
+          },
+          {
+            "id": "gap-competitors-1",
+            "angle": {
+              "he": "פיצוי פער: competitors",
+              "ar": "تعويض فجوة: competitors",
+              "en": "Gap compensate: competitors"
+            },
+            "hook": {
+              "he": "בלי שמות מתחרים — לא יומצאו; להתמקד ביתרון שלכם.",
+              "ar": "بلا أسماء منافسين — لن تُخترع؛ ركّزوا على ميزتكم.",
+              "en": "No competitor names — will not invent any; focus on your advantage."
+            }
+          },
+          {
             "id": "pain",
             "angle": {
               "he": "בעיה",
@@ -2554,9 +2599,9 @@
               "en": "Integrity"
             },
             "hook": {
-              "he": "בלי קופון מלאכותי.",
-              "ar": "بلا كوبون.",
-              "en": "No manufactured coupon."
+              "he": "מובילים ביתרון: بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت",
+              "ar": "نقود بالميزة: بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت",
+              "en": "Lead with advantage: بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت"
             }
           },
           {
@@ -2640,9 +2685,9 @@
           },
           {
             "angle": {
-              "he": "בעיה",
-              "ar": "مشكلة",
-              "en": "Problem"
+              "he": "רעיון CMO: שתי שפות שוות",
+              "ar": "فكرة CMO: لغتان متساويتان",
+              "en": "CMO idea: Two equal languages"
             },
             "proof": {
               "he": "بدون طوابير + بدون انتظار + 100% لمؤمني كلاليت",
@@ -2697,7 +2742,7 @@
             "format": "landing",
             "locale": "he",
             "title": "דף נחיתה — מבנה",
-            "body": "H1: ד\"ר סאמר מחמד אבו מוך — לפי סדר הגעה\nקבלה לפי סדר הגעה, בלי לקבוע תור.\nמתחם אל-נור, קומה 1\nשעות: ראשון 08:00 - 13:00 / 16:00 - 19:30 · שני 08:00 - 13:00 / 16:00 - 19:30 · שלישי 08:00 - 13:30 / סגור (ייעוץ וואטסאפ) · רביעי 08:00 - 13:00 / 16:00 - 19:30 · חמישי 08:00 - 13:00 / 16:00 - 19:30 · שישי 08:00 - 12:30 / סופ״ש · שבת חירום ובירורים טלפוניים לרשומים / סגור\nhttps://drsamerped.ai.studio\nוואטסאפ: 052-8885800 — לא לחירום.\nטופס: שם + טלפון + שפה. בלי המלצות בדויות.\nויזואל מהקבצים שהועלו: exterior · interior · interior · interior. בלי תמונת רופא שלא הועלתה."
+            "body": "H1: ד\"ר סאמר מחמד אבו מוך — לפי סדר הגעה\nקבלה לפי סדר הגעה, בלי לקבוע תור.\nמתחם אל-נור, קומה 1\nשעות: ראשון 08:00 - 13:00 / 16:00 - 19:30 · שני 08:00 - 13:00 / 16:00 - 19:30 · שלישי 08:00 - 13:30 / סגור (ייעוץ וואטסאפ) · רביעי 08:00 - 13:00 / 16:00 - 19:30 · חמישי 08:00 - 13:00 / 16:00 - 19:30 · שישי 08:00 - 12:30 / סופ״ש · שבת חירום ובירורים טלפוניים לרשומים / סגור\nhttps://drsamerped.ai.studio\nוואטסאפ: 052-8885800 — לא לחירום.\nטופס: שם + טלפון + שפה. בלי המלצות בדויות.\nויזואל מהקבצים שהועלו: waiting_room · exterior · interior · exterior · interior · interior · exterior · interior · interior · interior. בלי תמונת רופא שלא הועלתה."
           },
           {
             "format": "whatsapp",
@@ -2787,7 +2832,7 @@
             "format": "landing",
             "locale": "ar",
             "title": "صفحة هبوط",
-            "body": "H1: الولد مريض، جيبوه عالعيادة\nسجل طفلك اليوم واضمن له الرعاية الطبية الأرقى في باقة 📲\nجت أولاً بدون مواعيد. مش حاجة تحجزوا دور.\nمجمع النور، طابق 1\nالدوام: الأحد 08:00 - 13:00 / 16:00 - 19:30 · الإثنين 08:00 - 13:00 / 16:00 - 19:30 · الثلاثاء 08:00 - 13:30 / مغلق (استشارات واتساب) · الأربعاء 08:00 - 13:00 / 16:00 - 19:30 · الخميس 08:00 - 13:00 / 16:00 - 19:30 · الجمعة 08:00 - 12:30 / عطلة نهاية الأسبوع · السبت طوارئ واستفسارات هاتفية للمسجلين / مغلق\nhttps://drsamerped.ai.studio\nواتساب: 052-8885800 — مش للطوارئ.\nفورم: اسم + تلفون + لغة. بلا شهادات مختلقة.\nالصور من الملفات المرفوعة: exterior · interior · interior · interior. بلا صورة دكتور ما انرفعت."
+            "body": "H1: الولد مريض، جيبوه عالعيادة\nسجل طفلك اليوم واضمن له الرعاية الطبية الأرقى في باقة 📲\nجت أولاً بدون مواعيد. مش حاجة تحجزوا دور.\nمجمع النور، طابق 1\nالدوام: الأحد 08:00 - 13:00 / 16:00 - 19:30 · الإثنين 08:00 - 13:00 / 16:00 - 19:30 · الثلاثاء 08:00 - 13:30 / مغلق (استشارات واتساب) · الأربعاء 08:00 - 13:00 / 16:00 - 19:30 · الخميس 08:00 - 13:00 / 16:00 - 19:30 · الجمعة 08:00 - 12:30 / عطلة نهاية الأسبوع · السبت طوارئ واستفسارات هاتفية للمسجلين / مغلق\nhttps://drsamerped.ai.studio\nواتساب: 052-8885800 — مش للطوارئ.\nفورم: اسم + تلفون + لغة. بلا شهادات مختلقة.\nالصور من الملفات المرفوعة: waiting_room · exterior · interior · exterior · interior · interior · exterior · interior · interior · interior. بلا صورة دكتور ما انرفعت."
           },
           {
             "format": "whatsapp",
@@ -2877,7 +2922,7 @@
             "format": "landing",
             "locale": "en",
             "title": "Landing structure",
-            "body": "H1: Dr. Samer Abu Mokh — walk-in\nWalk-in, first come first served. No booking required.\nAl-Nour, 1st floor\nHours: Sun 08:00 - 13:00 / 16:00 - 19:30 · Mon 08:00 - 13:00 / 16:00 - 19:30 · Tue 08:00 - 13:30 / closed (WhatsApp consults) · Wed 08:00 - 13:00 / 16:00 - 19:30 · Thu 08:00 - 13:00 / 16:00 - 19:30 · Fri 08:00 - 12:30 / weekend · Sat emergency / phone questions for registered families / closed\nhttps://drsamerped.ai.studio\nWhatsApp: 052-8885800 — not for emergencies.\nForm: name + phone + language. No fake testimonials.\nVisuals from uploaded files: exterior · interior · interior · interior. No doctor photo that was not uploaded."
+            "body": "H1: Dr. Samer Abu Mokh — walk-in\nWalk-in, first come first served. No booking required.\nAl-Nour, 1st floor\nHours: Sun 08:00 - 13:00 / 16:00 - 19:30 · Mon 08:00 - 13:00 / 16:00 - 19:30 · Tue 08:00 - 13:30 / closed (WhatsApp consults) · Wed 08:00 - 13:00 / 16:00 - 19:30 · Thu 08:00 - 13:00 / 16:00 - 19:30 · Fri 08:00 - 12:30 / weekend · Sat emergency / phone questions for registered families / closed\nhttps://drsamerped.ai.studio\nWhatsApp: 052-8885800 — not for emergencies.\nForm: name + phone + language. No fake testimonials.\nVisuals from uploaded files: waiting_room · exterior · interior · exterior · interior · interior · exterior · interior · interior · interior. No doctor photo that was not uploaded."
           },
           {
             "format": "whatsapp",
@@ -2931,7 +2976,7 @@
             "format": "ad-strong_offer",
             "locale": "he",
             "title": "ד\"ר סאמר מחמד אבו מוך — לפי סדר הגעה",
-            "body": "ד\"ר סאמר מחמד אבו מוך — קבלה לפי סדר הגעה, בלי תור מראש.\n\nלמשפחות באקה שמחפשות רופא ילדים בכללית.\n\nשעות: ראשון 08:00 - 13:00 / 16:00 - 19:30 · שני 08:00 - 13:00 / 16:00 - 19:30 · שלישי 08:00 - 13:30 / סגור (ייעוץ וואטסאפ) · רביעי 08:00 - 13:00 / 16:00 - 19:30 · חמישי 08:00 - 13:00 / 16:00 - 19:30 · שישי 08:00 - 12:30 / סופ״ש · שבת חירום ובירורים טלפוניים לרשומים / סגור\nוואטסאפ 052-8885800 (לא לחירום).\nhttps://drsamerped.ai.studio\nאין מבצע ואין קופון.\n\nהגיעו למרפאה\nCTA: הגיעו למרפאה"
+            "body": "ד\"ר סאמר מחמד אבו מוך — קבלה לפי סדר הגעה, בלי תור מראש.\n\nלמשפחות באקה שמחפשות רופא ילדים בכללית.\n\nשעות: ראשון 08:00 - 13:00 / 16:00 - 19:30 · שני 08:00 - 13:00 / 16:00 - 19:30 · שלישי 08:00 - 13:30 / סגור (ייעוץ וואטסאפ) · רביעי 08:00 - 13:00 / 16:00 - 19:30 · חמישי 08:00 - 13:00 / 16:00 - 19:30 · שישי 08:00 - 12:30 / סופ״ש · שבת חירום ובירורים טלפוניים לרשומים / סגור\nוואטסאפ 052-8885800 (לא לחירום).\nhttps://drsamerped.ai.studio\nבלי תורים · בלי המתנה · 100% למבוטחי כללית\n\nהגיעו למרפאה\nCTA: הגיעו למרפאה"
           },
           {
             "format": "ad-very_short",
@@ -2967,7 +3012,7 @@
             "format": "ad-strong_offer",
             "locale": "ar",
             "title": "الولد مريض، جيبوه عالعيادة",
-            "body": "ד\"ר סאמר מחמד אבו מוך بباقة — جت أولاً بدون مواعيد.\n\nلأهل باقة اللي بدهم طبيب أطفال كلاليت قريب.\n\nالدوام: الأحد 08:00 - 13:00 / 16:00 - 19:30 · الإثنين 08:00 - 13:00 / 16:00 - 19:30 · الثلاثاء 08:00 - 13:30 / مغلق (استشارات واتساب) · الأربعاء 08:00 - 13:00 / 16:00 - 19:30 · الخميس 08:00 - 13:00 / 16:00 - 19:30 · الجمعة 08:00 - 12:30 / عطلة نهاية الأسبوع · السبت طوارئ واستفسارات هاتفية للمسجلين / مغلق\nواتساب 052-8885800 (مش للطوارئ).\nhttps://drsamerped.ai.studio\nما في عرض وما في كوبون.\n\nجيبوه عالعيادة\nCTA: جيبوه عالعيادة"
+            "body": "ד\"ר סאמר מחמד אבו מוך بباقة — جت أولاً بدون مواعيد.\n\nلأهل باقة اللي بدهم طبيب أطفال كلاليت قريب.\n\nالدوام: الأحد 08:00 - 13:00 / 16:00 - 19:30 · الإثنين 08:00 - 13:00 / 16:00 - 19:30 · الثلاثاء 08:00 - 13:30 / مغلق (استشارات واتساب) · الأربعاء 08:00 - 13:00 / 16:00 - 19:30 · الخميس 08:00 - 13:00 / 16:00 - 19:30 · الجمعة 08:00 - 12:30 / عطلة نهاية الأسبوع · السبت طوارئ واستفسارات هاتفية للمسجلين / مغلق\nواتساب 052-8885800 (مش للطوارئ).\nhttps://drsamerped.ai.studio\nبدون طوابير + بدون انتظار + 100% لمؤمني كلاليت\n\nجيبوه عالعيادة\nCTA: جيبوه عالعيادة"
           },
           {
             "format": "ad-very_short",
@@ -3003,7 +3048,7 @@
             "format": "ad-strong_offer",
             "locale": "en",
             "title": "Dr. Samer Abu Mokh — walk-in",
-            "body": "Dr. Samer Abu Mokh — walk-in, first come first served.\n\nFor Parents.\n\nHours: Sun 08:00 - 13:00 / 16:00 - 19:30 · Mon 08:00 - 13:00 / 16:00 - 19:30 · Tue 08:00 - 13:30 / closed (WhatsApp consults) · Wed 08:00 - 13:00 / 16:00 - 19:30 · Thu 08:00 - 13:00 / 16:00 - 19:30 · Fri 08:00 - 12:30 / weekend · Sat emergency / phone questions for registered families / closed\nWhatsApp 052-8885800 (not for emergencies).\nhttps://drsamerped.ai.studio\nNo offer and no coupon.\n\nCome to the clinic\nCTA: Come to the clinic"
+            "body": "Dr. Samer Abu Mokh — walk-in, first come first served.\n\nFor Parents.\n\nHours: Sun 08:00 - 13:00 / 16:00 - 19:30 · Mon 08:00 - 13:00 / 16:00 - 19:30 · Tue 08:00 - 13:30 / closed (WhatsApp consults) · Wed 08:00 - 13:00 / 16:00 - 19:30 · Thu 08:00 - 13:00 / 16:00 - 19:30 · Fri 08:00 - 12:30 / weekend · Sat emergency / phone questions for registered families / closed\nWhatsApp 052-8885800 (not for emergencies).\nhttps://drsamerped.ai.studio\nno queues · no long wait · 100% for Clalit members\n\nCome to the clinic\nCTA: Come to the clinic"
           },
           {
             "format": "ad-very_short",
@@ -3355,8 +3400,8 @@
   },
   {
     "id": "demo-olive-kitchen",
-    "createdAt": "2026-09-05T08:21:17.257Z",
-    "updatedAt": "2026-09-05T08:21:17.257Z",
+    "createdAt": "2026-09-05T13:28:26.898Z",
+    "updatedAt": "2026-09-05T13:28:26.898Z",
     "name": "מטבח הזית",
     "intake": {
       "type": "business",
@@ -3382,64 +3427,130 @@
       "offer": "ארוחת טעימות זוגית ב-₪149 בהזמנה מראש",
       "offerCustom": true,
       "competitors": [],
-      "businessModel": "",
-      "avgOrderValue": "",
-      "marginPercent": "",
-      "targetCac": "",
-      "monthlyBudget": "",
-      "pastAds": "",
-      "pastResults": "",
-      "whatFailed": "",
+      "businessModel": "דוגמת תכנון (לא מדידה). מסעדה ים-תיכונית משפחתית — הכסף מהשולחן, לא ממשלוח מהיר. המרה = שמירת שולחן בוואטסאפ / הגעה. קלט תכנון: ₪180 · 38% · CAC ₪45 · תקציב ₪2800.",
+      "avgOrderValue": "180",
+      "marginPercent": "38",
+      "targetCac": "45",
+      "monthlyBudget": "2800",
+      "pastAds": "סטוריז של חומוס, שמן זית ושולחן חוץ ריק בשקיעה. כיתוב על נווה שקד. בלי קטלוג 40 מנות מומצא. תיאור קריאייטיב קודם בלבד — לא תוצאות ממומנות.",
+      "pastResults": "דוגמת תכנון (לא מדידה). אין ROAS, אין כוכבים ואין לייקים מדודים. המספרים למעלה הם קלט תכנון לדוגמה בלבד.",
+      "whatFailed": "האוכל נראה חם אבל לא היה CTA להזמנה ולא שעת מטבח הבאה — ראו ולא כתבו.",
       "mediaAssets": [
         {
-          "id": "a4724646-e6e1-4edd-9967-525fe917bd65",
+          "id": "demo-olive-kitchen-photo-1",
+          "kind": "image",
+          "mime": "image/jpeg",
+          "name": "Mezze and olive oil",
+          "size": 1,
+          "label": "other",
+          "note": "offer:photo:olive-mezze",
+          "createdAt": "2026-09-05T12:00:00.000Z",
+          "publicSrc": "/packs/assets/demo-olive-kitchen/photo-1.jpg"
+        },
+        {
+          "id": "demo-olive-kitchen-photo-2",
+          "kind": "image",
+          "mime": "image/jpeg",
+          "name": "Dusk terrace table",
+          "size": 1,
+          "label": "exterior",
+          "note": "offer:photo:olive-terrace",
+          "createdAt": "2026-09-05T12:00:00.000Z",
+          "publicSrc": "/packs/assets/demo-olive-kitchen/photo-2.jpg"
+        },
+        {
+          "id": "demo-olive-kitchen-photo-3",
+          "kind": "image",
+          "mime": "image/jpeg",
+          "name": "Hummus ceramic bowl",
+          "size": 1,
+          "label": "other",
+          "note": "offer:photo:olive-hummus",
+          "createdAt": "2026-09-05T12:00:00.000Z",
+          "publicSrc": "/packs/assets/demo-olive-kitchen/photo-3.jpg"
+        },
+        {
+          "id": "demo-olive-kitchen-photo-4",
+          "kind": "image",
+          "mime": "image/jpeg",
+          "name": "Empty dining room",
+          "size": 1,
+          "label": "interior",
+          "note": "offer:photo:olive-interior",
+          "createdAt": "2026-09-05T12:00:00.000Z",
+          "publicSrc": "/packs/assets/demo-olive-kitchen/photo-4.jpg"
+        },
+        {
+          "id": "demo-olive-kitchen-photo-5",
+          "kind": "image",
+          "mime": "image/jpeg",
+          "name": "Citrus and linen",
+          "size": 1,
+          "label": "other",
+          "note": "offer:photo:olive-citrus",
+          "createdAt": "2026-09-05T12:00:00.000Z",
+          "publicSrc": "/packs/assets/demo-olive-kitchen/photo-5.jpg"
+        },
+        {
+          "id": "demo-olive-kitchen-photo-6",
+          "kind": "image",
+          "mime": "image/jpeg",
+          "name": "Courtyard two-top",
+          "size": 1,
+          "label": "exterior",
+          "note": "offer:photo:olive-courtyard",
+          "createdAt": "2026-09-05T12:00:00.000Z",
+          "publicSrc": "/packs/assets/demo-olive-kitchen/photo-6.jpg"
+        },
+        {
+          "id": "e5295767-035d-4ee5-91f4-161496c0630f",
           "kind": "image",
           "mime": "image/svg+xml",
           "name": "Plated dish",
           "size": 485,
           "label": "exterior",
           "note": "offer:studio:studio-restaurant-plated",
-          "createdAt": "2026-09-05T08:21:17.252Z",
+          "createdAt": "2026-09-05T13:28:26.895Z",
           "publicSrc": "/packs/assets/demo-olive-kitchen/still-1.svg"
         },
         {
-          "id": "4f147bf3-d62b-4d10-92cf-2e2e133ce36e",
+          "id": "f9776691-8d92-4fd4-b0b6-5dd80062cd75",
           "kind": "image",
           "mime": "image/svg+xml",
           "name": "Grill glow",
           "size": 819,
           "label": "interior",
           "note": "offer:studio:studio-restaurant-grill",
-          "createdAt": "2026-09-05T08:21:17.252Z",
+          "createdAt": "2026-09-05T13:28:26.895Z",
           "publicSrc": "/packs/assets/demo-olive-kitchen/still-2.svg"
         },
         {
-          "id": "49bbbf44-452a-4a79-8ff5-dac5cebd7fb7",
+          "id": "f368f889-596e-41a7-8408-5ebd6a92a29e",
           "kind": "image",
           "mime": "image/svg+xml",
           "name": "Table setting",
           "size": 593,
           "label": "interior",
           "note": "offer:studio:studio-restaurant-table",
-          "createdAt": "2026-09-05T08:21:17.252Z",
+          "createdAt": "2026-09-05T13:28:26.895Z",
           "publicSrc": "/packs/assets/demo-olive-kitchen/still-3.svg"
         },
         {
-          "id": "76863b02-43a3-4366-8afd-8e4d820f0eab",
+          "id": "3d067bb8-788c-4755-b3e5-681a0f18395f",
           "kind": "image",
           "mime": "image/svg+xml",
           "name": "Courtyard table",
           "size": 789,
           "label": "interior",
           "note": "offer:studio:studio-restaurant-courtyard",
-          "createdAt": "2026-09-05T08:21:17.252Z",
+          "createdAt": "2026-09-05T13:28:26.895Z",
           "publicSrc": "/packs/assets/demo-olive-kitchen/still-4.svg"
         }
       ],
       "ingestedDocs": [],
       "pastCreatives": [],
       "brandTone": "חם, ביתי, ים-תיכוני — בלי סלוגני רשת. שמן זית, קרמיקה, ישיבה בחוץ.",
-      "brandPositioning": "מסעדת שכונה משפחתית בנווה שקד — טקס שולחן רגוע, לא משלוחים מהירים.",
+      "brandPositioning": "שולחן שכונתי בנווה שקד הבדיונית — טקס שולחן רגוע, לא משלוחים מהירים.",
       "channelNotes": "facebook,instagram,whatsapp",
       "whatsappTemplates": "",
       "landingLines": "הזמינו שולחן במטבח הזית — נווה שקד",
@@ -3449,117 +3560,8 @@
       }
     },
     "intakeReport": {
-      "completeness": 63,
-      "missing": [
-        {
-          "field": "businessModel",
-          "label": {
-            "he": "מודל עסקי",
-            "ar": "نموذج العمل",
-            "en": "Business model"
-          },
-          "reason": {
-            "he": "בלי לדעת מה נחשב המרה, אי אפשר לתכנן באדג'ט.",
-            "ar": "بدون معرفة التحويل لا خطة ميزانية.",
-            "en": "Without the conversion event, budget planning is guesswork."
-          },
-          "impact": {
-            "he": "סוכן המדיה יסרב לנחש CPA.",
-            "ar": "وكيل الميديا سيرفض تخمين CPA.",
-            "en": "The media agent will refuse to guess CPA."
-          }
-        },
-        {
-          "field": "monthlyBudget",
-          "label": {
-            "he": "תקציב",
-            "ar": "الميزانية",
-            "en": "Budget"
-          },
-          "reason": {
-            "he": "בלי תקציב אין פיצול ערוצים מספרי.",
-            "ar": "بدون ميزانية لا تقسيم قنوات رقمياً.",
-            "en": "No budget means no numeric channel split."
-          },
-          "impact": {
-            "he": "לא יוצג מד לידים.",
-            "ar": "لن يُعرض مقياس عملاء.",
-            "en": "No lead gauge will be shown."
-          }
-        },
-        {
-          "field": "targetCac",
-          "label": {
-            "he": "CAC יעד",
-            "ar": "CAC مستهدف",
-            "en": "Target CAC"
-          },
-          "reason": {
-            "he": "בלי CAC אין תרחיש עלות.",
-            "ar": "بدون CAC لا سيناريو تكلفة.",
-            "en": "Without CAC there is no cost scenario."
-          },
-          "impact": {
-            "he": "רק כללי kill/scale, בלי מספרים.",
-            "ar": "فقط قواعد قتل/توسيع بلا أرقام.",
-            "en": "Kill/scale rules only, no numbers."
-          }
-        },
-        {
-          "field": "avgOrderValue",
-          "label": {
-            "he": "ערך הזמנה",
-            "ar": "قيمة الطلب",
-            "en": "Average order value"
-          },
-          "reason": {
-            "he": "צריך לבדוק אם CAC הגיוני מול מרווח.",
-            "ar": "يجب فحص منطقية CAC مقابل الهامش.",
-            "en": "Needed to check whether CAC is sane vs margin."
-          },
-          "impact": {
-            "he": "אין בדיקת יחידת כלכלה.",
-            "ar": "لا فحص لوحدة الاقتصاد.",
-            "en": "No unit-economics check."
-          }
-        },
-        {
-          "field": "marginPercent",
-          "label": {
-            "he": "מרווח",
-            "ar": "الهامش",
-            "en": "Margin"
-          },
-          "reason": {
-            "he": "מרווח חסר = אי אפשר לדעת אם הקמפיין מפסיד.",
-            "ar": "هامش ناقص = لا نعرف إن كانت الحملة تخسر.",
-            "en": "Missing margin = cannot tell if the campaign loses money."
-          },
-          "impact": {
-            "he": "אזהרת רווחיות תחסר.",
-            "ar": "ستغيب تحذيرة الربحية.",
-            "en": "Profitability warning will be missing."
-          }
-        },
-        {
-          "field": "pastAds",
-          "label": {
-            "he": "מודעות קודמות",
-            "ar": "إعلانات سابقة",
-            "en": "Past ads"
-          },
-          "reason": {
-            "he": "בלי היסטוריה האבחון הוא השערה.",
-            "ar": "بدون تاريخ التشخيص افتراض.",
-            "en": "Without history the diagnosis is a hypothesis."
-          },
-          "impact": {
-            "he": "ביטחון האבחון יהיה נמוך.",
-            "ar": "ثقة التشخيص ستكون منخفضة.",
-            "en": "Diagnosis confidence will be low."
-          }
-        }
-      ],
+      "completeness": 100,
+      "missing": [],
       "inconsistencies": [],
       "refusedGuesses": [
         {
@@ -3583,7 +3585,7 @@
       "hypotheses": [
         {
           "area": "hook",
-          "confidence": "low",
+          "confidence": "medium",
           "finding": {
             "he": "ההוק צריך לפתוח בבעיה של הקהל, לא בשם העסק.",
             "ar": "يجب أن يبدأ الخطاف بمشكلة الجمهور لا باسم النشاط.",
@@ -3599,29 +3601,10 @@
             "ar": "الجملة الأولى = ألم محدد. اسم النشاط في الثانية أو في CTA.",
             "en": "First line = specific pain. Business name on line two or in the CTA."
           }
-        },
-        {
-          "area": "creative",
-          "confidence": "low",
-          "finding": {
-            "he": "אין היסטוריית מודעות — אי אפשר לדעת מה נכשל. האבחון הוא כיוון עבודה, לא פסק דין.",
-            "ar": "لا تاريخ إعلانات — لا يمكن معرفة ما فشل. التشخيص اتجاه عمل لا حكم.",
-            "en": "No ad history — we cannot know what failed. This diagnosis is a working direction, not a verdict."
-          },
-          "evidence": {
-            "he": "מודעות קודמות לא מולאו.",
-            "ar": "الإعلانات السابقة غير مملوءة.",
-            "en": "Past ads were not filled in."
-          },
-          "recommendation": {
-            "he": "שמרו צילומי מודעות הבאים (טקסט, קהל, הוצאה, תוצאה) כדי שהאבחון הבא יהיה מבוסס.",
-            "ar": "احفظوا لقطات الإعلانات القادمة (نص، جمهور، إنفاق، نتيجة).",
-            "en": "Keep screenshots of the next ads (copy, audience, spend, result) so the next diagnosis is grounded."
-          }
         }
       ],
       "approved": true,
-      "approvedAt": "2026-09-05T08:21:17.253Z"
+      "approvedAt": "2026-09-05T13:28:26.895Z"
     },
     "variants": [
       {
@@ -3959,18 +3942,6 @@
               "ar": "يجب أن يبدأ الخطاف بمشكلة الجمهور لا باسم النشاط.\nالجملة الأولى = ألم محدد. اسم النشاط في الثانية أو في CTA.",
               "en": "The hook should open on the audience’s problem, not the business name.\nFirst line = specific pain. Business name on line two or in the CTA."
             }
-          },
-          {
-            "title": {
-              "he": "creative",
-              "ar": "creative",
-              "en": "creative"
-            },
-            "body": {
-              "he": "אין היסטוריית מודעות — אי אפשר לדעת מה נכשל. האבחון הוא כיוון עבודה, לא פסק דין.\nשמרו צילומי מודעות הבאים (טקסט, קהל, הוצאה, תוצאה) כדי שהאבחון הבא יהיה מבוסס.",
-              "ar": "لا تاريخ إعلانات — لا يمكن معرفة ما فشل. التشخيص اتجاه عمل لا حكم.\nاحفظوا لقطات الإعلانات القادمة (نص، جمهور، إنفاق، نتيجة).",
-              "en": "No ad history — we cannot know what failed. This diagnosis is a working direction, not a verdict.\nKeep screenshots of the next ads (copy, audience, spend, result) so the next diagnosis is grounded."
-            }
           }
         ]
       },
@@ -4020,9 +3991,9 @@
               "en": "Model"
             },
             "body": {
-              "he": "לא סופק — לא ננחש איך נסגר הכסף.",
-              "ar": "غير متوفر — لن نخمن كيف يُغلق المال.",
-              "en": "Not provided — we will not guess how money is made."
+              "he": "דוגמת תכנון (לא מדידה). מסעדה ים-תיכונית משפחתית — הכסף מהשולחן, לא ממשלוח מהיר. המרה = שמירת שולחן בוואטסאפ / הגעה. קלט תכנון: ₪180 · 38% · CAC ₪45 · תקציב ₪2800.",
+              "ar": "דוגמת תכנון (לא מדידה). מסעדה ים-תיכונית משפחתית — הכסף מהשולחן, לא ממשלוח מהיר. המרה = שמירת שולחן בוואטסאפ / הגעה. קלט תכנון: ₪180 · 38% · CAC ₪45 · תקציב ₪2800.",
+              "en": "דוגמת תכנון (לא מדידה). מסעדה ים-תיכונית משפחתית — הכסף מהשולחן, לא ממשלוח מהיר. המרה = שמירת שולחן בוואטסאפ / הגעה. קלט תכנון: ₪180 · 38% · CAC ₪45 · תקציב ₪2800."
             }
           }
         ]
@@ -4252,9 +4223,9 @@
               "en": "Budget"
             },
             "body": {
-              "he": "תקציב לא סופק — אין פיצול מספרי ולא מד לידים.",
-              "ar": "الميزانية غير معطاة — لا تقسيم رقمي.",
-              "en": "Budget not supplied — no numeric split and no lead gauge."
+              "he": "תקציב שסיפקת: 2800 ₪ לחודש. פיצול בכרטיס המדיה.",
+              "ar": "الميزانية التي أعطيتها: 2800 ₪ شهرياً.",
+              "en": "Budget you supplied: 2800 ₪ / month. Split is on the media card."
             }
           }
         ]
@@ -4262,30 +4233,6 @@
       {
         "id": "missing_questions",
         "items": [
-          {
-            "title": {
-              "he": "תקציב ו-CAC",
-              "ar": "الميزانية وCAC",
-              "en": "Budget and CAC"
-            },
-            "body": {
-              "he": "חסרים מספרים — תרחיש העלות לא יוצג כתחזית.",
-              "ar": "أرقام ناقصة — لن يُعرض سيناريو التكلفة كتوقع.",
-              "en": "Numbers missing — the cost scenario will not be shown as a forecast."
-            }
-          },
-          {
-            "title": {
-              "he": "מה רץ בעבר?",
-              "ar": "ماذا اشتغل سابقاً؟",
-              "en": "What ran before?"
-            },
-            "body": {
-              "he": "בלי צילום מודעה קודמת האבחון נשאר ברמת ביטחון נמוכה.",
-              "ar": "بدون لقطة إعلان سابق يبقى التشخيص منخفض الثقة.",
-              "en": "Without a past-ad snapshot diagnosis stays low-confidence."
-            }
-          },
           {
             "title": {
               "he": "מתחרים",
@@ -4302,6 +4249,7 @@
       }
     ],
     "media": {
+      "monthlyBudget": 2800,
       "split": [
         {
           "channel": "meta",
@@ -4311,6 +4259,8 @@
             "en": "Conversion / messages — awareness + enquiry"
           },
           "budgetSharePercent": 40,
+          "monthlyBudget": 1120,
+          "dailyBudget": 37.3,
           "targeting": {
             "geos": [
               "נווה שקד (עיירה בדיונית) — הרחוב הראשי 12, ליד הכיכר"
@@ -4329,7 +4279,9 @@
             "he": "גיאו: נווה שקד (עיירה בדיונית) — הרחוב הראשי 12, ליד הכיכר. קהל ליבה: local_families. בלי Lookalike לפני 50 המרות.",
             "ar": "الجغرافيا: נווה שקד (עיירה בדיונית) — הרחוב הראשי 12, ליד הכיכר. النواة: local_families. بلا lookalike قبل 50 تحويلاً.",
             "en": "Geo: נווה שקד (עיירה בדיונית) — הרחוב הראשי 12, ליד הכיכר. Core: local_families. No lookalike before 50 conversions."
-          }
+          },
+          "worstCaseCpa": 81,
+          "realisticCpa": 45
         },
         {
           "channel": "google",
@@ -4339,6 +4291,8 @@
             "en": "Intent search — people already looking"
           },
           "budgetSharePercent": 25,
+          "monthlyBudget": 700,
+          "dailyBudget": 23.3,
           "targeting": {
             "geos": [
               "נווה שקד (עיירה בדיונית) — הרחוב הראשי 12, ליד הכיכר"
@@ -4359,7 +4313,9 @@
             "he": "רק מילות כוונה מהקליטה. לא נרחיב למילות מתחרים שלא הוזנו.",
             "ar": "كلمات نية من البيانات فقط. لن نوسّع إلى كلمات منافسين غير مُدخلة.",
             "en": "Intent keywords from intake only. We will not expand into competitor terms that were not entered."
-          }
+          },
+          "worstCaseCpa": 81,
+          "realisticCpa": 45
         },
         {
           "channel": "tiktok",
@@ -4369,6 +4325,8 @@
             "en": "Raw video — only if real footage exists"
           },
           "budgetSharePercent": 10,
+          "monthlyBudget": 280,
+          "dailyBudget": 9.3,
           "targeting": {
             "geos": [
               "נווה שקד (עיירה בדיונית) — הרחוב הראשי 12, ליד הכיכר"
@@ -4385,7 +4343,9 @@
             "he": "חלק קטן. אל תצרו טיקטוק מבוים אם אין נוכחות. אפשר 0% אם אין וידאו.",
             "ar": "حصة صغيرة. لا تصنعوا تيك توك ممثلاً إن لم توجد مادة.",
             "en": "Small share. Don’t fabricate TikToks if you have no presence. 0% is allowed if there is no video."
-          }
+          },
+          "worstCaseCpa": 81,
+          "realisticCpa": 45
         },
         {
           "channel": "youtube",
@@ -4395,6 +4355,8 @@
             "en": "Video proof — consideration, not a cheap lead"
           },
           "budgetSharePercent": 25,
+          "monthlyBudget": 700,
+          "dailyBudget": 23.3,
           "targeting": {
             "geos": [
               "נווה שקד (עיירה בדיונית) — הרחוב הראשי 12, ליד הכיכר"
@@ -4415,7 +4377,9 @@
             "he": "אין מספר צפיות מובטח. בלי נכס 6–15 שניות אמיתי — השאירו 0% עד שיש צילום.",
             "ar": "لا مشاهدات مضمونة. بلا أصل 6–15 ثانية حقيقي اتركوا 0% حتى يتوفر تصوير.",
             "en": "No guaranteed views. Without a real 6–15s asset, leave 0% until you have footage."
-          }
+          },
+          "worstCaseCpa": 81,
+          "realisticCpa": 45
         }
       ],
       "assumptions": [
@@ -4437,27 +4401,24 @@
       ],
       "missingForLiveBuy": [
         {
-          "he": "תקציב חודשי",
-          "ar": "ميزانية شهرية",
-          "en": "Monthly budget"
-        },
-        {
           "he": "כתובת אתר / דף נחיתה (אופציונלי אבל חסר)",
           "ar": "عنوان موقع / صفحة (اختياري لكن ناقص)",
           "en": "Website / landing URL (optional but missing)"
         }
       ],
       "worstCase": {
-        "he": "אין תרחיש מספרי — חסר תקציב או CAC. לא יוצג מד 32–68 לידים.",
-        "ar": "لا سيناريو رقمي — تنقص الميزانية أو CAC. لن يُعرض مقياس 32–68.",
-        "en": "No numeric scenario — budget or CAC missing. No 32–68 leads gauge will be shown."
+        "he": "תרחיש גרוע (מהמספרים שלך, לא תחזית): CPA ≈ 81 ₪ → עד 34 המרות/חודש מתוך 2800 ₪. אם הפניות גרועות, המספר האמיתי יהיה נמוך יותר.",
+        "ar": "سيناريو سيئ (من أرقامك لا توقّع): CPA ≈ 81 ₪ → حتى 34 تحويلاً/شهر من 2800 ₪.",
+        "en": "Worst case (from your numbers, not a forecast): CPA ≈ 81 ₪ → up to 34 conversions/month from 2800 ₪. If enquiry quality is poor, actual will be lower."
       },
       "realistic": {
-        "he": "אין תרחיש מספרי — חסר תקציב או CAC. לא יוצג מד 32–68 לידים.",
-        "ar": "لا سيناريو رقمي — تنقص الميزانية أو CAC. لن يُعرض مقياس 32–68.",
-        "en": "No numeric scenario — budget or CAC missing. No 32–68 leads gauge will be shown."
+        "he": "תרחיש ריאלי (CAC היעד שסיפקת): ≈ 62 המרות/חודש ב-45 ₪. זה יעד עבודה, לא הבטחה.",
+        "ar": "سيناريو واقعي (CAC الذي أعطيته): ≈ 62 تحويلاً/شهر عند 45 ₪. هدف عمل لا وعد.",
+        "en": "Realistic scenario (your target CAC): ≈ 62 conversions/month at 45 ₪. A working target, not a promise."
       },
-      "scenarioFromUserNumbers": false
+      "scenarioLeadsWorst": 34,
+      "scenarioLeadsRealistic": 62,
+      "scenarioFromUserNumbers": true
     },
     "optimizer": {
       "ifThen": [
@@ -4492,9 +4453,9 @@
             "en": "CPA above 1.8× target after 50+ clicks"
           },
           "then": {
-            "he": "כבו ושמרו צילום. אין CAC יעד — אל תמציאו קו אדום מספרי.",
-            "ar": "أوقفوا واحفظوا لقطة. لا CAC — لا تخترعوا خطاً أحمر رقمياً.",
-            "en": "Kill it and keep a screenshot. No target CAC — don’t invent a numeric red line."
+            "he": "כבו את האדסט. יעד 45 ₪, קו אדום ≈ 81 ₪.",
+            "ar": "أوقفوا المجموعة. الهدف 45 ₪، الخط الأحمر ≈ 81 ₪.",
+            "en": "Kill the ad set. Target 45 ₪, red line ≈ 81 ₪."
           }
         },
         {
@@ -4529,9 +4490,9 @@
           "en": "Scale only an angle with quality enquiries, not a video that “went viral”."
         },
         {
-          "he": "אין תקציב בקליטה — אין סקייל אוטומטי.",
-          "ar": "لا ميزانية في البيانات — لا توسيع تلقائي.",
-          "en": "No budget in intake — no automatic scale."
+          "he": "תקרת סקייל חודשית = התקציב שסיפקתם, עד לעדכון ידני.",
+          "ar": "سقف التوسيع الشهري = الميزانية التي أعطيتموها.",
+          "en": "Monthly scale cap = the budget you supplied, until you update it."
         }
       ]
     },
@@ -4664,14 +4625,14 @@
           "id": "photos",
           "kind": "strength",
           "label": {
-            "he": "יש 4 תמונות מהאתר — אפשר לשים במודעה ובנחיתה",
-            "ar": "في 4 صور من الموقع — منستعملها بالإعلان والهبوط",
-            "en": "4 photos from the site — usable in ads and the landing"
+            "he": "יש 10 תמונות מהאתר — אפשר לשים במודעה ובנחיתה",
+            "ar": "في 10 صور من الموقع — منستعملها بالإعلان والهبوط",
+            "en": "10 photos from the site — usable in ads and the landing"
           },
           "evidence": {
-            "he": "ראיה · mediaAssets: 4",
-            "ar": "دليل · mediaAssets: 4",
-            "en": "Evidence · mediaAssets: 4"
+            "he": "ראיה · mediaAssets: 10",
+            "ar": "دليل · mediaAssets: 10",
+            "en": "Evidence · mediaAssets: 10"
           }
         },
         {
@@ -4814,9 +4775,9 @@
               },
               "score": 92,
               "note": {
-                "he": "יש 4 נכסי תמונה — עדיין בלי דירוגים מומצאים.",
-                "ar": "هناك 4 أصول صورة — بلا تقييمات مختلقة.",
-                "en": "4 image assets — still no invented ratings."
+                "he": "יש 10 נכסי תמונה — עדיין בלי דירוגים מומצאים.",
+                "ar": "هناك 10 أصول صورة — بلا تقييمات مختلقة.",
+                "en": "10 image assets — still no invented ratings."
               }
             },
             {
@@ -4840,7 +4801,7 @@
                 "ar": "تنوّع الإبداع (تخطيط 1–100)",
                 "en": "Creative variety (planning 1–100)"
               },
-              "score": 84,
+              "score": 85,
               "note": {
                 "he": "גיוון מתוכנן לפי זוויות הרעיון — לא לפי ROAS מדומה.",
                 "ar": "تنوّع مخطّط حسب زوايا الفكرة — لا حسب ROAS مختلق.",
@@ -4915,9 +4876,9 @@
               },
               "score": 92,
               "note": {
-                "he": "יש 4 נכסי תמונה — עדיין בלי דירוגים מומצאים.",
-                "ar": "هناك 4 أصول صورة — بلا تقييمات مختلقة.",
-                "en": "4 image assets — still no invented ratings."
+                "he": "יש 10 נכסי תמונה — עדיין בלי דירוגים מומצאים.",
+                "ar": "هناك 10 أصول صورة — بلا تقييمات مختلقة.",
+                "en": "10 image assets — still no invented ratings."
               }
             },
             {
@@ -4941,7 +4902,7 @@
                 "ar": "تنوّع الإبداع (تخطيط 1–100)",
                 "en": "Creative variety (planning 1–100)"
               },
-              "score": 92,
+              "score": 93,
               "note": {
                 "he": "גיוון מתוכנן לפי זוויות הרעיון — לא לפי ROAS מדומה.",
                 "ar": "تنوّع مخطّط حسب زوايا الفكرة — لا حسب ROAS مختلق.",
@@ -5016,9 +4977,9 @@
               },
               "score": 92,
               "note": {
-                "he": "יש 4 נכסי תמונה — עדיין בלי דירוגים מומצאים.",
-                "ar": "هناك 4 أصول صورة — بلا تقييمات مختلقة.",
-                "en": "4 image assets — still no invented ratings."
+                "he": "יש 10 נכסי תמונה — עדיין בלי דירוגים מומצאים.",
+                "ar": "هناك 10 أصول صورة — بلا تقييمات مختلقة.",
+                "en": "10 image assets — still no invented ratings."
               }
             },
             {
@@ -5042,7 +5003,7 @@
                 "ar": "تنوّع الإبداع (تخطيط 1–100)",
                 "en": "Creative variety (planning 1–100)"
               },
-              "score": 84,
+              "score": 85,
               "note": {
                 "he": "גיוון מתוכנן לפי זוויות הרעיון — לא לפי ROAS מדומה.",
                 "ar": "تنوّع مخطّط حسب زوايا الفكرة — لا حسب ROAS مختلق.",
@@ -5117,9 +5078,9 @@
               },
               "score": 92,
               "note": {
-                "he": "יש 4 נכסי תמונה — עדיין בלי דירוגים מומצאים.",
-                "ar": "هناك 4 أصول صورة — بلا تقييمات مختلقة.",
-                "en": "4 image assets — still no invented ratings."
+                "he": "יש 10 נכסי תמונה — עדיין בלי דירוגים מומצאים.",
+                "ar": "هناك 10 أصول صورة — بلا تقييمات مختلقة.",
+                "en": "10 image assets — still no invented ratings."
               }
             },
             {
@@ -5143,7 +5104,7 @@
                 "ar": "تنوّع الإبداع (تخطيط 1–100)",
                 "en": "Creative variety (planning 1–100)"
               },
-              "score": 84,
+              "score": 85,
               "note": {
                 "he": "גיוון מתוכנן לפי זוויות הרעיון — לא לפי ROAS מדומה.",
                 "ar": "تنوّع مخطّط حسب زوايا الفكرة — لا حسب ROAS مختلق.",
@@ -5218,9 +5179,9 @@
               },
               "score": 92,
               "note": {
-                "he": "יש 4 נכסי תמונה — עדיין בלי דירוגים מומצאים.",
-                "ar": "هناك 4 أصول صورة — بلا تقييمات مختلقة.",
-                "en": "4 image assets — still no invented ratings."
+                "he": "יש 10 נכסי תמונה — עדיין בלי דירוגים מומצאים.",
+                "ar": "هناك 10 أصول صورة — بلا تقييمات مختلقة.",
+                "en": "10 image assets — still no invented ratings."
               }
             },
             {
@@ -5244,7 +5205,7 @@
                 "ar": "تنوّع الإبداع (تخطيط 1–100)",
                 "en": "Creative variety (planning 1–100)"
               },
-              "score": 92,
+              "score": 93,
               "note": {
                 "he": "גיוון מתוכנן לפי זוויות הרעיון — לא לפי ROAS מדומה.",
                 "ar": "تنوّع مخطّط حسب زوايا الفكرة — لا حسب ROAS مختلق.",
@@ -5257,27 +5218,9 @@
       ],
       "gapPlan": {
         "missing": [
-          "monthlyBudget",
-          "targetCac",
           "competitors"
         ],
         "moves": [
-          {
-            "missingField": "monthlyBudget",
-            "move": {
-              "he": "תקציב חסר — לתכנן 2–3 קריאייטיבים לומדים, בלי לחזות ROAS.",
-              "ar": "الميزانية ناقصة — خطّطوا 2–3 إبداعات تعلّم بلا توقّع ROAS.",
-              "en": "Budget missing — plan 2–3 learning creatives; never forecast ROAS."
-            }
-          },
-          {
-            "missingField": "targetCac",
-            "move": {
-              "he": "CAC יעד חסר — לא יומצא; מדדי תכנון = בהירות מסר/הצעה בלבד.",
-              "ar": "CAC المستهدف ناقص — لن يُخترع؛ مقاييس التخطيط = وضوح الرسالة/العرض فقط.",
-              "en": "Target CAC missing — will not invent; planning metrics = message/offer clarity only."
-            }
-          },
           {
             "missingField": "competitors",
             "move": {
@@ -5309,9 +5252,9 @@
               "en": "Model"
             },
             "body": {
-              "he": "לא סופק — Intake מסרב לנחש איך נסגר כסף.",
-              "ar": "غير متوفر.",
-              "en": "Not given — Intake refuses to guess how money closes."
+              "he": "דוגמת תכנון (לא מדידה). מסעדה ים-תיכונית משפחתית — הכסף מהשולחן, לא ממשלוח מהיר. המרה = שמירת שולחן בוואטסאפ / הגעה. קלט תכנון: ₪180 · 38% · CAC ₪45 · תקציב ₪2800.",
+              "ar": "דוגמת תכנון (לא מדידה). מסעדה ים-תיכונית משפחתית — הכסף מהשולחן, לא ממשלוח מהיר. המרה = שמירת שולחן בוואטסאפ / הגעה. קלט תכנון: ₪180 · 38% · CAC ₪45 · תקציב ₪2800.",
+              "en": "דוגמת תכנון (לא מדידה). מסעדה ים-תיכונית משפחתית — הכסף מהשולחן, לא ממשלוח מהיר. המרה = שמירת שולחן בוואטסאפ / הגעה. קלט תכנון: ₪180 · 38% · CAC ₪45 · תקציב ₪2800."
             }
           },
           {
@@ -5321,9 +5264,9 @@
               "en": "Unit economics"
             },
             "body": {
-              "he": "AOV חסר · מרווח חסר% · CAC יעד חסר · תקציב חסר.",
-              "ar": "AOV ناقص · هامش ناقص · CAC ناقص · ميزانية ناقص.",
-              "en": "AOV missing · margin missing% · target CAC missing · budget missing."
+              "he": "AOV 180 · מרווח 38% · CAC יעד 45 · תקציב 2800.",
+              "ar": "AOV 180 · هامش 38 · CAC 45 · ميزانية 2800.",
+              "en": "AOV 180 · margin 38% · target CAC 45 · budget 2800."
             }
           },
           {
@@ -5333,9 +5276,9 @@
               "en": "History"
             },
             "body": {
-              "he": "אין מודעות קודמות בקליטה.",
-              "ar": "لا إعلانات سابقة.",
-              "en": "No past ads in intake."
+              "he": "סטוריז של חומוס, שמן זית ושולחן חוץ ריק בשקיעה. כיתוב על נווה שקד. בלי קטלוג 40 מנות מומצא. תיאור קריאייטיב קודם בלבד — לא תוצאות ממומנות.",
+              "ar": "סטוריז של חומוס, שמן זית ושולחן חוץ ריק בשקיעה. כיתוב על נווה שקד. בלי קטלוג 40 מנות מומצא. תיאור קריאייטיב קודם בלבד — לא תוצאות ממומנות.",
+              "en": "סטוריז של חומוס, שמן זית ושולחן חוץ ריק בשקיעה. כיתוב על נווה שקד. בלי קטלוג 40 מנות מומצא. תיאור קריאייטיב קודם בלבד — לא תוצאות ממומנות."
             }
           },
           {
@@ -5374,9 +5317,9 @@
               "en": "From intake: Local families. נווה שקד (עיירה בדיונית) — הרחוב הראשי 12, ליד הכיכר"
             },
             "unknown": {
-              "he": "חסר: budget, cac, competitors — לא הומצא.",
-              "ar": "ناقص: budget, cac, competitors.",
-              "en": "Missing: budget, cac, competitors — not invented."
+              "he": "חסר: competitors — לא הומצא.",
+              "ar": "ناقص: competitors.",
+              "en": "Missing: competitors — not invented."
             }
           },
           {
@@ -5432,9 +5375,9 @@
             "en": "Stated strength: מטבח ביתי ים-תיכוני טרי + ישיבה בחוץ רגועה"
           },
           "weakness": {
-            "he": "חולשה תפעולית לא סופקה — לא נכתוב «אין נוכחות דיגיטלית» סתם.",
-            "ar": "ضعف تشغيلي غير مذكور.",
-            "en": "Operational weakness not supplied — will not write “no digital presence” for flavor."
+            "he": "האוכל נראה חם אבל לא היה CTA להזמנה ולא שעת מטבח הבאה — ראו ולא כתבו.",
+            "ar": "האוכל נראה חם אבל לא היה CTA להזמנה ולא שעת מטבח הבאה — ראו ולא כתבו.",
+            "en": "האוכל נראה חם אבל לא היה CTA להזמנה ולא שעת מטבח הבאה — ראו ולא כתבו."
           },
           "opportunity": {
             "he": "קהל משפחות מקומיות בנווה שקד (עיירה בדיונית) — הרחוב הראשי 12, ליד הכיכר. מטרה: whatsapp.",
@@ -5458,9 +5401,9 @@
           "strategic"
         ],
         "positioning": {
-          "he": "מסעדת שכונה משפחתית בנווה שקד — טקס שולחן רגוע, לא משלוחים מהירים.",
-          "ar": "מסעדת שכונה משפחתית בנווה שקד — טקס שולחן רגוע, לא משלוחים מהירים.",
-          "en": "מסעדת שכונה משפחתית בנווה שקד — טקס שולחן רגוע, לא משלוחים מהירים."
+          "he": "שולחן שכונתי בנווה שקד הבדיונית — טקס שולחן רגוע, לא משלוחים מהירים.",
+          "ar": "שולחן שכונתי בנווה שקד הבדיונית — טקס שולחן רגוע, לא משלוחים מהירים.",
+          "en": "שולחן שכונתי בנווה שקד הבדיונית — טקס שולחן רגוע, לא משלוחים מהירים."
         },
         "uniqueMechanism": {
           "he": "המנגנון הייחודי הוא מה שסופק: מטבח ביתי ים-תיכוני טרי + ישיבה בחוץ רגועה. בלי פטנט מדומה.",
@@ -5789,6 +5732,45 @@
             }
           },
           {
+            "id": "cmo-square_neighbor",
+            "angle": {
+              "he": "רעיון CMO: שכן הכיכר",
+              "ar": "فكرة CMO: جار الساحة",
+              "en": "CMO idea: Square neighbor"
+            },
+            "hook": {
+              "he": "מיקום ליד הכיכר = סיפור שכונתי, לא גאופנסינג מדומה · למה זה מנצח: הופכת את הכתובת הבדיונית/האמיתית לזהות מקום חדה · תכנון 89/100 (לא ROAS)",
+              "ar": "الموقع جنب الساحة = قصة حي، مش جيوفنس مزيف · لماذا تفوز: تحوّل العنوان لهوية مكان حادة · تخطيط 89/100 (ليس ROAS)",
+              "en": "By-the-square location = neighborhood story, not fake geofencing · Why it wins: Turns the address into a sharp place identity · planning 89/100 (not ROAS)"
+            }
+          },
+          {
+            "id": "cmo-ceramic_system",
+            "angle": {
+              "he": "רעיון CMO: מערכת קרמיקה",
+              "ar": "فكرة CMO: نظام صحون",
+              "en": "CMO idea: Ceramic system"
+            },
+            "hook": {
+              "he": "גרפיקה: קרמיקה חמה + ירוק זית — לא תבנית סוכנות אדומה · למה זה מנצח: מגדירה שפה ויזואלית ייחודית כשיש פער בתמונות · תכנון 90/100 (לא ROAS)",
+              "ar": "غرافيك: صحون دافئة + أخضر زيتون — مش قالب وكالة أحمر · لماذا تفوز: تحدد لغة بصرية فريدة عند نقص الصور · تخطيط 90/100 (ليس ROAS)",
+              "en": "Graphics: warm ceramics + olive green — not red-agency templates · Why it wins: Defines a distinctive visual language when photos are thin · planning 90/100 (not ROAS)"
+            }
+          },
+          {
+            "id": "gap-competitors-0",
+            "angle": {
+              "he": "פיצוי פער: competitors",
+              "ar": "تعويض فجوة: competitors",
+              "en": "Gap compensate: competitors"
+            },
+            "hook": {
+              "he": "בלי שמות מתחרים — לא יומצאו; להתמקד ביתרון שלכם.",
+              "ar": "بلا أسماء منافسين — لن تُخترع؛ ركّزوا على ميزتكم.",
+              "en": "No competitor names — will not invent any; focus on your advantage."
+            }
+          },
+          {
             "id": "pain",
             "angle": {
               "he": "בעיה",
@@ -5921,9 +5903,9 @@
           },
           {
             "angle": {
-              "he": "בעיה",
-              "ar": "مشكلة",
-              "en": "Problem"
+              "he": "רעיון CMO: שכן הכיכר",
+              "ar": "فكرة CMO: جار الساحة",
+              "en": "CMO idea: Square neighbor"
             },
             "proof": {
               "he": "מטבח ביתי ים-תיכוני טרי + ישיבה בחוץ רגועה",
@@ -5978,7 +5960,7 @@
             "format": "landing",
             "locale": "he",
             "title": "דף נחיתה — מבנה",
-            "body": "H1: מטבח הזית\nהזמינו שולחן במטבח הזית — נווה שקד\nנווה שקד (עיירה\nשעות: א׳–ה׳ 12:00–22:00 · ו׳ 12:00–15:00 · ש׳ סגור\nוואטסאפ: 052-7001234.\nטופס: שם + טלפון + שפה. בלי המלצות בדויות.\nויזואל מהקבצים שהועלו: exterior · interior · interior · interior. בלי פנים שלא הועלו."
+            "body": "H1: מטבח הזית\nהזמינו שולחן במטבח הזית — נווה שקד\nנווה שקד (עיירה\nשעות: א׳–ה׳ 12:00–22:00 · ו׳ 12:00–15:00 · ש׳ סגור\nוואטסאפ: 052-7001234.\nטופס: שם + טלפון + שפה. בלי המלצות בדויות.\nויזואל מהקבצים שהועלו: other · exterior · other · interior · other · exterior · exterior · interior · interior · interior. בלי פנים שלא הועלו."
           },
           {
             "format": "whatsapp",
@@ -6068,7 +6050,7 @@
             "format": "landing",
             "locale": "ar",
             "title": "صفحة هبوط",
-            "body": "H1: מטבח הזית — נווה שקד (עיירה\nנווה שקד (עיירה\nالدوام: א׳–ה׳ 12:00–22:00 · ו׳ 12:00–15:00 · ש׳ סגור\nواتساب: 052-7001234.\nفورم: اسم + تلفون + لغة. بلا شهادات مختلقة.\nالصور من الملفات المرفوعة: exterior · interior · interior · interior. بلا وجوه ما انرفعت."
+            "body": "H1: מטבח הזית — נווה שקד (עיירה\nנווה שקד (עיירה\nالدوام: א׳–ה׳ 12:00–22:00 · ו׳ 12:00–15:00 · ש׳ סגור\nواتساب: 052-7001234.\nفورم: اسم + تلفون + لغة. بلا شهادات مختلقة.\nالصور من الملفات المرفوعة: other · exterior · other · interior · other · exterior · exterior · interior · interior · interior. بلا وجوه ما انرفعت."
           },
           {
             "format": "whatsapp",
@@ -6158,7 +6140,7 @@
             "format": "landing",
             "locale": "en",
             "title": "Landing structure",
-            "body": "H1: מטבח הזית\nנווה שקד (עיירה\nHours: א׳–ה׳ 12:00–22:00 · ו׳ 12:00–15:00 · ש׳ סגור\nWhatsApp: 052-7001234.\nForm: name + phone + language. No fake testimonials.\nVisuals from uploaded files: exterior · interior · interior · interior. No faces that were not uploaded."
+            "body": "H1: מטבח הזית\nנווה שקד (עיירה\nHours: א׳–ה׳ 12:00–22:00 · ו׳ 12:00–15:00 · ש׳ סגור\nWhatsApp: 052-7001234.\nForm: name + phone + language. No fake testimonials.\nVisuals from uploaded files: other · exterior · other · interior · other · exterior · exterior · interior · interior · interior. No faces that were not uploaded."
           },
           {
             "format": "whatsapp",
@@ -6399,9 +6381,9 @@
             "en": "IF Many enquiries with no real name / tyre-kickers THEN The offer is too wide (e.g. free). Tighten the CTA: a booking, not “learn more”."
           },
           {
-            "he": "IF CPA מעל 1.8× יעד אחרי 50+ קליקים THEN כבו ושמרו צילום. אין CAC יעד — אל תמציאו קו אדום מספרי.",
-            "ar": "IF CPA فوق 1.8× الهدف بعد 50+ نقرة THEN أوقفوا واحفظوا لقطة. لا CAC — لا تخترعوا خطاً أحمر رقمياً.",
-            "en": "IF CPA above 1.8× target after 50+ clicks THEN Kill it and keep a screenshot. No target CAC — don’t invent a numeric red line."
+            "he": "IF CPA מעל 1.8× יעד אחרי 50+ קליקים THEN כבו את האדסט. יעד 45 ₪, קו אדום ≈ 81 ₪.",
+            "ar": "IF CPA فوق 1.8× الهدف بعد 50+ نقرة THEN أوقفوا المجموعة. الهدف 45 ₪، الخط الأحمر ≈ 81 ₪.",
+            "en": "IF CPA above 1.8× target after 50+ clicks THEN Kill the ad set. Target 45 ₪, red line ≈ 81 ₪."
           },
           {
             "he": "IF יש 3+ המרות אמיתיות מתחת ליעד THEN העלו תקציב ב-20% כל 3 ימים, לא פי 3 ביום אחד.",
@@ -6636,8 +6618,8 @@
   },
   {
     "id": "demo-sand-boutique",
-    "createdAt": "2026-09-05T08:21:17.262Z",
-    "updatedAt": "2026-09-05T08:21:17.262Z",
+    "createdAt": "2026-09-05T13:28:26.904Z",
+    "updatedAt": "2026-09-05T13:28:26.904Z",
     "name": "בוטיק חול",
     "intake": {
       "type": "business",
@@ -6656,71 +6638,137 @@
       "audienceCustom": false,
       "biggestProblem": "קשה למצוא פריטים אלגנטיים ונוחים בלי קניון עמוס",
       "problemCustom": true,
-      "uniqueAdvantage": "ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי",
+      "uniqueAdvantage": "מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים",
       "advantageCustom": true,
       "mainGoal": "whatsapp",
       "goalCustom": false,
       "offer": "הנחת פתיחה רכה 15% על קולקציית האביב ללקוחות חדשות",
       "offerCustom": true,
       "competitors": [],
-      "businessModel": "",
-      "avgOrderValue": "",
-      "marginPercent": "",
-      "targetCac": "",
-      "monthlyBudget": "",
-      "pastAds": "",
-      "pastResults": "",
-      "whatFailed": "",
+      "businessModel": "דוגמת תכנון (לא מדידה). בוטיק אופנה נשית — הכסף מפריט שנוסה בחנות, לא מקטלוג מנופח. המרה = שמירת פריט בוואטסאפ / ביקור למדידה. קלט תכנון: ₪340 · 48% · CAC ₪75 · תקציב ₪2200.",
+      "avgOrderValue": "340",
+      "marginPercent": "48",
+      "targetCac": "75",
+      "monthlyBudget": "2200",
+      "pastAds": "סטוריז של מתלה פשתן אחד מורכב — לא קטלוג של 40 פריטים מומצאים. אור חלון, בלי פנים. תיאור קריאייטיב קודם בלבד.",
+      "pastResults": "דוגמת תכנון (לא מדידה). אין ROAS, אין כוכבים ואין לייקים. המספרים למעלה הם דוגמת תכנון — לא ביצוע ממומן.",
+      "whatFailed": "התמונות היו רגועות אבל לא היה «בואו למדידה» ולא שעת החנות הבאה — אהבו את האווירה ולא שמרו פריט.",
       "mediaAssets": [
         {
-          "id": "842054c6-042c-4ccc-a114-1e6e5bd1db37",
+          "id": "demo-sand-boutique-photo-1",
+          "kind": "image",
+          "mime": "image/jpeg",
+          "name": "One composed rack",
+          "size": 1,
+          "label": "interior",
+          "note": "offer:photo:sand-rack",
+          "createdAt": "2026-09-05T12:00:00.000Z",
+          "publicSrc": "/packs/assets/demo-sand-boutique/photo-1.jpg"
+        },
+        {
+          "id": "demo-sand-boutique-photo-2",
+          "kind": "image",
+          "mime": "image/jpeg",
+          "name": "Linen fabric close",
+          "size": 1,
+          "label": "other",
+          "note": "offer:photo:sand-linen",
+          "createdAt": "2026-09-05T12:00:00.000Z",
+          "publicSrc": "/packs/assets/demo-sand-boutique/photo-2.jpg"
+        },
+        {
+          "id": "demo-sand-boutique-photo-3",
+          "kind": "image",
+          "mime": "image/jpeg",
+          "name": "Empty dressing alcove",
+          "size": 1,
+          "label": "interior",
+          "note": "offer:photo:sand-alcove",
+          "createdAt": "2026-09-05T12:00:00.000Z",
+          "publicSrc": "/packs/assets/demo-sand-boutique/photo-3.jpg"
+        },
+        {
+          "id": "demo-sand-boutique-photo-4",
+          "kind": "image",
+          "mime": "image/jpeg",
+          "name": "Window display, no logo",
+          "size": 1,
+          "label": "exterior",
+          "note": "offer:photo:sand-window",
+          "createdAt": "2026-09-05T12:00:00.000Z",
+          "publicSrc": "/packs/assets/demo-sand-boutique/photo-4.jpg"
+        },
+        {
+          "id": "demo-sand-boutique-photo-5",
+          "kind": "image",
+          "mime": "image/jpeg",
+          "name": "Folded knits on wood",
+          "size": 1,
+          "label": "interior",
+          "note": "offer:photo:sand-folded",
+          "createdAt": "2026-09-05T12:00:00.000Z",
+          "publicSrc": "/packs/assets/demo-sand-boutique/photo-5.jpg"
+        },
+        {
+          "id": "demo-sand-boutique-photo-6",
+          "kind": "image",
+          "mime": "image/jpeg",
+          "name": "Ivory hangers on rail",
+          "size": 1,
+          "label": "interior",
+          "note": "offer:photo:sand-hangers",
+          "createdAt": "2026-09-05T12:00:00.000Z",
+          "publicSrc": "/packs/assets/demo-sand-boutique/photo-6.jpg"
+        },
+        {
+          "id": "92aab9dd-faef-4071-a1de-afcc0b5f837c",
           "kind": "image",
           "mime": "image/svg+xml",
           "name": "Boutique rail",
           "size": 753,
           "label": "exterior",
           "note": "offer:studio:studio-retail-rail",
-          "createdAt": "2026-09-05T08:21:17.259Z",
+          "createdAt": "2026-09-05T13:28:26.900Z",
           "publicSrc": "/packs/assets/demo-sand-boutique/still-1.svg"
         },
         {
-          "id": "2383bf6f-86b0-4eb5-9ce8-5fb3af00d8f0",
+          "id": "5fb206c6-4d65-4331-b243-c21216105789",
           "kind": "image",
           "mime": "image/svg+xml",
           "name": "Dressing alcove",
           "size": 593,
           "label": "interior",
           "note": "offer:studio:studio-retail-alcove",
-          "createdAt": "2026-09-05T08:21:17.259Z",
+          "createdAt": "2026-09-05T13:28:26.900Z",
           "publicSrc": "/packs/assets/demo-sand-boutique/still-2.svg"
         },
         {
-          "id": "2e844ba3-a5ec-4efb-b23f-a7af6208ba8f",
+          "id": "0ccf9117-fa42-497c-a416-d5bca25a2ab9",
           "kind": "image",
           "mime": "image/svg+xml",
           "name": "Shop counter",
           "size": 1032,
           "label": "interior",
           "note": "offer:studio:studio-retail-counter",
-          "createdAt": "2026-09-05T08:21:17.259Z",
+          "createdAt": "2026-09-05T13:28:26.900Z",
           "publicSrc": "/packs/assets/demo-sand-boutique/still-3.svg"
         },
         {
-          "id": "0cc1fd0a-08b0-49b9-963f-081353449ef6",
+          "id": "f1f03320-d830-423f-8f9c-9503a3500d5e",
           "kind": "image",
           "mime": "image/svg+xml",
           "name": "Soft light",
           "size": 543,
           "label": "interior",
           "note": "offer:studio:studio-retail-wellness",
-          "createdAt": "2026-09-05T08:21:17.259Z",
+          "createdAt": "2026-09-05T13:28:26.900Z",
           "publicSrc": "/packs/assets/demo-sand-boutique/still-4.svg"
         }
       ],
       "ingestedDocs": [],
       "pastCreatives": [],
       "brandTone": "רגוע, פשתן, חול — ייעוץ אישי בלי רעש קניון. אלגנטיות יומיומית.",
-      "brandPositioning": "בוטיק נשי שקט בעין ברק — מתלה אחד מדויק עדיף על קטלוג מנופח.",
+      "brandPositioning": "בוטיק נשי שקט בעין ברק הבדיונית — מתלה אחד מדויק עדיף על קטלוג מנופח.",
       "channelNotes": "facebook,instagram,whatsapp",
       "whatsappTemplates": "",
       "landingLines": "בקרו בבוטיק חול בעין ברק — וואטסאפ לשמירת פריט",
@@ -6730,117 +6778,8 @@
       }
     },
     "intakeReport": {
-      "completeness": 63,
-      "missing": [
-        {
-          "field": "businessModel",
-          "label": {
-            "he": "מודל עסקי",
-            "ar": "نموذج العمل",
-            "en": "Business model"
-          },
-          "reason": {
-            "he": "בלי לדעת מה נחשב המרה, אי אפשר לתכנן באדג'ט.",
-            "ar": "بدون معرفة التحويل لا خطة ميزانية.",
-            "en": "Without the conversion event, budget planning is guesswork."
-          },
-          "impact": {
-            "he": "סוכן המדיה יסרב לנחש CPA.",
-            "ar": "وكيل الميديا سيرفض تخمين CPA.",
-            "en": "The media agent will refuse to guess CPA."
-          }
-        },
-        {
-          "field": "monthlyBudget",
-          "label": {
-            "he": "תקציב",
-            "ar": "الميزانية",
-            "en": "Budget"
-          },
-          "reason": {
-            "he": "בלי תקציב אין פיצול ערוצים מספרי.",
-            "ar": "بدون ميزانية لا تقسيم قنوات رقمياً.",
-            "en": "No budget means no numeric channel split."
-          },
-          "impact": {
-            "he": "לא יוצג מד לידים.",
-            "ar": "لن يُعرض مقياس عملاء.",
-            "en": "No lead gauge will be shown."
-          }
-        },
-        {
-          "field": "targetCac",
-          "label": {
-            "he": "CAC יעד",
-            "ar": "CAC مستهدف",
-            "en": "Target CAC"
-          },
-          "reason": {
-            "he": "בלי CAC אין תרחיש עלות.",
-            "ar": "بدون CAC لا سيناريو تكلفة.",
-            "en": "Without CAC there is no cost scenario."
-          },
-          "impact": {
-            "he": "רק כללי kill/scale, בלי מספרים.",
-            "ar": "فقط قواعد قتل/توسيع بلا أرقام.",
-            "en": "Kill/scale rules only, no numbers."
-          }
-        },
-        {
-          "field": "avgOrderValue",
-          "label": {
-            "he": "ערך הזמנה",
-            "ar": "قيمة الطلب",
-            "en": "Average order value"
-          },
-          "reason": {
-            "he": "צריך לבדוק אם CAC הגיוני מול מרווח.",
-            "ar": "يجب فحص منطقية CAC مقابل الهامش.",
-            "en": "Needed to check whether CAC is sane vs margin."
-          },
-          "impact": {
-            "he": "אין בדיקת יחידת כלכלה.",
-            "ar": "لا فحص لوحدة الاقتصاد.",
-            "en": "No unit-economics check."
-          }
-        },
-        {
-          "field": "marginPercent",
-          "label": {
-            "he": "מרווח",
-            "ar": "الهامش",
-            "en": "Margin"
-          },
-          "reason": {
-            "he": "מרווח חסר = אי אפשר לדעת אם הקמפיין מפסיד.",
-            "ar": "هامش ناقص = لا نعرف إن كانت الحملة تخسر.",
-            "en": "Missing margin = cannot tell if the campaign loses money."
-          },
-          "impact": {
-            "he": "אזהרת רווחיות תחסר.",
-            "ar": "ستغيب تحذيرة الربحية.",
-            "en": "Profitability warning will be missing."
-          }
-        },
-        {
-          "field": "pastAds",
-          "label": {
-            "he": "מודעות קודמות",
-            "ar": "إعلانات سابقة",
-            "en": "Past ads"
-          },
-          "reason": {
-            "he": "בלי היסטוריה האבחון הוא השערה.",
-            "ar": "بدون تاريخ التشخيص افتراض.",
-            "en": "Without history the diagnosis is a hypothesis."
-          },
-          "impact": {
-            "he": "ביטחון האבחון יהיה נמוך.",
-            "ar": "ثقة التشخيص ستكون منخفضة.",
-            "en": "Diagnosis confidence will be low."
-          }
-        }
-      ],
+      "completeness": 100,
+      "missing": [],
       "inconsistencies": [],
       "refusedGuesses": [
         {
@@ -6864,7 +6803,7 @@
       "hypotheses": [
         {
           "area": "hook",
-          "confidence": "low",
+          "confidence": "medium",
           "finding": {
             "he": "ההוק צריך לפתוח בבעיה של הקהל, לא בשם העסק.",
             "ar": "يجب أن يبدأ الخطاف بمشكلة الجمهور لا باسم النشاط.",
@@ -6880,29 +6819,10 @@
             "ar": "الجملة الأولى = ألم محدد. اسم النشاط في الثانية أو في CTA.",
             "en": "First line = specific pain. Business name on line two or in the CTA."
           }
-        },
-        {
-          "area": "creative",
-          "confidence": "low",
-          "finding": {
-            "he": "אין היסטוריית מודעות — אי אפשר לדעת מה נכשל. האבחון הוא כיוון עבודה, לא פסק דין.",
-            "ar": "لا تاريخ إعلانات — لا يمكن معرفة ما فشل. التشخيص اتجاه عمل لا حكم.",
-            "en": "No ad history — we cannot know what failed. This diagnosis is a working direction, not a verdict."
-          },
-          "evidence": {
-            "he": "מודעות קודמות לא מולאו.",
-            "ar": "الإعلانات السابقة غير مملوءة.",
-            "en": "Past ads were not filled in."
-          },
-          "recommendation": {
-            "he": "שמרו צילומי מודעות הבאים (טקסט, קהל, הוצאה, תוצאה) כדי שהאבחון הבא יהיה מבוסס.",
-            "ar": "احفظوا لقطات الإعلانات القادمة (نص، جمهور، إنفاق، نتيجة).",
-            "en": "Keep screenshots of the next ads (copy, audience, spend, result) so the next diagnosis is grounded."
-          }
         }
       ],
       "approved": true,
-      "approvedAt": "2026-09-05T08:21:17.260Z"
+      "approvedAt": "2026-09-05T13:28:26.901Z"
     },
     "variants": [
       {
@@ -6944,8 +6864,8 @@
         "kind": "unique_advantage",
         "locale": "he",
         "cta": "בואו לחנות",
-        "headline": "ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי",
-        "primaryText": "ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי.\n\nבוטיק חול · עין ברק (עיירה.\n\nשעות: א׳–ה׳ 10:00–19:00 · ו׳ 09:00–14:00 · ש׳ סגור\nוואטסאפ 050-8112233.\nהנחת פתיחה רכה 15% על קולקציית האביב ללקוחות חדשות"
+        "headline": "מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40",
+        "primaryText": "מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים.\n\nבוטיק חול · עין ברק (עיירה.\n\nשעות: א׳–ה׳ 10:00–19:00 · ו׳ 09:00–14:00 · ש׳ סגור\nוואטסאפ 050-8112233.\nהנחת פתיחה רכה 15% על קולקציית האביב ללקוחות חדשות"
       },
       {
         "kind": "strong_offer",
@@ -6986,8 +6906,8 @@
         "kind": "unique_advantage",
         "locale": "ar",
         "cta": "تعوا ع المحل",
-        "headline": "עין ברק (עיירה، واتساب 050-8112233",
-        "primaryText": "עין ברק (עיירה، واتساب 050-8112233.\n\nבוטיק חול — עין ברק (עיירה.\n\nالدوام: א׳–ה׳ 10:00–19:00 · ו׳ 09:00–14:00 · ש׳ סגור\nواتساب 050-8112233.\nהנחת פתיחה רכה 15% על קולקציית האביב ללקוחות חדשות"
+        "headline": "+ — 40",
+        "primaryText": "+ — 40.\n\nבוטיק חול — עין ברק (עיירה.\n\nالدوام: א׳–ה׳ 10:00–19:00 · ו׳ 09:00–14:00 · ש׳ סגור\nواتساب 050-8112233.\nהנחת פתיחה רכה 15% על קולקציית האביב ללקוחות חדשות"
       },
       {
         "kind": "strong_offer",
@@ -7028,8 +6948,8 @@
         "kind": "unique_advantage",
         "locale": "en",
         "cta": "Come to the store",
-        "headline": "ייעוץ אישי רגוע · בדים נוחים ללוק",
-        "primaryText": "ייעוץ אישי רגוע · בדים נוחים ללוק יומיומי.\n\nבוטיק חול · עין ברק (עיירה.\n\nHours: א׳–ה׳ 10:00–19:00 · ו׳ 09:00–14:00 · ש׳ סגור\nWhatsApp 050-8112233.\nהנחת פתיחה רכה 15% על קולקציית האביב ללקוחות חדשות"
+        "headline": "מתלה אחד מדויק · ייעוץ רגוע — לא קטלוג",
+        "primaryText": "מתלה אחד מדויק · ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים.\n\nבוטיק חול · עין ברק (עיירה.\n\nHours: א׳–ה׳ 10:00–19:00 · ו׳ 09:00–14:00 · ש׳ סגור\nWhatsApp 050-8112233.\nהנחת פתיחה רכה 15% על קולקציית האביב ללקוחות חדשות"
       }
     ],
     "strategy": [
@@ -7055,9 +6975,9 @@
               "en": "Proof / advantage"
             },
             "body": {
-              "he": "ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי אין מבצע מומצא — מדברים על המדף והמותגים. אין קופון מומצא.\nימים 1–2: 3 קריאייטיבים (כאב / מדף / יתרון). פייסבוק+אינסטגרם. ימים 3–4: זווית מנצחת לפי הודעות. ימים 5–7: סטורי + דף נחיתה + וואטסאפ. PLAN בלבד, בלי סקייל.",
-              "ar": "ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי ما في عرض مختلق — نحكي عن الرف والماركات. بلا كوبون مختلق.\nيوم 1–2: 3 إبداعات (ألم / رف / ميزة). فيسبوك+إنستغرام. يوم 3–4: زاوية رابحة حسب الرسائل. يوم 5–7: ستوري + هبوط + واتساب. خطة فقط.",
-              "en": "ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי No invented promo — talk about the rack and the brands. No invented coupon.\nDays 1–2: 3 creatives (pain / rack / advantage). Facebook+Instagram. Days 3–4: winning angle by messages. Days 5–7: story + landing + WhatsApp. PLAN only, no scale."
+              "he": "מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים אין מבצע מומצא — מדברים על המדף והמותגים. אין קופון מומצא.\nימים 1–2: 3 קריאייטיבים (כאב / מדף / יתרון). פייסבוק+אינסטגרם. ימים 3–4: זווית מנצחת לפי הודעות. ימים 5–7: סטורי + דף נחיתה + וואטסאפ. PLAN בלבד, בלי סקייל.",
+              "ar": "מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים ما في عرض مختلق — نحكي عن الرف والماركات. بلا كوبون مختلق.\nيوم 1–2: 3 إبداعات (ألم / رف / ميزة). فيسبوك+إنستغرام. يوم 3–4: زاوية رابحة حسب الرسائل. يوم 5–7: ستوري + هبوط + واتساب. خطة فقط.",
+              "en": "מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים No invented promo — talk about the rack and the brands. No invented coupon.\nDays 1–2: 3 creatives (pain / rack / advantage). Facebook+Instagram. Days 3–4: winning angle by messages. Days 5–7: story + landing + WhatsApp. PLAN only, no scale."
             }
           },
           {
@@ -7084,9 +7004,9 @@
               "en": "AIDA"
             },
             "body": {
-              "he": "Attention: קשה למצוא פריטים אלגנטיים ונוחים בלי קניון עמוס. Interest: נשים 25–45. Desire: ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי. Action: whatsapp.",
-              "ar": "انتباه: קשה למצוא פריטים אלגנטיים ונוחים בלי קניון עמוס. اهتمام: נשים 25–45. رغبة: ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי. فعل: whatsapp.",
-              "en": "Attention: קשה למצוא פריטים אלגנטיים ונוחים בלי קניון עמוס. Interest: נשים 25–45. Desire: ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי. Action: whatsapp."
+              "he": "Attention: קשה למצוא פריטים אלגנטיים ונוחים בלי קניון עמוס. Interest: נשים 25–45. Desire: מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים. Action: whatsapp.",
+              "ar": "انتباه: קשה למצוא פריטים אלגנטיים ונוחים בלי קניון עמוס. اهتمام: נשים 25–45. رغبة: מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים. فعل: whatsapp.",
+              "en": "Attention: קשה למצוא פריטים אלגנטיים ונוחים בלי קניון עמוס. Interest: נשים 25–45. Desire: מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים. Action: whatsapp."
             }
           },
           {
@@ -7096,9 +7016,9 @@
               "en": "PAS"
             },
             "body": {
-              "he": "Problem: קשה למצוא פריטים אלגנטיים ונוחים בלי קניון עמוס. Agitate: מה קורה אם ממשיכים לדחות. Solution: בוטיק חול — ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי.",
-              "ar": "مشكلة: קשה למצוא פריטים אלגנטיים ונוחים בלי קניון עמוס. تحريض: ماذا يحدث إذا استمر التأجيل. حل: בוטיק חול — ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי.",
-              "en": "Problem: קשה למצוא פריטים אלגנטיים ונוחים בלי קניון עמוס. Agitate: what happens if they keep delaying. Solution: בוטיק חול — ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי."
+              "he": "Problem: קשה למצוא פריטים אלגנטיים ונוחים בלי קניון עמוס. Agitate: מה קורה אם ממשיכים לדחות. Solution: בוטיק חול — מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים.",
+              "ar": "مشكلة: קשה למצוא פריטים אלגנטיים ונוחים בלי קניון עמוס. تحريض: ماذا يحدث إذا استمر التأجيل. حل: בוטיק חול — מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים.",
+              "en": "Problem: קשה למצוא פריטים אלגנטיים ונוחים בלי קניון עמוס. Agitate: what happens if they keep delaying. Solution: בוטיק חול — מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים."
             }
           },
           {
@@ -7120,9 +7040,9 @@
               "en": "Hormozi value equation"
             },
             "body": {
-              "he": "תוצאה חלומית: whatsapp. סבירות נתפסת: ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי. עיכוב זמן: לא סופק לוח זמנים — לא ננחש. מאמץ: לא סופק — לא ננחש.",
-              "ar": "النتيجة الحلم: whatsapp. الاحتمال المدرك: ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי. تأخير الوقت: غير مذكور — لن نخمن. الجهد: غير مذكور — لن نخمن.",
-              "en": "Dream outcome: whatsapp. Perceived likelihood: ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי. Time delay: no timeline given — will not guess. Effort: not given — will not guess."
+              "he": "תוצאה חלומית: whatsapp. סבירות נתפסת: מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים. עיכוב זמן: לא סופק לוח זמנים — לא ננחש. מאמץ: לא סופק — לא ננחש.",
+              "ar": "النتيجة الحلم: whatsapp. الاحتمال المدرك: מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים. تأخير الوقت: غير مذكور — لن نخمن. الجهد: غير مذكور — لن نخمن.",
+              "en": "Dream outcome: whatsapp. Perceived likelihood: מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים. Time delay: no timeline given — will not guess. Effort: not given — will not guess."
             }
           }
         ]
@@ -7137,9 +7057,9 @@
               "en": "15s — problem"
             },
             "body": {
-              "he": "0–3: קשה למצוא פריטים אלגנטיים ונוחים בלי קניון עמוס. 3–10: ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי. 10–15: CTA לwhatsapp. בלי מוזיקה שמסתירה דיבור.",
-              "ar": "0–3: קשה למצוא פריטים אלגנטיים ונוחים בלי קניון עמוס. 3–10: ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי. 10–15: CTA لـ whatsapp.",
-              "en": "0–3: קשה למצוא פריטים אלגנטיים ונוחים בלי קניון עמוס. 3–10: ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי. 10–15: CTA to whatsapp. Don’t bury speech under music."
+              "he": "0–3: קשה למצוא פריטים אלגנטיים ונוחים בלי קניון עמוס. 3–10: מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים. 10–15: CTA לwhatsapp. בלי מוזיקה שמסתירה דיבור.",
+              "ar": "0–3: קשה למצוא פריטים אלגנטיים ונוחים בלי קניון עמוס. 3–10: מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים. 10–15: CTA لـ whatsapp.",
+              "en": "0–3: קשה למצוא פריטים אלגנטיים ונוחים בלי קניון עמוס. 3–10: מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים. 10–15: CTA to whatsapp. Don’t bury speech under music."
             }
           },
           {
@@ -7240,18 +7160,6 @@
               "ar": "يجب أن يبدأ الخطاف بمشكلة الجمهور لا باسم النشاط.\nالجملة الأولى = ألم محدد. اسم النشاط في الثانية أو في CTA.",
               "en": "The hook should open on the audience’s problem, not the business name.\nFirst line = specific pain. Business name on line two or in the CTA."
             }
-          },
-          {
-            "title": {
-              "he": "creative",
-              "ar": "creative",
-              "en": "creative"
-            },
-            "body": {
-              "he": "אין היסטוריית מודעות — אי אפשר לדעת מה נכשל. האבחון הוא כיוון עבודה, לא פסק דין.\nשמרו צילומי מודעות הבאים (טקסט, קהל, הוצאה, תוצאה) כדי שהאבחון הבא יהיה מבוסס.",
-              "ar": "لا تاريخ إعلانات — لا يمكن معرفة ما فشل. التشخيص اتجاه عمل لا حكم.\nاحفظوا لقطات الإعلانات القادمة (نص، جمهور، إنفاق، نتيجة).",
-              "en": "No ad history — we cannot know what failed. This diagnosis is a working direction, not a verdict.\nKeep screenshots of the next ads (copy, audience, spend, result) so the next diagnosis is grounded."
-            }
           }
         ]
       },
@@ -7301,9 +7209,9 @@
               "en": "Model"
             },
             "body": {
-              "he": "לא סופק — לא ננחש איך נסגר הכסף.",
-              "ar": "غير متوفر — لن نخمن كيف يُغلق المال.",
-              "en": "Not provided — we will not guess how money is made."
+              "he": "דוגמת תכנון (לא מדידה). בוטיק אופנה נשית — הכסף מפריט שנוסה בחנות, לא מקטלוג מנופח. המרה = שמירת פריט בוואטסאפ / ביקור למדידה. קלט תכנון: ₪340 · 48% · CAC ₪75 · תקציב ₪2200.",
+              "ar": "דוגמת תכנון (לא מדידה). בוטיק אופנה נשית — הכסף מפריט שנוסה בחנות, לא מקטלוג מנופח. המרה = שמירת פריט בוואטסאפ / ביקור למדידה. קלט תכנון: ₪340 · 48% · CAC ₪75 · תקציב ₪2200.",
+              "en": "דוגמת תכנון (לא מדידה). בוטיק אופנה נשית — הכסף מפריט שנוסה בחנות, לא מקטלוג מנופח. המרה = שמירת פריט בוואטסאפ / ביקור למדידה. קלט תכנון: ₪340 · 48% · CAC ₪75 · תקציב ₪2200."
             }
           }
         ]
@@ -7371,9 +7279,9 @@
               "en": "“I don’t know you”"
             },
             "body": {
-              "he": "יתרון אמיתי בלבד: ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי. בלי המלצות מומצאות.",
-              "ar": "ميزة حقيقية فقط: ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי. بلا توصيات مختلقة.",
-              "en": "Only a real advantage: ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי. No invented testimonials."
+              "he": "יתרון אמיתי בלבד: מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים. בלי המלצות מומצאות.",
+              "ar": "ميزة حقيقية فقط: מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים. بلا توصيات مختلقة.",
+              "en": "Only a real advantage: מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים. No invented testimonials."
             }
           }
         ]
@@ -7441,9 +7349,9 @@
               "en": "Type only"
             },
             "body": {
-              "he": "צהוב על שחור. משפט אחד: ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי.",
-              "ar": "أصفر على أسود. جملة واحدة: ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי.",
-              "en": "Yellow on black. One sentence: ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי."
+              "he": "צהוב על שחור. משפט אחד: מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים.",
+              "ar": "أصفر على أسود. جملة واحدة: מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים.",
+              "en": "Yellow on black. One sentence: מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים."
             }
           },
           {
@@ -7533,9 +7441,9 @@
               "en": "Budget"
             },
             "body": {
-              "he": "תקציב לא סופק — אין פיצול מספרי ולא מד לידים.",
-              "ar": "الميزانية غير معطاة — لا تقسيم رقمي.",
-              "en": "Budget not supplied — no numeric split and no lead gauge."
+              "he": "תקציב שסיפקת: 2200 ₪ לחודש. פיצול בכרטיס המדיה.",
+              "ar": "الميزانية التي أعطيتها: 2200 ₪ شهرياً.",
+              "en": "Budget you supplied: 2200 ₪ / month. Split is on the media card."
             }
           }
         ]
@@ -7543,30 +7451,6 @@
       {
         "id": "missing_questions",
         "items": [
-          {
-            "title": {
-              "he": "תקציב ו-CAC",
-              "ar": "الميزانية وCAC",
-              "en": "Budget and CAC"
-            },
-            "body": {
-              "he": "חסרים מספרים — תרחיש העלות לא יוצג כתחזית.",
-              "ar": "أرقام ناقصة — لن يُعرض سيناريو التكلفة كتوقع.",
-              "en": "Numbers missing — the cost scenario will not be shown as a forecast."
-            }
-          },
-          {
-            "title": {
-              "he": "מה רץ בעבר?",
-              "ar": "ماذا اشتغل سابقاً؟",
-              "en": "What ran before?"
-            },
-            "body": {
-              "he": "בלי צילום מודעה קודמת האבחון נשאר ברמת ביטחון נמוכה.",
-              "ar": "بدون لقطة إعلان سابق يبقى التشخيص منخفض الثقة.",
-              "en": "Without a past-ad snapshot diagnosis stays low-confidence."
-            }
-          },
           {
             "title": {
               "he": "מתחרים",
@@ -7583,6 +7467,7 @@
       }
     ],
     "media": {
+      "monthlyBudget": 2200,
       "split": [
         {
           "channel": "meta",
@@ -7592,6 +7477,8 @@
             "en": "Conversion / messages — awareness + enquiry"
           },
           "budgetSharePercent": 40,
+          "monthlyBudget": 880,
+          "dailyBudget": 29.3,
           "targeting": {
             "geos": [
               "עין ברק (עיירה בדיונית) — רחוב הדקל 3"
@@ -7610,7 +7497,9 @@
             "he": "גיאו: עין ברק (עיירה בדיונית) — רחוב הדקל 3. קהל ליבה: women. בלי Lookalike לפני 50 המרות.",
             "ar": "الجغرافيا: עין ברק (עיירה בדיונית) — רחוב הדקל 3. النواة: women. بلا lookalike قبل 50 تحويلاً.",
             "en": "Geo: עין ברק (עיירה בדיונית) — רחוב הדקל 3. Core: women. No lookalike before 50 conversions."
-          }
+          },
+          "worstCaseCpa": 135,
+          "realisticCpa": 75
         },
         {
           "channel": "google",
@@ -7620,6 +7509,8 @@
             "en": "Intent search — people already looking"
           },
           "budgetSharePercent": 25,
+          "monthlyBudget": 550,
+          "dailyBudget": 18.3,
           "targeting": {
             "geos": [
               "עין ברק (עיירה בדיונית) — רחוב הדקל 3"
@@ -7640,7 +7531,9 @@
             "he": "רק מילות כוונה מהקליטה. לא נרחיב למילות מתחרים שלא הוזנו.",
             "ar": "كلمات نية من البيانات فقط. لن نوسّع إلى كلمات منافسين غير مُدخلة.",
             "en": "Intent keywords from intake only. We will not expand into competitor terms that were not entered."
-          }
+          },
+          "worstCaseCpa": 135,
+          "realisticCpa": 75
         },
         {
           "channel": "tiktok",
@@ -7650,6 +7543,8 @@
             "en": "Raw video — only if real footage exists"
           },
           "budgetSharePercent": 10,
+          "monthlyBudget": 220,
+          "dailyBudget": 7.3,
           "targeting": {
             "geos": [
               "עין ברק (עיירה בדיונית) — רחוב הדקל 3"
@@ -7666,7 +7561,9 @@
             "he": "חלק קטן. אל תצרו טיקטוק מבוים אם אין נוכחות. אפשר 0% אם אין וידאו.",
             "ar": "حصة صغيرة. لا تصنعوا تيك توك ممثلاً إن لم توجد مادة.",
             "en": "Small share. Don’t fabricate TikToks if you have no presence. 0% is allowed if there is no video."
-          }
+          },
+          "worstCaseCpa": 135,
+          "realisticCpa": 75
         },
         {
           "channel": "youtube",
@@ -7676,6 +7573,8 @@
             "en": "Video proof — consideration, not a cheap lead"
           },
           "budgetSharePercent": 25,
+          "monthlyBudget": 550,
+          "dailyBudget": 18.3,
           "targeting": {
             "geos": [
               "עין ברק (עיירה בדיונית) — רחוב הדקל 3"
@@ -7696,7 +7595,9 @@
             "he": "אין מספר צפיות מובטח. בלי נכס 6–15 שניות אמיתי — השאירו 0% עד שיש צילום.",
             "ar": "لا مشاهدات مضمونة. بلا أصل 6–15 ثانية حقيقي اتركوا 0% حتى يتوفر تصوير.",
             "en": "No guaranteed views. Without a real 6–15s asset, leave 0% until you have footage."
-          }
+          },
+          "worstCaseCpa": 135,
+          "realisticCpa": 75
         }
       ],
       "assumptions": [
@@ -7718,27 +7619,24 @@
       ],
       "missingForLiveBuy": [
         {
-          "he": "תקציב חודשי",
-          "ar": "ميزانية شهرية",
-          "en": "Monthly budget"
-        },
-        {
           "he": "כתובת אתר / דף נחיתה (אופציונלי אבל חסר)",
           "ar": "عنوان موقع / صفحة (اختياري لكن ناقص)",
           "en": "Website / landing URL (optional but missing)"
         }
       ],
       "worstCase": {
-        "he": "אין תרחיש מספרי — חסר תקציב או CAC. לא יוצג מד 32–68 לידים.",
-        "ar": "لا سيناريو رقمي — تنقص الميزانية أو CAC. لن يُعرض مقياس 32–68.",
-        "en": "No numeric scenario — budget or CAC missing. No 32–68 leads gauge will be shown."
+        "he": "תרחיש גרוע (מהמספרים שלך, לא תחזית): CPA ≈ 135 ₪ → עד 16 המרות/חודש מתוך 2200 ₪. אם הפניות גרועות, המספר האמיתי יהיה נמוך יותר.",
+        "ar": "سيناريو سيئ (من أرقامك لا توقّع): CPA ≈ 135 ₪ → حتى 16 تحويلاً/شهر من 2200 ₪.",
+        "en": "Worst case (from your numbers, not a forecast): CPA ≈ 135 ₪ → up to 16 conversions/month from 2200 ₪. If enquiry quality is poor, actual will be lower."
       },
       "realistic": {
-        "he": "אין תרחיש מספרי — חסר תקציב או CAC. לא יוצג מד 32–68 לידים.",
-        "ar": "لا سيناريو رقمي — تنقص الميزانية أو CAC. لن يُعرض مقياس 32–68.",
-        "en": "No numeric scenario — budget or CAC missing. No 32–68 leads gauge will be shown."
+        "he": "תרחיש ריאלי (CAC היעד שסיפקת): ≈ 29 המרות/חודש ב-75 ₪. זה יעד עבודה, לא הבטחה.",
+        "ar": "سيناريو واقعي (CAC الذي أعطيته): ≈ 29 تحويلاً/شهر عند 75 ₪. هدف عمل لا وعد.",
+        "en": "Realistic scenario (your target CAC): ≈ 29 conversions/month at 75 ₪. A working target, not a promise."
       },
-      "scenarioFromUserNumbers": false
+      "scenarioLeadsWorst": 16,
+      "scenarioLeadsRealistic": 29,
+      "scenarioFromUserNumbers": true
     },
     "optimizer": {
       "ifThen": [
@@ -7773,9 +7671,9 @@
             "en": "CPA above 1.8× target after 50+ clicks"
           },
           "then": {
-            "he": "כבו ושמרו צילום. אין CAC יעד — אל תמציאו קו אדום מספרי.",
-            "ar": "أوقفوا واحفظوا لقطة. لا CAC — لا تخترعوا خطاً أحمر رقمياً.",
-            "en": "Kill it and keep a screenshot. No target CAC — don’t invent a numeric red line."
+            "he": "כבו את האדסט. יעד 75 ₪, קו אדום ≈ 135 ₪.",
+            "ar": "أوقفوا المجموعة. الهدف 75 ₪، الخط الأحمر ≈ 135 ₪.",
+            "en": "Kill the ad set. Target 75 ₪, red line ≈ 135 ₪."
           }
         },
         {
@@ -7810,9 +7708,9 @@
           "en": "Scale only an angle with quality enquiries, not a video that “went viral”."
         },
         {
-          "he": "אין תקציב בקליטה — אין סקייל אוטומטי.",
-          "ar": "لا ميزانية في البيانات — لا توسيع تلقائي.",
-          "en": "No budget in intake — no automatic scale."
+          "he": "תקרת סקייל חודשית = התקציב שסיפקתם, עד לעדכון ידני.",
+          "ar": "سقف التوسيع الشهري = الميزانية التي أعطيتموها.",
+          "en": "Monthly scale cap = the budget you supplied, until you update it."
         }
       ]
     },
@@ -7859,9 +7757,9 @@
             "en": "Proof / advantage"
           },
           "body": {
-            "he": "ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי אין מבצע מומצא — מדברים על המדף והמותגים. אין קופון מומצא.",
-            "ar": "ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי ما في عرض مختلق — نحكي عن الرف والماركات. بلا كوبون مختلق.",
-            "en": "ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי No invented promo — talk about the rack and the brands. No invented coupon."
+            "he": "מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים אין מבצע מומצא — מדברים על המדף והמותגים. אין קופון מומצא.",
+            "ar": "מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים ما في عرض مختلق — نحكي عن الرف والماركات. بلا كوبون مختلق.",
+            "en": "מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים No invented promo — talk about the rack and the brands. No invented coupon."
           },
           "plan7": {
             "he": "ימים 1–2: 3 קריאייטיבים (כאב / מדף / יתרון). פייסבוק+אינסטגרם. ימים 3–4: זווית מנצחת לפי הודעות. ימים 5–7: סטורי + דף נחיתה + וואטסאפ. PLAN בלבד, בלי סקייל.",
@@ -7945,14 +7843,14 @@
           "id": "photos",
           "kind": "strength",
           "label": {
-            "he": "יש 4 תמונות מהאתר — אפשר לשים במודעה ובנחיתה",
-            "ar": "في 4 صور من الموقع — منستعملها بالإعلان والهبوط",
-            "en": "4 photos from the site — usable in ads and the landing"
+            "he": "יש 10 תמונות מהאתר — אפשר לשים במודעה ובנחיתה",
+            "ar": "في 10 صور من الموقع — منستعملها بالإعلان والهبوط",
+            "en": "10 photos from the site — usable in ads and the landing"
           },
           "evidence": {
-            "he": "ראיה · mediaAssets: 4",
-            "ar": "دليل · mediaAssets: 4",
-            "en": "Evidence · mediaAssets: 4"
+            "he": "ראיה · mediaAssets: 10",
+            "ar": "دليل · mediaAssets: 10",
+            "en": "Evidence · mediaAssets: 10"
           }
         },
         {
@@ -8006,9 +7904,9 @@
             "en": "One advantage tighter than the description"
           },
           "evidence": {
-            "he": "ראיה · uniqueAdvantage: ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי",
-            "ar": "دليل · uniqueAdvantage: ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי",
-            "en": "Evidence · uniqueAdvantage: ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי"
+            "he": "ראיה · uniqueAdvantage: מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים",
+            "ar": "دليل · uniqueAdvantage: מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים",
+            "en": "Evidence · uniqueAdvantage: מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים"
           }
         },
         {
@@ -8095,9 +7993,9 @@
               },
               "score": 92,
               "note": {
-                "he": "יש 4 נכסי תמונה — עדיין בלי דירוגים מומצאים.",
-                "ar": "هناك 4 أصول صورة — بلا تقييمات مختلقة.",
-                "en": "4 image assets — still no invented ratings."
+                "he": "יש 10 נכסי תמונה — עדיין בלי דירוגים מומצאים.",
+                "ar": "هناك 10 أصول صورة — بلا تقييمات مختلقة.",
+                "en": "10 image assets — still no invented ratings."
               }
             },
             {
@@ -8121,7 +8019,7 @@
                 "ar": "تنوّع الإبداع (تخطيط 1–100)",
                 "en": "Creative variety (planning 1–100)"
               },
-              "score": 92,
+              "score": 93,
               "note": {
                 "he": "גיוון מתוכנן לפי זוויות הרעיון — לא לפי ROAS מדומה.",
                 "ar": "تنوّع مخطّط حسب زوايا الفكرة — لا حسب ROAS مختلق.",
@@ -8196,9 +8094,9 @@
               },
               "score": 92,
               "note": {
-                "he": "יש 4 נכסי תמונה — עדיין בלי דירוגים מומצאים.",
-                "ar": "هناك 4 أصول صورة — بلا تقييمات مختلقة.",
-                "en": "4 image assets — still no invented ratings."
+                "he": "יש 10 נכסי תמונה — עדיין בלי דירוגים מומצאים.",
+                "ar": "هناك 10 أصول صورة — بلا تقييمات مختلقة.",
+                "en": "10 image assets — still no invented ratings."
               }
             },
             {
@@ -8222,7 +8120,7 @@
                 "ar": "تنوّع الإبداع (تخطيط 1–100)",
                 "en": "Creative variety (planning 1–100)"
               },
-              "score": 92,
+              "score": 93,
               "note": {
                 "he": "גיוון מתוכנן לפי זוויות הרעיון — לא לפי ROAS מדומה.",
                 "ar": "تنوّع مخطّط حسب زوايا الفكرة — لا حسب ROAS مختلق.",
@@ -8297,9 +8195,9 @@
               },
               "score": 92,
               "note": {
-                "he": "יש 4 נכסי תמונה — עדיין בלי דירוגים מומצאים.",
-                "ar": "هناك 4 أصول صورة — بلا تقييمات مختلقة.",
-                "en": "4 image assets — still no invented ratings."
+                "he": "יש 10 נכסי תמונה — עדיין בלי דירוגים מומצאים.",
+                "ar": "هناك 10 أصول صورة — بلا تقييمات مختلقة.",
+                "en": "10 image assets — still no invented ratings."
               }
             },
             {
@@ -8323,7 +8221,7 @@
                 "ar": "تنوّع الإبداع (تخطيط 1–100)",
                 "en": "Creative variety (planning 1–100)"
               },
-              "score": 84,
+              "score": 85,
               "note": {
                 "he": "גיוון מתוכנן לפי זוויות הרעיון — לא לפי ROAS מדומה.",
                 "ar": "تنوّع مخطّط حسب زوايا الفكرة — لا حسب ROAS مختلق.",
@@ -8398,9 +8296,9 @@
               },
               "score": 92,
               "note": {
-                "he": "יש 4 נכסי תמונה — עדיין בלי דירוגים מומצאים.",
-                "ar": "هناك 4 أصول صورة — بلا تقييمات مختلقة.",
-                "en": "4 image assets — still no invented ratings."
+                "he": "יש 10 נכסי תמונה — עדיין בלי דירוגים מומצאים.",
+                "ar": "هناك 10 أصول صورة — بلا تقييمات مختلقة.",
+                "en": "10 image assets — still no invented ratings."
               }
             },
             {
@@ -8424,7 +8322,7 @@
                 "ar": "تنوّع الإبداع (تخطيط 1–100)",
                 "en": "Creative variety (planning 1–100)"
               },
-              "score": 84,
+              "score": 85,
               "note": {
                 "he": "גיוון מתוכנן לפי זוויות הרעיון — לא לפי ROAS מדומה.",
                 "ar": "تنوّع مخطّط حسب زوايا الفكرة — لا حسب ROAS مختلق.",
@@ -8499,9 +8397,9 @@
               },
               "score": 92,
               "note": {
-                "he": "יש 4 נכסי תמונה — עדיין בלי דירוגים מומצאים.",
-                "ar": "هناك 4 أصول صورة — بلا تقييمات مختلقة.",
-                "en": "4 image assets — still no invented ratings."
+                "he": "יש 10 נכסי תמונה — עדיין בלי דירוגים מומצאים.",
+                "ar": "هناك 10 أصول صورة — بلا تقييمات مختلقة.",
+                "en": "10 image assets — still no invented ratings."
               }
             },
             {
@@ -8525,7 +8423,7 @@
                 "ar": "تنوّع الإبداع (تخطيط 1–100)",
                 "en": "Creative variety (planning 1–100)"
               },
-              "score": 92,
+              "score": 93,
               "note": {
                 "he": "גיוון מתוכנן לפי זוויות הרעיון — לא לפי ROAS מדומה.",
                 "ar": "تنوّع مخطّط حسب زوايا الفكرة — لا حسب ROAS مختلق.",
@@ -8538,27 +8436,9 @@
       ],
       "gapPlan": {
         "missing": [
-          "monthlyBudget",
-          "targetCac",
           "competitors"
         ],
         "moves": [
-          {
-            "missingField": "monthlyBudget",
-            "move": {
-              "he": "תקציב חסר — לתכנן 2–3 קריאייטיבים לומדים, בלי לחזות ROAS.",
-              "ar": "الميزانية ناقصة — خطّطوا 2–3 إبداعات تعلّم بلا توقّع ROAS.",
-              "en": "Budget missing — plan 2–3 learning creatives; never forecast ROAS."
-            }
-          },
-          {
-            "missingField": "targetCac",
-            "move": {
-              "he": "CAC יעד חסר — לא יומצא; מדדי תכנון = בהירות מסר/הצעה בלבד.",
-              "ar": "CAC المستهدف ناقص — لن يُخترع؛ مقاييس التخطيط = وضوح الرسالة/العرض فقط.",
-              "en": "Target CAC missing — will not invent; planning metrics = message/offer clarity only."
-            }
-          },
           {
             "missingField": "competitors",
             "move": {
@@ -8590,9 +8470,9 @@
               "en": "Model"
             },
             "body": {
-              "he": "לא סופק — Intake מסרב לנחש איך נסגר כסף.",
-              "ar": "غير متوفر.",
-              "en": "Not given — Intake refuses to guess how money closes."
+              "he": "דוגמת תכנון (לא מדידה). בוטיק אופנה נשית — הכסף מפריט שנוסה בחנות, לא מקטלוג מנופח. המרה = שמירת פריט בוואטסאפ / ביקור למדידה. קלט תכנון: ₪340 · 48% · CAC ₪75 · תקציב ₪2200.",
+              "ar": "דוגמת תכנון (לא מדידה). בוטיק אופנה נשית — הכסף מפריט שנוסה בחנות, לא מקטלוג מנופח. המרה = שמירת פריט בוואטסאפ / ביקור למדידה. קלט תכנון: ₪340 · 48% · CAC ₪75 · תקציב ₪2200.",
+              "en": "דוגמת תכנון (לא מדידה). בוטיק אופנה נשית — הכסף מפריט שנוסה בחנות, לא מקטלוג מנופח. המרה = שמירת פריט בוואטסאפ / ביקור למדידה. קלט תכנון: ₪340 · 48% · CAC ₪75 · תקציב ₪2200."
             }
           },
           {
@@ -8602,9 +8482,9 @@
               "en": "Unit economics"
             },
             "body": {
-              "he": "AOV חסר · מרווח חסר% · CAC יעד חסר · תקציב חסר.",
-              "ar": "AOV ناقص · هامش ناقص · CAC ناقص · ميزانية ناقص.",
-              "en": "AOV missing · margin missing% · target CAC missing · budget missing."
+              "he": "AOV 340 · מרווח 48% · CAC יעד 75 · תקציב 2200.",
+              "ar": "AOV 340 · هامش 48 · CAC 75 · ميزانية 2200.",
+              "en": "AOV 340 · margin 48% · target CAC 75 · budget 2200."
             }
           },
           {
@@ -8614,9 +8494,9 @@
               "en": "History"
             },
             "body": {
-              "he": "אין מודעות קודמות בקליטה.",
-              "ar": "لا إعلانات سابقة.",
-              "en": "No past ads in intake."
+              "he": "סטוריז של מתלה פשתן אחד מורכב — לא קטלוג של 40 פריטים מומצאים. אור חלון, בלי פנים. תיאור קריאייטיב קודם בלבד.",
+              "ar": "סטוריז של מתלה פשתן אחד מורכב — לא קטלוג של 40 פריטים מומצאים. אור חלון, בלי פנים. תיאור קריאייטיב קודם בלבד.",
+              "en": "סטוריז של מתלה פשתן אחד מורכב — לא קטלוג של 40 פריטים מומצאים. אור חלון, בלי פנים. תיאור קריאייטיב קודם בלבד."
             }
           },
           {
@@ -8655,9 +8535,9 @@
               "en": "From intake: Women 25–45. עין ברק (עיירה בדיונית) — רחוב הדקל 3"
             },
             "unknown": {
-              "he": "חסר: budget, cac, competitors — לא הומצא.",
-              "ar": "ناقص: budget, cac, competitors.",
-              "en": "Missing: budget, cac, competitors — not invented."
+              "he": "חסר: competitors — לא הומצא.",
+              "ar": "ناقص: competitors.",
+              "en": "Missing: competitors — not invented."
             }
           },
           {
@@ -8708,14 +8588,14 @@
         "battlecards": [],
         "swot": {
           "strength": {
-            "he": "חוזק שסופק: ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי",
-            "ar": "قوة معطاة: ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי",
-            "en": "Stated strength: ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי"
+            "he": "חוזק שסופק: מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים",
+            "ar": "قوة معطاة: מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים",
+            "en": "Stated strength: מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים"
           },
           "weakness": {
-            "he": "חולשה תפעולית לא סופקה — לא נכתוב «אין נוכחות דיגיטלית» סתם.",
-            "ar": "ضعف تشغيلي غير مذكور.",
-            "en": "Operational weakness not supplied — will not write “no digital presence” for flavor."
+            "he": "התמונות היו רגועות אבל לא היה «בואו למדידה» ולא שעת החנות הבאה — אהבו את האווירה ולא שמרו פריט.",
+            "ar": "התמונות היו רגועות אבל לא היה «בואו למדידה» ולא שעת החנות הבאה — אהבו את האווירה ולא שמרו פריט.",
+            "en": "התמונות היו רגועות אבל לא היה «בואו למדידה» ולא שעת החנות הבאה — אהבו את האווירה ולא שמרו פריט."
           },
           "opportunity": {
             "he": "קהל נשים 25–45 בעין ברק (עיירה בדיונית) — רחוב הדקל 3. מטרה: whatsapp.",
@@ -8739,19 +8619,19 @@
           "strategic"
         ],
         "positioning": {
-          "he": "בוטיק נשי שקט בעין ברק — מתלה אחד מדויק עדיף על קטלוג מנופח.",
-          "ar": "בוטיק נשי שקט בעין ברק — מתלה אחד מדויק עדיף על קטלוג מנופח.",
-          "en": "בוטיק נשי שקט בעין ברק — מתלה אחד מדויק עדיף על קטלוג מנופח."
+          "he": "בוטיק נשי שקט בעין ברק הבדיונית — מתלה אחד מדויק עדיף על קטלוג מנופח.",
+          "ar": "בוטיק נשי שקט בעין ברק הבדיונית — מתלה אחד מדויק עדיף על קטלוג מנופח.",
+          "en": "בוטיק נשי שקט בעין ברק הבדיונית — מתלה אחד מדויק עדיף על קטלוג מנופח."
         },
         "uniqueMechanism": {
-          "he": "המנגנון הייחודי הוא מה שסופק: ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי. בלי פטנט מדומה.",
-          "ar": "الآلية الفريدة كما أُعطيت: ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי. بلا براءة وهمية.",
-          "en": "The unique mechanism is what you gave: ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי. No fake proprietary method."
+          "he": "המנגנון הייחודי הוא מה שסופק: מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים. בלי פטנט מדומה.",
+          "ar": "الآلية الفريدة كما أُعطيت: מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים. بلا براءة وهمية.",
+          "en": "The unique mechanism is what you gave: מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים. No fake proprietary method."
         },
         "hormozi": {
-          "he": "Dream = whatsapp. Likelihood = ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי. Time delay / effort = לא סופקו — לא ננחש.",
-          "ar": "الحلم = whatsapp. الاحتمال = ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי. الوقت/الجهد غير مذكورين.",
-          "en": "Dream = whatsapp. Likelihood = ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי. Time delay / effort not given — will not guess."
+          "he": "Dream = whatsapp. Likelihood = מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים. Time delay / effort = לא סופקו — לא ננחש.",
+          "ar": "الحلم = whatsapp. الاحتمال = מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים. الوقت/الجهد غير مذكورين.",
+          "en": "Dream = whatsapp. Likelihood = מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים. Time delay / effort not given — will not guess."
         },
         "aida": {
           "attention": {
@@ -8765,9 +8645,9 @@
             "en": "Women 25–45"
           },
           "desire": {
-            "he": "ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי",
-            "ar": "ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי",
-            "en": "ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי"
+            "he": "מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים",
+            "ar": "מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים",
+            "en": "מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים"
           },
           "action": {
             "he": "whatsapp",
@@ -8787,9 +8667,9 @@
             "en": "If they keep delaying: the problem stays, and generic ads still sound like everyone else."
           },
           "solution": {
-            "he": "בוטיק חול — ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי",
-            "ar": "בוטיק חול — ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי",
-            "en": "בוטיק חול — ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי"
+            "he": "בוטיק חול — מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים",
+            "ar": "בוטיק חול — מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים",
+            "en": "בוטיק חול — מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים"
           }
         },
         "hso": {
@@ -8843,9 +8723,9 @@
             "en": "TOF: hook on קשה למצוא פריטים אלגנטיים ונוחים בלי קניון עמוס. Meta/TikTok per the media plan. No fake leads."
           },
           "mof": {
-            "he": "MOF: הוכחה = ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי בלבד. רימרקטינג אחרי אירוע אמיתי.",
-            "ar": "MOF: إثبات = ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי فقط.",
-            "en": "MOF: proof = ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי only. Remarketing after a real event."
+            "he": "MOF: הוכחה = מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים בלבד. רימרקטינג אחרי אירוע אמיתי.",
+            "ar": "MOF: إثبات = מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים فقط.",
+            "en": "MOF: proof = מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים only. Remarketing after a real event."
           },
           "bof": {
             "he": "BOF: CTA לwhatsapp. וואטסאפ/תור — לא טופס של 12 שדות.",
@@ -9070,6 +8950,45 @@
             }
           },
           {
+            "id": "cmo-friday_browse",
+            "angle": {
+              "he": "רעיון CMO: שיטוט שישי",
+              "ar": "فكرة CMO: تجوّل الجمعة",
+              "en": "CMO idea: Friday browse"
+            },
+            "hook": {
+              "he": "שעות שישי הקצרות = חלון ביקור אמיתי · למה זה מנצח: דחיפות משעות אמת — לא מספירת מלאי מדומה · תכנון 89/100 (לא ROAS)",
+              "ar": "ساعات الجمعة القصيرة = نافذة زيارة حقيقية · لماذا تفوز: إلحاح من ساعات حقيقية — مش عدّ مخزون مزيف · تخطيط 89/100 (ليس ROAS)",
+              "en": "Short Friday hours = a real visit window · Why it wins: Urgency from real hours — not fake stock countdowns · planning 89/100 (not ROAS)"
+            }
+          },
+          {
+            "id": "cmo-fabric_closeup",
+            "angle": {
+              "he": "רעיון CMO: קרוס-אפ בד",
+              "ar": "فكرة CMO: لقطة قماش قريبة",
+              "en": "CMO idea: Fabric close-up"
+            },
+            "hook": {
+              "he": "לצלם טקסטיל ותנועה — לא דוגמניות בפנים מזוהות · למה זה מנצח: סוגרת פערי הוכחה במערכת גרפית של בדים במקום לייקים · תכנון 90/100 (לא ROAS)",
+              "ar": "صوروا قماش وحركة — مش عارضات بوجوه معروفة · لماذا تفوز: تسد فجوة الإثبات بنظام قماش بدل إعجابات · تخطيط 90/100 (ليس ROAS)",
+              "en": "Film textile and motion — never identifiable model faces · Why it wins: Closes proof gaps with a fabric graphic system instead of likes · planning 90/100 (not ROAS)"
+            }
+          },
+          {
+            "id": "gap-competitors-0",
+            "angle": {
+              "he": "פיצוי פער: competitors",
+              "ar": "تعويض فجوة: competitors",
+              "en": "Gap compensate: competitors"
+            },
+            "hook": {
+              "he": "בלי שמות מתחרים — לא יומצאו; להתמקד ביתרון שלכם.",
+              "ar": "بلا أسماء منافسين — لن تُخترع؛ ركّزوا على ميزتكم.",
+              "en": "No competitor names — will not invent any; focus on your advantage."
+            }
+          },
+          {
             "id": "pain",
             "angle": {
               "he": "בעיה",
@@ -9090,9 +9009,9 @@
               "en": "Advantage"
             },
             "hook": {
-              "he": "ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי",
-              "ar": "ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי",
-              "en": "ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי"
+              "he": "מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים",
+              "ar": "מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים",
+              "en": "מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים"
             }
           },
           {
@@ -9156,9 +9075,9 @@
               "en": "CMO idea: One-rack story"
             },
             "proof": {
-              "he": "ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי",
-              "ar": "ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי",
-              "en": "ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי"
+              "he": "מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים",
+              "ar": "מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים",
+              "en": "מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים"
             },
             "cta": {
               "he": "בואו לחנות",
@@ -9173,9 +9092,9 @@
               "en": "CMO idea: Everyday elegant"
             },
             "proof": {
-              "he": "ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי",
-              "ar": "ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי",
-              "en": "ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי"
+              "he": "מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים",
+              "ar": "מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים",
+              "en": "מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים"
             },
             "cta": {
               "he": "בואו לחנות",
@@ -9190,9 +9109,9 @@
               "en": "CMO idea: Hold via WhatsApp"
             },
             "proof": {
-              "he": "ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי",
-              "ar": "ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי",
-              "en": "ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי"
+              "he": "מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים",
+              "ar": "מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים",
+              "en": "מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים"
             },
             "cta": {
               "he": "בואו לחנות",
@@ -9202,14 +9121,14 @@
           },
           {
             "angle": {
-              "he": "בעיה",
-              "ar": "مشكلة",
-              "en": "Problem"
+              "he": "רעיון CMO: שיטוט שישי",
+              "ar": "فكرة CMO: تجوّل الجمعة",
+              "en": "CMO idea: Friday browse"
             },
             "proof": {
-              "he": "ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי",
-              "ar": "ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי",
-              "en": "ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי"
+              "he": "מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים",
+              "ar": "מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים",
+              "en": "מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים"
             },
             "cta": {
               "he": "בואו לחנות",
@@ -9247,7 +9166,7 @@
             "format": "rsa",
             "locale": "he",
             "title": "Google RSA",
-            "body": "H1: בוטיק חול\nH2: ייעוץ אישי רגוע + בדים נוחים\nH3: עין ברק (עיירה\nD1: שעות: א׳–ה׳ 10:00–19:00 · ו׳ 09:00–14:00 · ש׳ סגור\nD2: בואו לחנות"
+            "body": "H1: בוטיק חול\nH2: מתלה אחד מדויק + ייעוץ רגוע\nH3: עין ברק (עיירה\nD1: שעות: א׳–ה׳ 10:00–19:00 · ו׳ 09:00–14:00 · ש׳ סגור\nD2: בואו לחנות"
           },
           {
             "format": "search",
@@ -9259,7 +9178,7 @@
             "format": "landing",
             "locale": "he",
             "title": "דף נחיתה — מבנה",
-            "body": "H1: בוטיק חול\nבקרו בבוטיק חול בעין ברק — וואטסאפ לשמירת פריט\nעין ברק (עיירה\nשעות: א׳–ה׳ 10:00–19:00 · ו׳ 09:00–14:00 · ש׳ סגור\nוואטסאפ: 050-8112233.\nטופס: שם + טלפון + שפה. בלי המלצות בדויות.\nויזואל מהקבצים שהועלו: exterior · interior · interior · interior. בלי פנים שלא הועלו."
+            "body": "H1: בוטיק חול\nבקרו בבוטיק חול בעין ברק — וואטסאפ לשמירת פריט\nעין ברק (עיירה\nשעות: א׳–ה׳ 10:00–19:00 · ו׳ 09:00–14:00 · ש׳ סגור\nוואטסאפ: 050-8112233.\nטופס: שם + טלפון + שפה. בלי המלצות בדויות.\nויזואל מהקבצים שהועלו: interior · other · interior · exterior · interior · interior · exterior · interior · interior · interior. בלי פנים שלא הועלו."
           },
           {
             "format": "whatsapp",
@@ -9283,7 +9202,7 @@
             "format": "email-1",
             "locale": "he",
             "title": "אימייל 1",
-            "body": "1/5 היכרות: בוטיק חול — ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי"
+            "body": "1/5 היכרות: בוטיק חול — מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים"
           },
           {
             "format": "email-2",
@@ -9337,7 +9256,7 @@
             "format": "rsa",
             "locale": "ar",
             "title": "Google RSA",
-            "body": "H1: בוטיק חול — עין ברק (עיירה\nH2: עין ברק (עיירה، واتساب\nH3: עין ברק (עיירה\nD1: الدوام: א׳–ה׳ 10:00–19:00 · ו׳ 09:00–14:00 · ש׳ סגור\nD2: تعوا ع المحل"
+            "body": "H1: בוטיק חול — עין ברק (עיירה\nH2: + — 40\nH3: עין ברק (עיירה\nD1: الدوام: א׳–ה׳ 10:00–19:00 · ו׳ 09:00–14:00 · ש׳ סגור\nD2: تعوا ع المحل"
           },
           {
             "format": "search",
@@ -9349,7 +9268,7 @@
             "format": "landing",
             "locale": "ar",
             "title": "صفحة هبوط",
-            "body": "H1: בוטיק חול — עין ברק (עיירה\nעין ברק (עיירה\nالدوام: א׳–ה׳ 10:00–19:00 · ו׳ 09:00–14:00 · ש׳ סגור\nواتساب: 050-8112233.\nفورم: اسم + تلفون + لغة. بلا شهادات مختلقة.\nالصور من الملفات المرفوعة: exterior · interior · interior · interior. بلا وجوه ما انرفعت."
+            "body": "H1: בוטיק חול — עין ברק (עיירה\nעין ברק (עיירה\nالدوام: א׳–ה׳ 10:00–19:00 · ו׳ 09:00–14:00 · ש׳ סגור\nواتساب: 050-8112233.\nفورم: اسم + تلفون + لغة. بلا شهادات مختلقة.\nالصور من الملفات المرفوعة: interior · other · interior · exterior · interior · interior · exterior · interior · interior · interior. بلا وجوه ما انرفعت."
           },
           {
             "format": "whatsapp",
@@ -9427,7 +9346,7 @@
             "format": "rsa",
             "locale": "en",
             "title": "Google RSA",
-            "body": "H1: בוטיק חול\nH2: ייעוץ אישי רגוע · בדים נוחים\nH3: עין ברק (עיירה\nD1: Hours: א׳–ה׳ 10:00–19:00 · ו׳ 09:00–14:00 · ש׳ סגור\nD2: Come to the store"
+            "body": "H1: בוטיק חול\nH2: מתלה אחד מדויק · ייעוץ רגוע\nH3: עין ברק (עיירה\nD1: Hours: א׳–ה׳ 10:00–19:00 · ו׳ 09:00–14:00 · ש׳ סגור\nD2: Come to the store"
           },
           {
             "format": "search",
@@ -9439,7 +9358,7 @@
             "format": "landing",
             "locale": "en",
             "title": "Landing structure",
-            "body": "H1: בוטיק חול\nעין ברק (עיירה\nHours: א׳–ה׳ 10:00–19:00 · ו׳ 09:00–14:00 · ש׳ סגור\nWhatsApp: 050-8112233.\nForm: name + phone + language. No fake testimonials.\nVisuals from uploaded files: exterior · interior · interior · interior. No faces that were not uploaded."
+            "body": "H1: בוטיק חול\nעין ברק (עיירה\nHours: א׳–ה׳ 10:00–19:00 · ו׳ 09:00–14:00 · ש׳ סגור\nWhatsApp: 050-8112233.\nForm: name + phone + language. No fake testimonials.\nVisuals from uploaded files: interior · other · interior · exterior · interior · interior · exterior · interior · interior · interior. No faces that were not uploaded."
           },
           {
             "format": "whatsapp",
@@ -9463,7 +9382,7 @@
             "format": "email-1",
             "locale": "en",
             "title": "Email 1",
-            "body": "1/5 Intro: בוטיק חול — ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי"
+            "body": "1/5 Intro: בוטיק חול — מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים"
           },
           {
             "format": "email-2",
@@ -9522,8 +9441,8 @@
           {
             "format": "ad-unique_advantage",
             "locale": "he",
-            "title": "ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי",
-            "body": "ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי.\n\nבוטיק חול · עין ברק (עיירה.\n\nשעות: א׳–ה׳ 10:00–19:00 · ו׳ 09:00–14:00 · ש׳ סגור\nוואטסאפ 050-8112233.\nהנחת פתיחה רכה 15% על קולקציית האביב ללקוחות חדשות\nCTA: בואו לחנות"
+            "title": "מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40",
+            "body": "מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים.\n\nבוטיק חול · עין ברק (עיירה.\n\nשעות: א׳–ה׳ 10:00–19:00 · ו׳ 09:00–14:00 · ש׳ סגור\nוואטסאפ 050-8112233.\nהנחת פתיחה רכה 15% על קולקציית האביב ללקוחות חדשות\nCTA: בואו לחנות"
           },
           {
             "format": "ad-strong_offer",
@@ -9558,8 +9477,8 @@
           {
             "format": "ad-unique_advantage",
             "locale": "ar",
-            "title": "עין ברק (עיירה، واتساب 050-8112233",
-            "body": "עין ברק (עיירה، واتساب 050-8112233.\n\nבוטיק חול — עין ברק (עיירה.\n\nالدوام: א׳–ה׳ 10:00–19:00 · ו׳ 09:00–14:00 · ש׳ סגור\nواتساب 050-8112233.\nהנחת פתיחה רכה 15% על קולקציית האביב ללקוחות חדשות\nCTA: تعوا ع المحل"
+            "title": "+ — 40",
+            "body": "+ — 40.\n\nבוטיק חול — עין ברק (עיירה.\n\nالدوام: א׳–ה׳ 10:00–19:00 · ו׳ 09:00–14:00 · ש׳ סגור\nواتساب 050-8112233.\nהנחת פתיחה רכה 15% על קולקציית האביב ללקוחות חדשות\nCTA: تعوا ع المحل"
           },
           {
             "format": "ad-strong_offer",
@@ -9594,8 +9513,8 @@
           {
             "format": "ad-unique_advantage",
             "locale": "en",
-            "title": "ייעוץ אישי רגוע · בדים נוחים ללוק",
-            "body": "ייעוץ אישי רגוע · בדים נוחים ללוק יומיומי.\n\nבוטיק חול · עין ברק (עיירה.\n\nHours: א׳–ה׳ 10:00–19:00 · ו׳ 09:00–14:00 · ש׳ סגור\nWhatsApp 050-8112233.\nהנחת פתיחה רכה 15% על קולקציית האביב ללקוחות חדשות\nCTA: Come to the store"
+            "title": "מתלה אחד מדויק · ייעוץ רגוע — לא קטלוג",
+            "body": "מתלה אחד מדויק · ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים.\n\nבוטיק חול · עין ברק (עיירה.\n\nHours: א׳–ה׳ 10:00–19:00 · ו׳ 09:00–14:00 · ש׳ סגור\nWhatsApp 050-8112233.\nהנחת פתיחה רכה 15% על קולקציית האביב ללקוחות חדשות\nCTA: Come to the store"
           }
         ],
         "brandKit": {
@@ -9635,9 +9554,9 @@
               "en": "Problem hook: קשה למצוא פריטים אלגנטיים ונוחים בלי קניון עמוס"
             },
             "b": {
-              "he": "הוק יתרון: ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי",
+              "he": "הוק יתרון: מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים",
               "ar": "خطاف الميزة",
-              "en": "Advantage hook: ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי"
+              "en": "Advantage hook: מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים"
             },
             "metric": {
               "he": "פניות אמיתיות עם שם, לא CTR לבד.",
@@ -9680,9 +9599,9 @@
             "en": "IF Many enquiries with no real name / tyre-kickers THEN The offer is too wide (e.g. free). Tighten the CTA: a booking, not “learn more”."
           },
           {
-            "he": "IF CPA מעל 1.8× יעד אחרי 50+ קליקים THEN כבו ושמרו צילום. אין CAC יעד — אל תמציאו קו אדום מספרי.",
-            "ar": "IF CPA فوق 1.8× الهدف بعد 50+ نقرة THEN أوقفوا واحفظوا لقطة. لا CAC — لا تخترعوا خطاً أحمر رقمياً.",
-            "en": "IF CPA above 1.8× target after 50+ clicks THEN Kill it and keep a screenshot. No target CAC — don’t invent a numeric red line."
+            "he": "IF CPA מעל 1.8× יעד אחרי 50+ קליקים THEN כבו את האדסט. יעד 75 ₪, קו אדום ≈ 135 ₪.",
+            "ar": "IF CPA فوق 1.8× الهدف بعد 50+ نقرة THEN أوقفوا المجموعة. الهدف 75 ₪، الخط الأحمر ≈ 135 ₪.",
+            "en": "IF CPA above 1.8× target after 50+ clicks THEN Kill the ad set. Target 75 ₪, red line ≈ 135 ₪."
           },
           {
             "he": "IF יש 3+ המרות אמיתיות מתחת ליעד THEN העלו תקציב ב-20% כל 3 ימים, לא פי 3 ביום אחד.",

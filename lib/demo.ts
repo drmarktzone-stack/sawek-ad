@@ -11,6 +11,8 @@ import {
   DEMO_SAND_ID,
   type DemoPackId,
 } from "./demo-catalog";
+import { applyDemoCmoDesk } from "./demo-cmo";
+import { demoPhotoAssets } from "./demo-assets";
 
 export { DEMO_ID, DEMO_OLIVE_ID, DEMO_SAND_ID } from "./demo-catalog";
 export type { DemoPackId } from "./demo-catalog";
@@ -34,7 +36,7 @@ function demoName(locale: Locale): string {
 
 export function demoIntake(locale: Locale = "he"): Intake {
   const s = DEMO_SNAPSHOT;
-  return {
+  const base: Intake = {
     type: "business",
     depth: "quick",
     operatingModel: "free_service",
@@ -66,7 +68,7 @@ export function demoIntake(locale: Locale = "he"): Intake {
     pastAds: "",
     pastResults: "",
     whatFailed: "",
-    mediaAssets: [],
+    mediaAssets: demoPhotoAssets(DEMO_ID),
     ingestedDocs: [],
     pastCreatives: [],
     brandTone: "",
@@ -76,6 +78,7 @@ export function demoIntake(locale: Locale = "he"): Intake {
     landingLines: s.landingLines,
     brandKit: { colors: [], source: "none" },
   };
+  return applyDemoCmoDesk(base, DEMO_ID, locale);
 }
 
 export const DEMO_LABEL = {
@@ -160,9 +163,10 @@ export function relocalizePediatricIntake(intake: Intake, locale: Locale): Intak
   if (!isPediatricDemo(intake)) {
     return { ...intake, businessName: canonicalDoctorName(intake.businessName) };
   }
+  const fresh = demoIntake(locale);
   const out: Intake = {
-    ...demoIntake(locale),
-    mediaAssets: intake.mediaAssets ?? [],
+    ...fresh,
+    mediaAssets: (intake.mediaAssets ?? []).length ? intake.mediaAssets : fresh.mediaAssets,
     ingestedDocs: intake.ingestedDocs ?? [],
     pastCreatives: intake.pastCreatives ?? [],
   };
@@ -186,6 +190,10 @@ export function isOliveKitchenDemo(intake: Intake): boolean {
   return /052-?7001234|מטבח הזית|مطبخ الزيتون|Olive Kitchen|נווה שקד/i.test(blob);
 }
 
+export function isAnyDemoIntake(intake: Intake): boolean {
+  return isPediatricDemo(intake) || isOliveKitchenDemo(intake) || isSandBoutiqueDemo(intake);
+}
+
 export function isSandBoutiqueDemo(intake: Intake): boolean {
   const blob = `${intake.businessName}\n${intake.whatsapp}\n${intake.description}\n${intake.location}`;
   return /050-?8112233|בוטיק חול|بوتيك الرمل|Sand Boutique|עין ברק/i.test(blob);
@@ -197,7 +205,7 @@ export function relocalizeCatalogIntake(intake: Intake, locale: Locale): Intake 
     const base = catalogIntake(DEMO_OLIVE_ID, locale)!;
     return {
       ...base,
-      mediaAssets: intake.mediaAssets ?? [],
+      mediaAssets: (intake.mediaAssets ?? []).length ? intake.mediaAssets : base.mediaAssets,
       ingestedDocs: intake.ingestedDocs ?? [],
       pastCreatives: intake.pastCreatives ?? [],
       offer: intake.offerCustom ? intake.offer : base.offer,
@@ -207,7 +215,7 @@ export function relocalizeCatalogIntake(intake: Intake, locale: Locale): Intake 
     const base = catalogIntake(DEMO_SAND_ID, locale)!;
     return {
       ...base,
-      mediaAssets: intake.mediaAssets ?? [],
+      mediaAssets: (intake.mediaAssets ?? []).length ? intake.mediaAssets : base.mediaAssets,
       ingestedDocs: intake.ingestedDocs ?? [],
       pastCreatives: intake.pastCreatives ?? [],
       offer: intake.offerCustom ? intake.offer : base.offer,

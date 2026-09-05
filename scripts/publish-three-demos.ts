@@ -7,7 +7,7 @@
  * Attaches CMO idea packs (planning scorecards — never ROAS).
  * Writes SVG studio stills under public/packs/assets/.
  */
-import { writeFileSync, mkdirSync, existsSync } from "fs";
+import { writeFileSync, mkdirSync, existsSync, statSync } from "fs";
 import { join } from "path";
 import { assemblePack } from "../lib/engine/run";
 import { generateVariants } from "../lib/engine/copy";
@@ -30,9 +30,12 @@ import {
   type DemoPackId,
 } from "../lib/demo-catalog";
 import { studioStillsForIntake } from "../lib/studio-stills";
+import { isDemoCmoComplete } from "../lib/demo-cmo";
+import { demoPhotoManifest } from "../lib/demo-assets";
 import type { CampaignPack, Intake, Locale, MediaAssetMeta } from "../lib/types";
 import { detectVertical } from "../lib/vertical";
 import { uid } from "../lib/utils";
+import type { DemoAssetId } from "../lib/demo-assets";
 
 function enrichFictional(intake: Intake, kind: "olive" | "sand"): Intake {
   if (kind === "olive") {
@@ -83,7 +86,8 @@ function attachStudioAssets(intake: Intake, packId: DemoPackId): Intake {
       publicSrc,
     };
   });
-  return { ...intake, mediaAssets: [...(intake.mediaAssets ?? []), ...assets] };
+  const existing = intake.mediaAssets ?? [];
+  return { ...intake, mediaAssets: [...existing, ...assets] };
 }
 
 function buildFromIntake(intake: Intake, id: DemoPackId): CampaignPack {
@@ -204,9 +208,27 @@ function main() {
       console.error("missing cmo ideas", pack.id);
       process.exit(1);
     }
-    if (!(pack.intake.mediaAssets ?? []).length) {
-      console.error("missing media assets", pack.id);
+    if (!isDemoCmoComplete(pack.intake)) {
+      console.error("CMO desk incomplete", pack.id, {
+        businessModel: pack.intake.businessModel?.slice(0, 40),
+        budget: pack.intake.monthlyBudget,
+        pastAds: pack.intake.pastAds?.slice(0, 40),
+      });
       process.exit(1);
+    }
+    const photos = (pack.intake.mediaAssets ?? []).filter(
+      (a) => a.kind === "image" && a.publicSrc && !/\.svg$/i.test(a.publicSrc),
+    );
+    if (photos.length < 4) {
+      console.error("need ≥4 real photos", pack.id, photos.length);
+      process.exit(1);
+    }
+    for (const row of demoPhotoManifest(pack.id as DemoAssetId)) {
+      const abs = join(process.cwd(), "public/packs/assets", pack.id, row.file);
+      if (!existsSync(abs) || statSync(abs).size < 8000) {
+        console.error("missing or tiny photo file", abs);
+        process.exit(1);
+      }
     }
     const heIdeas = pack.demoMeta?.ideaNames?.he ?? [];
     console.log(

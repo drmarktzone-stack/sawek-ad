@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Trash2, WandSparkles } from "lucide-react";
 import type { AgentId, AgentStatus, CampaignPack, Competitor, Intake, WizardStep } from "@/lib/types";
-import { demoIntake, consumePendingDemo, clearPendingDemo, applyPediatricDemoDraft, applyCatalogDemoDraft, isPediatricDemo, relocalizePediatricIntake, relocalizeCatalogIntake, canonicalDoctorName, resolvePendingDemoId } from "@/lib/demo";
+import { demoIntake, consumePendingDemo, clearPendingDemo, applyPediatricDemoDraft, applyCatalogDemoDraft, isPediatricDemo, isAnyDemoIntake, relocalizePediatricIntake, relocalizeCatalogIntake, canonicalDoctorName, resolvePendingDemoId } from "@/lib/demo";
 import { installDemoPack } from "@/lib/active-pack";
 import { DemoPicker } from "@/components/demo-picker";
 import { cmoFieldsMissing, emptyIntake, wizardMissingFields, wizardReady } from "@/lib/engine/validate";
@@ -49,6 +49,7 @@ import { ConquerHeadline, Stepper } from "@/components/stepper";
 import { DepartmentRail } from "@/components/department-shell";
 import { useI18n } from "@/components/i18n-provider";
 import { CoachPanel } from "@/components/coach-panel";
+import { DiagnosisGaps } from "@/components/diagnosis-gaps";
 import { coachIntake } from "@/lib/engine/coach";
 import { useIsClient } from "@/lib/use-is-client";
 import { cn } from "@/lib/utils";
@@ -102,9 +103,9 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
         demoIntake(locale);
       clearPendingDemo();
       clearEmptyCampaign();
-      saveDraft({ intake: d, step: 2, phase: "wizard" });
+      saveDraft({ intake: d, step: 3, phase: "interview" });
       setIntake(d);
-      setStep(2);
+      setStep(3);
       setCustom({
         audience: true,
         problem: true,
@@ -112,7 +113,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
         goal: false,
         offer: d.offerCustom,
       });
-      setPhase("wizard");
+      setPhase("interview");
     } else if (emptyWanted) {
       const blankState = applyEmptyCampaignHydrate();
       setIntake(blankState.intake);
@@ -234,8 +235,8 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
     if (!hydrated) return;
     if (wantsEmptyCampaign()) return;
     if (!intake.businessName.trim()) return;
-    if (isPediatricDemo(intake)) {
-      setIntake((prev) => relocalizePediatricIntake(prev, locale));
+    if (isPediatricDemo(intake) || isAnyDemoIntake(intake)) {
+      setIntake((prev) => relocalizeCatalogIntake(prev, locale));
     }
   }, [locale, hydrated]);
 
@@ -312,21 +313,22 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
     [intake, locale, t],
   );
 
-  function applyDemo(_idOrSlug: string = "samer") {
+  function applyDemo(idOrSlug: string = "samer") {
     clearEmptyCampaign();
-    const d = applyPediatricDemoDraft(locale);
-    installDemoPack();
+    const d = applyCatalogDemoDraft(idOrSlug, locale) || applyPediatricDemoDraft(locale);
+    installDemoPack(idOrSlug);
     clearPendingDemo();
+    saveDraft({ intake: d, step: 3, phase: "interview" });
     setIntake(d);
     setCustom({
       audience: true,
       problem: true,
       advantage: true,
       goal: false,
-      offer: false,
+      offer: d.offerCustom,
     });
-    setStep(2);
-    setPhase("wizard");
+    setStep(3);
+    setPhase("interview");
     setPack(null);
     setAgentStatus(idleStatus());
   }
@@ -352,8 +354,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
 
   async function startBuild() {
     if (!wizardReady(intake)) return;
-    // Pediatric demo has no published budget/CAC — skip the CMO interview; unknowns stay blank.
-    if (cmoFieldsMissing(intake) && !isPediatricDemo(intake)) {
+    if (cmoFieldsMissing(intake)) {
       setPhase("interview");
       return;
     }
@@ -781,6 +782,30 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
                 intake={intake}
                 onChange={(mediaAssets) => patch({ mediaAssets })}
               />
+              <div className="rounded-2xl border border-teal/20 bg-white p-4">
+                <p className="mb-3 text-sm font-black text-navy">{t("interview.title")}</p>
+                <Field label={isFreeService(intake) ? t("interview.modelFree") : t("interview.model")}>
+                  <Textarea className={intake.businessModel ? "bg-white border-teal/25" : undefined} value={intake.businessModel} onChange={(e) => patch({ businessModel: e.target.value })} />
+                </Field>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {!isFreeService(intake) && (
+                    <>
+                      <Field label={t("interview.aov")}>
+                        <Input className={intake.avgOrderValue ? "bg-white border-teal/25" : undefined} value={intake.avgOrderValue} onChange={(e) => patch({ avgOrderValue: e.target.value })} />
+                      </Field>
+                      <Field label={t("interview.margin")}>
+                        <Input className={intake.marginPercent ? "bg-white border-teal/25" : undefined} value={intake.marginPercent} onChange={(e) => patch({ marginPercent: e.target.value })} />
+                      </Field>
+                      <Field label={t("interview.cac")}>
+                        <Input className={intake.targetCac ? "bg-white border-teal/25" : undefined} value={intake.targetCac} onChange={(e) => patch({ targetCac: e.target.value })} />
+                      </Field>
+                    </>
+                  )}
+                  <Field label={t("interview.budget")}>
+                    <Input className={intake.monthlyBudget ? "bg-white border-teal/25" : undefined} value={intake.monthlyBudget} onChange={(e) => patch({ monthlyBudget: e.target.value })} />
+                  </Field>
+                </div>
+              </div>
               {showsKupaFields(intake) && (
                 <>
               <div>
@@ -929,37 +954,55 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
             <DocumentIngest intake={intake} onApply={applyIngest} variant="compact" />
           </div>
           <h2 className="mb-2 text-2xl font-black">{t("interview.title")}</h2>
-          <p className="mb-6 text-sm text-muted">{t("interview.lead")}</p>
+          {isAnyDemoIntake(intake) && !cmoFieldsMissing(intake) ? (
+            <p className="mb-3 inline-flex rounded-full bg-teal/15 px-3 py-1 text-xs font-black uppercase tracking-wide text-teal">
+              {t("interview.demoBadge")}
+            </p>
+          ) : null}
+          <p className="mb-6 text-sm text-muted">
+            {cmoFieldsMissing(intake) ? t("interview.lead") : t("interview.leadFilled")}
+          </p>
           <Field label={isFreeService(intake) ? t("interview.modelFree") : t("interview.model")}>
-            <Textarea value={intake.businessModel} onChange={(e) => patch({ businessModel: e.target.value })} />
+            <Textarea
+              className={intake.businessModel ? "bg-white border-teal/25" : undefined}
+              value={intake.businessModel}
+              onChange={(e) => patch({ businessModel: e.target.value })}
+            />
           </Field>
           <div className="grid gap-4 sm:grid-cols-2">
             {!isFreeService(intake) && (
               <>
                 <Field label={t("interview.aov")}>
-                  <Input value={intake.avgOrderValue} onChange={(e) => patch({ avgOrderValue: e.target.value })} />
+                  <Input className={intake.avgOrderValue ? "bg-white border-teal/25" : undefined} value={intake.avgOrderValue} onChange={(e) => patch({ avgOrderValue: e.target.value })} />
                 </Field>
                 <Field label={t("interview.margin")}>
-                  <Input value={intake.marginPercent} onChange={(e) => patch({ marginPercent: e.target.value })} />
+                  <Input className={intake.marginPercent ? "bg-white border-teal/25" : undefined} value={intake.marginPercent} onChange={(e) => patch({ marginPercent: e.target.value })} />
                 </Field>
                 <Field label={t("interview.cac")}>
-                  <Input value={intake.targetCac} onChange={(e) => patch({ targetCac: e.target.value })} />
+                  <Input className={intake.targetCac ? "bg-white border-teal/25" : undefined} value={intake.targetCac} onChange={(e) => patch({ targetCac: e.target.value })} />
                 </Field>
               </>
             )}
             <Field label={t("interview.budget")}>
-              <Input value={intake.monthlyBudget} onChange={(e) => patch({ monthlyBudget: e.target.value })} />
+              <Input className={intake.monthlyBudget ? "bg-white border-teal/25" : undefined} value={intake.monthlyBudget} onChange={(e) => patch({ monthlyBudget: e.target.value })} />
             </Field>
           </div>
           <Field label={t("interview.past")}>
-            <Textarea value={intake.pastAds} onChange={(e) => patch({ pastAds: e.target.value })} />
+            <Textarea className={intake.pastAds ? "bg-white border-teal/25" : undefined} value={intake.pastAds} onChange={(e) => patch({ pastAds: e.target.value })} />
           </Field>
           <Field label={t("interview.results")}>
-            <Textarea value={intake.pastResults} onChange={(e) => patch({ pastResults: e.target.value })} />
+            <Textarea className={intake.pastResults ? "bg-white border-teal/25" : undefined} value={intake.pastResults} onChange={(e) => patch({ pastResults: e.target.value })} />
           </Field>
           <Field label={t("interview.failed")}>
-            <Textarea value={intake.whatFailed} onChange={(e) => patch({ whatFailed: e.target.value })} />
+            <Textarea className={intake.whatFailed ? "bg-white border-teal/25" : undefined} value={intake.whatFailed} onChange={(e) => patch({ whatFailed: e.target.value })} />
           </Field>
+          <div className="mt-2">
+            <MediaAssetUploader
+              assets={intake.mediaAssets ?? []}
+              intake={intake}
+              onChange={(mediaAssets) => patch({ mediaAssets })}
+            />
+          </div>
           <div className="mt-6 flex flex-col gap-3">
             <Button type="button" size="lg" onClick={runAgents} disabled={running}>
               {t("cta.next")}
@@ -1072,6 +1115,17 @@ function AgentsPanel({
 
       {pack && (
         <div className="rounded-2xl border border-gold/30 bg-white p-5">
+          {(pack.intake.mediaAssets ?? []).filter((a) => a.kind === "image" && a.publicSrc).length > 0 ? (
+            <div className="mb-4 grid grid-cols-3 gap-2 sm:grid-cols-6">
+              {(pack.intake.mediaAssets ?? [])
+                .filter((a) => a.kind === "image" && a.publicSrc && !/\.svg$/i.test(a.publicSrc))
+                .slice(0, 6)
+                .map((a) => (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img key={a.id} src={a.publicSrc} alt={a.name} className="aspect-square w-full rounded-lg object-cover" />
+                ))}
+            </div>
+          ) : null}
           <p className="mb-4 text-sm text-muted">{pack.diagnosis.summary[locale]}</p>
           <div className="space-y-3">
             {pack.diagnosis.hypotheses.map((h, i) => (
@@ -1088,15 +1142,11 @@ function AgentsPanel({
               </article>
             ))}
           </div>
-          {pack.intakeReport.missing.length > 0 && (
-            <div className="mt-4 rounded-xl border border-gold/30 bg-gold/5 p-3 text-sm text-foreground">
-              {pack.intakeReport.missing.map((m) => (
-                <p key={m.field}>
-                  <strong>{m.label[locale]}:</strong> {m.reason[locale]}
-                </p>
-              ))}
-            </div>
-          )}
+          <DiagnosisGaps
+            report={pack.intakeReport}
+            moves={pack.cmoIdeas?.gapPlan?.moves}
+            locale={locale}
+          />
           {pack.intakeReport.inconsistencies.length > 0 && (
             <div className="mt-3 rounded-xl border border-danger/40 bg-danger/10 p-3 text-sm text-danger">
               {pack.intakeReport.inconsistencies.map((inc, i) => (

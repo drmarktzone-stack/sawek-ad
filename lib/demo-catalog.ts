@@ -1,5 +1,7 @@
 import type { CampaignPack, Intake, Locale } from "./types";
 import { emptyIntake } from "./engine/validate";
+import { applyDemoCmoDesk } from "./demo-cmo";
+import { demoPhotoAssets } from "./demo-assets";
 
 /** Exactly 3 demos: real clinic + two FICTIONAL samples. Never Pizza Hut / Aluf Sport. */
 export const DEMO_ID = "demo-samer-clinic";
@@ -92,10 +94,9 @@ function sandName(locale: Locale): string {
 }
 
 export function oliveKitchenIntake(locale: Locale = "he"): Intake {
-  return {
+  const base: Intake = {
     ...emptyIntake(),
     type: "business",
-    depth: "quick",
     operatingModel: "paid",
     businessName: oliveName(locale),
     category: locale === "ar" ? "مطعم متوسطي" : locale === "en" ? "Mediterranean restaurant" : "מסעדה ים-תיכונית",
@@ -151,14 +152,16 @@ export function oliveKitchenIntake(locale: Locale = "he"): Intake {
         : locale === "en"
           ? "Book a table at Olive Kitchen — Neve Shaked"
           : "הזמינו שולחן במטבח הזית — נווה שקד",
+    mediaAssets: demoPhotoAssets(DEMO_OLIVE_ID),
+    depth: "deep",
   };
+  return applyDemoCmoDesk(base, DEMO_OLIVE_ID, locale);
 }
 
 export function sandBoutiqueIntake(locale: Locale = "he"): Intake {
-  return {
+  const base: Intake = {
     ...emptyIntake(),
     type: "business",
-    depth: "quick",
     operatingModel: "paid",
     businessName: sandName(locale),
     category: locale === "ar" ? "بوتيك أزياء" : locale === "en" ? "Fashion boutique" : "בוטיק אופנה",
@@ -193,10 +196,10 @@ export function sandBoutiqueIntake(locale: Locale = "he"): Intake {
     problemCustom: true,
     uniqueAdvantage:
       locale === "ar"
-        ? "اختيار شخصي هادئ + أقمشة مريحة لإطلالة يومية"
+        ? "علّاقة واحدة دقيقة + استشارة هادئة — ليس كتالوج 40 صنفاً مختلقاً"
         : locale === "en"
-          ? "Calm personal styling + soft fabrics for everyday looks"
-          : "ייעוץ אישי רגוע + בדים נוחים ללוק יומיומי",
+          ? "One precise rack + calm styling — not a catalog of 40 invented items"
+          : "מתלה אחד מדויק + ייעוץ רגוע — לא קטלוג של 40 פריטים מומצאים",
     advantageCustom: true,
     mainGoal: "whatsapp",
     goalCustom: false,
@@ -214,7 +217,10 @@ export function sandBoutiqueIntake(locale: Locale = "he"): Intake {
         : locale === "en"
           ? "Visit Sand Boutique in Ein Barak — WhatsApp for a quick hold"
           : "בקרו בבוטיק חול בעין ברק — וואטסאפ לשמירת פריט",
+    mediaAssets: demoPhotoAssets(DEMO_SAND_ID),
+    depth: "deep",
   };
+  return applyDemoCmoDesk(base, DEMO_SAND_ID, locale);
 }
 
 export function catalogIntake(idOrSlug: string, locale: Locale = "he"): Intake | null {

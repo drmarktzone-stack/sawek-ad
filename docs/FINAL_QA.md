@@ -26,6 +26,6 @@ Fails: 0 · Warns: 0
 - `demo-sand-boutique`: סיפור מתלה אחד · אלגנטיות יומיומית · שמירה בוואטסאפ
 
 ## Notes
-- All three packs rebuilt via engines with CMO ideas + studio still assets. Clinic uses real snapshot facts only.
+- All three packs rebuilt with filled CMO interview desks (sample planning inputs, no fake ROAS) + real JPEG photos + studio stills.
 - New Campaign must not auto-load demos (empty-campaign wipe + demo identity blocklist).
 - Demo UI exposes all three as selectable demos.

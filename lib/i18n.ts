@@ -342,6 +342,26 @@ export const copy: Dict = {
     ar: "تنقص أرقام أو سياق. الوكيل لن يخمن. املأ ما تعرفه واترك الباقي فارغاً.",
     en: "Numbers or context are missing. The agent will not guess. Fill what you have — leave blank if you don’t.",
   },
+  "interview.leadFilled": {
+    he: "שולחן CMO נטען. המספרים מסומנים כדוגמת תכנון — לא כ־ROAS ולא כתוצאות מדידה. אפשר לערוך.",
+    ar: "مكتب CMO محمّل. الأرقام عيّنة تخطيط — ليست ROAS وليست نتائج مقيسة. يمكن التعديل.",
+    en: "CMO desk loaded. Numbers are sample planning inputs — not ROAS and not measured results. You can edit.",
+  },
+  "interview.demoBadge": {
+    he: "הדגמה מלאה — שדות + תמונות",
+    ar: "عرض كامل — حقول + صور",
+    en: "Complete demo — fields + photos",
+  },
+  "diagnosis.gapsFirst": {
+    he: "איך מפצים על מה שחסר — במקום לקלל את השדות",
+    ar: "كيف نعوّض الناقص — بدل توبيخ الحقول",
+    en: "How to compensate for gaps — not a shaming wall",
+  },
+  "diagnosis.missingCompact": {
+    he: "שדות שטרם מולאו (סריקה דקה)",
+    ar: "حقول لم تُملأ بعد (مسح رقيق)",
+    en: "Fields still empty (thin scan)",
+  },
   "interview.model": { he: "מודל עסקי (איך מרוויחים, מה נחשב ליד)", ar: "نموذج العمل", en: "Business model (how you earn, what a lead is)" },
   "interview.aov": { he: "ערך הזמנה / ביקור ממוצע (₪)", ar: "متوسط قيمة الطلب (₪)", en: "Average order / visit value (₪)" },
   "interview.margin": { he: "שולי רווח %", ar: "هامش الربح %", en: "Margin %" },
