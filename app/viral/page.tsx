@@ -55,7 +55,7 @@ export default function ViralPage() {
           {t("cta.new")}
         </Button>
       </div>
-      <ViralDesk pack={pack} packLang={packLang} onPack={setPack} />
+      <ViralDesk key={pack?.id ?? "draft"} pack={pack} packLang={packLang} onPack={setPack} />
     </div>
   );
 }

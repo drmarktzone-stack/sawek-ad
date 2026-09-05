@@ -10,7 +10,7 @@ export default function StudioPage() {
     <DepartmentShell titleKey="nav.studio" leadKey="dept.creativeLead">
       {({ pack, packLang, onPack }) => (
         <>
-          <ViralDesk pack={pack} packLang={packLang} onPack={onPack} embedded />
+          <ViralDesk key={pack.id} pack={pack} packLang={packLang} onPack={onPack} embedded />
           <CreativeDeptView pack={pack} packLang={packLang} onPack={onPack} />
           <ContentStudio embedded />
         </>
