@@ -66,6 +66,8 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=
 
 Gemini 1.5 Pro/Flash are retired on Vertex — the app maps them to **gemini-2.5-pro** / **gemini-2.5-flash**. Status: `/status` and `GET /api/gemini-status`. Check routing with `npm run check:vertex-stack`.
 
+Viral-desk (next PR) should import `@/lib/gcp-ai` only — see `docs/VERTEX_STACK.md`. Hook/retention scores are Gemini Pro **estimates**, never live platform metrics or fake ROAS.
+
 Copy `.env.example` if you want those. The app runs the same without them (localStorage).
 
 ## Demo walkthrough (no typing)
