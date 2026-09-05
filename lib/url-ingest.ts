@@ -924,7 +924,7 @@ function jsonLdImageUrls(nodes: Record<string, unknown>[]): string[] {
   return out;
 }
 
-const TRACKER_IMG = /sprite|favicon|pixel|1x1|tracking|spacer|blank\.gif|data:image\/gif|gravatar|emoji|icon-?\d{2}|woocommerce-placeholder|spinner|loader/i;
+const TRACKER_IMG = /sprite|favicon|pixel|1x1|tracking|spacer|blank\.gif|data:image\/gif|gravatar|emoji|icon-?\d{2}|woocommerce-placeholder|spinner|loader|apple-touch|\/icons?\/|wp-includes\/images|logo-mark/i;
 
 function srcsetLargest(srcset: string, base: string): string {
   let best = "";

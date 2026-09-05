@@ -21,6 +21,7 @@ export function buildSiteAudit(intake: Intake): SiteAudit {
   const strengths: SiteAuditItem[] = [];
   const weaknesses: SiteAuditItem[] = [];
   const photos = (intake.mediaAssets ?? []).filter((m) => m.kind === "image");
+  const heroPhotos = photos.filter((m) => m.label !== "logo");
   const phone = intake.whatsapp.trim();
   const hasWa = Boolean(waMeDigits(phone));
   const loc = intake.location.trim();
@@ -50,12 +51,12 @@ export function buildSiteAudit(intake: Intake): SiteAudit {
       evidence: L("ראיה · שעות קבלה מהאתר — פירוט בכרטיסים", "دليل · ساعات الدوام من الموقع — التفصيل بالبطاقات", "Evidence · clinic hours from the site — details as chips"),
     });
   }
-  if (photos.length) {
+  if (heroPhotos.length) {
     strengths.push({
       id: "photos",
       kind: "strength",
-      label: L(`יש ${photos.length} תמונות מהאתר — אפשר לשים במודעה ובנחיתה`, `في ${photos.length} صور من الموقع — منستعملها بالإعلان والهبوط`, `${photos.length} photos from the site — usable in ads and the landing`),
-      evidence: ev("mediaAssets", String(photos.length)),
+      label: L(`יש ${heroPhotos.length} תמונות מהאתר — אפשר לשים במודעה ובנחיתה`, `في ${heroPhotos.length} صور من الموقع — منستعملها بالإعلان والهبوط`, `${heroPhotos.length} photos from the site — usable in ads and the landing`),
+      evidence: ev("mediaAssets", String(heroPhotos.length)),
     });
   }
   if (!isNoOffer(offer) && !isFreeService(intake)) {
@@ -135,12 +136,22 @@ export function buildSiteAudit(intake: Intake): SiteAudit {
       evidence: ev("offer", offer || "no_offer"),
     });
   }
-  if (!photos.length) {
+  if (!heroPhotos.length) {
     weaknesses.push({
       id: "no-photos",
       kind: "weakness",
-      label: L("אין תמונות מהאתר — אפשר להציע כרזות גרפיות או תמונת AI", "ما في صور من الموقع — فينا نقترح ملصقات غرافيك أو صورة ذكاء اصطناعي", "No photos from the site — offer graphic posters or an AI still"),
-      evidence: ev("mediaAssets", "0"),
+      label: L(
+        photos.length
+          ? "יש לוגו בלבד — חסרה תמונת מקום/מוצר לנושא. מציעים כרזות או תמונת AI לפי התחום."
+          : "אין תמונות מהאתר — אפשר להציע כרזות גרפיות או תמונת AI",
+        photos.length
+          ? "في شعار بس — ناقصة صورة مكان/منتج للموضوع. منقترح ملصقات أو صورة ذكاء حسب المجال."
+          : "ما في صور من الموقع — فينا نقترح ملصقات غرافيك أو صورة ذكاء اصطناعي",
+        photos.length
+          ? "Logo only — missing an on-topic place/product photo. Offering graphics or an AI still for the vertical."
+          : "No photos from the site — offer graphic posters or an AI still",
+      ),
+      evidence: ev("mediaAssets", String(heroPhotos.length)),
     });
   }
   if (!desc || desc.length < 40) {

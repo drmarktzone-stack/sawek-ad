@@ -24,7 +24,7 @@ const POOL_AS_BUSINESS =
   /hydrotherap|הידרותרפ|علاج مائي|בריכה טיפול|בריכה|مسبح|\bpools?\b|רנאן|رنان|\brinan\b/i;
 
 const FOOD_AS_BUSINESS =
-  /restaurant|מסעדה|مطعم|shawarma|شاورما|שוארמה|grill|גריל|غريل|burger|بورجر|برغر|המבורגר|בורגר|همبرغر|dessert|קינוח|حلوي|كباب|kebab|falafel|פלאפל|pizza|פיצה|بيتزا|steak|סטייק|kitchen|مطبخ|cafe|קפה|مقهى|أفندنا|أفندن|افندن|afanden|grill king|مأكول|גלידה|ice cream|حلويات/i;
+  /restaurant|מסעדה|مطعم|מטבח|ים-?תיכון|mediterranean|mezze|מזה|hummus|חומוס|حمص|shawarma|شاورما|שוארמה|grill|גריל|غريل|burger|بورجر|برغر|המבורגר|בורגר|همبرغر|dessert|קינוח|حلوي|كباب|kebab|falafel|פלאפל|pizza|פיצה|بيتزا|steak|סטייק|kitchen|مطبخ|cafe|קפה|مقهى|أفندنا|أفندن|افندن|afanden|grill king|مأكول|גלידה|ice cream|حلويات/i;
 
 const RETAIL_AS_BUSINESS =
   /אופנה|בוטיק|بوتيك|חנות|חנויות|מותגים|עיר המותגים|שופינג|לייף\s*סטייל|ספורט|כושר|הנעלה|ביגוד|fashion|boutique|outlet|\bmall\b|apparel|clothing|retail|lifestyle store|\bshops?\b|brand city|shopping|\bsport\b|fitness|sneakers/i;
@@ -157,32 +157,57 @@ export function crowdFallback(intake: VerticalFacts, locale: Locale): string {
   return locale === "ar" ? "ناس المنطقة" : locale === "he" ? "אנשים מהאזור" : "people nearby";
 }
 
-/** Hunger / delivery / menu angles from real site facts — never «don't know the restaurant» when a name exists. */
+export type FoodFamily = "mediterranean" | "grill" | "pizza" | "cafe" | "generic";
+
+/** Cuisine family from published facts only — never assume pizza. */
+export function foodFamily(facts: VerticalFacts & { uniqueAdvantage?: string; offer?: string }): FoodFamily {
+  const blob = `${facts.businessName ?? ""} ${facts.category ?? ""} ${facts.description ?? ""} ${facts.uniqueAdvantage ?? ""} ${facts.offer ?? ""}`.toLowerCase();
+  if (/פיצה|pizza|بيتزا/.test(blob)) return "pizza";
+  if (/זית|olive|زيتون|hummus|חומוס|حمص|mezze|מזה|ים.?תיכון|mediterranean|levant|שמן זית|زيت زيتون/.test(blob)) {
+    return "mediterranean";
+  }
+  if (/shawarma|شاورما|שוארמה|grill|גריל|غريل|kebab|كباب|כאבאב/.test(blob)) return "grill";
+  if (/cafe|קפה|مقهى|dessert|קינוח|حلوي|גלידה|ice cream/.test(blob)) return "cafe";
+  return "generic";
+}
+
+function foodBlob(intake: Intake): string {
+  return `${intake.businessName} ${intake.category} ${intake.description} ${intake.uniqueAdvantage} ${intake.offer}`.toLowerCase();
+}
+
+/** Hunger / table / menu angles from real site facts — never pizza unless the site said pizza. */
 export function restaurantHungerLine(intake: Intake, locale: Locale): string {
   const name = intake.businessName.trim();
-  const blob = `${name} ${intake.category} ${intake.description} ${intake.uniqueAdvantage} ${intake.offer}`.toLowerCase();
-  const pizza = /פיצה|pizza|بيتزا|hut/.test(blob);
-  const delivery = /משלוח|delivery|توصيل|order online|הזמנ/.test(blob);
-  const menu = /תפריט|menu|قائمة|מבצע|offer|خصم/.test(blob);
+  const blob = foodBlob(intake);
+  const fam = foodFamily(intake);
+  const pizza = fam === "pizza";
+  const delivery = /משלוח|delivery|توصيل|order online/.test(blob);
+  const tasting = /טעימות|tasting|تذوّق|149|זוג/.test(blob);
   if (locale === "he") {
+    if (fam === "mediterranean" && tasting) return name ? `${name} — טעימות לשניים, לא משלוח גנרי` : "טעימות לשניים";
+    if (fam === "mediterranean") return name ? `${name} — שולחן ים-תיכון, לא «אוכל טעים»` : "שולחן ים-תיכון";
     if (pizza && delivery) return name ? `${name} — פיצה ומשלוח כשרעבים` : "פיצה ומשלוח כשרעבים";
     if (pizza) return name ? `${name} — פיצה כשרעבים` : "פיצה כשרעבים";
+    if (fam === "grill") return name ? `${name} — גריל כשרעבים` : "גריל כשרעבים";
     if (delivery) return name ? `${name} — משלוח כשרעבים` : "משלוח כשרעבים";
-    if (menu) return name ? `${name} — מה בתפריט היום` : "מה בתפריט היום";
-    return name ? `${name} — רעבים? בואו היום` : "רעבים? בואו היום";
+    return name ? `${name} — בואו לשולחן היום` : "בואו לשולחן היום";
   }
   if (locale === "ar") {
+    if (fam === "mediterranean" && tasting) return name ? `${name} — تذوّق لاثنين، مش توصيل عام` : "تذوّق لاثنين";
+    if (fam === "mediterranean") return name ? `${name} — طاولة متوسطية، مش «أكل طيب»` : "طاولة متوسطية";
     if (pizza && delivery) return name ? `${name} — بيتزا وتوصيل لما تجوعوا` : "بيتزا وتوصيل لما تجوعوا";
     if (pizza) return name ? `${name} — بيتزا لما تجوعوا` : "بيتزا لما تجوعوا";
+    if (fam === "grill") return name ? `${name} — غريل لما تجوعوا` : "غريل لما تجوعوا";
     if (delivery) return name ? `${name} — توصيل لما تجوعوا` : "توصيل لما تجوعوا";
-    if (menu) return name ? `${name} — شو بالقائمة اليوم` : "شو بالقائمة اليوم";
-    return name ? `${name} — جوعانين؟ تعوا اليوم` : "جوعانين؟ تعوا اليوم";
+    return name ? `${name} — تعوا عالطاولة اليوم` : "تعوا عالطاولة اليوم";
   }
+  if (fam === "mediterranean" && tasting) return name ? `${name} — two-cover tasting, not generic delivery` : "Two-cover tasting";
+  if (fam === "mediterranean") return name ? `${name} — a Mediterranean table, not “tasty food”` : "A Mediterranean table";
   if (pizza && delivery) return name ? `${name} — pizza & delivery when hungry` : "Pizza & delivery when hungry";
   if (pizza) return name ? `${name} — pizza when hungry` : "Pizza when hungry";
+  if (fam === "grill") return name ? `${name} — grill when hungry` : "Grill when hungry";
   if (delivery) return name ? `${name} — delivery when hungry` : "Delivery when hungry";
-  if (menu) return name ? `${name} — what's on the menu today` : "What's on the menu today";
-  return name ? `${name} — hungry? come today` : "Hungry? Come today";
+  return name ? `${name} — come to the table today` : "Come to the table today";
 }
 
 export function painFallback(intake: Intake, locale: Locale): string {

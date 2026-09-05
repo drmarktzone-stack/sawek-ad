@@ -45,7 +45,24 @@ const retailQs = topicQueriesFor({ vertical: "retail", category: "אופנה", q
 if (!retailQs.some((q) => /clothing boutique/i.test(q))) fail(`retail missing boutique: ${retailQs.join(" | ")}`);
 
 const foodQs = topicQueriesFor({ vertical: "restaurant", category: "مطعم شاورما", q: "grill" });
-if (!foodQs.some((q) => /grilled food/i.test(q))) fail(`restaurant missing grilled food: ${foodQs.join(" | ")}`);
+if (!foodQs.some((q) => /grilled food|shawarma grill/i.test(q))) fail(`restaurant missing grilled food: ${foodQs.join(" | ")}`);
+
+const oliveQs = topicQueriesFor({
+  vertical: "restaurant",
+  category: "מטבח ים-תיכוני",
+  q: "שמן זית חומוס ישיבה בחוץ",
+  description: "מנות ביתיות, שמן זית, ישיבה בחוץ",
+});
+if (!oliveQs.some((q) => /hummus|mezze|olive|mediterranean/i.test(q))) {
+  fail(`olive kitchen missing mediterranean queries: ${oliveQs.join(" | ")}`);
+}
+if (oliveQs.some((q) => /pizza/i.test(q))) fail(`olive kitchen leaked pizza query: ${oliveQs.join(" | ")}`);
+if (isOnTopicStock("restaurant", "Pepperoni pizza hut menu", "", "mediterranean")) {
+  fail("pizza marked on-topic for mediterranean cuisine");
+}
+if (!isOnTopicStock("restaurant", "Hummus olive oil bowl", "", "mediterranean")) {
+  fail("hummus not on-topic for mediterranean");
+}
 
 const productQs = topicQueriesFor({ vertical: "product", category: "smart tools", q: "health app" });
 if (!productQs.some((q) => /parent using phone health app/i.test(q))) {

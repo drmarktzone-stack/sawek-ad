@@ -181,6 +181,7 @@ export function ImageOfferPicker({
   useEffect(() => {
     if (!open) return;
     void loadImagen();
+    void loadFreeStock();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, pack.id, pack.intake.category, pack.intake.description, pack.intake.offer]);
 
@@ -202,7 +203,13 @@ export function ImageOfferPicker({
         const urls = [...(data.images ?? [])];
         if (data.ogImage && !urls.includes(data.ogImage)) urls.unshift(data.ogImage);
         if (data.logo && !urls.includes(data.logo)) urls.push(data.logo);
-        const assets = assetsFromPublicUrls(urls, pack.intake.businessName, 16).filter((a) => a.label !== "logo");
+        const assets = assetsFromPublicUrls(urls, pack.intake.businessName, 16).filter((a) => {
+          if (a.label === "logo") return false;
+          const src = a.publicSrc || "";
+          if (/\.svg(\?|$)/i.test(src)) return false;
+          if (/\/icons?\/|apple-touch|favicon|sprite/i.test(src)) return false;
+          return true;
+        });
         if (!cancelled) {
           setSite(
             assets.map((asset, i) => ({
@@ -235,7 +242,9 @@ export function ImageOfferPicker({
         vertical,
         category: pack.intake.category || "",
         location: pack.intake.location || "",
-        q: (pack.intake.description || "").slice(0, 160),
+        q: (pack.intake.description || pack.intake.uniqueAdvantage || "").slice(0, 160),
+        description: (pack.intake.description || "").slice(0, 160),
+        offer: (pack.intake.offer || "").slice(0, 80),
         limit: "24",
         page: "1",
       });
@@ -273,7 +282,9 @@ export function ImageOfferPicker({
     void syncCampaign(next);
   }
 
-  const shown = imagen.length ? [...imagen, ...graphicOpts.slice(0, 4)] : graphicOpts;
+  const shown = imagen.length
+    ? [...imagen, ...graphicOpts.slice(0, 4), ...stock.slice(0, 4)]
+    : [...graphicOpts, ...stock.slice(0, 6)];
   const making = t("audit.makingImages").replace("{vertical}", noun);
   const vertexBusy = t("audit.makingVertex");
 

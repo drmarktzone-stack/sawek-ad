@@ -1,5 +1,5 @@
 import type { Vertical } from "./vertical";
-import { detectVertical } from "./vertical";
+import { detectVertical, foodFamily, type FoodFamily } from "./vertical";
 
 export type StockSource = "openverse" | "wikimedia" | "vertex" | "curated";
 
@@ -70,11 +70,13 @@ const TOPIC_QUERIES: Record<Vertical, string[]> = {
     "boutique dressing room",
   ],
   restaurant: [
-    "grilled food",
-    "restaurant grill",
-    "grilled chicken restaurant",
+    "Mediterranean mezze platter",
+    "hummus olive oil bowl",
+    "outdoor restaurant terrace dusk",
+    "olive oil bread restaurant table",
+    "ceramic plates Mediterranean food",
     "restaurant interior dining",
-    "fresh grilled meat",
+    "Levantine table setting",
   ],
   product: [
     "parent using phone health app",
@@ -103,7 +105,7 @@ const WIKI_CATEGORIES: Record<Vertical, string[]> = {
   clinic: ["Waiting rooms", "Clinics", "Pediatrics"],
   pool: ["Hydrotherapy", "Indoor swimming pools", "Physical therapy"],
   retail: ["Clothing shops", "Boutiques"],
-  restaurant: ["Grilled food", "Restaurants"],
+  restaurant: ["Restaurants", "Meze", "Grilled food"],
   product: ["Smartphones", "Mobile phones"],
   school: ["Classrooms", "Kindergartens"],
   generic: ["Shop interiors", "Storefronts"],
@@ -114,7 +116,7 @@ const TOPIC_NEEDLES: Record<Vertical, RegExp> = {
     /clinic|hospital|pediatric|waiting.?room|waiting area|doctor.?office|medical office|exam(ination)? room|family health|outpatient/i,
   pool: /pool|hydrotherap|swim|rehab|therapy water|aquatic/i,
   retail: /boutique|clothing|apparel|fashion|shop|store|retail|dress|garment|mannequin/i,
-  restaurant: /grill|food|restaurant|chicken|kebab|shawarma|dining|meal|kitchen|burger|plate/i,
+  restaurant: /grill|food|restaurant|chicken|kebab|shawarma|dining|meal|kitchen|burger|plate|hummus|mezze|olive|mediterranean|levant|terrace|ceramic|table/i,
   product: /phone|smartphone|mobile|app|parent|hand|screen|tablet|device/i,
   school: /school|classroom|kindergarten|desk|student|teacher|campus|preschool/i,
   generic: /shop|store|storefront|counter|interior|business|reception|office/i,
@@ -163,6 +165,52 @@ export function resolveStockVertical(input: StockSearchInput): Vertical {
   });
 }
 
+const RESTAURANT_QUERIES: Record<FoodFamily, string[]> = {
+  mediterranean: [
+    "Mediterranean mezze platter",
+    "hummus olive oil bowl",
+    "outdoor restaurant terrace dusk",
+    "olive oil bread restaurant table",
+    "ceramic plates Mediterranean food",
+    "Levantine table setting",
+    "empty outdoor dining table olive tree",
+  ],
+  grill: [
+    "grilled food",
+    "restaurant grill",
+    "grilled chicken restaurant",
+    "fresh grilled meat",
+    "charcoal grill restaurant",
+    "shawarma grill",
+  ],
+  pizza: [
+    "wood fired pizza restaurant",
+    "pizza oven restaurant interior",
+    "neapolitan pizza on ceramic",
+  ],
+  cafe: [
+    "cafe interior table",
+    "coffee shop pastry counter",
+    "empty cafe terrace",
+  ],
+  generic: [
+    "restaurant interior dining",
+    "plated food ceramic restaurant",
+    "neighborhood restaurant table",
+    "grilled food",
+  ],
+};
+
+function resolveFoodFamily(input: StockSearchInput): FoodFamily {
+  return foodFamily({
+    businessName: "",
+    category: input.category ?? "",
+    description: `${input.q ?? ""} ${input.description ?? ""} ${input.offer ?? ""}`,
+    uniqueAdvantage: input.description ?? "",
+    offer: input.offer ?? "",
+  });
+}
+
 function categoryBoosts(category: string, vertical: Vertical): string[] {
   const c = `${category}`.toLowerCase();
   const extra: string[] = [];
@@ -172,6 +220,7 @@ function categoryBoosts(category: string, vertical: Vertical): string[] {
   if (/أسنان|שיניים|dent/.test(c)) extra.push("dental clinic interior");
   if (/شاورما|shawarma|שוארמה/.test(c)) extra.push("shawarma grill");
   if (/برغر|burger|המבורגר/.test(c)) extra.push("burger restaurant");
+  if (/hummus|חומוס|حمص|olive|זית|زيتون/.test(c)) extra.push("hummus olive oil bowl", "Mediterranean mezze platter");
   const latin = latinWords(category);
   if (latin.length >= 4 && !/clalit/i.test(latin)) extra.push(latin);
   return extra;
@@ -181,7 +230,11 @@ function locationBoosts(location: string, vertical: Vertical): string[] {
   const loc = sanitizeStockHint(location);
   if (!loc) return [];
   if (vertical === "clinic") return ["Mediterranean family clinic interior", "community health clinic"];
-  if (vertical === "restaurant") return ["Levant grilled food"];
+  if (vertical === "restaurant") {
+    const fam = resolveFoodFamily({ category: location, q: location, description: location });
+    if (fam === "mediterranean") return ["Levantine outdoor dining", "Mediterranean restaurant terrace"];
+    return ["Levant grilled food"];
+  }
   if (vertical === "pool") return ["indoor therapy pool"];
   if (vertical === "retail") return ["clothing boutique interior"];
   return [];
@@ -190,7 +243,10 @@ function locationBoosts(location: string, vertical: Vertical): string[] {
 /** Public: the English queries we send (Openverse) / wrap (Wikimedia). */
 export function topicQueriesFor(input: StockSearchInput): string[] {
   const vertical = resolveStockVertical(input);
-  const out: string[] = [...TOPIC_QUERIES[vertical]];
+  const fam = vertical === "restaurant" ? resolveFoodFamily(input) : "generic";
+  const base =
+    vertical === "restaurant" ? RESTAURANT_QUERIES[fam] : TOPIC_QUERIES[vertical];
+  const out: string[] = [...base];
   out.push(...categoryBoosts(input.category ?? "", vertical));
   out.push(...locationBoosts(input.location ?? "", vertical));
   const hint = sanitizeStockHint(input.q ?? "");
@@ -262,16 +318,17 @@ const OFF_TOPIC: Record<Vertical, RegExp | null> = {
     /train station|bus station|ferry|airport|railway|metro station|swimsuit|bikini|nude|immigration|behörde|church|cathedral|priest|military|soldier|parking|microscope|rally|rallies|protest|demonstration|city council|town council|\bcouncil\b|politic|election|city hall|legislative|activis|picket|union march|news conference|press conference|capitol|parliament/i,
   pool: /hotel luxury|bikini|swimsuit fashion|beach party|rally|protest|council|politic/i,
   retail: /weapon|ammo|pharmacy|rally|protest|council|politic/i,
-  restaurant: /pet food|dog food|rally|protest|council|politic/i,
+  restaurant: /pet food|dog food|rally|protest|council|politic|pizza hut|pepperoni factory/i,
   product: /landline|rotary phone|payphone|rally|protest|council|politic/i,
   school: /prison|military academy|rally|protest|council|politic/i,
   generic: /rally|rallies|protest|demonstration|city council|politic|election campaign/i,
 };
 
-export function stockRelevance(vertical: Vertical, title: string, extra = ""): number {
+export function stockRelevance(vertical: Vertical, title: string, extra = "", cuisine?: FoodFamily): number {
   const blob = `${title} ${extra}`;
   if (isJunkStockTitle(title, extra)) return -1;
   if (OFF_TOPIC[vertical]?.test(blob)) return -1;
+  if (vertical === "restaurant" && cuisine === "mediterranean" && /pizza|pepperoni|\bhut\b/i.test(blob)) return -1;
   if (!TOPIC_NEEDLES[vertical].test(blob)) return 0;
   let score = 1;
   if (/waiting.?room|clinic interior|doctor.?office|stethoscope|boutique interior|hydrotherapy|grilled|classroom/i.test(blob)) score += 4;
@@ -280,8 +337,8 @@ export function stockRelevance(vertical: Vertical, title: string, extra = ""): n
   return score;
 }
 
-export function isOnTopicStock(vertical: Vertical, title: string, extra = ""): boolean {
-  return stockRelevance(vertical, title, extra) > 0;
+export function isOnTopicStock(vertical: Vertical, title: string, extra = "", cuisine?: FoodFamily): boolean {
+  return stockRelevance(vertical, title, extra, cuisine) > 0;
 }
 
 async function fetchJson(url: string, timeoutMs: number): Promise<unknown | null> {
@@ -339,7 +396,7 @@ function wikiAttribution(info: NonNullable<WikiPage["imageinfo"]>[0]): { attribu
   return { attribution: clip(`${who} · ${license}`, 160), license };
 }
 
-function fromWikiPage(page: WikiPage, query: string, vertical: Vertical): StockImage | null {
+function fromWikiPage(page: WikiPage, query: string, vertical: Vertical, cuisine?: FoodFamily): StockImage | null {
   const info = page.imageinfo?.[0];
   if (!info) return null;
   const mime = String(info.mime ?? "");
@@ -350,7 +407,7 @@ function fromWikiPage(page: WikiPage, query: string, vertical: Vertical): StockI
   if ((info.width ?? 0) > 0 && (info.width ?? 0) < 600) return null;
   const title = String(page.title ?? "").replace(/^File:/i, "");
   const desc = stripHtml(String(info.extmetadata?.ImageDescription?.value ?? ""));
-  if (stockRelevance(vertical, title, desc) <= 0) return null;
+  if (stockRelevance(vertical, title, desc, cuisine) <= 0) return null;
   const { attribution, license } = wikiAttribution(info);
   const id = `wiki-${page.pageid || normUrl(full).slice(-24)}`;
   return {
@@ -366,7 +423,7 @@ function fromWikiPage(page: WikiPage, query: string, vertical: Vertical): StockI
   };
 }
 
-async function wikiSearch(topic: string, limit: number, offset: number, vertical: Vertical): Promise<StockImage[]> {
+async function wikiSearch(topic: string, limit: number, offset: number, vertical: Vertical, cuisine?: FoodFamily): Promise<StockImage[]> {
   const params = new URLSearchParams({
     action: "query",
     generator: "search",
@@ -385,13 +442,13 @@ async function wikiSearch(topic: string, limit: number, offset: number, vertical
   const pages = (json as { query?: { pages?: Record<string, WikiPage> } }).query?.pages ?? {};
   const out: StockImage[] = [];
   for (const page of Object.values(pages)) {
-    const hit = fromWikiPage(page, topic, vertical);
+    const hit = fromWikiPage(page, topic, vertical, cuisine);
     if (hit) out.push(hit);
   }
   return out;
 }
 
-async function wikiCategory(cat: string, limit: number, vertical: Vertical): Promise<StockImage[]> {
+async function wikiCategory(cat: string, limit: number, vertical: Vertical, cuisine?: FoodFamily): Promise<StockImage[]> {
   const params = new URLSearchParams({
     action: "query",
     generator: "categorymembers",
@@ -409,7 +466,7 @@ async function wikiCategory(cat: string, limit: number, vertical: Vertical): Pro
   const pages = (json as { query?: { pages?: Record<string, WikiPage> } }).query?.pages ?? {};
   const out: StockImage[] = [];
   for (const page of Object.values(pages)) {
-    const hit = fromWikiPage(page, `category:${cat}`, vertical);
+    const hit = fromWikiPage(page, `category:${cat}`, vertical, cuisine);
     if (hit) out.push(hit);
   }
   return out;
@@ -429,7 +486,7 @@ type OvHit = {
   tags?: Array<{ name?: string } | string>;
 };
 
-async function openverseSearch(topic: string, page: number, vertical: Vertical): Promise<StockImage[]> {
+async function openverseSearch(topic: string, page: number, vertical: Vertical, cuisine?: FoodFamily): Promise<StockImage[]> {
   const params = new URLSearchParams({
     q: clip(topic, 180),
     page: String(Math.max(1, page)),
@@ -453,7 +510,7 @@ async function openverseSearch(topic: string, page: number, vertical: Vertical):
       .map((t) => (typeof t === "string" ? t : String(t?.name ?? "")))
       .join(" ");
     const extra = `${row.category ?? ""} ${tags} ${row.creator ?? ""}`;
-    if (!isOnTopicStock(vertical, title, extra)) continue;
+    if (!isOnTopicStock(vertical, title, extra, cuisine)) continue;
     const license = clip(String(row.license ?? "CC"), 40);
     const creator = clip(String(row.creator ?? "Openverse"), 80);
     out.push({
@@ -565,6 +622,7 @@ export async function curatedFallbackStills(input: StockSearchInput, max = 8): P
 
 export async function searchStockImages(input: StockSearchInput): Promise<StockSearchResult> {
   const vertical = resolveStockVertical(input);
+  const cuisine = vertical === "restaurant" ? resolveFoodFamily(input) : undefined;
   const queries = topicQueriesFor(input);
   const page = Math.max(1, Math.min(8, Math.floor(Number(input.page) || 1)));
   const limit = Math.max(24, Math.min(60, Math.floor(Number(input.limit) || 48)));
@@ -575,17 +633,17 @@ export async function searchStockImages(input: StockSearchInput): Promise<StockS
   const ovSlice = queries.slice(0, page === 1 ? 4 : 2);
 
   const [wikiHits, catHits, ovHits] = await Promise.all([
-    mapPool(searchSlice, 4, (q) => wikiSearch(q, 16, offset, vertical)),
-    mapPool(catSlice, 3, (c) => wikiCategory(c, 12, vertical)),
-    mapPool(ovSlice, 2, (q) => openverseSearch(q, page, vertical)),
+    mapPool(searchSlice, 4, (q) => wikiSearch(q, 16, offset, vertical, cuisine)),
+    mapPool(catSlice, 3, (c) => wikiCategory(c, 12, vertical, cuisine)),
+    mapPool(ovSlice, 2, (q) => openverseSearch(q, page, vertical, cuisine)),
   ]);
 
   const merged = dedupe([...wikiHits.flat(), ...catHits.flat(), ...ovHits.flat()])
-    .filter((img) => isOnTopicStock(vertical, img.title, img.attribution))
+    .filter((img) => isOnTopicStock(vertical, img.title, img.attribution, cuisine))
     .sort((a, b) => {
       // Score title+attribution only — never the search query (it always matches needles).
-      const sb = stockRelevance(vertical, b.title, b.attribution);
-      const sa = stockRelevance(vertical, a.title, a.attribution);
+      const sb = stockRelevance(vertical, b.title, b.attribution, cuisine);
+      const sa = stockRelevance(vertical, a.title, a.attribution, cuisine);
       return sb - sa;
     });
   const images = merged.slice(0, limit);

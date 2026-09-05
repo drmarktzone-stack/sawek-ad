@@ -156,18 +156,45 @@ export function HomeStudio() {
         <h2 className="agency-display text-center text-3xl sm:text-4xl">{t("home.vs.title")}</h2>
         <ul className="mt-6 grid gap-4 md:grid-cols-3">
           <li className="agency-shell p-5 text-start">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">Canva</p>
-            <p className="mt-3 text-base text-navy">{t("home.vs.canva")}</p>
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">{t("home.vs.ordinaryName")}</p>
+            <p className="mt-3 text-base text-navy">{t("home.vs.ordinary")}</p>
           </li>
           <li className="agency-shell p-5 text-start">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">AdCreative · Predis</p>
-            <p className="mt-3 text-base text-navy">{t("home.vs.adcreative")}</p>
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">{t("home.vs.toolsName")}</p>
+            <p className="mt-3 text-base text-navy">{t("home.vs.canva")}</p>
           </li>
           <li className="agency-shell border-teal/40 p-5 text-start ring-1 ring-teal/25">
             <p className="text-xs font-black uppercase tracking-[0.18em] text-teal">SAWEK</p>
             <p className="mt-3 text-base font-semibold text-navy">{t("home.vs.sawek")}</p>
           </li>
         </ul>
+        <div className="agency-shell mt-6 overflow-hidden p-0">
+          <table className="w-full text-start text-sm">
+            <thead>
+              <tr className="border-b border-navy/10 bg-[#F7F3EA] text-[11px] font-black uppercase tracking-wide text-navy/70">
+                <th className="px-4 py-3" />
+                <th className="px-4 py-3">{t("home.vs.ordinaryName")}</th>
+                <th className="px-4 py-3 text-teal">SAWEK</th>
+              </tr>
+            </thead>
+            <tbody className="text-navy">
+              {(
+                [
+                  ["home.vs.rowIdea", "home.vs.rowOrdinaryIdea", "home.vs.rowSawekIdea"],
+                  ["home.vs.rowScore", "home.vs.rowOrdinaryScore", "home.vs.rowSawekScore"],
+                  ["home.vs.rowGaps", "home.vs.rowOrdinaryGaps", "home.vs.rowSawekGaps"],
+                  ["home.vs.rowLang", "home.vs.rowOrdinaryLang", "home.vs.rowSawekLang"],
+                ] as const
+              ).map(([row, ordinary, sawek]) => (
+                <tr key={row} className="border-b border-navy/8 last:border-0">
+                  <td className="px-4 py-3 font-black">{t(row)}</td>
+                  <td className="px-4 py-3 text-navy/75">{t(ordinary)}</td>
+                  <td className="px-4 py-3 font-semibold">{t(sawek)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </section>
 
       <section className="relative mx-auto mt-12 max-w-5xl px-4">

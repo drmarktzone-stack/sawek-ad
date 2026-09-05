@@ -72,6 +72,7 @@ if (/VIP|ROAS|4\.9/.test(blob)) fail(`retail produceAd invented claim: ${blob}`)
 const hooks = hooksFor("retail", "he", store);
 if (!hooks.length) fail("retail hooks empty");
 if (hooks.some((h) => /VIP|ROAS|4\.9/.test(h))) fail("hooks invented ratings");
+if (hooks.every((h) => h === store.businessName || h.length < 8)) fail("retail hooks still generic name-only");
 const noSale = layoutsFor("retail", "facebook", false);
 if (noSale.some((l) => l.sale)) fail("sale layouts shown with no offer");
 if (LAYOUT_THUMBS.length !== 6) fail(`LAYOUT_THUMBS ${LAYOUT_THUMBS.length} != 6`);

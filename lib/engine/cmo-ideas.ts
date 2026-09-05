@@ -23,7 +23,7 @@ export type {
   CmoIdeasPack,
 } from "../types";
 import { filled } from "../utils";
-import { detectVertical, type Vertical } from "../vertical";
+import { detectVertical, foodFamily, type Vertical } from "../vertical";
 import { isNoOffer } from "../no-offer";
 import { isFreeService } from "../operating-model";
 
@@ -497,6 +497,79 @@ const SCHOOL_PLATFORMS: PlatformSeed[] = [
   },
 ];
 
+const PRODUCT_PLATFORMS: PlatformSeed[] = [
+  {
+    id: "pain_from_page",
+    name: L("כאב מהדף", "ألم من الصفحة", "Pain from the page"),
+    hook: L("רק הכאב שחולץ מהאתר — לא כאב סוכנות", "بس الألم المستخرج من الموقع — مش ألم وكالة", "Only pain extracted from the site — not agency pain"),
+    arc: L("כאב → מנגנון → CTA", "ألم → آلية → CTA", "Pain → mechanism → CTA"),
+    platform: L("פלטפורמת כאב-חולץ", "منصة ألم مستخرج", "Extracted-pain platform"),
+    why: L("שומרת על חדות בלי תבניות SaaS גנריות", "تحافظ على الحدة بلا قوالب SaaS عامة", "Keeps sharpness without generic SaaS templates"),
+    needs: ["problem"],
+  },
+  {
+    id: "mechanism_not_slogan",
+    name: L("מנגנון לא סלוגן", "آلية مش شعار", "Mechanism, not slogan"),
+    hook: L("היתרון שחולץ הוא המנגנון", "الميزة المستخرجة هي الآلية", "The extracted advantage is the mechanism"),
+    arc: L("מנגנון → משמעות → אתר", "آلية → معنى → موقع", "Mechanism → meaning → site"),
+    platform: L("פלטפורמת מנגנון", "منصة آلية", "Mechanism platform"),
+    why: L("מחדדת בידול ממה שסופק בלבד", "توضّح التميّز مما أُعطي فقط", "Sharpens differentiation from supplied facts only"),
+    needs: ["advantage"],
+  },
+  {
+    id: "no_price_theatre",
+    name: L("בלי תיאטרון מחיר", "بلا مسرح سعر", "No price theatre"),
+    hook: L("אין מחיר באתר? אין ₪ במודעה", "ما في سعر بالموقع؟ بلا ₪ بالإعلان", "No price on the site? No ₪ in the ad"),
+    arc: L("יושרה → יתרון → CTA", "صدق → ميزة → CTA", "Integrity → advantage → CTA"),
+    platform: L("פלטפורמת הצעה-או-יושרה", "منصة عرض أو صدق", "Offer-or-integrity platform"),
+    why: L("מונעת המצאת תמחור", "تمنع اختراع تسعير", "Prevents invented pricing"),
+  },
+  {
+    id: "device_still",
+    name: L("פריים מכשיר", "فريمة جهاز", "Device still"),
+    hook: L("לצלם מכשיר/שולחן — לא פנים מזוהות", "صوروا جهاز/مكتب — مش وجوه معروفة", "Film a device/desk — never identifiable faces"),
+    arc: L("פריים → כאב → CTA", "فريمة → ألم → CTA", "Frame → pain → CTA"),
+    platform: L("פלטפורמת ויז'ואל-מוצר", "منصة بصري المنتج", "Product-visual platform"),
+    why: L("מגשרת על פערי תמונה בלי לייקים", "تسد فجوة الصورة بلا إعجابات", "Bridges photo gaps without likes"),
+    needs: ["advantage"],
+  },
+  {
+    id: "site_as_cta",
+    name: L("האתר כ-CTA", "الموقع هو النداء", "Site as CTA"),
+    hook: L("הערוץ שסופק הוא האתר — לא טיקטוק מדומה", "القناة المعطاة هي الموقع — مش تيك توك مختلق", "The stated channel is the site — no invented TikTok"),
+    arc: L("הוק → יתרון → אתר", "خطاف → ميزة → موقع", "Hook → advantage → site"),
+    platform: L("פלטפורמת ערוץ-מוצהר", "منصة قناة مصرّح بها", "Declared-channel platform"),
+    why: L("מיישרת מדיה לערוץ שצוין", "توائم الميديا مع القناة المذكورة", "Fits media to the named channel"),
+    needs: ["advantage"],
+  },
+  {
+    id: "audience_as_written",
+    name: L("קהל כמו שנכתב", "جمهور كما كُتب", "Audience as written"),
+    hook: L("בלי «25–34» אם לא נכתב", "بلا «25–34» إن ما انكتب", "No “25–34” unless written"),
+    arc: L("קהל → כאב → פעולה", "جمهور → ألم → فعل", "Audience → pain → action"),
+    platform: L("פלטפורמת קהל-כנה", "منصة جمهور صادق", "Honest-audience platform"),
+    why: L("מכבדת קליטה בלי פרסונות בדויות", "تحترم البيانات بلا شخصيات مختلقة", "Respects intake without invented personas"),
+    needs: ["audience", "problem"],
+  },
+  {
+    id: "gap_as_brief_product",
+    name: L("הפער כבריף מוצר", "الفجوة كملخص منتج", "Gap as product brief"),
+    hook: L("מה שחסר = רשימת צילום, לא ניחוש מדדים", "الناقص = قائمة تصوير، مش تخمين مقاييس", "What’s missing = a shoot list, not metric guessing"),
+    arc: L("פער → מה לצלם → זווית", "فجوة → ماذا تصوّروا → زاوية", "Gap → what to film → angle"),
+    platform: L("פלטפורמת בריף-פערים", "منصة ملخص الفجوات", "Gap-brief platform"),
+    why: L("הופכת חוסרים לפעולות הפקה", "تحوّل النواقص لأفعال إنتاج", "Turns gaps into production moves"),
+  },
+  {
+    id: "no_roas_product",
+    name: L("בלי תיאטרון ROAS", "بلا مسرح ROAS", "No ROAS theatre"),
+    hook: L("אין תקציב/CAC? אין תחזית", "ما في ميزانية/CAC؟ بلا توقّع", "No budget/CAC? No forecast"),
+    arc: L("יושרה → מסר → CTA", "صدق → رسالة → CTA", "Integrity → message → CTA"),
+    platform: L("פלטפורמת אנטי-מדדים", "منصة ضد المقاييس المختلقة", "Anti-invented-metrics platform"),
+    why: L("כרטיס תכנון במקום ROAS בדוי", "بطاقة تخطيط بدل ROAS مختلق", "A planning card instead of fake ROAS"),
+    needs: ["problem"],
+  },
+];
+
 const GENERIC_PLATFORMS: PlatformSeed[] = [
   {
     id: "fact_first_spine",
@@ -575,7 +648,22 @@ function platformsFor(v: Vertical): PlatformSeed[] {
   if (v === "retail") return RETAIL_PLATFORMS;
   if (v === "pool") return POOL_PLATFORMS;
   if (v === "school") return SCHOOL_PLATFORMS;
+  if (v === "product") return PRODUCT_PLATFORMS;
   return GENERIC_PLATFORMS;
+}
+
+function cuisineBias(seed: PlatformSeed, intake: Intake): number {
+  if (detectVertical(intake) !== "restaurant") return 0;
+  const fam = foodFamily(intake);
+  const olive = /olive|hummus|ceramic|table_ritual|mediterranean|square_neighbor|two_cover|tasting/.test(seed.id);
+  const grill = /grill|steam|queue/.test(seed.id);
+  if (fam === "mediterranean" && olive) return 28;
+  if (fam === "mediterranean" && grill) return -8;
+  if (fam === "grill" && grill) return 22;
+  if (fam === "grill" && olive) return -12;
+  if (fam === "pizza" && olive) return -30;
+  if (fam === "pizza" && /grill|booking|steam/.test(seed.id)) return 18;
+  return 0;
 }
 
 function hasOffer(intake: Intake): boolean {
@@ -804,33 +892,21 @@ export function gapCompensation(intake: Intake): CmoGapPlan {
             ? "לצלם: מתלה/בד/חלון ראווה ריק; פלטת חול-פשתן."
             : v === "clinic"
               ? "לצלם: חדר המתנה ריק/חזית/שעות על הדלת — בלי פני ילדים."
-              : v === "pool"
-                ? "לצלם: מים ריקים/קצה בריכה/שעות על הדלת — בלי פני ילדים בטיפול."
-                : v === "school"
-                  ? "לצלם: חצר/אולם ריקים/שילוט הרשמה — בלי פני תלמידים מזוהים."
-                  : "לצלם מקום ריק + מערכת גרפית אנטי-גנרית לפי הקטגוריה.",
+              : "לצלם מקום ריק + מערכת גרפית אנטי-גנרית לפי הקטגוריה.",
         v === "restaurant"
           ? "صوّروا: بخار/صحون/طاولة برا فاضية؛ نظام زيتون-رمل."
           : v === "retail"
             ? "صوّروا: سكة/قماش/واجهة فاضية؛ لوحة رمل-كتان."
             : v === "clinic"
               ? "صوّروا: غرفة انتظار فاضية/واجهة/ساعات على الباب — بلا وجوه أطفال."
-              : v === "pool"
-                ? "صوّروا: مي فاضية/حافة مسبح/ساعات على الباب — بلا وجوه أطفال بعلاج."
-                : v === "school"
-                  ? "صوّروا: ساحة/قاعة فاضية/يافطة تسجيل — بلا وجوه طلاب معروفة."
-                  : "صوّروا مكاناً فارغاً + نظام غرافيك غير عام حسب الفئة.",
+              : "صوّروا مكاناً فارغاً + نظام غرافيك غير عام حسب الفئة.",
         v === "restaurant"
           ? "Film: steam/ceramics/empty outdoor table; olive-sand graphic system."
           : v === "retail"
             ? "Film: rail/fabric/empty vitrine; sand-linen palette."
             : v === "clinic"
               ? "Film: empty waiting room/facade/hours on the door — no children’s faces."
-              : v === "pool"
-                ? "Film: empty water/pool edge/hours on the door — no children’s faces in care."
-                : v === "school"
-                  ? "Film: empty yard/hall/enrollment signage — no identifiable student faces."
-                  : "Film empty place + anti-generic graphic system for the category.",
+              : "Film empty place + anti-generic graphic system for the category.",
       ),
     );
   }
@@ -891,7 +967,7 @@ export function pickIdeas(intake: Intake, _locale: Locale = "he"): CmoIdea[] {
   const seeds = platformsFor(v);
   const flags = factFlags(intake);
   const ranked = [...seeds]
-    .map((s) => ({ s, fit: seedFit(s, flags), salt: hashSalt(s.id + (intake.businessName || "")) }))
+    .map((s) => ({ s, fit: seedFit(s, flags) + cuisineBias(s, intake), salt: hashSalt(s.id + (intake.businessName || "")) }))
     .sort((a, b) => b.fit - a.fit || a.salt - b.salt);
 
   const picked: PlatformSeed[] = [];

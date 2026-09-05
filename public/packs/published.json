@@ -1,8 +1,8 @@
 [
   {
     "id": "demo-samer-clinic",
-    "createdAt": "2026-09-05T07:06:29.303Z",
-    "updatedAt": "2026-09-05T07:06:29.303Z",
+    "createdAt": "2026-09-05T08:21:17.248Z",
+    "updatedAt": "2026-09-05T08:21:17.248Z",
     "name": "ד\"ר סאמר מחמד אבו מוך",
     "intake": {
       "type": "business",
@@ -38,47 +38,47 @@
       "whatFailed": "",
       "mediaAssets": [
         {
-          "id": "9ad9b001-c76e-4fcc-a9f1-ae8c4a04567f",
+          "id": "e1b49e5f-89d1-402e-97b7-e715c57bd5ff",
           "kind": "image",
           "mime": "image/svg+xml",
           "name": "Sunlit waiting room",
           "size": 2118,
           "label": "exterior",
           "note": "offer:studio:studio-clinic-waiting-sun",
-          "createdAt": "2026-09-05T07:06:29.293Z",
+          "createdAt": "2026-09-05T08:21:17.239Z",
           "publicSrc": "/packs/assets/demo-samer-clinic/still-1.svg"
         },
         {
-          "id": "5dd1ef08-17c3-4ec0-8a88-4c1bf8f865fb",
+          "id": "515b5df9-8f30-4eff-b291-5021bee2d4cf",
           "kind": "image",
           "mime": "image/svg+xml",
           "name": "Mediterranean facade",
           "size": 1115,
           "label": "interior",
           "note": "offer:studio:studio-clinic-facade",
-          "createdAt": "2026-09-05T07:06:29.293Z",
+          "createdAt": "2026-09-05T08:21:17.239Z",
           "publicSrc": "/packs/assets/demo-samer-clinic/still-2.svg"
         },
         {
-          "id": "ff3e4487-f1be-4b98-80a3-34ec1da7d1a1",
+          "id": "6de8967b-f343-4164-8503-90fe7bb787fd",
           "kind": "image",
           "mime": "image/svg+xml",
           "name": "Olive courtyard",
           "size": 789,
           "label": "interior",
           "note": "offer:studio:studio-clinic-courtyard",
-          "createdAt": "2026-09-05T07:06:29.293Z",
+          "createdAt": "2026-09-05T08:21:17.239Z",
           "publicSrc": "/packs/assets/demo-samer-clinic/still-3.svg"
         },
         {
-          "id": "1a6c5aa9-599f-41bb-8880-dc9405c6c07f",
+          "id": "7d1043bf-1369-406c-993a-9431338fa04c",
           "kind": "image",
           "mime": "image/svg+xml",
           "name": "Warm reception",
           "size": 1036,
           "label": "interior",
           "note": "offer:studio:studio-clinic-reception",
-          "createdAt": "2026-09-05T07:06:29.293Z",
+          "createdAt": "2026-09-05T08:21:17.239Z",
           "publicSrc": "/packs/assets/demo-samer-clinic/still-4.svg"
         }
       ],
@@ -280,7 +280,7 @@
         }
       ],
       "approved": true,
-      "approvedAt": "2026-09-05T07:06:29.296Z"
+      "approvedAt": "2026-09-05T08:21:17.242Z"
     },
     "variants": [
       {
@@ -309,7 +309,7 @@
         "locale": "he",
         "cta": "הגיעו למרפאה",
         "headline": "ד\"ר סאמר מחמד אבו מוך במתחם אל-נור, קומה 1",
-        "primaryText": "וואטסאפ רך — כשיש מספר — הופכים אותו למסלול ברור בלי להמציא זמני מענה\n\nד\"ר סאמר מחמד אבו מוך — קבלה לפי סדר הגעה, בלי תור מראש.\n\nמקום: מתחם אל-נור, קומה 1.\n\nשעות: ראשון 08:00 - 13:00 / 16:00 - 19:30 · שני 08:00 - 13:00 / 16:00 - 19:30 · שלישי 08:00 - 13:30 / סגור (ייעוץ וואטסאפ) · רביעי 08:00 - 13:00 / 16:00 - 19:30 · חמישי 08:00 - 13:00 / 16:00 - 19:30 · שישי 08:00 - 12:30 / סופ״ש · שבת חירום ובירורים טלפוניים לרשומים / סגור\nוואטסאפ 052-8885800 (לא לחירום).\nhttps://drsamerped.ai.studio"
+        "primaryText": "וואטסאפ רך — כשיש מספר — הופכים אותו למסלול ברור בלי להמציא זמני מענה\n\nשקט באותו יום\n\nד\"ר סאמר מחמד אבו מוך — קבלה לפי סדר הגעה, בלי תור מראש.\n\nמקום: מתחם אל-נור, קומה 1.\n\nשעות: ראשון 08:00 - 13:00 / 16:00 - 19:30 · שני 08:00 - 13:00 / 16:00 - 19:30 · שלישי 08:00 - 13:30 / סגור (ייעוץ וואטסאפ) · רביעי 08:00 - 13:00 / 16:00 - 19:30 · חמישי 08:00 - 13:00 / 16:00 - 19:30 · שישי 08:00 - 12:30 / סופ״ש · שבת חירום ובירורים טלפוניים לרשומים / סגור\nוואטסאפ 052-8885800 (לא לחירום).\nhttps://drsamerped.ai.studio"
       },
       {
         "kind": "direct_sales",
@@ -351,7 +351,7 @@
         "locale": "ar",
         "cta": "جيبوه عالعيادة",
         "headline": "الولد مريض، جيبوه عالعيادة",
-        "primaryText": "واتساب لطيف — لما في رقم — مسار واضح بلا اختراع زمن رد\n\nד\"ר סאמר מחמד אבו מוך بباقة — جت أولاً بدون مواعيد.\n\nالمكان: مجمع النور، طابق 1.\n\nالدوام: الأحد 08:00 - 13:00 / 16:00 - 19:30 · الإثنين 08:00 - 13:00 / 16:00 - 19:30 · الثلاثاء 08:00 - 13:30 / مغلق (استشارات واتساب) · الأربعاء 08:00 - 13:00 / 16:00 - 19:30 · الخميس 08:00 - 13:00 / 16:00 - 19:30 · الجمعة 08:00 - 12:30 / عطلة نهاية الأسبوع · السبت طوارئ واستفسارات هاتفية للمسجلين / مغلق\nواتساب 052-8885800 (مش للطوارئ).\nhttps://drsamerped.ai.studio"
+        "primaryText": "واتساب لطيف — لما في رقم — مسار واضح بلا اختراع زمن رد\n\nهدوء بنفس اليوم\n\nד\"ר סאמר מחמד אבו מוך بباقة — جت أولاً بدون مواعيد.\n\nالمكان: مجمع النور، طابق 1.\n\nالدوام: الأحد 08:00 - 13:00 / 16:00 - 19:30 · الإثنين 08:00 - 13:00 / 16:00 - 19:30 · الثلاثاء 08:00 - 13:30 / مغلق (استشارات واتساب) · الأربعاء 08:00 - 13:00 / 16:00 - 19:30 · الخميس 08:00 - 13:00 / 16:00 - 19:30 · الجمعة 08:00 - 12:30 / عطلة نهاية الأسبوع · السبت طوارئ واستفسارات هاتفية للمسجلين / مغلق\nواتساب 052-8885800 (مش للطوارئ).\nhttps://drsamerped.ai.studio"
       },
       {
         "kind": "direct_sales",
@@ -393,7 +393,7 @@
         "locale": "en",
         "cta": "Come to the clinic",
         "headline": "Dr. Samer Abu Mokh at Al-Nour, 1st floor",
-        "primaryText": "Soft WhatsApp lane — When a number exists, make a clear lane — never invent reply-time SLAs\n\nDr. Samer Abu Mokh — walk-in, first come first served.\n\nPlace: Al-Nour, 1st floor.\n\nHours: Sun 08:00 - 13:00 / 16:00 - 19:30 · Mon 08:00 - 13:00 / 16:00 - 19:30 · Tue 08:00 - 13:30 / closed (WhatsApp consults) · Wed 08:00 - 13:00 / 16:00 - 19:30 · Thu 08:00 - 13:00 / 16:00 - 19:30 · Fri 08:00 - 12:30 / weekend · Sat emergency / phone questions for registered families / closed\nWhatsApp 052-8885800 (not for emergencies).\nhttps://drsamerped.ai.studio"
+        "primaryText": "Soft WhatsApp lane — When a number exists, make a clear lane — never invent reply-time SLAs\n\nsame-day calm\n\nDr. Samer Abu Mokh — walk-in, first come first served.\n\nPlace: Al-Nour, 1st floor.\n\nHours: Sun 08:00 - 13:00 / 16:00 - 19:30 · Mon 08:00 - 13:00 / 16:00 - 19:30 · Tue 08:00 - 13:30 / closed (WhatsApp consults) · Wed 08:00 - 13:00 / 16:00 - 19:30 · Thu 08:00 - 13:00 / 16:00 - 19:30 · Fri 08:00 - 12:30 / weekend · Sat emergency / phone questions for registered families / closed\nWhatsApp 052-8885800 (not for emergencies).\nhttps://drsamerped.ai.studio"
       },
       {
         "kind": "direct_sales",
@@ -1342,9 +1342,9 @@
       ],
       "anglesUsed": [
         {
-          "he": "אמון",
-          "ar": "ثقة",
-          "en": "trust"
+          "he": "שקט באותו יום",
+          "ar": "هدوء بنفس اليوم",
+          "en": "same-day calm"
         },
         {
           "he": "הגיעו למרפאה",
@@ -1352,9 +1352,9 @@
           "en": "Come to the clinic"
         },
         {
-          "he": "ד\"ר סאמר מחמד אבו מוך",
-          "ar": "ד\"ר סאמר מחמד אבו מוך",
-          "en": "ד\"ר סאמר מחמד אבו מוך"
+          "he": "ד\"ר סאמר מחמד אבו מוך — כשהילד חולה, לא סלוגן רפואי.",
+          "ar": "ד\"ר סאמר מחמד אבו מוך — لما الولد مريض، مش شعار طبي.",
+          "en": "ד\"ר סאמר מחמד אבו מוך — when the child is sick, not a medical slogan."
         },
         {
           "he": "תחום: clinic. ציון שלמות קליטה: 100/100.",
@@ -2949,7 +2949,7 @@
             "format": "ad-narrative",
             "locale": "he",
             "title": "ד\"ר סאמר מחמד אבו מוך במתחם אל-נור, קומה 1",
-            "body": "וואטסאפ רך — כשיש מספר — הופכים אותו למסלול ברור בלי להמציא זמני מענה\n\nד\"ר סאמר מחמד אבו מוך — קבלה לפי סדר הגעה, בלי תור מראש.\n\nמקום: מתחם אל-נור, קומה 1.\n\nשעות: ראשון 08:00 - 13:00 / 16:00 - 19:30 · שני 08:00 - 13:00 / 16:00 - 19:30 · שלישי 08:00 - 13:30 / סגור (ייעוץ וואטסאפ) · רביעי 08:00 - 13:00 / 16:00 - 19:30 · חמישי 08:00 - 13:00 / 16:00 - 19:30 · שישי 08:00 - 12:30 / סופ״ש · שבת חירום ובירורים טלפוניים לרשומים / סגור\nוואטסאפ 052-8885800 (לא לחירום).\nhttps://drsamerped.ai.studio\nCTA: הגיעו למרפאה"
+            "body": "וואטסאפ רך — כשיש מספר — הופכים אותו למסלול ברור בלי להמציא זמני מענה\n\nשקט באותו יום\n\nד\"ר סאמר מחמד אבו מוך — קבלה לפי סדר הגעה, בלי תור מראש.\n\nמקום: מתחם אל-נור, קומה 1.\n\nשעות: ראשון 08:00 - 13:00 / 16:00 - 19:30 · שני 08:00 - 13:00 / 16:00 - 19:30 · שלישי 08:00 - 13:30 / סגור (ייעוץ וואטסאפ) · רביעי 08:00 - 13:00 / 16:00 - 19:30 · חמישי 08:00 - 13:00 / 16:00 - 19:30 · שישי 08:00 - 12:30 / סופ״ש · שבת חירום ובירורים טלפוניים לרשומים / סגור\nוואטסאפ 052-8885800 (לא לחירום).\nhttps://drsamerped.ai.studio\nCTA: הגיעו למרפאה"
           },
           {
             "format": "ad-direct_sales",
@@ -2985,7 +2985,7 @@
             "format": "ad-narrative",
             "locale": "ar",
             "title": "الولد مريض، جيبوه عالعيادة",
-            "body": "واتساب لطيف — لما في رقم — مسار واضح بلا اختراع زمن رد\n\nד\"ר סאמר מחמד אבו מוך بباقة — جت أولاً بدون مواعيد.\n\nالمكان: مجمع النور، طابق 1.\n\nالدوام: الأحد 08:00 - 13:00 / 16:00 - 19:30 · الإثنين 08:00 - 13:00 / 16:00 - 19:30 · الثلاثاء 08:00 - 13:30 / مغلق (استشارات واتساب) · الأربعاء 08:00 - 13:00 / 16:00 - 19:30 · الخميس 08:00 - 13:00 / 16:00 - 19:30 · الجمعة 08:00 - 12:30 / عطلة نهاية الأسبوع · السبت طوارئ واستفسارات هاتفية للمسجلين / مغلق\nواتساب 052-8885800 (مش للطوارئ).\nhttps://drsamerped.ai.studio\nCTA: جيبوه عالعيادة"
+            "body": "واتساب لطيف — لما في رقم — مسار واضح بلا اختراع زمن رد\n\nهدوء بنفس اليوم\n\nד\"ר סאמר מחמד אבו מוך بباقة — جت أولاً بدون مواعيد.\n\nالمكان: مجمع النور، طابق 1.\n\nالدوام: الأحد 08:00 - 13:00 / 16:00 - 19:30 · الإثنين 08:00 - 13:00 / 16:00 - 19:30 · الثلاثاء 08:00 - 13:30 / مغلق (استشارات واتساب) · الأربعاء 08:00 - 13:00 / 16:00 - 19:30 · الخميس 08:00 - 13:00 / 16:00 - 19:30 · الجمعة 08:00 - 12:30 / عطلة نهاية الأسبوع · السبت طوارئ واستفسارات هاتفية للمسجلين / مغلق\nواتساب 052-8885800 (مش للطوارئ).\nhttps://drsamerped.ai.studio\nCTA: جيبوه عالعيادة"
           },
           {
             "format": "ad-direct_sales",
@@ -3021,7 +3021,7 @@
             "format": "ad-narrative",
             "locale": "en",
             "title": "Dr. Samer Abu Mokh at Al-Nour, 1st floor",
-            "body": "Soft WhatsApp lane — When a number exists, make a clear lane — never invent reply-time SLAs\n\nDr. Samer Abu Mokh — walk-in, first come first served.\n\nPlace: Al-Nour, 1st floor.\n\nHours: Sun 08:00 - 13:00 / 16:00 - 19:30 · Mon 08:00 - 13:00 / 16:00 - 19:30 · Tue 08:00 - 13:30 / closed (WhatsApp consults) · Wed 08:00 - 13:00 / 16:00 - 19:30 · Thu 08:00 - 13:00 / 16:00 - 19:30 · Fri 08:00 - 12:30 / weekend · Sat emergency / phone questions for registered families / closed\nWhatsApp 052-8885800 (not for emergencies).\nhttps://drsamerped.ai.studio\nCTA: Come to the clinic"
+            "body": "Soft WhatsApp lane — When a number exists, make a clear lane — never invent reply-time SLAs\n\nsame-day calm\n\nDr. Samer Abu Mokh — walk-in, first come first served.\n\nPlace: Al-Nour, 1st floor.\n\nHours: Sun 08:00 - 13:00 / 16:00 - 19:30 · Mon 08:00 - 13:00 / 16:00 - 19:30 · Tue 08:00 - 13:30 / closed (WhatsApp consults) · Wed 08:00 - 13:00 / 16:00 - 19:30 · Thu 08:00 - 13:00 / 16:00 - 19:30 · Fri 08:00 - 12:30 / weekend · Sat emergency / phone questions for registered families / closed\nWhatsApp 052-8885800 (not for emergencies).\nhttps://drsamerped.ai.studio\nCTA: Come to the clinic"
           },
           {
             "format": "ad-direct_sales",
@@ -3355,8 +3355,8 @@
   },
   {
     "id": "demo-olive-kitchen",
-    "createdAt": "2026-09-05T07:06:29.312Z",
-    "updatedAt": "2026-09-05T07:06:29.312Z",
+    "createdAt": "2026-09-05T08:21:17.257Z",
+    "updatedAt": "2026-09-05T08:21:17.257Z",
     "name": "מטבח הזית",
     "intake": {
       "type": "business",
@@ -3392,47 +3392,47 @@
       "whatFailed": "",
       "mediaAssets": [
         {
-          "id": "1c3bd4e5-73e2-4a96-8871-f29fc42bd2cf",
+          "id": "a4724646-e6e1-4edd-9967-525fe917bd65",
           "kind": "image",
           "mime": "image/svg+xml",
           "name": "Plated dish",
           "size": 485,
           "label": "exterior",
           "note": "offer:studio:studio-restaurant-plated",
-          "createdAt": "2026-09-05T07:06:29.309Z",
+          "createdAt": "2026-09-05T08:21:17.252Z",
           "publicSrc": "/packs/assets/demo-olive-kitchen/still-1.svg"
         },
         {
-          "id": "4246b711-f93d-4605-8c43-4507849a204f",
+          "id": "4f147bf3-d62b-4d10-92cf-2e2e133ce36e",
           "kind": "image",
           "mime": "image/svg+xml",
           "name": "Grill glow",
           "size": 819,
           "label": "interior",
           "note": "offer:studio:studio-restaurant-grill",
-          "createdAt": "2026-09-05T07:06:29.309Z",
+          "createdAt": "2026-09-05T08:21:17.252Z",
           "publicSrc": "/packs/assets/demo-olive-kitchen/still-2.svg"
         },
         {
-          "id": "463fa8ab-ef3f-4b21-91e2-842a27c5191e",
+          "id": "49bbbf44-452a-4a79-8ff5-dac5cebd7fb7",
           "kind": "image",
           "mime": "image/svg+xml",
           "name": "Table setting",
           "size": 593,
           "label": "interior",
           "note": "offer:studio:studio-restaurant-table",
-          "createdAt": "2026-09-05T07:06:29.309Z",
+          "createdAt": "2026-09-05T08:21:17.252Z",
           "publicSrc": "/packs/assets/demo-olive-kitchen/still-3.svg"
         },
         {
-          "id": "81159415-709e-4ac4-97cb-ecb05bfae2c2",
+          "id": "76863b02-43a3-4366-8afd-8e4d820f0eab",
           "kind": "image",
           "mime": "image/svg+xml",
           "name": "Courtyard table",
           "size": 789,
           "label": "interior",
           "note": "offer:studio:studio-restaurant-courtyard",
-          "createdAt": "2026-09-05T07:06:29.309Z",
+          "createdAt": "2026-09-05T08:21:17.252Z",
           "publicSrc": "/packs/assets/demo-olive-kitchen/still-4.svg"
         }
       ],
@@ -3621,7 +3621,7 @@
         }
       ],
       "approved": true,
-      "approvedAt": "2026-09-05T07:06:29.309Z"
+      "approvedAt": "2026-09-05T08:21:17.253Z"
     },
     "variants": [
       {
@@ -3642,15 +3642,15 @@
         "kind": "emotional",
         "locale": "he",
         "cta": "הזמינו בטלפון",
-        "headline": "מטבח הזית — משלוח כשרעבים",
-        "primaryText": "מטבח הזית — משלוח כשרעבים\n\nמטבח הזית · נווה שקד (עיירה.\n\nשעות: א׳–ה׳ 12:00–22:00 · ו׳ 12:00–15:00 · ש׳ סגור\nוואטסאפ 052-7001234.\nארוחת טעימות זוגית ב-₪149 בהזמנה מראש"
+        "headline": "מטבח הזית — טעימות לשניים, לא משלוח גנרי",
+        "primaryText": "מטבח הזית — טעימות לשניים, לא משלוח גנרי\n\nמטבח הזית · נווה שקד (עיירה.\n\nשעות: א׳–ה׳ 12:00–22:00 · ו׳ 12:00–15:00 · ש׳ סגור\nוואטסאפ 052-7001234.\nארוחת טעימות זוגית ב-₪149 בהזמנה מראש"
       },
       {
         "kind": "narrative",
         "locale": "he",
         "cta": "הזמינו בטלפון",
         "headline": "מטבח הזית בנווה שקד (עיירה",
-        "primaryText": "טעימות לשניים — כשיש מחיר אמיתי בהצעה — מובילים בו בלי להמציא ROAS\n\nמטבח הזית · נווה שקד (עיירה.\n\nמקום: נווה שקד (עיירה.\n\nשעות: א׳–ה׳ 12:00–22:00 · ו׳ 12:00–15:00 · ש׳ סגור\nוואטסאפ 052-7001234.\nארוחת טעימות זוגית ב-₪149 בהזמנה מראש"
+        "primaryText": "טעימות לשניים — כשיש מחיר אמיתי בהצעה — מובילים בו בלי להמציא ROAS\n\nטקס שולחן ים-תיכון\n\nמטבח הזית · נווה שקד (עיירה.\n\nמקום: נווה שקד (עיירה.\n\nשעות: א׳–ה׳ 12:00–22:00 · ו׳ 12:00–15:00 · ש׳ סגור\nוואטסאפ 052-7001234.\nארוחת טעימות זוגית ב-₪149 בהזמנה מראש"
       },
       {
         "kind": "direct_sales",
@@ -3684,15 +3684,15 @@
         "kind": "emotional",
         "locale": "ar",
         "cta": "اطلبوا عالهاتف",
-        "headline": "מטבח הזית — توصيل لما تجوعوا",
-        "primaryText": "מטבח הזית — توصيل لما تجوعوا — مش إعلان عام.\n\nמטבח הזית — נווה שקד (עיירה.\n\nالدوام: א׳–ה׳ 12:00–22:00 · ו׳ 12:00–15:00 · ש׳ סגור\nواتساب 052-7001234.\nארוחת טעימות זוגית ב-₪149 בהזמנה מראש"
+        "headline": "מטבח הזית — تذوّق لاثنين، مش توصيل عام",
+        "primaryText": "מטבח הזית — تذوّق لاثنين، مش توصيل عام — مش إعلان عام.\n\nמטבח הזית — נווה שקד (עיירה.\n\nالدوام: א׳–ה׳ 12:00–22:00 · ו׳ 12:00–15:00 · ש׳ סגור\nواتساب 052-7001234.\nארוחת טעימות זוגית ב-₪149 בהזמנה מראש"
       },
       {
         "kind": "narrative",
         "locale": "ar",
         "cta": "اطلبوا عالهاتف",
         "headline": "מטבח הזית",
-        "primaryText": "تذوّق لاثنين — لما في سعر حقيقي بالعرض — نقوده بلا اختراع ROAS\n\nמטבח הזית — נווה שקד (עיירה.\n\nالمكان: נווה שקד (עיירה.\n\nالدوام: א׳–ה׳ 12:00–22:00 · ו׳ 12:00–15:00 · ש׳ סגור\nواتساب 052-7001234.\nארוחת טעימות זוגית ב-₪149 בהזמנה מראש"
+        "primaryText": "تذوّق لاثنين — لما في سعر حقيقي بالعرض — نقوده بلا اختراع ROAS\n\nطقس طاولة متوسطية\n\nמטבח הזית — נווה שקד (עיירה.\n\nالمكان: נווה שקד (עיירה.\n\nالدوام: א׳–ה׳ 12:00–22:00 · ו׳ 12:00–15:00 · ש׳ סגור\nواتساب 052-7001234.\nארוחת טעימות זוגית ב-₪149 בהזמנה מראש"
       },
       {
         "kind": "direct_sales",
@@ -3726,15 +3726,15 @@
         "kind": "emotional",
         "locale": "en",
         "cta": "Order by phone",
-        "headline": "מטבח הזית — delivery when hungry",
-        "primaryText": "מטבח הזית — delivery when hungry\n\nמטבח הזית · נווה שקד (עיירה.\n\nHours: א׳–ה׳ 12:00–22:00 · ו׳ 12:00–15:00 · ש׳ סגור\nWhatsApp 052-7001234.\nארוחת טעימות זוגית ב-₪149 בהזמנה מראש"
+        "headline": "מטבח הזית",
+        "primaryText": "מטבח הזית — two-cover tasting, not generic delivery\n\nמטבח הזית · נווה שקד (עיירה.\n\nHours: א׳–ה׳ 12:00–22:00 · ו׳ 12:00–15:00 · ש׳ סגור\nWhatsApp 052-7001234.\nארוחת טעימות זוגית ב-₪149 בהזמנה מראש"
       },
       {
         "kind": "narrative",
         "locale": "en",
         "cta": "Order by phone",
         "headline": "מטבח הזית at נווה שקד (עיירה",
-        "primaryText": "Two-cover tasting — When the offer has a real price, lead with it — never invent ROAS\n\nמטבח הזית · נווה שקד (עיירה.\n\nPlace: נווה שקד (עיירה.\n\nHours: א׳–ה׳ 12:00–22:00 · ו׳ 12:00–15:00 · ש׳ סגור\nWhatsApp 052-7001234.\nארוחת טעימות זוגית ב-₪149 בהזמנה מראש"
+        "primaryText": "Two-cover tasting — When the offer has a real price, lead with it — never invent ROAS\n\nMediterranean table ritual\n\nמטבח הזית · נווה שקד (עיירה.\n\nPlace: נווה שקד (עיירה.\n\nHours: א׳–ה׳ 12:00–22:00 · ו׳ 12:00–15:00 · ש׳ סגור\nWhatsApp 052-7001234.\nארוחת טעימות זוגית ב-₪149 בהזמנה מראש"
       },
       {
         "kind": "direct_sales",
@@ -4609,19 +4609,19 @@
       ],
       "anglesUsed": [
         {
-          "he": "רעב ומשלוח",
-          "ar": "جوع وتوصيل",
-          "en": "hunger & delivery"
+          "he": "טקס שולחן ים-תיכון",
+          "ar": "طقس طاولة متوسطية",
+          "en": "Mediterranean table ritual"
         },
         {
-          "he": "תפריט היום",
-          "ar": "قائمة اليوم",
-          "en": "today's menu"
+          "he": "טעימות לשניים במחיר שסופק",
+          "ar": "تذوّق لاثنين بالسعر المعطى",
+          "en": "two-cover tasting at the stated price"
         },
         {
-          "he": "הזמינו עכשיו",
-          "ar": "اطلبوا الآن",
-          "en": "Order now"
+          "he": "הזמינו שולחן",
+          "ar": "احجزوا طاولة",
+          "en": "Book a table"
         },
         {
           "he": "תחום: restaurant. ציון שלמות קליטה: 100/100.",
@@ -5053,107 +5053,6 @@
           "planningScore": 89
         },
         {
-          "id": "family_middle_table",
-          "name": {
-            "he": "שולחן משפחה באמצע",
-            "ar": "طاولة عيلة بالنص",
-            "en": "Family middle table"
-          },
-          "whyItWins": {
-            "he": "מתאימה לקהל שסופק בלי פרסונות דמוגרפיות בדויות",
-            "ar": "تناسب الجمهور المعطى بلا شخصيات ديموغرافية مختلقة",
-            "en": "Fits the stated audience without invented demographic personas"
-          },
-          "hook": {
-            "he": "קהל משפחות מקומי — בלי להמציא גילאי ילדים",
-            "ar": "جمهور عائلات محلي — بلا اختراع أعمار أطفال",
-            "en": "Local families audience — no invented kids’ ages"
-          },
-          "narrativeArc": {
-            "he": "משפחה רעבה → מנות לשיתוף → הזמנה",
-            "ar": "عيلة جعانة → أطباق للمشاركة → حجز",
-            "en": "Hungry family → share plates → book"
-          },
-          "platform": {
-            "he": "פלטפורמת שולחן-אמצע",
-            "ar": "منصة طاولة الوسط",
-            "en": "Middle-table platform"
-          },
-          "scorecard": [
-            {
-              "id": "message_clarity",
-              "label": {
-                "he": "בהירות מסר (תכנון 1–100)",
-                "ar": "وضوح الرسالة (تخطيط 1–100)",
-                "en": "Message clarity (planning 1–100)"
-              },
-              "score": 94,
-              "note": {
-                "he": "מסר נשען על בעיה+יתרון שסופקו.",
-                "ar": "الرسالة تعتمد على مشكلة+ميزة معطاتين.",
-                "en": "Message rests on stated problem+advantage."
-              }
-            },
-            {
-              "id": "offer_clarity",
-              "label": {
-                "he": "בהירות הצעה (תכנון 1–100)",
-                "ar": "وضوح العرض (تخطيط 1–100)",
-                "en": "Offer clarity (planning 1–100)"
-              },
-              "score": 88,
-              "note": {
-                "he": "הצעה מהקליטה — לא הומצאה.",
-                "ar": "عرض من البيانات — غير مختلق.",
-                "en": "Offer from intake — not invented."
-              }
-            },
-            {
-              "id": "proof_gaps",
-              "label": {
-                "he": "פערי הוכחה (תכנון 1–100 — גבוה = פחות פער)",
-                "ar": "فجوات الإثبات (تخطيط 1–100 — أعلى = فجوة أقل)",
-                "en": "Proof gaps (planning 1–100 — higher = fewer gaps)"
-              },
-              "score": 92,
-              "note": {
-                "he": "יש 4 נכסי תמונה — עדיין בלי דירוגים מומצאים.",
-                "ar": "هناك 4 أصول صورة — بلا تقييمات مختلقة.",
-                "en": "4 image assets — still no invented ratings."
-              }
-            },
-            {
-              "id": "channel_fit",
-              "label": {
-                "he": "התאמת ערוץ (תכנון 1–100)",
-                "ar": "ملاءمة القناة (تخطيط 1–100)",
-                "en": "Channel fit (planning 1–100)"
-              },
-              "score": 85,
-              "note": {
-                "he": "וואטסאפ מסופק — מתאים ל-CTA מסר.",
-                "ar": "واتساب موجود — مناسب لـ CTA رسالة.",
-                "en": "WhatsApp present — fits message CTA."
-              }
-            },
-            {
-              "id": "creative_variety",
-              "label": {
-                "he": "גיוון קריאייטיב (תכנון 1–100)",
-                "ar": "تنوّع الإبداع (تخطيط 1–100)",
-                "en": "Creative variety (planning 1–100)"
-              },
-              "score": 84,
-              "note": {
-                "he": "גיוון מתוכנן לפי זוויות הרעיון — לא לפי ROAS מדומה.",
-                "ar": "تنوّع مخطّط حسب زوايا الفكرة — لا حسب ROAS مختلق.",
-                "en": "Variety planned from idea angles — not from fake ROAS."
-              }
-            }
-          ],
-          "planningScore": 89
-        },
-        {
           "id": "square_neighbor",
           "name": {
             "he": "שכן הכיכר",
@@ -5253,6 +5152,107 @@
             }
           ],
           "planningScore": 89
+        },
+        {
+          "id": "ceramic_system",
+          "name": {
+            "he": "מערכת קרמיקה",
+            "ar": "نظام صحون",
+            "en": "Ceramic system"
+          },
+          "whyItWins": {
+            "he": "מגדירה שפה ויזואלית ייחודית כשיש פער בתמונות",
+            "ar": "تحدد لغة بصرية فريدة عند نقص الصور",
+            "en": "Defines a distinctive visual language when photos are thin"
+          },
+          "hook": {
+            "he": "גרפיקה: קרמיקה חמה + ירוק זית — לא תבנית סוכנות אדומה",
+            "ar": "غرافيك: صحون دافئة + أخضر زيتون — مش قالب وكالة أحمر",
+            "en": "Graphics: warm ceramics + olive green — not red-agency templates"
+          },
+          "narrativeArc": {
+            "he": "פלטה צבע → מנה → טקסט עובדה",
+            "ar": "لوحة لون → طبق → نص حقيقة",
+            "en": "Color plate → dish → fact text"
+          },
+          "platform": {
+            "he": "פלטפורמת מערכת-גרפית",
+            "ar": "منصة نظام غرافيك",
+            "en": "Graphic-system platform"
+          },
+          "scorecard": [
+            {
+              "id": "message_clarity",
+              "label": {
+                "he": "בהירות מסר (תכנון 1–100)",
+                "ar": "وضوح الرسالة (تخطيط 1–100)",
+                "en": "Message clarity (planning 1–100)"
+              },
+              "score": 94,
+              "note": {
+                "he": "מסר נשען על בעיה+יתרון שסופקו.",
+                "ar": "الرسالة تعتمد على مشكلة+ميزة معطاتين.",
+                "en": "Message rests on stated problem+advantage."
+              }
+            },
+            {
+              "id": "offer_clarity",
+              "label": {
+                "he": "בהירות הצעה (תכנון 1–100)",
+                "ar": "وضوح العرض (تخطيط 1–100)",
+                "en": "Offer clarity (planning 1–100)"
+              },
+              "score": 88,
+              "note": {
+                "he": "הצעה מהקליטה — לא הומצאה.",
+                "ar": "عرض من البيانات — غير مختلق.",
+                "en": "Offer from intake — not invented."
+              }
+            },
+            {
+              "id": "proof_gaps",
+              "label": {
+                "he": "פערי הוכחה (תכנון 1–100 — גבוה = פחות פער)",
+                "ar": "فجوات الإثبات (تخطيط 1–100 — أعلى = فجوة أقل)",
+                "en": "Proof gaps (planning 1–100 — higher = fewer gaps)"
+              },
+              "score": 92,
+              "note": {
+                "he": "יש 4 נכסי תמונה — עדיין בלי דירוגים מומצאים.",
+                "ar": "هناك 4 أصول صورة — بلا تقييمات مختلقة.",
+                "en": "4 image assets — still no invented ratings."
+              }
+            },
+            {
+              "id": "channel_fit",
+              "label": {
+                "he": "התאמת ערוץ (תכנון 1–100)",
+                "ar": "ملاءمة القناة (تخطيط 1–100)",
+                "en": "Channel fit (planning 1–100)"
+              },
+              "score": 85,
+              "note": {
+                "he": "וואטסאפ מסופק — מתאים ל-CTA מסר.",
+                "ar": "واتساب موجود — مناسب لـ CTA رسالة.",
+                "en": "WhatsApp present — fits message CTA."
+              }
+            },
+            {
+              "id": "creative_variety",
+              "label": {
+                "he": "גיוון קריאייטיב (תכנון 1–100)",
+                "ar": "تنوّع الإبداع (تخطيط 1–100)",
+                "en": "Creative variety (planning 1–100)"
+              },
+              "score": 92,
+              "note": {
+                "he": "גיוון מתוכנן לפי זוויות הרעיון — לא לפי ROAS מדומה.",
+                "ar": "تنوّع مخطّط حسب زوايا الفكرة — لا حسب ROAS مختلق.",
+                "en": "Variety planned from idea angles — not from fake ROAS."
+              }
+            }
+          ],
+          "planningScore": 90
         }
       ],
       "gapPlan": {
@@ -5615,27 +5615,27 @@
           {
             "week": 4,
             "theme": {
-              "he": "זווית אחת מנצחת לפי פניות · רעיון: שולחן משפחה באמצע (תכנון 89/100)",
-              "ar": "زاوية واحدة وفق الطلبات · فكرة: طاولة عيلة بالنص (تخطيط 89/100)",
-              "en": "One winning angle by enquiries · Idea: Family middle table (planning 89/100)"
-            },
-            "action": {
-              "he": "שבוע 4: מטבח הזית · whatsapp. מתאימה לקהל שסופק בלי פרסונות דמוגרפיות בדויות בלי «חודש ויראלי» כתחזית. לא ROAS.",
-              "ar": "أسبوع 4: מטבח הזית · whatsapp. تناسب الجمهور المعطى بلا شخصيات ديموغرافية مختلقة بلا ROAS.",
-              "en": "Week 4: מטבח הזית · whatsapp. Fits the stated audience without invented demographic personas No “viral month” forecast. Not ROAS."
-            }
-          },
-          {
-            "week": 5,
-            "theme": {
               "he": "זווית אחת מנצחת לפי פניות · רעיון: שכן הכיכר (תכנון 89/100)",
               "ar": "زاوية واحدة وفق الطلبات · فكرة: جار الساحة (تخطيط 89/100)",
               "en": "One winning angle by enquiries · Idea: Square neighbor (planning 89/100)"
             },
             "action": {
-              "he": "שבוע 5: מטבח הזית · whatsapp. הופכת את הכתובת הבדיונית/האמיתית לזהות מקום חדה בלי «חודש ויראלי» כתחזית. לא ROAS.",
-              "ar": "أسبوع 5: מטבח הזית · whatsapp. تحوّل العنوان لهوية مكان حادة بلا ROAS.",
-              "en": "Week 5: מטבח הזית · whatsapp. Turns the address into a sharp place identity No “viral month” forecast. Not ROAS."
+              "he": "שבוע 4: מטבח הזית · whatsapp. הופכת את הכתובת הבדיונית/האמיתית לזהות מקום חדה בלי «חודש ויראלי» כתחזית. לא ROAS.",
+              "ar": "أسبوع 4: מטבח הזית · whatsapp. تحوّل العنوان لهوية مكان حادة بلا ROAS.",
+              "en": "Week 4: מטבח הזית · whatsapp. Turns the address into a sharp place identity No “viral month” forecast. Not ROAS."
+            }
+          },
+          {
+            "week": 5,
+            "theme": {
+              "he": "זווית אחת מנצחת לפי פניות · רעיון: מערכת קרמיקה (תכנון 90/100)",
+              "ar": "زاوية واحدة وفق الطلبات · فكرة: نظام صحون (تخطيط 90/100)",
+              "en": "One winning angle by enquiries · Idea: Ceramic system (planning 90/100)"
+            },
+            "action": {
+              "he": "שבוע 5: מטבח הזית · whatsapp. מגדירה שפה ויזואלית ייחודית כשיש פער בתמונות בלי «חודש ויראלי» כתחזית. לא ROAS.",
+              "ar": "أسبوع 5: מטבח הזית · whatsapp. تحدد لغة بصرية فريدة عند نقص الصور بلا ROAS.",
+              "en": "Week 5: מטבח הזית · whatsapp. Defines a distinctive visual language when photos are thin No “viral month” forecast. Not ROAS."
             }
           },
           {
@@ -5680,27 +5680,27 @@
           {
             "week": 9,
             "theme": {
-              "he": "תוכן אורגני + רימרקטינג זהיר · רעיון: שולחן משפחה באמצע (תכנון 89/100)",
-              "ar": "محتوى عضوي + إعادة استهداف حذرة · فكرة: طاولة عيلة بالنص (تخطيط 89/100)",
-              "en": "Organic + careful remarketing · Idea: Family middle table (planning 89/100)"
-            },
-            "action": {
-              "he": "שבוע 9: מטבח הזית · whatsapp. מתאימה לקהל שסופק בלי פרסונות דמוגרפיות בדויות בלי «חודש ויראלי» כתחזית. לא ROAS.",
-              "ar": "أسبوع 9: מטבח הזית · whatsapp. تناسب الجمهور المعطى بلا شخصيات ديموغرافية مختلقة بلا ROAS.",
-              "en": "Week 9: מטבח הזית · whatsapp. Fits the stated audience without invented demographic personas No “viral month” forecast. Not ROAS."
-            }
-          },
-          {
-            "week": 10,
-            "theme": {
               "he": "תוכן אורגני + רימרקטינג זהיר · רעיון: שכן הכיכר (תכנון 89/100)",
               "ar": "محتوى عضوي + إعادة استهداف حذرة · فكرة: جار الساحة (تخطيط 89/100)",
               "en": "Organic + careful remarketing · Idea: Square neighbor (planning 89/100)"
             },
             "action": {
-              "he": "שבוע 10: מטבח הזית · whatsapp. הופכת את הכתובת הבדיונית/האמיתית לזהות מקום חדה בלי «חודש ויראלי» כתחזית. לא ROAS.",
-              "ar": "أسبوع 10: מטבח הזית · whatsapp. تحوّل العنوان لهوية مكان حادة بلا ROAS.",
-              "en": "Week 10: מטבח הזית · whatsapp. Turns the address into a sharp place identity No “viral month” forecast. Not ROAS."
+              "he": "שבוע 9: מטבח הזית · whatsapp. הופכת את הכתובת הבדיונית/האמיתית לזהות מקום חדה בלי «חודש ויראלי» כתחזית. לא ROAS.",
+              "ar": "أسبوع 9: מטבח הזית · whatsapp. تحوّل العنوان لهوية مكان حادة بلا ROAS.",
+              "en": "Week 9: מטבח הזית · whatsapp. Turns the address into a sharp place identity No “viral month” forecast. Not ROAS."
+            }
+          },
+          {
+            "week": 10,
+            "theme": {
+              "he": "תוכן אורגני + רימרקטינג זהיר · רעיון: מערכת קרמיקה (תכנון 90/100)",
+              "ar": "محتوى عضوي + إعادة استهداف حذرة · فكرة: نظام صحون (تخطيط 90/100)",
+              "en": "Organic + careful remarketing · Idea: Ceramic system (planning 90/100)"
+            },
+            "action": {
+              "he": "שבוע 10: מטבח הזית · whatsapp. מגדירה שפה ויזואלית ייחודית כשיש פער בתמונות בלי «חודש ויראלי» כתחזית. לא ROAS.",
+              "ar": "أسبوع 10: מטבח הזית · whatsapp. تحدد لغة بصرية فريدة عند نقص الصور بلا ROAS.",
+              "en": "Week 10: מטבח הזית · whatsapp. Defines a distinctive visual language when photos are thin No “viral month” forecast. Not ROAS."
             }
           },
           {
@@ -6223,14 +6223,14 @@
           {
             "format": "ad-emotional",
             "locale": "he",
-            "title": "מטבח הזית — משלוח כשרעבים",
-            "body": "מטבח הזית — משלוח כשרעבים\n\nמטבח הזית · נווה שקד (עיירה.\n\nשעות: א׳–ה׳ 12:00–22:00 · ו׳ 12:00–15:00 · ש׳ סגור\nוואטסאפ 052-7001234.\nארוחת טעימות זוגית ב-₪149 בהזמנה מראש\nCTA: הזמינו בטלפון"
+            "title": "מטבח הזית — טעימות לשניים, לא משלוח גנרי",
+            "body": "מטבח הזית — טעימות לשניים, לא משלוח גנרי\n\nמטבח הזית · נווה שקד (עיירה.\n\nשעות: א׳–ה׳ 12:00–22:00 · ו׳ 12:00–15:00 · ש׳ סגור\nוואטסאפ 052-7001234.\nארוחת טעימות זוגית ב-₪149 בהזמנה מראש\nCTA: הזמינו בטלפון"
           },
           {
             "format": "ad-narrative",
             "locale": "he",
             "title": "מטבח הזית בנווה שקד (עיירה",
-            "body": "טעימות לשניים — כשיש מחיר אמיתי בהצעה — מובילים בו בלי להמציא ROAS\n\nמטבח הזית · נווה שקד (עיירה.\n\nמקום: נווה שקד (עיירה.\n\nשעות: א׳–ה׳ 12:00–22:00 · ו׳ 12:00–15:00 · ש׳ סגור\nוואטסאפ 052-7001234.\nארוחת טעימות זוגית ב-₪149 בהזמנה מראש\nCTA: הזמינו בטלפון"
+            "body": "טעימות לשניים — כשיש מחיר אמיתי בהצעה — מובילים בו בלי להמציא ROAS\n\nטקס שולחן ים-תיכון\n\nמטבח הזית · נווה שקד (עיירה.\n\nמקום: נווה שקד (עיירה.\n\nשעות: א׳–ה׳ 12:00–22:00 · ו׳ 12:00–15:00 · ש׳ סגור\nוואטסאפ 052-7001234.\nארוחת טעימות זוגית ב-₪149 בהזמנה מראש\nCTA: הזמינו בטלפון"
           },
           {
             "format": "ad-direct_sales",
@@ -6259,14 +6259,14 @@
           {
             "format": "ad-emotional",
             "locale": "ar",
-            "title": "מטבח הזית — توصيل لما تجوعوا",
-            "body": "מטבח הזית — توصيل لما تجوعوا — مش إعلان عام.\n\nמטבח הזית — נווה שקד (עיירה.\n\nالدوام: א׳–ה׳ 12:00–22:00 · ו׳ 12:00–15:00 · ש׳ סגור\nواتساب 052-7001234.\nארוחת טעימות זוגית ב-₪149 בהזמנה מראש\nCTA: اطلبوا عالهاتف"
+            "title": "מטבח הזית — تذوّق لاثنين، مش توصيل عام",
+            "body": "מטבח הזית — تذوّق لاثنين، مش توصيل عام — مش إعلان عام.\n\nמטבח הזית — נווה שקד (עיירה.\n\nالدوام: א׳–ה׳ 12:00–22:00 · ו׳ 12:00–15:00 · ש׳ סגור\nواتساب 052-7001234.\nארוחת טעימות זוגית ב-₪149 בהזמנה מראש\nCTA: اطلبوا عالهاتف"
           },
           {
             "format": "ad-narrative",
             "locale": "ar",
             "title": "מטבח הזית",
-            "body": "تذوّق لاثنين — لما في سعر حقيقي بالعرض — نقوده بلا اختراع ROAS\n\nמטבח הזית — נווה שקד (עיירה.\n\nالمكان: נווה שקד (עיירה.\n\nالدوام: א׳–ה׳ 12:00–22:00 · ו׳ 12:00–15:00 · ש׳ סגור\nواتساب 052-7001234.\nארוחת טעימות זוגית ב-₪149 בהזמנה מראש\nCTA: اطلبوا عالهاتف"
+            "body": "تذوّق لاثنين — لما في سعر حقيقي بالعرض — نقوده بلا اختراع ROAS\n\nطقس طاولة متوسطية\n\nמטבח הזית — נווה שקד (עיירה.\n\nالمكان: נווה שקד (עיירה.\n\nالدوام: א׳–ה׳ 12:00–22:00 · ו׳ 12:00–15:00 · ש׳ סגור\nواتساب 052-7001234.\nארוחת טעימות זוגית ב-₪149 בהזמנה מראש\nCTA: اطلبوا عالهاتف"
           },
           {
             "format": "ad-direct_sales",
@@ -6295,14 +6295,14 @@
           {
             "format": "ad-emotional",
             "locale": "en",
-            "title": "מטבח הזית — delivery when hungry",
-            "body": "מטבח הזית — delivery when hungry\n\nמטבח הזית · נווה שקד (עיירה.\n\nHours: א׳–ה׳ 12:00–22:00 · ו׳ 12:00–15:00 · ש׳ סגור\nWhatsApp 052-7001234.\nארוחת טעימות זוגית ב-₪149 בהזמנה מראש\nCTA: Order by phone"
+            "title": "מטבח הזית",
+            "body": "מטבח הזית — two-cover tasting, not generic delivery\n\nמטבח הזית · נווה שקד (עיירה.\n\nHours: א׳–ה׳ 12:00–22:00 · ו׳ 12:00–15:00 · ש׳ סגור\nWhatsApp 052-7001234.\nארוחת טעימות זוגית ב-₪149 בהזמנה מראש\nCTA: Order by phone"
           },
           {
             "format": "ad-narrative",
             "locale": "en",
             "title": "מטבח הזית at נווה שקד (עיירה",
-            "body": "Two-cover tasting — When the offer has a real price, lead with it — never invent ROAS\n\nמטבח הזית · נווה שקד (עיירה.\n\nPlace: נווה שקד (עיירה.\n\nHours: א׳–ה׳ 12:00–22:00 · ו׳ 12:00–15:00 · ש׳ סגור\nWhatsApp 052-7001234.\nארוחת טעימות זוגית ב-₪149 בהזמנה מראש\nCTA: Order by phone"
+            "body": "Two-cover tasting — When the offer has a real price, lead with it — never invent ROAS\n\nMediterranean table ritual\n\nמטבח הזית · נווה שקד (עיירה.\n\nPlace: נווה שקד (עיירה.\n\nHours: א׳–ה׳ 12:00–22:00 · ו׳ 12:00–15:00 · ש׳ סגור\nWhatsApp 052-7001234.\nארוחת טעימות זוגית ב-₪149 בהזמנה מראש\nCTA: Order by phone"
           },
           {
             "format": "ad-direct_sales",
@@ -6614,30 +6614,30 @@
           "טעימות לשניים",
           "טקס שולחן הזית",
           "ים-תיכון בלי תור",
-          "שולחן משפחה באמצע",
-          "שכן הכיכר"
+          "שכן הכיכר",
+          "מערכת קרמיקה"
         ],
         "ar": [
           "تذوّق لاثنين",
           "طقس طاولة الزيتون",
           "متوسطي بلا طابور",
-          "طاولة عيلة بالنص",
-          "جار الساحة"
+          "جار الساحة",
+          "نظام صحون"
         ],
         "en": [
           "Two-cover tasting",
           "Olive table ritual",
           "Mediterranean, no queue",
-          "Family middle table",
-          "Square neighbor"
+          "Square neighbor",
+          "Ceramic system"
         ]
       }
     }
   },
   {
     "id": "demo-sand-boutique",
-    "createdAt": "2026-09-05T07:06:29.319Z",
-    "updatedAt": "2026-09-05T07:06:29.319Z",
+    "createdAt": "2026-09-05T08:21:17.262Z",
+    "updatedAt": "2026-09-05T08:21:17.262Z",
     "name": "בוטיק חול",
     "intake": {
       "type": "business",
@@ -6673,47 +6673,47 @@
       "whatFailed": "",
       "mediaAssets": [
         {
-          "id": "6fb10b08-74ca-4903-8195-3764a86e2acc",
+          "id": "842054c6-042c-4ccc-a114-1e6e5bd1db37",
           "kind": "image",
           "mime": "image/svg+xml",
           "name": "Boutique rail",
           "size": 753,
           "label": "exterior",
           "note": "offer:studio:studio-retail-rail",
-          "createdAt": "2026-09-05T07:06:29.314Z",
+          "createdAt": "2026-09-05T08:21:17.259Z",
           "publicSrc": "/packs/assets/demo-sand-boutique/still-1.svg"
         },
         {
-          "id": "31e0a84d-1b8d-4e7d-9a7e-cbf4274549f9",
+          "id": "2383bf6f-86b0-4eb5-9ce8-5fb3af00d8f0",
           "kind": "image",
           "mime": "image/svg+xml",
           "name": "Dressing alcove",
           "size": 593,
           "label": "interior",
           "note": "offer:studio:studio-retail-alcove",
-          "createdAt": "2026-09-05T07:06:29.314Z",
+          "createdAt": "2026-09-05T08:21:17.259Z",
           "publicSrc": "/packs/assets/demo-sand-boutique/still-2.svg"
         },
         {
-          "id": "076910e8-0556-43d6-802b-41fbd98908ab",
+          "id": "2e844ba3-a5ec-4efb-b23f-a7af6208ba8f",
           "kind": "image",
           "mime": "image/svg+xml",
           "name": "Shop counter",
           "size": 1032,
           "label": "interior",
           "note": "offer:studio:studio-retail-counter",
-          "createdAt": "2026-09-05T07:06:29.315Z",
+          "createdAt": "2026-09-05T08:21:17.259Z",
           "publicSrc": "/packs/assets/demo-sand-boutique/still-3.svg"
         },
         {
-          "id": "cac85bc5-6c6e-4feb-aa4b-021e673a3a57",
+          "id": "0cc1fd0a-08b0-49b9-963f-081353449ef6",
           "kind": "image",
           "mime": "image/svg+xml",
           "name": "Soft light",
           "size": 543,
           "label": "interior",
           "note": "offer:studio:studio-retail-wellness",
-          "createdAt": "2026-09-05T07:06:29.315Z",
+          "createdAt": "2026-09-05T08:21:17.259Z",
           "publicSrc": "/packs/assets/demo-sand-boutique/still-4.svg"
         }
       ],
@@ -6902,7 +6902,7 @@
         }
       ],
       "approved": true,
-      "approvedAt": "2026-09-05T07:06:29.315Z"
+      "approvedAt": "2026-09-05T08:21:17.260Z"
     },
     "variants": [
       {
@@ -6931,7 +6931,7 @@
         "locale": "he",
         "cta": "בואו לחנות",
         "headline": "בוטיק חול בעין ברק (עיירה",
-        "primaryText": "סיפור מתלה אחד — מפצה על פערי מלאי מצולם בפיתוח רעיון, לא במספרים\n\nבוטיק חול · עין ברק (עיירה.\n\nמקום: עין ברק (עיירה.\n\nשעות: א׳–ה׳ 10:00–19:00 · ו׳ 09:00–14:00 · ש׳ סגור\nוואטסאפ 050-8112233.\nהנחת פתיחה רכה 15% על קולקציית האביב ללקוחות חדשות"
+        "primaryText": "סיפור מתלה אחד — מפצה על פערי מלאי מצולם בפיתוח רעיון, לא במספרים\n\nהלבשה שקטה מול קניון\n\nבוטיק חול · עין ברק (עיירה.\n\nמקום: עין ברק (עיירה.\n\nשעות: א׳–ה׳ 10:00–19:00 · ו׳ 09:00–14:00 · ש׳ סגור\nוואטסאפ 050-8112233.\nהנחת פתיחה רכה 15% על קולקציית האביב ללקוחות חדשות"
       },
       {
         "kind": "direct_sales",
@@ -6973,7 +6973,7 @@
         "locale": "ar",
         "cta": "تعوا ع المحل",
         "headline": "בוטיק חול",
-        "primaryText": "قصة سكة واحدة — تعوّض نقص المخزون المصوّر بتطوير فكرة لا بأرقام\n\nבוטיק חול — עין ברק (עיירה.\n\nالمكان: עין ברק (עיירה.\n\nالدوام: א׳–ה׳ 10:00–19:00 · ו׳ 09:00–14:00 · ש׳ סגור\nواتساب 050-8112233.\nהנחת פתיחה רכה 15% על קולקציית האביב ללקוחות חדשות"
+        "primaryText": "قصة سكة واحدة — تعوّض نقص المخزون المصوّر بتطوير فكرة لا بأرقام\n\nتجربة قياس هادئة مقابل المول\n\nבוטיק חול — עין ברק (עיירה.\n\nالمكان: עין ברק (עיירה.\n\nالدوام: א׳–ה׳ 10:00–19:00 · ו׳ 09:00–14:00 · ש׳ סגור\nواتساب 050-8112233.\nהנחת פתיחה רכה 15% על קולקציית האביב ללקוחות חדשות"
       },
       {
         "kind": "direct_sales",
@@ -7015,7 +7015,7 @@
         "locale": "en",
         "cta": "Come to the store",
         "headline": "בוטיק חול at עין ברק (עיירה",
-        "primaryText": "One-rack story — Compensates missing photographed stock with idea development, not numbers\n\nבוטיק חול · עין ברק (עיירה.\n\nPlace: עין ברק (עיירה.\n\nHours: א׳–ה׳ 10:00–19:00 · ו׳ 09:00–14:00 · ש׳ סגור\nWhatsApp 050-8112233.\nהנחת פתיחה רכה 15% על קולקציית האביב ללקוחות חדשות"
+        "primaryText": "One-rack story — Compensates missing photographed stock with idea development, not numbers\n\nquiet fitting vs the mall\n\nבוטיק חול · עין ברק (עיירה.\n\nPlace: עין ברק (עיירה.\n\nHours: א׳–ה׳ 10:00–19:00 · ו׳ 09:00–14:00 · ש׳ סגור\nWhatsApp 050-8112233.\nהנחת פתיחה רכה 15% על קולקציית האביב ללקוחות חדשות"
       },
       {
         "kind": "direct_sales",
@@ -7890,14 +7890,14 @@
       ],
       "anglesUsed": [
         {
-          "he": "מותגים על המדף",
-          "ar": "ماركات عالرف",
-          "en": "brands on the rack"
+          "he": "הלבשה שקטה מול קניון",
+          "ar": "تجربة قياس هادئة مقابل المول",
+          "en": "quiet fitting vs the mall"
         },
         {
-          "he": "בוטיק חול — אופנה במקום, בלי סיפור מומצא.",
-          "ar": "בוטיק חול — أزياء بالمحل، بلا قصة مختلقة.",
-          "en": "בוטיק חול — fashion in-store, no invented story."
+          "he": "בוטיק חול — מתלה אחד מורכב, לא קטלוג של 40 פריטים מומצאים.",
+          "ar": "בוטיק חול — سكة واحدة متقنة، مش كتالوج 40 قطعة مختلقة.",
+          "en": "בוטיק חול — one well-built rack, not a fake 40-SKU catalog."
         },
         {
           "he": "בואו לחנות",
@@ -9511,7 +9511,7 @@
             "format": "ad-narrative",
             "locale": "he",
             "title": "בוטיק חול בעין ברק (עיירה",
-            "body": "סיפור מתלה אחד — מפצה על פערי מלאי מצולם בפיתוח רעיון, לא במספרים\n\nבוטיק חול · עין ברק (עיירה.\n\nמקום: עין ברק (עיירה.\n\nשעות: א׳–ה׳ 10:00–19:00 · ו׳ 09:00–14:00 · ש׳ סגור\nוואטסאפ 050-8112233.\nהנחת פתיחה רכה 15% על קולקציית האביב ללקוחות חדשות\nCTA: בואו לחנות"
+            "body": "סיפור מתלה אחד — מפצה על פערי מלאי מצולם בפיתוח רעיון, לא במספרים\n\nהלבשה שקטה מול קניון\n\nבוטיק חול · עין ברק (עיירה.\n\nמקום: עין ברק (עיירה.\n\nשעות: א׳–ה׳ 10:00–19:00 · ו׳ 09:00–14:00 · ש׳ סגור\nוואטסאפ 050-8112233.\nהנחת פתיחה רכה 15% על קולקציית האביב ללקוחות חדשות\nCTA: בואו לחנות"
           },
           {
             "format": "ad-direct_sales",
@@ -9547,7 +9547,7 @@
             "format": "ad-narrative",
             "locale": "ar",
             "title": "בוטיק חול",
-            "body": "قصة سكة واحدة — تعوّض نقص المخزون المصوّر بتطوير فكرة لا بأرقام\n\nבוטיק חול — עין ברק (עיירה.\n\nالمكان: עין ברק (עיירה.\n\nالدوام: א׳–ה׳ 10:00–19:00 · ו׳ 09:00–14:00 · ש׳ סגור\nواتساب 050-8112233.\nהנחת פתיחה רכה 15% על קולקציית האביב ללקוחות חדשות\nCTA: تعوا ع المحل"
+            "body": "قصة سكة واحدة — تعوّض نقص المخزون المصوّر بتطوير فكرة لا بأرقام\n\nتجربة قياس هادئة مقابل المول\n\nבוטיק חול — עין ברק (עיירה.\n\nالمكان: עין ברק (עיירה.\n\nالدوام: א׳–ה׳ 10:00–19:00 · ו׳ 09:00–14:00 · ש׳ סגור\nواتساب 050-8112233.\nהנחת פתיחה רכה 15% על קולקציית האביב ללקוחות חדשות\nCTA: تعوا ع المحل"
           },
           {
             "format": "ad-direct_sales",
@@ -9583,7 +9583,7 @@
             "format": "ad-narrative",
             "locale": "en",
             "title": "בוטיק חול at עין ברק (עיירה",
-            "body": "One-rack story — Compensates missing photographed stock with idea development, not numbers\n\nבוטיק חול · עין ברק (עיירה.\n\nPlace: עין ברק (עיירה.\n\nHours: א׳–ה׳ 10:00–19:00 · ו׳ 09:00–14:00 · ש׳ סגור\nWhatsApp 050-8112233.\nהנחת פתיחה רכה 15% על קולקציית האביב ללקוחות חדשות\nCTA: Come to the store"
+            "body": "One-rack story — Compensates missing photographed stock with idea development, not numbers\n\nquiet fitting vs the mall\n\nבוטיק חול · עין ברק (עיירה.\n\nPlace: עין ברק (עיירה.\n\nHours: א׳–ה׳ 10:00–19:00 · ו׳ 09:00–14:00 · ש׳ סגור\nWhatsApp 050-8112233.\nהנחת פתיחה רכה 15% על קולקציית האביב ללקוחות חדשות\nCTA: Come to the store"
           },
           {
             "format": "ad-direct_sales",

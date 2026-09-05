@@ -1,6 +1,6 @@
 import type { Locale } from "./types";
 import type { Vertical } from "./vertical";
-import { detectVertical } from "./vertical";
+import { detectVertical, foodFamily } from "./vertical";
 
 /** How many distinct Vertex stills the picker requests per open. */
 export const IMAGEN_PICKER_COUNT = 10;
@@ -38,19 +38,32 @@ function clinicScenes(region: string): ImagenScene[] {
   return rows.map(([id, title, prompt]) => ({ id, title, prompt }));
 }
 
-function restaurantScenes(region: string): ImagenScene[] {
-  const rows: [string, string, string][] = [
-    ["plated", "Plated dish", `Cinematic plated food on ceramic, steam, shallow depth, restaurant table, no people, no menus with text. ${region}. ${GUARD}`],
-    ["grill", "Grill glow", `Night grill glow, charcoal and ember, empty station, warm light, no faces. ${region}. ${GUARD}`],
+function restaurantScenes(region: string, cuisine = "generic"): ImagenScene[] {
+  const med: [string, string, string][] = [
+    ["mezze", "Mezze platter", `Overhead mezze: hummus, olives, olive oil, warm ceramic, empty restaurant table, no people, no menus with text. ${region}. ${GUARD}`],
+    ["olive-oil", "Olive oil pour", `Still life of olive oil poured on hummus in a ceramic bowl, linen, Mediterranean daylight. ${region}. ${GUARD}`],
+    ["terrace", "Dusk terrace", `Empty outdoor dining terrace at dusk, olive tree, stone, terracotta, no signage. ${region}. ${GUARD}`],
     ["table", "Table setting", `Linen table setting, olive oil, bread, terracotta and cream, empty chairs. ${region}. ${GUARD}`],
     ["courtyard-dine", "Courtyard table", `Empty courtyard dining table, olive tree, stone, late sun. ${region}. ${GUARD}`],
-    ["spice", "Spice bowls", `Overhead still of spice bowls and herbs on wood, restaurant kitchen mood, no people. ${region}. ${GUARD}`],
     ["ceramic", "Ceramic plates", `Stacked cream ceramic plates, terracotta wall, soft window light. ${region}. ${GUARD}`],
-    ["steam", "Steam over grill", `Steam over a glowing grill, dark wood, cinematic, no faces. ${region}. ${GUARD}`],
-    ["interior", "Dining interior", `Empty neighborhood restaurant interior, wood tables, warm pendant light, no logos. ${region}. ${GUARD}`],
     ["citrus", "Citrus and oil", `Still life: citrus, olive oil, linen, Mediterranean restaurant mood. ${region}. ${GUARD}`],
-    ["ember", "Charcoal ember", `Close charcoal ember and iron grill bars, moody food photography, no text. ${region}. ${GUARD}`],
+    ["interior", "Dining interior", `Empty neighborhood restaurant interior, wood tables, warm pendant light, no logos. ${region}. ${GUARD}`],
+    ["spice", "Spice bowls", `Overhead still of spice bowls and herbs on wood, restaurant kitchen mood, no people. ${region}. ${GUARD}`],
+    ["plated", "Plated dish", `Cinematic plated Levantine food on ceramic, steam, shallow depth, no people. ${region}. ${GUARD}`],
   ];
+  const grill: [string, string, string][] = [
+    ["plated", "Plated dish", `Cinematic plated food on ceramic, steam, shallow depth, restaurant table, no people, no menus with text. ${region}. ${GUARD}`],
+    ["grill", "Grill glow", `Night grill glow, charcoal and ember, empty station, warm light, no faces. ${region}. ${GUARD}`],
+    ["steam", "Steam over grill", `Steam over a glowing grill, dark wood, cinematic, no faces. ${region}. ${GUARD}`],
+    ["ember", "Charcoal ember", `Close charcoal ember and iron grill bars, moody food photography, no text. ${region}. ${GUARD}`],
+    ["table", "Table setting", `Linen table setting, olive oil, bread, terracotta and cream, empty chairs. ${region}. ${GUARD}`],
+    ["interior", "Dining interior", `Empty neighborhood restaurant interior, wood tables, warm pendant light, no logos. ${region}. ${GUARD}`],
+    ["spice", "Spice bowls", `Overhead still of spice bowls and herbs on wood, restaurant kitchen mood, no people. ${region}. ${GUARD}`],
+    ["courtyard-dine", "Courtyard table", `Empty courtyard dining table, olive tree, stone, late sun. ${region}. ${GUARD}`],
+    ["ceramic", "Ceramic plates", `Stacked cream ceramic plates, terracotta wall, soft window light. ${region}. ${GUARD}`],
+    ["citrus", "Citrus and oil", `Still life: citrus, olive oil, linen, Mediterranean restaurant mood. ${region}. ${GUARD}`],
+  ];
+  const rows = cuisine === "mediterranean" ? med : grill;
   return rows.map(([id, title, prompt]) => ({ id, title, prompt }));
 }
 
@@ -169,9 +182,16 @@ export function imagenScenesFor(input: {
     forced === "clinic" || forced === "restaurant" || forced === "pool" || forced === "retail" || forced === "product" || forced === "school" || forced === "generic"
       ? (forced as Vertical)
       : vertical;
+  const cuisine = foodFamily({
+    businessName: "",
+    category,
+    description: `${description} ${offer}`,
+    uniqueAdvantage: description,
+    offer,
+  });
   const all =
     v === "clinic" ? clinicScenes(region)
-    : v === "restaurant" ? restaurantScenes(region)
+    : v === "restaurant" ? restaurantScenes(region, cuisine)
     : v === "pool" ? poolScenes(region)
     : v === "retail" ? retailScenes(region)
     : v === "product" ? productScenes(region)
