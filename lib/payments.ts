@@ -1,6 +1,7 @@
+import { PRICE_MONTHLY_ILS, PRICE_YEARLY_ILS } from "./plan";
 import { runtimeEnv } from "./runtime-env";
 
-/** Public receive details — shown to customers. Override with Cloud Run env. */
+/** Server-side receive defaults. Never ship these on public pages or public-config. */
 export const DEFAULT_BIT_PHONE = "052-8885800";
 export const DEFAULT_BANK_NAME = "בנק הפועלים";
 export const DEFAULT_BANK_NAME_EN = "Bank Hapoalim";
@@ -12,12 +13,16 @@ export const DEFAULT_BANK_HOLDER = "ד״ר סאמר / Drmarktzone (Markt)";
 export const MANUAL_PAY_PENDING_KEY = "sawek-manual-pay-pending";
 
 export type ManualPayMethod = "bit" | "bank";
+export type BillingInterval = "monthly" | "yearly";
 
 export type ManualPayPending = {
   method: ManualPayMethod;
+  interval: BillingInterval;
+  orderCode: string;
   at: string;
 };
 
+/** Flags only — safe for anonymous GET /api/public-config. */
 export type PublicPayments = {
   stripeEnabled: boolean;
   stripePublishableKey: string;
@@ -26,7 +31,16 @@ export type PublicPayments = {
   paypalOffline: true;
   bitConfigured: boolean;
   bankConfigured: boolean;
+};
+
+export type BitReceiveDetails = {
+  method: "bit";
   bitPhone: string;
+  bitInstructions: string;
+};
+
+export type BankReceiveDetails = {
+  method: "bank";
   bankName: string;
   bankNameEn: string;
   bankCode: string;
@@ -35,8 +49,14 @@ export type PublicPayments = {
   bankHolder: string;
   bankIban: "";
   bankInstructions: string;
-  bitInstructions: string;
 };
+
+export type ReceiveDetails = {
+  interval: BillingInterval;
+  amountIls: number;
+  orderCode: string;
+  holder: string;
+} & (BitReceiveDetails | BankReceiveDetails);
 
 /** Owner decision: PayPal Business for drmarktzone@gmail.com is permanently deactivated. */
 export function paypalLiveEnabled(): boolean {
@@ -151,33 +171,93 @@ export function bankConfigured(): boolean {
   return Boolean(bankName() && bankBranch() && bankAccount());
 }
 
+export function parseInterval(raw: unknown): BillingInterval {
+  return raw === "yearly" ? "yearly" : "monthly";
+}
+
+export function parsePayMethod(raw: unknown): ManualPayMethod | null {
+  if (raw === "bit" || raw === "bank") return raw;
+  return null;
+}
+
+export function amountForInterval(interval: BillingInterval): number {
+  return interval === "yearly" ? PRICE_YEARLY_ILS : PRICE_MONTHLY_ILS;
+}
+
 export function publicPayments(opts: {
   stripeEnabled: boolean;
   stripePublishableKey: string;
 }): PublicPayments {
-  const phone = bitPhone();
-  const name = bankName();
-  const branch = bankBranch();
-  const account = bankAccount();
   return {
     stripeEnabled: opts.stripeEnabled,
     stripePublishableKey: opts.stripePublishableKey,
     paypalEnabled: false,
     paypalMe: "",
     paypalOffline: true,
-    bitConfigured: Boolean(phone),
-    bankConfigured: Boolean(name && branch && account),
-    bitPhone: phone,
-    bankName: name,
+    bitConfigured: bitConfigured(),
+    bankConfigured: bankConfigured(),
+  };
+}
+
+export function receiveDetails(opts: {
+  method: ManualPayMethod;
+  interval: BillingInterval;
+  orderCode: string;
+}): ReceiveDetails {
+  const interval: BillingInterval = opts.interval === "yearly" ? "yearly" : "monthly";
+  const base = {
+    interval,
+    amountIls: amountForInterval(interval),
+    orderCode: opts.orderCode,
+    holder: bankHolder(),
+  };
+  if (opts.method === "bit") {
+    return {
+      ...base,
+      method: "bit",
+      bitPhone: bitPhone(),
+      bitInstructions: bitInstructions(),
+    };
+  }
+  return {
+    ...base,
+    method: "bank",
+    bankName: bankName(),
     bankNameEn: bankNameEn(),
     bankCode: bankCode(),
-    bankBranch: branch,
-    bankAccount: account,
+    bankBranch: bankBranch(),
+    bankAccount: bankAccount(),
     bankHolder: bankHolder(),
     bankIban: "",
     bankInstructions: bankInstructions(),
-    bitInstructions: bitInstructions(),
   };
+}
+
+const SECRET_KEYS = [
+  "bitPhone",
+  "bankAccount",
+  "bankBranch",
+  "bankCode",
+  "bankHolder",
+  "bankIban",
+  "bankInstructions",
+  "bitInstructions",
+  "bankName",
+  "bankNameEn",
+] as const;
+
+export function publicPayloadLeaksReceiveDetails(payload: unknown): boolean {
+  if (!payload || typeof payload !== "object") return false;
+  const rec = payload as Record<string, unknown>;
+  for (const key of SECRET_KEYS) {
+    const v = rec[key];
+    if (typeof v === "string" && v.trim()) return true;
+  }
+  const blob = JSON.stringify(payload);
+  if (blob.includes(DEFAULT_BIT_PHONE)) return true;
+  if (blob.includes(DEFAULT_BANK_ACCOUNT)) return true;
+  if (/\b052[- ]?8885800\b/.test(blob)) return true;
+  return false;
 }
 
 export function readLocalPending(): ManualPayPending | null {
@@ -187,18 +267,27 @@ export function readLocalPending(): ManualPayPending | null {
     if (!raw) return null;
     const parsed = JSON.parse(raw) as ManualPayPending;
     if (parsed?.method !== "bit" && parsed?.method !== "bank") return null;
-    if (!parsed.at) return null;
+    if (parsed.interval !== "monthly" && parsed.interval !== "yearly") return null;
+    if (!parsed.at || !parsed.orderCode) return null;
     return parsed;
   } catch {
     return null;
   }
 }
 
-export function writeLocalPending(method: ManualPayMethod): ManualPayPending {
-  const next: ManualPayPending = { method, at: new Date().toISOString() };
+export function writeLocalPending(opts: {
+  method: ManualPayMethod;
+  interval: BillingInterval;
+  orderCode: string;
+}): ManualPayPending {
+  const next: ManualPayPending = {
+    method: opts.method,
+    interval: opts.interval,
+    orderCode: opts.orderCode,
+    at: new Date().toISOString(),
+  };
   if (typeof window !== "undefined") {
     window.localStorage.setItem(MANUAL_PAY_PENDING_KEY, JSON.stringify(next));
   }
   return next;
 }
-

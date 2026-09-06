@@ -96,9 +96,9 @@ export const PRIVACY: LegalDoc = {
           en: "Supabase: if keys are configured, it is used for auth (email) and optional campaign sync. With no keys the app runs on localStorage only.",
         },
         {
-          he: "ביט והעברה בנקאית (בנק הפועלים): פרטי הקבלה מוצגים ב-/pricing. אחרי «שילמתי» נשמרת בקשת אישור — בלי שדרוג אוטומטי. PayPal כבוי (חשבון העסק מנותק). Stripe לכרטיס — רק אם יחובר; אין חיוב מדומה.",
-          ar: "بيت والحوالة البنكية (بنك هبوعليم): تفاصيل الاستلام معروضة بـ/pricing. بعد «دفعت» بتنحفظ طلب تأكيد — بلا ترقية تلقائية. PayPal مطفي (حساب البيزنس مفصول). Stripe للبطاقة — فقط إذا اتوصل؛ ما في خصم وهمي.",
-          en: "Bit and bank transfer (Bank Hapoalim): receive details are shown on /pricing. After “I paid” a review request is stored — no auto-upgrade. PayPal is offline (business account deactivated). Stripe for cards — only if connected; no fake charge.",
+          he: "ביט והעברה בנקאית: פרטי הקבלה מוצגים רק בקופה המאומתת אחרי בחירת שיטה, עם קוד הזמנה. אחרי «שילמתי» נשמרת בקשת אישור — בלי שדרוג אוטומטי. PayPal כבוי (חשבון העסק מנותק). Stripe לכרטיס — רק אם יחובר; אין חיוב מדומה.",
+          ar: "بيت والحوالة البنكية: تفاصيل الاستلام بتنعرض بس بالصندوق الموثّق بعد اختيار طريقة، مع رمز طلب. بعد «دفعت» بتنحفظ طلب تأكيد — بلا ترقية تلقائية. PayPal مطفي (حساب البيزنس مفصول). Stripe للبطاقة — فقط إذا اتوصل؛ ما في خصم وهمي.",
+          en: "Bit and bank transfer: receive details appear only in authenticated checkout after you pick a method, with an order code. After “I paid” a review request is stored — no auto-upgrade. PayPal is offline (business account deactivated). Stripe for cards — only if connected; no fake charge.",
         },
         {
           he: "אנליטיקס או ניטור שגיאות: נטענים רק אם הוגדר מזהה בסביבה (למשל Google Analytics או Plausible, או DSN של Sentry). בלי מזהה — לא נשלח מעקב.",
@@ -207,9 +207,9 @@ export const TERMS: LegalDoc = {
           en: "Free: ₪0 forever — one business, one saved campaign, site scan, Hebrew/Arabic ads, and a PNG download per card.",
         },
         {
-          he: "Pro: ₪99 לחודש או ₪990 לשנה. תשלום חי: ביט למספר 052-8885800, או העברה לבנק הפועלים (סניף 666, חשבון 422494, על שם ד״ר סאמר / Drmarktzone). אחרי «שילמתי» הבקשה ממתינה לאישור ידני — אין שדרוג אוטומטי. PayPal כבוי. כרטיס אשראי רק אם Stripe מחובר; אין מסך «התשלום הצליח» מזויף.",
-          ar: "Pro: ₪99 بالشهر أو ₪990 بالسنة. الدفع الحي: بيت على 052-8885800، أو حوالة لبنك هبوعليم (فرع 666، حساب 422494، باسم د. سامر / Drmarktzone). بعد «دفعت» الطلب بيستنى تأكيد يدوي — ما في ترقية تلقائية. PayPal مطفي. بطاقة فقط إذا Stripe مربوط؛ ما في شاشة «الدفع نجح» مزيفة.",
-          en: "Pro: ₪99 / month or ₪990 / year. Live payment: Bit to 052-8885800, or a Bank Hapoalim transfer (branch 666, account 422494, holder Dr. Samer / Drmarktzone). After “I paid” the request waits for manual review — no auto-upgrade. PayPal is offline. Cards only if Stripe is connected; no fake “payment succeeded” screen.",
+          he: "Pro: ₪99 לחודש או ₪990 לשנה. התשלום בקופה אחרי כניסה (ביט או העברה בנקאית, עם קוד הזמנה בהערה). אחרי «שילמתי» הבקשה ממתינה לאישור ידני — אין שדרוג אוטומטי. PayPal כבוי. כרטיס אשראי רק אם Stripe מחובר; אין מסך «התשלום הצליח» מזויף.",
+          ar: "Pro: ₪99 بالشهر أو ₪990 بالسنة. الدفع بالصندوق بعد الدخول (بيت أو حوالة بنكية، مع رمز طلب بالملاحظة). بعد «دفعت» الطلب بيستنى تأكيد يدوي — ما في ترقية تلقائية. PayPal مطفي. بطاقة فقط إذا Stripe مربوط؛ ما في شاشة «الدفع نجح» مزيفة.",
+          en: "Pro: ₪99 / month or ₪990 / year. Payment is in checkout after you sign in (Bit or bank transfer, with an order code in the note). After “I paid” the request waits for manual review — no auto-upgrade. PayPal is offline. Cards only if Stripe is connected; no fake “payment succeeded” screen.",
         },
       ],
     },

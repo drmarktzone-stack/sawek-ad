@@ -39,7 +39,7 @@ export async function GET(req: Request) {
   if (!service) return NextResponse.json({ ok: true, pending: [] });
   const { data } = await service
     .from("profiles")
-    .select("id,email,plan,bank_marked_paid_at,bit_marked_paid_at,bank_confirmed_at")
+    .select("id,email,plan,billing_interval,bank_marked_paid_at,bit_marked_paid_at,bank_confirmed_at")
     .or("bank_marked_paid_at.not.is.null,bit_marked_paid_at.not.is.null")
     .order("updated_at", { ascending: false })
     .limit(50);

@@ -5,6 +5,7 @@ import {
   isSupabaseAuthorizeUrl,
   makePkcePair,
   publicAppBase,
+  safeInternalPath,
   supabaseAnonCreds,
   supabaseAuthorizeWouldFail,
   supabaseGoogleProviderEnabled,
@@ -33,11 +34,13 @@ export async function GET(req: Request) {
     return NextResponse.redirect(new URL("/login?error=no_supabase", publicAppBase(req)));
   }
 
+  const next = safeInternalPath(new URL(req.url).searchParams.get("next"));
+
   const enabled = await supabaseGoogleProviderEnabled();
   if (enabled === false) return googleOff(req, json);
 
   if (enabled !== true) {
-    const probeUrl = googleAuthorizeUrl(req, makePkcePair().challenge);
+    const probeUrl = googleAuthorizeUrl(req, makePkcePair().challenge, next);
     if (!probeUrl || (isSupabaseAuthorizeUrl(probeUrl) && (await supabaseAuthorizeWouldFail(probeUrl)))) {
       return googleOff(req, json);
     }
@@ -47,7 +50,7 @@ export async function GET(req: Request) {
   if (json && probeOnly) return NextResponse.json({ ok: true, url: "ready" });
 
   const { verifier, challenge } = makePkcePair();
-  const url = googleAuthorizeUrl(req, challenge);
+  const url = googleAuthorizeUrl(req, challenge, next);
   if (!url) return googleOff(req, json);
 
   if (json) return applyPkceCookie(NextResponse.json({ ok: true, url }), req, verifier);

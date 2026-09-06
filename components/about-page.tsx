@@ -310,7 +310,7 @@ export function AboutPage() {
               ))}
             </ul>
             <Button asChild variant="coral" className="mt-6 w-full">
-              <LangLink href="/pricing">{t("home.cta.pricing")}</LangLink>
+              <LangLink href="/pricing">{t("pricing.cta.upgrade")}</LangLink>
             </Button>
           </article>
         </div>

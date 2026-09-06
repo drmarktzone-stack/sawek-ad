@@ -60,8 +60,8 @@ export async function POST(req: Request) {
     const params: Parameters<typeof stripe.checkout.sessions.create>[0] = {
       mode: "subscription",
       line_items: [{ price, quantity: 1 }],
-      success_url: `${base}/pricing?checkout=success`,
-      cancel_url: `${base}/pricing?checkout=cancel`,
+      success_url: `${base}/checkout/pending?checkout=success`,
+      cancel_url: `${base}/checkout?checkout=cancel`,
       client_reference_id: session.user.id,
       customer_email: session.user.email || undefined,
       metadata: { user_id: session.user.id, interval },
