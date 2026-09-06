@@ -288,40 +288,46 @@ export function UrlIngest() {
       <form
         onSubmit={(e) => void scan(e)}
         className={cn(
-          "mx-auto flex w-full max-w-[92rem] min-w-0 flex-col gap-2 sm:flex-row sm:items-center",
+          "mx-auto flex w-full max-w-[92rem] min-w-0 flex-col",
           home ? "gap-2" : "gap-1.5",
         )}
       >
-        <div className="flex min-w-0 flex-1 items-center gap-2">
-          <Globe className={cn("shrink-0 text-[#9FD4C8]", home ? "size-5" : "size-4")} aria-hidden />
-          <input
-            dir="ltr"
-            className={cn(
-              "w-full min-w-0 rounded-[12px] border border-white/15 bg-white px-4 text-[16px] text-ink placeholder:text-[#8794A3] outline-none focus:border-teal focus:shadow-[0_0_0_4px_rgba(12,122,107,0.22)]",
-              home ? "h-12" : "h-11 sm:h-10 sm:text-sm",
-            )}
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            placeholder={t("url.placeholder")}
-            autoComplete="url"
-            inputMode="url"
-            enterKeyHint="go"
-            name="business-url"
-            aria-label={t("url.placeholder")}
-          />
+        <label htmlFor="scan-url" className="text-start text-sm font-black text-[#F7F3EA]">
+          {t("url.label")}
+        </label>
+        <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center">
+          <div className="flex min-w-0 flex-1 items-center gap-2">
+            <Globe className={cn("shrink-0 text-[#9FD4C8]", home ? "size-5" : "size-4")} aria-hidden />
+            <input
+              id="scan-url"
+              dir="ltr"
+              className={cn(
+                "w-full min-w-0 rounded-[12px] border border-white/15 bg-white px-4 text-[16px] text-ink placeholder:text-[#8794A3] outline-none focus:border-teal focus:shadow-[0_0_0_4px_rgba(12,122,107,0.22)]",
+                home ? "h-12" : "h-11 sm:h-10 sm:text-sm",
+              )}
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+              placeholder={t("url.placeholder")}
+              autoComplete="url"
+              inputMode="url"
+              enterKeyHint="go"
+              name="business-url"
+              aria-describedby="scan-url-hint"
+            />
+          </div>
+          <Button
+            type="submit"
+            variant="coral"
+            size={home ? "default" : "sm"}
+            disabled={busy}
+            className={cn("shrink-0", "w-full min-h-12 sm:w-auto sm:min-h-11")}
+          >
+            <Link2 className={home ? "size-4" : "size-3.5"} />
+            {busy ? t("url.reading") : t("url.scan")}
+          </Button>
         </div>
-        <Button
-          type="submit"
-          variant="coral"
-          size={home ? "default" : "sm"}
-          disabled={busy}
-          className={cn("shrink-0", "w-full min-h-12 sm:w-auto sm:min-h-0")}
-        >
-          <Link2 className={home ? "size-4" : "size-3.5"} />
-          {busy ? t("url.reading") : t("url.scan")}
-        </Button>
       </form>
-      <p className={cn("mx-auto max-w-[92rem] text-sm text-[#C9D0D8]", home ? "mt-1.5" : "mt-1 hidden sm:block")}>
+      <p id="scan-url-hint" className={cn("mx-auto max-w-[92rem] text-sm text-[#C9D0D8]", home ? "mt-1.5" : "mt-1 hidden sm:block")}>
         {t("url.hint")}
       </p>
       {error && <p className="mx-auto mt-1 max-w-[92rem] whitespace-pre-line text-xs font-semibold text-danger">{error}</p>}

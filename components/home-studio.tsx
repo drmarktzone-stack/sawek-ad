@@ -29,6 +29,13 @@ export function HomeStudio() {
     });
   }
 
+  function focusScan() {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    requestAnimationFrame(() => {
+      document.getElementById("scan-url")?.focus();
+    });
+  }
+
   const stats = [
     { icon: Workflow, label: t("home.stat.steps") },
     { icon: Sparkles, label: t("home.stat.agents") },
@@ -70,14 +77,14 @@ export function HomeStudio() {
 
           <div className="mt-9 flex flex-col items-center gap-5 sm:mt-10">
             <div className="mobile-stack w-full justify-center">
-              <Button type="button" size="lg" variant="coral" className="btn-mobile-full text-base font-black sm:text-lg" onClick={startEmpty}>
+              <Button type="button" size="lg" variant="coral" className="btn-mobile-full text-base font-black sm:text-lg" onClick={focusScan}>
+                {t("home.cta.primary")}
+              </Button>
+              <Button type="button" size="lg" variant="outline" className="btn-mobile-full border-white/20 bg-white/8 text-[#F7F3EA] hover:bg-white hover:text-ink text-base font-black sm:text-lg" onClick={startEmpty}>
                 {t("cta.new")}
               </Button>
               <Button asChild size="lg" variant="outline" className="btn-mobile-full border-white/20 bg-white/8 text-[#F7F3EA] hover:bg-white hover:text-ink text-base font-black sm:text-lg">
                 <LangLink href="/about">{t("home.cta.about")}</LangLink>
-              </Button>
-              <Button asChild size="lg" variant="outline" className="btn-mobile-full border-white/20 bg-white/8 text-[#F7F3EA] hover:bg-white hover:text-ink text-base font-black sm:text-lg">
-                <LangLink href="/pricing">{t("home.cta.pricing")}</LangLink>
               </Button>
             </div>
             <p className="max-w-lg text-center text-sm font-semibold text-[#C9D0D8]">{t("home.demos.secondary")}</p>

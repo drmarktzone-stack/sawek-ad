@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Children, cloneElement, isValidElement, useEffect, useId, useMemo, useRef, useState, type ReactElement, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Trash2, WandSparkles } from "lucide-react";
 import type { AgentId, AgentStatus, CampaignPack, Competitor, Intake, WizardStep } from "@/lib/types";
@@ -57,6 +57,18 @@ import { coachIntake } from "@/lib/engine/coach";
 import { useIsClient } from "@/lib/use-is-client";
 import { cn } from "@/lib/utils";
 
+function attachFieldId(node: ReactNode, id: string, describedBy?: string): ReactNode {
+  if (!isValidElement(node)) return node;
+  const type = node.type;
+  const isControl = type === Input || type === Textarea || type === "input" || type === "textarea";
+  if (!isControl) return node;
+  const prev = node as ReactElement<{ id?: string; "aria-describedby"?: string }>;
+  return cloneElement(prev, {
+    id,
+    ...(describedBy ? { "aria-describedby": describedBy } : {}),
+  });
+}
+
 function Field({
   label,
   hint,
@@ -68,11 +80,20 @@ function Field({
   filled?: boolean;
   children: React.ReactNode;
 }) {
+  const id = useId();
+  const hintId = hint ? `${id}-hint` : undefined;
+  const labeled = Children.map(children, (child) => attachFieldId(child, id, hintId));
   return (
     <div className="mb-5">
-      <Label className={filled ? "text-teal" : "text-navy"}>{label}</Label>
-      {hint ? <p className="mb-2 text-sm font-medium text-muted">{hint}</p> : null}
-      <div className={filled ? "agency-field-wrap-filled" : undefined}>{children}</div>
+      <Label htmlFor={id} className={filled ? "text-teal" : "text-navy"}>
+        {label}
+      </Label>
+      {hint ? (
+        <p id={hintId} className="mb-2 text-sm font-medium text-muted">
+          {hint}
+        </p>
+      ) : null}
+      <div className={filled ? "agency-field-wrap-filled" : undefined}>{labeled}</div>
     </div>
   );
 }
@@ -625,8 +646,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
                   inputMode="tel"
                 />
               </Field>
-              <Field label={t("biz.hours")} filled={Boolean((intake.clinicHours ?? "").trim())}>
-                <p className="mb-2 text-xs text-muted">{t("biz.hoursHint")}</p>
+              <Field label={t("biz.hours")} hint={t("biz.hoursHint")} filled={Boolean((intake.clinicHours ?? "").trim())}>
                 <Textarea
                   value={intake.clinicHours ?? ""}
                   placeholder={t("biz.hoursPh")}
@@ -839,23 +859,20 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
               </div>
               {showsKupaFields(intake) && (
                 <>
-              <div>
-                <Label>{t("details.kupaFile")}</Label>
-                <p className="mb-2 text-xs text-muted">{t("details.kupaHint")}</p>
+              <Field label={t("details.kupaFile")} hint={t("details.kupaHint")} filled={Boolean((intake.kupaFileBy ?? "").trim())}>
                 <Input
                   value={intake.kupaFileBy ?? ""}
                   placeholder={t("details.kupaFilePh")}
                   onChange={(e) => patch({ kupaFileBy: e.target.value })}
                 />
-              </div>
-              <div>
-                <Label>{t("details.kupaMember")}</Label>
+              </Field>
+              <Field label={t("details.kupaMember")} filled={Boolean((intake.kupaMemberFrom ?? "").trim())}>
                 <Input
                   value={intake.kupaMemberFrom ?? ""}
                   placeholder={t("details.kupaMemberPh")}
                   onChange={(e) => patch({ kupaMemberFrom: e.target.value })}
                 />
-              </div>
+              </Field>
                 </>
               )}
             </section>

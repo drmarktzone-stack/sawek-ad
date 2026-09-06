@@ -347,6 +347,17 @@ export function AboutPage() {
                 <LangLink href="/pricing">{t("home.cta.pricing")}</LangLink>
               </Button>
             </div>
+            <p className="mx-auto mt-8 max-w-xl text-center text-sm font-semibold leading-relaxed text-[#C9D0D8]">
+              {t("about.legal.p")}
+            </p>
+            <p className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm font-black">
+              <LangLink href="/privacy" className="tap-target inline-flex items-center text-[#F7F3EA] underline decoration-teal underline-offset-4 hover:text-white">
+                {t("nav.privacy")}
+              </LangLink>
+              <LangLink href="/terms" className="tap-target inline-flex items-center text-[#F7F3EA] underline decoration-teal underline-offset-4 hover:text-white">
+                {t("nav.terms")}
+              </LangLink>
+            </p>
           </div>
         </div>
       </section>

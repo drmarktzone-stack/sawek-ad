@@ -4,6 +4,8 @@ import { I18nProvider } from "@/components/i18n-provider";
 import { Footer, Header } from "@/components/header";
 import { AuthProvider } from "@/components/auth-provider";
 import { PwaRegister } from "@/components/pwa-install-hint";
+import { Analytics } from "@/components/analytics";
+import { rootMetadata } from "@/lib/seo";
 import "./globals.css";
 
 const heebo = Heebo({
@@ -37,25 +39,7 @@ const amiri = Amiri({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: "SAWEK AD — سوِّق إعلانك بنفسك / סאווק",
-  description:
-    "SAWEK AD: paste a business website, get finished ads for Facebook, Instagram, TikTok and WhatsApp in Hebrew and Arabic, plus a landing page and download. No invented ROAS.",
-  manifest: "/manifest.webmanifest",
-  applicationName: "SAWEK AD",
-  appleWebApp: {
-    capable: true,
-    title: "SAWEK AD",
-    statusBarStyle: "default",
-  },
-  icons: {
-    icon: [
-      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
-      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
-    ],
-    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
-  },
-};
+export const metadata: Metadata = rootMetadata();
 
 export const viewport: Viewport = {
   themeColor: [
@@ -93,6 +77,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <AuthProvider>
           <I18nProvider>
             <PwaRegister />
+            <Analytics />
             <Header />
             <main className="flex-1 w-full min-w-0">{children}</main>
             <Footer />

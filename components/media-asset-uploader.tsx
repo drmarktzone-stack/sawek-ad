@@ -64,14 +64,16 @@ export function MediaAssetUploader({
 
   return (
     <div>
-      <Label>{t("details.assets")}</Label>
+      <Label htmlFor="media-assets">{t("details.assets")}</Label>
       <p className="mb-2 text-xs text-muted">{t("details.assetsHint")}</p>
       <input
         ref={inputRef}
+        id="media-assets"
         type="file"
         accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,.jpg,.jpeg,.png,.webp,.mp4,.webm"
         multiple
         className="hidden"
+        aria-label={t("details.assetsAdd")}
         onChange={(e) => void onFiles(e.target.files)}
       />
       <Button type="button" variant="outline" size="sm" onClick={() => inputRef.current?.click()}>
@@ -104,6 +106,7 @@ export function MediaAssetUploader({
               <select
                 className="h-9 w-full rounded-lg border border-navy/15 bg-background px-2 text-xs text-navy"
                 value={a.label}
+                aria-label={t("details.assetKind")}
                 onChange={(e) => patch(a.id, { label: e.target.value as MediaAssetLabel })}
               >
                 {labelOptions.map((opt) => (
@@ -115,6 +118,7 @@ export function MediaAssetUploader({
               <input
                 className="h-9 w-full rounded-lg border border-navy/10 bg-background px-2 text-xs text-navy"
                 placeholder={t("details.assetNote")}
+                aria-label={t("details.assetNote")}
                 value={a.note}
                 onChange={(e) => patch(a.id, { note: e.target.value })}
               />

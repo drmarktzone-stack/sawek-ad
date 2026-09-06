@@ -255,13 +255,19 @@ export function Footer() {
       </p>
       {t("footer.line")}
       <p className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
-        <LangLink href="/about" className="font-semibold text-[#F7F3EA] hover:text-teal hover:underline">
+        <LangLink href="/about" className="tap-target inline-flex items-center font-semibold text-[#F7F3EA] hover:text-teal hover:underline">
           {t("nav.about")}
         </LangLink>
-        <LangLink href="/pricing" className="font-semibold text-[#F7F3EA] hover:text-teal hover:underline">
+        <LangLink href="/privacy" className="tap-target inline-flex items-center font-semibold text-[#F7F3EA] hover:text-teal hover:underline">
+          {t("nav.privacy")}
+        </LangLink>
+        <LangLink href="/terms" className="tap-target inline-flex items-center font-semibold text-[#F7F3EA] hover:text-teal hover:underline">
+          {t("nav.terms")}
+        </LangLink>
+        <LangLink href="/pricing" className="tap-target inline-flex items-center font-semibold text-[#F7F3EA] hover:text-teal hover:underline">
           {t("home.cta.pricing")}
         </LangLink>
-        <LangLink href="/status" className="font-semibold text-teal hover:underline">
+        <LangLink href="/status" className="tap-target inline-flex items-center font-semibold text-[#9FD4C8] hover:text-[#F7F3EA] hover:underline">
           {t("nav.status")}
         </LangLink>
       </p>
