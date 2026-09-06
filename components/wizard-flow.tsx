@@ -50,6 +50,7 @@ import { DepartmentRail } from "@/components/department-shell";
 import { useI18n } from "@/components/i18n-provider";
 import { CoachPanel } from "@/components/coach-panel";
 import { DiagnosisCmoStrip, DiagnosisGaps } from "@/components/diagnosis-gaps";
+import { ResearchDesk } from "@/components/research-desk";
 import { ImageOfferPicker } from "@/components/image-offer-picker";
 import { VoiceFields } from "@/components/voice-fields";
 import { emptyVoice, voiceFromIntake } from "@/lib/engine/voice";
@@ -1172,6 +1173,7 @@ function AgentsPanel({
       {pack && (
         <div className="agency-board p-5 sm:p-7">
           <DiagnosisCmoStrip cmoIdeas={pack.cmoIdeas} locale={locale} />
+          <ResearchDesk pack={pack} locale={locale} onPack={onPack} compact />
           <DiagnosisGaps
             report={pack.intakeReport}
             moves={pack.cmoIdeas?.gapPlan?.moves}

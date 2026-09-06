@@ -58,10 +58,11 @@ import {
 | Hook / retention predictor | `runViralDeskJob("predict", body)` | Pro | `{ kind: "gemini_pro_estimate", notLiveMetrics: true }` — **not** live views/CTR/ROAS |
 | Video rewrite | `runViralDeskJob("rewrite", { …, script })` | Pro | |
 | Imagen carousel | `runViralDeskJob("carousel", { …, slides: 5 })` | Imagen 3 | Real bytes; no empty SVG |
-| 30-day calendar | `runViralDeskJob("calendar30", body)` | Pro | Planning only |
+| 30-day calendar | `runViralDeskJob("calendar30", body)` | Pro + Search Grounding | Trend-aware planning; cite URLs; no fake ROAS |
 | Trends | `runViralDeskJob("trends", body)` | Pro + `completeGemini({ grounding: true })` | Search Grounding; cite URLs; no invented views |
+| Market research | `runMarketResearch(intake)` or `POST /api/research` | Pro + free public surfaces | Meta Ad Library (token optional), TikTok Creative Center URLs, Google Ads Transparency, Pinterest Trends, YouTube suggest, LinkedIn Ad Library |
 | Brand voice | `saveBrandVoice` / `loadBrandVoice` | store | In-memory now. Next PR: Firestore collection `brand_voices` via `setBrandVoiceStore` |
 
-`completeGemini({ grounding: true })` sends Vertex `tools: [{ googleSearch: {} }]`. Use it only for trends.
+`completeGemini({ grounding: true })` sends Vertex `tools: [{ googleSearch: {} }]`. Use it for CMO idea platforms, angles, campaign assemble, strategy, site-audit insights, 7/30-day calendars, viral trends, and the research desk. Label outputs with as-of date + source URLs. Never invent views, likes, ROAS, spend, or CPM.
 
 **Forbidden in the viral-desk UI:** fake ROAS, invented likes/views/watch-time, live Meta/TikTok/YouTube API numbers. Predictor scores stay labeled as Gemini Pro estimates.

@@ -37,9 +37,15 @@ export function overlayProOnAgency(pack: CampaignPack, desk: ProDeskInsights): C
           kind: "strength" as const,
           label,
           evidence: {
-            he: "Vertex Gemini Pro · מתוך העובדות שסופקו",
-            ar: "Vertex Gemini Pro · من الوقائع المعطاة",
-            en: "Vertex Gemini Pro · from supplied facts",
+            he: desk.grounded
+              ? `Vertex Gemini Pro · מבוסס חיפוש${desk.asOf ? ` · ${desk.asOf.slice(0, 10)}` : ""}${desk.sources?.[i]?.url ? ` · ${desk.sources[i]!.url}` : ""}`
+              : "Vertex Gemini Pro · מתוך העובדות שסופקו",
+            ar: desk.grounded
+              ? `Vertex Gemini Pro · بحث${desk.asOf ? ` · ${desk.asOf.slice(0, 10)}` : ""}${desk.sources?.[i]?.url ? ` · ${desk.sources[i]!.url}` : ""}`
+              : "Vertex Gemini Pro · من الوقائع المعطاة",
+            en: desk.grounded
+              ? `Vertex Gemini Pro · search-grounded${desk.asOf ? ` · ${desk.asOf.slice(0, 10)}` : ""}${desk.sources?.[i]?.url ? ` · ${desk.sources[i]!.url}` : ""}`
+              : "Vertex Gemini Pro · from supplied facts",
           },
         })),
       ],

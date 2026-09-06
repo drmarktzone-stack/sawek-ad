@@ -84,6 +84,31 @@ export function SiteAuditPanel({
               <AuditList items={audit.weaknesses} locale={locale} pack={pack} onPack={onPack} />
             </div>
           </div>
+          {audit.groundedNotes?.length ? (
+            <div className="mt-4 rounded-[14px] border border-dashed border-navy/20 bg-navy/5 px-3 py-3">
+              <p className="text-[13px] font-bold uppercase tracking-wide text-teal">{t("research.groundedNotes")}</p>
+              <ul className="mt-2 space-y-2">
+                {audit.groundedNotes.map((n, i) => (
+                  <li key={`audit-g-${i}`} className="text-sm leading-relaxed text-foreground">
+                    <span className="font-black">{n.title[locale] || n.title.en}</span>
+                    {" — "}
+                    {n.note[locale] || n.note.en}
+                    <span className="mt-1 block text-[11px] text-muted">
+                      {t("research.asOf")} {n.asOf.slice(0, 10)}
+                      {n.sourceUrl ? (
+                        <>
+                          {" · "}
+                          <a href={n.sourceUrl} target="_blank" rel="noreferrer" className="text-teal underline">
+                            {n.sourceUrl.replace(/^https?:\/\//, "").slice(0, 48)}
+                          </a>
+                        </>
+                      ) : null}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
         </section>
       ) : null}
 

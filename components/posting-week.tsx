@@ -23,6 +23,20 @@ export function PostingWeek({ pack, locale }: { pack: CampaignPack; locale: Loca
             <h3 className="mt-2 line-clamp-3 text-sm font-black leading-snug text-navy">{d.headline}</h3>
             <p className="mt-2 line-clamp-4 text-xs leading-relaxed text-muted">{d.body}</p>
             <p className="mt-2 text-sm font-bold text-teal">{d.cta}</p>
+            {d.trendHint ? (
+              <p className="mt-2 text-[11px] leading-relaxed text-navy/70">
+                {t("research.trendHint")}: {d.trendHint}
+                {d.asOf ? ` · ${t("research.asOf")} ${d.asOf.slice(0, 10)}` : ""}
+                {d.trendSource ? (
+                  <>
+                    {" · "}
+                    <a href={d.trendSource} target="_blank" rel="noreferrer" className="text-teal underline">
+                      {t("research.source")}
+                    </a>
+                  </>
+                ) : null}
+              </p>
+            ) : null}
           </li>
         ))}
       </ol>

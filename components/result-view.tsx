@@ -38,6 +38,7 @@ import { AnglesStrip } from "@/components/angles-strip";
 import { CmoIdeasStrip } from "@/components/cmo-ideas-strip";
 import { ViralDesk } from "@/components/viral-desk";
 import { DiagnosisGaps } from "@/components/diagnosis-gaps";
+import { ResearchDesk } from "@/components/research-desk";
 import { buildCmoIdeasPack } from "@/lib/engine/cmo-ideas";
 import { CoachImprovedStrip } from "@/components/coach-panel";
 import { PublishToSocial } from "@/components/publish-to-social";
@@ -383,6 +384,7 @@ export function ResultView({
         locale={locale}
         compact
       />
+      <ResearchDesk pack={pack} locale={packLang} onPack={onChange} />
       {pack.intakeReport.inconsistencies.length > 0 && (
         <div className="mb-8 rounded-2xl border border-danger/40 bg-coral/10 p-4 text-sm text-danger">
           {pack.intakeReport.inconsistencies.map((inc, i) => (

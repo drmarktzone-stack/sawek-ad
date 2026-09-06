@@ -12,6 +12,13 @@ export interface SiteAuditItem {
 export interface SiteAudit {
   strengths: SiteAuditItem[];
   weaknesses: SiteAuditItem[];
+  /** Public-trend notes with date + source URL — never invented metrics. */
+  groundedNotes?: Array<{
+    title: Record<Locale, string>;
+    note: Record<Locale, string>;
+    sourceUrl?: string;
+    asOf: string;
+  }>;
 }
 
 /** Agency read of old Facebook/Instagram posts as past campaigns. Evidence-only. */
@@ -432,7 +439,12 @@ export interface CampaignPack {
     tier: "pro";
     down?: boolean;
     reason?: string;
+    asOf?: string;
+    grounded?: boolean;
+    sources?: { url: string; title?: string }[];
   };
+  /** Free public ad-intelligence desk (Meta Library, TikTok CC, peers). */
+  research?: MarketResearch;
   /** Vertex Gemini Flash burst variations (Meta / Google / WhatsApp / story). */
   flashVariations?: {
     variations: Array<{
@@ -638,6 +650,64 @@ export interface CmoIdeasPack {
   selected: CmoIdea[];
   gapPlan: CmoGapPlan;
   planningDisclaimer: Tri;
+  /** Search-grounded public-pattern notes — never ROAS / views. */
+  groundedNotes?: GroundedNote[];
+}
+
+export type ResearchSourceId =
+  | "meta_ad_library"
+  | "tiktok_creative_center"
+  | "google_ads_transparency"
+  | "pinterest_trends"
+  | "youtube_suggest"
+  | "linkedin_ad_library";
+
+export type ResearchSourceStatus =
+  | "ok"
+  | "grounded"
+  | "empty"
+  | "blocked"
+  | "rate_limited"
+  | "no_token"
+  | "pending";
+
+export interface PublicAdExample {
+  id: string;
+  source: ResearchSourceId;
+  advertiser?: string;
+  page?: string;
+  title: Tri;
+  snippet: Tri;
+  url: string;
+  asOf: string;
+}
+
+export interface GroundedNote {
+  title: Tri;
+  note: Tri;
+  sourceUrl?: string;
+  asOf: string;
+}
+
+export interface ResearchSourceCard {
+  id: ResearchSourceId;
+  status: ResearchSourceStatus;
+  label: Tri;
+  exploreUrl: string;
+  examples: PublicAdExample[];
+  notes: GroundedNote[];
+  emptyReason?: Tri;
+}
+
+export interface MarketResearch {
+  asOf: string;
+  query: string;
+  geo: string;
+  sources: ResearchSourceCard[];
+  notes: GroundedNote[];
+  grounded: boolean;
+  fetched: boolean;
+  disclaimer: Tri;
 }
 
 

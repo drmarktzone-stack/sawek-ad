@@ -16,6 +16,8 @@ import { demoIntake, DEMO_ID } from "../demo";
 import { catalogIntake, demoEntry, demoMetaFor, type DemoPackId, DEMO_OLIVE_ID, DEMO_SAND_ID } from "../demo-catalog";
 import { loadLocale } from "../storage";
 import { buildCmoIdeasPack, ideaNamesForLocale } from "./cmo-ideas";
+import { buildResearchSkeleton, runMarketResearch } from "./ad-research";
+import { applyResearchToPack } from "./research-overlay";
 
 export const AGENT_ORDER: AgentId[] = [
   "intake",
@@ -125,10 +127,18 @@ export async function runFullPipeline(
 }
 
 
-function proDeskUrl(): string {
-  if (typeof window !== "undefined") return "/api/generate/pro-desk";
+function apiUrl(path: string): string {
+  if (typeof window !== "undefined") return path;
   const base = process.env.NEXT_PUBLIC_BASE_URL?.trim() || "http://127.0.0.1:43147";
-  return `${base.replace(/\/$/, "")}/api/generate/pro-desk`;
+  return `${base.replace(/\/$/, "")}${path}`;
+}
+
+function proDeskUrl(): string {
+  return apiUrl("/api/generate/pro-desk");
+}
+
+function researchUrl(): string {
+  return apiUrl("/api/research");
 }
 
 function factsFromIntake(intake: Intake): string {
@@ -158,7 +168,18 @@ async function fetchProDesk(intake: Intake): Promise<ProDeskInsights> {
         description: factsFromIntake(intake),
         audience: intake.audience,
         mode: "strategy",
-        facts: factsFromIntake(intake),
+        facts: {
+          businessName: intake.businessName,
+          category: intake.category,
+          description: intake.description,
+          audience: intake.audience,
+          uniqueAdvantage: intake.uniqueAdvantage,
+          biggestProblem: intake.biggestProblem,
+          offer: intake.offer,
+          location: intake.location,
+          website: intake.website,
+          niche: intake.voice?.niche,
+        },
       }),
       signal: ctrl.signal,
     });
@@ -168,6 +189,46 @@ async function fetchProDesk(intake: Intake): Promise<ProDeskInsights> {
     return data;
   } catch {
     return { tier: "pro", down: true, reason: "gemini_error" };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function fetchResearch(intake: Intake): Promise<ReturnType<typeof buildResearchSkeleton>> {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 34_000);
+  try {
+    const res = await fetch(researchUrl(), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        description: factsFromIntake(intake),
+        audience: intake.audience,
+        facts: {
+          businessName: intake.businessName,
+          category: intake.category,
+          description: intake.description,
+          audience: intake.audience,
+          uniqueAdvantage: intake.uniqueAdvantage,
+          biggestProblem: intake.biggestProblem,
+          offer: intake.offer,
+          location: intake.location,
+          website: intake.website,
+          niche: intake.voice?.niche,
+        },
+      }),
+      signal: ctrl.signal,
+    });
+    if (!res.ok) return buildResearchSkeleton(intake);
+    const data = (await res.json()) as ReturnType<typeof buildResearchSkeleton>;
+    if (!data || !Array.isArray(data.sources)) return buildResearchSkeleton(intake);
+    return data;
+  } catch {
+    try {
+      return await runMarketResearch(intake);
+    } catch {
+      return { ...buildResearchSkeleton(intake), fetched: true };
+    }
   } finally {
     clearTimeout(timer);
   }
@@ -192,8 +253,10 @@ export async function overlayPackAgency(pack: CampaignPack): Promise<CampaignPac
     }
   })();
   const proOverlay = fetchProDesk(pack.intake);
-  const [flashed, desk] = await Promise.all([flashOverlay, proOverlay]);
+  const researchOverlay = fetchResearch(pack.intake);
+  const [flashed, desk, research] = await Promise.all([flashOverlay, proOverlay, researchOverlay]);
   next = overlayProOnAgency(flashed, desk);
+  next = applyResearchToPack(next, research);
   const audit = next.pastCampaignAudit ?? buildPastCampaignAudit(next.intake);
   if (audit) {
     try {
@@ -247,6 +310,7 @@ export function assemblePack(
     coach: partial.coach ?? coachIntake(intake),
     siteAudit: buildSiteAudit(intake),
     cmoIdeas,
+    research: buildResearchSkeleton(intake),
     ...(pastCampaignAudit ? { pastCampaignAudit } : {}),
     ...(partial.angles ? { angles: partial.angles } : {}),
     featureType: "campaign",

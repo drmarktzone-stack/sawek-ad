@@ -2,6 +2,7 @@ import type { CampaignPack, Locale } from "../types";
 import { channelFields } from "../channel-copy";
 import { pickIdeas } from "./cmo-ideas";
 import { buildCarouselPack, buildViralScripts } from "./viral-content";
+import { researchNotesForCalendar } from "./research-overlay";
 
 export type PostingChannel = "facebook" | "instagram" | "tiktok" | "whatsapp" | "landing";
 export type PostingKind = "post" | "script" | "carousel" | "campaign" | "ad";
@@ -20,6 +21,10 @@ export interface PostingDay {
   whyItWins?: string;
   planningScore?: number;
   kind?: PostingKind;
+  /** Public-trend hint with source URL — never invented views. */
+  trendHint?: string;
+  trendSource?: string;
+  asOf?: string;
 }
 
 const CH: Record<PostingChannel, Record<Locale, string>> = {
@@ -130,8 +135,13 @@ export function buildPostingCalendar(pack: CampaignPack, locale: Locale, days = 
     });
   }
 
+  const trendNotes = researchNotesForCalendar(pack);
+  const trendDays = new Set([4, 6, 8, 15, 22, 29]);
+
   return plan.slice(0, target).map((row) => {
     const idea = ideaAt(row.ideaIndex);
+    const note = trendDays.has(row.day) ? trendNotes[(row.day - 1) % Math.max(1, trendNotes.length)] : undefined;
+    const hint = note ? note.title[locale] || note.title.he || note.title.en : undefined;
     return {
       day: row.day,
       channel: row.channel,
@@ -145,6 +155,13 @@ export function buildPostingCalendar(pack: CampaignPack, locale: Locale, days = 
       whyItWins: idea?.whyItWins[locale] || idea?.whyItWins.he,
       planningScore: idea?.planningScore,
       kind: row.kind,
+      ...(hint
+        ? {
+            trendHint: hint,
+            ...(note?.sourceUrl ? { trendSource: note.sourceUrl } : {}),
+            ...(note?.asOf ? { asOf: note.asOf } : {}),
+          }
+        : {}),
     };
   });
 }

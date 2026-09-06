@@ -6,6 +6,7 @@ import {
   classifyVertexHttp,
   clearVertexQuota,
   extractGenerateText,
+  extractGroundingSources,
   fetchGoogleJson,
   geminiApiKeyPresent,
   markVertexQuota,
@@ -52,6 +53,11 @@ export type GenerateMode =
 export function tierForGenerateMode(mode: GenerateMode): GeminiTier {
   if (mode === "variations" || mode === "channels" || mode === "angles") return "flash";
   return "pro";
+}
+
+/** Search Grounding for CMO / angles / assemble / strategy / audit / calendars. */
+export function shouldGroundGenerateMode(mode: GenerateMode): boolean {
+  return mode === "ads" || mode === "angles" || mode === "strategy" || mode === "audit" || mode === "calendar";
 }
 export type GenerateLang = "he" | "ar" | "en";
 
@@ -110,6 +116,9 @@ export type GenerateOk = {
   model?: string;
   provider?: "vertex" | "ai_studio";
   tier?: GeminiTier;
+  asOf?: string;
+  grounded?: boolean;
+  sources?: { url: string; title?: string }[];
 };
 
 export type GenerateFail = {
@@ -397,15 +406,21 @@ const JSON_SHAPE_VARIATIONS = `{
 const JSON_SHAPE_STRATEGY = `{
   "audience":{"he":"","ar":"","en":""},
   "strategy":{"he":"","ar":"","en":""},
-  "psychology":{"he":"","ar":"","en":""}
+  "psychology":{"he":"","ar":"","en":""},
+  "asOf":"YYYY-MM-DD",
+  "sources":[{"url":"","title":""}]
 }`;
 
 const JSON_SHAPE_AUDIT = `{
-  "insights":[{"he":"","ar":"","en":""},{"he":"","ar":"","en":""},{"he":"","ar":"","en":""}]
+  "insights":[{"he":"","ar":"","en":""},{"he":"","ar":"","en":""},{"he":"","ar":"","en":""}],
+  "asOf":"YYYY-MM-DD",
+  "sources":[{"url":"","title":""}]
 }`;
 
 const JSON_SHAPE_CALENDAR = `{
-  "weeks":[{"week":1,"theme":{"he":"","ar":"","en":""},"action":{"he":"","ar":"","en":""}}]
+  "weeks":[{"week":1,"theme":{"he":"","ar":"","en":""},"action":{"he":"","ar":"","en":""}}],
+  "asOf":"YYYY-MM-DD",
+  "sources":[{"url":"","title":""}]
 }`;
 
 const JSON_SHAPE_SCRIPTS = `{
@@ -435,24 +450,24 @@ function modeHint(mode: GenerateMode): string {
     return "mode=channels. Fill the channels pack in HE+AR+EN. Use only facts above. Missing fact → [יש להשלים] / [يجب الاستكمال] / [TO COMPLETE]. Recreate per language, do not literal-translate.";
   }
   if (mode === "angles") {
-    return "mode=angles. Fill angles {pain,benefit,social_proof,story} each with he/ar/en {headline,copy,cta}. Recreate per language — do not translate literally. Social proof: only ratings/reviews/customer counts present in facts; otherwise [יש להשלים] / [يجب الاستكمال] / [TO COMPLETE].";
+    return "mode=angles. Search-grounded. Fill angles {pain,benefit,social_proof,story} each with he/ar/en {headline,copy,cta}. Recreate per language — do not translate literally. Social proof: only ratings/reviews/customer counts present in facts; otherwise [יש להשלים] / [يجب الاستكمال] / [TO COMPLETE]. Cite public source URLs in sources[] when grounding returns them. Label asOf today's date. Never invent views, likes, ROAS, spend, or CPM.";
   }
   if (mode === "variations") {
     return "mode=variations. FLASH path. Produce 12–18 SHORT ad variations across channels meta, google, whatsapp, story. Each variation needs he/ar/en {headline,body,cta}. Headlines ≤ 40 chars. Bodies ≤ 90 chars for Meta/Google, ≤ 300 for WhatsApp. Recreate per language — do not literal-translate. No invented prices, ROAS, ratings.";
   }
   if (mode === "strategy") {
-    return "mode=strategy. PRO path. Deep CMO strategy psychologically tuned to the audience in the facts. Fill audience / strategy / psychology in HE+AR+EN. Use only facts. Never invent ROAS, CAC, lead counts, or competitors.";
+    return "mode=strategy. PRO + Search grounding. Deep CMO strategy psychologically tuned to the audience in the facts. When public trends help, cite the source URL and today's date. Fill audience / strategy / psychology in HE+AR+EN. Use only facts. Never invent ROAS, CAC, lead counts, views, likes, spend, or competitors.";
   }
   if (mode === "audit") {
-    return "mode=audit. PRO path. Site-audit insights from provided facts only. 3 insight lines HE+AR+EN. No invented metrics.";
+    return "mode=audit. PRO + Search grounding. Site-audit insights from provided facts, plus current public marketing patterns when they help. 3 insight lines HE+AR+EN. Cite source URLs in sources[]. No invented metrics, views, or ROAS.";
   }
   if (mode === "calendar") {
-    return "mode=calendar. PRO path. 8–13 week campaign calendar from facts. theme + action per week in HE+AR+EN. Planning only — no fake ROAS.";
+    return "mode=calendar. PRO + Search grounding. 8–13 week campaign calendar from facts, trend-aware posting ideas when public sources cite a pattern. theme + action per week in HE+AR+EN. Planning only — no fake ROAS. Include asOf + sources[] with URLs when available.";
   }
   if (mode === "scripts") {
     return "mode=scripts. PRO path. Script pack for reels, tiktok, whatsapp in HE+AR+EN. 15s structure 0-3 / 3-12 / 12-15 for video. Facts only.";
   }
-  return "mode=ads. Fill HE+AR+EN locale packs (6 headlines each), the channels pack, AND angles {pain,benefit,social_proof,story} each with he/ar/en {headline,copy,cta}. Recreate per language — do not translate literally. Social proof: only ratings/reviews/customer counts present in facts; otherwise incomplete markers.";
+  return "mode=ads. Search-grounded assemble. Fill HE+AR+EN locale packs (6 headlines each), the channels pack, AND angles {pain,benefit,social_proof,story} each with he/ar/en {headline,copy,cta}. Recreate per language — do not translate literally. Social proof: only ratings/reviews/customer counts present in facts; otherwise incomplete markers. When public creative patterns help, cite source URLs in sources[] and asOf today's date. Never invent views, likes, ROAS, spend, or CPM.";
 }
 
 function factsBlockFromBody(body: GenerateBody): string {
@@ -545,7 +560,15 @@ export function bodyHasFacts(body: GenerateBody): boolean {
 
 type GeminiPart = { text: string } | { inlineData: { mimeType: string; data: string } };
 
-type CompleteOk = { ok: true; text: string; model: string; provider: "vertex" | "ai_studio" };
+type CompleteOk = {
+  ok: true;
+  text: string;
+  model: string;
+  provider: "vertex" | "ai_studio";
+  groundingSources?: { url: string; title?: string }[];
+  asOf?: string;
+  grounded?: boolean;
+};
 type CompleteFail = { ok: false; reason: "no_key" | "gemini_error" | "quota" | "vertex_denied" };
 
 async function vertexGenerate(
@@ -589,7 +612,17 @@ async function vertexGenerate(
           last = { ok: false, reason: "gemini_error" };
           continue;
         }
-        return { ok: true, text, model, provider: "vertex" };
+        const groundingSources = grounding ? extractGroundingSources(json) : [];
+        return {
+          ok: true,
+          text,
+          model,
+          provider: "vertex",
+          asOf: new Date().toISOString(),
+          ...(grounding
+            ? { grounded: true, ...(groundingSources.length ? { groundingSources } : {}) }
+            : {}),
+        };
       }
       if (kind === "quota") return { ok: false, reason: "quota" };
       if (kind === "not_found") {
@@ -668,7 +701,7 @@ export async function completeGemini(opts: {
   systemInstruction?: string;
   /** pro = CMO/strategy/audit/calendar/scripts; flash = burst variations. Default flash. */
   tier?: GeminiTier;
-  /** Vertex Google Search grounding — trends only. Never invent live platform metrics. */
+  /** Vertex Google Search grounding — CMO / angles / strategy / audit / calendars / trends. Never invent live platform metrics. */
   grounding?: boolean;
 }): Promise<CompleteOk | CompleteFail> {
   const timeoutMs = opts.timeoutMs ?? GEMINI_TIMEOUT_MS;
@@ -927,11 +960,13 @@ export async function runGeminiGenerate(body: GenerateBody): Promise<GenerateRes
     const mode = asMode(body.mode);
     const language = asLang(body.language);
     const userMessage = buildUserMessage(body);
+    const grounding = shouldGroundGenerateMode(mode);
     const completed = await completeGemini({
       parts: [{ text: userMessage }],
       temperature: body.medical === true ? 0.2 : 0.4,
       tier: tierForGenerateMode(mode),
-      timeoutMs: tierForGenerateMode(mode) === "pro" ? 28_000 : GEMINI_TIMEOUT_MS,
+      timeoutMs: grounding ? 32_000 : tierForGenerateMode(mode) === "pro" ? 28_000 : GEMINI_TIMEOUT_MS,
+      grounding,
     });
     if (!completed.ok) {
       // Never leave the client with empty/broken ads when facts exist.
@@ -954,6 +989,9 @@ export async function runGeminiGenerate(body: GenerateBody): Promise<GenerateRes
       model: completed.model,
       provider: completed.provider,
       tier: tierForGenerateMode(mode),
+      asOf: completed.asOf,
+      grounded: completed.grounded === true,
+      sources: completed.groundingSources,
     };
     if (mode === "scan" && parsed.brand) {
       out.brand = parsed.brand;
