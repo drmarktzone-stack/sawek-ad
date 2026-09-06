@@ -3,6 +3,7 @@ import { createClient, type Session, type User } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { runtimeEnv } from "./runtime-env";
 import { isOwnerEmail, resolvePlan, type PlanId } from "./plan";
+import { safeNextPath } from "./safe-path";
 
 export const ACCESS_COOKIE = "sawek-sb-access";
 export const REFRESH_COOKIE = "sawek-sb-refresh";
@@ -123,15 +124,17 @@ export function applyPkceCookie(res: NextResponse, req: Request, verifier: strin
 
 /** Relative path only — OAuth next must not become an open redirect. */
 export function safeInternalPath(next: string | null | undefined): string {
-  const n = String(next || "/").trim() || "/";
-  if (!n.startsWith("/") || n.startsWith("//") || n.includes("\\") || n.includes("://")) return "/";
-  return n;
+  return safeNextPath(next, "/");
 }
 
-export function googleAuthorizeUrl(req: Request, challenge: string): string | null {
+export function googleAuthorizeUrl(req: Request, challenge: string, nextPath?: string | null): string | null {
   const creds = supabaseAnonCreds();
   if (!creds) return null;
-  const redirectTo = `${publicAppBase(req)}/auth/callback`;
+  const next = safeInternalPath(nextPath);
+  const redirectTo =
+    next && next !== "/"
+      ? `${publicAppBase(req)}/auth/callback?next=${encodeURIComponent(next)}`
+      : `${publicAppBase(req)}/auth/callback`;
   const u = new URL(`${creds.url.replace(/\/$/, "")}/auth/v1/authorize`);
   u.searchParams.set("provider", "google");
   u.searchParams.set("redirect_to", redirectTo);

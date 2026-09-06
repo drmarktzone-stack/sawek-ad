@@ -9,6 +9,7 @@ import { LangLink } from "@/components/lang-link";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { withLang } from "@/lib/locale-url";
+import { safeNextPath } from "@/lib/safe-path";
 
 function looksLikeDump(s: string): boolean {
   const t = s.trim();
@@ -30,6 +31,8 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const [googleReady, setGoogleReady] = useState<boolean | null>(null);
 
   const qErr = params.get("error");
+  const nextPath = safeNextPath(params.get("next"), "/");
+  const nextQuery = nextPath !== "/" ? `?next=${encodeURIComponent(nextPath)}` : "";
   const googleOffQuery = qErr === "google_off" || qErr === "google";
 
   function messageFor(code: string | undefined, fallbackKey: "auth.error" | "auth.signupError"): string {
@@ -97,7 +100,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
           setError(messageFor(r.error, "auth.error"));
           return;
         }
-        router.push(withLang("/", locale));
+        router.push(withLang(nextPath, locale));
       } else {
         const r = await signup(email, password);
         if (!r.ok) {
@@ -108,7 +111,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
           setNeedsEmail(true);
           return;
         }
-        router.push(withLang("/", locale));
+        router.push(withLang(nextPath, locale));
       }
     } finally {
       setBusy(false);
@@ -120,7 +123,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
     setError("");
     setErrorDetail("");
     try {
-      const res = await fetch("/api/auth/google?json=1", {
+      const res = await fetch(`/api/auth/google?json=1${nextPath !== "/" ? `&next=${encodeURIComponent(nextPath)}` : ""}`, {
         headers: { Accept: "application/json" },
         cache: "no-store",
         credentials: "include",
@@ -224,11 +227,11 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
       {showGoogleOff ? <p className="mt-4 text-sm font-semibold text-danger">{t("auth.googleOff")}</p> : null}
       <p className="mt-4 text-center text-sm">
         {mode === "login" ? (
-          <LangLink href="/signup" className="font-semibold text-navy underline">
+          <LangLink href={`/signup${nextQuery}`} className="font-semibold text-navy underline">
             {t("auth.needAccount")}
           </LangLink>
         ) : (
-          <LangLink href="/login" className="font-semibold text-navy underline">
+          <LangLink href={`/login${nextQuery}`} className="font-semibold text-navy underline">
             {t("auth.haveAccount")}
           </LangLink>
         )}
