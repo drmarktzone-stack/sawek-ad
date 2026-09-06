@@ -74,6 +74,9 @@ export function HomeStudio() {
                 {t("cta.new")}
               </Button>
               <Button asChild size="lg" variant="outline" className="btn-mobile-full border-white/20 bg-white/8 text-[#F7F3EA] hover:bg-white hover:text-ink text-base font-black sm:text-lg">
+                <LangLink href="/about">{t("home.cta.about")}</LangLink>
+              </Button>
+              <Button asChild size="lg" variant="outline" className="btn-mobile-full border-white/20 bg-white/8 text-[#F7F3EA] hover:bg-white hover:text-ink text-base font-black sm:text-lg">
                 <LangLink href="/pricing">{t("home.cta.pricing")}</LangLink>
               </Button>
             </div>
