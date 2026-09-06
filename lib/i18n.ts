@@ -699,7 +699,7 @@ export const copy: Dict = {
   },
   "about.tech.imagen.h": { he: "Imagen 3 — סטילים", ar: "Imagen 3 — ستيلات", en: "Imagen 3 — stills" },
   "about.tech.imagen.p": {
-    he: "imagen-3.0-generate-001 (ואז alias מהיר / Imagen 4). באנרים וסטילים; נשמרים ב-/api/imagen. הצלחה דורשת בתים אמיתיים — לא SVG ריק. במנוי Pro.",
+    he: "imagen-3.0-generate-001 (ואז alias מהיר / Imagen 4). באנרים ותמונות סטיל; נשמרים ב-/api/imagen. הצלחה דורשת קובץ תמונה אמיתי — לא SVG ריק. במנוי Pro.",
     ar: "imagen-3.0-generate-001 (وبعدين alias سريع / Imagen 4). بنرات وستيلات؛ بتنحفظ بـ/api/imagen. النجاح بده بايتات حقيقية — مش SVG فاضي. باشتراك Pro.",
     en: "imagen-3.0-generate-001 (then a fast / Imagen 4 alias). Banners and stills; stored at /api/imagen. Success needs real image bytes — not an empty SVG. Pro.",
   },
