@@ -6,14 +6,12 @@ import { useAuth } from "@/components/auth-provider";
 import { useI18n } from "@/components/i18n-provider";
 import { LangLink } from "@/components/lang-link";
 import { Button } from "@/components/ui/button";
+import { ManualPayPanel, type BillingCfg } from "@/components/manual-pay-panel";
 import { PRICE_MONTHLY_ILS, PRICE_YEARLY_ILS } from "@/lib/plan";
 
-type PublicBilling = {
+type PublicBilling = BillingCfg & {
   stripeEnabled?: boolean;
   stripePublishableKey?: string;
-  paypalMe?: string;
-  bankConfigured?: boolean;
-  bitConfigured?: boolean;
 };
 
 export function PricingPage() {
@@ -42,7 +40,7 @@ export function PricingPage() {
 
   const flash = params.get("checkout");
 
-  async function checkout(interval: "monthly" | "yearly", method: "card" | "paypal" = "card") {
+  async function checkout(interval: "monthly" | "yearly") {
     setErr("");
     if (!user) {
       setErr(t("pricing.needLogin"));
@@ -52,13 +50,13 @@ export function PricingPage() {
       setErr(t("pricing.stripeWait"));
       return;
     }
-    setBusy(`${method}-${interval}`);
+    setBusy(`card-${interval}`);
     try {
       const res = await fetch("/api/stripe/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ interval, method }),
+        body: JSON.stringify({ interval, method: "card" }),
       });
       const data = (await res.json()) as { ok?: boolean; url?: string; messageHe?: string };
       if (!res.ok || !data.ok || !data.url) {
@@ -114,8 +112,14 @@ export function PricingPage() {
               <li key={k}>• {t(k)}</li>
             ))}
           </ul>
+
+          <div className="mt-6">
+            <ManualPayPanel cfg={cfg} showTitle />
+          </div>
+
           {cfg.stripeEnabled ? (
-            <div className="mt-6 flex flex-col gap-2">
+            <div className="mt-4 flex flex-col gap-2">
+              <p className="text-xs font-bold uppercase tracking-wide text-muted">{t("pricing.cardOptional")}</p>
               <Button type="button" className="w-full" disabled={Boolean(busy)} onClick={() => void checkout("monthly")}>
                 {busy === "card-monthly" ? t("auth.busy") : t("pricing.cta.month")}
               </Button>
@@ -124,32 +128,8 @@ export function PricingPage() {
               </Button>
             </div>
           ) : (
-            <div className="mt-6">
-              <Button type="button" className="w-full" disabled>
-                {t("pricing.cta.connectStripe")}
-              </Button>
-              <p className="mt-2 text-sm text-muted">{t("pricing.stripeWait")}</p>
-            </div>
+            <p className="mt-4 text-xs text-muted">{t("pricing.stripeWait")}</p>
           )}
-          <div className="mt-4 flex flex-col gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full"
-              disabled={Boolean(busy)}
-              onClick={() => {
-                if (cfg.stripeEnabled) void checkout("monthly", "paypal");
-                else if (cfg.paypalMe) window.location.href = cfg.paypalMe;
-                else setErr(t("pricing.stripeWait"));
-              }}
-            >
-              {t("pricing.paypal")}
-            </Button>
-            <p className="text-xs text-muted">{t("pricing.paypalHint")}</p>
-            <Button asChild variant="outline" className="w-full">
-              <LangLink href="/billing/bank">{t("pricing.bank")} / {t("pricing.bit")}</LangLink>
-            </Button>
-          </div>
         </article>
       </div>
       {err ? <p className="mt-4 text-center text-sm font-semibold text-danger">{err}</p> : null}

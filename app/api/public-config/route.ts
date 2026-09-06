@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { bankInstructions, bitInstructions, paypalMeUrl, stripeConfigured, stripePublishableKey } from "@/lib/stripe";
+import { publicPayments } from "@/lib/payments";
+import { stripeConfigured, stripePublishableKey } from "@/lib/stripe";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -11,20 +12,15 @@ export async function GET() {
   const appBaseUrl = String(process.env["APP_BASE_URL"] ?? process.env["NEXT_PUBLIC_APP_BASE_URL"] ?? "")
     .trim()
     .replace(/\/$/, "");
-  const bank = bankInstructions();
-  const bit = bitInstructions();
-  const paypalMe = paypalMeUrl();
+  const payments = publicPayments({
+    stripeEnabled: stripeConfigured(),
+    stripePublishableKey: stripePublishableKey(),
+  });
   return NextResponse.json({
     supabaseUrl,
     supabaseAnonKey,
     supabaseEnabled,
     appBaseUrl,
-    stripeEnabled: stripeConfigured(),
-    stripePublishableKey: stripePublishableKey(),
-    paypalMe,
-    bankConfigured: Boolean(bank),
-    bitConfigured: Boolean(bit),
-    bankInstructions: bank,
-    bitInstructions: bit,
+    ...payments,
   });
 }

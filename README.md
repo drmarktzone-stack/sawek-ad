@@ -70,6 +70,14 @@ Viral-desk (next PR) should import `@/lib/gcp-ai` only — see `docs/VERTEX_STAC
 
 Copy `.env.example` if you want those. The app runs the same without them (localStorage).
 
+## Pro payments (Bit + bank — PayPal off)
+
+Live checkout is **Bit** (`052-8885800`) and **העברה בנקאית** to **בנק הפועלים** (branch `666`, account `422494`, holder ד״ר סאמר / Drmarktzone). PayPal Business for `drmarktzone@gmail.com` is **permanently deactivated** — do not set `PAYPAL_ME`.
+
+Customers tap **«שילמתי»**. That creates a **pending review**. Pro is never auto-upgraded. Owner confirms on `/billing/bank`. Stripe cards stay off until real keys are set. No fake success screen. No invented IBAN.
+
+Documented env + Cloud Run commands: [docs/PAYMENTS.md](./docs/PAYMENTS.md). Check with `npm run check:payments`.
+
 ## Demo walkthrough (no typing)
 
 1. On **בניית קמפיין** (`/`) or **OptiBrain** (`/medical/optibrain`) click the yellow **הדגמה: מרפאת ילדים ד״ר סאמר אבו מוך** (AR/EN labels work the same).

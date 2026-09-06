@@ -76,9 +76,9 @@ export const PRIVACY: LegalDoc = {
       h: { he: "למה משתמשים במידע", ar: "ليش منستخدم المعلومات", en: "How we use it" },
       p: [
         {
-          he: "כדי לבנות חבילת קמפיין, לשמור טיוטות, לסנכרן חשבון אם חיברתם ענן, להפעיל יצירת טקסט/תמונה/תרגום שביקשתם, ולשייך מנוי Pro אם תשלום מחובר. לא ממציאים ROAS, לייקים או תחזית לידים.",
-          ar: "حتى نبني حزمة حملة، نحفظ مسودات، نزامن الحساب إذا ربطتوا سحابة، نشغّل توليد نص/صورة/ترجمة طلبتوها، ونربط اشتراك Pro إذا الدفع موصول. ما منخترع ROAS أو لايكات أو توقع عملاء.",
-          en: "To build a campaign pack, save drafts, sync an account if you connected cloud storage, run the text/image/translation you asked for, and attach a Pro plan when payments are connected. We do not invent ROAS, likes, or lead forecasts.",
+          he: "כדי לבנות חבילת קמפיין, לשמור טיוטות, לסנכרן חשבון אם חיברתם ענן, להפעיל יצירת טקסט/תמונה/תרגום שביקשתם, ולשייך מנוי Pro אחרי אישור תשלום (ביט / העברה, או Stripe אם יחובר). לא ממציאים ROAS, לייקים או תחזית לידים.",
+          ar: "حتى نبني حزمة حملة، نحفظ مسودات، نزامن الحساب إذا ربطتوا سحابة، نشغّل توليد نص/صورة/ترجمة طلبتوها، ونربط اشتراك Pro بعد تأكيد الدفع (بيت / حوالة، أو Stripe إذا اتوصل). ما منخترع ROAS أو لايكات أو توقع عملاء.",
+          en: "To build a campaign pack, save drafts, sync an account if you connected cloud storage, run the text/image/translation you asked for, and attach a Pro plan after a payment is confirmed (Bit / bank, or Stripe if connected). We do not invent ROAS, likes, or lead forecasts.",
         },
       ],
     },
@@ -96,9 +96,9 @@ export const PRIVACY: LegalDoc = {
           en: "Supabase: if keys are configured, it is used for auth (email) and optional campaign sync. With no keys the app runs on localStorage only.",
         },
         {
-          he: "Stripe / PayPal / העברה בנקאית: רק אם התשלום מחובר. Stripe מקבל אימייל ונתוני תשלום כדי לחייב מנוי Pro. אין חיוב מדומה לפני החיבור.",
-          ar: "Stripe / PayPal / حوالة بنكية: فقط إذا الدفع موصول. Stripe بياخد الإيميل وبيانات الدفع حتى يحاسب اشتراك Pro. ما في خصم وهمي قبل الربط.",
-          en: "Stripe / PayPal / bank transfer: only if payments are connected. Stripe receives email and payment data to charge a Pro subscription. There is no fake charge before that connection.",
+          he: "ביט והעברה בנקאית (בנק הפועלים): פרטי הקבלה מוצגים ב-/pricing. אחרי «שילמתי» נשמרת בקשת אישור — בלי שדרוג אוטומטי. PayPal כבוי (חשבון העסק מנותק). Stripe לכרטיס — רק אם יחובר; אין חיוב מדומה.",
+          ar: "بيت والحوالة البنكية (بنك هبوعليم): تفاصيل الاستلام معروضة بـ/pricing. بعد «دفعت» بتنحفظ طلب تأكيد — بلا ترقية تلقائية. PayPal مطفي (حساب البيزنس مفصول). Stripe للبطاقة — فقط إذا اتوصل؛ ما في خصم وهمي.",
+          en: "Bit and bank transfer (Bank Hapoalim): receive details are shown on /pricing. After “I paid” a review request is stored — no auto-upgrade. PayPal is offline (business account deactivated). Stripe for cards — only if connected; no fake charge.",
         },
         {
           he: "אנליטיקס או ניטור שגיאות: נטענים רק אם הוגדר מזהה בסביבה (למשל Google Analytics או Plausible, או DSN של Sentry). בלי מזהה — לא נשלח מעקב.",
@@ -207,9 +207,9 @@ export const TERMS: LegalDoc = {
           en: "Free: ₪0 forever — one business, one saved campaign, site scan, Hebrew/Arabic ads, and a PNG download per card.",
         },
         {
-          he: "Pro: ₪99 לחודש או ₪990 לשנה, כשהתשלום מחובר (Stripe, ואם הוגדר — PayPal.me / העברה / ביט). בלי חיבור Stripe אין חיוב בכרטיס ואין מסך «התשלום הצליח» מזויף.",
-          ar: "Pro: ₪99 بالشهر أو ₪990 بالسنة، لما الدفع يتوصل (Stripe، وإذا مضبوط — PayPal.me / حوالة / بيت). بلا ربط Stripe ما في خصم عالبطاقة ولا شاشة «الدفع نجح» مزيفة.",
-          en: "Pro: ₪99 / month or ₪990 / year, once payments are connected (Stripe, and if configured — PayPal.me / bank / Bit). Without Stripe there is no card charge and no fake “payment succeeded” screen.",
+          he: "Pro: ₪99 לחודש או ₪990 לשנה. תשלום חי: ביט למספר 052-8885800, או העברה לבנק הפועלים (סניף 666, חשבון 422494, על שם ד״ר סאמר / Drmarktzone). אחרי «שילמתי» הבקשה ממתינה לאישור ידני — אין שדרוג אוטומטי. PayPal כבוי. כרטיס אשראי רק אם Stripe מחובר; אין מסך «התשלום הצליח» מזויף.",
+          ar: "Pro: ₪99 بالشهر أو ₪990 بالسنة. الدفع الحي: بيت على 052-8885800، أو حوالة لبنك هبوعليم (فرع 666، حساب 422494، باسم د. سامر / Drmarktzone). بعد «دفعت» الطلب بيستنى تأكيد يدوي — ما في ترقية تلقائية. PayPal مطفي. بطاقة فقط إذا Stripe مربوط؛ ما في شاشة «الدفع نجح» مزيفة.",
+          en: "Pro: ₪99 / month or ₪990 / year. Live payment: Bit to 052-8885800, or a Bank Hapoalim transfer (branch 666, account 422494, holder Dr. Samer / Drmarktzone). After “I paid” the request waits for manual review — no auto-upgrade. PayPal is offline. Cards only if Stripe is connected; no fake “payment succeeded” screen.",
         },
       ],
     },
@@ -217,9 +217,9 @@ export const TERMS: LegalDoc = {
       h: { he: "החזרים", ar: "الاسترجاع", en: "Refunds" },
       p: [
         {
-          he: `כל עוד Pro לא שולם — אין מה להחזיר. אחרי שחיבור תשלום פעיל וחויבתם על Pro, פנו ל-${CONTACT_EMAIL}. נחזיר חיוב ראשון שלא נוצל (בלי שימוש ממשי בחבילות תמונת Vertex). חישוב כבר בוצע ב-Vertex לא יוחזר ככסף.`,
-          ar: `طالما Pro ما اندفع — ما في شي نرجّعه. بعد ما الدفع يشتغل وتنخصم Pro، راسلوا ${CONTACT_EMAIL}. منرجّع أول خصم ما انستخدم (بلا استخدام فعلي لحزم صور Vertex). حساب صار على Vertex ما بيرجع كفلوس.`,
-          en: `While Pro has not been paid, there is nothing to refund. After payments are connected and you are charged for Pro, email ${CONTACT_EMAIL}. We will refund an unused first charge (no real use of Vertex image packs). Vertex compute already used is not refunded as cash.`,
+          he: `כל עוד Pro לא אושר — אין מה להחזיר. אחרי ביט / העברה שאושרה (או חיוב Stripe אם יחובר), פנו ל-${CONTACT_EMAIL}. נחזיר תשלום ראשון שלא נוצל (בלי שימוש ממשי בחבילות תמונת Vertex). חישוב כבר בוצע ב-Vertex לא יוחזר ככסף.`,
+          ar: `طالما Pro ما تأكد — ما في شي نرجّعه. بعد بيت / حوالة اتأكدت (أو خصم Stripe إذا اتوصل)، راسلوا ${CONTACT_EMAIL}. منرجّع أول دفع ما انستخدم (بلا استخدام فعلي لحزم صور Vertex). حساب صار على Vertex ما بيرجع كفلوس.`,
+          en: `While Pro has not been confirmed, there is nothing to refund. After an approved Bit / bank payment (or a Stripe charge if connected), email ${CONTACT_EMAIL}. We will refund an unused first payment (no real use of Vertex image packs). Vertex compute already used is not refunded as cash.`,
         },
       ],
     },
