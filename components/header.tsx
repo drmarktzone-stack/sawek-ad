@@ -175,6 +175,17 @@ export function Header() {
         <div className="ms-auto flex items-center gap-2">
           <GeminiStatusBadge className="border-white/15 bg-white/8 text-[#F7F3EA]" />
           <AuthChip tone="ink" />
+          <LangLink
+            href="/about"
+            className={cn(
+              "inline-flex shrink-0 rounded-[12px] px-2.5 py-1.5 text-sm font-black sm:px-3",
+              pathname.startsWith("/about")
+                ? "bg-white text-ink"
+                : "text-[#C9D0D8] hover:bg-white/8 hover:text-[#F7F3EA]",
+            )}
+          >
+            {t("nav.about")}
+          </LangLink>
           <Button asChild size="sm" variant="coral" className="hidden shrink-0 sm:inline-flex">
             <LangLink href="/" onClick={(e) => beginNewCampaign(e)}>
               {t("cta.new")}
@@ -243,7 +254,13 @@ export function Footer() {
         {t("brand.name")} · {t("brand.scripts")}
       </p>
       {t("footer.line")}
-      <p className="mt-2">
+      <p className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+        <LangLink href="/about" className="font-semibold text-[#F7F3EA] hover:text-teal hover:underline">
+          {t("nav.about")}
+        </LangLink>
+        <LangLink href="/pricing" className="font-semibold text-[#F7F3EA] hover:text-teal hover:underline">
+          {t("home.cta.pricing")}
+        </LangLink>
         <LangLink href="/status" className="font-semibold text-teal hover:underline">
           {t("nav.status")}
         </LangLink>
