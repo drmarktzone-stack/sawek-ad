@@ -540,6 +540,44 @@ export async function publicGcpStackStatus(): Promise<GcpStackStatus> {
   return status;
 }
 
+export type GroundingSource = { url: string; title?: string };
+
+/** Vertex Search Grounding citations — never invent URLs. */
+export function extractGroundingSources(json: unknown): GroundingSource[] {
+  if (!json || typeof json !== "object") return [];
+  const root = json as Record<string, unknown>;
+  const candidates = Array.isArray(root.candidates) ? root.candidates : [];
+  const out: GroundingSource[] = [];
+  const seen = new Set<string>();
+  const push = (url: unknown, title?: unknown) => {
+    if (typeof url !== "string") return;
+    const u = url.trim();
+    if (!/^https?:\/\//i.test(u) || seen.has(u)) return;
+    seen.add(u);
+    out.push({
+      url: u,
+      ...(typeof title === "string" && title.trim() ? { title: title.trim().slice(0, 160) } : {}),
+    });
+  };
+  for (const cand of candidates) {
+    if (!cand || typeof cand !== "object") continue;
+    const meta = (cand as Record<string, unknown>).groundingMetadata;
+    if (!meta || typeof meta !== "object") continue;
+    const chunks = Array.isArray((meta as Record<string, unknown>).groundingChunks)
+      ? ((meta as Record<string, unknown>).groundingChunks as unknown[])
+      : [];
+    for (const chunk of chunks) {
+      if (!chunk || typeof chunk !== "object") continue;
+      const web = (chunk as Record<string, unknown>).web;
+      if (web && typeof web === "object") {
+        const w = web as Record<string, unknown>;
+        push(w.uri ?? w.url, w.title);
+      }
+    }
+  }
+  return out.slice(0, 12);
+}
+
 export function extractGenerateText(json: unknown): string {
   if (!json || typeof json !== "object") return "";
   const root = json as Record<string, unknown>;

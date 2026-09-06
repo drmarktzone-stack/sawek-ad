@@ -12,7 +12,7 @@ import {
   defaultModelForTier,
   modelsForTier,
 } from "../lib/vertex";
-import { tierForGenerateMode } from "../lib/engine/gemini-generate";
+import { shouldGroundGenerateMode, tierForGenerateMode } from "../lib/engine/gemini-generate";
 import { VIRAL_DESK_JOBS } from "../lib/engine/viral-desk";
 import { FIRESTORE_BRAND_VOICE_COLLECTION } from "../lib/brand-voice";
 
@@ -47,6 +47,10 @@ if (tierForGenerateMode("audit") !== "pro") fail("audit must be pro");
 if (tierForGenerateMode("calendar") !== "pro") fail("calendar must be pro");
 if (tierForGenerateMode("scripts") !== "pro") fail("scripts must be pro");
 if (tierForGenerateMode("scan") !== "pro") fail("scan must be pro");
+if (!shouldGroundGenerateMode("strategy") || !shouldGroundGenerateMode("audit") || !shouldGroundGenerateMode("calendar")) {
+  fail("strategy/audit/calendar must use Search Grounding");
+}
+if (!shouldGroundGenerateMode("ads") || !shouldGroundGenerateMode("angles")) fail("assemble/angles must use Search Grounding");
 
 const requiredFiles = [
   "lib/translate.ts",
@@ -61,6 +65,7 @@ const requiredFiles = [
   "docs/VERTEX_STACK.md",
   "lib/gcp-ai.ts",
   "lib/engine/viral-desk.ts",
+  "lib/engine/research-public.ts",
   "lib/brand-voice.ts",
   "app/api/generate/viral/route.ts",
   "app/api/brand-voice/route.ts",
@@ -90,6 +95,12 @@ if (!translate.includes("recordTranslationOutcome")) fail("translation outcomes 
 const run = readFileSync(join(root, "lib/engine/run.ts"), "utf8");
 if (!run.includes("/api/generate/pro-desk")) fail("pipeline must call Pro desk API");
 if (!run.includes("overlayProOnAgency")) fail("pipeline must overlay Pro desk");
+if (!run.includes("/api/research")) fail("pipeline must call research API");
+if (!run.includes("applyResearchToPack")) fail("pipeline must overlay research");
+
+const vertexDoc = readFileSync(join(root, "docs/VERTEX_STACK.md"), "utf8");
+if (vertexDoc.includes("Use it only for trends")) fail("VERTEX_STACK still limits grounding to trends");
+if (!vertexDoc.includes("runMarketResearch")) fail("VERTEX_STACK missing research desk");
 
 const env = readFileSync(join(root, ".env.example"), "utf8");
 if (!env.includes("GOOGLE_CLOUD_PROJECT=project-8fd8a005-ae6d-4139-ab4")) fail(".env.example project");
@@ -105,7 +116,9 @@ if (VIRAL_DESK_JOBS.hooks.tier !== "flash") fail("viral hooks must be Flash");
 if (VIRAL_DESK_JOBS.predict.tier !== "pro") fail("hook/retention predictor must be Pro");
 if (VIRAL_DESK_JOBS.rewrite.tier !== "pro") fail("video rewrite must be Pro");
 if (VIRAL_DESK_JOBS.carousel.tier !== "imagen") fail("carousel must be Imagen");
-if (VIRAL_DESK_JOBS.calendar30.tier !== "pro") fail("30-day calendar must be Pro");
+if (VIRAL_DESK_JOBS.calendar30.tier !== "pro" || !VIRAL_DESK_JOBS.calendar30.grounding) {
+  fail("30-day calendar must be Pro + Search Grounding");
+}
 if (VIRAL_DESK_JOBS.trends.tier !== "pro" || !VIRAL_DESK_JOBS.trends.grounding) {
   fail("trends must be Pro + Search Grounding");
 }
@@ -116,10 +129,35 @@ if (!gcpAi.includes("runViralDeskJob")) fail("gcp-ai must export runViralDeskJob
 if (!gcpAi.includes("completeGemini")) fail("gcp-ai must export completeGemini");
 if (!gcpAi.includes("runImagen")) fail("gcp-ai must export runImagen");
 if (!gcpAi.includes("translateTexts")) fail("gcp-ai must export translateTexts");
+if (!gcpAi.includes("runMarketResearch")) fail("gcp-ai must export runMarketResearch");
 
 const generateSrc = readFileSync(join(root, "lib/engine/gemini-generate.ts"), "utf8");
 if (!generateSrc.includes("googleSearch")) fail("completeGemini must support Search Grounding");
 if (!generateSrc.includes("grounding")) fail("completeGemini missing grounding option");
+if (!generateSrc.includes("shouldGroundGenerateMode")) fail("generate modes must declare grounding");
+if (!generateSrc.includes("grounding,")) fail("runGeminiGenerate must pass grounding");
+
+const proJobs = readFileSync(join(root, "lib/engine/gemini-pro-jobs.ts"), "utf8");
+if (!proJobs.includes("grounding: true")) fail("Pro desk must use Search Grounding");
+
+const research = readFileSync(join(root, "lib/engine/ad-research.ts"), "utf8");
+if (!research.includes("meta_ad_library")) fail("ad-research missing Meta Ad Library");
+if (!research.includes("tiktok_creative_center")) fail("ad-research missing TikTok Creative Center");
+if (!research.includes("google_ads_transparency")) fail("ad-research missing Google Ads Transparency");
+if (!research.includes("pinterest_trends")) fail("ad-research missing Pinterest Trends");
+if (!research.includes("youtube_suggest")) fail("ad-research missing YouTube suggest");
+if (!research.includes("linkedin_ad_library")) fail("ad-research missing LinkedIn Ad Library");
+if (!research.includes("META_ADS_LIBRARY_TOKEN")) fail("ad-research must read META_ADS_LIBRARY_TOKEN");
+
+try {
+  readFileSync(join(root, "app/api/research/route.ts"), "utf8");
+} catch {
+  fail("missing app/api/research/route.ts");
+}
+
+if (!env.includes("META_ADS_LIBRARY_TOKEN")) fail(".env.example missing META_ADS_LIBRARY_TOKEN");
+if (!i18n.includes("research.title")) fail("Hebrew research-desk copy");
+if (!i18n.includes("מה רץ עכשיו בשוק")) fail("research title Hebrew");
 
 const viral = readFileSync(join(root, "lib/engine/viral-desk.ts"), "utf8");
 if (!viral.includes("notLiveMetrics")) fail("predictor must flag notLiveMetrics");

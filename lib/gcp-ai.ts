@@ -30,6 +30,7 @@ export {
   completeGemini,
   runGeminiGenerate,
   tierForGenerateMode,
+  shouldGroundGenerateMode,
   factsToIntake,
   bodyHasFacts,
   geminiFailFromEnv,
@@ -50,6 +51,14 @@ export {
   type ViralDeskResult,
   type HookRetentionEstimate,
 } from "./engine/viral-desk";
+export {
+  runMarketResearch,
+  buildResearchSkeleton,
+  researchQuery,
+  researchGeo,
+  publicResearchUrls,
+} from "./engine/ad-research";
+export { applyResearchToPack } from "./engine/research-overlay";
 export {
   loadBrandVoice,
   saveBrandVoice,

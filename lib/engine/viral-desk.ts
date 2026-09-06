@@ -26,7 +26,7 @@ export const VIRAL_DESK_JOBS: Record<
   predict: { tier: "pro", note: "Estimated hook/retention 1–100 — not live platform metrics" },
   rewrite: { tier: "pro", note: "Rewrite a video script from facts + source text" },
   carousel: { tier: "imagen", note: "Imagen 3 sequential stills — real bytes only" },
-  calendar30: { tier: "pro", note: "30-day planning calendar — no fake ROAS" },
+  calendar30: { tier: "pro", grounding: true, note: "30-day trend-aware calendar — no fake ROAS" },
   trends: { tier: "pro", grounding: true, note: "Search-grounded trend notes — no invented views" },
 };
 
@@ -42,8 +42,14 @@ export type HookRetentionEstimate = {
   rationale: Record<Locale, string>;
   model?: string;
 };
-export type Calendar30Day = { day: number; theme: Record<Locale, string>; action: Record<Locale, string> };
-export type GroundedTrend = { title: Record<Locale, string>; note: Record<Locale, string>; source?: string };
+export type Calendar30Day = {
+  day: number;
+  theme: Record<Locale, string>;
+  action: Record<Locale, string>;
+  asOf?: string;
+  source?: string;
+};
+export type GroundedTrend = { title: Record<Locale, string>; note: Record<Locale, string>; source?: string; asOf?: string };
 
 export type ViralDeskOk = {
   ok: true;
@@ -240,26 +246,38 @@ async function runTextJob(
     return { ...base, rewrite };
   }
   if (job === "calendar30") {
+    const asOf = completed.asOf || new Date().toISOString();
     const calendar = (Array.isArray(obj.days) ? obj.days : [])
       .map((row, i) => {
         const o = asObj(row);
         const theme = asTri(o?.theme);
         const action = asTri(o?.action);
         if (!theme || !action) return null;
-        return { day: Number(o?.day) || i + 1, theme, action };
+        const source = typeof o?.source === "string" ? o.source.trim() : "";
+        const day: Calendar30Day = {
+          day: Number(o?.day) || i + 1,
+          theme,
+          action,
+          asOf,
+        };
+        if (source && /^https?:\/\//i.test(source)) day.source = source;
+        return day;
       })
       .filter((x): x is Calendar30Day => Boolean(x))
       .slice(0, 30);
     return { ...base, calendar };
   }
+  const asOf = completed.asOf || new Date().toISOString();
   const trends = (Array.isArray(obj.trends) ? obj.trends : [])
     .map((row) => {
       const o = asObj(row);
       const title = asTri(o?.title);
       const note = asTri(o?.note);
       if (!title || !note) return null;
-      const source = typeof o?.source === "string" ? o.source.trim() : undefined;
-      return { title, note, ...(source ? { source } : {}) };
+      const source = typeof o?.source === "string" ? o.source.trim() : "";
+      const rowOut: GroundedTrend = { title, note, asOf };
+      if (source && /^https?:\/\//i.test(source)) rowOut.source = source;
+      return rowOut;
     })
     .filter((x): x is GroundedTrend => Boolean(x))
     .slice(0, 8);
@@ -287,7 +305,7 @@ function promptFor(job: Exclude<ViralDeskJob, "carousel">, intake: Intake, scrip
     return `Facts:\n${facts}\n\nRewrite this video script (keep facts, improve hook/pacing). Source:\n${script || "(none — write a tight 15s from facts)"}\nJSON:\n{"he":"","ar":"","en":""}`;
   }
   if (job === "calendar30") {
-    return `Facts:\n${facts}\n\n30-day content calendar. Planning only — no ROAS, no best-time science. JSON:\n{"days":[{"day":1,"theme":{"he":"","ar":"","en":""},"action":{"he":"","ar":"","en":""}}]}`;
+    return `Facts:\n${facts}\n\nUsing Search grounding, build a 30-day content calendar with trend-aware posting ideas. Cite a public source URL on a day when the tool returns one. Label freshness with today's date. Planning only — no ROAS, no best-time science, no invented views/likes. JSON:\n{"days":[{"day":1,"theme":{"he":"","ar":"","en":""},"action":{"he":"","ar":"","en":""},"source":""}]}`;
   }
-  return `Facts:\n${facts}\n\nUsing Search grounding, list 4–8 *current public* content-format trends relevant to this business category. Cite a public source URL when the tool returns one. Do NOT invent view counts, likes, or ROAS. If grounding is unavailable, say so in the note. JSON:\n{"trends":[{"title":{"he":"","ar":"","en":""},"note":{"he":"","ar":"","en":""},"source":""}]}`;
+  return `Facts:\n${facts}\n\nUsing Search grounding, list 4–8 *current public* content-format trends relevant to this business category. Cite a public source URL when the tool returns one. Label freshness with today's date. Do NOT invent view counts, likes, or ROAS. If grounding is unavailable, say so in the note. JSON:\n{"trends":[{"title":{"he":"","ar":"","en":""},"note":{"he":"","ar":"","en":""},"source":""}]}`;
 }

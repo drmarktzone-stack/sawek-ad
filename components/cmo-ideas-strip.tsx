@@ -140,6 +140,34 @@ export function CmoIdeasStrip({ cmoIdeas, locale, className, compact }: Props) {
         ))}
       </div>
 
+      {cmoIdeas.groundedNotes?.length ? (
+        <div className="mt-5 rounded-[16px] border border-dashed border-[#F5C518]/30 bg-white/5 p-4">
+          <p className="mb-2 text-xs font-black uppercase tracking-wide text-[#F5C518]">
+            {locale === "he" ? "הערות מבוססות חיפוש" : locale === "ar" ? "ملاحظات مبنية على بحث" : "Search-grounded notes"}
+          </p>
+          <ul className="space-y-2">
+            {cmoIdeas.groundedNotes.slice(0, 5).map((n, i) => (
+              <li key={`g-${i}`} className="text-[13px] leading-relaxed text-[#E8E2D4]">
+                <span className="font-black text-[#F7F3EA]">{n.title[locale] || n.title.en}</span>
+                {" — "}
+                {n.note[locale] || n.note.en}
+                <span className="mt-1 block text-[11px] text-[#C9B896]">
+                  {n.asOf.slice(0, 10)}
+                  {n.sourceUrl ? (
+                    <>
+                      {" · "}
+                      <a href={n.sourceUrl} target="_blank" rel="noreferrer" className="text-[#F5C518]">
+                        {n.sourceUrl.replace(/^https?:\/\//, "").slice(0, 48)}
+                      </a>
+                    </>
+                  ) : null}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
       {!compact && moves.length > 0 ? <GapPlan locale={locale} moves={moves} /> : null}
     </section>
   );

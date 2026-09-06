@@ -6,7 +6,7 @@ import type { ProDeskInsights } from "./pro-desk-overlay";
 export type { ProDeskInsights };
 
 const SYSTEM =
-  "You are SAWEK AD Pro — the CMO brain. Deep audience analysis and high-converting strategy from facts only. Never invent prices, discounts, ratings, testimonials, VIP, ROAS, CAC, lead counts, competitors, or medical claims. Missing fact → [יש להשלים] / [يجب الاستكمال] / [TO COMPLETE]. Recreate HE/AR/EN — do not literal-translate. Reply JSON only.";
+  "You are SAWEK AD Pro — the CMO brain. Deep audience analysis and high-converting strategy from facts only. Use Google Search grounding when current public marketing patterns help idea platforms, creative banks, site-audit insights, or calendars. Cite a public URL when the tool returns one. Label freshness with today's date. Never invent prices, discounts, ratings, testimonials, VIP, ROAS, CAC, lead counts, views, likes, spend, CPM, competitors, or medical claims. Missing fact → [יש להשלים] / [يجب الاستكمال] / [TO COMPLETE]. Recreate HE/AR/EN — do not literal-translate. Reply JSON only.";
 
 function asObj(v: unknown): Record<string, unknown> | null {
   return v && typeof v === "object" && !Array.isArray(v) ? (v as Record<string, unknown>) : null;
@@ -65,7 +65,9 @@ const DESK_SHAPE = `{
   "psychology":{"he":"","ar":"","en":""},
   "audit":[{"he":"","ar":"","en":""},{"he":"","ar":"","en":""},{"he":"","ar":"","en":""}],
   "weeks":[{"week":1,"theme":{"he":"","ar":"","en":""},"action":{"he":"","ar":"","en":""}}],
-  "scripts":[{"channel":"reels","he":"","ar":"","en":""},{"channel":"whatsapp","he":"","ar":"","en":""},{"channel":"tiktok","he":"","ar":"","en":""}]
+  "scripts":[{"channel":"reels","he":"","ar":"","en":""},{"channel":"whatsapp","he":"","ar":"","en":""},{"channel":"tiktok","he":"","ar":"","en":""}],
+  "asOf":"YYYY-MM-DD",
+  "sources":[{"url":"","title":""}]
 }`;
 
 /**
@@ -76,14 +78,16 @@ export async function runProDesk(intake: Intake): Promise<ProDeskInsights> {
   if (!intake.businessName.trim() && !intake.description.trim() && !intake.website.trim()) {
     return { tier: "pro", down: true, reason: "no_facts" };
   }
-  const prompt = `Facts (use only these):\n${factsBlock(intake)}\n\nYou are the CMO. Produce:\n1) audience — who they are and what they feel, from facts\n2) strategy — positioning + offer stack language (no fake discounts)\n3) psychology — buying motives from the stated problem/advantage\n4) audit — 3 site/campaign insight lines\n5) weeks — 8 week calendar (theme + action). Planning only, no ROAS\n6) scripts — reels / whatsapp / tiktok packs\nJSON:\n${DESK_SHAPE}`;
+  const today = new Date().toISOString().slice(0, 10);
+  const prompt = `Facts (use only these):\n${factsBlock(intake)}\n\nToday: ${today}\nYou are the CMO. Use Search grounding for current public creative/campaign patterns that help this niche. Produce:\n1) audience — who they are and what they feel, from facts\n2) strategy — positioning + offer stack language (no fake discounts)\n3) psychology — buying motives from the stated problem/advantage\n4) audit — 3 site/campaign insight lines (public trends only when a source URL exists)\n5) weeks — 8 week calendar (theme + action). Trend-aware posting ideas. Planning only, no ROAS\n6) scripts — reels / whatsapp / tiktok packs\n7) asOf + sources[] with public URLs when grounding cites them\nNever invent views, likes, spend, CPM, or ROAS.\nJSON:\n${DESK_SHAPE}`;
 
   try {
     const completed = await completeGemini({
       parts: [{ text: prompt }],
       temperature: 0.35,
-      timeoutMs: 28_000,
+      timeoutMs: 32_000,
       tier: "pro",
+      grounding: true,
       systemInstruction: SYSTEM,
     });
     if (!completed.ok) {
@@ -132,6 +136,9 @@ export async function runProDesk(intake: Intake): Promise<ProDeskInsights> {
         })
         .filter((x): x is NonNullable<typeof x> => Boolean(x))
         .slice(0, 6),
+      asOf: completed.asOf || today,
+      grounded: completed.grounded === true,
+      sources: completed.groundingSources,
     };
   } catch {
     return { tier: "pro", down: true, reason: "gemini_error" };
