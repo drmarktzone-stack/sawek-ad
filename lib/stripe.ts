@@ -25,17 +25,12 @@ export function stripeConfigured(): boolean {
   return Boolean(stripeSecretKey() && stripePublishableKey() && stripePriceMonthly() && stripePriceYearly());
 }
 
-export function paypalMeUrl(): string {
-  return runtimeEnv("PAYPAL_ME");
-}
-
-export function bankInstructions(): string {
-  return runtimeEnv("BANK_INSTRUCTIONS");
-}
-
-export function bitInstructions(): string {
-  return runtimeEnv("BIT_INSTRUCTIONS");
-}
+export {
+  paypalMeUrl,
+  bankInstructions,
+  bitInstructions,
+  paypalLiveEnabled,
+} from "./payments";
 
 export function getStripe(): Stripe | null {
   const key = stripeSecretKey();

@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { publicAppBase, sessionFromRequest } from "@/lib/auth-server";
 import {
   getStripe,
-  paypalMeUrl,
   stripeConfigured,
   stripePriceMonthly,
   stripePriceYearly,
@@ -13,7 +12,30 @@ import {
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+const PAYPAL_OFF_HE = "PayPal כבוי. שלמו בביט או בהעברה בנקאית.";
+const PAYPAL_OFF_AR = "PayPal مطفي. ادفعوا ببيت أو حوالة بنكية.";
+const PAYPAL_OFF_EN = "PayPal is offline. Pay with Bit or bank transfer.";
+
 export async function POST(req: Request) {
+  let body: { interval?: unknown; method?: unknown } = {};
+  try {
+    body = (await req.json()) as typeof body;
+  } catch {
+    body = {};
+  }
+  const method = String(body.method ?? "card");
+  if (method === "paypal" || method === "paypal_me") {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "paypal_offline",
+        messageHe: PAYPAL_OFF_HE,
+        messageAr: PAYPAL_OFF_AR,
+        messageEn: PAYPAL_OFF_EN,
+      },
+      { status: 503 },
+    );
+  }
   if (!stripeConfigured()) {
     return NextResponse.json(
       { ok: false, error: "stripe_unconfigured", messageHe: STRIPE_UNAVAILABLE_HE, messageAr: STRIPE_UNAVAILABLE_AR },
@@ -31,21 +53,9 @@ export async function POST(req: Request) {
   if (!session?.user) {
     return NextResponse.json({ ok: false, error: "auth" }, { status: 401 });
   }
-  let body: { interval?: unknown; method?: unknown } = {};
-  try {
-    body = (await req.json()) as typeof body;
-  } catch {
-    body = {};
-  }
   const interval = body.interval === "yearly" ? "yearly" : "monthly";
-  const method = String(body.method ?? "card");
   const price = interval === "yearly" ? stripePriceYearly() : stripePriceMonthly();
   const base = publicAppBase(req);
-  if (method === "paypal_me") {
-    const me = paypalMeUrl();
-    if (!me) return NextResponse.json({ ok: false, error: "paypal_unconfigured" }, { status: 503 });
-    return NextResponse.json({ ok: true, url: me });
-  }
   try {
     const params: Parameters<typeof stripe.checkout.sessions.create>[0] = {
       mode: "subscription",
@@ -57,18 +67,10 @@ export async function POST(req: Request) {
       metadata: { user_id: session.user.id, interval },
       subscription_data: { metadata: { user_id: session.user.id, interval } },
     };
-    if (method === "paypal") {
-      params.payment_method_types = ["paypal"];
-    }
     const checkout = await stripe.checkout.sessions.create(params);
     if (!checkout.url) return NextResponse.json({ ok: false, error: "stripe" }, { status: 502 });
     return NextResponse.json({ ok: true, url: checkout.url });
   } catch {
-    if (method === "paypal") {
-      const me = paypalMeUrl();
-      if (me) return NextResponse.json({ ok: true, url: me, fallback: "paypal_me" });
-      return NextResponse.json({ ok: false, error: "paypal_unconfigured" }, { status: 503 });
-    }
     return NextResponse.json(
       { ok: false, error: "stripe", messageHe: STRIPE_UNAVAILABLE_HE, messageAr: STRIPE_UNAVAILABLE_AR },
       { status: 503 },
