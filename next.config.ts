@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { SECURITY_HEADERS } from "./lib/security-headers";
 
 const nextConfig: NextConfig = {
   turbopack: {},
@@ -8,6 +9,8 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [
+      { source: "/", headers: SECURITY_HEADERS },
+      { source: "/:path*", headers: SECURITY_HEADERS },
       {
         source: "/sw.js",
         headers: [

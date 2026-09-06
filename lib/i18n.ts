@@ -25,6 +25,8 @@ export const copy: Dict = {
   "nav.ops": { he: "אופס", ar: "التشغيل", en: "Ops" },
   "nav.campaigns": { he: "הקמפיינים שלי", ar: "حملاتي", en: "My campaigns" },
   "nav.about": { he: "אודות", ar: "حول", en: "About" },
+  "nav.privacy": { he: "פרטיות", ar: "الخصوصية", en: "Privacy" },
+  "nav.terms": { he: "תנאים", ar: "الشروط", en: "Terms" },
   "nav.self": { he: "שיווק עצמי", ar: "تسويق ذاتي", en: "Self-marketing" },
   "nav.medical": { he: "OptiBrain", ar: "OptiBrain", en: "OptiBrain" },
   "nav.lab": { he: "מעבדה", ar: "المختبر", en: "Lab" },
@@ -70,6 +72,11 @@ export const copy: Dict = {
   },
   "home.cta.pricing": { he: "מחירון", ar: "الأسعار", en: "Pricing" },
   "home.cta.about": { he: "מה זה SAWEK", ar: "ما هو SAWEK", en: "What is SAWEK" },
+  "home.cta.primary": {
+    he: "הדביקו קישור — בנו קמפיין",
+    ar: "لزّقوا رابط — ابنوا حملة",
+    en: "Paste a link — build a campaign",
+  },
   "home.startEmpty": { he: "התחל קמפיין ריק", ar: "ابدأ حملة فارغة", en: "Start an empty campaign" },
   "home.stat.steps": { he: "פלטפורמות רעיון CMO", ar: "منصات فكرة CMO", en: "CMO idea platforms" },
   "home.stat.agents": { he: "פיצוי פערי קליטה", ar: "تعويض فجوات البيانات", en: "Gap compensation plan" },
@@ -967,6 +974,11 @@ export const copy: Dict = {
   "fn.labHint": { he: "זוויות · ראייה · ציון", ar: "زوايا · رؤية · درجة", en: "Angles · vision · score" },
   "fn.dashboard": { he: "לוח בקרה", ar: "لوحة التحكم", en: "Dashboard" },
   "fn.dashboardHint": { he: "קמפיינים + ריצות מעבדה", ar: "حملات + تشغيل المختبر", en: "Campaigns + lab runs" },
+  "url.label": {
+    he: "כתובת האתר לסריקה",
+    ar: "رابط الموقع للمسح",
+    en: "Website URL to scan",
+  },
   "url.placeholder": {
     he: "אתר, דף פייסבוק או אינסטגרם",
     ar: "موقع، صفحة فيسبوك أو إنستغرام",
@@ -1512,6 +1524,21 @@ export const copy: Dict = {
     ar: "تخصّص → 7 سكربتات → كاروسيل / بايو / رزنامة 30 يوماً. بلا Hook Rate مختلق.",
     en: "Niche → 7 scripts + hooks → carousel / bio / 30-day grid. Estimated Hook Rate labeled as AI planning — never live Meta/TikTok.",
   },
+  "legal.contact": { he: "יצירת קשר", ar: "تواصل", en: "Contact" },
+  "legal.contactLead": {
+    he: "שאלות על פרטיות, תנאים, מחיקת חשבון או החזר Pro — כתבו לבעלים.",
+    ar: "أسئلة عن الخصوصية أو الشروط أو حذف الحساب أو ترجيع Pro — اكتبوا للمالك.",
+    en: "Questions about privacy, terms, account deletion, or a Pro refund — email the owner.",
+  },
+  "legal.more": { he: "עמודים קשורים", ar: "صفحات مرتبطة", en: "Related pages" },
+  "about.legal.h": { he: "פרטיות ותנאים", ar: "الخصوصية والشروط", en: "Privacy and terms" },
+  "about.legal.p": {
+    he: "מדיניות כנה: מה נאסף (אימייל, קלט קמפיין, קבצים), מי מעבד (Google / Vertex / Supabase), ומחירון חינם / Pro בלי חיוב מדומה.",
+    ar: "سياسة صادقة: شو بينجمع (إيميل، مدخلات حملة، ملفات)، مين بيعالج (Google / Vertex / Supabase)، وأسعار مجاني / Pro بلا خصم وهمي.",
+    en: "An honest policy: what is collected (email, campaign inputs, files), who processes it (Google / Vertex / Supabase), and Free / Pro pricing without a fake charge.",
+  },
+  "details.assetKind": { he: "סוג הקובץ", ar: "نوع الملف", en: "File kind" },
+  "ingest.imageNoteLabel": { he: "טקסט מהתמונה (אופציונלי)", ar: "نص من الصورة (اختياري)", en: "Text from the image (optional)" },
 };
 
 

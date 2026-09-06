@@ -56,6 +56,7 @@ export function ChipGroup({
         <input
           className="mt-3 h-12 w-full rounded-[12px] border border-teal/45 bg-white px-4 text-base text-ink outline-none focus:border-teal focus:shadow-[0_0_0_4px_rgba(12,122,107,0.16)]"
           placeholder={t("details.writeOwn")}
+          aria-label={t("details.writeOwn")}
           value={customValue ?? value}
           onChange={(e) => onCustom?.(e.target.value)}
         />

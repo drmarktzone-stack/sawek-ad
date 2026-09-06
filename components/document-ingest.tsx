@@ -69,6 +69,7 @@ export function IngestReviewDialog({
                     <input
                       type="checkbox"
                       checked={r.include}
+                      aria-label={`${t("ingest.include")} ${INGEST_FIELD_META[r.field].label[locale]}`}
                       onChange={(e) => patchRow(r.id, { include: e.target.checked })}
                     />
                   </td>
@@ -77,6 +78,7 @@ export function IngestReviewDialog({
                     <input
                       className="h-9 w-full rounded-lg border border-navy/15 bg-background px-2 text-xs text-navy"
                       value={r.value}
+                      aria-label={INGEST_FIELD_META[r.field].label[locale]}
                       placeholder={ingestToComplete(locale)}
                       onChange={(e) =>
                         patchRow(r.id, { value: e.target.value, include: Boolean(e.target.value.trim()) })
@@ -110,6 +112,7 @@ export function IngestReviewDialog({
                     type="checkbox"
                     className="mt-1"
                     checked={p.include}
+                    aria-label={t("ingest.pastPosts")}
                     onChange={(e) => onTogglePost?.(p.id, e.target.checked)}
                   />
                   <div className="min-w-0">
@@ -199,9 +202,11 @@ export function DocumentIngest({
     <>
       <input
         ref={inputRef}
+        id="ingest-file"
         type="file"
         accept=".pdf,.txt,.docx,application/pdf,text/plain,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
         className="hidden"
+        aria-label={t("ingest.scan")}
         onChange={(e) => void onFiles(e.target.files)}
       />
       <Button
@@ -242,8 +247,9 @@ export function DocumentIngest({
         extra={
           prep?.imageNeedsTypedText ? (
             <div className="mt-4 space-y-2 rounded-xl border border-gold/30 bg-gold/5 p-3">
+              <label htmlFor="ingest-image-note" className="block text-xs font-black text-navy">{t("ingest.imageNoteLabel")}</label>
               <p className="text-xs text-muted">{t("ingest.imageAsk")}</p>
-              <Textarea value={typed} onChange={(e) => setTyped(e.target.value)} placeholder={t("ingest.imageNote")} />
+              <Textarea id="ingest-image-note" value={typed} onChange={(e) => setTyped(e.target.value)} placeholder={t("ingest.imageNote")} />
               <Button type="button" size="sm" variant="outline" onClick={useTyped} disabled={!typed.trim()}>
                 {t("ingest.useTyped")}
               </Button>

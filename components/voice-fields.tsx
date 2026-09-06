@@ -3,6 +3,7 @@
 import type { VoiceProfile } from "@/lib/types";
 import { VOICE_DIALECTS } from "@/lib/engine/voice";
 import { filled } from "@/lib/utils";
+import { useId } from "react";
 import { useI18n } from "@/components/i18n-provider";
 import { Input, Label, Textarea } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -15,11 +16,13 @@ export function VoiceFields({
   onChange: (next: VoiceProfile) => void;
 }) {
   const { t, locale } = useI18n();
+  const nid = useId();
   return (
     <div className="space-y-4">
       <div>
-        <Label className={filled(value.niche) ? "text-teal" : undefined}>{t("viral.niche")}</Label>
+        <Label htmlFor={`${nid}-niche`} className={filled(value.niche) ? "text-teal" : undefined}>{t("viral.niche")}</Label>
         <Input
+          id={`${nid}-niche`}
           data-testid="viral-niche"
           value={value.niche}
           placeholder={t("viral.nichePh")}
@@ -28,8 +31,9 @@ export function VoiceFields({
         />
       </div>
       <div>
-        <Label className={filled(value.coreMessage) ? "text-teal" : undefined}>{t("viral.core")}</Label>
+        <Label htmlFor={`${nid}-core`} className={filled(value.coreMessage) ? "text-teal" : undefined}>{t("viral.core")}</Label>
         <Textarea
+          id={`${nid}-core`}
           data-testid="viral-core"
           value={value.coreMessage}
           placeholder={t("viral.corePh")}
@@ -38,8 +42,9 @@ export function VoiceFields({
         />
       </div>
       <div>
-        <Label className={filled(value.personalVoice) ? "text-teal" : undefined}>{t("viral.voice")}</Label>
+        <Label htmlFor={`${nid}-personal`} className={filled(value.personalVoice) ? "text-teal" : undefined}>{t("viral.voice")}</Label>
         <Textarea
+          id={`${nid}-personal`}
           data-testid="viral-voice"
           value={value.personalVoice}
           placeholder={t("viral.voicePh")}
