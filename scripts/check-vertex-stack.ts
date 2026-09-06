@@ -65,6 +65,7 @@ const requiredFiles = [
   "docs/VERTEX_STACK.md",
   "lib/gcp-ai.ts",
   "lib/engine/viral-desk.ts",
+  "lib/engine/research-public.ts",
   "lib/brand-voice.ts",
   "app/api/generate/viral/route.ts",
   "app/api/brand-voice/route.ts",

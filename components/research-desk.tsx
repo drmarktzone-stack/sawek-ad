@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { ExternalLink } from "lucide-react";
 import type { CampaignPack, Locale, MarketResearch, ResearchSourceCard } from "@/lib/types";
 import { applyResearchToPack } from "@/lib/engine/research-overlay";
+import { buildResearchSkeleton } from "@/lib/engine/research-public";
 import { useI18n } from "@/components/i18n-provider";
 
 function factsFromIntake(pack: CampaignPack) {
@@ -110,7 +111,7 @@ export function ResearchDesk({
 }) {
   const { t } = useI18n();
   const [busy, setBusy] = useState(false);
-  const research = pack.research;
+  const research = pack.research ?? buildResearchSkeleton(pack.intake);
 
   useEffect(() => {
     if (!onPack || !pack.id) return;
