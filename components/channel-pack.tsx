@@ -180,7 +180,14 @@ export function ChannelPack({
       </div>
 
       <ResizeStrip pack={pack} packLang={packLang} generatedImage={generatedImage} />
-      {skipCalendar ? null : canUse(plan, "calendar") ? <PostingWeek pack={pack} locale={packLang} /> : <PlanGate feature="calendar" className="mt-4" />}
+      {skipCalendar ? null : canUse(plan, "calendar") ? (
+        <PostingWeek pack={pack} locale={packLang} days={30} />
+      ) : (
+        <>
+          <PostingWeek pack={pack} locale={packLang} days={7} />
+          <PlanGate feature="calendar" className="mt-4" />
+        </>
+      )}
 
       <div className="mt-5 rounded-2xl border border-gold/25 bg-white p-4">
         <Button type="button" disabled className="w-full sm:w-auto" title={t("end.publishNeedLogin")}>

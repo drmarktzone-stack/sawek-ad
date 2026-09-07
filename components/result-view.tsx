@@ -249,9 +249,12 @@ export function ResultView({
       />
 
       {canUse(plan, "calendar") ? (
-        <PostingWeek pack={pack} locale={packLang} />
+        <PostingWeek pack={pack} locale={packLang} days={30} />
       ) : (
-        <PlanGate feature="calendar" className="mb-8" />
+        <>
+          <PostingWeek pack={pack} locale={packLang} days={7} />
+          <PlanGate feature="calendar" className="mb-8" />
+        </>
       )}
 
       <ResearchDesk pack={pack} locale={packLang} onPack={onChange} />

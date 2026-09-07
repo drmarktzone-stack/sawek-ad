@@ -1205,6 +1205,12 @@ export const copy: Dict = {
   },
   "resize.download": { he: "הורד PNG", ar: "تنزيل PNG", en: "Download PNG" },
   "resize.saving": { he: "שומר…", ar: "عم يحفظ…", en: "Saving…" },
+  "cal7.title7": { he: "שבוע הפרסום — מאותו רעיון", ar: "أسبوع النشر — من نفس الفكرة", en: "Posting week — same idea" },
+  "cal7.lead7": {
+    he: "שבעה ימים מאותו רעיון גיבור ומאותן מודעות. יומן 30 יום במנוי. בלי «שעה הכי טובה לפרסום».",
+    ar: "سبعة أيام من نفس الفكرة البطلة ونفس الإعلانات. رزنامة 30 يوماً بالاشتراك. بلا «أفضل وقت للنشر».",
+    en: "Seven days from the same hero idea and the same ads. The 30-day calendar is Pro. No “best time to post”.",
+  },
   "cal7.title": { he: "יומן 30 יום", ar: "رزنامة 30 يوماً", en: "30-day posting calendar" },
   "cal7.lead": {
     he: "יום 1 פייסבוק, יום 2 אינסטגרם… אחר כך תערובת פוסט / סקריפט / קרוסלה. מתוך הקריאייטיבים האמיתיים. בלי «שעה הכי טובה לפרסום».",
