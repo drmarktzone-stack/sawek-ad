@@ -21,6 +21,11 @@ export function PostingWeek({ pack, locale }: { pack: CampaignPack; locale: Loca
               {postingKindLabel(d.kind, locale)} · {d.formatLabel[locale]}
             </p>
             <h3 className="mt-2 line-clamp-3 text-sm font-black leading-snug text-navy">{d.headline}</h3>
+            {d.ideaName ? (
+              <p className="mt-1 text-[11px] font-bold text-teal" data-calendar-idea={d.ideaName}>
+                {d.ideaName}
+              </p>
+            ) : null}
             <p className="mt-2 line-clamp-4 text-xs leading-relaxed text-muted">{d.body}</p>
             <p className="mt-2 text-sm font-bold text-teal">{d.cta}</p>
             {d.trendHint ? (

@@ -424,6 +424,8 @@ export interface CampaignPack {
     /** Featured CMO idea names (HE/AR/EN) for demo picker */
     ideaNames?: Partial<Record<Locale, string[]>>;
   };
+  /** Single orchestration brain — CMO, ads, calendar, viral, images share this. */
+  brief?: CampaignBrief;
   /** CMO planning ideas + scorecard (never performance ROAS). */
   cmoIdeas?: CmoIdeasPack;
   /** Vertex Gemini Pro desk — strategy / audit / calendar / scripts. */
@@ -708,6 +710,49 @@ export interface MarketResearch {
   grounded: boolean;
   fetched: boolean;
   disclaimer: Tri;
+}
+
+/** One shared campaign brain. Every engine reads this — never invents a parallel story. */
+export type CampaignVertical =
+  | "clinic"
+  | "restaurant"
+  | "pool"
+  | "school"
+  | "product"
+  | "retail"
+  | "generic";
+
+export interface CampaignFacts {
+  name: string;
+  category: string;
+  description: string;
+  location: string;
+  website: string;
+  whatsapp: string;
+  hours: string;
+  audience: string;
+  problem: string;
+  advantage: string;
+  goal: string;
+  offer: string;
+  offerIsNone: boolean;
+  operatingModel: OperatingModel;
+  brandTone: string;
+}
+
+export interface CampaignBrief {
+  asOf: string;
+  vertical: CampaignVertical;
+  geo: string;
+  facts: CampaignFacts;
+  voice: VoiceProfile;
+  gaps: CmoGapPlan;
+  heroIdeaId: string;
+  angleIds: string[];
+  coreMessage: Tri;
+  viralIdea: Tri;
+  imageQueries: string[];
+  researchAttached: boolean;
 }
 
 

@@ -49,6 +49,7 @@ export function ChannelPack({
   onGeneratedImage,
   onPack,
   skipLivePreview = false,
+  skipCalendar = false,
 }: {
   pack: CampaignPack;
   packLang: Locale;
@@ -56,6 +57,7 @@ export function ChannelPack({
   onGeneratedImage?: (dataUrl: string | null) => void;
   onPack?: (p: CampaignPack) => void;
   skipLivePreview?: boolean;
+  skipCalendar?: boolean;
 }) {
   const { t } = useI18n();
   const { plan } = useAuth();
@@ -178,7 +180,7 @@ export function ChannelPack({
       </div>
 
       <ResizeStrip pack={pack} packLang={packLang} generatedImage={generatedImage} />
-      {canUse(plan, "calendar") ? <PostingWeek pack={pack} locale={packLang} /> : <PlanGate feature="calendar" className="mt-4" />}
+      {skipCalendar ? null : canUse(plan, "calendar") ? <PostingWeek pack={pack} locale={packLang} /> : <PlanGate feature="calendar" className="mt-4" />}
 
       <div className="mt-5 rounded-2xl border border-gold/25 bg-white p-4">
         <Button type="button" disabled className="w-full sm:w-auto" title={t("end.publishNeedLogin")}>

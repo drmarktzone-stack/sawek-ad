@@ -1,5 +1,6 @@
 import type { CampaignPack, Locale, SiteAudit, StrategyBlock } from "../types";
 import { inventsForbidden } from "./coach";
+import { contradictsVertical } from "./campaign-brief";
 
 export type ProDeskInsights = NonNullable<CampaignPack["proDesk"]>;
 
@@ -53,9 +54,12 @@ export function overlayProOnAgency(pack: CampaignPack, desk: ProDeskInsights): C
   }
   let agency = pack.agency;
   if (desk.calendarWeeks?.length && agency.strategy.calendar?.length) {
+    const vertical = pack.brief?.vertical ?? "";
     const cal = agency.strategy.calendar.map((w) => {
       const hit = desk.calendarWeeks?.find((d) => d.week === w.week) ?? desk.calendarWeeks?.[w.week - 1];
       if (!hit) return w;
+      const blob = `${hit.theme.en} ${hit.theme.he} ${hit.action.en} ${hit.action.he}`;
+      if (vertical && contradictsVertical(blob, vertical)) return w;
       return {
         ...w,
         theme: hit.theme,

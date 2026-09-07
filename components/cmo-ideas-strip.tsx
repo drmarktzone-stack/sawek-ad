@@ -8,6 +8,7 @@ type Props = {
   locale: Locale;
   className?: string;
   compact?: boolean;
+  heroId?: string;
 };
 
 const TITLE: Record<Locale, string> = {
@@ -77,7 +78,7 @@ function barColor(score: number): string {
   return "bg-coral";
 }
 
-export function CmoIdeasStrip({ cmoIdeas, locale, className, compact }: Props) {
+export function CmoIdeasStrip({ cmoIdeas, locale, className, compact, heroId }: Props) {
   if (!cmoIdeas?.selected?.length) return null;
   const moves = (cmoIdeas.gapPlan?.moves ?? []).filter((m) => m.priority !== "later");
 
@@ -93,8 +94,18 @@ export function CmoIdeasStrip({ cmoIdeas, locale, className, compact }: Props) {
       </p>
 
       <div className={cn("mt-6 grid gap-4", compact ? "grid-cols-1" : "lg:grid-cols-2")}>
-        {cmoIdeas.selected.map((idea) => (
-          <article key={idea.id} className="rounded-[18px] border border-white/10 bg-white/[0.06] p-5 backdrop-blur-sm">
+        {cmoIdeas.selected.map((idea, idx) => {
+          const isHero = (heroId ? idea.id === heroId : idx === 0);
+          return (
+          <article
+            key={idea.id}
+            data-cmo-idea={idea.id}
+            data-hero-idea={isHero ? "true" : undefined}
+            className={cn(
+              "rounded-[18px] border bg-white/[0.06] p-5 backdrop-blur-sm",
+              isHero ? "border-[#9FD4C8] ring-1 ring-[#9FD4C8]/40" : "border-white/10",
+            )}
+          >
             <div className="flex items-start justify-between gap-3">
               <p className="inline-flex rounded-[8px] border border-white/15 bg-white/10 px-2.5 py-0.5 text-[11px] font-black uppercase tracking-wide text-[#F7F3EA]">
                 {PLATFORM[locale]} · {idea.platform[locale] || idea.platform.he}
@@ -137,7 +148,8 @@ export function CmoIdeasStrip({ cmoIdeas, locale, className, compact }: Props) {
               {AVG[locale](idea.planningScore)}
             </p>
           </article>
-        ))}
+          );
+        })}
       </div>
 
       {cmoIdeas.groundedNotes?.length ? (

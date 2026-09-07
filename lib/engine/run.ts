@@ -1,5 +1,5 @@
-import type { AgentId, AgentStatus, CampaignAngles, CampaignPack, Diagnosis, Intake, Locale } from "../types";
-import { uid, sleep } from "../utils";
+import type { AgentId, AgentStatus, CampaignAngles, CampaignBrief, CampaignPack, Diagnosis, Intake, Locale } from "../types";
+import { sleep } from "../utils";
 import { validateIntake } from "./validate";
 import { diagnose } from "./diagnose";
 import { generateVariants } from "./copy";
@@ -8,16 +8,13 @@ import { overlayProOnAgency, type ProDeskInsights } from "./pro-desk-overlay";
 import { generateStrategy } from "./strategy";
 import { generateMedia } from "./media";
 import { generateOptimizer } from "./optimizer";
-import { buildAgency } from "./agency";
-import { coachIntake } from "./coach";
-import { buildSiteAudit } from "./site-audit";
 import { buildPastCampaignAudit, overlayPastCampaignAudit, creativesToPosts } from "./past-campaign-audit";
 import { demoIntake, DEMO_ID } from "../demo";
 import { catalogIntake, demoEntry, demoMetaFor, type DemoPackId, DEMO_OLIVE_ID, DEMO_SAND_ID } from "../demo-catalog";
 import { loadLocale } from "../storage";
-import { buildCmoIdeasPack, ideaNamesForLocale } from "./cmo-ideas";
+import { ideaNamesForLocale } from "./cmo-ideas";
 import { buildResearchSkeleton, runMarketResearch } from "./ad-research";
-import { applyResearchToPack } from "./research-overlay";
+import { attachResearchAndSync, orchestrateAssemble } from "./campaign-orchestrator";
 
 export const AGENT_ORDER: AgentId[] = [
   "intake",
@@ -141,7 +138,7 @@ function researchUrl(): string {
   return apiUrl("/api/research");
 }
 
-function factsFromIntake(intake: Intake): string {
+function factsFromIntake(intake: Intake, brief?: CampaignBrief): string {
   return [
     intake.businessName && `businessName: ${intake.businessName}`,
     intake.category && `category: ${intake.category}`,
@@ -152,12 +149,17 @@ function factsFromIntake(intake: Intake): string {
     intake.offer && `offer: ${intake.offer}`,
     intake.location && `location: ${intake.location}`,
     intake.website && `website: ${intake.website}`,
+    brief?.vertical && `vertical: ${brief.vertical}`,
+    brief?.heroIdeaId && `heroIdeaId: ${brief.heroIdeaId}`,
+    brief?.coreMessage.en && `coreMessage: ${brief.coreMessage.en}`,
+    brief?.angleIds?.length && `angleIds: ${brief.angleIds.join(",")}`,
+    brief?.geo && `geo: ${brief.geo}`,
   ]
     .filter(Boolean)
     .join("\n");
 }
 
-async function fetchProDesk(intake: Intake): Promise<ProDeskInsights> {
+async function fetchProDesk(intake: Intake, brief?: CampaignBrief): Promise<ProDeskInsights> {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), 28_000);
   try {
@@ -165,7 +167,7 @@ async function fetchProDesk(intake: Intake): Promise<ProDeskInsights> {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        description: factsFromIntake(intake),
+        description: factsFromIntake(intake, brief),
         audience: intake.audience,
         mode: "strategy",
         facts: {
@@ -179,6 +181,10 @@ async function fetchProDesk(intake: Intake): Promise<ProDeskInsights> {
           location: intake.location,
           website: intake.website,
           niche: intake.voice?.niche,
+          vertical: brief?.vertical,
+          heroIdeaId: brief?.heroIdeaId,
+          coreMessage: brief?.coreMessage.en,
+          angleIds: brief?.angleIds,
         },
       }),
       signal: ctrl.signal,
@@ -194,7 +200,7 @@ async function fetchProDesk(intake: Intake): Promise<ProDeskInsights> {
   }
 }
 
-async function fetchResearch(intake: Intake): Promise<ReturnType<typeof buildResearchSkeleton>> {
+async function fetchResearch(intake: Intake, brief?: CampaignBrief): Promise<ReturnType<typeof buildResearchSkeleton>> {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), 34_000);
   try {
@@ -202,7 +208,7 @@ async function fetchResearch(intake: Intake): Promise<ReturnType<typeof buildRes
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        description: factsFromIntake(intake),
+        description: factsFromIntake(intake, brief),
         audience: intake.audience,
         facts: {
           businessName: intake.businessName,
@@ -215,6 +221,9 @@ async function fetchResearch(intake: Intake): Promise<ReturnType<typeof buildRes
           location: intake.location,
           website: intake.website,
           niche: intake.voice?.niche,
+          vertical: brief?.vertical,
+          heroIdeaId: brief?.heroIdeaId,
+          coreMessage: brief?.coreMessage.en,
         },
       }),
       signal: ctrl.signal,
@@ -252,11 +261,21 @@ export async function overlayPackAgency(pack: CampaignPack): Promise<CampaignPac
       return pack;
     }
   })();
-  const proOverlay = fetchProDesk(pack.intake);
-  const researchOverlay = fetchResearch(pack.intake);
+  const proOverlay = fetchProDesk(pack.intake, pack.brief);
+  const researchOverlay = fetchResearch(pack.intake, pack.brief);
   const [flashed, desk, research] = await Promise.all([flashOverlay, proOverlay, researchOverlay]);
-  next = overlayProOnAgency(flashed, desk);
-  next = applyResearchToPack(next, research);
+  next = attachResearchAndSync(flashed, research);
+  // Re-apply Flash pieces after sync rebuilds agency from the shared brief.
+  if (flashed.agency?.creative.pieces?.length && next.agency) {
+    next = {
+      ...next,
+      agency: {
+        ...next.agency,
+        creative: { ...next.agency.creative, pieces: flashed.agency.creative.pieces },
+      },
+    };
+  }
+  next = overlayProOnAgency(next, desk);
   const audit = next.pastCampaignAudit ?? buildPastCampaignAudit(next.intake);
   if (audit) {
     try {
@@ -287,35 +306,7 @@ export function assemblePack(
     angles?: CampaignAngles;
   },
 ): CampaignPack {
-  const now = new Date().toISOString();
-  const pastCampaignAudit = buildPastCampaignAudit(intake);
-  const cmoIdeas = buildCmoIdeasPack(intake, "he");
-  const base: CampaignPack = {
-    id: partial.id ?? uid("camp"),
-    createdAt: now,
-    updatedAt: now,
-    name: intake.businessName || "Untitled campaign",
-    intake,
-    intakeReport: partial.report,
-    diagnosis: partial.diagnosis,
-    variants: partial.variants ?? [],
-    strategy: partial.strategy ?? [],
-    media: partial.media ?? generateMedia(intake),
-    optimizer: partial.optimizer ?? generateOptimizer(intake, generateMedia(intake)),
-    optimizerRuns: [],
-    producedAds: [],
-    agentStatus: partial.agentStatus,
-    saved: false,
-    planActivated: false,
-    coach: partial.coach ?? coachIntake(intake),
-    siteAudit: buildSiteAudit(intake),
-    cmoIdeas,
-    research: buildResearchSkeleton(intake),
-    ...(pastCampaignAudit ? { pastCampaignAudit } : {}),
-    ...(partial.angles ? { angles: partial.angles } : {}),
-    featureType: "campaign",
-  };
-  return { ...base, agency: buildAgency(base) };
+  return orchestrateAssemble(intake, partial);
 }
 
 /** Build any of the three published demos (clinic or fictional samples). */

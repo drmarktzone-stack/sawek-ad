@@ -29,7 +29,7 @@ function n(i: Intake) {
   return canonicalDoctorName(i.businessName.trim()) || "—";
 }
 
-export function buildAgency(pack: Pick<CampaignPack, "intake" | "intakeReport" | "diagnosis" | "media" | "optimizer" | "variants">): AgencyPack {
+export function buildAgency(pack: Pick<CampaignPack, "intake" | "intakeReport" | "diagnosis" | "media" | "optimizer" | "variants" | "cmoIdeas">): AgencyPack {
   const i = pack.intake;
   const name = n(i);
   const audChips = audienceChipsFor(i);
@@ -65,7 +65,7 @@ export function buildAgency(pack: Pick<CampaignPack, "intake" | "intakeReport" |
   if (!filled(i.targetCac)) unknowns.push("cac");
   if (!i.competitors.length) unknowns.push("competitors");
 
-  const cmoIdeasEarly = buildCmoIdeasPack(i, "he");
+  const cmoIdeasEarly = pack.cmoIdeas ?? buildCmoIdeasPack(i, "he");
   const personas = [
     {
       name: L("פרסונה א׳ — ליבה", "شخصية أ — النواة", "Persona A — core"),
@@ -466,9 +466,10 @@ export function buildAgency(pack: Pick<CampaignPack, "intake" | "intakeReport" |
 
 /** Hydrate agency + CMO idea platforms for every saved/scanned pack — not demos only. */
 export function ensureAgency(pack: CampaignPack): CampaignPack {
+  const cmoIdeas = pack.cmoIdeas ?? buildCmoIdeasPack(pack.intake);
+  const next = { ...pack, cmoIdeas };
   return {
-    ...pack,
-    agency: pack.agency ?? buildAgency(pack),
-    cmoIdeas: pack.cmoIdeas ?? buildCmoIdeasPack(pack.intake),
+    ...next,
+    agency: pack.agency ?? buildAgency(next),
   };
 }

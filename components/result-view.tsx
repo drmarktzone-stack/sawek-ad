@@ -40,6 +40,8 @@ import { ViralDesk } from "@/components/viral-desk";
 import { DiagnosisGaps } from "@/components/diagnosis-gaps";
 import { ResearchDesk } from "@/components/research-desk";
 import { buildCmoIdeasPack } from "@/lib/engine/cmo-ideas";
+import { heroIdeaOf, syncPackEngines } from "@/lib/engine/campaign-orchestrator";
+import { PostingWeek } from "@/components/posting-week";
 import { CoachImprovedStrip } from "@/components/coach-panel";
 import { PublishToSocial } from "@/components/publish-to-social";
 import { SiteAuditPanel } from "@/components/site-audit-panel";
@@ -81,17 +83,28 @@ export function ResultView({
     () => pack.variants.filter((v) => v.locale === packLang),
     [pack.variants, packLang],
   );
-  /** Every campaign result gets CMO platforms + planning scorecard + gap plan — rebuild if an old pack lacks them. */
+  /** Hydrate a shared CampaignBrief so old packs join the same brain. */
   const cmoIdeas = useMemo(
     () => (pack.cmoIdeas?.selected?.length ? pack.cmoIdeas : buildCmoIdeasPack(pack.intake, packLang)),
     [pack.cmoIdeas, pack.intake, packLang],
   );
+  const hero = useMemo(() => heroIdeaOf(pack) ?? cmoIdeas.selected[0], [pack, cmoIdeas]);
+  useEffect(() => {
+    if (pack.brief?.heroIdeaId && pack.viral?.idea) return;
+    onChange(syncPackEngines(pack));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pack.id]);
   useEffect(() => {
     if (pack.cmoIdeas?.selected?.length) return;
     if (!cmoIdeas.selected.length) return;
-    onChange({ ...pack, cmoIdeas, updatedAt: new Date().toISOString() });
+    onChange(syncPackEngines({ ...pack, cmoIdeas }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pack.id]);
+  useEffect(() => {
+    const seed = pack.brief?.viralIdea[packLang] || pack.brief?.coreMessage[packLang] || hero?.hook[packLang] || "";
+    if (seed && !idea) setIdea(seed);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pack.id, packLang, hero?.id]);
   const featured = ads.find((a) => a.kind === "strong_offer");
   const rest = ads.filter((a) => a.kind !== "strong_offer");
 
@@ -153,11 +166,17 @@ export function ResultView({
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <DepartmentRail />
-      <div className="agency-ink mb-8 overflow-hidden p-6 sm:p-8">
+      <div className="agency-ink mb-8 overflow-hidden p-6 sm:p-8" data-campaign-brain="brief">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <p className="text-[12px] font-black uppercase tracking-[0.22em] text-[#9FD4C8]">{tr("result.ready")}</p>
+            <p className="mt-2 text-[12px] font-bold uppercase tracking-[0.18em] text-[#F5C518]">{tr("result.story")}</p>
             <h1 className="agency-display-cream mt-2 text-3xl sm:text-5xl">{pack.name}</h1>
+            {pack.brief?.coreMessage[packLang] ? (
+              <p className="mt-3 max-w-2xl text-base leading-relaxed text-[#C9D0D8]" data-brief-core>
+                {pack.brief.coreMessage[packLang]}
+              </p>
+            ) : null}
             {canUse(plan, "landing") ? (
             <LangLink
               href={`/lp/${pack.id}`}
@@ -174,7 +193,52 @@ export function ResultView({
         </div>
       </div>
 
-      <SiteAuditPanel pack={pack} locale={packLang} onPack={onChange} />
+      {hero ? (
+        <section
+          className="agency-ink mb-8 p-5 sm:p-7"
+          data-testid="hero-idea"
+          data-hero-idea-id={hero.id}
+        >
+          <p className="text-[12px] font-black uppercase tracking-[0.22em] text-[#9FD4C8]">{tr("result.heroIdea")}</p>
+          <h2 className="agency-display-cream mt-2 text-2xl sm:text-4xl">{hero.name[packLang] || hero.name.he}</h2>
+          <p className="mt-3 text-lg font-semibold text-[#F7F3EA]">{hero.hook[packLang] || hero.hook.he}</p>
+          <p className="mt-3 text-sm text-[#C9D0D8]">
+            <span className="font-black text-[#9FD4C8]">{tr("result.whyWins")}: </span>
+            {hero.whyItWins[packLang] || hero.whyItWins.he}
+          </p>
+          <p className="mt-2 text-sm text-[#C9D0D8]">{hero.narrativeArc[packLang] || hero.narrativeArc.he}</p>
+        </section>
+      ) : null}
+
+      <h2 className="agency-display mb-4 text-3xl">{tr("result.adsReady")}</h2>
+      {featured && (
+        <AdCard
+          featured
+          locale={packLang}
+          headline={featured.headline}
+          body={featured.primaryText}
+          cta={featured.cta}
+          kind={featured.kind}
+          copied={copied === featured.kind}
+          onCopy={() =>
+            copyText(featured.kind, `${featured.headline}\n${featured.primaryText}\n${featured.cta}`)
+          }
+        />
+      )}
+      <div className="mt-4 mb-8 grid gap-4 md:grid-cols-2">
+        {rest.map((v) => (
+          <AdCard
+            key={v.kind}
+            locale={packLang}
+            headline={v.headline}
+            body={v.primaryText}
+            cta={v.cta}
+            kind={v.kind}
+            copied={copied === v.kind}
+            onCopy={() => copyText(v.kind, `${v.headline}\n${v.primaryText}\n${v.cta}`)}
+          />
+        ))}
+      </div>
 
       <LivePreviewStrip
         pack={pack}
@@ -184,53 +248,13 @@ export function ResultView({
         onPack={onChange}
       />
 
-      <CmoIdeasStrip cmoIdeas={cmoIdeas} locale={packLang} />
+      {canUse(plan, "calendar") ? (
+        <PostingWeek pack={pack} locale={packLang} />
+      ) : (
+        <PlanGate feature="calendar" className="mb-8" />
+      )}
 
-      <ViralDesk key={`${pack.id}-${packLang}`} pack={pack} packLang={packLang} onPack={onChange} embedded />
-
-      <ChannelPack
-        pack={pack}
-        packLang={packLang}
-        generatedImage={generatedImage}
-        onGeneratedImage={setGeneratedImage}
-        onPack={onChange}
-        skipLivePreview
-      />
-
-      <VariationsPanel pack={pack} locale={packLang} onPack={onChange} />
-
-      <AnglesStrip angles={pack.angles} locale={packLang} />
-
-      <div className="my-6 flex justify-center">
-        <NewCampaignCta other hint className="items-center text-center" />
-      </div>
-
-      <div className="agency-board mb-6 p-5">
-        <p className="agency-kicker mb-4">
-          {tr("agents.title")}
-        </p>
-        <ul className="grid gap-2 sm:grid-cols-5">
-          {(
-            [
-              ["intake", "agents.intake"],
-              ["diagnostic", "agents.diagnostic"],
-              ["strategic", "agents.strategic"],
-              ["media", "agents.media"],
-              ["optimizer", "agents.optimizer"],
-            ] as const
-          ).map(([id, key]) => (
-            <li key={id} className="rounded-[14px] border border-[rgba(8,17,31,0.08)] bg-ivory px-3 py-3">
-              <p className="text-[13px] font-semibold text-navy">{tr(key)}</p>
-              <p className="mt-1 text-[13px] font-bold uppercase tracking-wide text-teal">
-                {pack.agentStatus[id] === "approved" || pack.agentStatus[id] === "complete"
-                  ? tr("status.complete")
-                  : tr("status.needs_approval")}
-              </p>
-            </li>
-          ))}
-        </ul>
-        <p className="mt-3 text-xs text-muted">{tr("agents.hitl")}</p>
-      </div>
+      <ResearchDesk pack={pack} locale={packLang} onPack={onChange} />
 
       <div className="mb-6 flex flex-wrap items-center gap-2">
         <Button type="button" onClick={save} variant={pack.saved ? "dark" : "default"}>
@@ -294,6 +318,30 @@ export function ResultView({
           </div>
         </div>
       </div>
+
+      <Accordion type="multiple" className="agency-board mb-8 px-4" data-testid="secondary-tools">
+        <AccordionItem value="more">
+          <AccordionTrigger>
+            <span>
+              {tr("result.secondaryTools")}
+              <span className="mt-1 block text-xs font-normal text-muted">{tr("result.secondaryLead")}</span>
+            </span>
+          </AccordionTrigger>
+          <AccordionContent>
+            <CmoIdeasStrip cmoIdeas={cmoIdeas} locale={packLang} heroId={hero?.id} />
+            <ViralDesk key={`${pack.id}-${packLang}`} pack={pack} packLang={packLang} onPack={onChange} embedded />
+            <ChannelPack
+              pack={pack}
+              packLang={packLang}
+              generatedImage={generatedImage}
+              onGeneratedImage={setGeneratedImage}
+              onPack={onChange}
+              skipLivePreview
+              skipCalendar
+            />
+            <VariationsPanel pack={pack} locale={packLang} onPack={onChange} />
+            <AnglesStrip angles={pack.angles} locale={packLang} />
+            <SiteAuditPanel pack={pack} locale={packLang} onPack={onChange} />
 
       <div className="mb-8 grid gap-4 md:grid-cols-2">
         <div className="agency-ink p-6">
@@ -384,7 +432,6 @@ export function ResultView({
         locale={locale}
         compact
       />
-      <ResearchDesk pack={pack} locale={packLang} onPack={onChange} />
       {pack.intakeReport.inconsistencies.length > 0 && (
         <div className="mb-8 rounded-2xl border border-danger/40 bg-coral/10 p-4 text-sm text-danger">
           {pack.intakeReport.inconsistencies.map((inc, i) => (
@@ -394,36 +441,6 @@ export function ResultView({
           ))}
         </div>
       )}
-
-      <h2 className="agency-display mb-4 text-3xl">{tr("result.adsReady")}</h2>
-      {featured && (
-        <AdCard
-          featured
-          locale={packLang}
-          headline={featured.headline}
-          body={featured.primaryText}
-          cta={featured.cta}
-          kind={featured.kind}
-          copied={copied === featured.kind}
-          onCopy={() =>
-            copyText(featured.kind, `${featured.headline}\n${featured.primaryText}\n${featured.cta}`)
-          }
-        />
-      )}
-      <div className="mt-4 grid gap-4 md:grid-cols-2">
-        {rest.map((v) => (
-          <AdCard
-            key={v.kind}
-            locale={packLang}
-            headline={v.headline}
-            body={v.primaryText}
-            cta={v.cta}
-            kind={v.kind}
-            copied={copied === v.kind}
-            onCopy={() => copyText(v.kind, `${v.headline}\n${v.primaryText}\n${v.cta}`)}
-          />
-        ))}
-      </div>
 
       <div className="mt-10 grid gap-4 md:grid-cols-2">
         {(pack.agency?.creative.pieces ?? [])
@@ -660,6 +677,9 @@ export function ResultView({
           </ul>
         </div>
       </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
 
       <div className="mt-8 flex justify-center">
         <LanguageToggle />

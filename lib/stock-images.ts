@@ -25,6 +25,7 @@ export type StockSearchInput = {
   offer?: string;
   limit?: number;
   page?: number;
+  extraQueries?: string[];
 };
 
 export type StockSearchResult = {
@@ -310,7 +311,9 @@ export function topicQueriesFor(input: StockSearchInput): string[] {
   const short = vertical === "restaurant" ? RESTAURANT_SHORT[fam] : SHORT_QUERIES[vertical];
   const long = vertical === "restaurant" ? RESTAURANT_QUERIES[fam] : TOPIC_QUERIES[vertical];
   const facts = `${input.q ?? ""} ${input.category ?? ""} ${input.description ?? ""} ${input.offer ?? ""}`;
+  const extras = (input.extraQueries ?? []).map((q) => q.trim()).filter(Boolean);
   const out: string[] = [
+    ...extras,
     ...short,
     ...lexiconQueriesFrom(facts),
     ...long,

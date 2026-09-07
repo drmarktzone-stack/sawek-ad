@@ -108,7 +108,12 @@ export function ViralDesk({
   const [voice, setVoice] = useState<VoiceProfile>(() => voiceFromIntake(intake0));
   const [savedFlash, setSavedFlash] = useState(false);
   const [saveHint, setSaveHint] = useState("");
-  const [idea, setIdea] = useState(pack?.viral?.idea ?? "");
+  const [idea, setIdea] = useState(
+    pack?.viral?.idea
+      || (packLang && pack?.brief ? pack.brief.viralIdea[packLang] || pack.brief.viralIdea.he : "")
+      || pack?.brief?.viralIdea.he
+      || "",
+  );
   const [tab, setTab] = useState<Tab>("scripts");
   const [busy, setBusy] = useState<Tab | "voice" | null>(null);
   const [copied, setCopied] = useState<string | null>(null);

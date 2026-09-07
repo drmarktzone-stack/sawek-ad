@@ -154,14 +154,16 @@ export function ImageOfferPicker({
     setAiBusy(true);
     setImgError("");
     try {
+      const extra = (pack.brief?.imageQueries ?? []).slice(0, 6).join("|");
       const params = new URLSearchParams({
         source: "imagen",
         vertical,
         category: pack.intake.category || "",
         location: pack.intake.location || "",
-        q: (pack.intake.description || pack.intake.uniqueAdvantage || "").slice(0, 160),
+        q: (pack.brief?.coreMessage.en || pack.intake.description || pack.intake.uniqueAdvantage || "").slice(0, 160),
         description: (pack.intake.description || "").slice(0, 160),
         offer: (pack.intake.offer || "").slice(0, 80),
+        extra,
         limit: String(IMAGEN_PICKER_COUNT),
       });
       const res = await fetch(`/api/stock-images?${params.toString()}`);
@@ -246,14 +248,16 @@ export function ImageOfferPicker({
     if (stockBusy) return;
     setStockBusy(true);
     try {
+      const extra = (pack.brief?.imageQueries ?? []).slice(0, 6).join("|");
       const params = new URLSearchParams({
         source: "live",
         vertical,
         category: pack.intake.category || "",
         location: pack.intake.location || "",
-        q: (pack.intake.description || pack.intake.uniqueAdvantage || "").slice(0, 160),
+        q: (pack.brief?.coreMessage.en || pack.intake.description || pack.intake.uniqueAdvantage || "").slice(0, 160),
         description: (pack.intake.description || "").slice(0, 160),
         offer: (pack.intake.offer || "").slice(0, 80),
+        extra,
         limit: "48",
         page: "1",
       });
