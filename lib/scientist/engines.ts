@@ -99,7 +99,7 @@ export function extractDna(pack: CampaignPack, prior?: BusinessDna): BusinessDna
   push("advantage", String(pack.intake.uniqueAdvantage ?? ""), "intake.uniqueAdvantage", "know");
   push("problem", String(pack.intake.biggestProblem ?? ""), "intake.biggestProblem", "know");
   push("audience", String(pack.intake.audience ?? ""), "intake.audience", "know");
-  push("voice", String(pack.intake.voice?.coreMessage ?? pack.brief?.coreMessage.en ?? ""), "intake.voice.coreMessage", "know");
+  push("voice", String(pack.intake.voice?.coreMessage ?? ""), "intake.voice.coreMessage", "know");
   if (pack.intake.avgOrderValue) push("aov", String(pack.intake.avgOrderValue), "intake.avgOrderValue", "know");
   if (pack.intake.targetCac) push("target_cac", String(pack.intake.targetCac), "intake.targetCac", "know");
   if (pack.intake.monthlyBudget) push("budget", String(pack.intake.monthlyBudget), "intake.monthlyBudget", "know");
@@ -116,9 +116,11 @@ export function extractDna(pack: CampaignPack, prior?: BusinessDna): BusinessDna
     );
   }
 
-  if (prior?.traits.length) {
+  if (prior?.traits.length && prior.businessId === business.id) {
     const seen = new Set(traits.map((t) => `${t.topic}:${t.claim}`));
     for (const old of prior.traits) {
+      const userOrObserved = old.evidence.every((e) => e.source === "user_input" || e.source === "observed_metric");
+      if (old.kind !== "know" || !userOrObserved) continue;
       const key = `${old.topic}:${old.claim}`;
       if (!seen.has(key)) {
         traits.push(old);

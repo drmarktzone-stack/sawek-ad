@@ -52,6 +52,7 @@ import { useAuth } from "@/components/auth-provider";
 import { PlanGate } from "@/components/plan-gate";
 import { canSaveAnotherCampaign, canUse } from "@/lib/plan";
 import { loadCampaigns } from "@/lib/storage";
+import { CompleteAdCard } from "@/components/complete-ad-card";
 
 export function ResultView({
   pack,
@@ -91,7 +92,7 @@ export function ResultView({
   );
   const hero = useMemo(() => heroIdeaOf(pack) ?? cmoIdeas.selected[0], [pack, cmoIdeas]);
   useEffect(() => {
-    if (pack.brief?.heroIdeaId && pack.viral?.idea) return;
+    if (pack.brief?.heroIdeaId && pack.viral?.idea && pack.completeAd?.fingerprint) return;
     onChange(syncPackEngines(pack));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pack.id]);
@@ -206,6 +207,15 @@ export function ResultView({
           <NewCampaignCta other hint className="items-end text-end [&_p]:text-[#C9D0D8]" />
         </div>
       </div>
+
+      {pack.completeAd ? (
+        <CompleteAdCard
+          completeAd={pack.completeAd}
+          locale={packLang}
+          copied={copied === "complete"}
+          onCopy={(text) => copyText("complete", text)}
+        />
+      ) : null}
 
       {hero ? (
         <section

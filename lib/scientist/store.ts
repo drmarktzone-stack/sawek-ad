@@ -71,11 +71,16 @@ export function upsertWorkspace(ws: GrowthWorkspace): GrowthWorkspace[] {
   return list;
 }
 
-export function getWorkspaceByBusiness(businessId: string): GrowthWorkspace | undefined {
-  return (
-    loadScientistWorkspaces().find((w) => w.businessId === businessId) ||
-    loadDemoScientistWorkspaces().find((w) => w.businessId === businessId)
-  );
+export function getWorkspaceByBusiness(
+  businessId: string,
+  opts?: { sample?: boolean; ownerId?: string },
+): GrowthWorkspace | undefined {
+  const list = opts?.sample ? loadDemoScientistWorkspaces() : loadScientistWorkspaces();
+  return list.find((w) => {
+    if (w.businessId !== businessId) return false;
+    if (opts?.ownerId && w.ownerId && w.ownerId !== opts.ownerId) return false;
+    return true;
+  });
 }
 
 export function getPrimaryWorkspace(): GrowthWorkspace | null {
@@ -85,7 +90,11 @@ export function getPrimaryWorkspace(): GrowthWorkspace | null {
 }
 
 export function ingestPack(pack: CampaignPack): GrowthWorkspace {
-  const prior = getWorkspaceByBusiness(businessIdFromName(pack.intake.businessName || pack.name || pack.id));
+  const sample = Boolean(pack.demoMeta?.sample);
+  const prior = getWorkspaceByBusiness(businessIdFromName(pack.intake.businessName || pack.name || pack.id), {
+    sample,
+    ownerId: pack.ownerId,
+  });
   const next = workspaceFromPack(pack, prior);
   upsertWorkspace(next);
   return next;
@@ -256,7 +265,7 @@ export function ensureWorkspaceForName(name: string): GrowthWorkspace {
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
-  const existing = getWorkspaceByBusiness(business.id);
+  const existing = getWorkspaceByBusiness(business.id, { sample: false });
   if (existing) return existing;
   const ws = emptyWorkspace(business);
   upsertWorkspace(ws);

@@ -79,19 +79,8 @@ export function parseCampaignAngles(v: unknown): CampaignAngles | undefined {
 }
 
 export function hasSocialProofFacts(intake: Intake): boolean {
-  const past = (intake.pastCreatives ?? [])
-    .map((c) => `${c.headline} ${c.body} ${c.cta}`)
-    .join(" ");
-  const blob = [
-    intake.pastResults,
-    intake.pastAds,
-    intake.description,
-    intake.uniqueAdvantage,
-    intake.channelNotes,
-    past,
-  ]
-    .filter(Boolean)
-    .join(" ");
+  // Previous ads / creatives are novelty history — NEVER a current proof source.
+  const blob = [intake.pastResults, intake.description, intake.uniqueAdvantage].filter(Boolean).join(" ");
   return PROOF_RE.test(blob);
 }
 
