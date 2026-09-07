@@ -93,4 +93,5 @@ That is why a clinic could pick up olive-table / grill hooks, why calendars felt
 ## Browser dry-run notes
 
 - **Live (pre-fix production):** homepage is a long CMO desk + empty wizard (completeness 18/100) + three demo tiles + HE/AR/EN toggle. Pricing mentions Free vs Pro (Vertex packs, ZIP, landing, 30-day calendar). Scan field promises web/FB/IG. This matches the “salad” complaint: many modules visible before a single campaign story exists.
-- **This branch (post-fix):** see PR walkthrough — one fictional clinic produces the same hero name on the idea card, ad headlines, and calendar day-1 `ideaName`.
+- **This branch (post-fix), local `demo-olive-kitchen`:** one fictional restaurant. Hero **טעימות לשניים** (“the offer is the story — not a generic discount”). Featured ad **מטבח הזית — ארוחת טעימות זוגית ב-₪149** with the demo phone. **7-day posting week** stamps the same idea name on day 1 (Facebook) through the week. Research desk is food/hospitality libraries. **כלים משניים** stays collapsed. No clinic leak, no Pizza Hut, no invented ROAS number. 30-day calendar remains behind the Pro gate (as designed).
+- **Orchestrator QA** (`npm run check:orchestrator`): fictional pediatric clinic hero `street_trust` / «אמון רחוב» on viral + calendar day 1; café stays café; Mediterranean tasting pack has no ROAS in customer copy.

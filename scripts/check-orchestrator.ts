@@ -50,6 +50,33 @@ const clinic: Intake = {
   offer: "אין מבצע",
 };
 
+const oliveLike: Intake = {
+  ...emptyIntake(),
+  businessName: "מטבח גבעה",
+  category: "מסעדה ים-תיכונית",
+  description: "מטבח ביתי עם שמן זית וחומוס",
+  location: "נווה דקל",
+  whatsapp: "052-7001234",
+  audience: "זוגות",
+  uniqueAdvantage: "ישיבה בחוץ בשקיעה",
+  offer: "ארוחת טעימות זוגית ב-₪149 בהזמנה מראש",
+  mainGoal: "walk_in",
+};
+const olivePack = packOf(oliveLike);
+const oliveHero = heroIdeaOf(olivePack);
+const oliveAds = olivePack.variants.map((v) => `${v.headline}\n${v.primaryText}`).join("\n");
+const oliveCmo = (olivePack.cmoIdeas?.selected ?? [])
+  .map((i) => `${i.id} ${i.name.he} ${i.hook.he} ${i.whyItWins.he}`)
+  .join("\n");
+if (/\bROAS\b/i.test(`${oliveAds}\n${oliveCmo}`)) fail("olive customer/CMO copy mentions ROAS");
+if (oliveHero && /מרפא|pediatric|fever|הילד חולה/.test(`${oliveHero.name.he} ${oliveHero.hook.he}`)) {
+  fail(`olive hero leaked clinic: ${oliveHero.id}`);
+}
+const oliveWeek = buildPostingWeek(olivePack, "he");
+if (oliveHero && oliveWeek[0]?.ideaName !== oliveHero.name.he) {
+  fail(`olive calendar day 1 ${oliveWeek[0]?.ideaName} != hero ${oliveHero.name.he}`);
+}
+
 const cafe: Intake = {
   ...emptyIntake(),
   businessName: "קפה גבעה",
@@ -106,6 +133,10 @@ if (cafePack.cmoIdeas?.selected.some((i) => /olive_table|hummus|two_cover|same_d
   fail(`cafe leaked clinic/olive platforms: ${cafePack.cmoIdeas?.selected.map((i) => i.id).join(",")}`);
 }
 const cafeCal = buildPostingCalendar(cafePack, "he", 7);
+const cafeAds = cafePack.variants.map((v) => `${v.headline}\n${v.primaryText}`).join("\n");
+if (/\bROAS\b/i.test(cafeAds) || /\bROAS\b/i.test(clinicPack.variants.map((v) => v.primaryText).join("\n"))) {
+  fail("customer-facing ads mention ROAS");
+}
 const cafeBlob = [
   cafePack.viral?.idea,
   cafePack.cmoIdeas?.selected.map((i) => i.id).join(","),

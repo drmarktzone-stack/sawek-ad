@@ -28,7 +28,7 @@ import { buildAgency } from "./agency";
 import { coachIntake } from "./coach";
 import { buildSiteAudit } from "./site-audit";
 import { buildPastCampaignAudit } from "./past-campaign-audit";
-import { buildCmoIdeasPack, gapCompensation } from "./cmo-ideas";
+import { buildCmoIdeasPack, gapCompensation, refreshIdeaFromCatalog } from "./cmo-ideas";
 import { buildResearchSkeleton } from "./research-public";
 import { clipAtWord } from "./spoken";
 import { buildCampaignBrief, contradictsVertical, localeViralIdea } from "./campaign-brief";
@@ -69,6 +69,16 @@ function fillIncomplete(text: string, locale: Locale, intake: Intake, fallback: 
   return text;
 }
 
+function stripInternalMetricTalk(text: string): string {
+  const cleaned = text
+    .split("\n")
+    .filter((line) => !/\bROAS\b/i.test(line) && !/\bCAC\b/.test(line))
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+  return cleaned || text.replace(/\bROAS\b/gi, "").replace(/\bCAC\b/g, "").replace(/\s{2,}/g, " ").trim();
+}
+
 /**
  * Keep intake-grounded copy when it already has facts. Only stamp the shared
  * CMO hook onto generic / incomplete walls, and strip vertical leaks.
@@ -97,25 +107,29 @@ export function alignVariantsToBrief(
       const safe = `${idea.hook[v.locale]} ${intake.uniqueAdvantage || intake.location || ""}`.trim();
       if (safe && !contradictsVertical(safe, vertical)) body = clipAtWord(safe, 280);
     }
+    headline = stripInternalMetricTalk(headline);
+    body = stripInternalMetricTalk(body);
     return { ...v, headline, primaryText: body };
   });
 }
 
 export function cmoPackFromBrief(intake: Intake, brief: CampaignBrief, existing?: CmoIdeasPack): CmoIdeasPack {
-  const built = existing?.selected?.length ? existing : buildCmoIdeasPack(intake);
-  const selected = brief.angleIds.length
-    ? brief.angleIds
-        .map((id) => built.selected.find((i) => i.id === id))
-        .filter((i): i is CmoIdea => Boolean(i))
-    : built.selected;
+  const built = buildCmoIdeasPack(intake);
+  const refresh = (id: string, fallback?: CmoIdea): CmoIdea | undefined =>
+    refreshIdeaFromCatalog(intake, id) ?? built.selected.find((i) => i.id === id) ?? fallback;
+  const fromBrief = brief.angleIds
+    .map((id) => refresh(id))
+    .filter((i): i is CmoIdea => Boolean(i));
+  const fromExisting = (existing?.selected ?? []).map((i) => refresh(i.id, i)).filter((i): i is CmoIdea => Boolean(i));
   const ordered =
-    selected.length >= 3
-      ? selected
-      : built.selected;
+    fromBrief.length >= 3 ? fromBrief : fromExisting.length >= 3 ? fromExisting : built.selected;
+  const ids = new Set(ordered.map((i) => i.id));
+  const rest = built.selected.filter((i) => !ids.has(i.id));
   return {
     ...built,
-    selected: ordered.slice(0, 5),
+    selected: [...ordered, ...rest].slice(0, 5),
     gapPlan: brief.gaps?.moves?.length ? brief.gaps : gapCompensation(intake),
+    ...(existing?.groundedNotes?.length ? { groundedNotes: existing.groundedNotes } : {}),
   };
 }
 

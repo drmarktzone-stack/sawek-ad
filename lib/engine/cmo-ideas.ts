@@ -130,7 +130,7 @@ const CLINIC_PLATFORMS: PlatformSeed[] = [
     hook: L("אם יש עובדת קופה — אומרים אותה בלי למכור אותה כמבצע", "إن وُجدت حقيقة صندوق — تُقال بلا بيعها كعرض", "If an HMO fact exists — state it; never sell it as a promo"),
     arc: L("עובדת כיסוי → מה זה אומר להורה → ביקור", "حقيقة تغطية → ماذا تعني للأهل → زيارة", "Coverage fact → what it means for parents → visit"),
     platform: L("פלטפורמת שקיפות כיסוי", "منصة شفافية التغطية", "Coverage-transparency platform"),
-    why: L("מכבדת מודל שירות חינם — בלי ROAS ובלי קופון", "تحترم نموذج خدمة مجانية — بلا ROAS وبلا كوبون", "Respects free-service — no ROAS framing, no coupon"),
+    why: L("מכבדת מודל שירות חינם — בלי קופון מדומה", "تحترم نموذج خدمة مجانية — بلا كوبون مختلق", "Respects free-service — no invented coupon"),
     needs: ["advantage"],
   },
   {
@@ -178,7 +178,7 @@ const RESTAURANT_PLATFORMS: PlatformSeed[] = [
     hook: L("ההצעה היא הסיפור — לא הנחה גנרית", "العرض هو القصة — مش خصم عام", "The offer is the story — not a generic discount"),
     arc: L("זוג מגיע → תפריט טעימות → וואטסאפ הזמנה", "زوج يجي → قائمة تذوّق → واتساب حجز", "Couple arrives → tasting menu → WhatsApp booking"),
     platform: L("פלטפורמת ארוחת-זוג", "منصة عشاء زوجي", "Couple-tasting platform"),
-    why: L("כשיש מחיר אמיתי בהצעה — מובילים בו בלי להמציא ROAS", "لما في سعر حقيقي بالعرض — نقوده بلا اختراع ROAS", "When the offer has a real price, lead with it — never invent ROAS"),
+    why: L("המחיר שסופק בקליטה הוא ההוק — בלי הנחה מדומה", "السعر من البيانات هو الخطاف — بلا خصم مختلق", "The intake price is the hook — no invented discount"),
     needs: ["offer", "whatsapp"],
   },
   {
@@ -391,7 +391,7 @@ const POOL_PLATFORMS: PlatformSeed[] = [
     hook: L("אם יש עובדת קופה — אומרים אותה בלי למכור כמבצע", "إن وُجدت حقيقة صندوق — تُقال بلا بيع كعرض", "If an HMO fact exists — state it; never sell as a promo"),
     arc: L("עובדת כיסוי → משמעות למשפחה → ביקור", "حقيقة تغطية → معنى للعيلة → زيارة", "Coverage fact → meaning for family → visit"),
     platform: L("פלטפורמת שקיפות-כיסוי", "منصة شفافية التغطية", "Coverage-transparency platform"),
-    why: L("מכבדת מודל שירות/כיסוי בלי ROAS ובלי קופון", "تحترم نموذج خدمة/تغطية بلا ROAS وبلا كوبون", "Respects service/coverage model — no ROAS, no coupon"),
+    why: L("מכבדת מודל שירות/כיסוי בלי קופון מדומה", "تحترم نموذج خدمة/تغطية بلا كوبون مختلق", "Respects service/coverage model — no invented coupon"),
     needs: ["advantage"],
   },
   {
@@ -562,11 +562,11 @@ const PRODUCT_PLATFORMS: PlatformSeed[] = [
   },
   {
     id: "no_roas_product",
-    name: L("בלי תיאטרון ROAS", "بلا مسرح ROAS", "No ROAS theatre"),
-    hook: L("אין תקציב/CAC? אין תחזית", "ما في ميزانية/CAC؟ بلا توقّع", "No budget/CAC? No forecast"),
+    name: L("יושרה במקום תחזית", "صدق بدل توقّع", "Honesty, not a forecast"),
+    hook: L("אין תקציב מדויק? אין תחזית לידים", "ما في ميزانية دقيقة؟ بلا توقّع ليدات", "No precise budget? No lead forecast"),
     arc: L("יושרה → מסר → CTA", "صدق → رسالة → CTA", "Integrity → message → CTA"),
     platform: L("פלטפורמת אנטי-מדדים", "منصة ضد المقاييس المختلقة", "Anti-invented-metrics platform"),
-    why: L("כרטיס תכנון במקום ROAS בדוי", "بطاقة تخطيط بدل ROAS مختلق", "A planning card instead of fake ROAS"),
+    why: L("כרטיס תכנון כשחסר תקציב — בלי מספרים בדויים", "بطاقة تخطيط عند نقص الميزانية — بلا أرقام مختلقة", "A planning card when budget is missing — no invented numbers"),
     needs: ["problem"],
   },
 ];
@@ -1066,6 +1066,12 @@ function hashSalt(s: string): number {
   return Math.abs(h);
 }
 
+export function refreshIdeaFromCatalog(intake: Intake, id: string): CmoIdea | undefined {
+  const v = detectVertical(intake);
+  const seed = platformsFor(v, intake).find((s) => s.id === id);
+  return seed ? toIdea(intake, seed) : undefined;
+}
+
 export function buildCmoIdeasPack(intake: Intake, locale: Locale = "he"): CmoIdeasPack {
   return {
     selected: pickIdeas(intake, locale),
@@ -1084,8 +1090,8 @@ export function ideaFramingLine(intake: Intake, locale: Locale, index = 0): stri
   const idea = ideas[index] ?? ideas[0];
   if (!idea) return "";
   const name = idea.name[locale] || idea.name.he;
-  const why = idea.whyItWins[locale] || idea.whyItWins.he;
-  return `${name} — ${why}`;
+  const hook = idea.hook[locale] || idea.hook.he;
+  return `${name} — ${hook}`;
 }
 
 export function ideaNamesForLocale(intake: Intake, locale: Locale): string[] {
