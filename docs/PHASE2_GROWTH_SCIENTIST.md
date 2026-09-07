@@ -186,34 +186,35 @@ Mobile: stacked cards, overflow-x rails (same pattern as departments). **Browser
 
 | Check | Result |
 |---|---|
-| `npm run check:scientist` | See CI / local run in the PR |
-| `npm run verify:rls` | SQL/app guards; live DB **UNKNOWN** without credentials |
-| `npm run check:empty-campaign` | Demo wipe + olive/sand blocklist |
-| `npm run check:vertex-stack` | Rate-limit wiring + honest fail bodies |
-| Existing orchestrator / payments / url-ingest | Must still pass; run in PR CI |
+| `npm run check:scientist` | PASS (this VM) |
+| `npm run verify:rls` | PASS app/SQL guards; live DB **UNKNOWN** (no service role) |
+| `npm run check:empty-campaign` | PASS |
+| `npm run check:vertex-stack` | PASS |
+| orchestrator / payments / url-ingest | PASS (this VM) |
 
 **Manual / environment-limited (UNKNOWN unless noted)**
 
 | Scenario | Status |
 |---|---|
-| New user, empty campaign | Code path covered (empty NBA, no invented DNA) |
+| New user, empty campaign | Local `/growth` empty desk: no invented DNA/charts (browser, this VM) |
 | Existing user, multiple campaigns | Workspace keyed by business id; campaign ids appended |
-| Demo user → New Campaign | Code + `check:empty-campaign` |
-| Experiment create + result → DNA + NBA | `check:scientist` |
+| Demo user → New Campaign | Browser: clinic demo → New Campaign → `/discovery` empty; `/growth` did not keep demo DNA |
+| Experiment create + result → DNA + NBA | `check:scientist` PASS |
 | Signed-in persistence, second browser | Code path present; **live Supabase apply UNKNOWN** |
-| Cross-user isolation | Unit checks on `callerMayReadRow`; **live two-account test UNKNOWN** |
-| AR/HE RTL + mobile | i18n + dir wired; **visual QA on device UNKNOWN** |
-| API/AI failure | Rate-limit + existing `down`/`ok:false` paths |
-| Unauthorized campaign GET | 401/404 in route code |
-| Live Vertex/Imagen/Translate on current Cloud Run revision | **UNKNOWN in this session** |
+| Cross-user isolation | Unit + `GET /api/campaigns` anonymous `[]`; `POST` 401; live two-account **UNKNOWN** |
+| AR/HE RTL | Browser: HE/AR RTL and EN LTR on home + `/growth` |
+| Mobile ~390px | **PARTIAL / UNKNOWN** — DevTools device mode failed in the agent browser |
+| API/AI failure | Rate-limit tripped locally (`useTemplates:true`); Imagen 403 `plan_required` when unsigned |
+| Unauthorized campaign GET | 404 missing id; POST without session 401 |
+| Live Vertex/Imagen/Translate on **hosted** Cloud Run revision | **UNKNOWN in this session** |
 
 ---
 
 ## 12. Final Production Readiness /100
 
-**78 / 100** for this revision as reviewed from code + static checks.
+**80 / 100** for this revision (code + static checks + local browser on `/`, `/growth`, demo isolation, HE/AR/EN).
 
-Not 100: live RLS was not applied or proven from this VM; live Vertex/Imagen/Translate on the **hosted** revision were not re-proven here; two-browser signed-in persistence and two-account isolation were not executed against production credentials; visual mobile/RTL QA of `/growth` was not run in a real device browser in this session.
+Not 100: live RLS was not applied or proven from this VM; live Vertex/Imagen/Translate on the **hosted** revision were not re-proven here; two-browser signed-in persistence and two-account isolation were not executed against production credentials; mobile 390px was only a partial attempt.
 
 Ship-safe for: template campaigns with honest AI fallbacks, owner-scoped **app** APIs, evidence-only scientist desk, three demos, HE/AR/EN, gated Bit/bank (unchanged). Not yet a multi-tenant agency OS with proven hosted RLS.
 
