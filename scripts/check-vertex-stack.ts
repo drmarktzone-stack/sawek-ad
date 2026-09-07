@@ -96,7 +96,9 @@ const run = readFileSync(join(root, "lib/engine/run.ts"), "utf8");
 if (!run.includes("/api/generate/pro-desk")) fail("pipeline must call Pro desk API");
 if (!run.includes("overlayProOnAgency")) fail("pipeline must overlay Pro desk");
 if (!run.includes("/api/research")) fail("pipeline must call research API");
-if (!run.includes("applyResearchToPack")) fail("pipeline must overlay research");
+if (!run.includes("attachResearchAndSync") && !run.includes("applyResearchToPack")) {
+  fail("pipeline must overlay research");
+}
 
 const vertexDoc = readFileSync(join(root, "docs/VERTEX_STACK.md"), "utf8");
 if (vertexDoc.includes("Use it only for trends")) fail("VERTEX_STACK still limits grounding to trends");

@@ -25,7 +25,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const apply = useCallback((nextUser: AuthUser | null, nextPlan: PlanId) => {
     setUser(nextUser);
     setPlan(nextPlan);
-    setClientPlan(nextPlan, nextUser?.email);
+    setClientPlan(nextPlan, nextUser?.email, nextUser?.id);
   }, []);
 
   const refresh = useCallback(async () => {

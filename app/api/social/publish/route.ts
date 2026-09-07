@@ -5,6 +5,8 @@ import { loadDecrypted } from "@/lib/social/store";
 import { publishFacebookPage, publishInstagram } from "@/lib/social/facebook";
 import { publishLinkedIn } from "@/lib/social/linkedin";
 import { isSocialProvider, type PublishResult, type SocialProvider } from "@/lib/social/types";
+import { assertSafeUrl } from "@/lib/url-ingest";
+import { publicAppBase } from "@/lib/auth-server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -90,12 +92,26 @@ export async function POST(req: Request) {
   let mime = imageMime;
   if (!bytes && imageUrl) {
     try {
-      const imgRes = await fetch(imageUrl);
-      if (imgRes.ok) {
-        const buf = Buffer.from(await imgRes.arrayBuffer());
-        if (buf.length > 0 && buf.length <= 8 * 1024 * 1024) {
-          bytes = buf;
-          mime = imgRes.headers.get("content-type") || "image/jpeg";
+      let allowed = false;
+      try {
+        const own = new URL(imageUrl);
+        const base = new URL(publicAppBase(req));
+        allowed = own.origin === base.origin && own.pathname.startsWith("/api/imagen/");
+      } catch {
+        allowed = false;
+      }
+      if (!allowed) {
+        const safe = await assertSafeUrl(imageUrl);
+        allowed = safe.ok;
+      }
+      if (allowed) {
+        const imgRes = await fetch(imageUrl);
+        if (imgRes.ok) {
+          const buf = Buffer.from(await imgRes.arrayBuffer());
+          if (buf.length > 0 && buf.length <= 8 * 1024 * 1024) {
+            bytes = buf;
+            mime = imgRes.headers.get("content-type") || "image/jpeg";
+          }
         }
       }
     } catch {

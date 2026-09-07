@@ -2,17 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import Link from "next/link";
 import type { CampaignPack } from "@/lib/types";
 import type { MedicalCampaign } from "@/lib/medical/types";
 import { campaignBySlug } from "@/lib/medical/storage";
 import { getCampaignMerged } from "@/lib/published-packs";
-import { startPediatricDemoFlow } from "@/lib/start-pediatric-demo";
 import { LandingView } from "@/components/medical/landing-view";
 import { PackLandingScreen } from "@/components/channel-pack";
 import { LanguageToggle } from "@/components/header";
 import { useI18n } from "@/components/i18n-provider";
 import { Button } from "@/components/ui/button";
+import { LangLink } from "@/components/lang-link";
 
 export default function PublicLandingPage() {
   const params = useParams<{ slug: string }>();
@@ -69,20 +68,10 @@ export default function PublicLandingPage() {
 
   return (
     <div className="mx-auto max-w-lg px-4 py-16 text-center">
-      <p className="text-muted">{t("med.cred.empty")}</p>
-      <Button
-        type="button"
-        data-demo="pediatric"
-        className="mt-4 h-auto max-w-full whitespace-normal py-2"
-        onClick={() => startPediatricDemoFlow(locale)}
-      >
-        {t("med.demo")}
+      <p className="text-muted">{t("lp.missing")}</p>
+      <Button asChild className="mt-4">
+        <LangLink href="/">{t("lp.home")}</LangLink>
       </Button>
-      <p className="mt-4">
-        <Link href="/medical" className="text-gold">
-          {t("nav.medical")}
-        </Link>
-      </p>
     </div>
   );
 }

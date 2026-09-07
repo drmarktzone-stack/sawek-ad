@@ -70,8 +70,9 @@ function assertPediCommon(
     fail(`${label} audience should mention parent/הורים (got ${JSON.stringify(f.audience)})`);
   }
   if (!String(f.mainGoal || "").trim()) fail(`${label} goal empty`);
-  if (!/facebook/i.test(String(f.channelNotes || "")) || !/instagram/i.test(String(f.channelNotes || ""))) {
-    fail(`${label} channels should include facebook and instagram (got ${JSON.stringify(f.channelNotes)})`);
+  const channels = String(f.channelNotes || "").trim();
+  if (channels && !/facebook|instagram|tiktok|whatsapp|youtube|google/i.test(channels)) {
+    fail(`${label} invented unknown channels (got ${JSON.stringify(f.channelNotes)})`);
   }
   if (String(f.whatsapp || "").trim()) fail(`${label} invented phone ${JSON.stringify(f.whatsapp)}`);
   if (String(f.location || "").trim()) fail(`${label} invented address ${JSON.stringify(f.location)}`);

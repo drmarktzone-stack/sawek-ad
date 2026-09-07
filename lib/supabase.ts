@@ -1,6 +1,7 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { CampaignPack, LabFeatureType, LabRun } from "./types";
 import { getClientId, upsertCampaign as upsertLocal, upsertLabRunLocal } from "./storage";
+import { clientOwnerId } from "./plan";
 import { uid } from "./utils";
 
 let client: SupabaseClient | null = null;
@@ -55,18 +56,57 @@ async function getClient(): Promise<SupabaseClient | null> {
   }
 }
 
+function ownershipStamp(extra?: { clientId?: string }): { ownerId: string; clientId: string } {
+  const ownerId = clientOwnerId();
+  const clientId = extra?.clientId || getClientId() || "";
+  return { ownerId, clientId };
+}
+
+function stampPayload<T extends Record<string, unknown>>(payload: T): T & { ownerId?: string; clientId?: string } {
+  const { ownerId, clientId } = ownershipStamp(
+    typeof payload.clientId === "string" ? { clientId: payload.clientId } : undefined,
+  );
+  return {
+    ...payload,
+    ...(ownerId ? { ownerId } : {}),
+    ...(clientId ? { clientId } : {}),
+  };
+}
+
+function rowBelongsToCaller(row: { owner_id?: string | null; client_id?: string | null; payload?: unknown }): boolean {
+  const ownerId = clientOwnerId();
+  const clientId = getClientId();
+  const payload =
+    row.payload && typeof row.payload === "object" && !Array.isArray(row.payload)
+      ? (row.payload as { ownerId?: unknown; clientId?: unknown })
+      : {};
+  const rowOwner = String(row.owner_id || payload.ownerId || "").trim();
+  const rowClient = String(row.client_id || payload.clientId || "").trim();
+  if (ownerId && rowOwner) return rowOwner === ownerId;
+  if (clientId && rowClient) return rowClient === clientId;
+  return false;
+}
+
 /** Best-effort remote sync. Always writes localStorage. Never throws to the UI. */
 export async function syncCampaign(pack: CampaignPack): Promise<void> {
   try {
-    upsertLocal(pack);
+    const { ownerId, clientId } = ownershipStamp({ clientId: pack.clientId });
+    const stamped: CampaignPack = {
+      ...pack,
+      ...(ownerId ? { ownerId } : {}),
+      ...(clientId ? { clientId } : {}),
+    };
+    upsertLocal(stamped);
     const sb = await getClient();
     if (!sb) return;
     await upsertCampaignRow(sb, {
-      id: pack.id,
-      name: pack.name,
-      payload: pack,
-      updated_at: pack.updatedAt,
-      feature_type: pack.featureType ?? "campaign",
+      id: stamped.id,
+      name: stamped.name,
+      payload: stamped,
+      updated_at: stamped.updatedAt,
+      feature_type: stamped.featureType ?? "campaign",
+      owner_id: ownerId || undefined,
+      client_id: clientId || undefined,
     });
   } catch {
     // localStorage is enough
@@ -79,6 +119,8 @@ export type RemoteCampaignRow = {
   payload: unknown;
   updated_at: string;
   feature_type?: string | null;
+  owner_id?: string | null;
+  client_id?: string | null;
 };
 
 async function upsertCampaignRow(
@@ -89,22 +131,34 @@ async function upsertCampaignRow(
     payload: unknown;
     updated_at: string;
     feature_type?: string;
+    owner_id?: string;
+    client_id?: string;
   },
 ): Promise<void> {
-  const withType = await sb.from("campaigns").upsert({
+  const payload = stampPayload(
+    row.payload && typeof row.payload === "object" && !Array.isArray(row.payload)
+      ? (row.payload as Record<string, unknown>)
+      : { value: row.payload },
+  );
+  const base = {
     id: row.id,
     name: row.name,
-    payload: row.payload,
+    payload,
     updated_at: row.updated_at,
+  };
+  const withOwner = await sb.from("campaigns").upsert({
+    ...base,
+    feature_type: row.feature_type ?? null,
+    owner_id: row.owner_id || null,
+    client_id: row.client_id || null,
+  });
+  if (!withOwner.error) return;
+  const withType = await sb.from("campaigns").upsert({
+    ...base,
     feature_type: row.feature_type ?? null,
   });
   if (!withType.error) return;
-  await sb.from("campaigns").upsert({
-    id: row.id,
-    name: row.name,
-    payload: row.payload,
-    updated_at: row.updated_at,
-  });
+  await sb.from("campaigns").upsert(base);
 }
 
 function stripLabInput(input: unknown): unknown {
@@ -158,12 +212,15 @@ export async function saveLabRun(
       clientId: clientId ?? null,
       generated_content: output,
     };
+    const { ownerId, clientId: cid } = ownershipStamp({ clientId });
     await upsertCampaignRow(sb, {
       id: run.id,
       name: FEATURE_LABEL[featureType],
-      payload,
+      payload: stampPayload({ ...payload, ownerId: ownerId || undefined, clientId: cid || clientId }),
       updated_at: createdAt,
       feature_type: featureType,
+      owner_id: ownerId || undefined,
+      client_id: cid || undefined,
     });
   } catch {
     /* localStorage is enough */
@@ -175,21 +232,63 @@ export async function fetchRemoteCampaigns(): Promise<RemoteCampaignRow[]> {
   try {
     const sb = await getClient();
     if (!sb) return [];
+    const ownerId = clientOwnerId();
+    const clientId = getClientId();
+    const scoped =
+      ownerId
+        ? await sb
+            .from("campaigns")
+            .select("id,name,payload,updated_at,feature_type,owner_id,client_id")
+            .eq("owner_id", ownerId)
+            .order("updated_at", { ascending: false })
+        : clientId
+          ? await sb
+              .from("campaigns")
+              .select("id,name,payload,updated_at,feature_type,owner_id,client_id")
+              .eq("client_id", clientId)
+              .order("updated_at", { ascending: false })
+          : null;
+    if (scoped && !scoped.error && Array.isArray(scoped.data)) {
+      return scoped.data as RemoteCampaignRow[];
+    }
+    const withType = await sb
+      .from("campaigns")
+      .select("id,name,payload,updated_at,feature_type,owner_id,client_id")
+      .order("updated_at", { ascending: false });
+    const rows = !withType.error && Array.isArray(withType.data)
+      ? (withType.data as RemoteCampaignRow[])
+      : await (async () => {
+          const plain = await sb
+            .from("campaigns")
+            .select("id,name,payload,updated_at")
+            .order("updated_at", { ascending: false });
+          if (plain.error || !Array.isArray(plain.data)) return [];
+          return plain.data as RemoteCampaignRow[];
+        })();
+    return rows.filter((row) => rowBelongsToCaller(row));
+  } catch {
+    return [];
+  }
+}
+
+/** Share-by-id landing fetch. Does not list other users' campaigns. */
+export async function fetchRemoteCampaignById(id: string): Promise<RemoteCampaignRow | null> {
+  const key = String(id ?? "").trim();
+  if (!key || key.length > 120) return null;
+  try {
+    const sb = await getClient();
+    if (!sb) return null;
     const withType = await sb
       .from("campaigns")
       .select("id,name,payload,updated_at,feature_type")
-      .order("updated_at", { ascending: false });
-    if (!withType.error && Array.isArray(withType.data)) {
-      return withType.data as RemoteCampaignRow[];
-    }
-    const plain = await sb
-      .from("campaigns")
-      .select("id,name,payload,updated_at")
-      .order("updated_at", { ascending: false });
-    if (plain.error || !Array.isArray(plain.data)) return [];
-    return plain.data as RemoteCampaignRow[];
+      .eq("id", key)
+      .maybeSingle();
+    if (!withType.error && withType.data) return withType.data as RemoteCampaignRow;
+    const plain = await sb.from("campaigns").select("id,name,payload,updated_at").eq("id", key).maybeSingle();
+    if (plain.error || !plain.data) return null;
+    return plain.data as RemoteCampaignRow;
   } catch {
-    return [];
+    return null;
   }
 }
 

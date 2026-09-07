@@ -775,7 +775,6 @@ export function fillEmptyFromPageProse(
   if (!String(out.channelNotes || "").trim()) {
     const found = extractChannels(hay);
     if (found) out.channelNotes = found;
-    else if (out.operatingModel !== "free_service") out.channelNotes = "facebook, instagram";
   }
 
   if (!String(out.landingLines || "").trim()) {

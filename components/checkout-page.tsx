@@ -119,8 +119,13 @@ export function CheckoutPage() {
         credentials: "include",
         body: JSON.stringify({ method: details.method, interval: details.interval, orderCode: details.orderCode }),
       });
-      if (!res.ok) {
+      const data = (await res.json().catch(() => ({}))) as { ok?: boolean; persisted?: boolean; error?: string };
+      if (res.status === 401 || data.error === "auth") {
         setErr(t("bank.needLogin"));
+        return;
+      }
+      if (!res.ok || data.ok === false || data.persisted === false) {
+        setErr(t("checkout.notQueued"));
         return;
       }
       router.push(withLang("/checkout/pending", locale));

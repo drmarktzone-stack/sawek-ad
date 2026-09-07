@@ -2,11 +2,13 @@ import type { CampaignPack, Locale } from "./types";
 import { ensureAgency } from "./engine/agency";
 import { buildDemoPack } from "./engine/run";
 import { loadCampaigns, upsertCampaign } from "./storage";
-import { DEMO_ID } from "./demo-catalog";
+import { DEMO_ID, isPublishedDemoId } from "./demo-catalog";
 
+/** Latest *user* pack. Published demos never auto-fill departments — only Demo click. */
 export function latestPack(): CampaignPack | null {
   const list = loadCampaigns();
-  return list[0] ? ensureAgency(list[0]) : null;
+  const own = list.find((p) => !isPublishedDemoId(p.id) && !p.demoMeta);
+  return own ? ensureAgency(own) : null;
 }
 
 export function packById(id: string): CampaignPack | null {

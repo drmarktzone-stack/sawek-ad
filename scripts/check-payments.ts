@@ -80,6 +80,12 @@ if (!bank.includes("422494")) fail("bank instructions missing account");
 if (/IL\d{2}/.test(bank) || /IBAN IL/i.test(bank)) fail("bank instructions invented an IBAN");
 if (!bit.includes("052-8885800")) fail("bit instructions missing phone");
 
+const confirmSrc = readFileSync(join(process.cwd(), "app/api/billing/confirm/route.ts"), "utf8");
+if (/interval:\s*method/.test(confirmSrc)) fail("confirm must not store payment method as billing_interval");
+if (!confirmSrc.includes("existingInterval") && !confirmSrc.includes("billing_interval")) {
+  fail("confirm must preserve billing_interval");
+}
+
 const leakRe = /052-8885800|0528885800|422494/;
 const publicFiles = [
   "components/pricing-page.tsx",

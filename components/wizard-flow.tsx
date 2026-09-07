@@ -4,7 +4,7 @@ import { Children, cloneElement, isValidElement, useEffect, useId, useMemo, useR
 import { useRouter } from "next/navigation";
 import { Plus, Trash2, WandSparkles } from "lucide-react";
 import type { AgentId, AgentStatus, CampaignPack, Competitor, Intake, WizardStep } from "@/lib/types";
-import { demoIntake, consumePendingDemo, clearPendingDemo, applyPediatricDemoDraft, applyCatalogDemoDraft, isPediatricDemo, isAnyDemoIntake, relocalizePediatricIntake, relocalizeCatalogIntake, canonicalDoctorName, resolvePendingDemoId } from "@/lib/demo";
+import { demoIntake, clearPendingDemo, applyPediatricDemoDraft, applyCatalogDemoDraft, isPediatricDemo, isAnyDemoIntake, relocalizePediatricIntake, relocalizeCatalogIntake, canonicalDoctorName } from "@/lib/demo";
 import { installDemoPack } from "@/lib/active-pack";
 import { DemoPicker } from "@/components/demo-picker";
 import { cmoFieldsMissing, emptyIntake, wizardMissingFields, wizardReady } from "@/lib/engine/validate";
@@ -15,7 +15,6 @@ import { uid } from "@/lib/utils";
 import { MAX_COMPETITORS } from "@/lib/factory-formats";
 import { AREA_LABEL } from "@/lib/i18n";
 import { markEmptyCampaign, wantsEmptyCampaign, clearEmptyCampaign, explicitDemoInUrl, demoParamFromUrl, applyEmptyCampaignHydrate, EMPTY_CAMPAIGN_EVENT, releaseEmptyIfTypedName } from "@/lib/empty-campaign";
-import { isBlockedEmptySessionName } from "@/lib/clinic-leak";
 import { stripDemoParamsPreserveLang, withLang } from "@/lib/locale-url";
 import {
   ADVANTAGE_CHIPS,
@@ -124,10 +123,10 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
   useEffect(() => {
     if (!client || hydrated) return;
     const emptyWanted = wantsEmptyCampaign();
-    const urlDemo = !emptyWanted && (explicitDemoInUrl() || consumePendingDemo());
+    const urlDemo = !emptyWanted && explicitDemoInUrl();
     if (urlDemo) {
       demoConsumed.current = true;
-      const demoId = resolvePendingDemoId() || demoParamFromUrl() || "samer";
+      const demoId = demoParamFromUrl() || "samer";
       const d =
         applyCatalogDemoDraft(demoId, locale) ||
         demoIntake(locale);
@@ -275,14 +274,6 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
     document.getElementById("studio")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, [phase]);
 
-  useEffect(() => {
-    if (!hydrated || phase !== "wizard" || step !== 4) return;
-    if (wantsEmptyCampaign()) return;
-    if (!intake.businessName.trim() || isBlockedEmptySessionName(intake.businessName)) return;
-    if (isFreeService(intake) || intake.channelNotes.trim()) return;
-    setIntake((s) => (s.channelNotes.trim() || isFreeService(s) ? s : { ...s, channelNotes: "facebook, instagram" }));
-  }, [hydrated, phase, step, intake.operatingModel, intake.channelNotes, intake.businessName]);
-
   const patch = (p: Partial<Intake>) => setIntake((s) => ({ ...s, ...p }));
 
   const coachReport = useMemo(() => coachIntake(intake), [intake]);
@@ -364,10 +355,6 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
     setPhase("interview");
     setPack(null);
     setAgentStatus(idleStatus());
-  }
-
-  function loadDemo() {
-    applyDemo("samer");
   }
 
   function newCampaign() {

@@ -1,3 +1,5 @@
+import { readFileSync } from "fs";
+import { join } from "path";
 import { emptyIntake } from "../lib/engine/validate";
 import { demoIntake } from "../lib/demo";
 import { loadDraft, saveDraft, loadCampaigns, saveCampaigns } from "../lib/storage";
@@ -149,6 +151,18 @@ if (wantsEmptyCampaign()) fail("clearEmptyCampaign did not drop flag");
 if (loadCampaigns().some((c) => c.id === "pack-keep-me") === false) {
   fail("saved pack missing after empty hydrate");
 }
+
+const src = {
+  wizard: readFileSync(join(process.cwd(), "components/wizard-flow.tsx"), "utf8"),
+  active: readFileSync(join(process.cwd(), "lib/active-pack.ts"), "utf8"),
+  empty: readFileSync(join(process.cwd(), "lib/empty-campaign.ts"), "utf8"),
+  lp: readFileSync(join(process.cwd(), "app/lp/[slug]/page.tsx"), "utf8"),
+};
+if (src.wizard.includes("consumePendingDemo(")) fail("wizard must not restore demo from session leftover");
+if (src.wizard.includes('channelNotes: "facebook, instagram"')) fail("wizard must not invent facebook/instagram channels");
+if (!src.active.includes("isPublishedDemoId")) fail("latestPack must skip published demo packs");
+if (!src.empty.includes("clearPediatricMedicalLeftovers")) fail("new campaign must wipe pediatric medical leftovers");
+if (src.lp.includes("startPediatricDemoFlow")) fail("unknown landing must not promote the clinic demo");
 
 if (bodyHasFacts({})) fail("empty body should not look like facts");
 if (bodyHasFacts({ description: "", audience: "" })) fail("blank description is not facts");

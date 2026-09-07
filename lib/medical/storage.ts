@@ -104,3 +104,28 @@ export function loadOptiDesk(): OptiDeskState {
 export function saveOptiDesk(state: OptiDeskState) {
   write(K.desk, state);
 }
+
+/** Wipe pediatric demo leftovers so New Campaign does not reopen the clinic desk. */
+export function clearPediatricMedicalLeftovers() {
+  if (!canUse()) return;
+  const clinic = loadClinic();
+  const blob = `${clinic?.id ?? ""}\n${clinic?.name ?? ""}\n${clinic?.doctorName ?? ""}\n${clinic?.whatsapp ?? ""}`;
+  const isPedsDemo =
+    clinic?.id === "demo-samer-peds" ||
+    /052-?8885800|סאמר|أبو مخ|أبو موخ|Abu Mokh|demo-samer-peds/i.test(blob);
+  if (isPedsDemo) {
+    try {
+      localStorage.removeItem(K.clinic);
+    } catch {
+      /* private mode */
+    }
+  }
+  const camps = loadMedCampaigns().filter(
+    (c) => c.id !== "demo-samer-peds-campaign" && c.slug !== "samer-abu-mokh-peds",
+  );
+  if (camps.length !== loadMedCampaigns().length) saveMedCampaigns(camps);
+  const desk = loadOptiDesk();
+  if (/סאמר|أبو مخ|Abu Mokh|באקה אל-גרביה|باقة/i.test(`${desk.subject}\n${desk.city}\n${desk.coreMessage}`)) {
+    write(K.desk, { ...EMPTY_DESK });
+  }
+}

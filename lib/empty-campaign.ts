@@ -2,6 +2,7 @@ import { saveDraft, type DraftState } from "./storage";
 import { emptyIntake } from "./engine/validate";
 import { intakeIsClinicDemo, intakeIsDemoBusiness, isBlockedEmptySessionName } from "./clinic-leak";
 import { demoEntry } from "./demo-catalog";
+import { clearPediatricMedicalLeftovers } from "./medical/storage";
 
 export const EMPTY_CAMPAIGN_KEY = "sawek-empty-campaign";
 export const EMPTY_CAMPAIGN_EVENT = "sawek-empty-campaign";
@@ -42,6 +43,11 @@ export function markEmptyCampaign() {
     localStorage.removeItem("sawek-pending-demo");
   } catch {
     /* private mode */
+  }
+  try {
+    clearPediatricMedicalLeftovers();
+  } catch {
+    /* medical wipe is best-effort */
   }
   writeEmptyFlag(true);
   // Persist blank draft so a remount cannot reload clinic leftovers from a stale draft blob.
