@@ -45,25 +45,32 @@ export function researchQuery(intake: Intake): string {
   return (bits.join(" ") || "local business advertising").replace(/\s+/g, " ").trim().slice(0, 80);
 }
 
-export function publicResearchUrls(query: string, geo: string): Record<ResearchSourceId, string> {
+export function tiktokPeriodDays(lookbackDays?: number): 7 | 30 {
+  return (lookbackDays ?? 7) > 7 ? 30 : 7;
+}
+
+export function publicResearchUrls(query: string, geo: string, lookbackDays?: number): Record<ResearchSourceId, string> {
   const q = encodeURIComponent(query);
   const g = encodeURIComponent(geo);
+  const period = tiktokPeriodDays(lookbackDays);
+  const pinPeriod = (lookbackDays ?? 7) >= 30 ? 30 : 7;
   return {
     meta_ad_library: `https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=${g}&q=${q}&search_type=keyword_unordered&media_type=all`,
-    tiktok_creative_center: `https://ads.tiktok.com/business/creativecenter/inspiration/popular/ads/pc/en?period=7&region=${g}`,
+    tiktok_creative_center: `https://ads.tiktok.com/business/creativecenter/inspiration/popular/ads/pc/en?period=${period}&region=${g}`,
     google_ads_transparency: `https://adstransparency.google.com/?region=${g}&preset-id=ft&q=${q}`,
-    pinterest_trends: `https://trends.pinterest.com/explore?country=${g}&period=30&terms=${q}`,
+    pinterest_trends: `https://trends.pinterest.com/explore?country=${g}&period=${pinPeriod}&terms=${q}`,
     youtube_suggest: `https://www.youtube.com/results?search_query=${q}`,
     linkedin_ad_library: `https://www.linkedin.com/ad-library/search?accountOwner=&countries=${g}&keyword=${q}`,
   };
 }
 
-export function tiktokCreativeCenterUrls(geo: string): { ads: string; keywords: string; hashtags: string } {
+export function tiktokCreativeCenterUrls(geo: string, lookbackDays?: number): { ads: string; keywords: string; hashtags: string } {
   const g = encodeURIComponent(geo);
+  const period = tiktokPeriodDays(lookbackDays);
   return {
-    ads: `https://ads.tiktok.com/business/creativecenter/inspiration/popular/ads/pc/en?period=7&region=${g}`,
-    keywords: `https://ads.tiktok.com/business/creativecenter/keyword/pc/en?period=7&region=${g}`,
-    hashtags: `https://ads.tiktok.com/business/creativecenter/hashtag/pc/en?period=7&region=${g}`,
+    ads: `https://ads.tiktok.com/business/creativecenter/inspiration/popular/ads/pc/en?period=${period}&region=${g}`,
+    keywords: `https://ads.tiktok.com/business/creativecenter/keyword/pc/en?period=${period}&region=${g}`,
+    hashtags: `https://ads.tiktok.com/business/creativecenter/hashtag/pc/en?period=${period}&region=${g}`,
   };
 }
 
