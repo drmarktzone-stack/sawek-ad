@@ -1,4 +1,5 @@
 import type { Locale } from "../types";
+import type { MarketIntel } from "./market-types";
 
 export type Uncertainty = "high" | "medium" | "low" | "unknown";
 export type KnowledgeKind = "know" | "think" | "dont_know";
@@ -261,6 +262,8 @@ export interface GrowthWorkspace {
   nba: NextBestAction;
   knowledge: KnowledgeBoard;
   campaignIds: string[];
+  /** Market DNA + scans. Optional on legacy blobs; normalize via ensureMarket(). */
+  market?: MarketIntel;
   sample?: boolean;
   createdAt: string;
   updatedAt: string;

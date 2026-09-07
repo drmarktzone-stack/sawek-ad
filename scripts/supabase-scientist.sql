@@ -75,3 +75,10 @@ create policy scientist_ent_update_own
 create policy scientist_ent_delete_own
   on public.scientist_entities for delete to authenticated
   using (owner_id = auth.uid());
+
+-- Market Intelligence lives inside scientist_workspaces.payload.market
+-- (sources, scans, ads, patterns, signals, dna, insights, recommendedExperiments, watch).
+-- Optional scientist_entities.kind values if you later normalize:
+-- market_source | market_scan | market_ad | market_pattern | market_signal
+-- market_dna | competitor_insight | market_opportunity | recommended_experiment
+-- Payload remains the source of truth. No parallel tables required.

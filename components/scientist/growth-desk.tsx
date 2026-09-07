@@ -12,14 +12,21 @@ import { loadCampaigns } from "@/lib/storage";
 import { ingestPack } from "@/lib/scientist/store";
 import {
   addManualRevenue,
+  adoptMarketExperiment,
+  applyMarketToWorkspace,
   completeExperiment,
   fetchRemoteWorkspaces,
   getPrimaryWorkspace,
   loadScientistWorkspaces,
   mergeRemoteWorkspaces,
   recordExperiment,
+  setMarketWatch,
 } from "@/lib/scientist/store";
 import type { GrowthWorkspace, KnowledgeKind, Uncertainty } from "@/lib/scientist/types";
+import { controlsFromWorkspace, hasMarketScanContext, scanIsStale, watchIsDue } from "@/lib/scientist/market-engines";
+import { defaultScanControls, type MarketScanControls } from "@/lib/scientist/market-types";
+import { requestMarketScan } from "@/lib/scientist/market-client";
+import { MarketBoard, MarketDnaStrip, MarketScanBar, PatternsBoard } from "@/components/scientist/market-desk";
 import { cn } from "@/lib/utils";
 
 export type GrowthSection =
@@ -27,6 +34,8 @@ export type GrowthSection =
   | "dna"
   | "audience"
   | "competitors"
+  | "market"
+  | "patterns"
   | "radar"
   | "hypotheses"
   | "experiments"
@@ -37,6 +46,8 @@ const SECTIONS: { id: GrowthSection; key: `sci.nav.${GrowthSection}` }[] = [
   { id: "dna", key: "sci.nav.dna" },
   { id: "audience", key: "sci.nav.audience" },
   { id: "competitors", key: "sci.nav.competitors" },
+  { id: "market", key: "sci.nav.market" },
+  { id: "patterns", key: "sci.nav.patterns" },
   { id: "radar", key: "sci.nav.radar" },
   { id: "hypotheses", key: "sci.nav.hypotheses" },
   { id: "experiments", key: "sci.nav.experiments" },
@@ -79,6 +90,9 @@ export function GrowthDesk({ section = "home" }: { section?: GrowthSection }) {
   const [expActual, setExpActual] = useState("");
   const [revAmount, setRevAmount] = useState("");
   const [revSource, setRevSource] = useState("");
+  const [controls, setControls] = useState<MarketScanControls>(defaultScanControls());
+  const [scanning, setScanning] = useState(false);
+  const [scanReason, setScanReason] = useState("");
 
   useEffect(() => {
     if (!ready) return;
@@ -95,8 +109,23 @@ export function GrowthDesk({ section = "home" }: { section?: GrowthSection }) {
         }
       }
       if (cancelled) return;
-      setWs(getPrimaryWorkspace() ?? loadScientistWorkspaces()[0] ?? null);
+      const primary = getPrimaryWorkspace() ?? loadScientistWorkspaces()[0] ?? null;
+      setWs(primary);
+      if (primary) setControls(controlsFromWorkspace(primary));
       setBooted(true);
+      if (primary && hasMarketScanContext(primary) && (scanIsStale(primary) || watchIsDue(primary))) {
+        setScanning(true);
+        const result = await requestMarketScan(primary, controlsFromWorkspace(primary), watchIsDue(primary));
+        if (cancelled) return;
+        if (result.ok && result.workspace) {
+          applyMarketToWorkspace(result.workspace, result.workspace.market!);
+          setWs(result.workspace);
+          setScanReason(result.workspace.market?.scans[0]?.reason || "");
+        } else {
+          setScanReason(result.reason || "scan_failed");
+        }
+        setScanning(false);
+      }
     })();
     return () => {
       cancelled = true;
@@ -148,6 +177,32 @@ export function GrowthDesk({ section = "home" }: { section?: GrowthSection }) {
     setRevSource("");
   };
 
+  const runScan = async () => {
+    if (!ws || scanning) return;
+    setScanning(true);
+    setScanReason("");
+    const result = await requestMarketScan(ws, controls, false);
+    if (result.ok && result.workspace) {
+      applyMarketToWorkspace(result.workspace, result.workspace.market!);
+      setWs(result.workspace);
+      setScanReason(result.workspace.market?.scans[0]?.reason || "");
+    } else {
+      setScanReason(result.reason || "scan_failed");
+    }
+    setScanning(false);
+  };
+
+  const toggleWatch = () => {
+    if (!ws) return;
+    const enabled = !ws.market?.watch?.enabled;
+    setWs(setMarketWatch(ws, enabled, controls));
+  };
+
+  const adoptRec = (id?: string) => {
+    if (!ws) return;
+    setWs(adoptMarketExperiment(ws, id));
+  };
+
   if (!booted) return <p className="p-10 text-center text-muted">…</p>;
 
   return (
@@ -180,9 +235,31 @@ export function GrowthDesk({ section = "home" }: { section?: GrowthSection }) {
       )}
 
       {ws && section === "home" && <HomeBoard ws={ws} />}
-      {ws && section === "dna" && <DnaBoard ws={ws} />}
+      {ws && section === "dna" && (
+        <div className="space-y-4">
+          <DnaBoard ws={ws} />
+          <MarketDnaStrip ws={ws} />
+        </div>
+      )}
       {ws && section === "audience" && <AudienceBoard ws={ws} />}
       {ws && section === "competitors" && <CompetitorBoard ws={ws} />}
+      {ws && (section === "market" || section === "home") && ws && (
+        <div className={section === "home" ? "mt-4" : "space-y-4"}>
+          {(section === "market" || section === "home") && (
+            <MarketScanBar
+              controls={controls}
+              setControls={setControls}
+              scanning={scanning}
+              watching={Boolean(ws.market?.watch?.enabled)}
+              lastReason={scanReason}
+              onScan={runScan}
+              onWatch={toggleWatch}
+            />
+          )}
+          {section === "market" && <MarketBoard ws={ws} onAdopt={adoptRec} />}
+        </div>
+      )}
+      {ws && section === "patterns" && <PatternsBoard ws={ws} />}
       {ws && section === "radar" && <RadarBoard ws={ws} />}
       {ws && section === "hypotheses" && <HypothesisBoard ws={ws} />}
       {ws && section === "experiments" && (
@@ -225,6 +302,9 @@ function HomeBoard({ ws }: { ws: GrowthWorkspace }) {
   }, [ws, t]);
   const learned = ws.learnings[0]?.summary || t("sci.unknown.learn");
   const opp = ws.opportunities.find((o) => o.confidence !== "unknown") ?? ws.opportunities[0];
+  const marketLine = ws.market?.patterns[0]
+    ? `${ws.market.patterns[0].name}: ${ws.market.patterns[0].language}`
+    : t("sci.mkt.empty");
   return (
     <div className="grid gap-4 md:grid-cols-2">
       <Panel title={t("sci.home.happened")} dark>
@@ -257,6 +337,17 @@ function HomeBoard({ ws }: { ws: GrowthWorkspace }) {
         <div className="mt-3">
           <Unc level={ws.nba.uncertainty} />
         </div>
+        {ws.market?.nextBestExperiment && (
+          <p className="mt-3 text-xs text-[#C9D0D8]">
+            {t("sci.mkt.nbe")}: {ws.market.nextBestExperiment.title}
+          </p>
+        )}
+      </Panel>
+      <Panel title={t("sci.mkt.happening")}>
+        <p className="text-sm text-navy">{marketLine}</p>
+        {!!ws.market?.notifications.length && (
+          <p className="mt-2 text-xs text-muted">{ws.market.notifications[0].text}</p>
+        )}
       </Panel>
       <div className="md:col-span-2">
         <KnowledgeBoard ws={ws} />

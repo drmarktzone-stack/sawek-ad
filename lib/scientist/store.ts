@@ -10,6 +10,8 @@ import {
 } from "./types";
 import { applyLearning, businessIdFromName, emptyWorkspace, experimentDeltas, experimentOutcomeFromMetrics, workspaceFromPack } from "./engines";
 import { uid } from "../utils";
+import { applyWatchToggle, ensureMarket } from "./market-engines";
+import type { MarketIntel, MarketScanControls } from "./market-types";
 
 function canUse(): boolean {
   return typeof window !== "undefined";
@@ -55,7 +57,7 @@ export function upsertWorkspace(ws: GrowthWorkspace): GrowthWorkspace[] {
   const ownerId = clientOwnerId();
   const clientId = getClientId() || undefined;
   const stamped: GrowthWorkspace = {
-    ...ws,
+    ...ensureMarket(ws),
     ...(ownerId ? { ownerId } : {}),
     ...(clientId ? { clientId } : {}),
     updatedAt: new Date().toISOString(),
@@ -197,6 +199,50 @@ export function mergeRemoteWorkspaces(remote: GrowthWorkspace[]) {
   }
   const next = [...byId.values()].sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1));
   writeKey(SCIENTIST_STORAGE_KEY, next);
+  return next;
+}
+
+export function applyMarketToWorkspace(ws: GrowthWorkspace, market: MarketIntel): GrowthWorkspace {
+  const next = ensureMarket({ ...ws, market, updatedAt: new Date().toISOString() });
+  upsertWorkspace(next);
+  return next;
+}
+
+export function adoptMarketExperiment(ws: GrowthWorkspace, recId?: string): GrowthWorkspace {
+  const rec = recId
+    ? ws.market?.recommendedExperiments.find((r) => r.id === recId)
+    : ws.market?.nextBestExperiment;
+  if (!rec || rec.claim === "UNKNOWN") return ws;
+  const next = recordExperiment(ws, {
+    name: rec.title,
+    status: "draft",
+    variants: [
+      { id: "a", name: "Current", notes: "Baseline creative already in the pack." },
+      { id: "b", name: rec.title, notes: rec.hypothesisStatement },
+    ],
+    metrics: [{ name: "leads" }],
+    notes: rec.why,
+    hypothesisId: ws.hypotheses.find((h) => h.status === "open")?.id,
+  });
+  if (next.market) {
+    next.market = {
+      ...next.market,
+      recommendedExperiments: next.market.recommendedExperiments.map((r) =>
+        r.id === rec.id ? { ...r, tested: true, experimentId: next.experiments[0]?.id } : r,
+      ),
+      nextBestExperiment:
+        next.market.nextBestExperiment?.id === rec.id
+          ? { ...next.market.nextBestExperiment, tested: true, experimentId: next.experiments[0]?.id }
+          : next.market.nextBestExperiment,
+    };
+    upsertWorkspace(next);
+  }
+  return next;
+}
+
+export function setMarketWatch(ws: GrowthWorkspace, enabled: boolean, controls?: Partial<MarketScanControls>): GrowthWorkspace {
+  const next = applyWatchToggle(ws, enabled, controls);
+  upsertWorkspace(next);
   return next;
 }
 
