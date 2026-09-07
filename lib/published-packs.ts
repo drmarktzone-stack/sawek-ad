@@ -1,6 +1,7 @@
 import type { CampaignPack } from "./types";
 import { getCampaign, loadCampaigns } from "./storage";
 import { PUBLISHED_DEMO_ID_SET } from "./demo-catalog";
+import { fetchRemoteCampaignById } from "./supabase";
 
 function onlyAllowedDemos(packs: CampaignPack[]): CampaignPack[] {
   return packs.filter((p) => PUBLISHED_DEMO_ID_SET.has(p.id));
@@ -48,9 +49,29 @@ export async function loadCampaignsMerged(): Promise<CampaignPack[]> {
   return mergeCampaigns(loadCampaigns(), published);
 }
 
+function asPack(payload: unknown, id: string): CampaignPack | undefined {
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) return undefined;
+  const o = payload as CampaignPack;
+  if (!o.intake || !Array.isArray(o.variants)) return undefined;
+  return { ...o, id: o.id || id };
+}
+
 export async function getCampaignMerged(id: string): Promise<CampaignPack | undefined> {
   const local = getCampaign(id);
   if (local) return local;
   const published = await fetchPublishedPacks();
-  return published.find((c) => c.id === id);
+  const demo = published.find((c) => c.id === id);
+  if (demo) return demo;
+  try {
+    const res = await fetch(`/api/campaigns/${encodeURIComponent(id)}`, { cache: "no-store" });
+    if (res.ok) {
+      const data = (await res.json()) as { ok?: boolean; pack?: unknown };
+      const fromApi = data.ok ? asPack(data.pack, id) : undefined;
+      if (fromApi) return fromApi;
+    }
+  } catch {
+    /* fall through to browser supabase */
+  }
+  const remote = await fetchRemoteCampaignById(id);
+  return remote ? asPack(remote.payload, remote.id) : undefined;
 }

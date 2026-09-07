@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { ConquerHeadline } from "@/components/stepper";
 import { cn } from "@/lib/utils";
 import { PublishToSocial } from "@/components/publish-to-social";
+import { useAuth } from "@/components/auth-provider";
 
 type Filter = "all" | LabFeatureType;
 
@@ -33,11 +34,13 @@ function isPack(payload: unknown): payload is CampaignPack {
 
 export function DashboardPage() {
   const { t, locale } = useI18n();
+  const { ready, user } = useAuth();
   const [filter, setFilter] = useState<Filter>("all");
   const [items, setItems] = useState<DashItem[]>([]);
   const [booted, setBooted] = useState(false);
 
   useEffect(() => {
+    if (!ready) return;
     let cancelled = false;
     (async () => {
       const localPacks = loadCampaigns();
@@ -105,7 +108,7 @@ export function DashboardPage() {
     return () => {
       cancelled = true;
     };
-  }, [t]);
+  }, [t, ready, user?.id]);
 
   const shown = useMemo(
     () => (filter === "all" ? items : items.filter((i) => i.featureType === filter)),

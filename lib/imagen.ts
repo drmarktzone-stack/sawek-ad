@@ -490,11 +490,14 @@ async function runImagenAttempt(facts: ImagenFacts, prompt: string): Promise<Ima
 
 function attachStore(hit: ImagenOk): ImagenOk {
   try {
-    const stored = storeImagenImage(hit.imageBase64, hit.mime, hit.model);
-    return { ...hit, publicUrl: stored.publicUrl };
+    // Keep an in-process GET /api/imagen/:id for this instance, but persist a
+    // data URL so packs/pickers survive Cloud Run restarts (memory store does not).
+    storeImagenImage(hit.imageBase64, hit.mime, hit.model);
   } catch {
-    return hit;
+    /* in-memory store is optional */
   }
+  const mime = hit.mime.startsWith("image/") ? hit.mime : "image/png";
+  return { ...hit, publicUrl: `data:${mime};base64,${hit.imageBase64}` };
 }
 
 function promptList(facts: ImagenFacts): string[] {

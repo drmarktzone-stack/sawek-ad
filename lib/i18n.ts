@@ -1284,9 +1284,20 @@ export const copy: Dict = {
   "end.publish": { he: "פרסם לפייסבוק / אינסטגרם", ar: "انشر على فيسبوك / إنستغرام", en: "Publish to Facebook / Instagram" },
   "end.publishNeedLogin": { he: "נדרשת התחברות Meta", ar: "يلزم تسجيل دخول Meta", en: "Meta login required" },
   "end.publishHint": {
-    he: "פרסום אמיתי דורש התחברות Meta (OAuth). הכפתור כבוי עד שזה קיים — בלי מפתחות Ads ובלי פרסום מדומה.",
-    ar: "النشر الحقيقي يلزم تسجيل دخول Meta (OAuth). الزر معطّل لحد ما يصير — بلا مفاتيح Ads وبلا نشر وهمي.",
-    en: "Real publish needs a Meta login (OAuth). This button stays disabled until that exists — no Ads keys and no fake publish.",
+    he: "פרסום אמיתי דרך «פרסם לרשתות» למעלה — אחרי חיבור Meta/LinkedIn. בלי מפתחות Ads ובלי פרסום מדומה.",
+    ar: "النشر الحقيقي من «انشر للشبكات» فوق — بعد ربط Meta/LinkedIn. بلا مفاتيح Ads وبلا نشر وهمي.",
+    en: "Real publish is the “Publish to social” control above — after Meta/LinkedIn connect. No Ads keys and no fake publish.",
+  },
+  "lp.missing": {
+    he: "דף הנחיתה לא נמצא על המכשיר הזה. פתחו את הקישור ממכשיר ששמר את הקמפיין, או התחברו אם הסנכרון פעיל.",
+    ar: "صفحة الهبوط مش موجودة على هاد الجهاز. افتحوا الرابط من جهاز حفظ الحملة، أو سجّلوا دخول إذا المزامنة شغّالة.",
+    en: "This landing page is not on this device. Open the link on the device that saved the campaign, or sign in if remote sync is on.",
+  },
+  "lp.home": { he: "חזרה לשולחן", ar: "رجوع للمكتب", en: "Back to the desk" },
+  "checkout.notQueued": {
+    he: "סימנתם ששילמתם במכשיר, אבל הבקשה לא נשמרה בתור הבעלים. שמרו את קוד ההזמנה ופנו אלינו — אין שדרוג אוטומטי.",
+    ar: "علّمتوا إنكم دفعتوا على الجهاز، بس الطلب ما انحفظ بطابور المالك. احفظوا رمز الطلب وتواصلوا معنا — ما في ترقية تلقائية.",
+    en: "You marked payment on this device, but the owner queue did not store it. Keep the order code and contact us — no auto-upgrade.",
   },
   "coach.title": { he: "מנוע CMO", ar: "محرك CMO", en: "CMO engine" },
   "coach.scoreHint": { he: "איכות קליטה — לא ROAS", ar: "جودة البيانات — مش ROAS", en: "Intake quality — not ROAS" },

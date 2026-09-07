@@ -167,9 +167,7 @@ export function DepartmentShell({
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <PackLangToggle value={packLang} onChange={setPackLang} />
-              <Button type="button" size="sm" variant="dark" onClick={() => loadDemo()}>
-                {t("dept.loadDemo")}
-              </Button>
+              <DemoPicker onSelect={(id) => loadDemo(id)} size="sm" />
               <Button asChild size="sm" variant="outline">
                 <LangLink href={`/campaigns/${pack.id}`}>{t("campaigns.open")}</LangLink>
               </Button>

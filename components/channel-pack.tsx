@@ -189,15 +189,7 @@ export function ChannelPack({
         </>
       )}
 
-      <div className="mt-5 rounded-2xl border border-gold/25 bg-white p-4">
-        <Button type="button" disabled className="w-full sm:w-auto" title={t("end.publishNeedLogin")}>
-          {t("end.publish")}
-        </Button>
-        <p className="mt-2 text-xs leading-relaxed text-muted">{t("end.publishHint")}</p>
-        <p className="mt-1 text-sm font-bold uppercase tracking-wide text-gold">
-          {t("end.publishNeedLogin")}
-        </p>
-      </div>
+      <p className="mt-5 text-xs leading-relaxed text-muted">{t("end.publishHint")}</p>
     </section>
   );
 }

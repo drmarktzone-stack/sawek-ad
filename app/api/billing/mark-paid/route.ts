@@ -40,15 +40,18 @@ export async function POST(req: Request) {
       persisted = !error;
     }
   }
-  return NextResponse.json({
-    ok: true,
-    method,
-    interval,
-    orderCode,
-    at: now,
-    pendingReview: true,
-    upgraded: false,
-    persisted,
-    stored: persisted ? "supabase" : "local",
-  });
+  return NextResponse.json(
+    {
+      ok: persisted,
+      method,
+      interval,
+      orderCode,
+      at: now,
+      pendingReview: persisted,
+      upgraded: false,
+      persisted,
+      stored: persisted ? "supabase" : "local",
+    },
+    { status: persisted ? 200 : 503 },
+  );
 }

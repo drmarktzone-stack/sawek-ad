@@ -53,6 +53,7 @@ declare global {
   interface Window {
     __SAWEK_PLAN?: PlanId;
     __SAWEK_EMAIL?: string;
+    __SAWEK_USER_ID?: string;
   }
 }
 
@@ -61,8 +62,14 @@ export function clientPlan(): PlanId {
   return window.__SAWEK_PLAN === "pro" ? "pro" : "free";
 }
 
-export function setClientPlan(plan: PlanId, email?: string | null) {
+export function clientOwnerId(): string {
+  if (typeof window === "undefined") return "";
+  return String(window.__SAWEK_USER_ID ?? "").trim();
+}
+
+export function setClientPlan(plan: PlanId, email?: string | null, userId?: string | null) {
   if (typeof window === "undefined") return;
   window.__SAWEK_PLAN = plan;
   window.__SAWEK_EMAIL = email ? normalizeEmail(email) : "";
+  window.__SAWEK_USER_ID = userId ? String(userId).trim() : "";
 }
