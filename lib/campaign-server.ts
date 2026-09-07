@@ -35,7 +35,7 @@ export async function listOwnedCampaignRows(ownerId: string): Promise<CampaignRo
       .select(selectCols())
       .eq("owner_id", ownerId)
       .order("updated_at", { ascending: false });
-    if (!scoped.error && Array.isArray(scoped.data)) return scoped.data as CampaignRow[];
+    if (!scoped.error && Array.isArray(scoped.data)) return scoped.data as unknown as CampaignRow[];
     const plain = await sb.from("campaigns").select("id,name,payload,updated_at,owner_id,client_id").eq("owner_id", ownerId);
     if (plain.error || !Array.isArray(plain.data)) return [];
     return plain.data as CampaignRow[];
@@ -50,7 +50,7 @@ export async function getCampaignRowById(id: string): Promise<CampaignRow | null
   if (!sb || !key || key.length > 120 || /[^\w.-]/.test(key)) return null;
   try {
     const withShare = await sb.from("campaigns").select(selectCols()).eq("id", key).maybeSingle();
-    if (!withShare.error && withShare.data) return withShare.data as CampaignRow;
+    if (!withShare.error && withShare.data) return withShare.data as unknown as CampaignRow;
     const plain = await sb.from("campaigns").select("id,name,payload,updated_at,owner_id,client_id").eq("id", key).maybeSingle();
     if (plain.error || !plain.data) return null;
     return plain.data as CampaignRow;

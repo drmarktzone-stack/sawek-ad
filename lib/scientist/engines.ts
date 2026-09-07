@@ -168,7 +168,7 @@ export function extractCompetitors(pack: CampaignPack): CompetitorIntel {
   const business = extractBusiness(pack);
   const listed = pack.intake.competitors ?? [];
   const cards = pack.agency?.discovery?.battlecards ?? [];
-  const gaps = [];
+  const gaps: CompetitorIntel["gaps"] = [];
   for (const c of listed) {
     const name = String(c.name ?? "").trim();
     if (!name) continue;

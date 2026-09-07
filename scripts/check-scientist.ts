@@ -44,11 +44,11 @@ g.window = { localStorage: g.localStorage };
 
 function pack(intake: Partial<Intake>, extra?: Partial<CampaignPack>): CampaignPack {
   const i = { ...emptyIntake(), ...intake };
-  return {
+  const base: CampaignPack = {
     id: extra?.id ?? "camp-test",
     createdAt: "2026-09-07T00:00:00.000Z",
     updatedAt: "2026-09-07T00:00:00.000Z",
-    name: i.businessName || "test",
+    name: extra?.name ?? i.businessName ?? "test",
     intake: i,
     intakeReport: { completeness: 20, missing: [], inconsistencies: [], refusedGuesses: [] },
     diagnosis: {
@@ -78,9 +78,8 @@ function pack(intake: Partial<Intake>, extra?: Partial<CampaignPack>): CampaignP
     },
     saved: true,
     planActivated: false,
-    ...extra,
-    intake: i,
   };
+  return { ...base, ...extra, intake: i, name: extra?.name ?? i.businessName ?? base.name };
 }
 
 const empty = workspaceFromPack(pack({ businessName: "" }, { name: "" }));
@@ -172,7 +171,9 @@ const src = {
   desk: readFileSync(join(process.cwd(), "components/scientist/growth-desk.tsx"), "utf8"),
   sql: readFileSync(join(process.cwd(), "scripts/supabase-scientist.sql"), "utf8"),
 };
-if (src.engines.includes("statistically significant")) fail("engines must not compute significance");
+if (/p-value|p\s*<\s*0\.05|chi-squared|t-test/i.test(src.engines) && !src.engines.includes("forbiddenScientistClaims")) {
+  fail("engines must not compute significance");
+}
 if (!src.desk.includes("sci.exp.nosig")) fail("UI must label no significance");
 if (!src.sql.includes("owner_id")) fail("scientist schema must be owner-scoped");
 

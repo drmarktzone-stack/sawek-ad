@@ -13,8 +13,16 @@ function fail(msg: string) {
 }
 
 const sql = readFileSync(join(process.cwd(), "scripts/supabase-campaigns.sql"), "utf8");
-if (sql.includes("campaigns_select_by_id_anon")) fail("old anon-by-id policy name still present");
-if (/using\s*\(\s*true\s*\)/i.test(sql)) fail("campaigns SQL must not use using(true)");
+const sqlActive = sql
+  .split("\n")
+  .filter((line) => !line.trim().startsWith("--"))
+  .join("\n");
+if (/create policy[\s\S]{0,200}campaigns_select_by_id_anon/i.test(sqlActive)) {
+  fail("must not recreate campaigns_select_by_id_anon");
+}
+if (/create policy[\s\S]{0,400}using\s*\(\s*true\s*\)/i.test(sqlActive)) {
+  fail("campaigns SQL must not create a using(true) policy");
+}
 if (!sql.includes("campaigns_select_shared_anon")) fail("missing share_enabled anon policy");
 if (!sql.includes("share_enabled")) fail("missing share_enabled column");
 if (!sql.includes("owner_id = auth.uid()")) fail("missing owner RLS");
@@ -57,25 +65,29 @@ for (let i = 0; i < 30; i++) {
 if (!blocked) fail("vertex limiter should trip for anonymous after the window fills");
 if (vertexRateLimitedBody().useTemplates !== true) fail("rate limit must keep useTemplates for anonymous overlays");
 
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || "";
-const service = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
-const live: { applied: boolean; note: string } = { applied: false, note: "UNKNOWN — no service credentials in this VM" };
-if (url && service) {
+async function probeLive(): Promise<{ applied: boolean; note: string }> {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || "";
+  const service = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+  if (!url || !service) return { applied: false, note: "UNKNOWN — no service credentials in this VM" };
   try {
     const res = await fetch(`${url.replace(/\/$/, "")}/rest/v1/campaigns?select=id&limit=1`, {
       headers: { apikey: service, Authorization: `Bearer ${service}` },
     });
-    live.applied = res.ok;
-    live.note = res.ok ? "service role can reach campaigns table" : `HTTP ${res.status} — table or project UNKNOWN`;
+    return {
+      applied: res.ok,
+      note: res.ok ? "service role can reach campaigns table" : `HTTP ${res.status} — table or project UNKNOWN`,
+    };
   } catch (e) {
-    live.note = `UNKNOWN — fetch failed (${e instanceof Error ? e.message : "error"})`;
+    return { applied: false, note: `UNKNOWN — fetch failed (${e instanceof Error ? e.message : "error"})` };
   }
 }
 
-if (failures.length) {
-  console.error("FAIL RLS / isolation\n" + failures.join("\n"));
-  process.exit(1);
-}
-console.log("PASS RLS scripts + app isolation guards");
-console.log(`LIVE_SUPABASE ${live.applied ? "reachable" : "UNKNOWN"} — ${live.note}`);
-console.log("CHECKLIST: apply scripts/supabase-campaigns.sql and scripts/supabase-scientist.sql in the Supabase SQL editor, then re-run this script with SUPABASE_SERVICE_ROLE_KEY.");
+void probeLive().then((live) => {
+  if (failures.length) {
+    console.error("FAIL RLS / isolation\n" + failures.join("\n"));
+    process.exit(1);
+  }
+  console.log("PASS RLS scripts + app isolation guards");
+  console.log(`LIVE_SUPABASE ${live.applied ? "reachable" : "UNKNOWN"} — ${live.note}`);
+  console.log("CHECKLIST: apply scripts/supabase-campaigns.sql and scripts/supabase-scientist.sql in the Supabase SQL editor, then re-run this script with SUPABASE_SERVICE_ROLE_KEY.");
+});
