@@ -3,6 +3,7 @@ import { channelFields } from "../channel-copy";
 import { pickIdeas } from "./cmo-ideas";
 import { buildCarouselPack, buildViralScripts } from "./viral-content";
 import { researchNotesForCalendar } from "./research-overlay";
+import { localeViralIdea } from "./campaign-brief";
 
 export type PostingChannel = "facebook" | "instagram" | "tiktok" | "whatsapp" | "landing";
 export type PostingKind = "post" | "script" | "carousel" | "campaign" | "ad";
@@ -67,12 +68,13 @@ export function buildPostingCalendar(pack: CampaignPack, locale: Locale, days = 
   });
   const ideas = pack.cmoIdeas?.selected ?? pickIdeas(pack.intake, locale);
   const ideaAt = (i: number) => ideas[i % Math.max(1, ideas.length)];
+  const viralIdea = pack.viral?.idea || (pack.brief ? localeViralIdea(pack.brief, locale) : "");
   const scripts = pack.viral?.scripts?.locale === locale
     ? pack.viral.scripts
-    : buildViralScripts(pack.intake, pack.viral?.idea || "", locale);
+    : buildViralScripts(pack.intake, viralIdea, locale);
   const carousel = pack.viral?.carousel?.locale === locale
     ? pack.viral.carousel
-    : buildCarouselPack(pack.intake, pack.viral?.idea || "", locale);
+    : buildCarouselPack(pack.intake, viralIdea, locale);
 
   const week1: Array<{
     day: number;

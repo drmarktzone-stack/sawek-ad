@@ -31,6 +31,10 @@ export async function GET(req: Request) {
       location: read(req, "location"),
       description: read(req, "description"),
       offer: read(req, "offer"),
+      extraQueries: read(req, "extra")
+        .split("|")
+        .map((s) => s.trim())
+        .filter(Boolean),
       limit: Number(read(req, "limit") || 48) || 48,
       page: Number(read(req, "page") || 1) || 1,
     };
