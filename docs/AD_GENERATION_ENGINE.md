@@ -175,15 +175,19 @@ Automated in this VM (`npm run check:ad-engine` plus existing engine scripts):
 
 `check:baqa-ar` still fails on **pre-existing** `DEMO_LABEL.ar` (“عرض — حملة جاهزة” does not include `أبو مخ`). This revision did not touch `lib/demo.ts`.
 
-Manual / environment-limited:
+Manual / local browser (this VM, `http://127.0.0.1:43147`, Olive Kitchen published demo + empty wizard):
 
 | Scenario | Status |
 |---|---|
-| Mobile ~390 + desktop result page | PENDING browser pass on this branch |
+| One-click complete ad on HITL + `/campaigns/demo-olive-kitchen` | **PASS** — card “מודעה שלמה בלחיצה אחת” / “ONE-CLICK COMPLETE AD” |
+| Offer ₪149 from demo intake; proof UNKNOWN | **PASS** — no invented testimonial |
+| Fact status USER-PROVIDED; novelty original | **PASS** |
+| HE RTL + EN on pack language | **PASS** |
+| Mobile ~390×844 complete-ad readable | **PASS** |
+| New Campaign empty wizard (no leftover name) | **PASS** |
 | Vertex / research / performance down | **PASS (code)** — complete ad is template-scored; Gemini overlay no-ops |
 | Live Cloud Run revision after deploy | **UNKNOWN** — this PR is not that revision |
 | Signed-in two-account isolation of fingerprints | **PASS (code)** — `ownerId` scope; live two-account **UNKNOWN** |
-| RTL chrome HE/AR | **PASS (code)** — complete ad `dir` follows pack language; chrome already RTL |
 
 ---
 
@@ -206,11 +210,10 @@ Risks watched in QA: `check:orchestrator`, `check:scientist`, `check:empty-campa
 
 **PARTIAL**
 
-- **PASS (this VM, automated):** source split, novelty across 5 generations, no previous-ad / competitor inheritance, no invented offer/proof, cross-business isolation, HE/AR/EN scripts, empty/partial, validation repair, DNA not overwritten, existing orchestrator/scientist/empty-campaign/product paths.
-- **NOT claimed:** live Cloud Run revision (not deployed from this PR), two-account fingerprint isolation on hosted Supabase, Vertex-on-production overlay of the complete ad.
-- **Browser UI** of the one-click card is verified on the local app in this session when the walkthrough exists below; otherwise treat UI as code-complete only.
+- **PASS (this VM):** automated engine checks + local browser on the Olive Kitchen result pack (desktop HITL + `/campaigns/demo-olive-kitchen` HE/EN + 390px) + empty New Campaign wizard.
+- **NOT claimed / UNKNOWN:** hosted Cloud Run revision (not deployed from this PR), live two-account fingerprint isolation, Vertex overlay of the complete ad on production.
 
-Do not treat production as PASS until a human or agent confirms the deployed revision.
+Do not treat production as PASS until this revision is deployed and a human confirms the live host.
 
 ---
 

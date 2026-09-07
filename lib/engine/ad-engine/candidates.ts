@@ -14,6 +14,7 @@ import type {
 import { isNoOffer } from "../../no-offer";
 import { filled } from "../../utils";
 import { detectVertical } from "../../vertical";
+import { audienceChipsFor, resolveChipLabel } from "../../chips";
 import { spokenCta } from "../spoken";
 import { contradictsVertical } from "../campaign-brief";
 import type { SourceLayers } from "./sources";
@@ -444,7 +445,10 @@ function localePack(family: StrategyFamily, intake: Intake, idea: CmoIdea | unde
   return {
     concept: copy.concept[locale],
     why: copy.why[locale],
-    audience: intake.audience.trim() || factOr(locale, "", L("קהל לא צוין", "الجمهور غير مذكور", "Audience not specified")),
+    audience:
+      resolveChipLabel(intake.audience, audienceChipsFor(intake), locale) ||
+      intake.audience.trim() ||
+      factOr(locale, "", L("קהל לא צוין", "الجمهور غير مذكور", "Audience not specified")),
     angle: copy.angle[locale],
     hook: copy.hook[locale],
     headline: copy.headline[locale],
