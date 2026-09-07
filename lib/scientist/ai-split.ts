@@ -16,8 +16,8 @@ export const AI_ROLE_RULES: Record<AiRole, string> = {
 
 export function roleForScientistField(field: string): AiRole {
   if (/score|cpa|delta|total|funnel/.test(field)) return "scoring";
-  if (/dna|nba|learning/.test(field)) return "learning";
-  if (/hypothesis|opportunity|audience/.test(field)) return "reasoning";
+  if (/dna|nba|learning|market/.test(field)) return "learning";
+  if (/hypothesis|opportunity|audience|pattern/.test(field)) return "reasoning";
   if (/copy|variant|script/.test(field)) return "generation";
   if (/valid|forbidden/.test(field)) return "validation";
   return "extraction";

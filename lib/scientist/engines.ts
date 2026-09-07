@@ -26,6 +26,7 @@ import type {
   Uncertainty,
 } from "./types";
 import { emptyKnowledge, emptyNba } from "./types";
+import { emptyMarketIntel } from "./market-types";
 
 const nowIso = () => new Date().toISOString();
 
@@ -490,6 +491,16 @@ export function computeNba(ws: GrowthWorkspace): NextBestAction {
       updatedAt: t,
     };
   }
+  const nbe = ws.market?.nextBestExperiment;
+  if (nbe && nbe.claim !== "UNKNOWN" && !nbe.tested) {
+    return {
+      action: nbe.title,
+      reason: nbe.why,
+      evidence: nbe.evidence,
+      uncertainty: nbe.confidence,
+      updatedAt: t,
+    };
+  }
   const opp = ws.opportunities.find((o) => o.confidence !== "unknown");
   if (opp) {
     return {
@@ -653,6 +664,15 @@ export function applyLearning(ws: GrowthWorkspace, pack?: CampaignPack): GrowthW
     next.learnings = [rec, ...next.learnings].slice(0, 40);
   }
 
+  if (ws.market) {
+    next.market = ws.market;
+    const marketOpps = ws.opportunities.filter((o) => /Untested market pattern|Observed advertiser/i.test(o.title));
+    if (marketOpps.length) {
+      const keep = next.opportunities.filter((o) => !/UNKNOWN — no opportunity evidence/i.test(o.title));
+      next.opportunities = [...marketOpps, ...keep].slice(0, 20);
+    }
+  }
+
   next.knowledge = buildKnowledge(next);
   next.nba = computeNba(next);
   return next;
@@ -687,6 +707,7 @@ export function emptyWorkspace(business: BusinessRecord, extras?: Partial<Growth
     nba: emptyNba(),
     knowledge: emptyKnowledge(),
     campaignIds: [],
+    market: extras?.market ?? emptyMarketIntel(business.id),
     createdAt: t,
     updatedAt: t,
     ...extras,

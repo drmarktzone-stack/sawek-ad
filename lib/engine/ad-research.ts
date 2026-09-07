@@ -35,6 +35,15 @@ export {
   tiktokCreativeCenterUrls,
 } from "./research-public";
 
+export type MarketResearchControls = {
+  lookbackDays?: number;
+  language?: string;
+  objective?: string;
+  competitorCategory?: string;
+  query?: string;
+  geo?: string;
+};
+
 const L = (he: string, ar: string, en: string): Tri => ({ he, ar, en });
 
 const FAKE_METRIC =
@@ -274,6 +283,16 @@ async function fetchTikTokCreativeCenter(query: string, geo: string): Promise<Pa
       };
     }
     const root = json && typeof json === "object" ? (json as Record<string, unknown>) : {};
+    if (root.code === 40101 || /no permission/i.test(String(root.msg ?? ""))) {
+      return {
+        status: "blocked",
+        emptyReason: L(
+          "Creative Center דחה את הקריאה (אין הרשאה). נשאר קישור העמוד הרשמי — לא נמציא צפיות.",
+          "Creative Center رفض النداء (ما في صلاحية). بقي رابط الصفحة الرسمية — مش حنختلق مشاهدات.",
+          "Creative Center rejected the call (no permission). Official page link remains — we will not invent views.",
+        ),
+      };
+    }
     const data = root.data && typeof root.data === "object" ? (root.data as Record<string, unknown>) : root;
     const list = Array.isArray(data.list) ? data.list : Array.isArray(data.hashtags) ? data.hashtags : [];
     if (!list.length) {
@@ -286,7 +305,14 @@ async function fetchTikTokCreativeCenter(query: string, geo: string): Promise<Pa
         ),
       };
     }
-    return { status: "empty" };
+    return {
+      status: "blocked",
+      emptyReason: L(
+        "אין API רשמי חופשי לדוגמאות מודעות — פתחו את Creative Center. לא נמציא צפיות.",
+        "ما في API رسمي مجاني لأمثلة الإعلانات — افتحوا Creative Center. مش حنختلق مشاهدات.",
+        "No official free ads API — open Creative Center. We will not invent views.",
+      ),
+    };
   } catch {
     return {
       status: "blocked",
@@ -322,10 +348,12 @@ async function groundedMarketNotes(
   geo: string,
   urls: Record<ResearchSourceId, string>,
   asOf: string,
+  controls?: MarketResearchControls,
 ): Promise<{ notes: GroundedNote[]; examples: PublicAdExample[]; sources: { url: string; title?: string }[]; grounded: boolean }> {
-  const cc = tiktokCreativeCenterUrls(geo);
+  const cc = tiktokCreativeCenterUrls(geo, controls?.lookbackDays);
   const prompt = [
     `Business facts: name=${intake.businessName}; category=${intake.category}; niche=${intake.voice?.niche || ""}; location=${intake.location}; offer=${intake.offer}; geo=${geo}`,
+    `Scan controls: language=${controls?.language || ""}; objective=${controls?.objective || ""}; lookbackDays=${controls?.lookbackDays ?? 7}; competitorCategory=${controls?.competitorCategory || ""}`,
     `Today: ${asOf.slice(0, 10)}`,
     "Using Google Search grounding, summarize CURRENT public ad/creative patterns for this niche.",
     "Preferred public pages (cite the URL when used):",
@@ -456,10 +484,11 @@ function hostHint(id: ResearchSourceId): string {
   return "linkedin.com/ad-library";
 }
 
-export async function runMarketResearch(intake: Intake): Promise<MarketResearch> {
-  const query = researchQuery(intake);
-  const geo = researchGeo(intake);
-  const cacheKey = `${query}::${geo}`;
+export async function runMarketResearch(intake: Intake, controls?: MarketResearchControls): Promise<MarketResearch> {
+  const query = (controls?.query || researchQuery(intake)).trim();
+  const geo = (controls?.geo || researchGeo(intake)).trim() || "IL";
+  const lookback = controls?.lookbackDays;
+  const cacheKey = `${query}::${geo}::${lookback ?? 7}::${controls?.language ?? ""}::${controls?.objective ?? ""}::${controls?.competitorCategory ?? ""}`;
   const hit = cache.get(cacheKey);
   if (hit && Date.now() - hit.at < CACHE_MS) return hit.data;
   if (!intake.businessName.trim() && !intake.description.trim() && !intake.category.trim() && !intake.voice?.niche) {
@@ -467,12 +496,12 @@ export async function runMarketResearch(intake: Intake): Promise<MarketResearch>
     return { ...empty, fetched: true, sources: empty.sources.map((s) => ({ ...s, status: "empty" as const })) };
   }
   const asOf = new Date().toISOString();
-  const urls = publicResearchUrls(query, geo);
+  const urls = publicResearchUrls(query, geo, lookback);
   const [meta, youtube, tiktok, grounded] = await Promise.all([
     fetchMetaAdLibrary(query, geo, asOf),
     fetchYouTubeSuggest(query, asOf),
     fetchTikTokCreativeCenter(query, geo),
-    groundedMarketNotes(intake, query, geo, urls, asOf),
+    groundedMarketNotes(intake, query, geo, urls, asOf, controls),
   ]);
   const extraNotes = grounded.notes;
   const sources: ResearchSourceCard[] = [
