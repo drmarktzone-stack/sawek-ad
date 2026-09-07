@@ -1040,22 +1040,38 @@ function toIdea(intake: Intake, seed: PlatformSeed): CmoIdea {
  * Pick 3–5 distinctive ideas from vertical platforms using ONLY available facts
  * + structural creativity (no invented metrics).
  */
-export function pickIdeas(intake: Intake, _locale: Locale = "he"): CmoIdea[] {
+export function pickIdeas(
+  intake: Intake,
+  _locale: Locale = "he",
+  opts?: { excludeIds?: string[] },
+): CmoIdea[] {
   const v = detectVertical(intake);
   const seeds = platformsFor(v, intake);
   const flags = factFlags(intake);
+  const excluded = new Set((opts?.excludeIds ?? []).filter(Boolean));
   const ranked = [...seeds]
     .map((s) => ({ s, fit: seedFit(s, flags) + cuisineBias(s, intake), salt: hashSalt(s.id + (intake.businessName || "")) }))
     .sort((a, b) => b.fit - a.fit || a.salt - b.salt);
 
   const picked: PlatformSeed[] = [];
+  const skipped: PlatformSeed[] = [];
   for (const row of ranked) {
     if (picked.length >= 5) break;
+    if (excluded.has(row.s.id)) {
+      skipped.push(row.s);
+      continue;
+    }
     // Prefer high fit, but always keep at least 3 even if facts are thin
     if (row.fit >= 40 || picked.length < 3) picked.push(row.s);
   }
+  for (const s of skipped) {
+    if (picked.length >= 3) break;
+    picked.push(s);
+  }
   while (picked.length < 3 && ranked[picked.length]) {
-    picked.push(ranked[picked.length]!.s);
+    const next = ranked.find((r) => !picked.includes(r.s));
+    if (!next) break;
+    picked.push(next.s);
   }
   return picked.slice(0, 5).map((s) => toIdea(intake, s));
 }

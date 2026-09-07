@@ -92,19 +92,23 @@ export function imageQueriesFromFacts(
   }).slice(0, 12);
 }
 
-export function ideasForBrief(intake: Intake, existing?: CmoIdea[]): CmoIdea[] {
+export function ideasForBrief(
+  intake: Intake,
+  existing?: CmoIdea[],
+  opts?: { excludeIds?: string[] },
+): CmoIdea[] {
   if (existing && existing.length >= 3) return existing.slice(0, 5);
-  return pickIdeas(intake);
+  return pickIdeas(intake, "he", { excludeIds: opts?.excludeIds });
 }
 
 export function buildCampaignBrief(
   intake: Intake,
-  opts?: { research?: MarketResearch; ideas?: CmoIdea[] },
+  opts?: { research?: MarketResearch; ideas?: CmoIdea[]; excludeIds?: string[] },
 ): CampaignBrief {
   const facts = factsFromIntake(intake);
   const vertical = detectVertical(intake) as CampaignVertical;
   const voice = voiceFromIntake(intake);
-  const ideas = ideasForBrief(intake, opts?.ideas);
+  const ideas = ideasForBrief(intake, opts?.ideas, { excludeIds: opts?.excludeIds });
   const hero = ideas[0];
   const research = opts?.research;
   return {

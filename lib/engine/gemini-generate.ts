@@ -140,7 +140,7 @@ export type GenerateBody = {
 };
 
 const SYSTEM_INSTRUCTION =
-  "You are SAWEK AD / سوِّق إعلانك بنفسك, a converting marketing agency. Produce converting copy in Hebrew, Arabic, and English, plus per-channel packs (Facebook feed, Instagram story, Reels 15s, TikTok, WhatsApp, landing). Use ONLY facts in the user message. Never invent prices, discounts, ratings, testimonials, VIP, ROAS, CAC, medical claims, or competitors. If a fact is missing, write [יש להשלים] / [يجب الاستكمال] / [TO COMPLETE]. Medical: no clinical decoration. Reply with JSON only. Do not overwrite labeled extracted phone, address, hours, offer, name, or website. Recreate for each language — never translate literally. Hebrew: direct, action-driving. Arabic: rich marketing, regional (Levant/Gulf-aware), RTL. English: modern SaaS / global. Each locale must be original prose in that language, not a calque of another.";
+  "You are SAWEK AD / سوِّق إعلانك بنفسك, a converting marketing agency. Produce converting copy in Hebrew, Arabic, and English, plus per-channel packs (Facebook feed, Instagram story, Reels 15s, TikTok, WhatsApp, landing). SOURCE SEPARATION is mandatory: LAYER A Business Truth is the only factual source. LAYER B is campaign context. LAYER C previous ads are fingerprints for novelty — NEVER copy their prices, discounts, testimonials, or claims into this business. LAYER D Market Intelligence is strategy only — never inject competitor offers, prices, or stats as customer facts. LAYER E AI insights are labeled inferences, not facts. LAYER F generated copy must not be treated as Business Truth. Use ONLY Business Truth facts. Never invent prices, discounts, ratings, testimonials, VIP, ROAS, CAC, medical claims, guarantees, certifications, scarcity, deadlines, or competitors. If a fact is missing, write [יש להשלים] / [يجب الاستكمال] / [TO COMPLETE] — do not guess. Medical: no clinical decoration. Reply with JSON only. Do not overwrite labeled extracted phone, address, hours, offer, name, or website. Recreate for each language — never translate literally. Hebrew: direct, action-driving. Arabic: rich marketing, regional (Levant/Gulf-aware), RTL. English: modern SaaS / global. Each locale must be original prose in that language, not a calque of another.";
 
 const JSON_SHAPE_ANGLES = `{
   "angles": {
@@ -493,7 +493,7 @@ function factsBlockFromBody(body: GenerateBody): string {
     intake.voice?.dialect && `voiceDialect: ${intake.voice.dialect}`,
     intake.pastResults && `pastResults: ${intake.pastResults}`,
   ].filter(Boolean);
-  return lines.join("\n");
+  return ["LAYER A — BUSINESS TRUTH (authoritative facts only):", ...lines].join("\n");
 }
 
 export function buildUserMessage(body: GenerateBody): string {
@@ -508,14 +508,24 @@ export function buildUserMessage(body: GenerateBody): string {
 
   if (factsBlock) parts.push(`Facts (use only these):\n${factsBlock}`);
   if (description && (!factsBlock || !factsBlock.includes(description.slice(0, 40)))) {
-    parts.push(`Description:\n${description}`);
+    if (/LAYER A|LAYER B|LAYER D/.test(description)) {
+      parts.push(description);
+    } else {
+      parts.push(`LAYER A — additional business description (facts only):\n${description}`);
+    }
   }
-  if (audience) parts.push(`Audience:\n${audience}`);
+  if (audience) parts.push(`LAYER A — Audience:\n${audience}`);
+  parts.push(
+    "LAYER C — Previous ads / creatives are NOT facts. Do not inherit discounts, testimonials, prices, or guarantees from older ads or from competitors.",
+  );
+  parts.push(
+    "LAYER D — Market intelligence is strategy only. Do not write competitor offers into this business.",
+  );
   if (language) parts.push(`Language: ${language} (still return HE+AR+EN packs)`);
   if (medical) parts.push("Medical: true. No clinical decoration.");
   parts.push(modeHint(mode));
   if (prompt) parts.push(prompt);
-  parts.push(`Reply with JSON only, this shape:\n${jsonShapeFor(mode)}\nUse only facts above. Prefer real businessName / phone / city / offer over incomplete markers when those facts exist.`);
+  parts.push(`Reply with JSON only, this shape:\n${jsonShapeFor(mode)}\nUse only LAYER A Business Truth. Prefer real businessName / phone / city / offer over incomplete markers when those facts exist. Missing offer/proof/price → incomplete markers, never a guess.`);
   const max = mode === "scan" ? 8000 : 5000;
   return parts.join("\n\n").slice(0, max);
 }
@@ -1062,7 +1072,6 @@ export function factsToIntake(body: { description?: unknown; audience?: unknown;
     intake.uniqueAdvantage = str("uniqueAdvantage") || str("advantage");
     intake.mainGoal = str("mainGoal") || str("goal");
     intake.offer = str("offer") || intake.offer;
-    intake.pastAds = str("pastAds");
     intake.pastResults = str("pastResults");
     intake.website = str("website") || str("url") || str("site");
     intake.whatsapp = str("whatsapp") || str("phone") || str("tel") || str("mobile");

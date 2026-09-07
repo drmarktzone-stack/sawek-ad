@@ -2,6 +2,8 @@ import type { AdVariant, CampaignAngles, FactoryPiece, Intake, Locale } from "..
 import { filled } from "../utils";
 import { inventsForbidden } from "./coach";
 import { isClinicLike } from "../vertical";
+import { hasInventedCommercialClaim } from "./ad-engine/facts";
+import { buildBusinessTruth } from "./ad-engine/sources";
 import { overlayAnglesOnVariants, parseCampaignAngles, sanitizeAngles } from "./angles";
 
 const ABORT_MS = 28_000;
@@ -138,7 +140,7 @@ function cachedChannelsFor(intake: Intake): GeminiChannels | null {
 
 function promptAllLocales(): string {
   const kinds = VARIANT_KINDS.join(", ");
-  return `Produce JSON with ALL three locales (he, ar, en), channel packs, AND angles {pain,benefit,social_proof,story} each with he/ar/en {headline,copy,cta}. Exactly 6 headlines per locale in this order: ${kinds}. Recreate per language — do not translate literally. Hebrew: direct, action-driving. Arabic: rich marketing, regional, RTL. English: modern SaaS/global. Use ONLY facts in description and audience. Never invent prices, discounts, ratings, testimonials, VIP, ROAS, CAC, medical claims, or competitors. Social proof: only ratings/reviews/customer counts present in facts; otherwise [יש להשלים] / [يجب الاستكمال] / [TO COMPLETE].`;
+  return `Produce JSON with ALL three locales (he, ar, en), channel packs, AND angles {pain,benefit,social_proof,story} each with he/ar/en {headline,copy,cta}. Exactly 6 headlines per locale in this order: ${kinds}. Recreate per language — do not translate literally. Hebrew: direct, action-driving. Arabic: rich marketing, regional, RTL. English: modern SaaS/global. Use ONLY LAYER A Business Truth. Previous ads are fingerprints — do not inherit their discounts/testimonials. Market intel is strategy only. Never invent prices, discounts, ratings, testimonials, VIP, ROAS, CAC, medical claims, or competitors. Social proof: only ratings/reviews/customer counts present in Business Truth; otherwise [יש להשלים] / [يجب الاستكمال] / [TO COMPLETE].`;
 }
 
 function promptFor(locale: Locale, sixHeadlines: boolean): string {
@@ -185,6 +187,7 @@ function payloadFromIntake(
 function safeText(text: string | undefined, intake: Intake): string | undefined {
   if (!text) return undefined;
   if (inventsForbidden(text, intake)) return undefined;
+  if (hasInventedCommercialClaim(text, buildBusinessTruth(intake), intake)) return undefined;
   return text;
 }
 

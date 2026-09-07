@@ -33,6 +33,10 @@ import { buildResearchSkeleton } from "./research-public";
 import { clipAtWord } from "./spoken";
 import { buildCampaignBrief, contradictsVertical, localeViralIdea } from "./campaign-brief";
 import { applyResearchToPack } from "./research-overlay";
+import { attachCompleteAd } from "./ad-engine/complete-ad";
+import { excludeFromHistory } from "./ad-engine/fingerprint";
+import { loadCreativeHistory } from "./ad-engine/memory";
+import { businessKey } from "./ad-engine/sources";
 export { contradictsVertical, verticalLeakRe } from "./campaign-brief";
 
 const KIND_ANGLE: VariantKind[] = [
@@ -181,7 +185,8 @@ export function syncPackEngines(pack: CampaignPack): CampaignPack {
     viral,
     updatedAt: new Date().toISOString(),
   };
-  return { ...next, agency: buildAgency(next) };
+  const withAgency = { ...next, agency: buildAgency(next) };
+  return attachCompleteAd(withAgency, { rotate: false });
 }
 
 /** Fold research notes into the same brief / CMO pack — never a second set of angles. */
@@ -191,9 +196,14 @@ export function attachResearchAndSync(pack: CampaignPack, research: MarketResear
 }
 
 export function orchestrateAssemble(intake: Intake, partial: AssemblePartial): CampaignPack {
+  const history = loadCreativeHistory({
+    businessId: businessKey(intake.businessName),
+  });
+  const exclude = excludeFromHistory(history);
   const brief = buildCampaignBrief(intake, {
     research: partial.research,
     ideas: undefined,
+    excludeIds: exclude.ids,
   });
   const cmoIdeas = cmoPackFromBrief(intake, brief);
   const rawVariants = partial.variants ?? [];
@@ -233,7 +243,8 @@ export function orchestrateAssemble(intake: Intake, partial: AssemblePartial): C
     ...(partial.angles ? { angles: partial.angles } : {}),
     featureType: "campaign",
   };
-  return { ...base, agency: buildAgency(base) };
+  const assembled = { ...base, agency: buildAgency(base) };
+  return attachCompleteAd(assembled, { rotate: true });
 }
 
 export function briefVerticalOf(pack: CampaignPack): CampaignVertical {

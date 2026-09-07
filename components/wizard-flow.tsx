@@ -56,6 +56,7 @@ import { emptyVoice, voiceFromIntake } from "@/lib/engine/voice";
 import { coachIntake } from "@/lib/engine/coach";
 import { useIsClient } from "@/lib/use-is-client";
 import { cn } from "@/lib/utils";
+import { CompleteAdCard } from "@/components/complete-ad-card";
 
 function attachFieldId(node: ReactNode, id: string, describedBy?: string): ReactNode {
   if (!isValidElement(node)) return node;
@@ -1159,6 +1160,9 @@ function AgentsPanel({
 
       {pack && (
         <div className="agency-board p-5 sm:p-7">
+          {pack.completeAd ? (
+            <CompleteAdCard completeAd={pack.completeAd} locale={locale} compact />
+          ) : null}
           <DiagnosisCmoStrip cmoIdeas={pack.cmoIdeas} locale={locale} />
           <ResearchDesk pack={pack} locale={locale} onPack={onPack} compact />
           <DiagnosisGaps

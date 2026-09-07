@@ -389,6 +389,117 @@ export interface ProducedAd {
   assetId?: string;
 }
 
+/** Fact governance — never silently promote generated or market text to truth. */
+export type FactStatus =
+  | "VERIFIED"
+  | "USER-PROVIDED"
+  | "SOURCE-VERIFIED"
+  | "INFERENCE"
+  | "UNSUPPORTED"
+  | "UNKNOWN";
+
+export type SourceLayerId =
+  | "business_truth"
+  | "campaign_context"
+  | "creative_history"
+  | "market_intelligence"
+  | "ai_insights"
+  | "generated_content";
+
+export type StrategyFamily =
+  | "problem_led"
+  | "transformation"
+  | "proof"
+  | "educational"
+  | "authority"
+  | "objection"
+  | "comparison"
+  | "demo"
+  | "contrarian"
+  | "emotional"
+  | "social_proof"
+  | "curiosity"
+  | "reframing"
+  | "market_gap"
+  | "discovered";
+
+export type NoveltyStatus = "original" | "evolved" | "saturated" | "unknown";
+
+/** Fingerprint of a generated creative. Learning / novelty only — never a factual source. */
+export interface CreativeFingerprint {
+  id: string;
+  businessId: string;
+  ownerId?: string;
+  clientId?: string;
+  campaignId?: string;
+  createdAt: string;
+  family: StrategyFamily;
+  ideaId?: string;
+  angle: string;
+  hook: string;
+  problem: string;
+  promise: string;
+  offer: string;
+  proof: string;
+  trigger: string;
+  framing: string;
+  cta: string;
+  structure: string;
+  visual: string;
+  format: string;
+  hash: string;
+}
+
+export interface CompleteAdLocale {
+  concept: string;
+  why: string;
+  audience: string;
+  angle: string;
+  hook: string;
+  headline: string;
+  copy: string;
+  offer?: string;
+  proof?: string;
+  cta: string;
+  visual: string;
+  format: string;
+  platform: string;
+  imagePrompt?: string;
+}
+
+export interface CompleteAdScores {
+  relevance: number;
+  objective: number;
+  audience: number;
+  evidence: number;
+  novelty: number;
+  clarity: number;
+  persuasion: number;
+  platform: number;
+  factualSafety: number;
+  saturation: number;
+  marketOpportunity: number;
+  total: number;
+}
+
+export interface CompleteAdPackage {
+  family: StrategyFamily;
+  locales: Record<Locale, CompleteAdLocale>;
+  language: Locale;
+  factStatus: FactStatus;
+  noveltyStatus: NoveltyStatus;
+  compliance: { ok: boolean; notes: string[] };
+  fingerprint: CreativeFingerprint;
+  validation: { passed: boolean; repaired: boolean; attempts: number; failures: string[] };
+  marketUsed: boolean;
+  marketEvidence?: string;
+  metadata?: {
+    scores: CompleteAdScores;
+    candidateFamilies: StrategyFamily[];
+    sourceLayers: SourceLayerId[];
+  };
+}
+
 export interface CampaignPack {
   id: string;
   createdAt: string;
@@ -467,6 +578,11 @@ export interface CampaignPack {
   };
   /** Short-form viral desk (scripts, carousel, bio, trends, remix, analysis). */
   viral?: ViralDeskState;
+  /**
+   * One-click complete ad. Generated content layer only — never written back
+   * into Business DNA / intake facts.
+   */
+  completeAd?: CompleteAdPackage;
 }
 
 export type VoiceDialect = "he" | "ar-levant" | "ar-gulf" | "ar-msa" | "en";

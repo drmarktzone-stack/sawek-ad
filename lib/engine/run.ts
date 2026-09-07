@@ -140,6 +140,7 @@ function researchUrl(): string {
 
 function factsFromIntake(intake: Intake, brief?: CampaignBrief): string {
   return [
+    "LAYER A — BUSINESS TRUTH (authoritative facts only; do not mix other layers into these facts):",
     intake.businessName && `businessName: ${intake.businessName}`,
     intake.category && `category: ${intake.category}`,
     intake.description && `description: ${intake.description}`,
@@ -149,13 +150,19 @@ function factsFromIntake(intake: Intake, brief?: CampaignBrief): string {
     intake.offer && `offer: ${intake.offer}`,
     intake.location && `location: ${intake.location}`,
     intake.website && `website: ${intake.website}`,
+    intake.whatsapp && `whatsapp: ${intake.whatsapp}`,
+    intake.clinicHours && `clinicHours: ${intake.clinicHours}`,
+    "",
+    "LAYER B — CAMPAIGN CONTEXT (not customer facts):",
     brief?.vertical && `vertical: ${brief.vertical}`,
-    brief?.heroIdeaId && `heroIdeaId: ${brief.heroIdeaId}`,
-    brief?.coreMessage.en && `coreMessage: ${brief.coreMessage.en}`,
-    brief?.angleIds?.length && `angleIds: ${brief.angleIds.join(",")}`,
     brief?.geo && `geo: ${brief.geo}`,
+    intake.mainGoal && `goal: ${intake.mainGoal}`,
+    "",
+    "LAYER D — MARKET / STRATEGY HINT (strategy only — never copy competitor prices, discounts, or stats into customer facts):",
+    brief?.heroIdeaId && `preferredAngleId: ${brief.heroIdeaId}`,
+    brief?.angleIds?.length && `angleIds: ${brief.angleIds.join(",")}`,
   ]
-    .filter(Boolean)
+    .filter((line) => line !== undefined)
     .join("\n");
 }
 
