@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import type { AgentId, CampaignPack, Locale } from "@/lib/types";
 import { installDemoPack, latestPack } from "@/lib/active-pack";
+import { EMPTY_CAMPAIGN_EVENT, wantsEmptyCampaign } from "@/lib/empty-campaign";
 import { DemoPicker } from "@/components/demo-picker";
 import { LOCALES } from "@/lib/i18n";
 import { useI18n } from "@/components/i18n-provider";
@@ -32,6 +33,7 @@ const DEPT_RAIL = [
   { href: "/medical/optibrain", key: "nav.medical" as const },
   { href: "/campaigns", key: "nav.campaigns" as const },
   { href: "/dashboard", key: "nav.dashboard" as const },
+  { href: "/growth", key: "nav.growth" as const },
   { href: "/lab", key: "nav.lab" as const },
   { href: "/self", key: "nav.self" as const },
 ];
@@ -130,6 +132,14 @@ export function DepartmentShell({
   useEffect(() => {
     setPackLang(locale);
   }, [locale]);
+
+  useEffect(() => {
+    function onEmpty() {
+      if (wantsEmptyCampaign()) setPack(null);
+    }
+    window.addEventListener(EMPTY_CAMPAIGN_EVENT, onEmpty);
+    return () => window.removeEventListener(EMPTY_CAMPAIGN_EVENT, onEmpty);
+  }, []);
 
   function loadDemo(idOrSlug: string = "samer") {
     const next = installDemoPack(idOrSlug, packLang);

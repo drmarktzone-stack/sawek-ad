@@ -1,6 +1,6 @@
 "use client";
 
-import { Clapperboard, Compass, FlaskConical, FolderKanban, LayoutDashboard, Megaphone, Palette, Sparkles, Store } from "lucide-react";
+import { Brain, Clapperboard, Compass, FlaskConical, FolderKanban, LayoutDashboard, Megaphone, Palette, Sparkles, Store } from "lucide-react";
 import { useI18n } from "@/components/i18n-provider";
 import { LangLink } from "@/components/lang-link";
 import { cn } from "@/lib/utils";
@@ -78,6 +78,15 @@ export const PRODUCT_FUNCTIONS = [
     key: "fn.dashboard" as const,
     hint: "fn.dashboardHint" as const,
     icon: LayoutDashboard,
+  },
+  {
+    id: "growth",
+    href: "/growth",
+    extraHref: "/growth/experiments",
+    extraKey: "sci.nav.experiments" as const,
+    key: "fn.growth" as const,
+    hint: "fn.growthHint" as const,
+    icon: Brain,
   },
 ] as const;
 

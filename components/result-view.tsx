@@ -15,6 +15,7 @@ import { adviseFromResults } from "@/lib/engine/optimizer";
 import { highlightsOf, missionOf, pillarsOf } from "@/lib/engine/brief";
 import { saveDraft } from "@/lib/storage";
 import { syncCampaign } from "@/lib/supabase";
+import { ingestPack } from "@/lib/scientist/store";
 import { NewCampaignCta } from "@/components/new-campaign-cta";
 import { LangLink } from "@/components/lang-link";
 import { withLang } from "@/lib/locale-url";
@@ -161,6 +162,11 @@ export function ResultView({
     const next = { ...pack, optimizerRuns: [advice, ...pack.optimizerRuns] };
     void syncCampaign(next);
     onChange(next);
+    try {
+      ingestPack(next);
+    } catch {
+      /* scientist learning is best-effort */
+    }
   }
 
   return (
@@ -177,17 +183,25 @@ export function ResultView({
                 {pack.brief.coreMessage[packLang]}
               </p>
             ) : null}
+            <div className="mt-4 flex flex-wrap gap-2">
             {canUse(plan, "landing") ? (
             <LangLink
               href={`/lp/${pack.id}`}
-              className="mt-4 inline-flex items-center gap-2 rounded-[12px] bg-coral px-4 py-2 text-sm font-black text-white"
+              className="inline-flex items-center gap-2 rounded-[12px] bg-coral px-4 py-2 text-sm font-black text-white"
             >
               <ExternalLink className="size-4" />
               {tr("end.clientLanding")}
             </LangLink>
             ) : (
-              <PlanGate feature="landing" className="mt-3" />
+              <PlanGate feature="landing" className="mt-0" />
             )}
+            <LangLink
+              href="/growth"
+              className="inline-flex items-center gap-2 rounded-[12px] bg-[#F5C518] px-4 py-2 text-sm font-black text-black"
+            >
+              {tr("nav.growth")}
+            </LangLink>
+            </div>
           </div>
           <NewCampaignCta other hint className="items-end text-end [&_p]:text-[#C9D0D8]" />
         </div>

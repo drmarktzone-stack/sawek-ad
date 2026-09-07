@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { localeFromUnknown, localizeTriple, translateTexts } from "@/lib/translate";
+import { checkAiRateLimit, rateLimitHeaders, translateRateLimitedBody, userIdFromRequest } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -9,6 +10,11 @@ export const dynamic = "force-dynamic";
  */
 export async function POST(req: Request) {
   try {
+    const userId = await userIdFromRequest(req);
+    const limit = checkAiRateLimit(req, "translate", userId);
+    if (!limit.allowed) {
+      return NextResponse.json(translateRateLimitedBody(), { status: 200, headers: rateLimitHeaders(limit) });
+    }
     const body = (await req.json()) as {
       texts?: unknown;
       text?: unknown;

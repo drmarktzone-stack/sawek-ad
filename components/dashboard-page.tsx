@@ -15,6 +15,9 @@ import { ConquerHeadline } from "@/components/stepper";
 import { cn } from "@/lib/utils";
 import { PublishToSocial } from "@/components/publish-to-social";
 import { useAuth } from "@/components/auth-provider";
+import { DecisionStrip } from "@/components/scientist/growth-desk";
+import { getPrimaryWorkspace, fetchRemoteWorkspaces, mergeRemoteWorkspaces } from "@/lib/scientist/store";
+import type { GrowthWorkspace } from "@/lib/scientist/types";
 
 type Filter = "all" | LabFeatureType;
 
@@ -38,6 +41,7 @@ export function DashboardPage() {
   const [filter, setFilter] = useState<Filter>("all");
   const [items, setItems] = useState<DashItem[]>([]);
   const [booted, setBooted] = useState(false);
+  const [workspace, setWorkspace] = useState<GrowthWorkspace | null>(null);
 
   useEffect(() => {
     if (!ready) return;
@@ -103,6 +107,13 @@ export function DashboardPage() {
       }
       next.sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1));
       setItems(next);
+      try {
+        const remoteWs = await fetchRemoteWorkspaces();
+        if (remoteWs.length) mergeRemoteWorkspaces(remoteWs);
+        setWorkspace(getPrimaryWorkspace());
+      } catch {
+        setWorkspace(getPrimaryWorkspace());
+      }
       setBooted(true);
     })();
     return () => {
@@ -128,6 +139,7 @@ export function DashboardPage() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-10" dir={locale === "en" ? "ltr" : "rtl"}>
       <ConquerHeadline subtitle={t("nav.dashboard")} />
+      <DecisionStrip ws={workspace} />
       <p className="mb-4 text-center text-xs text-muted">{t("dash.filter")}</p>
       <div className="mb-6 flex flex-wrap justify-center gap-2">
         {filters.map((f) => (

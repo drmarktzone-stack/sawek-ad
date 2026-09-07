@@ -128,4 +128,16 @@ export function clearPediatricMedicalLeftovers() {
   if (/סאמר|أبو مخ|Abu Mokh|באקה אל-גרביה|باقة/i.test(`${desk.subject}\n${desk.city}\n${desk.coreMessage}`)) {
     write(K.desk, { ...EMPTY_DESK });
   }
+  const leakRe = /סאמר|أبو مخ|Abu Mokh|052-?8885800|demo-samer|באקה/i;
+  const leads = loadLeads().filter(
+    (l) =>
+      l.campaignId !== "demo-samer-peds-campaign" &&
+      l.slug !== "samer-abu-mokh-peds" &&
+      !leakRe.test(`${l.name}\n${l.phone}\n${l.message}`),
+  );
+  if (leads.length !== loadLeads().length) saveLeads(leads);
+  const appts = loadAppointments().filter(
+    (a) => a.campaignId !== "demo-samer-peds-campaign" && !leakRe.test(`${a.name}\n${a.phone}\n${a.notes}`),
+  );
+  if (appts.length !== loadAppointments().length) saveAppointments(appts);
 }

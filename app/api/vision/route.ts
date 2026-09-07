@@ -8,6 +8,7 @@ import {
   VISION_MAX_BYTES,
   type VisionBody,
 } from "@/lib/engine/gemini-generate";
+import { checkAiRateLimit, rateLimitHeaders, userIdFromRequest, vertexRateLimitedBody } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -49,6 +50,11 @@ async function fetchImageUrl(raw: string): Promise<{ mime: string; data: string 
 
 export async function POST(req: Request) {
   try {
+    const userId = await userIdFromRequest(req);
+    const limit = checkAiRateLimit(req, "vertex", userId);
+    if (!limit.allowed) {
+      return NextResponse.json(vertexRateLimitedBody(), { status: 200, headers: rateLimitHeaders(limit) });
+    }
     const body = (await req.json()) as VisionBody;
     let image = decodeVisionImage(body);
     if (!image && typeof body.imageUrl === "string" && body.imageUrl.trim()) {

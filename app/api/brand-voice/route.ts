@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { loadBrandVoice, saveBrandVoice, FIRESTORE_BRAND_VOICE_COLLECTION } from "@/lib/gcp-ai";
 import type { BrandVoice } from "@/lib/brand-voice";
+import { checkAiRateLimit, rateLimitHeaders, userIdFromRequest } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -38,6 +39,14 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
+    const userId = await userIdFromRequest(req);
+    const limit = checkAiRateLimit(req, "brand_voice", userId);
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { ok: false, reason: "rate_limited", collection: FIRESTORE_BRAND_VOICE_COLLECTION },
+        { status: 200, headers: rateLimitHeaders(limit) },
+      );
+    }
     const voice = asVoice(await req.json());
     if (!voice) return NextResponse.json({ ok: false, reason: "no_id" }, { status: 200 });
     const saved = await saveBrandVoice(voice);

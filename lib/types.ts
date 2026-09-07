@@ -416,6 +416,8 @@ export interface CampaignPack {
   clientId?: string;
   /** Signed-in Supabase user id when the pack was saved. Used to isolate remote sync. */
   ownerId?: string;
+  /** Owner opted in to share-by-id landing. Default false — never implied. */
+  shareEnabled?: boolean;
   /** Product demo / sample pack markers (clinic real; others fictional samples). */
   demoMeta?: {
     sample: true;

@@ -18,7 +18,9 @@
     "check:viral-desk": "npx --yes tsx scripts/check-viral-desk.ts",
     "check:ad-research": "npx --yes tsx scripts/check-ad-research.ts",
     "check:orchestrator": "npx --yes tsx scripts/check-orchestrator.ts",
-    "check:payments": "npx --yes tsx scripts/check-payments.ts"
+    "check:payments": "npx --yes tsx scripts/check-payments.ts",
+    "check:scientist": "npx --yes tsx scripts/check-scientist.ts",
+    "verify:rls": "npx --yes tsx scripts/verify-rls.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

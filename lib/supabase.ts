@@ -97,6 +97,27 @@ export async function syncCampaign(pack: CampaignPack): Promise<void> {
       ...(clientId ? { clientId } : {}),
     };
     upsertLocal(stamped);
+    if (stamped.featureType !== "angles" && stamped.featureType !== "vision" && stamped.featureType !== "score") {
+      try {
+        const { ingestPack } = await import("./scientist/store");
+        ingestPack(stamped);
+      } catch {
+        /* scientist seed is best-effort */
+      }
+    }
+    if (ownerId && typeof window !== "undefined") {
+      try {
+        const res = await fetch("/api/campaigns", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "same-origin",
+          body: JSON.stringify({ pack: stamped }),
+        });
+        if (res.ok) return;
+      } catch {
+        /* fall through to browser client */
+      }
+    }
     const sb = await getClient();
     if (!sb) return;
     await upsertCampaignRow(sb, {
@@ -230,10 +251,27 @@ export async function saveLabRun(
 
 export async function fetchRemoteCampaigns(): Promise<RemoteCampaignRow[]> {
   try {
+    if (typeof window !== "undefined" && clientOwnerId()) {
+      try {
+        const res = await fetch("/api/campaigns", { cache: "no-store", credentials: "same-origin" });
+        if (res.ok) {
+          const data = (await res.json()) as { campaigns?: RemoteCampaignRow[] };
+          if (Array.isArray(data.campaigns)) {
+            return data.campaigns.filter((row) => {
+              if (row.owner_id && clientOwnerId()) return row.owner_id === clientOwnerId();
+              return rowBelongsToCaller(row) || Boolean(clientOwnerId());
+            });
+          }
+        }
+      } catch {
+        /* fall through */
+      }
+    }
     const sb = await getClient();
     if (!sb) return [];
     const ownerId = clientOwnerId();
     const clientId = getClientId();
+    if (!ownerId && !clientId) return [];
     const scoped =
       ownerId
         ? await sb
@@ -241,52 +279,48 @@ export async function fetchRemoteCampaigns(): Promise<RemoteCampaignRow[]> {
             .select("id,name,payload,updated_at,feature_type,owner_id,client_id")
             .eq("owner_id", ownerId)
             .order("updated_at", { ascending: false })
-        : clientId
-          ? await sb
-              .from("campaigns")
-              .select("id,name,payload,updated_at,feature_type,owner_id,client_id")
-              .eq("client_id", clientId)
-              .order("updated_at", { ascending: false })
-          : null;
-    if (scoped && !scoped.error && Array.isArray(scoped.data)) {
-      return scoped.data as RemoteCampaignRow[];
-    }
-    const withType = await sb
-      .from("campaigns")
-      .select("id,name,payload,updated_at,feature_type,owner_id,client_id")
-      .order("updated_at", { ascending: false });
-    const rows = !withType.error && Array.isArray(withType.data)
-      ? (withType.data as RemoteCampaignRow[])
-      : await (async () => {
-          const plain = await sb
+        : await sb
             .from("campaigns")
-            .select("id,name,payload,updated_at")
+            .select("id,name,payload,updated_at,feature_type,owner_id,client_id")
+            .eq("client_id", clientId)
             .order("updated_at", { ascending: false });
-          if (plain.error || !Array.isArray(plain.data)) return [];
-          return plain.data as RemoteCampaignRow[];
-        })();
-    return rows.filter((row) => rowBelongsToCaller(row));
+    if (scoped && !scoped.error && Array.isArray(scoped.data)) {
+      return (scoped.data as RemoteCampaignRow[]).filter((row) => rowBelongsToCaller(row));
+    }
+    return [];
   } catch {
     return [];
   }
 }
 
-/** Share-by-id landing fetch. Does not list other users' campaigns. */
+/** Owner or share_enabled landing via cookie API. No unscoped anon table scan. */
 export async function fetchRemoteCampaignById(id: string): Promise<RemoteCampaignRow | null> {
   const key = String(id ?? "").trim();
-  if (!key || key.length > 120) return null;
+  if (!key || key.length > 120 || /[^\w.-]/.test(key)) return null;
   try {
-    const sb = await getClient();
-    if (!sb) return null;
-    const withType = await sb
-      .from("campaigns")
-      .select("id,name,payload,updated_at,feature_type")
-      .eq("id", key)
-      .maybeSingle();
-    if (!withType.error && withType.data) return withType.data as RemoteCampaignRow;
-    const plain = await sb.from("campaigns").select("id,name,payload,updated_at").eq("id", key).maybeSingle();
-    if (plain.error || !plain.data) return null;
-    return plain.data as RemoteCampaignRow;
+    if (typeof window !== "undefined") {
+      const res = await fetch(`/api/campaigns/${encodeURIComponent(key)}`, {
+        cache: "no-store",
+        credentials: "same-origin",
+      });
+      if (res.ok) {
+        const data = (await res.json()) as { ok?: boolean; pack?: unknown };
+        if (data.ok && data.pack) {
+          const pack = data.pack as { name?: string; updatedAt?: string; featureType?: string; ownerId?: string; clientId?: string };
+          return {
+            id: key,
+            name: String(pack.name ?? key),
+            payload: data.pack,
+            updated_at: String(pack.updatedAt ?? ""),
+            feature_type: pack.featureType,
+            owner_id: pack.ownerId,
+            client_id: pack.clientId,
+          };
+        }
+      }
+      if (res.status === 404 || res.status === 401) return null;
+    }
+    return null;
   } catch {
     return null;
   }

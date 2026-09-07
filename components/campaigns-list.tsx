@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from "react";
 import type { AgentId, AgentStatus, CampaignPack } from "@/lib/types";
-import { deleteCampaign, loadCampaigns } from "@/lib/storage";
+import { deleteCampaign, loadCampaigns, upsertCampaign } from "@/lib/storage";
 import { cachedPublished, fetchPublishedPacks, mergeCampaigns } from "@/lib/published-packs";
+import { fetchRemoteCampaigns } from "@/lib/supabase";
+import { useAuth } from "@/components/auth-provider";
 import { installDemoPack } from "@/lib/active-pack";
 import { markEmptyCampaign } from "@/lib/empty-campaign";
 import { DemoPicker } from "@/components/demo-picker";
@@ -40,6 +42,7 @@ function mergedList(): CampaignPack[] {
 
 export function CampaignsList() {
   const { t, locale } = useI18n();
+  const { ready, user } = useAuth();
   const [list, setList] = useState<CampaignPack[]>([]);
   const [booted, setBooted] = useState(false);
   const [socialFlash, setSocialFlash] = useState<string | null>(null);
@@ -53,8 +56,19 @@ export function CampaignsList() {
     } catch {
       /* ignore */
     }
+    if (!ready) return;
     let cancelled = false;
     (async () => {
+      const remote = await fetchRemoteCampaigns();
+      for (const row of remote) {
+        if (row.payload && typeof row.payload === "object" && "intake" in (row.payload as object) && "variants" in (row.payload as object)) {
+          try {
+            upsertCampaign(row.payload as CampaignPack);
+          } catch {
+            /* ignore */
+          }
+        }
+      }
       const published = await fetchPublishedPacks();
       const rows = mergeCampaigns(loadCampaigns().map(ensureAgency), published.map(ensureAgency));
       if (!cancelled) {
@@ -65,7 +79,7 @@ export function CampaignsList() {
     return () => {
       cancelled = true;
     };
-  }, [locale]);
+  }, [locale, ready, user?.id]);
 
   function loadDemo(idOrSlug: string = "samer") {
     installDemoPack(idOrSlug);
