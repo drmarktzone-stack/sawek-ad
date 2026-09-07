@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { ingestUrl } from "@/lib/url-ingest";
 import { factsToIntake, geminiFailFromEnv, runViralDesk, type ViralBody } from "@/lib/gcp-ai";
 import { remixFromSource, remixNeedTranscript } from "@/lib/engine/viral-content";
+import { checkAiRateLimit, rateLimitHeaders, userIdFromRequest, vertexRateLimitedBody } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -32,6 +33,11 @@ function publicTextFromIngest(result: Awaited<ReturnType<typeof ingestUrl>>): st
 
 export async function POST(req: Request) {
   try {
+    const userId = await userIdFromRequest(req);
+    const limit = checkAiRateLimit(req, "vertex", userId);
+    if (!limit.allowed) {
+      return NextResponse.json(vertexRateLimitedBody(), { status: 200, headers: rateLimitHeaders(limit) });
+    }
     const body = (await req.json()) as ViralBody;
     const mode = body.mode;
     const transcript = typeof body.transcript === "string" ? body.transcript.trim() : "";

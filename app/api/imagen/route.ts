@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { runImagen, runImagenMany, type ImagenFacts } from "@/lib/imagen";
 import { IMAGEN_PICKER_COUNT } from "@/lib/imagen-scenes";
+import { checkAiRateLimit, imagenRateLimitedBody, rateLimitHeaders, userIdFromRequest } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -13,6 +14,11 @@ export const maxDuration = 60;
  */
 export async function POST(req: Request) {
   try {
+    const userId = await userIdFromRequest(req);
+    const limit = checkAiRateLimit(req, "imagen", userId);
+    if (!limit.allowed) {
+      return NextResponse.json(imagenRateLimitedBody(), { status: 200, headers: rateLimitHeaders(limit) });
+    }
     let facts: ImagenFacts = {};
     try {
       const body = (await req.json()) as ImagenFacts;

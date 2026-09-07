@@ -44,6 +44,7 @@ const NAV = [
   { href: "/medical/optibrain", key: "nav.medical" as const, icon: Brain },
   { href: "/campaigns", key: "nav.campaigns" as const, icon: Folder },
   { href: "/dashboard", key: "nav.dashboard" as const, icon: LayoutDashboard },
+  { href: "/growth", key: "nav.growth" as const, icon: Brain },
   { href: "/lab", key: "nav.lab" as const, icon: FlaskConical },
   { href: "/pricing", key: "nav.pricing" as const, icon: Coins },
   { href: "/about", key: "nav.about" as const, icon: HelpCircle },

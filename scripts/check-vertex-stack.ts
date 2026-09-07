@@ -78,6 +78,17 @@ for (const f of requiredFiles) {
   }
 }
 
+const generateRoute = readFileSync(join(root, "app/api/generate/route.ts"), "utf8");
+if (!generateRoute.includes("checkAiRateLimit") || !generateRoute.includes("useTemplates")) {
+  fail("generate route must rate-limit Vertex and keep template overlays");
+}
+const imagenRoute = readFileSync(join(root, "app/api/imagen/route.ts"), "utf8");
+if (!imagenRoute.includes("checkAiRateLimit")) fail("imagen route must rate-limit");
+const translateRoute = readFileSync(join(root, "app/api/translate/route.ts"), "utf8");
+if (!translateRoute.includes("checkAiRateLimit")) fail("translate route must rate-limit");
+const proRoute = readFileSync(join(root, "app/api/generate/pro-desk/route.ts"), "utf8");
+if (!proRoute.includes("proDeskRateLimitedBody")) fail("pro-desk must fail honest on rate limit");
+
 const generate = readFileSync(join(root, "lib/engine/gemini-generate.ts"), "utf8");
 if (!generate.includes('tier: tierForGenerateMode(mode)')) fail("generate route missing tier");
 if (!generate.includes('tier: "pro"')) fail("vision/score missing pro tier");

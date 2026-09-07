@@ -3,6 +3,7 @@ import { emptyIntake } from "./engine/validate";
 import { intakeIsClinicDemo, intakeIsDemoBusiness, isBlockedEmptySessionName } from "./clinic-leak";
 import { demoEntry } from "./demo-catalog";
 import { clearPediatricMedicalLeftovers } from "./medical/storage";
+import { clearDemoScientistWorkspaces } from "./scientist/store";
 
 export const EMPTY_CAMPAIGN_KEY = "sawek-empty-campaign";
 export const EMPTY_CAMPAIGN_EVENT = "sawek-empty-campaign";
@@ -48,6 +49,11 @@ export function markEmptyCampaign() {
     clearPediatricMedicalLeftovers();
   } catch {
     /* medical wipe is best-effort */
+  }
+  try {
+    clearDemoScientistWorkspaces();
+  } catch {
+    /* scientist demo wipe is best-effort */
   }
   writeEmptyFlag(true);
   // Persist blank draft so a remount cannot reload clinic leftovers from a stale draft blob.

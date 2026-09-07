@@ -3,7 +3,7 @@ const CLINIC_NAME_RE =
   /052-?8885800|drsamerped|אבו מוך|أبو مخ|أبو موخ|Abu Mokh|סאמר|سامر|Samer Abu|Al-Nour|مجمع النور|אל-נור/i;
 
 const PUBLISHED_DEMO_RE =
-  /1-?700-?50-?60-?70|pizzahut\.co\.il|פיצה האט|بيتزا هت|Pizza Hut|08-?9336658|alufsport\.co\.il|אלוף ספורט|ألوف|Aluf Sport/i;
+  /1-?700-?50-?60-?70|pizzahut\.co\.il|פיצה האט|بيتزا هت|Pizza Hut|08-?9336658|alufsport\.co\.il|אלוף ספורט|ألوف|Aluf Sport|מטבח הזית|مطبخ الزيتون|Olive Kitchen|נווה שקד|בוטיק חול|بوتيك الرمل|Sand Boutique|עין ברק|demo-olive-kitchen|demo-sand-boutique/i;
 
 export function isBlockedEmptySessionName(name: string): boolean {
   const n = String(name ?? "").trim();

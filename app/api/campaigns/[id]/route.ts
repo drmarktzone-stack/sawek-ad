@@ -1,31 +1,65 @@
 import { NextResponse } from "next/server";
-import { supabaseAnonClient, supabaseServiceClient } from "@/lib/auth-server";
+import { applyAuthCookies, sessionFromRequest } from "@/lib/auth-server";
+import { callerMayReadRow, getCampaignRowById, isCampaignPack, upsertOwnedCampaign } from "@/lib/campaign-server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-function isPack(payload: unknown): payload is Record<string, unknown> {
-  if (!payload || typeof payload !== "object" || Array.isArray(payload)) return false;
-  const o = payload as Record<string, unknown>;
-  return Boolean(o.intake && o.id && Array.isArray(o.variants));
+function invalidId(id: string): boolean {
+  return !id || id.length > 120 || /[^\w.-]/.test(id);
 }
 
-/** Share-by-id landing. Returns one pack or 404. Never lists campaigns. */
-export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> }) {
+/** Owner read, or share_enabled landing. Never lists other users. 404 if unauthorized. */
+export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
   const key = String(id || "").trim();
-  if (!key || key.length > 120 || /[^\w.-]/.test(key)) {
+  if (invalidId(key)) {
     return NextResponse.json({ ok: false, error: "invalid" }, { status: 400 });
   }
-  const sb = supabaseServiceClient() ?? supabaseAnonClient();
-  if (!sb) return NextResponse.json({ ok: false, error: "not_found" }, { status: 404 });
-  try {
-    const { data, error } = await sb.from("campaigns").select("id,payload").eq("id", key).maybeSingle();
-    if (error || !data || !isPack(data.payload)) {
-      return NextResponse.json({ ok: false, error: "not_found" }, { status: 404 });
-    }
-    return NextResponse.json({ ok: true, pack: data.payload });
-  } catch {
+  const { session, tokens, refreshed } = await sessionFromRequest(req);
+  const row = await getCampaignRowById(key);
+  if (!row || !isCampaignPack(row.payload)) {
     return NextResponse.json({ ok: false, error: "not_found" }, { status: 404 });
   }
+  if (!callerMayReadRow(row, session?.user.id ?? null)) {
+    return NextResponse.json({ ok: false, error: "not_found" }, { status: 404 });
+  }
+  const res = NextResponse.json({ ok: true, pack: row.payload }, { status: 200 });
+  if (refreshed && tokens) applyAuthCookies(res, req, tokens);
+  return res;
+}
+
+/** Owner can toggle share_enabled. */
+export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }> }) {
+  const { id } = await ctx.params;
+  const key = String(id || "").trim();
+  if (invalidId(key)) {
+    return NextResponse.json({ ok: false, error: "invalid" }, { status: 400 });
+  }
+  const { session, tokens, refreshed } = await sessionFromRequest(req);
+  if (!session) {
+    return NextResponse.json({ ok: false, reason: "unauthorized" }, { status: 401 });
+  }
+  const row = await getCampaignRowById(key);
+  if (!row || !isCampaignPack(row.payload) || !callerMayReadRow(row, session.user.id)) {
+    return NextResponse.json({ ok: false, error: "not_found" }, { status: 404 });
+  }
+  if (row.owner_id && row.owner_id !== session.user.id) {
+    return NextResponse.json({ ok: false, reason: "forbidden" }, { status: 403 });
+  }
+  let shareEnabled = false;
+  try {
+    const body = (await req.json()) as { shareEnabled?: unknown };
+    shareEnabled = body.shareEnabled === true;
+  } catch {
+    shareEnabled = false;
+  }
+  const pack = { ...row.payload, shareEnabled, ownerId: session.user.id };
+  const saved = await upsertOwnedCampaign(session.user.id, pack);
+  const res = NextResponse.json(
+    { ok: saved.ok, shareEnabled, reason: saved.reason },
+    { status: saved.ok ? 200 : 503 },
+  );
+  if (refreshed && tokens) applyAuthCookies(res, req, tokens);
+  return res;
 }
