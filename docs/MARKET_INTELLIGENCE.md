@@ -50,8 +50,23 @@ Probed from this Cloud Agent VM on 2026-09-08. Hosted Cloud Run revision behavio
 | **Gemini Search Grounding** | Existing Vertex `completeGemini({ grounding: true })` inside `runMarketResearch` | ADC / project **unset in this shell**. Live Vertex on hosted Run: **UNKNOWN** | `grounded` or `empty`. Notes labeled **ESTIMATE** |
 | **Google Trends** | Official explore URL only | Not scraped | `grounded` or `unavailable` |
 
-**Working without extra secrets from this VM:** YouTube suggest.  
-**Working when Cloud Run already has Vertex ADC (same $300 pack as Phase 2):** Search Grounding — **UNKNOWN here**.  
+**Live `POST /api/scientist/market` from this VM (fictional Nazareth clinic, no Meta token, no ADC in shell):**
+
+| platform | status |
+|---|---|
+| youtube_suggest | `ok` (later UI scan with a different query: `empty`) |
+| google_ads_transparency | `grounded` (explore + label; no HTML scrape) |
+| pinterest_trends | `grounded` (explore + label) |
+| meta_ad_library | `no_token` |
+| tiktok_creative_center | `blocked` |
+| linkedin_ad_library | `blocked` |
+| gemini_search_grounding | `empty` (no Vertex citations this pass) |
+| google_trends | `unavailable` |
+
+That scan stored 8 YouTube suggestion rows, **0** public-ad patterns, NBE **UNKNOWN**. No invented advertisers.
+
+**Working without extra secrets from this VM:** YouTube suggest (when the suggest endpoint returns rows).  
+**Working when Cloud Run already has Vertex ADC (same $300 pack as Phase 2):** Search Grounding — **UNKNOWN on hosted Run**; **empty** in this shell.  
 **Working only with `META_ADS_LIBRARY_TOKEN`:** Meta `ads_archive`.  
 **Not working as a live feed:** TikTok CC API, LinkedIn library, Google Transparency as an API.
 
@@ -188,7 +203,8 @@ A full desk boot does **not** scan 8 campaigns — only the primary workspace, a
 | Meta `ads_archive` with a real token | UNKNOWN (token absent) |
 | Cloud Scheduler actually attached | UNKNOWN / unconfigured unless secret is set |
 | Signed-in persistence of market payload on hosted Supabase | Code path same as Phase 2; live apply UNKNOWN |
-| Browser HE/AR/EN + mobile after deploy | To be run locally in this agent pass; hosted revision UNKNOWN |
+| Browser HE/AR/EN + mobile **local Next** (`127.0.0.1:43147`) | PASS — empty `/growth` RTL HE / LTR EN / RTL AR, no invented DNA; seeded clinic shows Business DNA; Scan Now + Watch controls; `/growth/market` lists honest source statuses; no ROAS; NBE UNKNOWN when no public ads; `/growth/dna` + `/growth/experiments` still render; 390px cards stack and tabs scroll |
+| Browser HE/AR/EN + mobile after **hosted** deploy | UNKNOWN |
 | Cross-user isolation of market blobs | Same owner RLS as scientist; live two-account UNKNOWN |
 
 ---
