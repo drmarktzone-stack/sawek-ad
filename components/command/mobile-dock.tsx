@@ -25,7 +25,7 @@ export function MobileDock({ onMore }: { onMore: () => void }) {
           </LangLink>
         );
       })}
-      <button type="button" className="flex flex-1 flex-col items-center justify-center gap-0.5 text-[0.62rem] font-extrabold uppercase tracking-wide text-[#C9D0D8]" onClick={onMore}>
+      <button type="button" className="flex flex-1 flex-col items-center justify-center gap-0.5 min-h-[var(--dock-h)] text-[0.62rem] font-extrabold uppercase tracking-wide text-[#C9D0D8]" onClick={onMore}>
         <Menu className="size-4" />
         {t("nav.more")}
       </button>

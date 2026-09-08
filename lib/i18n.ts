@@ -447,6 +447,21 @@ export const copy: Dict = {
     ar: "اعتماد بشري بين مراحل الوكلاء. التشخيص إلزامي قبل البناء.",
     en: "Human approval between agent stages. Diagnosis is required before build.",
   },
+  "agents.packMissing": {
+    he: "האבחון לא נטען. סרקו שוב או המשיכו מהשלב הקודם.",
+    ar: "التشخيص ما انتحميل. امسحوا مرة ثانية أو ارجعوا للمرحلة السابقة.",
+    en: "Diagnosis did not load. Scan again or go back a step.",
+  },
+  "agents.hitlError": {
+    he: "ההמשך נכשל. נסו שוב.",
+    ar: "المتابعة فشلت. حاولوا مرة ثانية.",
+    en: "Could not continue. Try again.",
+  },
+  "agents.advancing": {
+    he: "ממשיכים לשלב הבא…",
+    ar: "عم نكمل للمرحلة الجاي…",
+    en: "Continuing to the next stage…",
+  },
   "status.idle": { he: "ממתין", ar: "بالانتظار", en: "Idle" },
   "status.running": { he: "רץ", ar: "يعمل", en: "Running" },
   "status.blocked": { he: "חסום", ar: "محظور", en: "Blocked" },

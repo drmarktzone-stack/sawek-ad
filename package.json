@@ -24,6 +24,7 @@
     "check:prompt5": "npx --yes tsx scripts/check-prompt5.ts",
     "check:scan-truth": "npx --yes tsx scripts/check-scan-truth.ts",
     "check:market-intel": "npx --yes tsx scripts/check-market-intel.ts",
+    "check:hitl-advance": "npx --yes tsx scripts/check-hitl-advance.ts",
     "verify:rls": "npx --yes tsx scripts/verify-rls.ts"
   },
   "dependencies": {
