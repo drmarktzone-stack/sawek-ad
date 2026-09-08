@@ -6,7 +6,10 @@ import {
   fillEmptyFromPageProse,
   formatIlPhone,
   isCatalogHeading,
+  isChromePromoText,
   isJunkUiText,
+  isUsableLocation,
+  sanitizeExtractedFields,
   syncPhoneWhatsappFields,
   type IngestFieldId,
 } from "./document-ingest";
@@ -139,6 +142,26 @@ function htmlHasUsefulMeta(html: string): boolean {
 
 
 const GENERIC_SCHEMA = new Set(["localbusiness", "organization", "thing", "place", "webpage", "website"]);
+
+const CATEGORY_RANK: Record<string, number> = {
+  hospital: 100,
+  medicalclinic: 95,
+  physician: 90,
+  dentist: 88,
+  medicalorganization: 85,
+  bakery: 80,
+  cafeorcoffeeshop: 78,
+  clothingstore: 70,
+  grocerystore: 68,
+  store: 50,
+  restaurant: 40,
+  foodestablishment: 38,
+  fastfoodrestaurant: 36,
+};
+
+function categoryRank(type: string): number {
+  return CATEGORY_RANK[String(type || "").toLowerCase()] ?? 20;
+}
 
 const BUSINESS_SCHEMA = new Set([
   "localbusiness",
@@ -436,7 +459,10 @@ function asString(v: unknown): string {
 
 function formatAddress(addr: unknown): string {
   if (!addr) return "";
-  if (typeof addr === "string") return clip(addr, 280);
+  if (typeof addr === "string") {
+    const s = clip(addr, 280);
+    return isUsableLocation(s) ? s : "";
+  }
   if (Array.isArray(addr)) return formatAddress(addr[0]);
   if (typeof addr !== "object") return "";
   const o = addr as Record<string, unknown>;
@@ -444,7 +470,12 @@ function formatAddress(addr: unknown): string {
     .flatMap((x) => (Array.isArray(x) ? x : [x]))
     .map((x) => (typeof x === "string" ? x.trim() : ""))
     .filter(Boolean);
-  return clip(parts.join(", "), 280);
+  const formatted = clip(parts.join(", "), 280);
+  return isUsableLocation(formatted) || (formatted.length >= 8 && formatted.length <= 160 && /\d/.test(formatted))
+    ? formatted
+    : formatted && formatted.length <= 80
+      ? formatted
+      : "";
 }
 
 function formatHours(node: Record<string, unknown>): string {
@@ -521,55 +552,75 @@ function labeledFromJsonLd(nodes: Record<string, unknown>[]): string[] {
     const line = `${label}: ${v}`;
     if (!lines.includes(line)) lines.push(line);
   };
+  const bestName = jsonLdName(nodes);
+  if (bestName) push("שם העסק", bestName);
   for (const n of nodes) {
-    push("שם העסק", asString(n.name));
+    if (!bestName) push("שם העסק", asString(n.name));
     push("טלפון", asString(n.telephone));
     push("כתובת", formatAddress(n.address));
     push("אתר", asString(n.url));
     push("שעות", formatHours(n));
     push("תיאור", asString(n.description));
-    const types = schemaTypes(n["@type"]).filter((t) => !GENERIC_SCHEMA.has(t.toLowerCase()));
-    if (types[0]) push("תחום", types[0]);
     const services = asString(n.serviceType) || asString(n.knowsAbout) || asString(n.makesOffer);
     if (services && !/\$|₪|€|price|מחיר|سعر/i.test(services)) push("תיאור", services);
   }
+  const bestCat = jsonLdCategory(nodes);
+  if (bestCat) push("תחום", bestCat);
   return lines;
 }
 
 function jsonLdName(nodes: Record<string, unknown>[]): string {
+  let best = "";
+  let bestRank = -1;
   for (const n of nodes) {
     const name = asString(n.name);
-    if (name) return clip(name, 120);
+    if (!name || isJunkUiText(name) || isCatalogHeading(name)) continue;
+    const types = schemaTypes(n["@type"]);
+    const r = types.length ? Math.max(...types.map((t) => categoryRank(t))) : 20;
+    if (r > bestRank) {
+      bestRank = r;
+      best = name;
+    }
   }
-  return "";
+  return best ? clip(best, 120) : "";
 }
 
 function jsonLdCategory(nodes: Record<string, unknown>[]): string {
-  const rank: Record<string, number> = {
-    hospital: 100,
-    medicalclinic: 95,
-    physician: 90,
-    dentist: 88,
-    medicalorganization: 85,
-    bakery: 80,
-    cafeorcoffeeshop: 78,
-    clothingstore: 70,
-    grocerystore: 68,
-    store: 50,
-    restaurant: 40,
-    foodestablishment: 38,
-    fastfoodrestaurant: 36,
-  };
   let best = "";
   let bestRank = -1;
   for (const n of nodes) {
     const types = schemaTypes(n["@type"]).filter((t) => !GENERIC_SCHEMA.has(t.toLowerCase()));
     for (const t of types) {
-      const r = rank[t.toLowerCase()] ?? 20;
+      const r = categoryRank(t);
       if (r > bestRank) {
         bestRank = r;
         best = t;
       }
+    }
+  }
+  return best;
+}
+
+function jsonLdPostalAddress(nodes: Record<string, unknown>[]): string {
+  for (const n of nodes) {
+    const a = formatAddress(n.address);
+    if (a && isUsableLocation(a)) return a;
+  }
+  for (const n of nodes) {
+    const a = formatAddress(n.address);
+    if (a) return a;
+  }
+  return "";
+}
+
+function preferredCategoryFromTypes(types: string[]): string {
+  let best = "";
+  let bestRank = -1;
+  for (const t of types) {
+    const r = categoryRank(t);
+    if (r > bestRank) {
+      bestRank = r;
+      best = t;
     }
   }
   return best;
@@ -1079,7 +1130,7 @@ function isCssResponse(contentType: string | null, sniff: string): boolean {
 
 
 const PAGE_ADDRESS_HINT =
-  /(?:מחלף|רחוב\s+\S|שדרות\s+\S|כביש\s*\d|الشارع|شارع\s+|مجمع|الطابق|קומה|בצד|بجانب|street|avenue|\bfloor\b)/i;
+  /(?:מחלף|רחוב\s+\S|שדרות\s+\S|כביש\s*\d|الشارع|شارع\s+|مجمع|الطابق|קומה|בצד|بجانب|\d+(?:st|nd|rd|th)\s+(?:street|st\.?|avenue|ave\.?)\b|\d+\s+[\w.'-]+\s+(?:street|st\.?|avenue|ave\.?|road|rd\.?|blvd)\b)/i;
 
 export function parseFetchedHtml(
   html: string,
@@ -1128,9 +1179,9 @@ export function parseFetchedHtml(
     const footText = decodeEntities(foot.replace(/<[^>]+>/g, " ")).replace(/[ \t]+/g, " ");
     for (const line of footText.split(/\n/)) {
       const s = line.replace(/\s+/g, " ").trim();
-      if (s.length < 8 || s.length > 280) continue;
+      if (s.length < 8 || s.length > 160) continue;
       if (/אימייל|email|סיסמה|password/i.test(s)) continue;
-      if (PAGE_ADDRESS_HINT.test(s)) {
+      if (PAGE_ADDRESS_HINT.test(s) && isUsableLocation(s)) {
         labeled.push(`כתובת: ${s}`);
         break;
       }
@@ -1148,9 +1199,9 @@ export function parseFetchedHtml(
   if (!addr) {
     for (const line of visible.split(/\n/)) {
       const s = line.replace(/\s+/g, " ").trim();
-      if (s.length < 8 || s.length > 280) continue;
+      if (s.length < 8 || s.length > 160) continue;
       if (/אימייל|email|סיסמה|password/i.test(s)) continue;
-      if (PAGE_ADDRESS_HINT.test(s)) {
+      if (PAGE_ADDRESS_HINT.test(s) && isUsableLocation(s)) {
         labeled.push(`כתובת: ${s}`);
         break;
       }
@@ -1160,7 +1211,8 @@ export function parseFetchedHtml(
   const h2s: string[] = [];
   for (const m of raw.matchAll(/<h2\b[^>]*>([\s\S]*?)<\/h2>/gi)) {
     const t = clip(decodeEntities((m[1] || "").replace(/<[^>]+>/g, " ")), 160);
-    if (t && !h2s.includes(t)) h2s.push(t);
+    if (!t || h2s.includes(t) || isJunkUiText(t) || isChromePromoText(t)) continue;
+    h2s.push(t);
     if (h2s.length >= 4) break;
   }
   const headerP = firstHeaderOrSeoParagraph(raw);
@@ -1201,11 +1253,22 @@ export function parseFetchedHtml(
     const current = String(fields.description || "").trim();
     if (!current || current.length < 40) fields.description = clip(ogDescription, 500);
   }
-  if (!fields.category) {
-    const cat = jsonLdCategory(nodes);
-    if (cat && !isJunkUiText(cat) && !isCatalogHeading(cat)) fields.category = cat;
+  const rankedCat = jsonLdCategory(nodes);
+  if (rankedCat && !isJunkUiText(rankedCat) && !isCatalogHeading(rankedCat)) {
+    const cur = String(fields.category || "").trim();
+    if (!cur || categoryRank(rankedCat) > categoryRank(cur)) fields.category = rankedCat;
   }
+  const fromLdAddr = jsonLdPostalAddress(nodes);
+  if (fromLdAddr) fields.location = fromLdAddr;
+  else if (fields.location && !isUsableLocation(fields.location)) delete fields.location;
   fields = fillEmptyFromPageProse(fields, blob, extraProse);
+  if (rankedCat && !isJunkUiText(rankedCat) && !isCatalogHeading(rankedCat)) {
+    const cur = String(fields.category || "").trim();
+    if (!cur || categoryRank(rankedCat) > categoryRank(cur)) fields.category = rankedCat;
+  }
+  if (fromLdAddr) fields.location = fromLdAddr;
+  fields = sanitizeExtractedFields(fields, blob);
+  if (fromLdAddr && !fields.location) fields.location = fromLdAddr;
   syncPhoneWhatsappFields(fields);
   if (!fields.uniqueAdvantage || fields.uniqueAdvantage === fields.description) {
     const distinct = distinctPageAdvantage([ogDescription, extraProse, blob].filter(Boolean).join("\n"), fields.description || "");
@@ -1522,6 +1585,7 @@ function mergeUrlIngestResults(home: UrlIngestOk, extras: UrlIngestOk[]): UrlIng
   const fromAll = extractFieldsFromText(text, filenameFromUrl(home.url));
   fields = mergeExtractedFields(fields, fromAll);
   fields = fillEmptyFromPageProse(fields, text);
+  fields = sanitizeExtractedFields(fields, text);
   if (home.fields.website) fields.website = home.fields.website;
   if (home.fields.businessName) fields.businessName = home.fields.businessName;
   const ogImage = home.ogImage || extras.find((e) => e.ogImage)?.ogImage;
@@ -1538,6 +1602,12 @@ function mergeUrlIngestResults(home: UrlIngestOk, extras: UrlIngestOk[]): UrlIng
       if (!jsonLdHits.includes(t)) jsonLdHits.push(t);
     }
   }
+  const bestHit = preferredCategoryFromTypes(jsonLdHits);
+  if (bestHit) {
+    const cur = String(fields.category || "").trim();
+    if (!cur || categoryRank(bestHit) > categoryRank(cur)) fields.category = bestHit;
+  }
+  fields = sanitizeExtractedFields(fields, text);
   const colors: string[] = [...(home.colors ?? [])];
   for (const e of extras) {
     for (const c of e.colors ?? []) {

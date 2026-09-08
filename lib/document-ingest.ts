@@ -237,9 +237,15 @@ const PROMO_WORD = /מבצע(?:\s+חדש)?|חיסול|הנחה|خصم|تصفية
 const CATALOG_H1 = /חדשים על המדפים|hot sale|קטלוג|catalog|new in|on the shelves/i;
 const JUNK_UI_RE =
   /איפוס סיסמה|שחזור סיסמה|התחבר(?:ות)?|\bהרשם\b|הרשמה|skip to|\bcookie\b|forgot password|\blogin\b|\blog[- ]?in\b|\bcart\b|lost.?password|woocommerce-LostPassword|have an account|create (?:an )?account|already have an account|don['’]t have an account|sign[- ]?in|sign[- ]?up|my account|reset password|remember me|newsletter/i;
+const ECOMMERCE_CHROME_RE =
+  /unlock\s+free(?:\s+shipping)?|free\s*shipping|משלוח(?:ים)? חינם|add (?:a |the )?.{0,40}\btote\b|\btote\b.{0,80}(?:finishing touch|cart|bag)|add to (?:cart|bag|basket)|הוספה לסל/i;
+const LOCATION_MARKETING_RE =
+  /enhancing |gateway into|including proposed|streetscape|urban plan|public realm|supporting pedestrians|continuous podium|\bpodium\b|street level|important gateway|proposed (?:street|improvement)|campus restaurant/i;
 const SCHEMA_CATEGORY_LABEL =
   /(?:^|\n)\s*(?:תחום|קטגוריה|المجال|category)\s*[:：]\s*(MedicalClinic|MedicalOrganization|Physician|Hospital|Dentist|Bakery|CafeOrCoffeeShop|FoodEstablishment|FastFoodRestaurant|Restaurant|ClothingStore|GroceryStore|Store)\b/i;
 const SHIPPING_PROMO = /משלוח(?:ים)? חינם|free shipping/i;
+const MEDICAL_SCHEMA_RE = /\b(Hospital|MedicalClinic|MedicalOrganization|Physician|Dentist)\b/i;
+const FOOD_SCHEMA_RE = /\b(Restaurant|FoodEstablishment|FastFoodRestaurant|CafeOrCoffeeShop)\b/i;
 /** Advantage phrasing (no queues) — never the problem field. */
 const QUEUE_ADVANTAGE =
   /بدون طوابير(?:\s*\/?\s*بدون انتظار)?|بدون طوابير ولا انتظار(?: طويل)?|بدون انتظار|בלי תור|ללא תור|ללא המתנה|no waiting/i;
@@ -289,14 +295,146 @@ export function formatIlPhone(raw: string): string {
 }
 
 
-/** Login/cart/cookie chrome — never a business name, problem, or advantage. */
+/** Shipping/tote/unlock-free merch chrome — never an offer or problem. */
+export function isChromePromoText(value: string): boolean {
+  const v = value.replace(/\s+/g, " ").trim();
+  if (!v) return false;
+  return ECOMMERCE_CHROME_RE.test(v) || SHIPPING_PROMO.test(v);
+}
+
+/** Login/cart/cookie/shipping chrome — never a business name, problem, or advantage. */
 export function isJunkUiText(value: string): boolean {
   const v = value.replace(/\s+/g, " ").trim();
   if (!v) return true;
+  if (isChromePromoText(v)) return true;
   const core = v.replace(/[?؟!.]+$/g, "").trim();
   if (core.length <= 80 && JUNK_UI_RE.test(core)) return true;
   if (v.length <= 80 && JUNK_UI_RE.test(v)) return true;
   return false;
+}
+
+/** Page-owned sale (מבצע / חיסול / 1+1), not H2 shipping/tote podium. */
+export function isPrimaryBusinessOffer(value: string): boolean {
+  const v = cleanPromoLine(value);
+  if (!v || isChromePromoText(v) || isJunkUiText(v)) return false;
+  if (/tote|\bcart\b|account|login|unlock\s+free/i.test(v)) return false;
+  if (SHIPPING_PROMO.test(v)) return false;
+  if (!PROMO_WORD.test(v) && !/מבצע|חיסול|הנחה|خصم|تصفية|1\s*\+\s*1|\d+\s*%/.test(v)) return false;
+  const stripped = v.replace(PROMO_WORD, "").replace(/[!?.\s\-–—:*#]+/g, "").trim();
+  if (!stripped && !/חיסול|מבצע(?:\s+חדש)?|hot\s*sale/i.test(v)) return false;
+  return true;
+}
+
+function looksLikePostalAddress(v: string): boolean {
+  if (
+    /\d+(?:st|nd|rd|th)\s+(?:street|st\.?|avenue|ave\.?)\b/i.test(v) ||
+    /\d+\s+[\w.'-]+\s+(?:street|st\.?|avenue|ave\.?|road|rd\.?|blvd)\b/i.test(v) ||
+    /רחוב\s+\S+|שדרות\s+\S+|מחלף|כביש\s*\d|شارع\s+|الشارع|مجمع|الطابق|קומה/.test(v)
+  ) {
+    return true;
+  }
+  if (/\d{5}(?:-\d{4})?/.test(v) && v.length <= 140) return true;
+  if (v.length <= 80 && /\d/.test(v) && /street|st\b|avenue|רחוב|שדרות|מחלף|כביש|شارع/i.test(v)) return true;
+  return false;
+}
+
+/** Prefer PostalAddress-shaped values. Reject long marketing / urban-planning paragraphs. */
+export function isUsableLocation(value: string): boolean {
+  const v = value.replace(/\s+/g, " ").trim();
+  if (!v || v.length < 3) return false;
+  if (LOCATION_MARKETING_RE.test(v)) return false;
+  if (/\b(?:including|proposed|supporting|enhancing|gateway into)\b/i.test(v)) return false;
+  if (v.length > 160) return false;
+  const longBits = v.split(/[.!?]+/).filter((s) => s.trim().length > 25);
+  if (longBits.length >= 2) return false;
+  if (looksLikePostalAddress(v)) return true;
+  if (v.length <= 80 && !/\b(?:cafeteria|women'?s health|parent organization)\b/i.test(v)) return true;
+  return false;
+}
+
+function pediatricAudienceContext(hay: string): boolean {
+  if (/parent organization|parent company|חברת אם|founding member/i.test(hay)) return false;
+  return /pediatric|מרפאת ילדים|عيادة طب الأطفال|רופא ילדים|طبيب أطفال|ילד עם|child is unwell|when your child|תינוק|infant|toddler|חום ב[־\-]3/i.test(
+    hay,
+  );
+}
+
+/** Bare women/parents/men from incidental copy — not a labeled audience. */
+export function isIncidentalDemographicAudience(value: string, pageText: string): boolean {
+  const v = value.replace(/\s+/g, " ").trim();
+  if (!v) return false;
+  const hay = pageText.replace(/\s+/g, " ");
+  const pediatric = pediatricAudienceContext(hay);
+  const explicitWomenMen =
+    /לנשים|\bfor women\b|קהל.?נשים|לגברים|\bfor men\b|קהל.?גברים|(?:audience|קהל יעד|target audience)\s*[:：]\s*(?:women|men|נשים|גברים)/i.test(
+      hay,
+    );
+  const explicitParents =
+    pediatric ||
+    /every parent|7000\s*\+?\s*parents|(?:audience|קהל יעד|target audience)\s*[:：]\s*(?:parents|הורים)/i.test(hay);
+  const tokens = v.split(/[,/]+/).map((s) => s.trim()).filter(Boolean);
+  if (!tokens.length) return false;
+  const incidental = (t: string): boolean => {
+    const id = t.toLowerCase();
+    if (id === "parents" || t === "הורים" || t === "أهل") return !explicitParents;
+    if (id === "women" || t === "נשים" || /women 25/.test(id)) return !explicitWomenMen;
+    if (id === "men" || t === "גברים" || /men 30/.test(id)) return !explicitWomenMen;
+    return false;
+  };
+  return tokens.every(incidental);
+}
+
+export function acceptScanBrandValue(fieldId: IngestFieldId, incoming: string, pageHay: string): boolean {
+  const v = incoming.replace(/\s+/g, " ").trim();
+  if (!v) return false;
+  if (isJunkUiText(v) || isChromePromoText(v)) return false;
+  if (fieldId === "biggestProblem") {
+    if (/^(unknown|לא מכירים|unknown problem)$/i.test(v)) return false;
+    if (isChromePromoText(v) || JUNK_UI_RE.test(v.replace(/[?؟!.]+$/g, "").trim())) return false;
+  }
+  if (fieldId === "audience" && isIncidentalDemographicAudience(v, pageHay)) return false;
+  if (fieldId === "uniqueAdvantage" && isChromePromoText(v)) return false;
+  return true;
+}
+
+export function sanitizeExtractedFields(
+  fields: Partial<Record<IngestFieldId, string>>,
+  pageText = "",
+): Partial<Record<IngestFieldId, string>> {
+  const out: Partial<Record<IngestFieldId, string>> = { ...fields };
+  const hay = pageText.replace(/\s+/g, " ");
+  if (out.offer) {
+    const parts = out.offer.split(/,\s*/).map((s) => s.trim()).filter((s) => isPrimaryBusinessOffer(s));
+    if (parts.length) out.offer = parts.join(", ");
+    else delete out.offer;
+  }
+  if (out.biggestProblem && (isJunkUiText(out.biggestProblem) || isChromePromoText(out.biggestProblem))) {
+    delete out.biggestProblem;
+  }
+  if (out.audience) {
+    const kept = out.audience
+      .split(/[,/]+/)
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .filter((t) => !isIncidentalDemographicAudience(t, hay || out.audience || ""));
+    if (kept.length) out.audience = kept.join(",");
+    else delete out.audience;
+  }
+  if (out.location && !isUsableLocation(out.location)) delete out.location;
+  if (out.category && FOOD_SCHEMA_RE.test(out.category) && MEDICAL_SCHEMA_RE.test(hay)) {
+    const med = hay.match(MEDICAL_SCHEMA_RE);
+    if (med?.[1]) out.category = med[1];
+    else delete out.category;
+  }
+  if (out.landingLines) {
+    const bits = out.landingLines
+      .split(/\s*·\s*/)
+      .map((s) => s.trim())
+      .filter((s) => s && !isJunkUiText(s) && !isChromePromoText(s));
+    if (bits.length) out.landingLines = clip(bits.join(" · "), 400);
+    else delete out.landingLines;
+  }
+  return out;
 }
 
 export function isCatalogHeading(value: string): boolean {
@@ -309,41 +447,41 @@ function cleanPromoLine(line: string): string {
   return line.replace(/^\*+|\*+$/g, "").replace(/^(?:H[1-6]|title)\s*[:：]\s*/i, "").trim();
 }
 
-/** Page-owned promo line: keyword + concrete extra that already appears in the text. Never invent %. */
+/** Page-owned promo line: keyword + concrete extra that already appears in the text. Never invent %. Never shipping/tote chrome. */
 export function extractUnlabeledPromo(text: string): string {
   const lines = text.split(/\r?\n/).map((l) => l.replace(/\s+/g, " ").trim()).filter(Boolean);
-  const shipping: string[] = [];
   const sales: string[] = [];
   for (let i = 0; i < lines.length; i++) {
-    let line = cleanPromoLine(lines[i]);
-    if (!line || /^H1\s*:/i.test(lines[i])) continue;
+    const raw = lines[i];
+    let line = cleanPromoLine(raw);
+    if (!line || /^H1\s*:/i.test(raw)) continue;
     if (/^(?:תיאור|כתובת|טלפון|שעות|וואטסאפ|שם העסק|CTA|description|title)\s*:/i.test(line)) continue;
-    if (/דירוג|\brating\b|\bstars?\b|כוכבים/i.test(line) && !/מבצע|הנחה|خصم|משלוח/.test(line)) continue;
-    if (SHIPPING_PROMO.test(line)) {
-      if (line.length < 4 || line.length > 180) continue;
-      if (!shipping.includes(line)) shipping.push(line);
-      continue;
-    }
+    if (isChromePromoText(line) || SHIPPING_PROMO.test(line)) continue;
+    if (/דירוג|\brating\b|\bstars?\b|כוכבים/i.test(line) && !/מבצע|הנחה|خصم/.test(line)) continue;
     if (!PROMO_WORD.test(line)) continue;
     let stripped = line.replace(PROMO_WORD, "").replace(/[!?.\s\-–—:*#]+/g, "").trim();
     if (!stripped && lines[i + 1] && lines[i + 1].length <= 40) {
       line = cleanPromoLine(`${line} ${lines[i + 1]}`.replace(/\s+/g, " "));
       stripped = line.replace(PROMO_WORD, "").replace(/[!?.\s\-–—:*#]+/g, "").trim();
     }
+    if (isChromePromoText(line) || SHIPPING_PROMO.test(line)) continue;
     if (line.length < 4 || line.length > 240) continue;
     if (!stripped) continue;
     if (INSTAGRAM_BIO_JUNK.test(line) || /\$\{|whatsappDisplay|contentHe:|contentAr:/.test(line)) continue;
-    if (/₪|\bNIS\b|\d+[.,]\d{2}/.test(line) && !SHIPPING_PROMO.test(line)) continue;
-    const concrete = /[0-9]|1\s*\+\s*1|חינם|חיסול|مجانا|مجاني|تصفية|חדש|₪|%|ש״ח|ש"ח|hot\s*sale|קופון|كوبون|كلاليت|כללית/i.test(line) || stripped.length >= 3;
+    if (/₪|\bNIS\b|\d+[.,]\d{2}/.test(line)) continue;
+    const fromH2 = /^(?:H[2-6])\s*[:：]/i.test(raw);
+    if (fromH2 && !isPrimaryBusinessOffer(line)) continue;
+    const concrete = /[0-9]|1\s*\+\s*1|חיסול|مجانا|مجاني|تصفية|חדש|₪|%|ש״ח|ש"ח|hot\s*sale|קופון|كوبون|كلاليت|כללית|מבצע/i.test(line) || stripped.length >= 3;
     if (!concrete) continue;
+    if (!isPrimaryBusinessOffer(line)) continue;
     if (!sales.includes(line)) sales.push(line);
   }
   sales.sort((a, b) => {
     const score = (s: string) =>
-      (/100\s*%/.test(s) ? 40 : 0) + (/كلاليت|כללית|clalit/i.test(s) ? 30 : 0) + (/مجانا|مجاني|חינם/.test(s) ? 10 : 0) - s.length / 100;
+      (/100\s*%/.test(s) ? 40 : 0) + (/كلاليت|כללית|clalit/i.test(s) ? 30 : 0) + (/مجانا|مجاني/.test(s) ? 10 : 0) - s.length / 100;
     return score(b) - score(a);
   });
-  return [...shipping, ...sales].slice(0, 2).join(", ");
+  return sales.slice(0, 2).join(", ");
 }
 
 /** Advantage phrase that is on the page and not a clone of description. */
@@ -419,20 +557,27 @@ function extractLooseHours(text: string): string {
 }
 
 const ADDRESS_HINT =
-  /(?:מחלף|רחוב\s+\S|שדרות\s+\S|כביש\s*\d|الشارع|شارع\s+|مجمع|الطابق|קומה|בצד|بجانب|(?<!above\s)(?<!podium\s)street(?!\s+level)|avenue|\d+(?:st|nd|rd|th)?\s+floor)/i;
+  /(?:מחלף|רחוב\s+\S|שדרות\s+\S|כביש\s*\d|الشارع|شارع\s+|مجمع|الطابق|קומה|בצד|بجانب|\d+(?:st|nd|rd|th)\s+(?:street|st\.?|avenue|ave\.?)\b|\d+\s+[\w.'-]+\s+(?:street|st\.?|avenue|ave\.?|road|rd\.?|blvd)\b)/i;
 
 function extractLooseAddress(text: string): string {
   const lines = text.split(/\r?\n/).map((l) => l.replace(/\s+/g, " ").trim());
+  const hits: string[] = [];
   for (const line of lines) {
-    if (line.length < 8 || line.length > 280) continue;
+    if (line.length < 8 || line.length > 160) continue;
     if (/אימייל|email|סיסמה|password|כתובת אימייל|lost.?password|podium|street level|have an account/i.test(line)) continue;
+    if (LOCATION_MARKETING_RE.test(line)) continue;
     if (/^H1\s*:/i.test(line)) continue;
     if (/[|]/.test(line) && !ADDRESS_HINT.test(line)) continue;
     if (ADDRESS_HINT.test(line)) {
-      return clip(line.replace(/^(?:כתובת|מיקום|العنوان|الموقع|عنوان|address|location)\s*[:：]\s*/i, ""), 280);
+      const v = clip(line.replace(/^(?:כתובת|מיקום|العنوان|الموقع|عنوان|address|location)\s*[:：]\s*/i, ""), 160);
+      if (isUsableLocation(v) && !hits.includes(v)) hits.push(v);
     }
   }
-  return "";
+  hits.sort((a, b) => {
+    const score = (s: string) => (looksLikePostalAddress(s) ? 50 : 0) + (/\d/.test(s) ? 20 : 0) - s.length / 20;
+    return score(b) - score(a);
+  });
+  return hits[0] || "";
 }
 
 function extractMenuOrServices(text: string): string {
@@ -612,7 +757,7 @@ export function fillEmptyFromPageProse(
   const acceptProblem = (raw: string, sourceForRemainder: string): boolean => {
     const v = stripProseLead(raw);
     if (!v || isBrandHeading(v, brand, h1)) return false;
-    if (isJunkUiText(v) || isCatalogHeading(v)) return false;
+    if (isJunkUiText(v) || isCatalogHeading(v) || isChromePromoText(v)) return false;
     if (/^(?:תחום|קטגוריה|שם העסק|טלפון|כתובת|שעות|תיאור|CTA)\s*:/i.test(v)) return false;
     if (/^(?:Physician|MedicalClinic|Store|Restaurant|LocalBusiness)$/i.test(v)) return false;
     out.biggestProblem = v;
@@ -651,15 +796,15 @@ export function fillEmptyFromPageProse(
   if (!String(out.audience || "").trim()) {
     const ids: string[] = [];
     if (/לכל המשפחה|משפחות מקומיות|local families/i.test(hay)) ids.push("local_families");
+    const pediatric = pediatricAudienceContext(hay);
     const he = hay.match(/להורים|\bהורים\b/)?.[0];
-    const childContext = /ילד|תינוק|ילדים|תינוקות|طفل|أطفال|pediatric|child(?:ren)?|infant|toddler|מרפאת ילדים|عيادة طب الأطفال/i.test(hay);
-    if (/every parent|7000\s*\+?\s*parents/i.test(hay) || he) ids.push("parents");
-    else if (/\bparents?\b/i.test(hay) && childContext && !/parent organization|parent company|חברת אם/i.test(hay)) ids.push("parents");
-    if (/ילדים|תינוקות|أطفال|أهل/.test(hay) && !ids.includes("parents")) ids.push("parents");
-    if (/לנשים|\bfor women\b|קהל.?נשים/i.test(hay) || (/\bנשים\b/.test(hay) && /קהל|audience|יעד/i.test(hay))) ids.push("women");
-    if (/לגברים|\bfor men\b|קהל.?גברים/i.test(hay) || (/\bגברים\b/.test(hay) && /קהל|audience|יעד/i.test(hay))) ids.push("men");
-    if (ids.length) out.audience = ids.join(",");
-    else if (he && !/\bparents?\b/i.test(hay)) out.audience = "הורים";
+    if (pediatric || /every parent|7000\s*\+?\s*parents/i.test(hay) || (he && pediatric)) ids.push("parents");
+    else if (/\bparents?\b/i.test(hay) && pediatric) ids.push("parents");
+    if (/לנשים|\bfor women\b|קהל.?נשים/i.test(hay)) ids.push("women");
+    if (/לגברים|\bfor men\b|קהל.?גברים/i.test(hay)) ids.push("men");
+    const kept = ids.filter((id) => !isIncidentalDemographicAudience(id, hay));
+    if (kept.length) out.audience = kept.join(",");
+    else if (he && pediatric && !/\bparents?\b/i.test(hay)) out.audience = "הורים";
   }
 
   if (!String(out.category || "").trim()) {
@@ -673,7 +818,15 @@ export function fillEmptyFromPageProse(
         hay.match(/طبيب أطفال/) ||
         hay.match(/\bpediatrics?\b/i) ||
         hay.match(SCHEMA_CATEGORY_LABEL);
-      if (catHit) out.category = (catHit[1] || catHit[0]).trim();
+      if (catHit) {
+        let cat = (catHit[1] || catHit[0]).trim();
+        if (FOOD_SCHEMA_RE.test(cat) && MEDICAL_SCHEMA_RE.test(hay)) {
+          const med = hay.match(MEDICAL_SCHEMA_RE);
+          if (med?.[1]) cat = med[1];
+          else cat = "";
+        }
+        if (cat) out.category = cat;
+      }
     }
   }
 
@@ -818,7 +971,11 @@ export function fillEmptyFromPageProse(
     }
   }
 
-  return out;
+  const cleaned = sanitizeExtractedFields(out, hay);
+  if (!String(cleaned.biggestProblem || "").trim() && hay.length > 40) {
+    cleaned.biggestProblem = "unknown";
+  }
+  return cleaned;
 }
 
 function phoneDigitKey(raw: string): string {
@@ -875,8 +1032,9 @@ function labeledPromoSentences(text: string): string[] {
   const rows = text.split(/\r?\n/).map((l) => l.replace(/\s+/g, " ").trim());
   const out: string[] = [];
   for (const row of rows) {
-    const line = cleanPromoLine(row).replace(/^(?:H2)\s*[:：]\s*/i, "").trim();
+    const line = cleanPromoLine(row).replace(/^(?:H[2-6])\s*[:：]\s*/i, "").trim();
     if (!line || line.length < 4 || line.length > 180) continue;
+    if (isChromePromoText(line) || !isPrimaryBusinessOffer(line)) continue;
     for (const lab of labels) {
       if (!startsWithLabel(line, lab)) continue;
       if (!out.includes(line)) out.push(clip(line, 180));
@@ -906,10 +1064,12 @@ export function extractFieldsFromText(text: string, filename: string): Partial<R
   if (name) out.businessName = name;
 
   const locHits = labeledValues(text, ["כתובת", "מיקום", "العنوان", "عنوان", "الموقع", "address", "location"]);
-  const locJunk = /podium|street level|have an account|sign[- ]?in/i;
-  const locStrong = locHits.filter((h) => ADDRESS_HINT.test(h) && !locJunk.test(h)).sort((a, b) => b.length - a.length);
-  const locNamed = locHits.find((h) => !locJunk.test(h) && h.length >= 3 && h.length <= 160);
-  const loc = locStrong[0] || locNamed || "";
+  const locUsable = locHits.filter((h) => isUsableLocation(h)).sort((a, b) => {
+    const score = (s: string) =>
+      (looksLikePostalAddress(s) ? 80 : 0) + (/\d/.test(s) ? 30 : 0) + (s.length <= 80 ? 20 : 0) - s.length / 10;
+    return score(b) - score(a);
+  });
+  const loc = locUsable[0] || "";
   if (loc) out.location = loc;
   else {
     const looseA = extractLooseAddress(text);
@@ -1000,7 +1160,7 @@ export function extractFieldsFromText(text: string, filename: string): Partial<R
     "audience",
     "target audience",
   ]);
-  if (aud) out.audience = aud;
+  if (aud && !isIncidentalDemographicAudience(aud, text)) out.audience = aud;
 
   const problem = labeledValue(text, [
     "הבעיה הכי גדולה",
@@ -1012,7 +1172,7 @@ export function extractFieldsFromText(text: string, filename: string): Partial<R
     "biggest problem",
     "pain point",
   ]);
-  if (problem) out.biggestProblem = problem;
+  if (problem && !isJunkUiText(problem) && !isChromePromoText(problem)) out.biggestProblem = problem;
 
   const goal = labeledValue(text, [
     "מטרת קמפיין",
@@ -1072,6 +1232,11 @@ export function extractFieldsFromText(text: string, filename: string): Partial<R
   if (!String(out.offer || "").trim()) {
     const promo = extractUnlabeledPromo(text);
     if (promo) out.offer = promo;
+  }
+  if (out.offer) {
+    const kept = out.offer.split(/,\s*/).filter((s) => isPrimaryBusinessOffer(s));
+    if (kept.length) out.offer = kept.join(", ");
+    else delete out.offer;
   }
 
   if (looksLikeAd(text, filename)) {
