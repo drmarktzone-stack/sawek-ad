@@ -57,13 +57,13 @@ export const PRIMARY_NAV: NavItem[] = [
   { href: "/campaigns", key: "nav.campaigns", icon: Folder },
   { href: "/studio", key: "nav.studio", icon: Pencil },
   { href: "/growth/market", key: "nav.intel", icon: Radar },
-  { href: "/growth/dna", key: "nav.dna", icon: Fingerprint },
-  { href: "/growth/experiments", key: "nav.experiments", icon: FlaskConical },
-  { href: "/leads", key: "nav.leads", icon: Users },
 ];
 
 export const MORE_NAV: NavItem[] = [
   { href: "/", key: "nav.build", icon: WandSparkles },
+  { href: "/growth/dna", key: "nav.dna", icon: Fingerprint },
+  { href: "/growth/experiments", key: "nav.experiments", icon: FlaskConical },
+  { href: "/leads", key: "nav.leads", icon: Users },
   { href: "/discovery", key: "nav.discovery", icon: Search },
   { href: "/strategy", key: "nav.strategy", icon: Compass },
   { href: "/viral", key: "nav.viral", icon: Sparkles },
