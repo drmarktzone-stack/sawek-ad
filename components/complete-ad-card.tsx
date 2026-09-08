@@ -86,7 +86,7 @@ export function CompleteAdCard({
 
       <div className="mt-4 flex flex-wrap items-center gap-2">
         <span className="os-badge os-badge-warn">
-          {t("complete.fact")}: {completeAd.factStatus}
+          {t("complete.fact")}: {t(`complete.fact.${completeAd.factStatus}`)}
         </span>
         <span className="os-badge os-badge-ink">{novelty}</span>
         {completeAd.validation.passed ? (

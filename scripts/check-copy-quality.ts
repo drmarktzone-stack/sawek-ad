@@ -25,6 +25,7 @@ import {
 } from "../lib/copy-purity";
 import { composeCoreMessage } from "../lib/engine/core-message";
 import { VOICE_DIALECTS, defaultDialectForLocale, effectiveDialect } from "../lib/engine/voice";
+import { pickIdeas } from "../lib/engine/cmo-ideas";
 import type { CampaignPack, Intake, Locale } from "../lib/types";
 
 const failures: string[] = [];
@@ -246,6 +247,14 @@ const palCore = composeCoreMessage(
 if (!/ناس الناصرة|خبز|بالبلد/.test(palCore)) fail(`Palestinian core message off-register: ${palCore}`);
 if (/شلون|دلوقتي|إزيك|هذه الرسالة الجوهرية/.test(palCore)) fail(`Palestinian core used Gulf/Egyptian/fusHa: ${palCore}`);
 if (/شلون|إزيك|دلوقتي/.test(arBlob)) fail(`AR bakery ads used Gulf/Egyptian: ${arBlob.slice(0, 200)}`);
+const heroAr = pickIdeas(meshhdawi(), "ar")[0];
+const heroBlob = heroAr ? `${heroAr.name.ar} ${heroAr.hook.ar} ${heroAr.narrativeArc?.ar ?? ""}` : "";
+if (/طاولة عيلة|أطباق للمشاركة|فنجان كافتتاح|الحمص/.test(heroBlob)) {
+  fail(`AR bakery CMO hero still restaurant/cafe: ${heroBlob}`);
+}
+if (heroAr && !/خبز|مخبز|فرن|حارة|شارع/.test(heroBlob)) {
+  fail(`AR bakery CMO hero not bakery-voiced: ${heroBlob}`);
+}
 if (!/ما في عرض|هاليوم|تعوا/.test(arBlob + thinkText + knowText)) {
   fail("AR bakery/diagnosis missing Palestinian spoken markers");
 }

@@ -23,7 +23,7 @@ export type {
   CmoIdeasPack,
 } from "../types";
 import { filled } from "../utils";
-import { detectVertical, foodFamily, type Vertical } from "../vertical";
+import { detectVertical, foodFamily, isBakery, type Vertical } from "../vertical";
 import { serviceFamily } from "../creative-bank";
 import { isNoOffer } from "../no-offer";
 import { isFreeService } from "../operating-model";
@@ -700,9 +700,49 @@ const GENERIC_PLATFORMS: PlatformSeed[] = [
   },
 ];
 
+const BAKERY_PLATFORMS: PlatformSeed[] = [
+  {
+    id: "oven_today",
+    name: L("לחם חם היום", "خبز طازج هاليوم", "Fresh bread today"),
+    hook: L("לחם מהתנור — בואו לקחת היום", "خبز من الفرن — تعوا خدوا هاليوم", "Bread from the oven — come take some today"),
+    arc: L("תנור → שקית → הביתה", "فرن → كيس → عالبيت", "Oven → bag → home"),
+    platform: L("פלטפורמת תנור-בוקר", "منصة فرن الصبح", "Morning-oven platform"),
+    why: L("עובדת מאפייה אמיתית — בלי תפריט מסעדה", "حقيقة مخبز — مش قائمة مطعم", "A real bakery fact — not a restaurant menu"),
+    needs: ["place", "audience"],
+  },
+  {
+    id: "street_bakery",
+    name: L("המאפייה ברחוב", "المخبز بالشارع", "The bakery on the street"),
+    hook: L("כתובת אחת — לחם מהמקום", "عنوان واحد — خبز من المحل", "One address — bread from this shop"),
+    arc: L("רחוב → דלת → לחם", "شارع → باب → خبز", "Street → door → bread"),
+    platform: L("פלטפורמת רחוב-מאפייה", "منصة شارع المخبز", "Bakery-street platform"),
+    why: L("המקום שסופק הוא הסיפור", "المكان المعطى هو القصة", "The supplied place is the story"),
+    needs: ["place"],
+  },
+  {
+    id: "whatsapp_loaf",
+    name: L("וואטסאפ ללחם", "واتساب للخبز", "WhatsApp for bread"),
+    hook: L("וואטסאפ — לקחת לחם, לא קופון", "واتساب — خدوا خبز، مش كوبون", "WhatsApp — take bread, not a coupon"),
+    arc: L("הודעה → כתובת → שקית", "رسالة → عنوان → كيس", "Message → address → bag"),
+    platform: L("פלטפורמת וואטסאפ-לחם", "منصة واتساب الخبز", "Bread-WhatsApp platform"),
+    why: L("הערוץ שסופק — וואטסאפ", "القناة اللي انكتبت — واتساب", "The named channel — WhatsApp"),
+    needs: ["whatsapp", "place"],
+  },
+  {
+    id: "neighbors_bread",
+    name: L("לחם לשכונה", "خبز للحارة", "Bread for the neighborhood"),
+    hook: L("לאנשי האזור — לחם מהתנור", "لأهل المنطقة — خبز من الفرن", "For people nearby — bread from the oven"),
+    arc: L("שכונה → מאפייה → הביתה", "الحارة → المخبز → البيت", "Block → bakery → home"),
+    platform: L("פלטפורמת שכונה", "منصة الحارة", "Neighborhood platform"),
+    why: L("קהל מקומי שסופק", "جمهور محلي معطى", "The supplied local audience"),
+    needs: ["audience", "place"],
+  },
+];
+
 function platformsFor(v: Vertical, intake?: Intake): PlatformSeed[] {
   if (v === "clinic") return CLINIC_PLATFORMS;
   if (v === "restaurant") {
+    if (intake && isBakery(intake)) return BAKERY_PLATFORMS;
     if (intake && foodFamily(intake) === "cafe") return CAFE_PLATFORMS;
     return RESTAURANT_PLATFORMS;
   }
@@ -716,6 +756,11 @@ function platformsFor(v: Vertical, intake?: Intake): PlatformSeed[] {
 
 function cuisineBias(seed: PlatformSeed, intake: Intake): number {
   if (detectVertical(intake) !== "restaurant") return 0;
+  if (isBakery(intake)) {
+    if (/oven|bakery|loaf|bread|street_bakery|neighbors_bread/.test(seed.id)) return 36;
+    if (/olive|hummus|family_middle|booking|ceramic|tasting|grill|cup_/.test(seed.id)) return -50;
+    return 0;
+  }
   const fam = foodFamily(intake);
   const olive = /olive|hummus|ceramic|table_ritual|mediterranean|square_neighbor|two_cover|tasting/.test(seed.id);
   const grill = /grill|steam|queue/.test(seed.id);
