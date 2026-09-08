@@ -75,7 +75,7 @@ function storyFor(angle: Angle, f: ReturnType<typeof facts>, locale: Locale): st
     .filter(Boolean);
   const base = bits.join(" · ") || f.name;
   if (locale === "ar") {
-    if (angle === "problem") return clip(`${f.problem || "المشكلة من المدخلات"}. بعدين ${base}.`, 160);
+    if (angle === "problem") return clip(`${f.problem && !/^(unknown|no_offer)$/i.test(f.problem) ? f.problem : f.name}. بعدين ${base}.`, 160);
     if (angle === "proof") return clip(`${f.proof || f.advantage || "إثبات محفوظ"}. ${base}.`, 160);
     return clip(base, 160);
   }

@@ -23,6 +23,8 @@ import {
   localeScriptBleed,
   factSpamHits,
 } from "../lib/copy-purity";
+import { composeCoreMessage } from "../lib/engine/core-message";
+import { VOICE_DIALECTS, defaultDialectForLocale, effectiveDialect } from "../lib/engine/voice";
 import type { CampaignPack, Intake, Locale } from "../lib/types";
 
 const failures: string[] = [];
@@ -225,6 +227,36 @@ for (const v of hso.variants) {
     fail(`HSO leaked: ${v.hook}`);
   }
   if (HE_SCRIPT.test(v.hook + v.story)) fail(`HSO AR has Hebrew: ${v.hook}`);
+}
+
+// --- Palestinian dialect is first-class + AR default ---
+if (defaultDialectForLocale("ar") !== "ar-palestinian") fail("AR default dialect must be Palestinian");
+if (effectiveDialect(meshhdawi(), "ar") !== "ar-palestinian") fail("empty-voice AR intake must resolve Palestinian");
+const palRow = VOICE_DIALECTS.find((d) => d.id === "ar-palestinian");
+if (!palRow) fail("VOICE_DIALECTS missing ar-palestinian");
+else {
+  if (!/פלסטין|מדובר/.test(palRow.label.he)) fail(`Palestinian HE label missing: ${palRow.label.he}`);
+  if (!/فلسطين/.test(palRow.label.ar)) fail(`Palestinian AR label missing: ${palRow.label.ar}`);
+  if (!/Palestinian/i.test(palRow.label.en)) fail(`Palestinian EN label missing: ${palRow.label.en}`);
+}
+const palCore = composeCoreMessage(
+  { niche: "مخبز", audience: "ناس الناصرة", dialect: "ar-palestinian", beliefs: ["خبز طازج"], neverSay: "" },
+  "ar",
+);
+if (!/ناس الناصرة|خبز|بالبلد/.test(palCore)) fail(`Palestinian core message off-register: ${palCore}`);
+if (/شلون|دلوقتي|إزيك|هذه الرسالة الجوهرية/.test(palCore)) fail(`Palestinian core used Gulf/Egyptian/fusHa: ${palCore}`);
+if (/شلون|إزيك|دلوقتي/.test(arBlob)) fail(`AR bakery ads used Gulf/Egyptian: ${arBlob.slice(0, 200)}`);
+if (!/ما في عرض|هاليوم|تعوا/.test(arBlob + thinkText + knowText)) {
+  fail("AR bakery/diagnosis missing Palestinian spoken markers");
+}
+if (/يجب أن يأتي|يجب أن يبدأ/.test(thinkText)) fail(`AR diagnosis still stiff fusHa: ${thinkText}`);
+const plantedEg = gateCustomerAd(
+  { headline: "إزيك يا معلم دلوقتي", body: "دي الرسالة", cta: "للموقع" },
+  meshhdawi(),
+  "ar",
+);
+if (/إزيك|دلوقتي/.test(plantedEg.headline + plantedEg.body)) {
+  fail(`gate kept Egyptian register: ${plantedEg.headline}`);
 }
 
 // --- Blocklist completeness vs user screenshots ---

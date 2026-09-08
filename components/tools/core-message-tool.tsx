@@ -8,7 +8,7 @@ import { useI18n } from "@/components/i18n-provider";
 import { LangLink } from "@/components/lang-link";
 import { loadCampaignTools, persistLockedVoice } from "@/lib/campaign-tools";
 import { canLockCoreMessage, generateCoreMessage } from "@/lib/engine/core-message";
-import { VOICE_DIALECTS, normalizeVoice, voiceIsLocked } from "@/lib/engine/voice";
+import { VOICE_DIALECTS, defaultDialectForLocale, normalizeVoice, voiceIsLocked } from "@/lib/engine/voice";
 import type { Intake, VoiceDialect, VoiceProfile } from "@/lib/types";
 import { useIsClient } from "@/lib/use-is-client";
 import { cn, filled } from "@/lib/utils";
@@ -43,7 +43,7 @@ export function CoreMessageTool() {
     const next = inputFrom(intake);
     setNiche(next.niche);
     setAudience(next.audience);
-    setDialect(next.dialect);
+    setDialect(next.dialect || (locale === "ar" ? defaultDialectForLocale("ar") : next.dialect));
     setBeliefs(next.beliefs);
     setNeverSay(next.neverSay);
     const existing = normalizeVoice(intake.voice);

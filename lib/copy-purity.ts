@@ -11,6 +11,7 @@
 import type { Intake, Locale } from "./types";
 import { isNoOffer } from "./no-offer";
 import { ADVANTAGE_CHIPS, AUDIENCE_CHIPS, GOAL_CHIPS, OFFER_CHIPS, PROBLEM_CHIPS, resolveChipLabel } from "./chips";
+import { arabicRegisterBleed, effectiveDialect } from "./engine/voice";
 
 export const HE_SCRIPT = /[\u0590-\u05FF]/;
 export const AR_SCRIPT = /[\u0600-\u06FF]/;
@@ -249,7 +250,7 @@ function fallbackHeadline(intake: Intake, locale: Locale): string {
   const bakery = intakeLooksBakery(intake);
   if (locale === "ar") {
     if (bakery) return name ? `${name} — خبز طازج هاليوم` : "خبز طازج هاليوم";
-    return name || "المحّل قريب منكم";
+    return name || "المحل قريب منكم";
   }
   if (locale === "he") {
     if (bakery) return name ? `${name} — לחם חם מהתנור` : "לחם חם מהתנור";
@@ -266,7 +267,7 @@ function fallbackBenefit(intake: Intake, locale: Locale): string {
   }
   const bakery = intakeLooksBakery(intake);
   if (locale === "ar") {
-    return bakery ? "خبز طازج من الفرن — تعوا خدوا هاليوم." : "خدمة واضحة من المحل — تعوا أو اطلبوا.";
+    return bakery ? "خبز طازج من الفرن — تعوا خدوا هاليوم." : "خدمة واضحة من المحل — تعوا أو احكوا معنا.";
   }
   if (locale === "he") {
     return bakery ? "לחם חם מהתנור — בואו לקחת היום." : "שירות ברור מהעסק — בואו או כתבו.";
@@ -329,17 +330,19 @@ export function gateCustomerAd(
   const blob = `${headline}\n${body}\n${cta}`;
   const hits = customerCopyLeakHits(blob);
   const bleed = localeScriptBleed(blob, locale);
+  const dialect = effectiveDialect(intake, locale);
+  const register = locale === "ar" && arabicRegisterBleed(blob, dialect, locale);
   const spam = factSpamHits(body, facts);
   const empty = !headline.trim() || headline.length < 3;
 
-  if (hits.length || bleed || empty || customerCopyHasLeak(headline) || customerCopyHasLeak(cta)) {
+  if (hits.length || bleed || register || empty || customerCopyHasLeak(headline) || customerCopyHasLeak(cta)) {
     return {
       headline: fallback.headline,
       body: fallback.body,
       cta: cta && !customerCopyHasLeak(cta) && !localeScriptBleed(cta, locale) ? cta : fallback.cta,
       ok: false,
       repaired: true,
-      hits: [...hits, ...(bleed ? ["locale-bleed"] : []), ...(empty ? ["empty-headline"] : [])],
+      hits: [...hits, ...(bleed ? ["locale-bleed"] : []), ...(register ? ["arabic-register"] : []), ...(empty ? ["empty-headline"] : [])],
     };
   }
 
@@ -352,10 +355,11 @@ export function gateCustomerAd(
   return { headline, body, cta, ok: hits.length === 0 && !bleed, repaired: Boolean(spam.length), hits: spam };
 }
 
-export function isCustomerCopyPublishable(text: string, locale: Locale): boolean {
+export function isCustomerCopyPublishable(text: string, locale: Locale, intake?: Intake): boolean {
   if (!String(text ?? "").trim()) return false;
   if (customerCopyHasLeak(text)) return false;
   if (localeScriptBleed(text, locale)) return false;
+  if (locale === "ar" && arabicRegisterBleed(text, effectiveDialect(intake, locale), locale)) return false;
   return true;
 }
 
@@ -401,8 +405,8 @@ export function localizeTopicKey(topic: string, locale: Locale): string {
 }
 
 const VALUE_MAP: Array<{ re: RegExp; he: string; ar: string; en: string }> = [
-  { re: /^(no_offer|אין מבצע|لا يوجد عرض|no offer)$/i, he: "אין מבצע", ar: "لا يوجد عرض", en: "No offer" },
-  { re: /^(unknown|לא ידוע|غير معروف)$/i, he: "לא ידוע", ar: "غير معروف", en: "Unknown" },
+  { re: /^(no_offer|אין מבצע|لا يوجد عرض|ما في عرض|no offer)$/i, he: "אין מבצע", ar: "ما في عرض", en: "No offer" },
+  { re: /^(unknown|לא ידוע|غير معروف)$/i, he: "לא ידוע", ar: "مش معروف", en: "Unknown" },
   { re: /^(custom)$/i, he: "מותאם", ar: "مخصّص", en: "Custom" },
 ];
 
@@ -413,10 +417,10 @@ export function localizeIntakeValue(value: string, locale: Locale): string {
     if (row.re.test(v)) return locale === "he" ? row.he : locale === "ar" ? row.ar : row.en;
   }
   if (v === "unknown" || v.startsWith("unknown,")) {
-    return resolveChipLabel(v, PROBLEM_CHIPS, locale) || (locale === "ar" ? "غير معروف" : locale === "he" ? "לא ידוע" : "Unknown");
+    return resolveChipLabel(v, PROBLEM_CHIPS, locale) || (locale === "ar" ? "مش معروف" : locale === "he" ? "לא ידוע" : "Unknown");
   }
   if (v === "no_offer" || v.includes("no_offer")) {
-    return resolveChipLabel(v, OFFER_CHIPS, locale) || (locale === "ar" ? "لا يوجد عرض" : locale === "he" ? "אין מבצע" : "No offer");
+    return resolveChipLabel(v, OFFER_CHIPS, locale) || (locale === "ar" ? "ما في عرض" : locale === "he" ? "אין מבצע" : "No offer");
   }
   for (const chips of [GOAL_CHIPS, AUDIENCE_CHIPS, ADVANTAGE_CHIPS, PROBLEM_CHIPS, OFFER_CHIPS]) {
     const label = resolveChipLabel(v, chips, locale);

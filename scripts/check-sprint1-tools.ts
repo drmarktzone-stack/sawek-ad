@@ -180,6 +180,23 @@ const gulf = generateCoreMessage(
 );
 if (!gulf.coreMessage.trim()) fail("gulf dialect produced empty core message");
 
+const palestinian = generateCoreMessage(
+  {
+    niche: "مخبز",
+    audience: "ناس الناصرة",
+    dialect: "ar-palestinian",
+    beliefs: ["خبز طازج"],
+    neverSay: "",
+  },
+  { locale: "ar" },
+);
+if (!/ناس الناصرة|خبز|بالبلد/.test(palestinian.coreMessage)) {
+  fail(`Palestinian core message off-register: ${palestinian.coreMessage}`);
+}
+if (/شلون|دلوقتي|إزيك/.test(palestinian.coreMessage)) {
+  fail(`Palestinian core leaked Gulf/Egyptian: ${palestinian.coreMessage}`);
+}
+
 if (failures.length) {
   console.error(`SPRINT1 FAIL (${failures.length})\n- ${failures.join("\n- ")}`);
   process.exit(1);

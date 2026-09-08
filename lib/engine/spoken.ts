@@ -755,7 +755,7 @@ export function spokenBody(kind: VariantKind, intake: Intake, locale: Locale): s
           facts,
         ].filter(Boolean).join("\n\n");
       case "direct_sales":
-        return [open, facts, `إذا مناسب — ${cta}.`].filter(Boolean).join("\n\n");
+        return [open, facts, `إذا بناسبكم — ${cta}.`].filter(Boolean).join("\n\n");
       case "unique_advantage":
         return [
           edgeShort(intake, locale, 180) + ".",

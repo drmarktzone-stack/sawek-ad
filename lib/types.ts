@@ -633,6 +633,7 @@ export interface CampaignPack {
 
 export type VoiceDialect =
   | "he"
+  | "ar-palestinian"
   | "ar-levant"
   | "ar-gulf"
   | "ar-egyptian"

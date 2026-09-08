@@ -1,7 +1,7 @@
 "use client";
 
 import type { VoiceProfile } from "@/lib/types";
-import { VOICE_DIALECTS } from "@/lib/engine/voice";
+import { VOICE_DIALECTS, defaultDialectForLocale } from "@/lib/engine/voice";
 import { filled } from "@/lib/utils";
 import { useId } from "react";
 import { useI18n } from "@/components/i18n-provider";
@@ -17,6 +17,7 @@ export function VoiceFields({
 }) {
   const { t, locale } = useI18n();
   const nid = useId();
+  const selected = value.dialect || (locale === "ar" ? defaultDialectForLocale("ar") : value.dialect);
   return (
     <div className="space-y-4">
       <div>
@@ -60,16 +61,16 @@ export function VoiceFields({
               key={d.id}
               type="button"
               data-testid={`viral-dialect-${d.id}`}
-              onClick={() => onChange({ ...value, dialect: value.dialect === d.id ? "" : d.id })}
+              onClick={() => onChange({ ...value, dialect: selected === d.id && value.dialect === d.id ? "" : d.id })}
               className={cn(
                 "rounded-[12px] border px-3 py-2 text-start text-sm font-bold",
-                value.dialect === d.id
+                selected === d.id
                   ? "border-teal bg-teal text-white"
                   : "border-[rgba(8,17,31,0.12)] bg-white text-navy hover:border-teal",
               )}
             >
               <span className="block">{d.label[locale]}</span>
-              <span className={cn("mt-0.5 block text-xs font-medium", value.dialect === d.id ? "text-white/80" : "text-muted")}>
+              <span className={cn("mt-0.5 block text-xs font-medium", selected === d.id ? "text-white/80" : "text-muted")}>
                 {d.hint[locale]}
               </span>
             </button>
