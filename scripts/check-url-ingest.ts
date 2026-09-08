@@ -9,7 +9,7 @@ import { buildSiteAudit } from "../lib/engine/site-audit";
 import { buildPostingCalendar } from "../lib/engine/posting-calendar";
 import { RESIZE_FORMATS } from "../lib/resize-formats";
 import { assemblePack } from "../lib/engine/run";
-import { applyIngestReview, rowsFromExtracted } from "../lib/document-ingest";
+import { acceptScanBrandValue, applyIngestReview, rowsFromExtracted } from "../lib/document-ingest";
 import { emptyIntake, wizardReady } from "../lib/engine/validate";
 import { detectVertical, isPediatrics, showsHmoAudience } from "../lib/vertical";
 import { AUDIENCE_CHIPS, audienceChipsFor, resolveChipLabel, toggleChipValue } from "../lib/chips";
@@ -508,6 +508,12 @@ if (!hospitalCafe.ok) {
 } else {
   const f = hospitalCafe.fields;
   const cat = String(f.category || "");
+  if (/cafeteria/i.test(String(f.businessName || ""))) {
+    fail(`hospital businessName leaked cafeteria (${JSON.stringify(f.businessName)})`);
+  }
+  if (!/mass test hospital/i.test(String(f.businessName || ""))) {
+    fail(`hospital businessName should be Mass Test Hospital (got ${JSON.stringify(f.businessName)})`);
+  }
   if (/restaurant/i.test(cat)) fail(`hospital category leaked restaurant (${JSON.stringify(cat)})`);
   if (!/hospital|medical/i.test(cat)) fail(`hospital category should be Hospital (got ${JSON.stringify(cat)})`);
   const problem = String(f.biggestProblem || "");
@@ -521,6 +527,61 @@ if (!hospitalCafe.ok) {
   if (/podium|street level/i.test(String(f.location || ""))) {
     fail(`hospital location is architecture chrome ${JSON.stringify(f.location)}`);
   }
+  if (/cambridge street|gateway into|including proposed|streetscape/i.test(String(f.location || ""))) {
+    fail(`hospital location is marketing paragraph ${JSON.stringify(f.location)}`);
+  }
+  if (!/fruit street|55 fruit/i.test(String(f.location || ""))) {
+    fail(`hospital location should prefer JSON-LD PostalAddress (got ${JSON.stringify(f.location)})`);
+  }
+}
+
+const bakeryChromeHtml = readFileSync(join(__dirname, "fixtures/url-ingest-bakery-chrome.html"), "utf8");
+const bakeryChrome = parseFetchedHtml(bakeryChromeHtml, "https://www.levainbakery.com/", "https://www.levainbakery.com/");
+if (!bakeryChrome.ok) {
+  fail(`bakery-chrome parse failed: ${bakeryChrome.error}`);
+} else {
+  const f = bakeryChrome.fields;
+  const offer = String(f.offer || "");
+  const problem = String(f.biggestProblem || "");
+  const aud = String(f.audience || "");
+  const loc = String(f.location || "");
+  const cat = String(f.category || "");
+  const truth = [offer, problem, aud, loc, cat, f.businessName].join(" | ");
+  if (/unlock free|free shipping|משלוח/i.test(offer)) {
+    fail(`bakery offer is shipping chrome ${JSON.stringify(offer)}`);
+  }
+  if (/tote|have an account|cart|unlock free/i.test(problem)) {
+    fail(`bakery problem is merch/account chrome ${JSON.stringify(problem)}`);
+  }
+  if (/\bparents?\b|\bwomen\b/i.test(aud)) {
+    fail(`bakery audience from incidental copy ${JSON.stringify(aud)}`);
+  }
+  if (!/74th|167/i.test(loc)) {
+    fail(`bakery location should be PostalAddress 74th Street (got ${JSON.stringify(loc)})`);
+  }
+  if (/restaurant/i.test(cat)) fail(`bakery category leaked restaurant (${JSON.stringify(cat)})`);
+  if (!/bakery/i.test(cat)) fail(`bakery category should be Bakery (got ${JSON.stringify(cat)})`);
+  if (/have an account|unlock free shipping|parents|restaurant/i.test(truth)) {
+    fail(`bakery Business Truth fields still contain chrome ${JSON.stringify({ offer, problem, aud, loc, cat })}`);
+  }
+}
+
+const hospitalHay =
+  "Women's health brochure. Parent organization of several clinics. Campus restaurant and cafeteria. Enhancing Cambridge Street as an important gateway into Boston.";
+if (acceptScanBrandValue("audience", "women", hospitalHay)) {
+  fail("scan overlay must reject bare audience=women on hospital copy");
+}
+if (acceptScanBrandValue("audience", "parents", hospitalHay)) {
+  fail("scan overlay must reject bare audience=parents without pediatric context");
+}
+if (acceptScanBrandValue("biggestProblem", "Add a Levain Tote for the perfect finishing touch?", "Add a Levain Tote for the perfect finishing touch?")) {
+  fail("scan overlay must reject tote merch as problem");
+}
+if (acceptScanBrandValue("biggestProblem", "Unlock Free Shipping, Free Shipping* on 8pks", "Unlock Free Shipping")) {
+  fail("scan overlay must reject shipping chrome as problem");
+}
+if (!acceptScanBrandValue("audience", "parents", "ילד עם חום ב־3 בלילה ולא בטוחים מה לעשות? רופא AI להורים. pediatric tools.")) {
+  fail("scan overlay must still accept parents with pediatric context");
 }
 
 const saleHtml = readFileSync(join(__dirname, "fixtures/url-ingest-store-sale.html"), "utf8");

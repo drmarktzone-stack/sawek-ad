@@ -32,7 +32,7 @@ import {
   researchQueryFromFacts,
   placeStem,
 } from "../lib/engine/search-suggest";
-import { fillEmptyFromPageProse, isJunkUiText } from "../lib/document-ingest";
+import { acceptScanBrandValue, fillEmptyFromPageProse, isChromePromoText, isJunkUiText, isUsableLocation } from "../lib/document-ingest";
 import { researchQuery, buildResearchSkeleton } from "../lib/engine/research-public";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -238,19 +238,44 @@ if (jaccard("תנור אבן כל בוקר", "תנור אבן כל בוקר הי
 // 11) Scan chrome must not become Business Truth
 if (!isJunkUiText("Have an account?")) fail("test11 login question not junk");
 if (!isJunkUiText("Sign in")) fail("test11 sign-in not junk");
+if (!isJunkUiText("Add a Levain Tote for the perfect finishing touch?")) fail("test11 tote upsell not junk");
+if (!isChromePromoText("Unlock Free Shipping, Free Shipping* on 8pks, 12pks & Gift")) fail("test11 shipping podium not chrome");
+if (isUsableLocation("Enhancing Cambridge Street as an important gateway into Boston, including proposed streetscape improvements supporting pedestrians.")) {
+  fail("test11 marketing paragraph accepted as location");
+}
+if (!isUsableLocation("55 Fruit Street, Boston, MA 02114")) fail("test11 PostalAddress rejected");
 const hospitalPage = fillEmptyFromPageProse(
   { businessName: "Mass Test Hospital" },
   [
     "Have an account?",
     "Women's health brochure. Parent organization of several clinics.",
     "Campus restaurant and cafeteria.",
+    "category: Restaurant",
+    "תחום: Hospital",
     "location: 5 continuous podium level floors above street level",
+    "Enhancing Cambridge Street as an important gateway into Boston, including proposed streetscape improvements.",
   ].join("\n"),
 );
 if (/restaurant/i.test(String(hospitalPage.category || ""))) fail("test11 hospital category restaurant");
 if (/have an account/i.test(String(hospitalPage.biggestProblem || ""))) fail("test11 login became problem");
 if (/\bwomen\b|\bparents?\b/i.test(String(hospitalPage.audience || ""))) fail("test11 audience from chrome");
-if (/podium|street level/i.test(String(hospitalPage.location || ""))) fail("test11 podium became location");
+if (/podium|street level|cambridge street|gateway/i.test(String(hospitalPage.location || ""))) fail("test11 podium/marketing became location");
+const levainPage = fillEmptyFromPageProse(
+  { businessName: "Levain Bakery" },
+  [
+    "Have an account?",
+    "H2: Unlock Free Shipping, Free Shipping* on 8pks, 12pks & Gift",
+    "Add a Levain Tote for the perfect finishing touch?",
+    "Parents love a warm cookie.",
+    "כתובת: 167 W 74th Street, New York, NY",
+  ].join("\n"),
+);
+if (/unlock free|free shipping/i.test(String(levainPage.offer || ""))) fail("test11 shipping became offer");
+if (/tote|have an account/i.test(String(levainPage.biggestProblem || ""))) fail("test11 tote/account became problem");
+if (/\bparents?\b/i.test(String(levainPage.audience || ""))) fail("test11 parents from incidental bakery copy");
+if (acceptScanBrandValue("audience", "women", "Women's health brochure. Parent organization of several clinics.")) {
+  fail("test11 overlay women on hospital copy");
+}
 
 if (failures.length) {
   console.error("FAIL prompt5\n" + failures.join("\n"));

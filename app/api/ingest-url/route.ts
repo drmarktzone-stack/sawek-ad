@@ -4,7 +4,7 @@ import { buildPastCampaignAuditFromPosts, overlayPastCampaignAudit } from "@/lib
 import { runGeminiGenerate, type GenerateBrand } from "@/lib/engine/gemini-generate";
 import { inventsForbidden } from "@/lib/engine/coach";
 import { emptyIntake } from "@/lib/engine/validate";
-import { isJunkUiText, type IngestFieldId } from "@/lib/document-ingest";
+import { isJunkUiText, acceptScanBrandValue, type IngestFieldId } from "@/lib/document-ingest";
 import { filled } from "@/lib/utils";
 import { isClinicLike } from "@/lib/vertical";
 import type { Intake } from "@/lib/types";
@@ -102,6 +102,7 @@ function mergeScanBrand(result: UrlIngestOk, brand: GenerateBrand): UrlIngestOk 
     if (!incoming) continue;
     if (filled(fields[fieldId])) continue;
     if (isJunkUiText(incoming)) continue;
+    if (!acceptScanBrandValue(fieldId, incoming, hay)) continue;
     if (fieldId === "biggestProblem" && /^(unknown|לא מכירים|unknown problem)$/i.test(incoming)) continue;
     if (!groundedInScanText(incoming, hay)) continue;
     fields[fieldId] = incoming;
