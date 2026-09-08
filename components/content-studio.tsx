@@ -72,18 +72,33 @@ export function ContentStudio({ embedded = false }: { embedded?: boolean }) {
   };
 
   return (
-    <div className={embedded ? "" : "mx-auto max-w-5xl px-4 py-10"}>
+    <div className={embedded ? "" : "os-page max-w-5xl"}>
       {!embedded && (
         <>
           <ConquerHeadline subtitle={t("studio.title")} />
-          <p className="mx-auto mb-8 max-w-xl text-center text-sm text-muted">{t("studio.lead")}</p>
+          <p className="mx-auto mb-6 max-w-xl text-center text-sm text-muted">{t("studio.lead")}</p>
         </>
       )}
       {embedded && (
-        <h2 className="mb-4 mt-8 text-lg font-black text-gold">{t("studio.title")}</h2>
+        <h2 className="os-kicker mb-4 mt-6">{t("os.studio.copy")} · {t("studio.title")}</h2>
       )}
+      <p className="mb-4 flex flex-wrap gap-x-3 gap-y-1 text-[11px] font-extrabold uppercase tracking-[0.14em] text-muted">
+        <span>{t("os.studio.campaign")}</span>
+        <span>→</span>
+        <span>{t("os.studio.concept")}</span>
+        <span>→</span>
+        <span>{t("os.studio.preview")}</span>
+        <span>→</span>
+        <span>{t("os.studio.copy")}</span>
+        <span>→</span>
+        <span>{t("os.studio.visual")}</span>
+        <span>→</span>
+        <span>{t("os.studio.variants")}</span>
+        <span>→</span>
+        <span>{t("os.studio.export")}</span>
+      </p>
 
-      <div className="rounded-2xl border border-navy/10 bg-white p-5 sm:p-8">
+      <div className="border-t border-[var(--line)] py-5">
         <div className="mb-4 flex flex-wrap gap-2">
           {KINDS.map((k) => (
             <button

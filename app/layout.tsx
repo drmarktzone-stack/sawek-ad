@@ -79,7 +79,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <PwaRegister />
             <Analytics />
             <Header />
-            <main className="flex-1 w-full min-w-0">{children}</main>
+            <main className="has-dock flex-1 w-full min-w-0">{children}</main>
             <Footer />
           </I18nProvider>
         </AuthProvider>

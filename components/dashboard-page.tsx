@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import type { CampaignPack, LabFeatureType, LabRun } from "@/lib/types";
+import type { CampaignPack, LabFeatureType } from "@/lib/types";
 import { getCampaign, loadCampaigns, loadLabRuns, upsertCampaign, upsertLabRunLocal } from "@/lib/storage";
 import {
   fetchRemoteCampaigns,
@@ -11,13 +11,12 @@ import {
 import { useI18n } from "@/components/i18n-provider";
 import { LangLink } from "@/components/lang-link";
 import { Button } from "@/components/ui/button";
-import { ConquerHeadline } from "@/components/stepper";
-import { cn } from "@/lib/utils";
 import { PublishToSocial } from "@/components/publish-to-social";
 import { useAuth } from "@/components/auth-provider";
-import { DecisionStrip } from "@/components/scientist/growth-desk";
-import { getPrimaryWorkspace, fetchRemoteWorkspaces, mergeRemoteWorkspaces } from "@/lib/scientist/store";
-import type { GrowthWorkspace } from "@/lib/scientist/types";
+import { fetchRemoteWorkspaces, mergeRemoteWorkspaces } from "@/lib/scientist/store";
+import { useCommandSignals } from "@/components/command/signals";
+import { CampaignTable, ContextBar, ModuleSummaries, TodayBoard } from "@/components/command/command-center";
+import { OsLoading, OsPage, OsSection, OsTabs } from "@/components/command/primitives";
 
 type Filter = "all" | LabFeatureType;
 
@@ -38,10 +37,10 @@ function isPack(payload: unknown): payload is CampaignPack {
 export function DashboardPage() {
   const { t, locale } = useI18n();
   const { ready, user } = useAuth();
+  const signals = useCommandSignals();
   const [filter, setFilter] = useState<Filter>("all");
   const [items, setItems] = useState<DashItem[]>([]);
   const [booted, setBooted] = useState(false);
-  const [workspace, setWorkspace] = useState<GrowthWorkspace | null>(null);
 
   useEffect(() => {
     if (!ready) return;
@@ -110,9 +109,8 @@ export function DashboardPage() {
       try {
         const remoteWs = await fetchRemoteWorkspaces();
         if (remoteWs.length) mergeRemoteWorkspaces(remoteWs);
-        setWorkspace(getPrimaryWorkspace());
       } catch {
-        setWorkspace(getPrimaryWorkspace());
+        /* local workspace is enough */
       }
       setBooted(true);
     })();
@@ -134,59 +132,65 @@ export function DashboardPage() {
     { id: "score", key: "lab.tab.score" },
   ];
 
-  if (!booted) return <p className="p-10 text-center text-muted">…</p>;
+  if (!booted) return <OsLoading />;
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-10" dir={locale === "en" ? "ltr" : "rtl"}>
-      <ConquerHeadline subtitle={t("nav.dashboard")} />
-      <DecisionStrip ws={workspace} />
-      <p className="mb-4 text-center text-xs text-muted">{t("dash.filter")}</p>
-      <div className="mb-6 flex flex-wrap justify-center gap-2">
-        {filters.map((f) => (
-          <button
-            key={f.id}
-            type="button"
-            onClick={() => setFilter(f.id)}
-            className={cn(
-              "rounded-full px-3 py-1 text-xs font-bold",
-              filter === f.id ? "bg-navy text-white" : "border border-navy/15 text-muted",
-            )}
-          >
-            {t(f.key)}
-          </button>
-        ))}
-      </div>
+    <OsPage dir={locale === "en" ? "ltr" : "rtl"}>
+      <p className="os-kicker">{t("os.kicker")}</p>
+      <h1 className="os-title mt-1 text-3xl sm:text-4xl">{t("nav.command")}</h1>
+      <p className="mt-2 mb-6 max-w-2xl text-sm text-muted">{t("os.todayTitle")}</p>
 
-      {shown.length === 0 && <p className="text-center text-muted">{t("dash.empty")}</p>}
+      {signals.ready ? (
+        <>
+          <ContextBar signals={signals} />
+          <TodayBoard signals={signals} />
+          <ModuleSummaries signals={signals} />
+          <CampaignTable signals={signals} />
+        </>
+      ) : null}
 
-      <ul className="space-y-3">
-        {shown.map((item) => (
-          <li key={item.id} className="rounded-2xl border border-navy/10 bg-white p-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <p className="font-bold text-navy">{item.name}</p>
-                <p className="text-xs text-muted">
-                  {item.updatedAt.slice(0, 16).replace("T", " ")} · {item.featureType}
-                </p>
-              </div>
-              <div className="flex flex-wrap items-start gap-2">
-                {item.kind === "campaign" ? (
-                  <>
-                    <Button asChild size="sm">
-                      <LangLink href={`/campaigns/${item.id}`}>{t("campaigns.open")}</LangLink>
-                    </Button>
-                    <PublishToSocial campaignId={item.id} pack={getCampaign(item.id)} locale={locale} compact />
-                  </>
-                ) : (
-                  <Button asChild size="sm">
-                    <LangLink href={`/lab?tab=${item.featureType}&run=${item.id}`}>{t("dash.openLab")}</LangLink>
-                  </Button>
-                )}
-              </div>
-            </div>
-          </li>
-        ))}
-      </ul>
-    </div>
+      <OsSection kicker={t("dash.filter")} title={t("nav.dashboard")}>
+        <OsTabs
+          tabs={filters.map((f) => ({ id: f.id, label: t(f.key) }))}
+          value={filter}
+          onChange={(id) => setFilter(id as Filter)}
+        />
+
+        {shown.length === 0 && <p className="os-unknown mt-4">{t("dash.empty")}</p>}
+
+        <div className="mt-4 overflow-x-auto">
+          <table className="os-table">
+            <tbody>
+              {shown.map((item) => (
+                <tr key={item.id}>
+                  <td>
+                    <p className="font-bold text-navy">{item.name}</p>
+                    <p className="text-xs text-muted">
+                      {item.updatedAt.slice(0, 16).replace("T", " ")} · {item.featureType}
+                    </p>
+                  </td>
+                  <td className="text-end">
+                    <div className="flex flex-wrap items-start justify-end gap-2">
+                      {item.kind === "campaign" ? (
+                        <>
+                          <Button asChild size="sm">
+                            <LangLink href={`/campaigns/${item.id}`}>{t("campaigns.open")}</LangLink>
+                          </Button>
+                          <PublishToSocial campaignId={item.id} pack={getCampaign(item.id)} locale={locale} compact />
+                        </>
+                      ) : (
+                        <Button asChild size="sm">
+                          <LangLink href={`/lab?tab=${item.featureType}&run=${item.id}`}>{t("dash.openLab")}</LangLink>
+                        </Button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </OsSection>
+    </OsPage>
   );
 }

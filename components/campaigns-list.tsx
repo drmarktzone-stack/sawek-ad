@@ -91,7 +91,7 @@ export function CampaignsList() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-10">
+    <div className="os-page max-w-5xl">
       <ConquerHeadline subtitle={t("nav.campaigns")} />
       <p className="mx-auto mb-6 max-w-2xl text-center text-sm text-muted">{t("dept.opsLead")}</p>
       <DepartmentRail />
@@ -115,7 +115,7 @@ export function CampaignsList() {
         {list.map((c) => (
           <li
             key={c.id}
-            className="rounded-2xl border border-navy/10 bg-white p-4"
+            className="border-b border-[var(--line)] py-5"
           >
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>

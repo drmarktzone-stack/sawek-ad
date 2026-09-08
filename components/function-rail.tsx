@@ -92,54 +92,33 @@ export const PRODUCT_FUNCTIONS = [
 
 export function FunctionRail({ compact = false, tone = "light" }: { compact?: boolean; tone?: "light" | "ink" }) {
   const { t } = useI18n();
-  if (compact) {
-    return (
-      <nav className="flex min-w-0 items-center gap-1 overflow-x-auto" aria-label={t("fn.title")}>
-        {PRODUCT_FUNCTIONS.map((fn) => {
-          const Icon = fn.icon;
-          return (
-            <LangLink
-              key={fn.id}
-              href={fn.href}
-              className={cn(
-                "tap-row flex shrink-0 items-center gap-1 rounded-[10px] border px-3 py-2 text-sm font-bold",
-                tone === "ink"
-                  ? "border-white/15 text-[#F7F3EA] hover:bg-white/10"
-                  : "border-navy/15 text-navy hover:bg-teal/10",
-              )}
-            >
-              <Icon className="size-3" />
-              {t(fn.key)}
-            </LangLink>
-          );
-        })}
-      </nav>
-    );
-  }
   return (
-    <section className="mx-auto max-w-5xl px-4 pb-2">
-      <p className="agency-kicker mb-3 text-center">
-        {t("fn.title")} · {t("fn.engines")}
-      </p>
-      <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-8 [&>li]:min-w-0">
+    <nav className={cn("mx-auto max-w-6xl px-4", compact ? "py-1" : "py-3")} aria-label={t("fn.title")}>
+      {!compact && (
+        <p className="os-kicker mb-2 text-center">
+          {t("fn.title")} · {t("fn.engines")}
+        </p>
+      )}
+      <ul className="flex min-w-0 items-center gap-1 overflow-x-auto pb-1">
         {PRODUCT_FUNCTIONS.map((fn) => {
           const Icon = fn.icon;
           return (
-            <li key={fn.id}>
+            <li key={fn.id} className="shrink-0">
               <LangLink
                 href={fn.href}
                 className={cn(
-                  "flex h-full flex-col rounded-[20px] border border-[rgba(8,17,31,0.1)] bg-white p-3.5 shadow-[var(--shadow-card)] transition hover:-translate-y-0.5 hover:border-teal/40",
+                  "tap-row inline-flex items-center gap-1.5 border-b-2 border-transparent px-2.5 py-2 text-sm font-bold",
+                  tone === "ink"
+                    ? "text-[#F7F3EA] hover:border-[#9FD4C8]"
+                    : "text-navy hover:border-teal",
                 )}
+                title={t(fn.hint)}
               >
-                <span className="flex items-center gap-2 text-sm font-black text-navy">
-                  <Icon className="size-4 text-teal" />
-                  {t(fn.key)}
-                </span>
-                <span className="mt-1 text-sm text-muted">{t(fn.hint)}</span>
+                <Icon className="size-3.5 text-teal" />
+                {t(fn.key)}
               </LangLink>
               {fn.extraHref && fn.extraKey && (
-                <LangLink href={fn.extraHref} className="mt-1 inline-block px-1 text-sm text-muted hover:text-navy">
+                <LangLink href={fn.extraHref} className="ms-1 text-xs text-muted hover:text-navy">
                   {t(fn.extraKey)}
                 </LangLink>
               )}
@@ -147,11 +126,13 @@ export function FunctionRail({ compact = false, tone = "light" }: { compact?: bo
           );
         })}
       </ul>
-      <p className="mt-2 flex items-center justify-center gap-2 text-sm text-muted">
-        <Compass className="size-3" />
-        {t("fn.engines")}
-      </p>
-    </section>
+      {!compact && (
+        <p className="mt-1 flex items-center justify-center gap-2 text-xs text-muted">
+          <Compass className="size-3" />
+          {t("fn.engines")}
+        </p>
+      )}
+    </nav>
   );
 }
 
@@ -171,7 +152,7 @@ export function FunctionMenuLinks({ onPick, tone = "light" }: { onPick?: () => v
             href={fn.href}
             onClick={onPick}
             className={cn(
-              "tap-row flex items-center gap-2 rounded-[12px] px-3 py-3 text-base",
+              "tap-row flex items-center gap-2 rounded-[10px] px-3 py-3 text-base",
               ink ? "text-[#F7F3EA] hover:bg-white/8" : "text-navy hover:bg-navy/5",
             )}
           >
