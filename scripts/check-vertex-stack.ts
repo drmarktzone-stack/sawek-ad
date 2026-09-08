@@ -159,6 +159,7 @@ if (!research.includes("tiktok_creative_center")) fail("ad-research missing TikT
 if (!research.includes("google_ads_transparency")) fail("ad-research missing Google Ads Transparency");
 if (!research.includes("pinterest_trends")) fail("ad-research missing Pinterest Trends");
 if (!research.includes("youtube_suggest")) fail("ad-research missing YouTube suggest");
+if (!research.includes("google_suggest")) fail("ad-research missing Google suggest");
 if (!research.includes("linkedin_ad_library")) fail("ad-research missing LinkedIn Ad Library");
 if (!research.includes("META_ADS_LIBRARY_TOKEN")) fail("ad-research must read META_ADS_LIBRARY_TOKEN");
 

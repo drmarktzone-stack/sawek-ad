@@ -18,12 +18,12 @@ export async function POST(req: Request) {
         { status: 200, headers: rateLimitHeaders(limit) },
       );
     }
-    const body = (await req.json()) as GenerateBody;
+    const body = (await req.json()) as GenerateBody & { retry?: unknown };
     const intake = factsToIntake(body);
     if (!intake.businessName.trim() && !intake.description.trim() && !intake.website.trim() && !intake.category.trim()) {
       return NextResponse.json({ ...buildResearchSkeleton(intake), fetched: true }, { status: 200 });
     }
-    const research = await runMarketResearch(intake);
+    const research = await runMarketResearch(intake, { bypassCache: Boolean(body.retry) });
     return NextResponse.json(research, { status: 200 });
   } catch {
     return NextResponse.json({ ...buildResearchSkeleton(factsToIntake({})), fetched: true }, { status: 200 });

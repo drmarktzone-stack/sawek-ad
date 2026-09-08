@@ -6,11 +6,14 @@ import type { CampaignPack, CmoIdea, CompleteAdPackage, Intake, Locale } from ".
 import { pickIdeas } from "../cmo-ideas";
 import { detectVertical } from "../../vertical";
 import { classifyOffer, classifyProof, factStatusForAd } from "./facts";
-import { buildFingerprint, excludeFromHistory, noveltyAgainst } from "./fingerprint";
+import { buildFingerprint, excludeFromHistory } from "./fingerprint";
 import { loadCreativeHistory, recordCreativeFingerprint, scopeFromPack } from "./memory";
-import { buildCandidates, familyForIdeaId, pickWinner, STRATEGY_FAMILIES } from "./candidates";
+import { buildCandidates, familyForIdeaId, STRATEGY_FAMILIES } from "./candidates";
+import { pickDiverseWinner, selectStrategicDirections } from "./diversity";
 import { separateSources } from "./sources";
 import { runValidationGate } from "./validate";
+import { decideComposition, treatmentLabel } from "../image-composition";
+import { pickHero } from "../../media-assets";
 
 const MAX_ATTEMPTS = 4;
 
@@ -39,15 +42,15 @@ export function buildCompleteAd(pack: CampaignPack, opts?: { rotate?: boolean })
     : pickIdeas(intake, "he", { excludeIds: exclude.ids });
 
   let candidates = buildCandidates(intake, layers, ideas, history);
-  if (opts?.rotate !== false && exclude.families.length) {
-    const unused = candidates.filter((c) => !exclude.families.includes(c.family));
-    if (unused.length) candidates = [...unused, ...candidates.filter((c) => exclude.families.includes(c.family))];
-  }
+  const directions = opts?.rotate === false && pack.completeAd?.family
+    ? [pack.completeAd.family, ...STRATEGY_FAMILIES.filter((f) => f !== pack.completeAd!.family)]
+    : selectStrategicDirections({ intake, layers, history });
 
   let attempts = 0;
   let repaired = false;
   const failures: string[] = [];
-  let winner = pickWinner(candidates);
+  let diversity = pickDiverseWinner(candidates, opts?.rotate === false ? [] : history, directions);
+  let winner = diversity.winner;
   let locales = winner?.locales;
   let gate = winner && locales
     ? runValidationGate({
@@ -75,7 +78,8 @@ export function buildCompleteAd(pack: CampaignPack, opts?: { rotate?: boolean })
       if (gate.ok) break;
     }
     candidates = candidates.filter((c) => c.family !== winner!.family);
-    winner = pickWinner(candidates);
+    diversity = pickDiverseWinner(candidates, opts?.rotate === false ? [] : history, directions);
+    winner = diversity.winner;
     locales = winner?.locales;
     if (!winner || !locales) break;
     gate = runValidationGate({
@@ -103,19 +107,31 @@ export function buildCompleteAd(pack: CampaignPack, opts?: { rotate?: boolean })
     clientId: pack.clientId,
     campaignId: pack.id,
   });
-  const novelty = noveltyAgainst(fingerprint, history);
+  const noveltyStatus = diversity.noveltyStatus;
   const marketUsed = (winner.family === "market_gap" || winner.family === "discovered") && layers.marketIntel.notes.length > 0;
   const passed = gate.ok;
-  if (passed && !pack.demoMeta?.sample) {
+  if (passed && !pack.demoMeta?.sample && opts?.rotate !== false) {
     recordCreativeFingerprint(scope, fingerprint);
   }
 
+  const heroAsset = pickHero(intake.mediaAssets);
+  const imageComposition = decideComposition({ asset: heroAsset });
+  const treat = treatmentLabel(imageComposition.mode);
+  const localesWithTreatment = {
+    he: { ...finalLocales.he, imageTreatment: treat.he },
+    ar: { ...finalLocales.ar, imageTreatment: treat.ar },
+    en: { ...finalLocales.en, imageTreatment: treat.en },
+  };
+
   const complete: CompleteAdPackage = {
     family: winner.family,
-    locales: finalLocales,
+    locales: localesWithTreatment,
     language: "he",
     factStatus: factStatusForAd(blob, layers.businessTruth, intake),
-    noveltyStatus: novelty.status,
+    noveltyStatus,
+    noveltyReason: diversity.noveltyReason,
+    directionsExhausted: diversity.exhausted,
+    imageComposition,
     compliance: {
       ok: passed,
       notes: [
@@ -133,6 +149,8 @@ export function buildCompleteAd(pack: CampaignPack, opts?: { rotate?: boolean })
     metadata: {
       scores: winner.scores,
       candidateFamilies: STRATEGY_FAMILIES.slice(),
+      rejectedFamilies: diversity.rejected,
+      selectedFrom: directions.slice(0, 8),
       sourceLayers: [
         "business_truth",
         "campaign_context",

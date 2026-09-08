@@ -26,6 +26,14 @@ import {
   researchQuery,
   tiktokCreativeCenterUrls,
 } from "./research-public";
+import {
+  buildSearchQueries,
+  examplesFromSuggestions,
+  parseSuggestPayload,
+  suggestEmptyCard,
+  suggestEndpoints,
+  suggestExploreUrl,
+} from "./search-suggest";
 
 export {
   buildResearchSkeleton,
@@ -42,6 +50,8 @@ export type MarketResearchControls = {
   competitorCategory?: string;
   query?: string;
   geo?: string;
+  /** Skip in-memory cache (Retry from the desk). */
+  bypassCache?: boolean;
 };
 
 const L = (he: string, ar: string, en: string): Tri => ({ he, ar, en });
@@ -89,13 +99,23 @@ async function fetchJson(url: string, timeoutMs: number, headers?: Record<string
   try {
     const res = await fetch(url, {
       method: "GET",
-      headers: { Accept: "application/json", ...(headers ?? {}) },
+      headers: {
+        Accept: "application/json,text/javascript,text/plain,*/*",
+        "User-Agent": "Mozilla/5.0 (compatible; SAWEK-AD-research/1.0)",
+        ...(headers ?? {}),
+      },
       signal: ctrl.signal,
       cache: "no-store",
     });
     let json: unknown = null;
     try {
-      json = await res.json();
+      const text = await res.text();
+      try {
+        json = JSON.parse(text);
+      } catch {
+        const wrapped = text.match(/^[^(]*\(([\s\S]*)\)\s*$/);
+        json = wrapped?.[1] ? JSON.parse(wrapped[1]) : null;
+      }
     } catch {
       json = null;
     }
@@ -196,60 +216,131 @@ async function fetchMetaAdLibrary(query: string, geo: string, asOf: string): Pro
   }
 }
 
-function latinResearchQuery(query: string): string {
-  const ascii = query.replace(/[^\x00-\x7F]+/g, " ").replace(/\s+/g, " ").trim();
-  return ascii || "mediterranean restaurant advertising";
+async function fetchSuggestJson(url: string): Promise<{ status: number; json: unknown }> {
+  return fetchJson(url, 6000);
 }
 
-async function fetchYouTubeSuggest(query: string, asOf: string): Promise<Partial<ResearchSourceCard>> {
-  if (!allowCall("youtube_suggest", 4000)) {
+async function collectSuggestions(kind: "google" | "youtube", queries: string[]): Promise<{
+  suggestions: string[];
+  queryUsed: string;
+  status: ResearchSourceStatus;
+  reason: Tri;
+}> {
+  const key = kind === "youtube" ? "youtube_suggest" : "google_suggest";
+  if (!allowCall(key, 4000)) {
     return {
+      suggestions: [],
+      queryUsed: queries[0] || "",
       status: "rate_limited",
-      emptyReason: L("הגבלת קצב להצעות יוטיוב.", "حدّ معدل لاقتراحات يوتيوب.", "YouTube suggest rate limit."),
+      reason: L(
+        kind === "youtube" ? "הגבלת קצב להצעות יוטיוב." : "הגבלת קצב להצעות Google.",
+        kind === "youtube" ? "حدّ معدل لاقتراحات يوتيوب." : "حدّ معدل لاقتراحات Google.",
+        kind === "youtube" ? "YouTube suggest rate limit." : "Google suggest rate limit.",
+      ),
     };
   }
-  const q = /[A-Za-z]/.test(query) ? query : latinResearchQuery(query);
-  const url = `https://suggestqueries.google.com/complete/search?client=firefox&ds=yt&q=${encodeURIComponent(q)}`;
-  try {
-    const { status, json } = await fetchJson(url, 6000);
-    if (status === 429) return { status: "rate_limited", emptyReason: L("יוטיוב 429.", "يوتيوب 429.", "YouTube 429.") };
-    if (status < 200 || status >= 300 || !Array.isArray(json)) {
-      return {
-        status: "blocked",
-        emptyReason: L("הצעות יוטיוב חסומות כרגע.", "اقتراحات يوتيوب محجوبة هلق.", "YouTube suggest is blocked right now."),
-      };
+  let lastStatus: ResearchSourceStatus = "empty";
+  let lastReason = L("אין הצעות חיפוש למונח.", "ما في اقتراحات بحث للمصطلح.", "No search suggestions for this term.");
+  const found: string[] = [];
+  let queryUsed = queries[0] || "";
+  for (const q of queries.slice(0, 6)) {
+    if (!q.trim()) continue;
+    queryUsed = q;
+    for (const url of suggestEndpoints(kind, q)) {
+      try {
+        const { status, json } = await fetchSuggestJson(url);
+        if (status === 429) {
+          lastStatus = "rate_limited";
+          lastReason = L("429 מהמקור.", "429 من المصدر.", "Source returned 429.");
+          continue;
+        }
+        if (status < 200 || status >= 300 || !Array.isArray(json)) {
+          lastStatus = "blocked";
+          lastReason = L(
+            "הצעות החיפוש חסומות מהשרת — UNKNOWN, לא המצאה.",
+            "اقتراحات البحث محجوبة من السيرفر — UNKNOWN، مش اختراع.",
+            "Search suggest is blocked from this host — UNKNOWN, not invented.",
+          );
+          continue;
+        }
+        const parsed = parseSuggestPayload(json);
+        for (const s of parsed) {
+          if (!found.includes(s)) found.push(s);
+        }
+        if (found.length) {
+          return { suggestions: found, queryUsed: q, status: "ok", reason: L("", "", "") };
+        }
+        lastStatus = "empty";
+        lastReason = L("אין הצעות חיפוש למונח.", "ما في اقتراحات بحث للمصطلح.", "No search suggestions for this term.");
+      } catch {
+        lastStatus = "blocked";
+        lastReason = L("הצעות החיפוש לא זמינות.", "اقتراحات البحث غير متاحة.", "Search suggest is unavailable.");
+      }
     }
-    const suggestions = Array.isArray(json[1]) ? (json[1] as unknown[]) : [];
-    const examples: PublicAdExample[] = [];
-    for (const s of suggestions) {
-      if (typeof s !== "string" || !s.trim() || looksFake(s)) continue;
-      const text = s.trim().slice(0, 80);
-      examples.push({
-        id: `yt-${examples.length + 1}`,
-        source: "youtube_suggest",
-        title: L(text, text, text),
-        snippet: L(
-          "הצעת חיפוש ציבורית — לא מספר צפיות.",
-          "اقتراح بحث عام — مش عدد مشاهدات.",
-          "Public search suggestion — not a view count.",
-        ),
-        url: `https://www.youtube.com/results?search_query=${encodeURIComponent(text)}`,
-        asOf,
-      });
-    }
-    if (!examples.length) {
-      return {
-        status: "empty",
-        emptyReason: L("אין הצעות חיפוש למונח.", "ما في اقتراحات بحث للمصطلح.", "No search suggestions for this term."),
-      };
-    }
-    return { status: "ok", examples: examples.slice(0, 8) };
-  } catch {
+  }
+  return { suggestions: found, queryUsed, status: lastStatus, reason: lastReason };
+}
+
+async function fetchYouTubeSuggest(query: string, asOf: string, queries: string[]): Promise<Partial<ResearchSourceCard>> {
+  const all = queries.length ? queries : [query];
+  const live = await collectSuggestions("youtube", all);
+  if (live.suggestions.length) {
     return {
-      status: "blocked",
-      emptyReason: L("הצעות יוטיוב לא זמינות.", "اقتراحات يوتيوب غير متاحة.", "YouTube suggest is unavailable."),
-    };
-  }
+      status: "ok",
+      examples: examplesFromSuggestions({
+        source: "youtube_suggest",
+        suggestions: live.suggestions,
+        asOf,
+        queryUsed: live.queryUsed,
+        kind: "youtube",
+      }),
+        retryable: true,
+        queryUsed: live.queryUsed,
+        alternateSources: [
+          { label: L("חיפוש YouTube", "بحث YouTube", "YouTube Search"), url: suggestExploreUrl("youtube", live.queryUsed) },
+          { label: L("חיפוש Google", "بحث Google", "Google Search"), url: suggestExploreUrl("google", live.queryUsed) },
+        ],
+      };
+    }
+  return suggestEmptyCard({
+    id: "youtube_suggest",
+    label: RESEARCH_SOURCE_LABEL.youtube_suggest,
+    exploreUrl: suggestExploreUrl("youtube", live.queryUsed || query),
+    status: live.status,
+    reason: live.reason,
+    query: live.queryUsed || query,
+  });
+}
+
+async function fetchGoogleSuggest(query: string, asOf: string, queries: string[]): Promise<Partial<ResearchSourceCard>> {
+  const all = queries.length ? queries : [query];
+  const live = await collectSuggestions("google", all);
+  if (live.suggestions.length) {
+    return {
+      status: "ok",
+      examples: examplesFromSuggestions({
+        source: "google_suggest",
+        suggestions: live.suggestions,
+        asOf,
+        queryUsed: live.queryUsed,
+        kind: "google",
+      }),
+        retryable: true,
+        queryUsed: live.queryUsed,
+        alternateSources: [
+          { label: L("חיפוש Google", "بحث Google", "Google Search"), url: suggestExploreUrl("google", live.queryUsed) },
+          { label: L("Google Trends", "Google Trends", "Google Trends"), url: `https://trends.google.com/trends/explore?q=${encodeURIComponent(live.queryUsed)}` },
+        ],
+      };
+    }
+  return suggestEmptyCard({
+    id: "google_suggest",
+    label: RESEARCH_SOURCE_LABEL.google_suggest,
+    exploreUrl: suggestExploreUrl("google", live.queryUsed || query),
+    status: live.status,
+    reason: live.reason,
+    query: live.queryUsed || query,
+  });
 }
 
 async function fetchTikTokCreativeCenter(query: string, geo: string): Promise<Partial<ResearchSourceCard>> {
@@ -364,6 +455,7 @@ async function groundedMarketNotes(
     `- Google Ads Transparency: ${urls.google_ads_transparency}`,
     `- Pinterest Trends: ${urls.pinterest_trends}`,
     `- YouTube: ${urls.youtube_suggest}`,
+    `- Google Search: ${urls.google_suggest}`,
     `- LinkedIn Ad Library: ${urls.linkedin_ad_library}`,
     "Each example: advertiser/page ONLY if the public page shows it, one-line pattern, source URL, asOf today's date.",
     "Do NOT invent view counts, spend, ROAS, likes, CPM, or rankings.",
@@ -414,6 +506,7 @@ async function groundedMarketNotes(
       "google_ads_transparency",
       "pinterest_trends",
       "youtube_suggest",
+      "google_suggest",
       "linkedin_ad_library",
     ]);
     const examples: PublicAdExample[] = [];
@@ -472,6 +565,9 @@ function mergeCard(
     examples,
     notes,
     ...(live.emptyReason && !examples.length ? { emptyReason: live.emptyReason } : {}),
+    ...(live.alternateSources?.length ? { alternateSources: live.alternateSources } : {}),
+    ...(live.retryable ? { retryable: true } : {}),
+    ...(live.queryUsed ? { queryUsed: live.queryUsed } : {}),
   };
 }
 
@@ -481,6 +577,7 @@ function hostHint(id: ResearchSourceId): string {
   if (id === "google_ads_transparency") return "adstransparency.google.com";
   if (id === "pinterest_trends") return "pinterest.com";
   if (id === "youtube_suggest") return "youtube.com";
+  if (id === "google_suggest") return "google.com";
   return "linkedin.com/ad-library";
 }
 
@@ -488,18 +585,26 @@ export async function runMarketResearch(intake: Intake, controls?: MarketResearc
   const query = (controls?.query || researchQuery(intake)).trim();
   const geo = (controls?.geo || researchGeo(intake)).trim() || "IL";
   const lookback = controls?.lookbackDays;
-  const cacheKey = `${query}::${geo}::${lookback ?? 7}::${controls?.language ?? ""}::${controls?.objective ?? ""}::${controls?.competitorCategory ?? ""}`;
-  const hit = cache.get(cacheKey);
-  if (hit && Date.now() - hit.at < CACHE_MS) return hit.data;
+  const queries = buildSearchQueries(intake, {
+    objective: controls?.objective,
+    market: controls?.competitorCategory || intake.location,
+  });
+  if (query && !queries.includes(query)) queries.unshift(query);
+  const cacheKey = `${query}::${queries.join("|")}::${geo}::${lookback ?? 7}::${controls?.language ?? ""}::${controls?.objective ?? ""}::${controls?.competitorCategory ?? ""}`;
+  if (!controls?.bypassCache) {
+    const hit = cache.get(cacheKey);
+    if (hit && Date.now() - hit.at < CACHE_MS) return hit.data;
+  }
   if (!intake.businessName.trim() && !intake.description.trim() && !intake.category.trim() && !intake.voice?.niche) {
     const empty = buildResearchSkeleton(intake);
     return { ...empty, fetched: true, sources: empty.sources.map((s) => ({ ...s, status: "empty" as const })) };
   }
   const asOf = new Date().toISOString();
   const urls = publicResearchUrls(query, geo, lookback);
-  const [meta, youtube, tiktok, grounded] = await Promise.all([
+  const [meta, youtube, googleSuggest, tiktok, grounded] = await Promise.all([
     fetchMetaAdLibrary(query, geo, asOf),
-    fetchYouTubeSuggest(query, asOf),
+    fetchYouTubeSuggest(query, asOf, queries),
+    fetchGoogleSuggest(query, asOf, queries),
     fetchTikTokCreativeCenter(query, geo),
     groundedMarketNotes(intake, query, geo, urls, asOf, controls),
   ]);
@@ -535,7 +640,8 @@ export async function runMarketResearch(intake: Intake, controls?: MarketResearc
       grounded.examples,
       extraNotes,
     ),
-    mergeCard("youtube_suggest", urls.youtube_suggest, youtube, grounded.examples, extraNotes),
+    mergeCard("google_suggest", urls.google_suggest, googleSuggest, [], []),
+    mergeCard("youtube_suggest", urls.youtube_suggest, youtube, [], []),
     mergeCard(
       "linkedin_ad_library",
       urls.linkedin_ad_library,
@@ -554,6 +660,7 @@ export async function runMarketResearch(intake: Intake, controls?: MarketResearc
   const research: MarketResearch = {
     asOf,
     query,
+    queries,
     geo,
     sources,
     notes: extraNotes,
@@ -561,7 +668,11 @@ export async function runMarketResearch(intake: Intake, controls?: MarketResearc
     fetched: true,
     disclaimer: RESEARCH_DISCLAIMER,
   };
-  cache.set(cacheKey, { at: Date.now(), data: research });
+  const suggestFilled = research.sources.some(
+    (s) => (s.id === "google_suggest" || s.id === "youtube_suggest") && s.examples.length > 0,
+  );
+  // Empty suggest is often a too-specific query or a transient block — do not freeze UNKNOWN for 10 minutes.
+  if (suggestFilled || research.notes.length) cache.set(cacheKey, { at: Date.now(), data: research });
   return research;
 }
 

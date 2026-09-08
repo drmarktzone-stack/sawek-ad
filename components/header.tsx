@@ -35,6 +35,7 @@ import { isPro } from "@/lib/plan";
 /** Captured OmniAd chrome + user list — one link per route, no Creative/Studio or Ops/Campaigns duplicates. */
 const NAV = [
   { href: "/", key: "nav.build" as const, icon: WandSparkles },
+  { href: "/task/ad", key: "nav.task" as const, icon: Pencil },
   { href: "/discovery", key: "nav.discovery" as const, icon: Search },
   { href: "/strategy", key: "nav.strategy" as const, icon: Compass },
   { href: "/studio", key: "nav.studio" as const, icon: Pencil },

@@ -46,13 +46,14 @@ if (!urls.tiktok_creative_center.includes("tiktok.com")) fail("tiktok cc url");
 if (!urls.google_ads_transparency.includes("adstransparency.google.com")) fail("google transparency url");
 if (!urls.pinterest_trends.includes("pinterest.com")) fail("pinterest url");
 if (!urls.youtube_suggest.includes("youtube.com")) fail("youtube url");
+if (!urls.google_suggest.includes("google.com")) fail("google suggest url");
 if (!urls.linkedin_ad_library.includes("linkedin.com/ad-library")) fail("linkedin url");
 
 const cc = tiktokCreativeCenterUrls("US");
 if (!/region=US/.test(cc.ads + cc.keywords + cc.hashtags)) fail("tiktok region");
 
 const skeleton = buildResearchSkeleton(olive);
-if (skeleton.sources.length !== 6) fail(`skeleton sources ${skeleton.sources.length}`);
+if (skeleton.sources.length !== 7) fail(`skeleton sources ${skeleton.sources.length}`);
 if (skeleton.fetched) fail("skeleton should not be fetched");
 if (!researchLooksHonest(skeleton)) fail("skeleton leaked fake metrics");
 if (FAKE.test(JSON.stringify(skeleton))) fail("skeleton FAKE");
@@ -114,7 +115,7 @@ function packOf(intake: Intake) {
 const olivePack = packOf(olive);
 if (!olivePack.research) fail("assemblePack missing research skeleton");
 if (olivePack.research!.fetched) fail("assemblePack research should start unfetched");
-if (olivePack.research!.sources.length !== 6) fail("assemblePack research sources");
+if (olivePack.research!.sources.length !== 7) fail("assemblePack research sources");
 
 const applied = applyResearchToPack(olivePack, grounded);
 if (!applied.cmoIdeas?.groundedNotes?.length) fail("CMO missing grounded notes");

@@ -99,7 +99,7 @@ function Field({
   );
 }
 
-export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
+export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: boolean; taskMode?: boolean }) {
   const { t, locale } = useI18n();
   const router = useRouter();
   const client = useIsClient();
@@ -408,6 +408,10 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
     setPack(p);
     setAgentStatus(p.agentStatus);
     setRunning(false);
+    saveDraft({ intake, step: 4, phase: "agents", packId: p.id });
+    if (!taskMode) {
+      router.push(withLang("/task/ad", locale));
+    }
   }
 
   async function advanceHitl() {
@@ -488,7 +492,7 @@ export function WizardFlow({ embedded = false }: { embedded?: boolean }) {
   return (
     <div className={embedded ? "mx-auto w-full min-w-0 max-w-3xl px-3 py-5 sm:px-4 sm:py-8" : "mx-auto w-full min-w-0 max-w-3xl px-3 py-6 sm:px-4 sm:py-12"}>
       {!embedded && <DepartmentRail />}
-      {embedded ? (
+      {taskMode ? null : embedded ? (
         <div className="mb-6 flex flex-col items-center gap-3">
           <DemoPicker onSelect={(id) => applyDemo(id)} />
           <Button type="button" size="lg" onClick={newCampaign}>

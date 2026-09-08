@@ -583,6 +583,7 @@ export function ResultView({
                   headline={v?.headline ?? pack.intake.businessName}
                   cta={v?.cta}
                   fallbackSrc={studioStillsForIntake(pack.intake)[idx % 8]?.dataUrl}
+                  composition={pack.completeAd?.imageComposition}
                 />
                 <div className="space-y-3 bg-white p-4">
                   <p className="line-clamp-3 text-xs text-muted">
