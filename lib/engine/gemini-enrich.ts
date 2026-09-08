@@ -6,6 +6,7 @@ import { copyLeaksClinic } from "../clinic-leak";
 import { hasInventedCommercialClaim } from "./ad-engine/facts";
 import { buildBusinessTruth } from "./ad-engine/sources";
 import { overlayAnglesOnVariants, parseCampaignAngles, sanitizeAngles } from "./angles";
+import { customerCopyHasLeak, localeScriptBleed } from "../copy-purity";
 
 const ABORT_MS = 28_000;
 const OVERLAY_ABORT_MS = 32_000;
@@ -333,6 +334,7 @@ function overlayFromResponse(data: GeminiResponse, intake: Intake): GeminiAdCopy
   if (!headline && !copy && !cta) return null;
   const blob = [headline, copy, cta].filter(Boolean).join("\n");
   if (detectVertical(intake) !== "clinic" && copyLeaksClinic(blob)) return null;
+  if (customerCopyHasLeak(blob)) return null;
   return {
     ...(headline ? { headline } : {}),
     ...(copy ? { copy } : {}),
@@ -375,11 +377,16 @@ export async function enrichVariantsWithGemini(
       if (!pack) return v;
       const kindIndex = VARIANT_KINDS.indexOf(v.kind);
       const headline = (kindIndex >= 0 ? safeText(pack.headlines[kindIndex], intake) : undefined) || v.headline;
+      const primaryText = safeText(pack.copy, intake) ?? v.primaryText;
+      const cta = safeText(pack.cta, intake) ?? v.cta;
+      if (customerCopyHasLeak(`${headline}\n${primaryText}\n${cta}`) || localeScriptBleed(`${headline}\n${primaryText}`, v.locale)) {
+        return v;
+      }
       return {
         ...v,
         headline,
-        primaryText: safeText(pack.copy, intake) ?? v.primaryText,
-        cta: safeText(pack.cta, intake) ?? v.cta,
+        primaryText,
+        cta,
       };
     });
   }
@@ -387,10 +394,12 @@ export async function enrichVariantsWithGemini(
   return { variants: next, ...(angles ? { angles } : {}) };
 }
 
-function textSafe(parts: (string | undefined)[], intake: Intake): boolean {
+function textSafe(parts: (string | undefined)[], intake: Intake, locale?: Locale): boolean {
   const joined = parts.filter((s): s is string => Boolean(s && s.trim())).join("\n");
   if (!joined.trim()) return false;
   if (detectVertical(intake) !== "clinic" && copyLeaksClinic(joined)) return false;
+  if (customerCopyHasLeak(joined)) return false;
+  if (locale && localeScriptBleed(joined, locale)) return false;
   return !inventsForbidden(joined, intake);
 }
 
@@ -403,7 +412,7 @@ function overlayCopyPiece(
   const title = copy.headline?.trim() || piece.title;
   const bodyBits = [copy.body, copy.cta].map((s) => s?.trim()).filter((s): s is string => Boolean(s));
   const body = bodyBits.length ? bodyBits.join("\n") : piece.body;
-  if (!textSafe([title, body], intake)) return piece;
+  if (!textSafe([title, body], intake, piece.locale)) return piece;
   return { ...piece, title, body };
 }
 
@@ -414,7 +423,7 @@ function overlayScriptPiece(
 ): FactoryPiece {
   const s = script?.trim();
   if (!s) return piece;
-  if (!textSafe([s], intake)) return piece;
+  if (!textSafe([s], intake, piece.locale)) return piece;
   return { ...piece, body: s };
 }
 
@@ -426,7 +435,7 @@ function overlayLandingPiece(
   if (!land) return piece;
   const title = land.title?.trim() || piece.title;
   const body = land.body?.trim() || piece.body;
-  if (!textSafe([title, body], intake)) return piece;
+  if (!textSafe([title, body], intake, piece.locale)) return piece;
   return { ...piece, title, body };
 }
 

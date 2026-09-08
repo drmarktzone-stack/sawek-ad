@@ -51,19 +51,11 @@ export function factsFromIntake(intake: Intake): CampaignFacts {
 }
 
 export function viralIdeaFromHero(hero: CmoIdea | undefined, facts: CampaignFacts): Tri {
-  if (hero) {
-    return L(
-      clip(`${hero.name.he} — ${hero.hook.he}`, 180),
-      clip(`${hero.name.ar} — ${hero.hook.ar}`, 180),
-      clip(`${hero.name.en} — ${hero.hook.en}`, 180),
-    );
-  }
-  const name = facts.name || "—";
-  return L(
-    clip(`${name}${facts.problem ? ` — ${facts.problem}` : facts.advantage ? ` — ${facts.advantage}` : ""}`, 180),
-    clip(`${name}${facts.problem ? ` — ${facts.problem}` : facts.advantage ? ` — ${facts.advantage}` : ""}`, 180),
-    clip(`${name}${facts.problem ? ` — ${facts.problem}` : facts.advantage ? ` — ${facts.advantage}` : ""}`, 180),
-  );
+  void hero;
+  const bit = (s: string) => clip(`${facts.name}${s ? ` — ${s}` : ""}`.trim() || facts.name, 180);
+  const adv = facts.advantage;
+  const problem = facts.problem && !/^(unknown|no_offer)$/i.test(facts.problem) ? facts.problem : "";
+  return L(bit(adv || problem), bit(adv || problem), bit(adv || problem));
 }
 
 export function coreMessageFromHero(hero: CmoIdea | undefined, facts: CampaignFacts, voiceCore: string): Tri {

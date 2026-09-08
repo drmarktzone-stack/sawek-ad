@@ -14,6 +14,7 @@ import { separateSources } from "./sources";
 import { runValidationGate } from "./validate";
 import { decideComposition, treatmentLabel } from "../image-composition";
 import { pickHero } from "../../media-assets";
+import { customerCopyHasLeak } from "../../copy-purity";
 
 const MAX_ATTEMPTS = 4;
 
@@ -179,6 +180,7 @@ export function overlayCompleteOnFeatured(
     if (v.kind !== "strong_offer") return v;
     const loc = complete.locales[v.locale as Locale];
     if (!loc) return v;
+    if (customerCopyHasLeak(`${loc.headline}\n${loc.copy}`)) return v;
     return {
       ...v,
       headline: loc.headline || v.headline,

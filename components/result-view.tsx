@@ -54,6 +54,7 @@ import { PlanGate } from "@/components/plan-gate";
 import { canSaveAnotherCampaign, canUse } from "@/lib/plan";
 import { loadCampaigns } from "@/lib/storage";
 import { CompleteAdCard } from "@/components/complete-ad-card";
+import { customerCopyHasLeak } from "@/lib/copy-purity";
 
 export function ResultView({
   pack,
@@ -106,7 +107,8 @@ export function ResultView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pack.id]);
   useEffect(() => {
-    const seed = pack.brief?.viralIdea[packLang] || pack.brief?.coreMessage[packLang] || hero?.hook[packLang] || "";
+    const rawSeed = pack.brief?.viralIdea[packLang] || pack.brief?.coreMessage[packLang] || "";
+    const seed = rawSeed && !customerCopyHasLeak(rawSeed) ? rawSeed : "";
     if (seed && !idea) setIdea(seed);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pack.id, packLang, hero?.id]);
@@ -194,7 +196,7 @@ export function ResultView({
     void syncCampaign(next);
     onChange(next);
     try {
-      ingestPack(next);
+      ingestPack(next, packLang);
     } catch {
       /* scientist learning is best-effort */
     }

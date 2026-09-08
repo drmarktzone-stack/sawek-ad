@@ -1,5 +1,6 @@
 import type { AdVariant, CampaignPack, Locale } from "./types";
 import { copyLeaksClinic, scrubClinicCopy } from "./clinic-leak";
+import { gateCustomerAd, purifyCustomerText, copyFactsFromIntake } from "./copy-purity";
 import { detectVertical } from "./vertical";
 import { clipAtWord, isWalkIn, localizeFactBlob, shortName, spokenAdvantage } from "./engine/spoken";
 import { hoursChips, isHoursWall, stripHoursWall } from "./hours-chips";
@@ -204,19 +205,24 @@ export function channelFields(pack: CampaignPack, locale: Locale): ChannelFields
   );
   const tiktokCta = fieldOrFact(sanitizeForLocale(v?.cta || "", locale) || v?.cta, locale, facts);
   const factFallback = fieldOrFact("", locale, facts);
+  const purityFacts = copyFactsFromIntake(pack.intake);
   const keep = (s: string) => {
-    if (detectVertical(pack.intake) === "clinic") return s;
-    if (!copyLeaksClinic(s)) return s;
-    return scrubClinicCopy(s, pack.intake) || factFallback;
+    let next = s;
+    if (detectVertical(pack.intake) !== "clinic" && copyLeaksClinic(next)) {
+      next = scrubClinicCopy(next, pack.intake) || factFallback;
+    }
+    next = purifyCustomerText(next, locale, purityFacts);
+    return next || factFallback;
   };
+  const gated = gateCustomerAd({ headline, body, cta }, pack.intake, locale);
   return {
-    headline: keep(headline),
+    headline: keep(gated.headline),
     posterHeadline: keep(posterHeadline),
     posterSupport: keep(posterSupport),
     hoursChips: chips,
-    body: keep(body),
+    body: keep(gated.body),
     shortBody: keep(shortBody),
-    cta: keep(cta),
+    cta: keep(gated.cta),
     waScript: keep(waScript),
     landingTitle: keep(landingTitle),
     landingBody: keep(landingBody),

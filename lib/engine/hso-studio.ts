@@ -4,6 +4,7 @@ import { spokenCta } from "./spoken";
 import { uid } from "../utils";
 import { voiceFromIntake } from "./voice";
 import { offerBlueprintIsSaved, offerLineForCopy } from "./offer-builder";
+import { customerCopyHasLeak, gateCustomerAd } from "../copy-purity";
 
 const FORMATS: Record<HsoPlatform, string[]> = {
   meta: ["1:1 feed", "4:5 feed", "9:16 story", "Reels 9:16", "Carousel 1:1", "1:1 primary text"],
@@ -83,7 +84,7 @@ function storyFor(angle: Angle, f: ReturnType<typeof facts>, locale: Locale): st
     if (angle === "proof") return clip(`${f.proof || f.advantage || "Saved proof"}. ${base}.`, 160);
     return clip(base, 160);
   }
-  if (angle === "problem") return clip(`${f.problem || "הבעיה שסופקה"}. אחר כך ${base}.`, 160);
+  if (angle === "problem") return clip(`${f.problem || f.name}. אחר כך ${base}.`, 160);
   if (angle === "proof") return clip(`${f.proof || f.advantage || "הוכחה שמורה"}. ${base}.`, 160);
   return clip(base, 160);
 }
@@ -101,10 +102,21 @@ export function generateHsoStudio(
   const f = facts(intake, locale);
   const formats = FORMATS[platform];
   const variants: HsoVariant[] = ANGLES.map((angle, i) => {
-    const hook = scrubClinicCopy(hookFor(angle, f, locale), intake);
-    const story = scrubClinicCopy(storyFor(angle, f, locale), intake);
-    const offer = scrubClinicCopy(f.offer || f.core || f.name, intake);
-    const cta = scrubClinicCopy(f.cta || (locale === "ar" ? "واتساب" : locale === "en" ? "WhatsApp" : "וואטסאפ"), intake);
+    const gated = gateCustomerAd(
+      {
+        headline: scrubClinicCopy(hookFor(angle, f, locale), intake),
+        body: scrubClinicCopy(storyFor(angle, f, locale), intake),
+        cta: scrubClinicCopy(f.cta || (locale === "ar" ? "واتساب" : locale === "en" ? "WhatsApp" : "וואטסאפ"), intake),
+      },
+      intake,
+      locale,
+    );
+    const hook = gated.headline;
+    const story = gated.body;
+    const offer = customerCopyHasLeak(f.offer || "")
+      ? ""
+      : scrubClinicCopy(f.offer || f.core || f.name, intake);
+    const cta = gated.cta;
     return {
       id: uid("hso"),
       platform,

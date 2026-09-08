@@ -1,6 +1,7 @@
 "use client";
 
 import { useI18n } from "@/components/i18n-provider";
+import { localizeTopicKey } from "@/lib/copy-purity";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { LangLink } from "@/components/lang-link";
@@ -249,7 +250,7 @@ export function PatternsBoard({ ws }: { ws: GrowthWorkspace }) {
 }
 
 export function MarketDnaStrip({ ws }: { ws: GrowthWorkspace }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const traits = ws.market?.dna.traits ?? [];
   if (!traits.length) return null;
   return (
@@ -258,7 +259,7 @@ export function MarketDnaStrip({ ws }: { ws: GrowthWorkspace }) {
         {traits.slice(0, 8).map((tr) => (
           <li key={tr.id} className="border-b border-[var(--line)] py-3 text-sm last:border-0">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="font-bold text-navy">{tr.topic}</span>
+              <span className="font-bold text-navy">{localizeTopicKey(tr.topic, locale)}</span>
               <Claim label={tr.label} />
             </div>
             <p className="mt-1">{tr.claim}</p>
