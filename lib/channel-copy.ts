@@ -3,6 +3,8 @@ import { copyLeaksClinic, scrubClinicCopy } from "./clinic-leak";
 import { detectVertical } from "./vertical";
 import { clipAtWord, isWalkIn, localizeFactBlob, shortName, spokenAdvantage } from "./engine/spoken";
 import { hoursChips, isHoursWall, stripHoursWall } from "./hours-chips";
+import { applyVoiceLockToText, voiceFromIntake, voiceIsLocked } from "./engine/voice";
+import { offerLineForCopy } from "./engine/offer-builder";
 
 const HE_RE = /[\u0590-\u05FF]/;
 const AR_RE = /[\u0600-\u06FF]/;
@@ -143,9 +145,14 @@ export function channelFields(pack: CampaignPack, locale: Locale): ChannelFields
     phone: pack.intake.whatsapp,
     website: pack.intake.website,
   };
-  const headline = fieldOrFact(v?.headline, locale, facts);
-  const body = fieldOrFact(v?.primaryText, locale, facts);
-  const cta = fieldOrFact(v?.cta, locale, facts);
+  const locked = voiceFromIntake(pack.intake);
+  const lockedHeadline =
+    voiceIsLocked(locked)
+      ? applyVoiceLockToText(offerLineForCopy(pack.intake, locale) || locked.coreMessage, pack.intake)
+      : "";
+  const headline = applyVoiceLockToText(lockedHeadline || fieldOrFact(v?.headline, locale, facts), pack.intake);
+  const body = applyVoiceLockToText(fieldOrFact(v?.primaryText, locale, facts), pack.intake);
+  const cta = applyVoiceLockToText(fieldOrFact(v?.cta, locale, facts), pack.intake);
   const waFromIntake = pack.intake.whatsappTemplates?.trim() ?? "";
   const waRaw = stripHoursWall(waFromIntake || waPiece?.body || "");
   const waClean = waRaw

@@ -14,6 +14,7 @@ import { PRICE_MONTHLY_ILS, PRICE_YEARLY_ILS } from "@/lib/plan";
 import { useCommandSignals } from "@/components/command/signals";
 import { CampaignTable, CommandHero, ModuleSummaries, TodayBoard } from "@/components/command/command-center";
 import { OsDisclosure } from "@/components/command/primitives";
+import { CampaignJourney } from "@/components/campaign-journey";
 
 export function HomeStudio() {
   const { t } = useI18n();
@@ -72,6 +73,10 @@ export function HomeStudio() {
       </div>
 
       <FunctionRail />
+
+      <div className="mx-auto max-w-6xl px-4">
+        <CampaignJourney />
+      </div>
 
       {signals.ready ? (
         <div className="mx-auto max-w-6xl px-4">

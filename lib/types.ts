@@ -184,6 +184,10 @@ export interface Intake {
   brandKit?: ClientBrandKit;
   /** Niche / core message / personal voice — define once; copy follows. */
   voice?: VoiceProfile;
+  /** Grand Slam / value-equation offer built in Tool F — campaign-scoped. */
+  offerBlueprint?: OfferBlueprint;
+  /** User confirmed Skip — not recommended (ad-pack gate). */
+  offerSkipConfirmed?: boolean;
 }
 
 export interface MissingFlag {
@@ -621,15 +625,74 @@ export interface CampaignPack {
    * into Business DNA / intake facts.
    */
   completeAd?: CompleteAdPackage;
+  /** Tool F — saved Grand Slam offer (mirrors intake.offerBlueprint). */
+  offerBlueprint?: OfferBlueprint;
+  /** Tool G — Hook–Story–Offer studio variants, per platform. */
+  hsoStudio?: HsoStudioState;
 }
 
-export type VoiceDialect = "he" | "ar-levant" | "ar-gulf" | "ar-msa" | "en";
+export type VoiceDialect =
+  | "he"
+  | "ar-levant"
+  | "ar-gulf"
+  | "ar-egyptian"
+  | "ar-light"
+  | "ar-msa"
+  | "en";
 
 export interface VoiceProfile {
   niche: string;
+  /** Who we speak to — Tool A audience lock. */
+  audience: string;
   coreMessage: string;
   personalVoice: string;
   dialect: VoiceDialect | "";
+  /** Up to 3 beliefs / values the brand stands on. */
+  beliefs: string[];
+  /** Phrases / claims we never say. */
+  neverSay: string;
+  /** True after Tool A lock — generators must reuse this voice. */
+  locked: boolean;
+  lockedAt?: string;
+}
+
+export type HsoPlatform = "meta" | "tiktok" | "google";
+
+export interface OfferBlueprint {
+  dreamOutcome: string;
+  proof: string;
+  timeToResult: string;
+  customerEffort: string;
+  price: string;
+  objections: string;
+  /** Guarantee copy is generated only when the user marks this real. */
+  guaranteeReal: boolean;
+  headline: string;
+  valueStack: string[];
+  guarantee: string;
+  hooks: string[];
+  locale: Locale;
+  saved: boolean;
+  savedAt?: string;
+  skipped?: boolean;
+}
+
+export interface HsoVariant {
+  id: string;
+  platform: HsoPlatform;
+  hook: string;
+  story: string;
+  offer: string;
+  cta: string;
+  format: string;
+  locale: Locale;
+}
+
+export interface HsoStudioState {
+  platform: HsoPlatform;
+  locale: Locale;
+  variants: HsoVariant[];
+  generatedAt: string;
 }
 
 export type ViralScriptStyle =

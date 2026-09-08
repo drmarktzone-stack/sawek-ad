@@ -11,6 +11,8 @@ import { cmoFieldsMissing, emptyIntake, wizardMissingFields, wizardReady } from 
 import { assemblePack, idleStatus, overlayPackAgency, runIntakeAndDiagnosis, runMedia, runOptimizerStage, runStrategic } from "@/lib/engine/run";
 import { loadDraft, saveDraft, getCampaign, INGEST_APPLIED_EVENT } from "@/lib/storage";
 import { nextHitlGate } from "@/lib/engine/hitl";
+import { offerGate } from "@/lib/engine/offer-builder";
+import { OfferGateBanner } from "@/components/offer-gate-banner";
 import { syncCampaign } from "@/lib/supabase";
 import { uid } from "@/lib/utils";
 import { MAX_COMPETITORS } from "@/lib/factory-formats";
@@ -113,6 +115,7 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
   const [running, setRunning] = useState(false);
   const [hitlError, setHitlError] = useState("");
   const advancing = useRef(false);
+  const [offerBlocked, setOfferBlocked] = useState(false);
   const [compOpen, setCompOpen] = useState(false);
   const [compDraft, setCompDraft] = useState<Competitor>({ id: "", name: "", url: "", notes: "" });
   const [custom, setCustom] = useState({
@@ -383,6 +386,12 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
 
   async function startBuild() {
     if (!wizardReady(intake)) return;
+    const gate = offerGate(intake, pack);
+    if (!gate.ok) {
+      setOfferBlocked(true);
+      return;
+    }
+    setOfferBlocked(false);
     if (cmoFieldsMissing(intake)) {
       setPhase("interview");
       return;
@@ -402,17 +411,22 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
       optimizer: "blocked",
     });
     const { report, diagnosis } = await runIntakeAndDiagnosis(intake, onStatus);
-    const p = assemblePack(intake, {
-      report,
-      diagnosis,
-      agentStatus: {
-        intake: "complete",
-        diagnostic: "needs_approval",
-        strategic: "blocked",
-        media: "blocked",
-        optimizer: "blocked",
-      },
-    });
+    const draft = loadDraft();
+    const p = {
+      ...assemblePack(intake, {
+        report,
+        diagnosis,
+        agentStatus: {
+          intake: "complete",
+          diagnostic: "needs_approval",
+          strategic: "blocked",
+          media: "blocked",
+          optimizer: "blocked",
+        },
+      }),
+      offerBlueprint: intake.offerBlueprint,
+      hsoStudio: draft.hsoStudio,
+    };
     void syncCampaign(p);
     setPack(p);
     setAgentStatus(p.agentStatus);
@@ -994,6 +1008,15 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
                 <WandSparkles className="size-5" />
                 {t("cta.build")}
               </Button>
+              {offerBlocked ? (
+                <OfferGateBanner
+                  onSkip={() => {
+                    const d = loadDraft();
+                    setIntake(d.intake);
+                    setOfferBlocked(false);
+                  }}
+                />
+              ) : null}
               {!wizardReady(intake) && (
                 <div
                   className="mt-3 rounded-xl border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-danger"

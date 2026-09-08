@@ -5,6 +5,8 @@ import { detectVertical, isPediatrics, restaurantHungerLine, unknownProblemLabel
 import { isNoOffer } from "../no-offer";
 import { OFFER_CHIPS, resolveChipLabel } from "../chips";
 import { coachIntake, isUnknownProblem } from "./coach";
+import { applyVoiceLockToText, voiceFromIntake, voiceIsLocked } from "./voice";
+import { offerLineForCopy } from "./offer-builder";
 
 const KINDS: VariantKind[] = [
   "strong_offer",
@@ -21,10 +23,25 @@ export function generateVariants(intake: Intake): AdVariant[] {
     ? { ...intake, businessName: canonicalDoctorName(intake.businessName) }
     : { ...intake };
   const coach = coachIntake(fixed);
+  const voice = voiceFromIntake(fixed);
   const out: AdVariant[] = [];
   for (const locale of ["he", "ar", "en"] as Locale[]) {
     for (const kind of KINDS) {
-      out.push(overlayCoachHeadline(buildSpokenVariant(fixed, kind, locale), fixed, coach, locale));
+      let variant = overlayCoachHeadline(buildSpokenVariant(fixed, kind, locale), fixed, coach, locale);
+      if (voiceIsLocked(voice)) {
+        const offer = offerLineForCopy(fixed, locale);
+        const core = voice.coreMessage.trim();
+        if (kind === "strong_offer" && (offer || core)) {
+          variant = { ...variant, headline: clipAtWord(applyVoiceLockToText(offer || core, fixed), 48) };
+        }
+        variant = {
+          ...variant,
+          headline: applyVoiceLockToText(variant.headline, fixed),
+          primaryText: applyVoiceLockToText(variant.primaryText, fixed),
+          cta: applyVoiceLockToText(variant.cta, fixed),
+        };
+      }
+      out.push(variant);
     }
   }
   return out;

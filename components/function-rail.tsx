@@ -26,6 +26,15 @@ export const PRODUCT_FUNCTIONS = [
     icon: Store,
   },
   {
+    id: "tools",
+    href: "/tools/offer",
+    extraHref: "/tools/hso",
+    extraKey: "nav.hso" as const,
+    key: "fn.tools" as const,
+    hint: "fn.toolsHint" as const,
+    icon: Compass,
+  },
+  {
     id: "promotion",
     href: "/media",
     extraHref: "/leads",

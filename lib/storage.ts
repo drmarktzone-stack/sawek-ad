@@ -1,10 +1,12 @@
-import type { CampaignPack, CoachReport, Intake, LabRun, Locale, SelfPlan, SelfProfile, StudioPiece } from "./types";
+import type { CampaignPack, CoachReport, HsoStudioState, Intake, LabRun, Locale, SelfPlan, SelfProfile, StudioPiece } from "./types";
 import { emptyIntake } from "./engine/validate";
 import { coachIntake } from "./engine/coach";
 import { copyLeaksClinic, intakeIsClinicDemo, isBlockedEmptySessionName } from "./clinic-leak";
 import { canSaveAnotherCampaign, clientPlan } from "./plan";
 import { businessKey } from "./engine/ad-engine/sources";
 import { detectVertical } from "./vertical";
+import { normalizeVoice } from "./engine/voice";
+import { normalizeOfferBlueprint } from "./engine/offer-builder";
 
 const K = {
   locale: "omniad-locale",
@@ -66,6 +68,7 @@ export interface DraftState {
   phase?: WizardPhase;
   packId?: string;
   coach?: CoachReport;
+  hsoStudio?: HsoStudioState;
 }
 
 export function loadDraft(): DraftState {
@@ -83,26 +86,11 @@ export function loadDraft(): DraftState {
       pastCreatives: Array.isArray(d.intake?.pastCreatives) ? d.intake.pastCreatives : [],
       brandTone: typeof d.intake?.brandTone === "string" ? d.intake.brandTone : "",
       brandPositioning: typeof d.intake?.brandPositioning === "string" ? d.intake.brandPositioning : "",
-      voice: (() => {
-        const v = d.intake?.voice;
-        if (!v || typeof v !== "object") {
-          return { niche: "", coreMessage: "", personalVoice: "", dialect: "" as const };
-        }
-        const dialect = v.dialect;
-        return {
-          niche: typeof v.niche === "string" ? v.niche : "",
-          coreMessage: typeof v.coreMessage === "string" ? v.coreMessage : "",
-          personalVoice: typeof v.personalVoice === "string" ? v.personalVoice : "",
-          dialect:
-            dialect === "he" ||
-            dialect === "ar-levant" ||
-            dialect === "ar-gulf" ||
-            dialect === "ar-msa" ||
-            dialect === "en"
-              ? dialect
-              : "",
-        };
-      })(),
+      voice: normalizeVoice(d.intake?.voice),
+      offerBlueprint: d.intake?.offerBlueprint
+        ? normalizeOfferBlueprint(d.intake.offerBlueprint)
+        : undefined,
+      offerSkipConfirmed: d.intake?.offerSkipConfirmed === true,
       channelNotes: typeof d.intake?.channelNotes === "string" ? d.intake.channelNotes : "",
       whatsappTemplates: typeof d.intake?.whatsappTemplates === "string" ? d.intake.whatsappTemplates : "",
       landingLines: typeof d.intake?.landingLines === "string" ? d.intake.landingLines : "",
@@ -120,6 +108,10 @@ export function loadDraft(): DraftState {
     phase,
     packId: typeof d.packId === "string" ? d.packId : undefined,
     coach: d.coach && typeof d.coach === "object" ? d.coach : undefined,
+    hsoStudio:
+      d.hsoStudio && typeof d.hsoStudio === "object" && Array.isArray(d.hsoStudio.variants)
+        ? d.hsoStudio
+        : undefined,
   };
 }
 

@@ -1,6 +1,7 @@
 import type { Intake, Locale, MarketResearch, PublicAdExample, ResearchSourceCard, Tri } from "../types";
 import { uid } from "../utils";
 import { emptyIntake } from "../engine/validate";
+import { emptyVoice } from "../engine/voice";
 import { researchGeo, researchQuery } from "../engine/research-public";
 import { evidence } from "./engines";
 import type {
@@ -76,12 +77,7 @@ export function controlsFromWorkspace(ws: GrowthWorkspace, override?: Partial<Ma
   intakeLike.location = ws.business.location;
   intakeLike.businessName = ws.business.name;
   intakeLike.offer = ws.dna.traits.find((t) => t.topic === "offer")?.claim ?? "";
-  intakeLike.voice = {
-    niche: ws.business.category,
-    coreMessage: "",
-    personalVoice: "",
-    dialect: "",
-  };
+  intakeLike.voice = { ...emptyVoice(), niche: ws.business.category };
   const region = override?.region || ws.market?.watch?.controls.region || researchGeo(intakeLike);
   const industry = override?.industry || ws.market?.watch?.controls.industry || ws.business.category;
   const objective =
@@ -116,10 +112,9 @@ export function intakeFromWorkspace(ws: GrowthWorkspace, controls: MarketScanCon
   intake.mainGoal = controls.objective;
   intake.uniqueAdvantage = ws.dna.traits.find((t) => t.topic === "advantage")?.claim ?? "";
   intake.voice = {
+    ...emptyVoice(),
     niche: controls.industry || ws.business.category,
     coreMessage: controls.query,
-    personalVoice: "",
-    dialect: "",
   };
   return intake;
 }

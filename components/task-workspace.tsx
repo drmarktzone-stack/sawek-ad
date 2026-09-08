@@ -23,6 +23,9 @@ import { studioStillsForIntake } from "@/lib/studio-stills";
 import { useIsClient } from "@/lib/use-is-client";
 import { useAuth } from "@/components/auth-provider";
 import { OsDisclosure, OsEmpty, OsLoading, OsPage, OsRow, OsSection, OsUnknown, OverlayStatus, ValueOrUnknown } from "@/components/command/primitives";
+import { CampaignJourney } from "@/components/campaign-journey";
+import { OfferGateBanner } from "@/components/offer-gate-banner";
+import { offerGate } from "@/lib/engine/offer-builder";
 
 export function TaskWorkspace() {
   const { t, locale } = useI18n();
@@ -32,6 +35,7 @@ export function TaskWorkspace() {
   const [pack, setPack] = useState<CampaignPack | null>(null);
   const [ready, setReady] = useState(false);
   const [building, setBuilding] = useState(false);
+  const [gateOpen, setGateOpen] = useState(false);
 
   function hydrate() {
     const d = loadDraft();
@@ -56,12 +60,21 @@ export function TaskWorkspace() {
 
   async function createCompleteAd() {
     if (ctx.empty) return;
+    const draft = loadDraft();
+    const liveIntake = draft.intake;
+    const gate = offerGate(liveIntake, pack);
+    if (!gate.ok) {
+      setIntake(liveIntake);
+      setGateOpen(true);
+      return;
+    }
+    setGateOpen(false);
     setBuilding(true);
     try {
-      const report = validateIntake(intake);
-      const diagnosis = diagnose(intake, report);
-      const variants = generateVariants(intake);
-      const assembled = assemblePack(intake, {
+      const report = validateIntake(liveIntake);
+      const diagnosis = diagnose(liveIntake, report);
+      const variants = generateVariants(liveIntake);
+      const assembled = assemblePack(liveIntake, {
         report,
         diagnosis,
         variants,
@@ -74,9 +87,14 @@ export function TaskWorkspace() {
         },
         ...(pack?.id ? { id: pack.id } : {}),
       });
-      const next = await overlayPackAgency(assembled);
+      const next = await overlayPackAgency({
+        ...assembled,
+        offerBlueprint: liveIntake.offerBlueprint ?? pack?.offerBlueprint,
+        hsoStudio: pack?.hsoStudio ?? draft.hsoStudio,
+      });
       void syncCampaign(next);
-      saveDraft({ intake, step: 4, phase: "agents", packId: next.id });
+      saveDraft({ intake: liveIntake, step: 4, phase: "agents", packId: next.id, hsoStudio: next.hsoStudio });
+      setIntake(liveIntake);
       setPack(next);
     } finally {
       setBuilding(false);
@@ -97,6 +115,7 @@ export function TaskWorkspace() {
 
   return (
     <OsPage data-testid="task-workspace" dir={locale === "en" ? "ltr" : "rtl"}>
+      <CampaignJourney compact />
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <LangLink href="/dashboard" className="inline-flex items-center gap-2 text-sm font-bold text-muted hover:text-navy">
           <LayoutDashboard className="size-4" />
@@ -169,7 +188,22 @@ export function TaskWorkspace() {
               <WandSparkles className="size-5" />
               {building ? t("task.building") : t("complete.kicker")}
             </Button>
+            {gateOpen ? (
+              <OfferGateBanner
+                onSkip={() => {
+                  const d = loadDraft();
+                  setIntake(d.intake);
+                  setGateOpen(false);
+                }}
+              />
+            ) : null}
             <div className="mt-4 flex flex-wrap gap-2">
+              <Button asChild size="sm" variant="outline" className="border-white/20 bg-white/8 text-[#F7F3EA] hover:bg-white hover:text-ink">
+                <LangLink href="/tools/hso">{t("nav.hso")}</LangLink>
+              </Button>
+              <Button asChild size="sm" variant="outline" className="border-white/20 bg-white/8 text-[#F7F3EA] hover:bg-white hover:text-ink">
+                <LangLink href="/tools/offer">{t("nav.offerTool")}</LangLink>
+              </Button>
               <Button asChild size="sm" variant="outline" className="border-white/20 bg-white/8 text-[#F7F3EA] hover:bg-white hover:text-ink">
                 <LangLink href="/growth/market">{t("os.findOpp")}</LangLink>
               </Button>
