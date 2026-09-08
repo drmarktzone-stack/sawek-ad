@@ -863,6 +863,8 @@ export interface ResearchSourceCard {
   emptyReason?: Tri;
   alternateSources?: Array<{ label: Tri; url: string }>;
   retryable?: boolean;
+  /** Query actually sent to this source — shown even when UNKNOWN. */
+  queryUsed?: string;
 }
 
 export interface MarketResearch {

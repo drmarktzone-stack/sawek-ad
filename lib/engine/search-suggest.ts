@@ -13,19 +13,68 @@ const FAKE_METRIC =
 
 export const GENERIC_LATIN_FALLBACK = "mediterranean restaurant advertising";
 
+function firstWords(s: string, n: number): string {
+  return s
+    .replace(/\s+/g, " ")
+    .trim()
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, n)
+    .join(" ");
+}
+
+/** Drop street numbers / parentheticals so autocomplete can match. */
+export function placeStem(raw: string): string {
+  return firstWords(
+    raw
+      .replace(/\([^)]*\)/g, " ")
+      .replace(/\d+/g, " ")
+      .replace(/[—–|,/]/g, " ")
+      .replace(/\b(st|street|rd|ave|main)\b/gi, " "),
+    2,
+  );
+}
+
+/** Latin phrases already present in Business Truth (never invented). */
+export function latinFactPhrases(blob: string): string[] {
+  const out: string[] = [];
+  const re = /[A-Za-z][A-Za-z0-9&.'’-]*(?:\s+[A-Za-z][A-Za-z0-9&.'’-]*){0,3}/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(blob))) {
+    const t = m[0].replace(/\s+/g, " ").trim();
+    if (t.length < 6 || t.length > 40) continue;
+    if (/https?:|www\./i.test(t)) continue;
+    if (/fictional|sample\/demo|not a real/i.test(t)) continue;
+    if (!out.some((x) => x.toLowerCase() === t.toLowerCase())) out.push(t);
+    if (out.length >= 3) break;
+  }
+  return out;
+}
+
 export function buildSearchQueries(intake: Intake, extra?: { objective?: string; market?: string }): string[] {
-  const offer = isNoOffer(intake.offer) ? "" : intake.offer.trim();
-  const objective = (extra?.objective || intake.mainGoal || "").trim();
-  const market = (extra?.market || intake.location || "").trim();
+  const offer = isNoOffer(intake.offer) ? "" : firstWords(intake.offer.trim(), 4);
+  const audience = (intake.audience || "").replace(/_/g, " ").trim();
+  const niche = (intake.voice?.niche || "").trim();
+  const category = intake.category.trim();
+  const name = intake.businessName.trim();
+  const place = placeStem(extra?.market || intake.location || "");
+  const advantage = firstWords(intake.uniqueAdvantage.trim(), 4);
+  const latin = latinFactPhrases(
+    [name, category, niche, intake.description, intake.brandTone].filter(filled).join(" "),
+  );
+  // Autocomplete dies on long concatenated facts. Short stems first; longer explore queries last.
   const bits = [
-    [intake.category, intake.voice?.niche, market].filter(filled).join(" "),
-    [intake.businessName, intake.category].filter(filled).join(" "),
-    [intake.category, intake.audience, objective].filter(filled).join(" "),
-    [intake.uniqueAdvantage, intake.category].filter(filled).join(" "),
-    [offer, intake.category, market].filter(filled).join(" "),
-    [intake.biggestProblem, intake.category].filter(filled).join(" "),
+    category,
+    [category, place].filter(filled).join(" "),
+    firstWords(niche, 5),
+    advantage,
+    ...latin,
+    name.length <= 28 ? name : firstWords(name, 3),
+    [category, audience].filter(filled).join(" "),
+    offer,
+    [category, offer].filter(filled).join(" "),
   ]
-    .map((s) => s.replace(/\s+/g, " ").trim().slice(0, 80))
+    .map((s) => s.replace(/\s+/g, " ").trim().slice(0, 48))
     .filter((s) => s.length >= 3);
   const seen = new Set<string>();
   const out: string[] = [];
@@ -34,7 +83,7 @@ export function buildSearchQueries(intake: Intake, extra?: { objective?: string;
     if (seen.has(key)) continue;
     seen.add(key);
     out.push(q);
-    if (out.length >= 4) break;
+    if (out.length >= 6) break;
   }
   return out;
 }
@@ -68,16 +117,23 @@ export function suggestExploreUrl(kind: "google" | "youtube", query: string): st
     : `https://www.google.com/search?q=${q}`;
 }
 
+export function suggestLang(query: string): "he" | "ar" | "en" {
+  if (/[\u0590-\u05FF]/.test(query)) return "he";
+  if (/[\u0600-\u06FF]/.test(query)) return "ar";
+  return "en";
+}
+
 export function suggestEndpoints(kind: "google" | "youtube", query: string): string[] {
   const q = encodeURIComponent(query);
+  const hl = suggestLang(query);
   if (kind === "youtube") {
     return [
-      `https://suggestqueries.google.com/complete/search?client=firefox&ds=yt&hl=en&q=${q}`,
+      `https://suggestqueries.google.com/complete/search?client=firefox&ds=yt&hl=${hl}&q=${q}`,
       `https://suggestqueries.google.com/complete/search?client=firefox&ds=yt&q=${q}`,
     ];
   }
   return [
-    `https://suggestqueries.google.com/complete/search?client=firefox&hl=en&q=${q}`,
+    `https://suggestqueries.google.com/complete/search?client=firefox&hl=${hl}&q=${q}`,
     `https://suggestqueries.google.com/complete/search?client=firefox&q=${q}`,
     `https://clients1.google.com/complete/search?client=firefox&q=${q}`,
   ];
@@ -134,6 +190,7 @@ export function suggestEmptyCard(input: {
     examples: [],
     notes: [],
     emptyReason: input.reason,
+    queryUsed: input.query,
     retryable: true,
     alternateSources: input.id === "youtube_suggest" ? [ytAlt, googleAlt, trendsAlt] : [googleAlt, ytAlt, trendsAlt],
   };

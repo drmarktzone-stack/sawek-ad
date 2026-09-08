@@ -50,6 +50,8 @@ export type MarketResearchControls = {
   competitorCategory?: string;
   query?: string;
   geo?: string;
+  /** Skip in-memory cache (Retry from the desk). */
+  bypassCache?: boolean;
 };
 
 const L = (he: string, ar: string, en: string): Tri => ({ he, ar, en });
@@ -97,13 +99,23 @@ async function fetchJson(url: string, timeoutMs: number, headers?: Record<string
   try {
     const res = await fetch(url, {
       method: "GET",
-      headers: { Accept: "application/json", ...(headers ?? {}) },
+      headers: {
+        Accept: "application/json,text/javascript,text/plain,*/*",
+        "User-Agent": "Mozilla/5.0 (compatible; SAWEK-AD-research/1.0)",
+        ...(headers ?? {}),
+      },
       signal: ctrl.signal,
       cache: "no-store",
     });
     let json: unknown = null;
     try {
-      json = await res.json();
+      const text = await res.text();
+      try {
+        json = JSON.parse(text);
+      } catch {
+        const wrapped = text.match(/^[^(]*\(([\s\S]*)\)\s*$/);
+        json = wrapped?.[1] ? JSON.parse(wrapped[1]) : null;
+      }
     } catch {
       json = null;
     }
@@ -231,7 +243,7 @@ async function collectSuggestions(kind: "google" | "youtube", queries: string[])
   let lastReason = L("אין הצעות חיפוש למונח.", "ما في اقتراحات بحث للمصطلح.", "No search suggestions for this term.");
   const found: string[] = [];
   let queryUsed = queries[0] || "";
-  for (const q of queries.slice(0, 3)) {
+  for (const q of queries.slice(0, 6)) {
     if (!q.trim()) continue;
     queryUsed = q;
     for (const url of suggestEndpoints(kind, q)) {
@@ -282,13 +294,14 @@ async function fetchYouTubeSuggest(query: string, asOf: string, queries: string[
         queryUsed: live.queryUsed,
         kind: "youtube",
       }),
-      retryable: true,
-      alternateSources: [
-        { label: L("חיפוש YouTube", "بحث YouTube", "YouTube Search"), url: suggestExploreUrl("youtube", live.queryUsed) },
-        { label: L("חיפוש Google", "بحث Google", "Google Search"), url: suggestExploreUrl("google", live.queryUsed) },
-      ],
-    };
-  }
+        retryable: true,
+        queryUsed: live.queryUsed,
+        alternateSources: [
+          { label: L("חיפוש YouTube", "بحث YouTube", "YouTube Search"), url: suggestExploreUrl("youtube", live.queryUsed) },
+          { label: L("חיפוש Google", "بحث Google", "Google Search"), url: suggestExploreUrl("google", live.queryUsed) },
+        ],
+      };
+    }
   return suggestEmptyCard({
     id: "youtube_suggest",
     label: RESEARCH_SOURCE_LABEL.youtube_suggest,
@@ -312,13 +325,14 @@ async function fetchGoogleSuggest(query: string, asOf: string, queries: string[]
         queryUsed: live.queryUsed,
         kind: "google",
       }),
-      retryable: true,
-      alternateSources: [
-        { label: L("חיפוש Google", "بحث Google", "Google Search"), url: suggestExploreUrl("google", live.queryUsed) },
-        { label: L("Google Trends", "Google Trends", "Google Trends"), url: `https://trends.google.com/trends/explore?q=${encodeURIComponent(live.queryUsed)}` },
-      ],
-    };
-  }
+        retryable: true,
+        queryUsed: live.queryUsed,
+        alternateSources: [
+          { label: L("חיפוש Google", "بحث Google", "Google Search"), url: suggestExploreUrl("google", live.queryUsed) },
+          { label: L("Google Trends", "Google Trends", "Google Trends"), url: `https://trends.google.com/trends/explore?q=${encodeURIComponent(live.queryUsed)}` },
+        ],
+      };
+    }
   return suggestEmptyCard({
     id: "google_suggest",
     label: RESEARCH_SOURCE_LABEL.google_suggest,
@@ -553,6 +567,7 @@ function mergeCard(
     ...(live.emptyReason && !examples.length ? { emptyReason: live.emptyReason } : {}),
     ...(live.alternateSources?.length ? { alternateSources: live.alternateSources } : {}),
     ...(live.retryable ? { retryable: true } : {}),
+    ...(live.queryUsed ? { queryUsed: live.queryUsed } : {}),
   };
 }
 
@@ -576,8 +591,10 @@ export async function runMarketResearch(intake: Intake, controls?: MarketResearc
   });
   if (query && !queries.includes(query)) queries.unshift(query);
   const cacheKey = `${query}::${queries.join("|")}::${geo}::${lookback ?? 7}::${controls?.language ?? ""}::${controls?.objective ?? ""}::${controls?.competitorCategory ?? ""}`;
-  const hit = cache.get(cacheKey);
-  if (hit && Date.now() - hit.at < CACHE_MS) return hit.data;
+  if (!controls?.bypassCache) {
+    const hit = cache.get(cacheKey);
+    if (hit && Date.now() - hit.at < CACHE_MS) return hit.data;
+  }
   if (!intake.businessName.trim() && !intake.description.trim() && !intake.category.trim() && !intake.voice?.niche) {
     const empty = buildResearchSkeleton(intake);
     return { ...empty, fetched: true, sources: empty.sources.map((s) => ({ ...s, status: "empty" as const })) };
@@ -651,7 +668,11 @@ export async function runMarketResearch(intake: Intake, controls?: MarketResearc
     fetched: true,
     disclaimer: RESEARCH_DISCLAIMER,
   };
-  cache.set(cacheKey, { at: Date.now(), data: research });
+  const suggestFilled = research.sources.some(
+    (s) => (s.id === "google_suggest" || s.id === "youtube_suggest") && s.examples.length > 0,
+  );
+  // Empty suggest is often a too-specific query or a transient block — do not freeze UNKNOWN for 10 minutes.
+  if (suggestFilled || research.notes.length) cache.set(cacheKey, { at: Date.now(), data: research });
   return research;
 }
 

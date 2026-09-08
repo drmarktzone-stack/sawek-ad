@@ -33,6 +33,7 @@ A bigger prompt would not have fixed ranking, calendar wiring, or the missing no
 - YouTube used `suggestqueries.google.com`. Hebrew-only queries were stripped to ASCII, then replaced with a hardcoded **`mediterranean restaurant advertising`** fallback — wrong business, and often empty.
 - Blocked/empty states had no Retry, no alternate public URLs, and no query provenance.
 - Query was `niche + category + offer + name`, not audience / market / objective.
+- **Follow-up (this revision):** even after adding `google_suggest`, autocomplete still returned `[]` because queries concatenated street address + niche + objective (80 chars). Google/YouTube suggest only match short stems (`מאפייה`, `מסעדה ים-תיכונית`). Empty results were then **cached for 10 minutes**, so Retry did nothing. Browser QA showed UNKNOWN + alternates (honest) while `curl` of a short stem from the same host returned real rows.
 
 ### Problem 4 — Text over text on images
 
@@ -121,7 +122,7 @@ Create Ad / scan now **execute** in the task workspace.
 | 4 | Business A clinic vs B café | **PASS** — zero fact leak; distinct workspace keys |
 | 5 | Image with text band | **PASS** — `separate_headline`, overlay rejected |
 | 6 | Clean image / logo | **PASS** — clean `overlay_safe`; logo never overlay |
-| 7 | Google/YouTube query | **PASS (code)** — queries from bakery facts; parser drops fake metrics; no restaurant fallback. Live suggest HTTP from Cloud Run: **UNKNOWN until probed** |
+| 7 | Google/YouTube query | **PASS** — short category stems; no street numbers; no restaurant fallback; parser drops fake metrics. This host: `מאפייה` / `מסעדה ים-תיכונית` return real suggest JSON. Olive QA first showed UNKNOWN because queries were too long + empty cache; that path is now Retry-able and stems are short. Cloud Run egress: **UNKNOWN until this revision is deployed** |
 | 8 | HE / AR / EN | **PASS** |
 | 9 | Mobile 390px | Exercised in browser QA on `/task/ad` (see artifacts) |
 | 10 | Existing workflows | **PASS** — orchestrator / empty campaign / CMO / ingest / scientist |
@@ -145,8 +146,8 @@ Create Ad / scan now **execute** in the task workspace.
 
 | Source | What the code does | Honest status |
 |---|---|---|
-| **Google search suggest** (`google_suggest`) | Official-adjacent autocomplete JSON (`suggestqueries.google.com` / `clients1.google.com`, `client=firefox`). Rows stored as **search suggestions**, not ads, not volumes | Working when the endpoint returns JSON. If blocked/empty: `UNKNOWN` + reason + Google Search / Trends URLs + Retry |
-| **YouTube search suggest** (`youtube_suggest`) | Same family with `ds=yt`. Multiple fact-based queries (never restaurant fallback) | Same as Google. Prior empty root cause (ASCII wipe → generic restaurant query) **removed** |
+| **Google search suggest** (`google_suggest`) | Autocomplete JSON (`suggestqueries.google.com` / `clients1.google.com`, `client=firefox`). Queries are **short Business-Truth stems** (category, place without street, latin phrases already on the intake, name). Rows are **search suggestions**, not volumes | **Live from this host:** category stems return real rows. Over-long queries return `[]` (now avoided). If blocked/empty: `UNKNOWN` + query used + Google Search / Trends / YouTube URLs + Retry (bypasses empty cache) |
+| **YouTube search suggest** (`youtube_suggest`) | Same family with `ds=yt`. Short fact-based queries (never restaurant fallback) | Same as Google. ASCII wipe → generic restaurant query **removed** |
 | Google Ads Transparency | Unchanged: explore URL + grounding. Not a suggest API | `grounded` / explore-only |
 | Invented CPC / volume / “trending #1” | Forbidden | Never stored |
 
@@ -157,8 +158,8 @@ Create Ad / scan now **execute** in the task workspace.
 | Layer | Status |
 |---|---|
 | Asset heuristics (logo label, scan https photo, SVG/graphic) | **Shipped** |
-| Pixel band edge-density (top / middle / bottom + corners) | **Shipped** (used in QA buffers; client uses heuristics + optional decision on the pack) |
-| Full OCR / Gemini Vision on every poster | **Not required** — Vision API already exists (`/api/vision`) but is not a blocker; we do not invent detections |
+| Pixel band edge-density (top / middle / bottom + corners) | **Shipped** (QA buffers + same-origin/data-URL canvas sample in `AdVisual` on load) |
+| Full OCR / Gemini Vision on every poster | **Not required** — Vision API already exists (`/api/vision`) but is not a blocker; we do not invent detections. Cross-origin scan photos stay on the no-overlay heuristic (canvas would be tainted) |
 | Overlay collision | **Reject / recompose** to Option A (`image_only`) or B (`separate_headline`) or C (safe zone) |
 | Delete/cover original type | **Never**, unless the user explicitly asks to edit the image (`userAskedToEditImage`) |
 
@@ -180,8 +181,9 @@ Create Ad / scan now **execute** in the task workspace.
 
 ## 10. Remaining limitations
 
-- Unofficial Google/YouTube suggest endpoints may be **blocked from some Cloud Run egress**. UI then shows UNKNOWN + public search URLs + Retry — not blank fake rows.
-- Pixel OCR is heuristic, not a commercial text detector. Scan photos default to **no overlay** until a clean band is proven.
+- Unofficial Google/YouTube suggest endpoints may be **blocked from some Cloud Run egress**. UI then shows UNKNOWN + query used + public search URLs + Retry — not blank fake rows.
+- Suggest autocomplete has **no official free API** and no volumes. We only store observed suggestion strings.
+- Pixel OCR is heuristic (edge density), not a commercial text detector. Cross-origin scan photos default to **no overlay** until a same-origin pixel pass proves a clean band.
 - Consecutive Complete Ads rotate **strategy family**. They still share verified Business Truth (name, place) — that is required, not contamination.
 - Hosted Cloud Run revision is **UNKNOWN** until this PR is deployed.
 - Two-account fingerprint isolation on live Supabase is **UNKNOWN** (code is owner-scoped).
@@ -190,9 +192,9 @@ Create Ad / scan now **execute** in the task workspace.
 
 ## 11. Production readiness
 
-**78 / 100 — PARTIAL, ready to deploy with honest gaps**
+**82 / 100 — PARTIAL, ready to deploy with honest gaps**
 
-- **PASS in this VM:** diversity, isolation, calendar days, image composition unit tests, research source wiring, task route, HE/AR/EN, existing engine contracts.
-- **Not claimed:** live suggest JSON on the current Cloud Run host; Vision-grade OCR; post-deploy human click-through on production.
+- **PASS in this VM:** diversity, isolation, calendar days, image composition unit tests + same-origin canvas sample, research source wiring, **short-stem Google/YouTube suggest JSON**, task route, HE/AR/EN, existing engine contracts, local `/task/ad` browser QA.
+- **Not claimed:** live suggest JSON on the current Cloud Run revision (this PR is not deployed); Vision-grade OCR; post-deploy human click-through on production.
 
 Do not treat production as PASS until this revision is deployed and a human confirms `/task/ad` after a real scan.

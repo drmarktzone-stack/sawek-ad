@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import type { ImageCompositionDecision, ImageCompositionMode, Locale, MediaAssetMeta } from "@/lib/types";
 import { isOfferedAsset, pickAsset, pickHero } from "@/lib/media-assets";
 import { useResolvedAssets } from "@/lib/use-resolved-assets";
@@ -7,7 +8,34 @@ import { sampleLabel } from "@/lib/operating-model";
 import { dirFor } from "@/lib/i18n";
 import { isRedundantKicker } from "@/lib/channel-copy";
 import { cn } from "@/lib/utils";
-import { decideComposition } from "@/lib/engine/image-composition";
+import { decideComposition, type PixelBuffer } from "@/lib/engine/image-composition";
+
+function canSamplePixels(src: string): boolean {
+  if (src.startsWith("data:") || src.startsWith("blob:")) return true;
+  try {
+    return new URL(src, typeof window !== "undefined" ? window.location.href : "http://localhost").origin ===
+      (typeof window !== "undefined" ? window.location.origin : "");
+  } catch {
+    return false;
+  }
+}
+
+function bufferFromImg(img: HTMLImageElement): PixelBuffer | null {
+  try {
+    const w = 96;
+    const h = 96;
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return null;
+    ctx.drawImage(img, 0, 0, w, h);
+    const data = ctx.getImageData(0, 0, w, h);
+    return { width: w, height: h, data: data.data };
+  } catch {
+    return null;
+  }
+}
 
 export type AdPosterChannel = "facebook" | "instagram" | "tiktok" | "whatsapp";
 
@@ -258,7 +286,11 @@ export function AdVisual({
   const hasPlate = Boolean(showPhoto || showVideo);
   const posterHeadline = (headline ?? "").trim();
   const hasPosterType = Boolean(posterHeadline);
-  const decided = composition ?? decideComposition({ asset });
+  const [pixelDecision, setPixelDecision] = useState<ImageCompositionDecision | null>(null);
+  useEffect(() => {
+    setPixelDecision(null);
+  }, [url]);
+  const decided = pixelDecision ?? composition ?? decideComposition({ asset });
   let mode: ImageCompositionMode = hasPlate ? decided.mode : "overlay_safe";
   // Feed/chat chrome already prints headline under the media — don't add a second type plate.
   if (
@@ -300,6 +332,14 @@ export function AdVisual({
           className={cn(
             separateHeadline ? "relative h-[68%] w-full object-cover" : "absolute inset-0 h-full w-full object-cover",
           )}
+          onLoad={(e) => {
+            if (pixelDecision) return;
+            const el = e.currentTarget;
+            if (!canSamplePixels(el.src)) return;
+            const buf = bufferFromImg(el);
+            if (!buf) return;
+            setPixelDecision(decideComposition({ asset, pixels: buf }));
+          }}
         />
       )}
       {showVideo && assetUrl && (

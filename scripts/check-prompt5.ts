@@ -29,6 +29,7 @@ import {
   neverUseGenericRestaurantFallback,
   GENERIC_LATIN_FALLBACK,
   researchQueryFromFacts,
+  placeStem,
 } from "../lib/engine/search-suggest";
 import { researchQuery, buildResearchSkeleton } from "../lib/engine/research-public";
 import { readFileSync } from "node:fs";
@@ -169,7 +170,23 @@ const qs = buildSearchQueries(bakery());
 if (!qs.length) fail("test7 no search queries");
 if (qs.some((x) => !neverUseGenericRestaurantFallback(x))) fail("test7 generic restaurant fallback used");
 if (q === GENERIC_LATIN_FALLBACK) fail("test7 primary query is restaurant fallback");
-if (!/מאפי|לחם|bakery|שכנים|עין/.test(qs.join(" "))) fail(`test7 queries missing business facts: ${qs.join(" | ")}`);
+if (qs[0] && qs[0].length > 48) fail(`test7 primary query too long for suggest: ${qs[0]}`);
+if (!qs.some((x) => x === "מאפייה" || x.startsWith("מאפייה "))) fail(`test7 missing short category stem: ${qs.join(" | ")}`);
+if (qs.some((x) => /\d{2,}/.test(x) && /רחוב|street|st\b/i.test(x))) fail("test7 street address leaked into suggest query");
+const oliveQs = buildSearchQueries({
+  ...emptyIntake(),
+  businessName: "מטבח הזית",
+  category: "מסעדה ים-תיכונית",
+  location: "נווה שקד (עיירה בדיונית) — הרחוב הראשי 12, ליד הכיכר",
+  audience: "local_families",
+  uniqueAdvantage: "מטבח ביתי ים-תיכוני טרי + ישיבה בחוץ רגועה",
+  description: "Olive Kitchen — family Mediterranean restaurant",
+});
+if (!oliveQs.some((x) => x === "מסעדה ים-תיכונית")) fail(`test7 olive missing category stem: ${oliveQs.join(" | ")}`);
+if (oliveQs.some((x) => /12/.test(x))) fail(`test7 olive street number in query: ${oliveQs.join(" | ")}`);
+if (placeStem("נווה שקד (עיירה בדיונית) — הרחוב הראשי 12, ליד הכיכר") !== "נווה שקד") {
+  fail(`test7 placeStem ${placeStem("נווה שקד (עיירה בדיונית) — הרחוב הראשי 12, ליד הכיכר")}`);
+}
 const parsed = parseSuggestPayload(["q", ["fresh bread nearby", "bakery hours ein", 12, "million views 9"]]);
 if (!parsed.includes("fresh bread nearby")) fail("test7 parse missed suggestion");
 if (parsed.some((s) => /million views/i.test(s))) fail("test7 parsed fake metric");

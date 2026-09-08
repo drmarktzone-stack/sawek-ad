@@ -46,6 +46,11 @@ function SourceCard({ card, locale, onRetry }: { card: ResearchSourceCard; local
             {card.emptyReason?.[locale] || card.emptyReason?.en || t("research.empty")}
           </p>
           <p className="mt-2 text-[11px] font-bold uppercase tracking-wide text-[#C9B896]">{t("research.unknownHonest")}</p>
+          {card.queryUsed ? (
+            <p className="mt-1 text-[11px] text-[#9FD4C8]" data-testid="research-query-used">
+              {t("research.queryUsed")}: {card.queryUsed}
+            </p>
+          ) : null}
           {card.alternateSources?.length ? (
             <ul className="mt-2 space-y-1">
               {card.alternateSources.map((alt) => (
@@ -136,6 +141,7 @@ export function ResearchDesk({
 }) {
   const { t } = useI18n();
   const [busy, setBusy] = useState(false);
+  const [retryNonce, setRetryNonce] = useState(0);
   const research = pack.research ?? buildResearchSkeleton(pack.intake);
 
   useEffect(() => {
@@ -148,7 +154,7 @@ export function ResearchDesk({
     fetch("/api/research", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ description: facts, audience: pack.intake.audience, facts }),
+      body: JSON.stringify({ description: facts, audience: pack.intake.audience, facts, retry: retryNonce > 0 }),
     })
       .then((r) => r.json())
       .then((data: MarketResearch) => {
@@ -162,9 +168,9 @@ export function ResearchDesk({
     return () => {
       cancelled = true;
     };
-    // Fetch once per campaign until research.fetched is true.
+    // Fetch once per campaign until research.fetched is true. Retry bumps nonce.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pack.id, pack.research?.fetched]);
+  }, [pack.id, pack.research?.fetched, retryNonce]);
 
   const notes = research?.notes ?? pack.cmoIdeas?.groundedNotes ?? [];
   const sources = [...(research?.sources ?? [])].sort((a, b) => {
@@ -175,6 +181,7 @@ export function ResearchDesk({
   function retry() {
     if (!onPack) return;
     const skeleton = buildResearchSkeleton(pack.intake);
+    setRetryNonce((n) => n + 1);
     onPack({ ...pack, research: { ...skeleton, fetched: false }, updatedAt: new Date().toISOString() });
   }
 
@@ -214,7 +221,7 @@ export function ResearchDesk({
       {busy && !research?.fetched ? (
         <p className="mt-4 text-sm text-[#9FD4C8]">{t("research.loading")}</p>
       ) : null}
-      <div className={`mt-5 grid gap-3 ${compact ? "grid-cols-1" : "md:grid-cols-2"}`}>
+      <div className={`mt-5 grid gap-3 ${compact ? "grid-cols-1 sm:grid-cols-2" : "md:grid-cols-2"}`}>
         {sources.map((card) => (
           <SourceCard key={card.id} card={card} locale={locale} onRetry={onPack ? retry : undefined} />
         ))}
