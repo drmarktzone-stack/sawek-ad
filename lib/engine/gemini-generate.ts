@@ -36,6 +36,7 @@ import {
   whatsappScript,
 } from "./spoken";
 import { VISION_MAX_BYTES } from "./gemini-client-caps";
+import { isVoiceDialect, normalizeVoice, voiceFactLines } from "./voice";
 export { VISION_MAX_BYTES };
 
 export type GenerateMode =
@@ -487,10 +488,7 @@ function factsBlockFromBody(body: GenerateBody): string {
     intake.clinicHours && `clinicHours: ${intake.clinicHours}`,
     intake.brandTone && `brandTone: ${intake.brandTone}`,
     intake.brandPositioning && `brandPositioning: ${intake.brandPositioning}`,
-    intake.voice?.niche && `coreNiche: ${intake.voice.niche}`,
-    intake.voice?.coreMessage && `coreMessage: ${intake.voice.coreMessage}`,
-    intake.voice?.personalVoice && `personalVoice: ${intake.voice.personalVoice}`,
-    intake.voice?.dialect && `voiceDialect: ${intake.voice.dialect}`,
+    ...voiceFactLines(intake),
     intake.pastResults && `pastResults: ${intake.pastResults}`,
   ].filter(Boolean);
   return ["LAYER A — BUSINESS TRUTH (authoritative facts only):", ...lines].join("\n");
@@ -1085,30 +1083,23 @@ export function factsToIntake(body: { description?: unknown; audience?: unknown;
     const coreMessage = str("coreMessage");
     const personalVoice = str("personalVoice") || intake.brandTone;
     if (niche || coreMessage || personalVoice || dialect) {
-      intake.voice = {
+      intake.voice = normalizeVoice({
+        ...intake.voice,
         niche,
         coreMessage,
         personalVoice,
-        dialect:
-          dialect === "he" ||
-          dialect === "ar-levant" ||
-          dialect === "ar-gulf" ||
-          dialect === "ar-msa" ||
-          dialect === "en"
-            ? dialect
-            : "",
-      };
+        dialect: isVoiceDialect(dialect) ? dialect : "",
+      });
     }
     if (o.voice && typeof o.voice === "object" && !Array.isArray(o.voice)) {
       const v = o.voice as Record<string, unknown>;
-      const d = typeof v.dialect === "string" ? v.dialect : "";
-      intake.voice = {
+      intake.voice = normalizeVoice({
+        ...intake.voice,
+        ...v,
         niche: typeof v.niche === "string" ? v.niche : niche,
         coreMessage: typeof v.coreMessage === "string" ? v.coreMessage : coreMessage,
         personalVoice: typeof v.personalVoice === "string" ? v.personalVoice : personalVoice,
-        dialect:
-          d === "he" || d === "ar-levant" || d === "ar-gulf" || d === "ar-msa" || d === "en" ? d : intake.voice?.dialect || "",
-      };
+      });
     }
   }
   if (typeof body.description === "string" && body.description.trim()) {

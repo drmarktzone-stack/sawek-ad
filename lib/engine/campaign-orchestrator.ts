@@ -242,6 +242,7 @@ export function orchestrateAssemble(intake: Intake, partial: AssemblePartial): C
     ...(pastCampaignAudit ? { pastCampaignAudit } : {}),
     ...(partial.angles ? { angles: partial.angles } : {}),
     featureType: "campaign",
+    ...(intake.offerBlueprint ? { offerBlueprint: intake.offerBlueprint } : {}),
   };
   const assembled = { ...base, agency: buildAgency(base) };
   return attachCompleteAd(assembled, { rotate: true });

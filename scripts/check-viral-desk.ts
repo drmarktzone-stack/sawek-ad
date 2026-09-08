@@ -61,9 +61,13 @@ if (blank.voice?.niche) fail("empty voice niche not blank");
 
 const saved = applyVoiceToIntake(blank, {
   niche: "בוטיק בדיוני לחולצות פשתן",
+  audience: "",
   coreMessage: "מתלה אחד מדויק — בלי קטלוג מנופח.",
   personalVoice: "רגוע, קצר, בלי סלנג קניון.",
   dialect: "he",
+  beliefs: ["", "", ""],
+  neverSay: "",
+  locked: false,
 });
 if (!voiceIsSaved(voiceFromIntake(saved))) fail("voice save did not stick");
 if (saved.brandTone !== "רגוע, קצר, בלי סלנג קניון.") fail("personal voice should copy into brandTone");

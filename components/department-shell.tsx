@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { ConquerHeadline } from "@/components/stepper";
 import { cn } from "@/lib/utils";
 import { LangLink } from "@/components/lang-link";
+import { CampaignJourney } from "@/components/campaign-journey";
 
 const AGENT_LABEL: Record<AgentId, Record<Locale, string>> = {
   intake: { he: "קליטה", ar: "الاستقبال", en: "Intake" },
@@ -40,6 +41,9 @@ const DEPT_RAIL = [
   { href: "/growth", key: "nav.growth" as const },
   { href: "/lab", key: "nav.lab" as const },
   { href: "/self", key: "nav.self" as const },
+  { href: "/tools/core-message", key: "nav.voice" as const },
+  { href: "/tools/offer", key: "nav.offerTool" as const },
+  { href: "/tools/hso", key: "nav.hso" as const },
 ];
 
 export function DepartmentRail() {
@@ -147,6 +151,7 @@ export function DepartmentShell({
 
   return (
     <div className="os-page max-w-6xl">
+      <CampaignJourney compact />
       <ConquerHeadline subtitle={t(titleKey)} />
       <p className="mx-auto mb-4 max-w-2xl text-center text-sm text-muted">{t(leadKey)}</p>
       <DepartmentRail />

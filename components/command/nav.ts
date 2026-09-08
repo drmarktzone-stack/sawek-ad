@@ -43,7 +43,10 @@ export type NavKey =
   | "nav.about"
   | "nav.social"
   | "nav.status"
-  | "nav.more";
+  | "nav.more"
+  | "nav.voice"
+  | "nav.offerTool"
+  | "nav.hso";
 
 export type NavItem = {
   href: string;
@@ -60,6 +63,9 @@ export const PRIMARY_NAV: NavItem[] = [
 ];
 
 export const MORE_NAV: NavItem[] = [
+  { href: "/tools/core-message", key: "nav.voice", icon: Fingerprint },
+  { href: "/tools/offer", key: "nav.offerTool", icon: Compass },
+  { href: "/tools/hso", key: "nav.hso", icon: Megaphone },
   { href: "/", key: "nav.build", icon: WandSparkles },
   { href: "/growth/dna", key: "nav.dna", icon: Fingerprint },
   { href: "/growth/experiments", key: "nav.experiments", icon: FlaskConical },

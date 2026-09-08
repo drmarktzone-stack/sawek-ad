@@ -119,6 +119,8 @@ function voiceLine(v: VoiceProfile, locale: Locale): string {
 function dialectNote(v: VoiceProfile, locale: Locale): string {
   if (locale !== "ar") return "";
   if (v.dialect === "ar-gulf") return "سجّلوا بالخليجي إن كان هذا لهجتكم.";
+  if (v.dialect === "ar-egyptian") return "سجّلوا بالمصري إن كان هذا لهجتكم.";
+  if (v.dialect === "ar-light") return "فصحى خفيفة — واضحة بلا ثقل.";
   if (v.dialect === "ar-msa") return "صياغة فصحى واضحة.";
   if (v.dialect === "ar-levant" || v.dialect === "") return "سجّلوا بالشامية إن كان هذا لهجتكم.";
   return "";

@@ -8,6 +8,8 @@ import { canonicalDoctorName } from "../demo";
 import { isFreeService } from "../operating-model";
 import { detectVertical, visualNoPhotoNote } from "../vertical";
 import { copyLeaksClinic, scrubClinicCopy } from "../clinic-leak";
+import { applyVoiceLockToText, voiceIsLocked, voiceFromIntake } from "./voice";
+import { offerLineForCopy } from "./offer-builder";
 
 function pastRefNote(intake: Intake, locale: Locale): string {
   const n = (intake.pastCreatives ?? []).length;
@@ -44,8 +46,15 @@ export function produceAd(intake: Intake, styleId: string, idea: string, locale:
   const style = styleById(styleId) || stylesForVertical(vertical)[0] || DESIGN_STYLES[0];
   const requested = idea.trim();
   const usableIdea = requested && (clinic || !copyLeaksClinic(requested)) ? requested : "";
+  const locked = voiceFromIntake(intake);
+  const lockedLine = voiceIsLocked(locked)
+    ? applyVoiceLockToText(scrubClinicCopy(locked.coreMessage, intake), intake)
+    : "";
+  const offerLine = applyVoiceLockToText(offerLineForCopy(intake, locale), intake);
   const headline =
     scrubClinicCopy(usableIdea, intake) ||
+    lockedLine ||
+    offerLine ||
     scrubClinicCopy(landingH1(intake, locale), intake) ||
     intake.businessName.trim() ||
     landingH1(intake, locale);
@@ -83,13 +92,16 @@ export function produceAd(intake: Intake, styleId: string, idea: string, locale:
         spokenCta(intake, locale),
       ].filter(Boolean);
 
-  const body = scrubClinicCopy(bodyParts.join(" · "), intake) || [intake.businessName.trim(), site].filter(Boolean).join(" · ");
+  const body = applyVoiceLockToText(
+    scrubClinicCopy(bodyParts.join(" · "), intake) || [intake.businessName.trim(), site].filter(Boolean).join(" · "),
+    intake,
+  );
 
   return {
     id: uid("ad"),
     styleId: style.id,
     idea: usableIdea,
-    headline: scrubClinicCopy(headline, intake) || intake.businessName.trim() || headline,
+    headline: applyVoiceLockToText(scrubClinicCopy(headline, intake) || intake.businessName.trim() || headline, intake),
     body,
     visualNotes: {
       he: `סגנון «${style.name.he}»: ${style.description.he}. ${visualNoPhotoNote(intake, "he", (intake.mediaAssets ?? []).length > 0)} בלי דירוגים או פנים שאין לכם רשות עליהם.` + pastRefNote(intake, "he"),
