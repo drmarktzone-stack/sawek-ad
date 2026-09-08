@@ -31,6 +31,8 @@ export function CreativeDeptView({
   const l = packLang;
   const [format, setFormat] = useState(FACTORY_FORMATS[0].id);
   const [idea, setIdea] = useState("");
+  const [making, setMaking] = useState("");
+  const [makeError, setMakeError] = useState("");
   const packVertical = detectVertical(pack.intake);
   const [styleFilter, setStyleFilter] = useState<"all" | Vertical>(packVertical);
   const visibleStyles = styleFilter === "all" ? DESIGN_STYLES : stylesForVertical(styleFilter);
@@ -41,10 +43,27 @@ export function CreativeDeptView({
   );
 
   function makeAd(styleId: string) {
-    const ad = produceAd(pack.intake, styleId, idea, packLang);
-    const next = { ...pack, producedAds: [ad, ...pack.producedAds] };
-    upsertCampaign(next);
-    onPack(next);
+    if (making) return;
+    setMakeError("");
+    if (!pack.intake.businessName.trim() && !pack.intake.website.trim()) {
+      setMakeError(t("design.needBusiness"));
+      return;
+    }
+    setMaking(styleId);
+    try {
+      const seed = idea.trim() || pack.intake.uniqueAdvantage.trim() || pack.intake.businessName;
+      const ad = produceAd(pack.intake, styleId, seed, packLang);
+      const next = { ...pack, producedAds: [ad, ...(pack.producedAds ?? [])] };
+      upsertCampaign(next);
+      onPack(next);
+      requestAnimationFrame(() => {
+        document.getElementById("produced-ads")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+    } catch {
+      setMakeError(t("design.makeError"));
+    } finally {
+      setMaking("");
+    }
   }
 
   return (
@@ -155,6 +174,11 @@ export function CreativeDeptView({
           onChange={(e) => setIdea(e.target.value)}
           placeholder={pack.intake.uniqueAdvantage}
         />
+        {makeError ? (
+          <p className="mb-3 text-sm font-semibold text-danger" role="alert" data-testid="design-make-error">
+            {makeError}
+          </p>
+        ) : null}
         <div className="mb-4 flex flex-wrap gap-1">
           <button
             type="button"
@@ -201,14 +225,47 @@ export function CreativeDeptView({
                   </div>
                   <p className="text-sm font-bold text-muted">{s.name[packLang]}</p>
                   <p className="line-clamp-2 text-sm text-muted">{s.description[packLang]}</p>
-                  <Button type="button" size="sm" className="w-full" onClick={() => makeAd(s.id)}>
-                    {t("design.make")}
+                  <Button
+                    type="button"
+                    size="sm"
+                    className="relative z-10 w-full"
+                    disabled={Boolean(making)}
+                    data-testid={`design-make-${s.id}`}
+                    onClick={() => makeAd(s.id)}
+                  >
+                    {making === s.id ? t("design.making") : t("design.make")}
                   </Button>
                 </div>
               </article>
             );
           })}
         </div>
+        {(pack.producedAds ?? []).length > 0 ? (
+          <div id="produced-ads" className="mt-6 space-y-3" data-testid="produced-ads">
+            <p className="text-sm font-black text-navy">{t("design.produced")}</p>
+            {(pack.producedAds ?? []).map((ad) => {
+              const style = DESIGN_STYLES.find((s) => s.id === ad.styleId);
+              return (
+                <article key={ad.id} className="overflow-hidden rounded-2xl border border-navy/10 bg-white">
+                  <CampaignAdVisual
+                    locale={packLang}
+                    palette={style?.palette ?? ["#111", "#333"]}
+                    assets={pack.intake.mediaAssets}
+                    index={0}
+                    className="min-h-36"
+                    headline={ad.headline}
+                    fallbackSrc={studioStillsForIntake(pack.intake)[0]?.dataUrl}
+                  />
+                  <div className="space-y-1 p-3">
+                    <p className="text-xs font-bold text-muted">{style?.name[packLang]}</p>
+                    <p className="text-base font-black text-navy">{ad.headline}</p>
+                    <p className="text-sm text-muted">{ad.body}</p>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        ) : null}
       </Card>
       <Card title={t("design.layouts")}>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">

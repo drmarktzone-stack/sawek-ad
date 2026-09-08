@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { generateStudioVariants } from "@/lib/studio-engine";
 import { DESIGN_STYLES } from "@/lib/design-styles";
-import { loadDraft, loadStudio, saveDraft, saveStudio } from "@/lib/storage";
+import { loadDraft, loadStudio, saveDraft, saveStudio, studioPiecesForIntake } from "@/lib/storage";
+import { businessKey } from "@/lib/engine/ad-engine/sources";
 import { produceAd } from "@/lib/engine/produce-ad";
 import { emptyIntake } from "@/lib/engine/validate";
 import { MediaAssetUploader } from "@/components/media-asset-uploader";
@@ -29,26 +30,14 @@ export function ContentStudio({ embedded = false }: { embedded?: boolean }) {
   const client = useIsClient();
   const [booted, setBooted] = useState(false);
 
+  const [produceError, setProduceError] = useState("");
+  const [producing, setProducing] = useState(false);
+
   if (client && !booted) {
-    setLibrary(loadStudio());
+    const intake = { ...emptyIntake(), ...loadDraft().intake };
+    setLibrary(studioPiecesForIntake(intake));
     setAssets(loadDraft().intake.mediaAssets ?? []);
     setBooted(true);
-  }
-
-  function generate() {
-    const variants = generateStudioVariants(kind, idea, locale);
-    const piece: StudioPiece = {
-      id: uid("studio"),
-      createdAt: new Date().toISOString(),
-      kind,
-      idea,
-      locale,
-      variants,
-      styleId,
-    };
-    const next = [piece, ...library];
-    setLibrary(next);
-    saveStudio(next);
   }
 
   function currentIntake(): Intake {
@@ -56,11 +45,50 @@ export function ContentStudio({ embedded = false }: { embedded?: boolean }) {
     return intake;
   }
 
+  function generate() {
+    const intake = currentIntake();
+    const seed = idea.trim() || intake.uniqueAdvantage.trim() || intake.businessName.trim();
+    if (!seed) {
+      setProduceError(t("design.needBusiness"));
+      return;
+    }
+    const variants = generateStudioVariants(kind, seed, locale, intake);
+    const piece: StudioPiece = {
+      id: uid("studio"),
+      createdAt: new Date().toISOString(),
+      kind,
+      idea: seed,
+      locale,
+      variants,
+      styleId,
+      businessId: businessKey(intake.businessName || intake.website || ""),
+    };
+    const next = [piece, ...studioPiecesForIntake(intake).filter((p) => p.id !== piece.id)];
+    setLibrary(next);
+    saveStudio([piece, ...loadStudio().filter((p) => p.id !== piece.id)]);
+    setProduceError("");
+  }
+
   function produce() {
     const intake = currentIntake();
-    intake.businessName = intake.businessName || idea.slice(0, 40) || "Studio";
-    intake.uniqueAdvantage = intake.uniqueAdvantage || idea;
-    setMock(produceAd(intake, styleId, idea, locale));
+    const seed = idea.trim() || intake.uniqueAdvantage.trim() || intake.businessName.trim();
+    if (!intake.businessName.trim() && !intake.website.trim() && !seed) {
+      setProduceError(t("design.needBusiness"));
+      return;
+    }
+    setProducing(true);
+    setProduceError("");
+    try {
+      const next = produceAd(intake, styleId, seed, locale);
+      setMock(next);
+      requestAnimationFrame(() => {
+        document.getElementById("studio-produced")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+    } catch {
+      setProduceError(t("design.makeError"));
+    } finally {
+      setProducing(false);
+    }
   }
 
   const kindLabel: Record<StudioPiece["kind"], Record<Locale, string>> = {
@@ -115,7 +143,7 @@ export function ContentStudio({ embedded = false }: { embedded?: boolean }) {
         </div>
         <Label>{t("design.idea")}</Label>
         <Textarea value={idea} onChange={(e) => setIdea(e.target.value)} className="mb-4" />
-        <Button type="button" onClick={generate} disabled={!idea.trim()}>
+        <Button type="button" onClick={generate} disabled={!idea.trim() && !currentIntake().businessName.trim()}>
           {t("cta.next")}
         </Button>
         {client && (
@@ -152,11 +180,16 @@ export function ContentStudio({ embedded = false }: { embedded?: boolean }) {
           </button>
         ))}
       </div>
-      <Button type="button" className="mt-4" onClick={produce} disabled={!idea.trim()}>
-        {t("design.make")}
+      {produceError ? (
+        <p className="mt-3 text-sm font-semibold text-danger" role="alert">
+          {produceError}
+        </p>
+      ) : null}
+      <Button type="button" className="relative z-10 mt-4" onClick={produce} disabled={producing}>
+        {producing ? t("design.making") : t("design.make")}
       </Button>
       {mock && (
-        <div className="mt-4 overflow-hidden rounded-2xl border border-navy/10">
+        <div id="studio-produced" className="mt-4 overflow-hidden rounded-2xl border border-navy/10" data-testid="studio-produced">
           <CampaignAdVisual
             locale={locale}
             palette={DESIGN_STYLES.find((s) => s.id === mock.styleId)?.palette ?? ["#111", "#333"]}

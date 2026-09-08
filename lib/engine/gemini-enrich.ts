@@ -1,7 +1,8 @@
 import type { AdVariant, CampaignAngles, FactoryPiece, Intake, Locale } from "../types";
 import { filled } from "../utils";
 import { inventsForbidden } from "./coach";
-import { isClinicLike } from "../vertical";
+import { detectVertical, isClinicLike } from "../vertical";
+import { copyLeaksClinic } from "../clinic-leak";
 import { hasInventedCommercialClaim } from "./ad-engine/facts";
 import { buildBusinessTruth } from "./ad-engine/sources";
 import { overlayAnglesOnVariants, parseCampaignAngles, sanitizeAngles } from "./angles";
@@ -330,6 +331,8 @@ function overlayFromResponse(data: GeminiResponse, intake: Intake): GeminiAdCopy
   const cta = safeText(asTrimmed(data.cta), intake);
   const headline = safeText(headlines[0], intake);
   if (!headline && !copy && !cta) return null;
+  const blob = [headline, copy, cta].filter(Boolean).join("\n");
+  if (detectVertical(intake) !== "clinic" && copyLeaksClinic(blob)) return null;
   return {
     ...(headline ? { headline } : {}),
     ...(copy ? { copy } : {}),
@@ -387,6 +390,7 @@ export async function enrichVariantsWithGemini(
 function textSafe(parts: (string | undefined)[], intake: Intake): boolean {
   const joined = parts.filter((s): s is string => Boolean(s && s.trim())).join("\n");
   if (!joined.trim()) return false;
+  if (detectVertical(intake) !== "clinic" && copyLeaksClinic(joined)) return false;
   return !inventsForbidden(joined, intake);
 }
 

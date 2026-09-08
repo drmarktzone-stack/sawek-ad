@@ -1,8 +1,10 @@
 import type { CampaignPack, CoachReport, Intake, LabRun, Locale, SelfPlan, SelfProfile, StudioPiece } from "./types";
 import { emptyIntake } from "./engine/validate";
 import { coachIntake } from "./engine/coach";
-import { intakeIsClinicDemo, isBlockedEmptySessionName } from "./clinic-leak";
+import { copyLeaksClinic, intakeIsClinicDemo, isBlockedEmptySessionName } from "./clinic-leak";
 import { canSaveAnotherCampaign, clientPlan } from "./plan";
+import { businessKey } from "./engine/ad-engine/sources";
+import { detectVertical } from "./vertical";
 
 const K = {
   locale: "omniad-locale",
@@ -158,6 +160,7 @@ export function applyIntakeToDraft(intake: Intake, opts?: { resetWizard?: boolea
     ? { intake, step: 2, phase: "wizard", coach }
     : { ...d, intake, coach };
   saveDraft(next);
+  if (opts?.resetWizard) isolateStudioToIntake(intake);
   if (typeof window !== "undefined") {
     window.dispatchEvent(new Event(INGEST_APPLIED_EVENT));
   }
@@ -198,11 +201,37 @@ export function deleteCampaign(id: string): CampaignPack[] {
 }
 
 export function loadStudio(): StudioPiece[] {
-  return read<StudioPiece[]>(K.studio, []);
+  const list = read<StudioPiece[]>(K.studio, []);
+  return Array.isArray(list) ? list : [];
 }
 
 export function saveStudio(list: StudioPiece[]) {
   write(K.studio, list);
+}
+
+export function isolateStudioToIntake(intake: Intake) {
+  const id = businessKey(intake.businessName || intake.website || "");
+  const clinic = detectVertical(intake) === "clinic";
+  const named = Boolean(intake.businessName?.trim()) && id !== "unnamed-business";
+  const kept = loadStudio().filter((p) => {
+    const blob = `${p.idea}\n${(p.variants ?? []).map((v) => v.body).join("\n")}`;
+    if (!clinic && copyLeaksClinic(blob)) return false;
+    if (named && p.businessId && p.businessId !== id) return false;
+    return true;
+  });
+  saveStudio(kept);
+}
+
+export function studioPiecesForIntake(intake: Intake): StudioPiece[] {
+  const id = businessKey(intake.businessName || intake.website || "");
+  const clinic = detectVertical(intake) === "clinic";
+  const named = Boolean(intake.businessName?.trim()) && id !== "unnamed-business";
+  return loadStudio().filter((p) => {
+    const blob = `${p.idea}\n${(p.variants ?? []).map((v) => v.body).join("\n")}`;
+    if (!clinic && copyLeaksClinic(blob)) return false;
+    if (named) return !p.businessId || p.businessId === id;
+    return true;
+  });
 }
 
 export function loadSelfProfile(): SelfProfile {

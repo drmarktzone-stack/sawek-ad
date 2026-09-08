@@ -25,6 +25,7 @@
     "check:scan-truth": "npx --yes tsx scripts/check-scan-truth.ts",
     "check:market-intel": "npx --yes tsx scripts/check-market-intel.ts",
     "check:hitl-advance": "npx --yes tsx scripts/check-hitl-advance.ts",
+    "check:clinic-isolation": "npx --yes tsx scripts/check-clinic-isolation.ts",
     "verify:rls": "npx --yes tsx scripts/verify-rls.ts"
   },
   "dependencies": {

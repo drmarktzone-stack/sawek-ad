@@ -7,6 +7,7 @@ import { hoursLine, kupaLine, landingH1, spokenAdvantage, spokenCta, isWalkIn } 
 import { canonicalDoctorName } from "../demo";
 import { isFreeService } from "../operating-model";
 import { detectVertical, visualNoPhotoNote } from "../vertical";
+import { copyLeaksClinic, scrubClinicCopy } from "../clinic-leak";
 
 function pastRefNote(intake: Intake, locale: Locale): string {
   const n = (intake.pastCreatives ?? []).length;
@@ -41,8 +42,14 @@ export function produceAd(intake: Intake, styleId: string, idea: string, locale:
   const vertical = detectVertical(intake);
   const clinic = vertical === "clinic";
   const style = styleById(styleId) || stylesForVertical(vertical)[0] || DESIGN_STYLES[0];
-  const headline = idea.trim() || landingH1(intake, locale);
-  const adv = spokenAdvantage(intake, locale);
+  const requested = idea.trim();
+  const usableIdea = requested && (clinic || !copyLeaksClinic(requested)) ? requested : "";
+  const headline =
+    scrubClinicCopy(usableIdea, intake) ||
+    scrubClinicCopy(landingH1(intake, locale), intake) ||
+    intake.businessName.trim() ||
+    landingH1(intake, locale);
+  const adv = scrubClinicCopy(spokenAdvantage(intake, locale), intake);
   const site = intake.website?.trim() ?? "";
   const offerBit =
     isFreeService(intake) || isNoOffer(intake.offer)
@@ -55,7 +62,7 @@ export function produceAd(intake: Intake, styleId: string, idea: string, locale:
   const bodyParts = clinic
     ? [
         canonicalDoctorName(intake.businessName),
-        idea.trim(),
+        usableIdea,
         isWalkIn(intake)
           ? locale === "he"
             ? "לפי סדר הגעה"
@@ -70,18 +77,20 @@ export function produceAd(intake: Intake, styleId: string, idea: string, locale:
       ].filter(Boolean)
     : [
         adv,
-        idea.trim() && idea.trim() !== headline ? idea.trim() : "",
+        usableIdea && usableIdea !== headline ? usableIdea : "",
         site,
         offerBit,
         spokenCta(intake, locale),
       ].filter(Boolean);
 
+  const body = scrubClinicCopy(bodyParts.join(" · "), intake) || [intake.businessName.trim(), site].filter(Boolean).join(" · ");
+
   return {
     id: uid("ad"),
     styleId: style.id,
-    idea: idea.trim(),
-    headline,
-    body: bodyParts.join(" · "),
+    idea: usableIdea,
+    headline: scrubClinicCopy(headline, intake) || intake.businessName.trim() || headline,
+    body,
     visualNotes: {
       he: `סגנון «${style.name.he}»: ${style.description.he}. ${visualNoPhotoNote(intake, "he", (intake.mediaAssets ?? []).length > 0)} בלי דירוגים או פנים שאין לכם רשות עליהם.` + pastRefNote(intake, "he"),
       ar: `أسلوب «${style.name.ar}»: ${style.description.ar}. ${visualNoPhotoNote(intake, "ar", (intake.mediaAssets ?? []).length > 0)} بلا تقييمات أو وجوه بلا إذن.` + pastRefNote(intake, "ar"),

@@ -1,4 +1,6 @@
 import type { AdVariant, CampaignPack, Locale } from "./types";
+import { copyLeaksClinic, scrubClinicCopy } from "./clinic-leak";
+import { detectVertical } from "./vertical";
 import { clipAtWord, isWalkIn, localizeFactBlob, shortName, spokenAdvantage } from "./engine/spoken";
 import { hoursChips, isHoursWall, stripHoursWall } from "./hours-chips";
 
@@ -194,22 +196,28 @@ export function channelFields(pack: CampaignPack, locale: Locale): ChannelFields
     90,
   );
   const tiktokCta = fieldOrFact(sanitizeForLocale(v?.cta || "", locale) || v?.cta, locale, facts);
+  const factFallback = fieldOrFact("", locale, facts);
+  const keep = (s: string) => {
+    if (detectVertical(pack.intake) === "clinic") return s;
+    if (!copyLeaksClinic(s)) return s;
+    return scrubClinicCopy(s, pack.intake) || factFallback;
+  };
   return {
-    headline,
-    posterHeadline,
-    posterSupport,
+    headline: keep(headline),
+    posterHeadline: keep(posterHeadline),
+    posterSupport: keep(posterSupport),
     hoursChips: chips,
-    body,
-    shortBody,
-    cta,
-    waScript,
-    landingTitle,
-    landingBody,
-    primaryText: primaryText.trim() ? primaryText : fieldOrFact("", locale, facts),
-    caption,
-    pageName,
-    tiktokCaption,
-    tiktokCta,
+    body: keep(body),
+    shortBody: keep(shortBody),
+    cta: keep(cta),
+    waScript: keep(waScript),
+    landingTitle: keep(landingTitle),
+    landingBody: keep(landingBody),
+    primaryText: keep(primaryText.trim() ? primaryText : factFallback),
+    caption: keep(caption),
+    pageName: keep(pageName),
+    tiktokCaption: keep(tiktokCaption),
+    tiktokCta: keep(tiktokCta),
   };
 }
 

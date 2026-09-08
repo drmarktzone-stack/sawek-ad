@@ -1049,6 +1049,8 @@ export interface StudioPiece {
   locale: Locale;
   variants: { title: string; body: string }[];
   styleId?: string;
+  /** Isolates library rows to one Business Truth. Never reuse clinic leftovers. */
+  businessId?: string;
 }
 
 export interface SelfProfile {

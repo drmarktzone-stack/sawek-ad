@@ -7,6 +7,7 @@ import type { CampaignPack, Locale, OptimizerResultInput } from "@/lib/types";
 import { LOCALES, STRATEGY_META, VARIANT_META, orderedStrategy, t } from "@/lib/i18n";
 import { DESIGN_STYLES, stylesForVertical } from "@/lib/design-styles";
 import { detectVertical } from "@/lib/vertical";
+import { copyLeaksClinic } from "@/lib/clinic-leak";
 import { copyAllAds, downloadTxt, printBible, printPdf } from "@/lib/export";
 import { DepartmentRail } from "@/components/department-shell";
 import { produceAd } from "@/lib/engine/produce-ad";
@@ -73,6 +74,8 @@ export function ResultView({
   const [saveLimit, setSaveLimit] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [idea, setIdea] = useState("");
+  const [making, setMaking] = useState("");
+  const [makeError, setMakeError] = useState("");
   const [optIn, setOptIn] = useState<OptimizerResultInput>({
     spend: "",
     leads: "",
@@ -129,18 +132,45 @@ export function ResultView({
   }
 
   async function makeAd(styleId: string) {
-    const ad = produceAd(pack.intake, styleId, idea, packLang);
-    const overlay = await geminiAdCopy(pack.intake, packLang);
-    const finalAd = overlay
-      ? {
-          ...ad,
-          ...(overlay.headline ? { headline: overlay.headline } : {}),
-          ...(overlay.copy ? { body: overlay.copy } : {}),
-        }
-      : ad;
-    const next = { ...pack, producedAds: [finalAd, ...pack.producedAds] };
-    void syncCampaign(next);
-    onChange(next);
+    if (making) return;
+    setMakeError("");
+    if (!pack.intake.businessName.trim() && !pack.intake.website.trim()) {
+      setMakeError(tr("design.needBusiness"));
+      return;
+    }
+    setMaking(styleId);
+    try {
+      const seed = idea.trim() || pack.intake.uniqueAdvantage.trim() || pack.intake.businessName;
+      const ad = produceAd(pack.intake, styleId, seed, packLang);
+      let overlay: Awaited<ReturnType<typeof geminiAdCopy>> = null;
+      try {
+        overlay = await geminiAdCopy(pack.intake, packLang);
+      } catch {
+        overlay = null;
+      }
+      const overlayBlob = `${overlay?.headline ?? ""} ${overlay?.copy ?? ""}`;
+      const safeOverlay =
+        overlay && (detectVertical(pack.intake) === "clinic" || !copyLeaksClinic(overlayBlob))
+          ? overlay
+          : null;
+      const finalAd = safeOverlay
+        ? {
+            ...ad,
+            ...(safeOverlay.headline ? { headline: safeOverlay.headline } : {}),
+            ...(safeOverlay.copy ? { body: safeOverlay.copy } : {}),
+          }
+        : ad;
+      const next = { ...pack, producedAds: [finalAd, ...(pack.producedAds ?? [])] };
+      void syncCampaign(next);
+      onChange(next);
+      requestAnimationFrame(() => {
+        document.getElementById("produced-ads")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+    } catch {
+      setMakeError(tr("design.makeError"));
+    } finally {
+      setMaking("");
+    }
   }
 
   function activatePlan() {
@@ -566,6 +596,11 @@ export function ResultView({
           onChange={(e) => setIdea(e.target.value)}
           placeholder={pack.intake.uniqueAdvantage}
         />
+        {makeError ? (
+          <p className="mb-3 text-sm font-semibold text-danger" role="alert">
+            {makeError}
+          </p>
+        ) : null}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {stylesForVertical(detectVertical(pack.intake)).map((s, idx) => {
             const v = ads[idx % Math.max(ads.length, 1)];
@@ -604,8 +639,15 @@ export function ResultView({
                       ))}
                     </div>
                   </div>
-                  <Button type="button" size="sm" className="w-full" onClick={() => makeAd(s.id)}>
-                    {tr("design.make")}
+                  <Button
+                    type="button"
+                    size="sm"
+                    className="relative z-10 w-full"
+                    disabled={Boolean(making)}
+                    data-testid={`design-make-${s.id}`}
+                    onClick={() => void makeAd(s.id)}
+                  >
+                    {making === s.id ? tr("design.making") : tr("design.make")}
                   </Button>
                 </div>
               </article>
@@ -613,7 +655,7 @@ export function ResultView({
           })}
         </div>
         {pack.producedAds.length > 0 && (
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
+          <div id="produced-ads" className="mt-6 grid gap-4 md:grid-cols-2" data-testid="produced-ads">
             {pack.producedAds.map((ad) => {
               const style = DESIGN_STYLES.find((s) => s.id === ad.styleId);
               return (

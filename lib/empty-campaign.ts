@@ -1,4 +1,4 @@
-import { saveDraft, type DraftState } from "./storage";
+import { isolateStudioToIntake, saveDraft, type DraftState } from "./storage";
 import { emptyIntake } from "./engine/validate";
 import { intakeIsClinicDemo, intakeIsDemoBusiness, isBlockedEmptySessionName } from "./clinic-leak";
 import { demoEntry } from "./demo-catalog";
@@ -58,6 +58,11 @@ export function markEmptyCampaign() {
   writeEmptyFlag(true);
   // Persist blank draft so a remount cannot reload clinic leftovers from a stale draft blob.
   applyEmptyCampaignHydrate();
+  try {
+    isolateStudioToIntake(emptyIntake());
+  } catch {
+    /* studio wipe is best-effort */
+  }
   if (typeof window !== "undefined") {
     window.dispatchEvent(new Event(EMPTY_CAMPAIGN_EVENT));
   }
