@@ -31,6 +31,7 @@ import {
   researchQueryFromFacts,
   placeStem,
 } from "../lib/engine/search-suggest";
+import { fillEmptyFromPageProse, isJunkUiText } from "../lib/document-ingest";
 import { researchQuery, buildResearchSkeleton } from "../lib/engine/research-public";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -225,6 +226,23 @@ if (!gate.pass) fail("test10 first candidate blocked with empty history");
 
 // similarity of reword vs new family
 if (jaccard("תנור אבן כל בוקר", "תנור אבן כל בוקר היום") < 0.5) fail("test10 reword should be similar");
+
+// 11) Scan chrome must not become Business Truth
+if (!isJunkUiText("Have an account?")) fail("test11 login question not junk");
+if (!isJunkUiText("Sign in")) fail("test11 sign-in not junk");
+const hospitalPage = fillEmptyFromPageProse(
+  { businessName: "Mass Test Hospital" },
+  [
+    "Have an account?",
+    "Women's health brochure. Parent organization of several clinics.",
+    "Campus restaurant and cafeteria.",
+    "location: 5 continuous podium level floors above street level",
+  ].join("\n"),
+);
+if (/restaurant/i.test(String(hospitalPage.category || ""))) fail("test11 hospital category restaurant");
+if (/have an account/i.test(String(hospitalPage.biggestProblem || ""))) fail("test11 login became problem");
+if (/\bwomen\b|\bparents?\b/i.test(String(hospitalPage.audience || ""))) fail("test11 audience from chrome");
+if (/podium|street level/i.test(String(hospitalPage.location || ""))) fail("test11 podium became location");
 
 if (failures.length) {
   console.error("FAIL prompt5\n" + failures.join("\n"));

@@ -4,9 +4,9 @@ import { buildPastCampaignAuditFromPosts, overlayPastCampaignAudit } from "@/lib
 import { runGeminiGenerate, type GenerateBrand } from "@/lib/engine/gemini-generate";
 import { inventsForbidden } from "@/lib/engine/coach";
 import { emptyIntake } from "@/lib/engine/validate";
+import { isJunkUiText, type IngestFieldId } from "@/lib/document-ingest";
 import { filled } from "@/lib/utils";
 import { isClinicLike } from "@/lib/vertical";
-import type { IngestFieldId } from "@/lib/document-ingest";
 import type { Intake } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -76,17 +76,34 @@ function pageIntake(result: UrlIngestOk): Intake {
   return i;
 }
 
+function scanGroundHay(result: UrlIngestOk): string {
+  return `${labeledFields(result.fields)}\n${result.text || ""}`.replace(/\s+/g, " ").toLowerCase();
+}
+
+function groundedInScanText(value: string, hay: string): boolean {
+  const v = value.replace(/\s+/g, " ").trim();
+  if (v.length < 3) return false;
+  const low = v.toLowerCase();
+  if (hay.includes(low)) return true;
+  const tokens = low.split(/[,\s/]+/).filter((t) => t.length >= 4);
+  return tokens.length > 0 && tokens.every((t) => hay.includes(t));
+}
+
 function mergeScanBrand(result: UrlIngestOk, brand: GenerateBrand): UrlIngestOk {
   const intake = pageIntake(result);
   const joined = [brand.tone, brand.positioning, brand.problem, brand.advantage, brand.audience].join(" ");
   if (!joined.trim()) return result;
   if (inventsForbidden(joined, intake)) return result;
 
+  const hay = scanGroundHay(result);
   const fields: UrlIngestFields = { ...result.fields };
   for (const [brandKey, fieldId] of BRAND_TO_FIELD) {
     const incoming = brand[brandKey]?.trim();
     if (!incoming) continue;
     if (filled(fields[fieldId])) continue;
+    if (isJunkUiText(incoming)) continue;
+    if (fieldId === "biggestProblem" && /^(unknown|לא מכירים|unknown problem)$/i.test(incoming)) continue;
+    if (!groundedInScanText(incoming, hay)) continue;
     fields[fieldId] = incoming;
   }
   return { ...result, fields };

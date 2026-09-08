@@ -236,7 +236,9 @@ function firstMatch(text: string, re: RegExp): string {
 const PROMO_WORD = /מבצע(?:\s+חדש)?|חיסול|הנחה|خصم|تصفية|كوبون|קופון|\bdiscount\b|\bhot\s*sale\b|\bsale\b|مجانا[ً]?|مجاني/i;
 const CATALOG_H1 = /חדשים על המדפים|hot sale|קטלוג|catalog|new in|on the shelves/i;
 const JUNK_UI_RE =
-  /איפוס סיסמה|שחזור סיסמה|התחבר(?:ות)?|\bהרשם\b|הרשמה|skip to|\bcookie\b|forgot password|\blogin\b|\bcart\b|lost.?password|woocommerce-LostPassword/i;
+  /איפוס סיסמה|שחזור סיסמה|התחבר(?:ות)?|\bהרשם\b|הרשמה|skip to|\bcookie\b|forgot password|\blogin\b|\blog[- ]?in\b|\bcart\b|lost.?password|woocommerce-LostPassword|have an account|create (?:an )?account|already have an account|don['’]t have an account|sign[- ]?in|sign[- ]?up|my account|reset password|remember me|newsletter/i;
+const SCHEMA_CATEGORY_LABEL =
+  /(?:^|\n)\s*(?:תחום|קטגוריה|المجال|category)\s*[:：]\s*(MedicalClinic|MedicalOrganization|Physician|Hospital|Dentist|Bakery|CafeOrCoffeeShop|FoodEstablishment|FastFoodRestaurant|Restaurant|ClothingStore|GroceryStore|Store)\b/i;
 const SHIPPING_PROMO = /משלוח(?:ים)? חינם|free shipping/i;
 /** Advantage phrasing (no queues) — never the problem field. */
 const QUEUE_ADVANTAGE =
@@ -292,8 +294,8 @@ export function isJunkUiText(value: string): boolean {
   const v = value.replace(/\s+/g, " ").trim();
   if (!v) return true;
   const core = v.replace(/[?؟!.]+$/g, "").trim();
-  if (core.length <= 48 && JUNK_UI_RE.test(core)) return true;
-  if (v.length <= 48 && JUNK_UI_RE.test(v)) return true;
+  if (core.length <= 80 && JUNK_UI_RE.test(core)) return true;
+  if (v.length <= 80 && JUNK_UI_RE.test(v)) return true;
   return false;
 }
 
@@ -304,7 +306,7 @@ export function isCatalogHeading(value: string): boolean {
 }
 
 function cleanPromoLine(line: string): string {
-  return line.replace(/^\*+|\*+$/g, "").replace(/^(?:H1|title)\s*[:：]\s*/i, "").trim();
+  return line.replace(/^\*+|\*+$/g, "").replace(/^(?:H[1-6]|title)\s*[:：]\s*/i, "").trim();
 }
 
 /** Page-owned promo line: keyword + concrete extra that already appears in the text. Never invent %. */
@@ -417,13 +419,13 @@ function extractLooseHours(text: string): string {
 }
 
 const ADDRESS_HINT =
-  /(?:מחלף|רחוב\s+\S|שדרות\s+\S|כביש\s*\d|الشارع|شارع\s+|مجمع|الطابق|קומה|בצד|بجانب|street|avenue|\bfloor\b)/i;
+  /(?:מחלף|רחוב\s+\S|שדרות\s+\S|כביש\s*\d|الشارع|شارع\s+|مجمع|الطابق|קומה|בצד|بجانب|(?<!above\s)(?<!podium\s)street(?!\s+level)|avenue|\d+(?:st|nd|rd|th)?\s+floor)/i;
 
 function extractLooseAddress(text: string): string {
   const lines = text.split(/\r?\n/).map((l) => l.replace(/\s+/g, " ").trim());
   for (const line of lines) {
     if (line.length < 8 || line.length > 280) continue;
-    if (/אימייל|email|סיסמה|password|כתובת אימייל|lost.?password/i.test(line)) continue;
+    if (/אימייל|email|סיסמה|password|כתובת אימייל|lost.?password|podium|street level|have an account/i.test(line)) continue;
     if (/^H1\s*:/i.test(line)) continue;
     if (/[|]/.test(line) && !ADDRESS_HINT.test(line)) continue;
     if (ADDRESS_HINT.test(line)) {
@@ -650,10 +652,12 @@ export function fillEmptyFromPageProse(
     const ids: string[] = [];
     if (/לכל המשפחה|משפחות מקומיות|local families/i.test(hay)) ids.push("local_families");
     const he = hay.match(/להורים|\bהורים\b/)?.[0];
-    if (/every parent|7000\s*\+?\s*parents|\bparents?\b/i.test(hay) || he) ids.push("parents");
+    const childContext = /ילד|תינוק|ילדים|תינוקות|طفل|أطفال|pediatric|child(?:ren)?|infant|toddler|מרפאת ילדים|عيادة طب الأطفال/i.test(hay);
+    if (/every parent|7000\s*\+?\s*parents/i.test(hay) || he) ids.push("parents");
+    else if (/\bparents?\b/i.test(hay) && childContext && !/parent organization|parent company|חברת אם/i.test(hay)) ids.push("parents");
     if (/ילדים|תינוקות|أطفال|أهل/.test(hay) && !ids.includes("parents")) ids.push("parents");
-    if (/נשים/.test(hay) || /\bwomen\b/i.test(hay)) ids.push("women");
-    if (/גברים/.test(hay) || /\bmen\b/i.test(hay)) ids.push("men");
+    if (/לנשים|\bfor women\b|קהל.?נשים/i.test(hay) || (/\bנשים\b/.test(hay) && /קהל|audience|יעד/i.test(hay))) ids.push("women");
+    if (/לגברים|\bfor men\b|קהל.?גברים/i.test(hay) || (/\bגברים\b/.test(hay) && /קהל|audience|יעד/i.test(hay))) ids.push("men");
     if (ids.length) out.audience = ids.join(",");
     else if (he && !/\bparents?\b/i.test(hay)) out.audience = "הורים";
   }
@@ -668,11 +672,8 @@ export function fillEmptyFromPageProse(
         hay.match(/רופא ילדים/) ||
         hay.match(/طبيب أطفال/) ||
         hay.match(/\bpediatrics?\b/i) ||
-        hay.match(/\bMedicalClinic\b/i) ||
-        hay.match(/\bPhysician\b/i) ||
-        hay.match(/\bRestaurant\b/i) ||
-        hay.match(/\bStore\b/);
-      if (catHit) out.category = catHit[0];
+        hay.match(SCHEMA_CATEGORY_LABEL);
+      if (catHit) out.category = (catHit[1] || catHit[0]).trim();
     }
   }
 
@@ -905,8 +906,10 @@ export function extractFieldsFromText(text: string, filename: string): Partial<R
   if (name) out.businessName = name;
 
   const locHits = labeledValues(text, ["כתובת", "מיקום", "العنوان", "عنوان", "الموقع", "address", "location"]);
-  const locStrong = locHits.filter((h) => ADDRESS_HINT.test(h)).sort((a, b) => b.length - a.length);
-  const loc = locStrong[0] || locHits[0] || "";
+  const locJunk = /podium|street level|have an account|sign[- ]?in/i;
+  const locStrong = locHits.filter((h) => ADDRESS_HINT.test(h) && !locJunk.test(h)).sort((a, b) => b.length - a.length);
+  const locNamed = locHits.find((h) => !locJunk.test(h) && h.length >= 3 && h.length <= 160);
+  const loc = locStrong[0] || locNamed || "";
   if (loc) out.location = loc;
   else {
     const looseA = extractLooseAddress(text);

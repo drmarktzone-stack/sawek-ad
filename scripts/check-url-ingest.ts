@@ -501,6 +501,28 @@ if (!clinic.ok) {
   }
 }
 
+const hospitalCafeHtml = readFileSync(join(__dirname, "fixtures/url-ingest-hospital-cafeteria.html"), "utf8");
+const hospitalCafe = parseFetchedHtml(hospitalCafeHtml, "https://hospital-cafe.example/", "https://hospital-cafe.example/");
+if (!hospitalCafe.ok) {
+  fail(`hospital-cafeteria parse failed: ${hospitalCafe.error}`);
+} else {
+  const f = hospitalCafe.fields;
+  const cat = String(f.category || "");
+  if (/restaurant/i.test(cat)) fail(`hospital category leaked restaurant (${JSON.stringify(cat)})`);
+  if (!/hospital|medical/i.test(cat)) fail(`hospital category should be Hospital (got ${JSON.stringify(cat)})`);
+  const problem = String(f.biggestProblem || "");
+  if (/have an account|sign in|login/i.test(problem)) {
+    fail(`hospital problem is login chrome ${JSON.stringify(problem)}`);
+  }
+  const aud = String(f.audience || "");
+  if (/\bwomen\b|\bparents?\b/i.test(aud)) {
+    fail(`hospital audience invented from page chrome ${JSON.stringify(aud)}`);
+  }
+  if (/podium|street level/i.test(String(f.location || ""))) {
+    fail(`hospital location is architecture chrome ${JSON.stringify(f.location)}`);
+  }
+}
+
 const saleHtml = readFileSync(join(__dirname, "fixtures/url-ingest-store-sale.html"), "utf8");
 const saleUrl = "https://store-sale.example/";
 const sale = parseFetchedHtml(saleHtml, saleUrl, saleUrl);
