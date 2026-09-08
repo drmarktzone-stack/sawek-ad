@@ -23,16 +23,20 @@ const AGENT_LABEL: Record<AgentId, Record<Locale, string>> = {
 };
 
 const DEPT_RAIL = [
+  { href: "/dashboard", key: "nav.command" as const },
+  { href: "/task/ad", key: "nav.create" as const },
+  { href: "/campaigns", key: "nav.campaigns" as const },
+  { href: "/studio", key: "nav.studio" as const },
+  { href: "/growth/market", key: "nav.intel" as const },
+  { href: "/growth/dna", key: "nav.dna" as const },
+  { href: "/growth/experiments", key: "nav.experiments" as const },
+  { href: "/leads", key: "nav.leads" as const },
   { href: "/", key: "nav.build" as const },
   { href: "/discovery", key: "nav.discovery" as const },
   { href: "/strategy", key: "nav.strategy" as const },
-  { href: "/studio", key: "nav.studio" as const },
   { href: "/viral", key: "nav.viral" as const },
   { href: "/media", key: "nav.media" as const },
-  { href: "/leads", key: "nav.leads" as const },
   { href: "/medical/optibrain", key: "nav.medical" as const },
-  { href: "/campaigns", key: "nav.campaigns" as const },
-  { href: "/dashboard", key: "nav.dashboard" as const },
   { href: "/growth", key: "nav.growth" as const },
   { href: "/lab", key: "nav.lab" as const },
   { href: "/self", key: "nav.self" as const },
@@ -42,7 +46,7 @@ export function DepartmentRail() {
   const { t } = useI18n();
   const pathname = usePathname();
   return (
-    <nav className="mb-6 flex gap-1 overflow-x-auto pb-1">
+    <nav className="os-tabs mb-6" aria-label={t("os.kicker")}>
       {DEPT_RAIL.map((item) => {
         const active =
           item.href === "/"
@@ -52,12 +56,7 @@ export function DepartmentRail() {
           <LangLink
             key={item.href}
             href={item.href}
-            className={cn(
-              "shrink-0 rounded-[10px] px-3 py-1.5 text-xs font-semibold",
-              active
-                ? "bg-ink text-[#F7F3EA]"
-                : "border border-[rgba(8,17,31,0.12)] text-muted hover:border-teal",
-            )}
+            className={cn("os-tab", active && "is-active")}
           >
             {t(item.key)}
           </LangLink>
@@ -147,15 +146,15 @@ export function DepartmentShell({
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8">
+    <div className="os-page max-w-6xl">
       <ConquerHeadline subtitle={t(titleKey)} />
-      <p className="mx-auto mb-6 max-w-2xl text-center text-sm text-muted">{t(leadKey)}</p>
+      <p className="mx-auto mb-4 max-w-2xl text-center text-sm text-muted">{t(leadKey)}</p>
       <DepartmentRail />
 
-      {!booted && <p className="text-center text-muted">…</p>}
+      {!booted && <p className="os-state">{t("os.loading")}</p>}
 
       {booted && !pack && (
-        <div className="rounded-2xl border border-navy/10 bg-white p-8 text-center">
+        <div className="agency-empty px-5 py-8 text-center">
           <p className="text-muted">{t("dept.empty")}</p>
           <div className="mt-5 flex flex-col items-center gap-3">
             <DemoPicker onSelect={(id) => loadDemo(id)} size="default" />
@@ -168,9 +167,10 @@ export function DepartmentShell({
 
       {pack && (
         <>
-          <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-navy/10 bg-white px-4 py-3">
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-[var(--line)] pb-4">
             <div>
-              <p className="text-sm font-black text-navy">{pack.name}</p>
+              <p className="os-kicker">{t("os.studio.campaign")}</p>
+              <p className="text-lg font-black text-navy">{pack.name}</p>
               <p className="text-sm text-muted">
                 {t("result.score")}: {pack.intakeReport.completeness}/100 · {pack.intake.offer}
               </p>
@@ -198,8 +198,8 @@ export function Card({
   children: ReactNode;
 }) {
   return (
-    <section className="rounded-2xl border border-navy/10 bg-white p-5">
-      <h2 className="mb-3 text-sm font-black uppercase tracking-wide text-teal">{title}</h2>
+    <section className="os-section">
+      <h2 className="os-kicker mb-3">{title}</h2>
       {children}
     </section>
   );

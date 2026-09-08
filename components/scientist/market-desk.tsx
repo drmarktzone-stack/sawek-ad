@@ -26,8 +26,8 @@ function Claim({ label }: { label: ClaimLabel }) {
 
 function Panel({ title, children, dark = false }: { title: string; children: React.ReactNode; dark?: boolean }) {
   return (
-    <section className={cn("rounded-2xl border p-5", dark ? "border-white/10 bg-ink text-[#F7F3EA]" : "border-navy/10 bg-white")}>
-      <h2 className={cn("mb-3 text-sm font-black uppercase tracking-wide", dark ? "text-[#F5C518]" : "text-teal")}>{title}</h2>
+    <section className={cn("os-section", dark && "agency-ink px-4 py-5")}>
+      <h2 className={cn("os-kicker mb-3", dark && "text-[#9FD4C8]")}>{title}</h2>
       {children}
     </section>
   );
@@ -131,7 +131,7 @@ export function MarketBoard({
           {!ads.length && <p className="text-sm text-muted">{t("sci.mkt.noAds")}</p>}
           <ul className="space-y-2">
             {ads.map((a) => (
-              <li key={a.id} className="rounded-xl border border-navy/10 p-3">
+              <li key={a.id} className="border-b border-[var(--line)] py-3 last:border-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <p className="font-bold text-navy">{a.advertiser || t("sci.mkt.unnamed")}</p>
                   <Claim label={a.claim} />
@@ -152,7 +152,7 @@ export function MarketBoard({
           {!m?.patterns.length && <p className="text-sm text-muted">{t("sci.mkt.noPatterns")}</p>}
           <ul className="space-y-2">
             {(m?.patterns ?? []).slice(0, 6).map((p) => (
-              <li key={p.id} className="rounded-xl border border-navy/10 p-3">
+              <li key={p.id} className="border-b border-[var(--line)] py-3 last:border-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <p className="font-bold text-navy">{p.name}</p>
                   <Claim label={p.claim} />
@@ -176,7 +176,7 @@ export function MarketBoard({
         <Panel title={t("sci.mkt.relevant")}>
           <ul className="space-y-2 text-sm">
             {(m?.insights ?? []).slice(0, 6).map((i) => (
-              <li key={i.id} className="rounded-xl border border-navy/10 p-3">
+              <li key={i.id} className="border-b border-[var(--line)] py-3 last:border-0">
                 <div className="flex flex-wrap gap-2">
                   <Claim label={i.claim} />
                   <span className="text-xs text-muted">
@@ -230,7 +230,7 @@ export function PatternsBoard({ ws }: { ws: GrowthWorkspace }) {
       {!patterns.length && <p className="text-sm text-muted">{t("sci.mkt.noPatterns")}</p>}
       <ul className="space-y-3">
         {patterns.map((p) => (
-          <li key={p.id} className="rounded-xl border border-navy/10 p-3">
+          <li key={p.id} className="border-b border-[var(--line)] py-3 last:border-0">
             <div className="flex flex-wrap items-center gap-2">
               <p className="font-bold text-navy">{p.name}</p>
               <Claim label={p.claim} />
@@ -256,7 +256,7 @@ export function MarketDnaStrip({ ws }: { ws: GrowthWorkspace }) {
     <Panel title={t("sci.mkt.dna")}>
       <ul className="grid gap-2 md:grid-cols-2">
         {traits.slice(0, 8).map((tr) => (
-          <li key={tr.id} className="rounded-xl border border-navy/10 p-3 text-sm">
+          <li key={tr.id} className="border-b border-[var(--line)] py-3 text-sm last:border-0">
             <div className="flex flex-wrap items-center gap-2">
               <span className="font-bold text-navy">{tr.topic}</span>
               <Claim label={tr.label} />

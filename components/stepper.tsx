@@ -62,16 +62,14 @@ export function Stepper({
 export function ConquerHeadline({ subtitle }: { subtitle?: string }) {
   const { t } = useI18n();
   return (
-    <div className="mb-10 text-center">
-      <h1 className="agency-display text-4xl sm:text-5xl">
+    <div className="mb-8 text-center">
+      <p className="os-kicker mb-2">{t("os.kicker")}</p>
+      <h1 className="os-title text-3xl sm:text-4xl">
         {t("hero.titlePrefix")}{" "}
-        <span className="relative inline-block rounded-[10px] bg-teal px-2.5 py-0.5 text-white">
-          {t("hero.conquer")}
-          <span className="absolute inset-x-1.5 -bottom-1 h-1 rounded-full bg-ink/80" />
-        </span>{" "}
+        <span className="text-teal">{t("hero.conquer")}</span>{" "}
         {t("hero.titleSuffix")}
       </h1>
-      {subtitle && <p className="mt-4 text-base font-medium text-muted">{subtitle}</p>}
+      {subtitle && <p className="mt-3 text-base font-medium text-muted">{subtitle}</p>}
     </div>
   );
 }

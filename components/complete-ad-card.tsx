@@ -5,6 +5,7 @@ import type { CompleteAdPackage, Locale } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/components/i18n-provider";
 import { cn } from "@/lib/utils";
+import { OverlayStatus } from "@/components/command/primitives";
 
 export function CompleteAdCard({
   completeAd,
@@ -35,7 +36,7 @@ export function CompleteAdCard({
 
   return (
     <section
-      className={cn("agency-ink mb-8 p-5 sm:p-7", compact && "mb-4")}
+      className={cn("mb-8 border-t border-[var(--line)] pt-5", compact && "mb-4")}
       data-testid="complete-ad"
       data-complete-family={completeAd.family}
       data-fact-status={completeAd.factStatus}
@@ -43,91 +44,107 @@ export function CompleteAdCard({
       data-validation={completeAd.validation.passed ? "pass" : "fail"}
       dir={dir}
     >
-      <p className="text-[12px] font-black uppercase tracking-[0.22em] text-[#F5C518]">{t("complete.kicker")}</p>
-      <p className="mt-2 text-xs font-bold uppercase tracking-[0.16em] text-[#9FD4C8]">{loc.concept}</p>
-      <h2 className="agency-display-cream mt-2 text-2xl sm:text-4xl">{loc.headline}</h2>
-      <p className="mt-3 text-lg font-semibold text-[#F7F3EA]">{loc.hook}</p>
-      <p className="mt-3 whitespace-pre-wrap text-base leading-relaxed text-[#E8E2D4]">{loc.copy}</p>
+      <p className="os-kicker">{t("complete.kicker")}</p>
+      <p className="mt-2 os-meta">{t("os.studio.concept")} · {loc.concept}</p>
+      <h2 className="os-title mt-2 text-3xl sm:text-5xl">{loc.headline}</h2>
+
+      <div className="mt-6 space-y-4">
+        <div>
+          <p className="os-meta">{t("os.hook")}</p>
+          <p className="mt-1 text-xl font-semibold text-navy">{loc.hook}</p>
+        </div>
+        <div>
+          <p className="os-meta">{t("os.primaryCopy")}</p>
+          <p className="mt-1 whitespace-pre-wrap text-base leading-relaxed text-navy">{loc.copy}</p>
+        </div>
+        <div>
+          <p className="os-meta">{t("os.studio.export")}</p>
+          <span className="mt-2 inline-block bg-coral px-4 py-2 text-sm font-black text-white">{loc.cta}</span>
+        </div>
+      </div>
+
       {loc.offer ? (
-        <p className="mt-3 text-sm text-[#F5C518]">
+        <p className="mt-4 text-sm text-navy">
           <span className="font-black">{t("complete.offer")}: </span>
           {loc.offer}
         </p>
       ) : (
-        <p className="mt-3 text-sm text-[#C9D0D8]">{t("complete.offerUnknown")}</p>
+        <p className="mt-4 text-sm text-muted">{t("complete.offerUnknown")}</p>
       )}
       {loc.proof ? (
-        <p className="mt-1 text-sm text-[#9FD4C8]">
+        <p className="mt-1 text-sm text-navy">
           <span className="font-black">{t("complete.proof")}: </span>
           {loc.proof}
         </p>
       ) : (
-        <p className="mt-1 text-sm text-[#C9D0D8]">{t("complete.proofUnknown")}</p>
+        <p className="mt-1 text-sm text-muted">{t("complete.proofUnknown")}</p>
       )}
-      <span className="mt-5 inline-block rounded-[10px] bg-coral px-3 py-1.5 text-xs font-black text-white">{loc.cta}</span>
-      <div className="mt-4 flex flex-wrap gap-2 text-xs text-[#C9D0D8]">
-        <span className="rounded-full border border-white/15 px-2 py-1">{t("complete.why")}: {loc.why}</span>
-        <span className="rounded-full border border-white/15 px-2 py-1">{t("complete.audience")}: {loc.audience}</span>
-        <span className="rounded-full border border-white/15 px-2 py-1">{t("complete.angle")}: {loc.angle}</span>
-        <span className="rounded-full border border-white/15 px-2 py-1">{loc.platform} · {loc.format}</span>
-      </div>
-      <p className="mt-3 text-sm text-[#C9D0D8]">{t("complete.visual")}: {loc.visual}</p>
+
       <div className="mt-4 flex flex-wrap items-center gap-2">
-        <span className="rounded-[8px] bg-[#F5C518] px-2 py-1 text-[11px] font-black text-black">
+        <span className="os-badge os-badge-warn">
           {t("complete.fact")}: {completeAd.factStatus}
         </span>
-        <span className="rounded-[8px] bg-white/10 px-2 py-1 text-[11px] font-black text-[#F7F3EA]">{novelty}</span>
+        <span className="os-badge os-badge-ink">{novelty}</span>
         {completeAd.validation.passed ? (
-          <span className="rounded-[8px] bg-[#1F6F5B] px-2 py-1 text-[11px] font-black text-white">{t("complete.validated")}</span>
+          <span className="os-badge os-badge-ok">{t("complete.validated")}</span>
         ) : (
-          <span className="rounded-[8px] bg-[#7A1F1F] px-2 py-1 text-[11px] font-black text-white">{t("complete.repaired")}</span>
+          <span className="os-badge os-badge-danger">{t("complete.repaired")}</span>
         )}
         {onCopy ? (
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            className="border-white/20 bg-white/8 text-[#F7F3EA] hover:bg-white hover:text-ink"
-            onClick={() => onCopy(text)}
-          >
+          <Button type="button" size="sm" variant="outline" onClick={() => onCopy(text)}>
             {copied ? t("cta.copied") : t("cta.copy")}
           </Button>
         ) : null}
       </div>
+      <OverlayStatus composition={completeAd.imageComposition} />
+      <p className="mt-3 text-sm text-muted">{t("complete.visual")}: {loc.visual}</p>
+
       {!compact ? (
         <div className="mt-4">
           <button
             type="button"
-            className="text-xs font-bold uppercase tracking-[0.14em] text-[#9FD4C8]"
+            className="os-kicker"
             onClick={() => setOpen((v) => !v)}
           >
-            {open ? t("complete.hideMeta") : t("complete.showMeta")}
+            {open ? t("complete.hideMeta") : t("os.whyOpen")}
           </button>
           {open ? (
-            <dl className="mt-3 grid gap-2 text-sm text-[#C9D0D8] sm:grid-cols-2">
-              <div>
-                <dt className="font-black text-[#9FD4C8]">{t("complete.family")}</dt>
+            <dl className="mt-3 divide-y divide-[var(--line)] text-sm">
+              <div className="os-row">
+                <dt className="os-meta">{t("complete.why")}</dt>
+                <dd>{loc.why}</dd>
+              </div>
+              <div className="os-row">
+                <dt className="os-meta">{t("complete.audience")}</dt>
+                <dd>{loc.audience}</dd>
+              </div>
+              <div className="os-row">
+                <dt className="os-meta">{t("complete.angle")}</dt>
+                <dd>{loc.angle}</dd>
+              </div>
+              <div className="os-row">
+                <dt className="os-meta">{t("complete.family")}</dt>
                 <dd>{completeAd.family}</dd>
               </div>
-              <div>
-                <dt className="font-black text-[#9FD4C8]">{t("complete.language")}</dt>
-                <dd>{locale.toUpperCase()}</dd>
+              <div className="os-row">
+                <dt className="os-meta">{loc.platform}</dt>
+                <dd>{loc.format} · {locale.toUpperCase()}</dd>
               </div>
               {loc.imagePrompt ? (
-                <div className="sm:col-span-2">
-                  <dt className="font-black text-[#9FD4C8]">{t("complete.imagePrompt")}</dt>
+                <div className="os-row">
+                  <dt className="os-meta">{t("complete.imagePrompt")}</dt>
                   <dd>{loc.imagePrompt}</dd>
                 </div>
               ) : null}
               {completeAd.marketUsed ? (
-                <div className="sm:col-span-2">
-                  <dt className="font-black text-[#9FD4C8]">{t("complete.market")}</dt>
+                <div className="os-row">
+                  <dt className="os-meta">{t("complete.market")}</dt>
                   <dd>{completeAd.marketEvidence || t("complete.marketStrategy")}</dd>
                 </div>
               ) : null}
               {completeAd.metadata?.scores ? (
-                <div className="sm:col-span-2">
-                  <dt className="font-black text-[#9FD4C8]">{t("complete.scores")}</dt>
+                <div className="os-row">
+                  <dt className="os-meta">{t("complete.scores")}</dt>
                   <dd>total {completeAd.metadata.scores.total} · novelty {completeAd.metadata.scores.novelty} · safety {completeAd.metadata.scores.factualSafety}</dd>
                 </div>
               ) : null}

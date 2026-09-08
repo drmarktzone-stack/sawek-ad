@@ -28,6 +28,7 @@ import { defaultScanControls, type MarketScanControls } from "@/lib/scientist/ma
 import { requestMarketScan } from "@/lib/scientist/market-client";
 import { MarketBoard, MarketDnaStrip, MarketScanBar, PatternsBoard } from "@/components/scientist/market-desk";
 import { cn } from "@/lib/utils";
+import { ExperimentBadge } from "@/components/command/primitives";
 
 export type GrowthSection =
   | "home"
@@ -68,12 +69,12 @@ function Unc({ level }: { level: Uncertainty | KnowledgeKind }) {
   const { t } = useI18n();
   const tone =
     level === "high" || level === "know"
-      ? "bg-[#F5C518] text-black"
+      ? "os-badge-warn"
       : level === "medium" || level === "think"
-        ? "bg-white/10 text-[#F7F3EA]"
-        : "border border-white/20 text-[#C9D0D8]";
+        ? "os-badge-ink"
+        : "os-badge-line";
   return (
-    <span className={cn("inline-flex rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wide", tone)}>
+    <span className={cn("os-badge", tone)}>
       {t(badge(level))}
     </span>
   );
@@ -206,19 +207,16 @@ export function GrowthDesk({ section = "home" }: { section?: GrowthSection }) {
   if (!booted) return <p className="p-10 text-center text-muted">…</p>;
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8" dir={dir}>
+    <div className="os-page max-w-6xl" dir={dir}>
       <ConquerHeadline subtitle={t("sci.title")} />
-      <p className="mx-auto mb-6 max-w-2xl text-center text-sm text-muted">{t("sci.lead")}</p>
+      <p className="mx-auto mb-4 max-w-2xl text-center text-sm text-muted">{t("sci.lead")}</p>
       <DepartmentRail />
-      <nav className="mb-6 flex gap-1 overflow-x-auto pb-1" aria-label={t("sci.title")}>
+      <nav className="os-tabs mb-6" aria-label={t("sci.title")}>
         {SECTIONS.map((s) => (
           <LangLink
             key={s.id}
             href={href(s.id)}
-            className={cn(
-              "shrink-0 rounded-[10px] px-3 py-1.5 text-xs font-semibold",
-              section === s.id ? "bg-ink text-[#F7F3EA]" : "border border-[rgba(8,17,31,0.12)] text-muted hover:border-teal",
-            )}
+            className={cn("os-tab", section === s.id && "is-active")}
           >
             {t(s.key)}
           </LangLink>
@@ -226,7 +224,7 @@ export function GrowthDesk({ section = "home" }: { section?: GrowthSection }) {
       </nav>
 
       {!ws && (
-        <div className="rounded-2xl border border-navy/10 bg-white p-8 text-center">
+        <div className="agency-empty px-5 py-8 text-center">
           <p className="text-muted">{t("sci.empty")}</p>
           <Button asChild className="mt-4">
             <LangLink href="/">{t("nav.build")}</LangLink>
@@ -286,8 +284,8 @@ export function GrowthDesk({ section = "home" }: { section?: GrowthSection }) {
 
 function Panel({ title, children, dark = false }: { title: string; children: React.ReactNode; dark?: boolean }) {
   return (
-    <section className={cn("rounded-2xl border p-5", dark ? "border-white/10 bg-ink text-[#F7F3EA]" : "border-navy/10 bg-white")}>
-      <h2 className={cn("mb-3 text-sm font-black uppercase tracking-wide", dark ? "text-[#F5C518]" : "text-teal")}>{title}</h2>
+    <section className={cn("os-section", dark && "agency-ink px-4 py-5")}>
+      <h2 className={cn("os-kicker mb-3", dark && "text-[#9FD4C8]")}>{title}</h2>
       {children}
     </section>
   );
@@ -387,28 +385,56 @@ function KnowledgeBoard({ ws }: { ws: GrowthWorkspace }) {
 
 function DnaBoard({ ws }: { ws: GrowthWorkspace }) {
   const { t } = useI18n();
+  const facts = ws.dna.traits.filter((tr) => tr.kind === "know");
+  const insights = ws.dna.traits.filter((tr) => tr.kind !== "know");
+  const learned = ws.learnings.slice(0, 6);
   return (
-    <Panel title={t("sci.dna.title")}>
-      <p className="mb-3 text-sm text-muted">{t("sci.dna.lead")}</p>
-      {!ws.dna.traits.length && <p className="text-sm text-muted">{t("sci.unknown.dna")}</p>}
-      <ul className="space-y-3">
-        {ws.dna.traits.map((tr) => (
-          <li key={tr.id} className="rounded-xl border border-navy/10 p-3">
-            <div className="flex flex-wrap items-center gap-2">
-              <p className="font-bold text-navy">{tr.topic}</p>
-              <Unc level={tr.confidence} />
-              <Unc level={tr.kind} />
-            </div>
-            <p className="mt-1 text-sm">{tr.claim}</p>
-            {tr.evidence[0] && (
-              <p className="mt-1 text-xs text-muted">
-                {t("sci.evidence")}: {tr.evidence[0].ref} · {tr.evidence[0].layer}
-              </p>
-            )}
-          </li>
-        ))}
-      </ul>
-    </Panel>
+    <div className="space-y-2">
+      <Panel title={`${t("sci.dna.title")} · ${t("os.facts")}`}>
+        <p className="mb-3 text-sm text-muted">{t("sci.dna.lead")}</p>
+        {!facts.length && <p className="os-unknown">{t("sci.unknown.dna")}</p>}
+        <ul className="divide-y divide-[var(--line)]">
+          {facts.map((tr) => (
+            <li key={tr.id} className="py-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="font-bold text-navy">{tr.topic}</p>
+                <Unc level={tr.confidence} />
+                <Unc level={tr.kind} />
+              </div>
+              <p className="mt-1 text-sm">{tr.claim}</p>
+              {tr.evidence[0] && (
+                <p className="mt-1 text-xs text-muted">
+                  {t("sci.evidence")}: {tr.evidence[0].ref} · {tr.evidence[0].layer}
+                </p>
+              )}
+            </li>
+          ))}
+        </ul>
+      </Panel>
+      <Panel title={t("os.insights")}>
+        {!insights.length && <p className="os-unknown">UNKNOWN</p>}
+        <ul className="divide-y divide-[var(--line)]">
+          {insights.map((tr) => (
+            <li key={tr.id} className="py-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="font-bold text-navy">{tr.topic}</p>
+                <Unc level={tr.confidence} />
+                <Unc level={tr.kind} />
+              </div>
+              <p className="mt-1 text-sm">{tr.claim}</p>
+            </li>
+          ))}
+        </ul>
+      </Panel>
+      <Panel title={t("os.history")}>
+        {!learned.length && <p className="os-unknown">{t("sci.unknown.learn")}</p>}
+        <ul className="divide-y divide-[var(--line)]">
+          {learned.map((l) => (
+            <li key={l.id} className="py-3 text-sm">{l.summary}</li>
+          ))}
+        </ul>
+      </Panel>
+    </div>
   );
 }
 
@@ -563,9 +589,14 @@ function ExperimentBoard({
         {!ws.experiments.length && <p className="text-sm text-muted">{t("sci.unknown.exp")}</p>}
         <ul className="space-y-3">
           {ws.experiments.map((e) => (
-            <li key={e.id} className="rounded-xl border border-navy/10 p-3">
-              <p className="font-bold text-navy">
-                {e.name} · {e.status} · {e.outcome}
+            <li key={e.id} className="border-b border-[var(--line)] py-3 last:border-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="font-bold text-navy">{e.name}</p>
+                <ExperimentBadge status={e.status} learned={e.status === "completed" && Boolean(e.notes || e.outcome !== "unknown")} />
+                <span className="text-xs text-muted">{e.outcome}</span>
+              </div>
+              <p className="mt-1 text-xs font-bold uppercase tracking-wide text-muted">
+                {t("sci.hyp.title")} → {t("os.studio.preview")} → {e.outcome} → {t("os.learnings")} → {t("os.nba")}
               </p>
               <p className="text-sm text-muted">
                 {e.metrics.map((m) => `${m.name}: ${m.baseline ?? "—"} → ${m.actual ?? "UNKNOWN"}`).join(" · ")}
@@ -687,11 +718,11 @@ export function DecisionStrip({ ws }: { ws: GrowthWorkspace | null }) {
   const { t } = useI18n();
   if (!ws) return null;
   return (
-    <aside className="mb-6 rounded-2xl border border-navy/10 bg-ink p-4 text-[#F7F3EA]">
-      <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#F5C518]">{t("sci.strip.kicker")}</p>
-      <p className="mt-2 text-sm font-black">{ws.nba.action || t("sci.unknown.nba")}</p>
-      <p className="mt-1 text-xs text-[#C9D0D8]">{ws.nba.reason}</p>
-      <LangLink href="/growth" className="mt-3 inline-block text-xs font-bold text-[#F5C518]">
+    <aside className="mb-6 border-s-2 border-teal ps-4">
+      <p className="os-kicker">{t("sci.strip.kicker")}</p>
+      <p className="mt-2 text-sm font-black text-navy">{ws.nba.action || t("sci.unknown.nba")}</p>
+      <p className="mt-1 text-xs text-muted">{ws.nba.reason}</p>
+      <LangLink href="/growth" className="mt-3 inline-block text-xs font-bold text-teal">
         {t("sci.strip.open")}
       </LangLink>
     </aside>
