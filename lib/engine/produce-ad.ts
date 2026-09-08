@@ -10,6 +10,7 @@ import { detectVertical, visualNoPhotoNote } from "../vertical";
 import { copyLeaksClinic, scrubClinicCopy } from "../clinic-leak";
 import { applyVoiceLockToText, voiceIsLocked, voiceFromIntake } from "./voice";
 import { offerLineForCopy } from "./offer-builder";
+import { customerCopyHasLeak, gateCustomerAd } from "../copy-purity";
 
 function pastRefNote(intake: Intake, locale: Locale): string {
   const n = (intake.pastCreatives ?? []).length;
@@ -45,7 +46,8 @@ export function produceAd(intake: Intake, styleId: string, idea: string, locale:
   const clinic = vertical === "clinic";
   const style = styleById(styleId) || stylesForVertical(vertical)[0] || DESIGN_STYLES[0];
   const requested = idea.trim();
-  const usableIdea = requested && (clinic || !copyLeaksClinic(requested)) ? requested : "";
+  const usableIdea =
+    requested && (clinic || !copyLeaksClinic(requested)) && !customerCopyHasLeak(requested) ? requested : "";
   const locked = voiceFromIntake(intake);
   const lockedLine = voiceIsLocked(locked)
     ? applyVoiceLockToText(scrubClinicCopy(locked.coreMessage, intake), intake)
@@ -97,12 +99,21 @@ export function produceAd(intake: Intake, styleId: string, idea: string, locale:
     intake,
   );
 
+  const gated = gateCustomerAd(
+    {
+      headline: applyVoiceLockToText(scrubClinicCopy(headline, intake) || intake.businessName.trim() || headline, intake),
+      body,
+      cta: spokenCta(intake, locale),
+    },
+    intake,
+    locale,
+  );
   return {
     id: uid("ad"),
     styleId: style.id,
-    idea: usableIdea,
-    headline: applyVoiceLockToText(scrubClinicCopy(headline, intake) || intake.businessName.trim() || headline, intake),
-    body,
+    idea: usableIdea && !customerCopyHasLeak(usableIdea) ? usableIdea : gated.headline,
+    headline: gated.headline,
+    body: gated.body,
     visualNotes: {
       he: `סגנון «${style.name.he}»: ${style.description.he}. ${visualNoPhotoNote(intake, "he", (intake.mediaAssets ?? []).length > 0)} בלי דירוגים או פנים שאין לכם רשות עליהם.` + pastRefNote(intake, "he"),
       ar: `أسلوب «${style.name.ar}»: ${style.description.ar}. ${visualNoPhotoNote(intake, "ar", (intake.mediaAssets ?? []).length > 0)} بلا تقييمات أو وجوه بلا إذن.` + pastRefNote(intake, "ar"),

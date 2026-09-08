@@ -1,3 +1,4 @@
+import { customerCopyHasLeak } from "../copy-purity";
 import type {
   AdVariant,
   AngleCopy,
@@ -147,6 +148,7 @@ export function overlayAnglesOnVariants(
       if (!pack) return v;
       const incomplete = [pack.headline, pack.copy, pack.cta].some((s) => INCOMPLETE.he === s || INCOMPLETE.ar === s || INCOMPLETE.en === s);
       if (incomplete && (v.headline || v.primaryText)) return v;
+      if (customerCopyHasLeak(`${pack.headline}\n${pack.copy}\n${pack.cta}`)) return v;
       return {
         ...v,
         headline: pack.headline || v.headline,

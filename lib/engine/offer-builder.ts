@@ -151,7 +151,7 @@ function hooksFor(input: OfferBuilderInput, locale: Locale): string[] {
     return [
       dream ? `وإذا صارت ${dream}؟` : "النتيجة اللي بدكم ياها — بجملة.",
       proof ? `${proof} — مش كلام فاضي.` : "إثبات من المدخلات فقط.",
-      time ? `${dream || "النتيجة"} خلال ${time}.` : objection || effort || "العرض بلا خصم مختلق.",
+      time ? `${dream || "النتيجة"} خلال ${time}.` : objection || effort || "العرض مثل ما كتبتوه.",
     ];
   }
   if (locale === "en") {

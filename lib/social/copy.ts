@@ -1,5 +1,6 @@
 import type { CampaignPack, Locale } from "@/lib/types";
 import { agencyPiece, spokenVariant } from "@/lib/channel-copy";
+import { gateCustomerAd, purifyCustomerText, copyFactsFromIntake } from "@/lib/copy-purity";
 
 function joinParts(...parts: Array<string | undefined | null>): string {
   return parts
@@ -23,17 +24,22 @@ export function publishMessage(pack: CampaignPack, locale: Locale): string {
   const v = spokenVariant(pack, locale) ?? pack.variants.find((x) => x.locale === locale) ?? pack.variants[0];
   const cta = (v?.cta ?? "").trim();
 
+  const facts = copyFactsFromIntake(pack.intake);
   if (piece) {
-    const body = joinParts(piece.title, piece.body);
-    if (body) return cta && !body.includes(cta) ? joinParts(body, cta) : body;
+    const body = purifyCustomerText(joinParts(piece.title, piece.body), locale, facts);
+    if (body) {
+      const gated = gateCustomerAd({ headline: piece.title, body, cta }, pack.intake, locale);
+      return [gated.headline, gated.body, gated.cta].filter(Boolean).join("\n\n");
+    }
   }
 
   if (v) {
-    const text = joinParts(v.headline, v.primaryText, v.cta);
+    const gated = gateCustomerAd({ headline: v.headline, body: v.primaryText, cta: v.cta }, pack.intake, locale);
+    const text = joinParts(gated.headline, gated.body, gated.cta);
     if (text) return text;
   }
 
-  return (pack.name ?? "").trim();
+  return purifyCustomerText((pack.name ?? "").trim(), locale, facts);
 }
 
 export function packPublicImageUrl(pack: CampaignPack, baseUrl?: string): string | undefined {

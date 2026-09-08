@@ -1,6 +1,6 @@
 import type { Intake, Locale } from "./types";
 import type { Vertical } from "./vertical";
-import { detectVertical, foodFamily } from "./vertical";
+import { detectVertical, foodFamily, isBakery } from "./vertical";
 import { isNoOffer } from "./no-offer";
 
 export type CreativeChannel = "facebook" | "instagram" | "whatsapp" | "landing" | "story" | "reels" | "flyer";
@@ -338,7 +338,7 @@ export function serviceFamily(intake?: Intake): ServiceFamily {
   const blob = `${intake.businessName} ${intake.category} ${intake.description}`.toLowerCase();
   if (/salon|ספר|מספרה|حلاق|صالون|barber|שיער|تجميل|יופי|nails|ציפורן/.test(blob)) return "salon";
   if (/gym|כושר|نادي|fitness|חדר כושר|yoga|יוגה|pilates|פילאטיס/.test(blob)) return "gym";
-  if (/cafe|קפה|مقهى|coffee|espresso|מאפה|مخبز|bakery/.test(blob)) return "cafe";
+  if (/cafe|קפה|مقهى|coffee|espresso/.test(blob) && !isBakery(intake)) return "cafe";
   if (/workshop|סדנ|ورشة|studio|סטודיו|נגר|עץ|ceramic|קרמי/.test(blob)) return "workshop";
   if (/lawyer|עורך דין|محام|accountant|רואה חשבון|محاسب|consult|ייעוץ|استشار/.test(blob)) return "pro";
   return null;
@@ -384,9 +384,9 @@ const SERVICE_ANGLES: Record<Exclude<ServiceFamily, null>, Record<Locale, string
     en: ["floor as fact", "hours as hero", "no body promise", "WhatsApp for hours — not a miracle"],
   },
   cafe: {
-    he: ["כוס כפתיח", "שולחן שקט", "כתובת כגיבור", "בלי «הכי טעים»"],
-    ar: ["الفنجان كافتتاح", "طاولة هادئة", "العنوان كبطل", "بلا «الألذ»"],
-    en: ["cup as open", "quiet table", "address as hero", "no “tastiest”"],
+    he: ["כוס שקטה בבוקר", "שולחן שקט", "הכתובת מהמקום", "טעם מהמקום"],
+    ar: ["فنجان هادي الصبح", "طاولة هادئة", "العنوان من المحل", "طعم من المحل"],
+    en: ["a quiet morning cup", "a quiet table", "the shop address", "taste from this shop"],
   },
   workshop: {
     he: ["יד על חומר", "סדנה ריקה מצולמת", "תהליך 3 שלבים בלי מדדים", "הזמנה לפני קטלוג"],
@@ -400,7 +400,22 @@ const SERVICE_ANGLES: Record<Exclude<ServiceFamily, null>, Record<Locale, string
   },
 };
 
+const BAKERY_HOOKS: Record<Locale, string[]> = {
+  he: ["{name} — לחם חם מהתנור.", "{advantage}", "בואו ל{place} — לקחת לחם, לא באנר."],
+  ar: ["{name} — خبز طازج هاليوم.", "{advantage}", "تعوا ع {place} — خدوا خبز، مش بنر."],
+  en: ["{name} — fresh bread from the oven.", "{advantage}", "Come to {place} — take bread, not a banner."],
+};
+
+const BAKERY_ANGLES: Record<Locale, string[]> = {
+  he: ["לחם חם בבוקר", "מהרחוב שלכם", "התנור כל בוקר", "לחם מהמקום"],
+  ar: ["خبز طازج الصبح", "من شارعكم", "الفرن كل يوم", "خبز من المحل"],
+  en: ["warm bread in the morning", "from your street", "the oven every morning", "bread from this shop"],
+};
+
 export function hooksFor(vertical: Vertical, locale: Locale, intake?: Intake): string[] {
+  if (intake && isBakery(intake)) {
+    return BAKERY_HOOKS[locale].map((t) => fill(t, intake, locale)).filter((s) => s.length > 0);
+  }
   const cafe = vertical === "restaurant" && intake && foodFamily(intake) === "cafe";
   const fam = cafe ? "cafe" : (vertical === "generic" || vertical === "product" ? serviceFamily(intake) : null);
   const raw = fam ? SERVICE_HOOKS[fam][locale] : (HOOKS[vertical]?.[locale] ?? HOOKS.generic[locale]);
@@ -409,6 +424,7 @@ export function hooksFor(vertical: Vertical, locale: Locale, intake?: Intake): s
 }
 
 export function anglesFor(vertical: Vertical, locale: Locale, intake?: Intake): string[] {
+  if (intake && isBakery(intake)) return BAKERY_ANGLES[locale];
   if (vertical === "restaurant" && intake) {
     const fam = foodFamily(intake);
     if (fam === "mediterranean") return MED_ANGLES[locale];

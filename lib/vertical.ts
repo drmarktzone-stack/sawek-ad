@@ -24,7 +24,7 @@ const POOL_AS_BUSINESS =
   /hydrotherap|הידרותרפ|علاج مائي|בריכה טיפול|בריכה|مسبح|\bpools?\b|רנאן|رنان|\brinan\b/i;
 
 const FOOD_AS_BUSINESS =
-  /restaurant|מסעדה|مطعم|מטבח|ים-?תיכון|mediterranean|mezze|מזה|hummus|חומוס|حمص|shawarma|شاورما|שוארמה|grill|גריל|غريل|burger|بورجر|برغر|המבורגר|בורגר|همبرغر|dessert|קינוח|حلوي|كباب|kebab|falafel|פלאפל|pizza|פיצה|بيتزا|steak|סטייק|kitchen|مطبخ|cafe|קפה|مقهى|أفندنا|أفندن|افندن|afanden|grill king|مأكول|גלידה|ice cream|حلويات/i;
+  /restaurant|מסעדה|مطعم|מטבח|ים-?תיכון|mediterranean|mezze|מזה|hummus|חומוס|حمص|shawarma|شاورما|שוארמה|grill|גריל|غريل|burger|بورجر|برغر|המבורגר|בורגר|همبرغر|dessert|קינוח|حلوي|كباب|kebab|falafel|פלאפל|pizza|פיצה|بيتزا|steak|סטייק|kitchen|مطبخ|cafe|קפה|مقهى|أفندنا|أفندن|افندن|afanden|grill king|مأكول|גלידה|ice cream|حلويات|bakery|מאפיי|מאפה|مخبز|معجنات/i;
 
 const RETAIL_AS_BUSINESS =
   /אופנה|בוטיק|بوتيك|חנות|חנויות|מותגים|עיר המותגים|שופינג|לייף\s*סטייל|ספורט|כושר|הנעלה|ביגוד|fashion|boutique|outlet|\bmall\b|apparel|clothing|retail|lifestyle store|\bshops?\b|brand city|shopping|\bsport\b|fitness|sneakers/i;
@@ -120,7 +120,14 @@ const PLACE: Record<Vertical, Record<Locale, string>> = {
   generic: { he: "העסק", ar: "المحل", en: "the business" },
 };
 
+export function isBakery(facts: VerticalFacts): boolean {
+  return /bakery|מאפיי|מאפה|مخبز|معجنات|לחם מחמצ|خبز/i.test(blob(facts));
+}
+
 export function placeNoun(intake: VerticalFacts, locale: Locale): string {
+  if (isBakery(intake)) {
+    return locale === "ar" ? "المخبز" : locale === "he" ? "המאפייה" : "the bakery";
+  }
   return PLACE[detectVertical(intake)][locale];
 }
 
@@ -167,6 +174,7 @@ export function foodFamily(facts: VerticalFacts & { uniqueAdvantage?: string; of
     return "mediterranean";
   }
   if (/shawarma|شاورما|שוארמה|grill|גריל|غريل|kebab|كباب|כאבאב/.test(blob)) return "grill";
+  if (isBakery(facts)) return "generic";
   if (/cafe|קפה|مقهى|dessert|קינוח|حلوي|גלידה|ice cream/.test(blob)) return "cafe";
   return "generic";
 }
@@ -184,6 +192,8 @@ export function restaurantHungerLine(intake: Intake, locale: Locale): string {
   const delivery = /משלוח|delivery|توصيل|order online/.test(blob);
   const tasting = /טעימות|tasting|تذوّق|149|זוג/.test(blob);
   if (locale === "he") {
+    if (isBakery(intake)) return name ? `${name} — לחם חם מהתנור` : "לחם חם מהתנור";
+    if (fam === "cafe") return name ? `${name} — כוס שקטה, לא סלוגן` : "כוס ושקט";
     if (fam === "mediterranean" && tasting) return name ? `${name} — טעימות לשניים, לא משלוח גנרי` : "טעימות לשניים";
     if (fam === "mediterranean") return name ? `${name} — שולחן ים-תיכון, לא «אוכל טעים»` : "שולחן ים-תיכון";
     if (pizza && delivery) return name ? `${name} — פיצה ומשלוח כשרעבים` : "פיצה ומשלוח כשרעבים";
@@ -193,6 +203,8 @@ export function restaurantHungerLine(intake: Intake, locale: Locale): string {
     return name ? `${name} — בואו לשולחן היום` : "בואו לשולחן היום";
   }
   if (locale === "ar") {
+    if (isBakery(intake)) return name ? `${name} — خبز طازج هاليوم` : "خبز طازج هاليوم";
+    if (fam === "cafe") return name ? `${name} — فنجان هادي، مش شعار` : "فنجان وهدوء";
     if (fam === "mediterranean" && tasting) return name ? `${name} — تذوّق لاثنين، مش توصيل عام` : "تذوّق لاثنين";
     if (fam === "mediterranean") return name ? `${name} — طاولة متوسطية، مش «أكل طيب»` : "طاولة متوسطية";
     if (pizza && delivery) return name ? `${name} — بيتزا وتوصيل لما تجوعوا` : "بيتزا وتوصيل لما تجوعوا";
@@ -201,6 +213,8 @@ export function restaurantHungerLine(intake: Intake, locale: Locale): string {
     if (delivery) return name ? `${name} — توصيل لما تجوعوا` : "توصيل لما تجوعوا";
     return name ? `${name} — تعوا عالطاولة اليوم` : "تعوا عالطاولة اليوم";
   }
+  if (isBakery(intake)) return name ? `${name} — fresh bread today` : "Fresh bread today";
+  if (fam === "cafe") return name ? `${name} — a quiet cup` : "A cup and a quiet table";
   if (fam === "mediterranean" && tasting) return name ? `${name} — two-cover tasting, not generic delivery` : "Two-cover tasting";
   if (fam === "mediterranean") return name ? `${name} — a Mediterranean table, not “tasty food”` : "A Mediterranean table";
   if (pizza && delivery) return name ? `${name} — pizza & delivery when hungry` : "Pizza & delivery when hungry";
@@ -234,20 +248,15 @@ export function painFallback(intake: Intake, locale: Locale): string {
 export function emotionalOpen(intake: Intake, locale: Locale): string {
   if (isPediatrics(intake)) {
     return locale === "ar"
-      ? "لما الولد بيمرض، الأهل بدهم يعرفوا وين يروحوا اليوم — مش إعلان عام."
+      ? "لما الولد بيمرض، الأهل بدهم يعرفوا وين يروحوا اليوم."
       : locale === "he"
         ? "כשהילד חולה צריך לדעת לאן הולכים היום."
         : "When a child is sick, families need to know where to go today.";
   }
   if (detectVertical(intake) === "restaurant") {
-    const line = restaurantHungerLine(intake, locale);
-    if (locale === "ar") return `${line} — مش إعلان عام.`;
-    return line;
+    return restaurantHungerLine(intake, locale);
   }
-  const pain = painFallback(intake, locale);
-  if (locale === "ar") return `${pain} — مش إعلان عام.`;
-  if (locale === "he") return `${pain}`;
-  return pain;
+  return painFallback(intake, locale);
 }
 
 export function emotionalWalkHeadline(intake: Intake, locale: Locale): string | null {
@@ -266,6 +275,9 @@ export function visitCta(intake: Intake, locale: Locale): string {
     return locale === "he" ? "הגיעו למרפאה" : locale === "ar" ? "تعوا عالعيادة" : "Come to the clinic";
   }
   if (v === "restaurant") {
+    if (isBakery(intake)) {
+      return locale === "he" ? "בואו למאפייה" : locale === "ar" ? "تعوا ع المخبز" : "Come to the bakery";
+    }
     return locale === "he" ? "בואו למסעדה" : locale === "ar" ? "تعوا ع المطعم" : "Come to the restaurant";
   }
   if (v === "pool") {

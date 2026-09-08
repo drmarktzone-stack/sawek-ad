@@ -27,6 +27,7 @@ import type {
 } from "./types";
 import { emptyKnowledge, emptyNba } from "./types";
 import { emptyMarketIntel } from "./market-types";
+import { localizeIntakeValue, localizeTopicKey } from "../copy-purity";
 
 const nowIso = () => new Date().toISOString();
 
@@ -45,9 +46,14 @@ export function uncertaintyFromPresence(hasEvidence: boolean, thin?: boolean): U
   return "medium";
 }
 
-function textOf(tri: Record<Locale, string> | undefined, locale: Locale = "he"): string {
+function textOf(tri: Record<Locale, string> | undefined, locale?: Locale): string {
   if (!tri) return "";
-  return String(tri[locale] || tri.he || tri.en || tri.ar || "").trim();
+  if (locale) {
+    const hit = String(tri[locale] || "").trim();
+    if (hit) return hit;
+    return "";
+  }
+  return String(tri.he || tri.en || tri.ar || "").trim();
 }
 
 export function businessIdFromName(name: string): string {
@@ -75,7 +81,7 @@ export function extractBusiness(pack: CampaignPack): BusinessRecord {
   };
 }
 
-export function extractDna(pack: CampaignPack, prior?: BusinessDna): BusinessDna {
+export function extractDna(pack: CampaignPack, prior?: BusinessDna, locale: Locale = "he"): BusinessDna {
   const business = extractBusiness(pack);
   const traits: DnaTrait[] = [];
   const push = (topic: string, claim: string, ref: string, kind: DnaTrait["kind"], extra?: EvidenceLink[]) => {
@@ -95,24 +101,25 @@ export function extractDna(pack: CampaignPack, prior?: BusinessDna): BusinessDna
   push("identity", business.name, "intake.businessName", "know");
   push("category", business.category, "intake.category", "know");
   push("location", business.location, "intake.location", "know");
-  push("offer", String(pack.intake.offer ?? ""), "intake.offer", "know");
-  push("advantage", String(pack.intake.uniqueAdvantage ?? ""), "intake.uniqueAdvantage", "know");
-  push("problem", String(pack.intake.biggestProblem ?? ""), "intake.biggestProblem", "know");
-  push("audience", String(pack.intake.audience ?? ""), "intake.audience", "know");
+  push("offer", localizeIntakeValue(String(pack.intake.offer ?? ""), locale), "intake.offer", "know");
+  push("advantage", localizeIntakeValue(String(pack.intake.uniqueAdvantage ?? ""), locale), "intake.uniqueAdvantage", "know");
+  push("problem", localizeIntakeValue(String(pack.intake.biggestProblem ?? ""), locale), "intake.biggestProblem", "know");
+  push("audience", localizeIntakeValue(String(pack.intake.audience ?? ""), locale), "intake.audience", "know");
   push("voice", String(pack.intake.voice?.coreMessage ?? ""), "intake.voice.coreMessage", "know");
   if (pack.intake.avgOrderValue) push("aov", String(pack.intake.avgOrderValue), "intake.avgOrderValue", "know");
   if (pack.intake.targetCac) push("target_cac", String(pack.intake.targetCac), "intake.targetCac", "know");
   if (pack.intake.monthlyBudget) push("budget", String(pack.intake.monthlyBudget), "intake.monthlyBudget", "know");
 
   for (const h of pack.diagnosis?.hypotheses ?? []) {
-    const finding = textOf(h.finding);
-    const rec = textOf(h.recommendation);
+    const finding = textOf(h.finding, locale);
+    const rec = textOf(h.recommendation, locale);
+    if (!finding && !rec) continue;
     push(
       `diagnosis.${h.area}`,
-      `${finding} — ${rec}`,
+      `${finding}${finding && rec ? " — " : ""}${rec}`,
       `diagnosis.hypotheses.${h.area}`,
       "think",
-      [evidence("hypothesis", `diagnosis.${h.area}`, "hypothesis", textOf(h.evidence))],
+      [evidence("hypothesis", `diagnosis.${h.area}`, "hypothesis", textOf(h.evidence, locale))],
     );
   }
 
@@ -132,7 +139,7 @@ export function extractDna(pack: CampaignPack, prior?: BusinessDna): BusinessDna
   return { businessId: business.id, traits, updatedAt: nowIso() };
 }
 
-export function extractAudience(pack: CampaignPack): AudienceIntel {
+export function extractAudience(pack: CampaignPack, locale: Locale = "he"): AudienceIntel {
   const business = extractBusiness(pack);
   const nodes: AudienceNode[] = [];
   const add = (kind: AudienceNode["kind"], text: string, ref: string, knowledge: AudienceNode["knowledge"]) => {
@@ -148,20 +155,20 @@ export function extractAudience(pack: CampaignPack): AudienceIntel {
     });
   };
 
-  add("segment", String(pack.intake.audience ?? ""), "intake.audience", "know");
-  add("pain", String(pack.intake.biggestProblem ?? ""), "intake.biggestProblem", "know");
-  add("desire", String(pack.intake.mainGoal ?? ""), "intake.mainGoal", "know");
+  add("segment", localizeIntakeValue(String(pack.intake.audience ?? ""), locale), "intake.audience", "know");
+  add("pain", localizeIntakeValue(String(pack.intake.biggestProblem ?? ""), locale), "intake.biggestProblem", "know");
+  add("desire", localizeIntakeValue(String(pack.intake.mainGoal ?? ""), locale), "intake.mainGoal", "know");
 
   for (const p of pack.agency?.discovery?.personas ?? []) {
-    const name = textOf(p.name);
+    const name = textOf(p.name, locale);
     if (name) add("segment", name, "agency.discovery.personas", "think");
-    if (p.jtbd) add("desire", textOf(p.jtbd), "agency.discovery.personas.jtbd", "think");
-    const unknown = textOf(p.unknown);
+    if (p.jtbd) add("desire", textOf(p.jtbd, locale), "agency.discovery.personas.jtbd", "think");
+    const unknown = textOf(p.unknown, locale);
     if (unknown) add("pain", unknown, "agency.discovery.personas.unknown", "dont_know");
   }
 
   if (pack.proDesk?.audience) {
-    add("segment", textOf(pack.proDesk.audience), "proDesk.audience", "think");
+    add("segment", textOf(pack.proDesk.audience, locale), "proDesk.audience", "think");
   }
 
   return { businessId: business.id, nodes, updatedAt: nowIso() };
@@ -251,11 +258,11 @@ export function extractOpportunities(pack: CampaignPack, competitors: Competitor
   return out;
 }
 
-export function extractHypotheses(pack: CampaignPack): Hypothesis[] {
+export function extractHypotheses(pack: CampaignPack, locale: Locale = "he"): Hypothesis[] {
   const list: Hypothesis[] = [];
   for (const h of pack.diagnosis?.hypotheses ?? []) {
-    const finding = textOf(h.finding);
-    const ev = textOf(h.evidence);
+    const finding = textOf(h.finding, locale);
+    const ev = textOf(h.evidence, locale);
     const hasEvidence = Boolean(ev);
     if (!finding) continue;
     list.push({
@@ -423,30 +430,60 @@ export function extractLeads(pack: CampaignPack): GrowthWorkspace["leads"] {
   ];
 }
 
-export function buildKnowledge(ws: Pick<GrowthWorkspace, "dna" | "audience" | "competitors" | "performance" | "revenue">): KnowledgeBoard {
+export function buildKnowledge(
+  ws: Pick<GrowthWorkspace, "dna" | "audience" | "competitors" | "performance" | "revenue">,
+  locale: Locale = "he",
+): KnowledgeBoard {
   const know: KnowledgeBoard["know"] = [];
   const think: KnowledgeBoard["think"] = [];
   const dontKnow: KnowledgeBoard["dontKnow"] = [];
   for (const t of ws.dna.traits) {
-    const item = { text: `${t.topic}: ${t.claim}`, evidence: t.evidence };
+    const item = { text: `${localizeTopicKey(t.topic, locale)}: ${localizeIntakeValue(t.claim, locale)}`, evidence: t.evidence };
     if (t.kind === "know") know.push(item);
     else if (t.kind === "think") think.push(item);
     else dontKnow.push(item);
   }
   for (const n of ws.audience.nodes) {
-    const item = { text: `${n.kind}: ${n.text}`, evidence: n.evidence };
+    const item = {
+      text: `${localizeTopicKey(n.kind, locale)}: ${localizeIntakeValue(n.text, locale)}`,
+      evidence: n.evidence,
+    };
     if (n.knowledge === "know") know.push(item);
     else if (n.knowledge === "think") think.push(item);
     else dontKnow.push(item);
   }
   if (ws.competitors.missing) {
-    dontKnow.push({ text: "Competitor set — none entered.", evidence: [] });
+    dontKnow.push({
+      text:
+        locale === "ar"
+          ? "المنافسون — ما انكتب أحد."
+          : locale === "he"
+            ? "מתחרים — לא הוזן אף אחד."
+            : "Competitor set — none entered.",
+      evidence: [],
+    });
   }
   if (!ws.performance.observed.length) {
-    dontKnow.push({ text: "Live campaign performance — no observed metrics entered.", evidence: [] });
+    dontKnow.push({
+      text:
+        locale === "ar"
+          ? "أداء الحملات — لا مؤشرات مرصودة."
+          : locale === "he"
+            ? "ביצועי קמפיין — אין מדדים שנצפו."
+            : "Live campaign performance — no observed metrics entered.",
+      evidence: [],
+    });
   }
   if (ws.revenue.confidence === "unknown") {
-    dontKnow.push({ text: "Revenue — no attributable events.", evidence: [] });
+    dontKnow.push({
+      text:
+        locale === "ar"
+          ? "الإيراد — لا أحداث منسوبة."
+          : locale === "he"
+            ? "הכנסה — אין אירועים מיוחסים."
+            : "Revenue — no attributable events.",
+      evidence: [],
+    });
   }
   return { know, think, dontKnow, updatedAt: nowIso() };
 }
@@ -577,11 +614,11 @@ export function applyHypothesisResult(h: Hypothesis, outcome: ExperimentOutcome)
   };
 }
 
-export function applyLearning(ws: GrowthWorkspace, pack?: CampaignPack): GrowthWorkspace {
+export function applyLearning(ws: GrowthWorkspace, pack?: CampaignPack, locale: Locale = "he"): GrowthWorkspace {
   const next: GrowthWorkspace = { ...ws, updatedAt: nowIso() };
   if (pack) {
-    next.dna = extractDna(pack, ws.dna);
-    next.audience = extractAudience(pack);
+    next.dna = extractDna(pack, ws.dna, locale);
+    next.audience = extractAudience(pack, locale);
     next.competitors = extractCompetitors(pack);
     next.opportunities = extractOpportunities(pack, next.competitors);
     next.performance = extractPerformance(pack);
@@ -590,7 +627,7 @@ export function applyLearning(ws: GrowthWorkspace, pack?: CampaignPack): GrowthW
     next.leads = extractLeads(pack);
     if (!next.campaignIds.includes(pack.id)) next.campaignIds = [...next.campaignIds, pack.id];
     const existingStatements = new Set(next.hypotheses.map((h) => h.statement));
-    for (const h of extractHypotheses(pack)) {
+    for (const h of extractHypotheses(pack, locale)) {
       if (!existingStatements.has(h.statement)) next.hypotheses.push(h);
     }
   }
@@ -675,7 +712,7 @@ export function applyLearning(ws: GrowthWorkspace, pack?: CampaignPack): GrowthW
     }
   }
 
-  next.knowledge = buildKnowledge(next);
+  next.knowledge = buildKnowledge(next, locale);
   next.nba = computeNba(next);
   return next;
 }
@@ -719,12 +756,12 @@ export function emptyWorkspace(business: BusinessRecord, extras?: Partial<Growth
   return base;
 }
 
-export function workspaceFromPack(pack: CampaignPack, prior?: GrowthWorkspace): GrowthWorkspace {
+export function workspaceFromPack(pack: CampaignPack, prior?: GrowthWorkspace, locale: Locale = "he"): GrowthWorkspace {
   const business = extractBusiness(pack);
   const seed = prior && prior.businessId === business.id ? prior : emptyWorkspace(business);
   seed.business = business;
   seed.sample = Boolean(pack.demoMeta);
-  return applyLearning(seed, pack);
+  return applyLearning(seed, pack, locale);
 }
 
 export function forbiddenScientistClaims(text: string): boolean {

@@ -13,9 +13,10 @@ import type {
 } from "../../types";
 import { isNoOffer } from "../../no-offer";
 import { filled } from "../../utils";
-import { detectVertical } from "../../vertical";
+import { detectVertical, isBakery, restaurantHungerLine } from "../../vertical";
 import { audienceChipsFor, resolveChipLabel } from "../../chips";
 import { spokenCta } from "../spoken";
+import { copyFactsFromIntake, customerCopyHasLeak, gateCustomerAd, purifyCustomerText } from "../../copy-purity";
 import { contradictsVertical } from "../campaign-brief";
 import type { SourceLayers } from "./sources";
 import { businessTruthBlob } from "./sources";
@@ -144,14 +145,20 @@ function factOr(locale: Locale, value: string, fallback: Tri): string {
 export function familyCopy(family: StrategyFamily, intake: Intake, idea?: CmoIdea): FamilyCopy {
   const name = intake.businessName.trim() || "—";
   const place = intake.location.trim();
-  const problem = intake.biggestProblem.trim();
-  const adv = intake.uniqueAdvantage.trim();
-  const audience = intake.audience.trim();
+  const rawProblem = intake.biggestProblem.trim();
+  const problem = /^(unknown|no_offer|custom)$/i.test(rawProblem) || customerCopyHasLeak(rawProblem) ? "" : rawProblem;
+  const rawAdv = intake.uniqueAdvantage.trim();
+  const adv = /^(unknown|no_offer|custom)$/i.test(rawAdv) || customerCopyHasLeak(rawAdv) ? "" : rawAdv;
+  const audience = /^(unknown|custom)$/i.test(intake.audience.trim()) ? "" : intake.audience.trim();
   const hours = intake.clinicHours.trim();
   const offer = isNoOffer(intake.offer) ? "" : intake.offer.trim();
-  const ideaHook = idea?.hook;
-  const ideaName = idea?.name;
+  void idea;
   const ideaWhy = idea?.whyItWins;
+  const hunger = {
+    he: isBakery(intake) ? restaurantHungerLine(intake, "he") : name,
+    ar: isBakery(intake) ? restaurantHungerLine(intake, "ar") : name,
+    en: isBakery(intake) ? restaurantHungerLine(intake, "en") : name,
+  };
 
   const named = (he: string, ar: string, en: string) => L(he, ar, en);
   const withName = (he: string, ar: string, en: string) => named(`${name} — ${he}`, `${name} — ${ar}`, `${name} — ${en}`);
@@ -161,9 +168,9 @@ export function familyCopy(family: StrategyFamily, intake: Intake, idea?: CmoIde
       return {
         concept: named("זווית בעיה", "زاوية مشكلة", "Problem-led"),
         why: ideaWhy || named("מתחילים בכאב שסופק בקליטה — בלי להמציא כאב.", "نبدأ بالألم المعطى — بلا اختراع.", "Start from the stated pain — never invent one."),
-        angle: ideaName || named("בעיה → צעד", "مشكلة → خطوة", "Pain → step"),
-        hook: ideaHook || named(problem || "יש בעיה שכתבתם — נדבר עליה.", problem || "في مشكلة كتبتوها.", problem || "A problem you wrote — we speak to it."),
-        headline: withName(problem || "בלי סיסמה ריקה", problem || "بلا شعار فاضي", problem || "No empty slogan"),
+        angle: named("בעיה → צעד", "مشكلة → خطوة", "Pain → step"),
+        hook: named(problem || hunger.he, problem || hunger.ar, problem || hunger.en),
+        headline: problem ? withName(problem, problem, problem) : named(hunger.he, hunger.ar, hunger.en),
         body: named(
           [problem && `הבעיה: ${problem}`, adv && `מה שיש בפועל: ${adv}`, place && `איפה: ${place}`, "בלי הבטחות שלא נכתבו."].filter(Boolean).join(" "),
           [problem && `المشكلة: ${problem}`, adv && `الواقع: ${adv}`, place && `المكان: ${place}`].filter(Boolean).join(" "),
@@ -177,8 +184,8 @@ export function familyCopy(family: StrategyFamily, intake: Intake, idea?: CmoIde
       return {
         concept: named("לפני → אחרי (תהליך)", "قبل → بعد (مسار)", "Transformation"),
         why: ideaWhy || named("מסלול ברור מהמצב הכתוב לצעד אחד אמיתי.", "مسار واضح من الحالة المكتوبة لخطوة حقيقية.", "A clear path from the written state to one real step."),
-        angle: ideaName || named("מסלול", "مسار", "Path"),
-        hook: ideaHook || named("צעד אחד — לא סיפור קסם.", "خطوة واحدة — مش قصة سحر.", "One step — not a magic story."),
+        angle: named("מסלול", "مسار", "Path"),
+        hook: named("צעד אחד — לא סיפור קסם.", "خطوة واحدة — مش قصة سحر.", "One step — not a magic story."),
         headline: withName("צעד אחד ברור", "خطوة واحدة واضحة", "One clear step"),
         body: named(
           [audience && `למי: ${audience}`, adv && `איך: ${adv}`, intake.whatsapp && `וואטסאפ ${intake.whatsapp}`].filter(Boolean).join(" "),
@@ -225,14 +232,14 @@ export function familyCopy(family: StrategyFamily, intake: Intake, idea?: CmoIde
           hasProof ? "إثبات فقط مما أُعطي." : "ما في إثبات — لن نخترع شهادة.",
           hasProof ? "Only proof supplied in intake." : "No proof in intake — we will not invent a testimonial.",
         ),
-        angle: ideaName || named("עובדת מקום", "حقيقة مكان", "Place fact"),
-        hook: ideaHook || named(place ? `${name} ב${place}` : name, place ? `${name} في ${place}` : name, place ? `${name} in ${place}` : name),
+        angle: named("עובדת מקום", "حقيقة مكان", "Place fact"),
+        hook: named(place ? `${name} ב${place}` : name, place ? `${name} في ${place}` : name, place ? `${name} in ${place}` : name),
         headline: withName(place || "עובדות המקום", place || "حقائق المكان", place || "Place facts"),
         body: named(
           hasProof
             ? [adv, intake.pastResults, place].filter(Boolean).join(" ")
             : `${name}${place ? ` · ${place}` : ""}. בלי דירוגים או עדויות מומצאים.`,
-          hasProof ? [adv, intake.pastResults, place].filter(Boolean).join(" ") : `${name}. بلا تقييمات مختلقة.`,
+          hasProof ? [adv, intake.pastResults, place].filter(Boolean).join(" ") : `${name}${place ? ` — ${place}` : ""}.`,
           hasProof ? [adv, intake.pastResults, place].filter(Boolean).join(" ") : `${name}. No invented ratings or testimonials.`,
         ),
         visual: named("שלט / כתובת / שעות", "لافتة / عنوان / ساعات", "Sign / address / hours"),
@@ -244,8 +251,8 @@ export function familyCopy(family: StrategyFamily, intake: Intake, idea?: CmoIde
       return {
         concept: named("חינוכי", "تعليمي", "Educational"),
         why: ideaWhy || named("מסבירים עובדה אחת מהקליטה.", "نشرح حقيقة واحدة من الإدخال.", "Explain one intake fact."),
-        angle: ideaName || named("מה צריך לדעת", "شو لازم تعرفوا", "What to know"),
-        hook: ideaHook || named(hours || adv || "עובדה אחת ברורה", hours || adv || "حقيقة واحدة", hours || adv || "One clear fact"),
+        angle: named("מה צריך לדעת", "شو لازم تعرفوا", "What to know"),
+        hook: named(hours || adv || "עובדה אחת ברורה", hours || adv || "حقيقة واحدة", hours || adv || "One clear fact"),
         headline: withName(hours || adv || "עובדה, לא סיסמה", hours || adv || "حقيقة مش شعار", hours || adv || "A fact, not a slogan"),
         body: named(
           [hours && `שעות: ${hours}`, adv && adv, place && place].filter(Boolean).join(" — ") || name,
@@ -260,8 +267,8 @@ export function familyCopy(family: StrategyFamily, intake: Intake, idea?: CmoIde
       return {
         concept: named("סמכות מקומית", "سلطة محلية", "Local authority"),
         why: ideaWhy || named("שם + מקום + מה שסופק. בלי «הכי טוב».", "اسم + مكان + ما أُعطي. بلا «الأفضل».", "Name + place + supplied facts. Never “best in town”."),
-        angle: ideaName || named("זהות מקומית", "هوية محلية", "Local identity"),
-        hook: ideaHook || named(place ? `${name} · ${place}` : name, place ? `${name} · ${place}` : name, place ? `${name} · ${place}` : name),
+        angle: named("זהות מקומית", "هوية محلية", "Local identity"),
+        hook: named(place ? `${name} · ${place}` : name, place ? `${name} · ${place}` : name, place ? `${name} · ${place}` : name),
         headline: named(place ? `${name} · ${place}` : name, place ? `${name} · ${place}` : name, place ? `${name} · ${place}` : name),
         body: named(
           [adv, hours, intake.whatsapp && `וואטסאפ ${intake.whatsapp}`].filter(Boolean).join(" · ") || name,
@@ -280,9 +287,9 @@ export function familyCopy(family: StrategyFamily, intake: Intake, idea?: CmoIde
         hook: named("בלי הנחה אוטומטית", "بلا خصم أوتوماتيكي", "No automatic discount"),
         headline: withName("תשובה כנה", "جواب صادق", "An honest answer"),
         body: named(
-          [problem && `אם ${problem}`, adv && `— אז ${adv}`, "לא ממציאים מחיר."].filter(Boolean).join(" "),
-          [problem && `إذا ${problem}`, adv && `— فـ ${adv}`, "ما منخترع سعر."].filter(Boolean).join(" "),
-          [problem && `If ${problem}`, adv && `— then ${adv}`, "No invented price."].filter(Boolean).join(" "),
+          [problem && `אם ${problem}`, adv && `— אז ${adv}`].filter(Boolean).join(" ") || name,
+          [problem && `إذا ${problem}`, adv && `— فـ ${adv}`].filter(Boolean).join(" ") || name,
+          [problem && `If ${problem}`, adv && `— then ${adv}`].filter(Boolean).join(" ") || name,
         ),
         visual: named("טקסט ישיר, רקע נקי", "نص مباشر", "Direct type, clean ground"),
         format: named("מודעה קצרה", "إعلان قصير", "Short ad"),
@@ -308,8 +315,8 @@ export function familyCopy(family: StrategyFamily, intake: Intake, idea?: CmoIde
       return {
         concept: named("הדגמה / מקום", "عرض / مكان", "Demo / place"),
         why: ideaWhy || named("מראים את המקום — לא פרצופים מומצאים.", "نُظهر المكان — بلا وجوه مختلقة.", "Show the place — no invented faces."),
-        angle: ideaName || named("המקום עצמו", "المكان نفسه", "The place itself"),
-        hook: ideaHook || named("תצלמו את החלל", "صوّروا المكان", "Film the space"),
+        angle: named("המקום עצמו", "المكان نفسه", "The place itself"),
+        hook: named(place ? `${name} ב${place}` : name, place ? `${name} في ${place}` : name, place ? `${name} in ${place}` : name),
         headline: withName(place || "המקום", place || "المكان", place || "The place"),
         body: named(
           [place && `מיקום: ${place}`, hours && `שעות: ${hours}`, "בלי עדויות מזויפות."].filter(Boolean).join(" "),
@@ -325,12 +332,12 @@ export function familyCopy(family: StrategyFamily, intake: Intake, idea?: CmoIde
         concept: named("נגד הז׳רגון", "ضد الكلام الفارغ", "Contrarian"),
         why: named("מסרים שלא ממציאים ROAS, VIP, או «הכי טוב».", "بلا ROAS وVIP و«الأفضل».", "Copy that refuses ROAS, VIP, or “best”."),
         angle: named("בלי תיאטרון", "بلا مسرح", "No theatre"),
-        hook: named("בלי כוכבים מומצאים", "بلا نجوم مختلقة", "No invented stars"),
+        hook: named(hunger.he, hunger.ar, hunger.en),
         headline: withName("רק מה שנכון", "بس اللي صحيح", "Only what is true"),
         body: named(
-          `${name}${place ? ` ב${place}` : ""}. מדברים בעובדות שכתבתם — בלי מדדים בדויים.`,
-          `${name}. نحكي بالحقائق المكتوبة — بلا أرقام مختلقة.`,
-          `${name}${place ? ` in ${place}` : ""}. Written facts only — no fake gauges.`,
+          `${name}${place ? ` ב${place}` : ""}.`,
+          `${name}${place ? ` — ${place}` : ""}.`,
+          `${name}${place ? ` in ${place}` : ""}.`,
         ),
         visual: named("טיפוגרפיה שחורה-צהובה", "طباعة سوداء-صفراء", "Black-yellow type"),
         format: named("מודעת טיפוגרפיה", "إعلان طباعي", "Type-led ad"),
@@ -339,9 +346,9 @@ export function familyCopy(family: StrategyFamily, intake: Intake, idea?: CmoIde
     case "emotional":
       return {
         concept: named("רגשי", "عاطفي", "Emotional"),
-        why: ideaWhy || named("רגש מהקהל/הבעיה שסופקו — לא מלודרמה רפואית מומצאת.", "عاطفة من الجمهور/المشكلة المعطاة.", "Emotion from the supplied audience/problem — no invented medical drama."),
-        angle: ideaName || named("הרגש הכתוב", "العاطفة المكتوبة", "The written feeling"),
-        hook: ideaHook || named(problem || audience || name, problem || audience || name, problem || audience || name),
+        why: ideaWhy || named("רגש מהקהל שסופק — בלי דרמה רפואית.", "عاطفة من الجمهور المكتوب.", "Emotion from the supplied audience — no medical drama."),
+        angle: named("הרגש הכתוב", "العاطفة المكتوبة", "The written feeling"),
+        hook: named(problem || audience || name, problem || audience || name, problem || audience || name),
         headline: withName(problem || audience || "בגובה העיניים", problem || audience || "ببساطة", problem || audience || "At eye level"),
         body: named(
           [audience && `ל${audience}`, problem && problem, place && place].filter(Boolean).join(" — ") || name,
@@ -372,8 +379,8 @@ export function familyCopy(family: StrategyFamily, intake: Intake, idea?: CmoIde
       return {
         concept: named("ריפריימינג", "إعادة إطار", "Reframing"),
         why: ideaWhy || named("אותה עובדה, מסגרת חדשה.", "نفس الحقيقة، إطار جديد.", "The same fact, a new frame."),
-        angle: ideaName || named("מסגרת חדשה", "إطار جديد", "New frame"),
-        hook: ideaHook || named(adv || "לא הסיסמה הרגילה", adv || "مش الشعار العادي", adv || "Not the usual slogan"),
+        angle: named("מסגרת חדשה", "إطار جديد", "New frame"),
+        hook: named(adv || "לא הסיסמה הרגילה", adv || "مش الشعار العادي", adv || "Not the usual slogan"),
         headline: withName(adv || "מסגרת אחרת", adv || "إطار ثاني", adv || "A different frame"),
         body: named(
           [adv, audience && `ל${audience}`, "בלי טענה חדשה שלא נכתבה."].filter(Boolean).join(" "),
@@ -388,8 +395,8 @@ export function familyCopy(family: StrategyFamily, intake: Intake, idea?: CmoIde
       return {
         concept: named("סיפור", "قصة", "Story"),
         why: named("סיפור קצר מהעובדות — בלי מלודרמה מומצאת.", "قصة قصيرة من الحقائق — بلا دراما مختلقة.", "A short story from supplied facts — no invented drama."),
-        angle: ideaName || named("רגע אחד", "لحظة واحدة", "One moment"),
-        hook: ideaHook || named(
+        angle: named("רגע אחד", "لحظة واحدة", "One moment"),
+        hook: named(
           audience ? `${audience} מגיעים ל${name}` : `${name} — רגע אמיתי`,
           audience ? `${audience} بيوصلوا لـ ${name}` : `${name} — لحظة حقيقية`,
           audience ? `${audience} arrive at ${name}` : `${name} — a real moment`,
@@ -413,15 +420,15 @@ export function familyCopy(family: StrategyFamily, intake: Intake, idea?: CmoIde
           hasOffer ? "العرض المعطى هو الرسالة — بلا خصم مختلق." : "ما في عرض — لن نخترع خصماً.",
           hasOffer ? "The supplied offer is the message — no invented discount." : "No offer in intake — we will not invent a promo.",
         ),
-        angle: ideaName || named(hasOffer ? "ההצעה הכתובה" : "בלי מבצע מדומה", hasOffer ? "العرض المكتوب" : "بلا عرض وهمي", hasOffer ? "The written offer" : "No fake promo"),
-        hook: ideaHook || named(hasOffer ? offer : `${name} בלי מבצע מומצא`, hasOffer ? offer : `${name} بلا عرض مختلق`, hasOffer ? offer : `${name} without an invented promo`),
-        headline: withName(hasOffer ? offer : "בלי מבצע שלא נכתב", hasOffer ? offer : "بلا عرض ما انكتب", hasOffer ? offer : "No unwritten promo"),
+        angle: named(hasOffer ? "ההצעה הכתובה" : "שירות במקום", hasOffer ? "العرض المكتوب" : "خدمة من المحل", hasOffer ? "The written offer" : "Service in place"),
+        hook: named(hasOffer ? offer : hunger.he, hasOffer ? offer : hunger.ar, hasOffer ? offer : hunger.en),
+        headline: hasOffer ? withName(offer, offer, offer) : named(hunger.he, hunger.ar, hunger.en),
         body: named(
           hasOffer
             ? [offer, place && `איפה: ${place}`, intake.whatsapp && `וואטסאפ ${intake.whatsapp}`].filter(Boolean).join(" · ")
-            : `${name}${place ? ` · ${place}` : ""}. אין מבצע בקליטה — לא יומצא.`,
-          hasOffer ? [offer, place].filter(Boolean).join(" · ") : `${name}. ما في عرض مختلق.`,
-          hasOffer ? [offer, place && `Where: ${place}`].filter(Boolean).join(" · ") : `${name}. No invented promo.`,
+            : `${name}${place ? ` · ${place}` : ""}.`,
+          hasOffer ? [offer, place].filter(Boolean).join(" · ") : `${name}${place ? ` — ${place}` : ""}.`,
+          hasOffer ? [offer, place && `Where: ${place}`].filter(Boolean).join(" · ") : `${name}${place ? ` · ${place}` : ""}.`,
         ),
         visual: named("פריים של ההצעה הכתובה / המוצר", "فريمة العرض المكتوب", "Frame of the written offer / product"),
         format: named("מודעת פיד", "إعلان فيد", "Feed ad"),
@@ -433,13 +440,13 @@ export function familyCopy(family: StrategyFamily, intake: Intake, idea?: CmoIde
       return {
         concept: named(family === "market_gap" ? "פער שוק (רק עם ראיה)" : "אסטרטגיה מגולה", family === "market_gap" ? "فجوة سوق (مع دليل)" : "استراتيجية مكتشفة", family === "market_gap" ? "Market gap (evidence only)" : "Discovered strategy"),
         why: named("מידע שוק משפיע על אסטרטגיה בלבד — לא על מחיר/תעודה.", "ذكاء السوق للاستراتيجية فقط.", "Market intel shapes strategy only — never price or credentials."),
-        angle: ideaName || named("פער כנה", "فجوة صادقة", "Honest gap"),
-        hook: ideaHook || named(adv || problem || name, adv || problem || name, adv || problem || name),
-        headline: withName(adv || problem || "מה שחסר אצל אחרים לא יומצא", adv || problem || "الناقص عند غيرنا مش منخترعه", adv || problem || "We will not invent what others lack"),
+        angle: named("פער כנה", "فجوة صادقة", "Honest gap"),
+        hook: named(adv || problem || name, adv || problem || name, adv || problem || name),
+        headline: named(adv || problem || hunger.he, adv || problem || hunger.ar, adv || problem || hunger.en),
         body: named(
-          [adv, problem, "אם אין מקור — לא ממציאים סטטיסטיקה."].filter(Boolean).join(" "),
-          [adv, problem, "إذا ما في مصدر — ما منخترع إحصاء."].filter(Boolean).join(" "),
-          [adv, problem, "No source → no invented statistic."].filter(Boolean).join(" "),
+          [adv, problem, name].filter(Boolean).join(" — "),
+          [adv, problem, name].filter(Boolean).join(" — "),
+          [adv, problem, name].filter(Boolean).join(" — "),
         ),
         visual: named("מפה מקומית / עובדה", "خريطة محلية", "Local map / fact"),
         format: named("מודעת פיד", "إعلان فيد", "Feed ad"),
@@ -488,6 +495,15 @@ function localePack(family: StrategyFamily, intake: Intake, idea: CmoIdea | unde
   })
     ? (intake.pastResults.trim() || intake.uniqueAdvantage.trim() || undefined)
     : undefined;
+  const gated = gateCustomerAd(
+    { headline: copy.headline[locale], body: copy.body[locale], cta: familyCta(family, intake, locale) },
+    intake,
+    locale,
+  );
+  const hookRaw = copy.hook[locale];
+  const hook = customerCopyHasLeak(hookRaw)
+    ? gated.headline
+    : purifyCustomerText(hookRaw, locale, copyFactsFromIntake(intake)) || gated.headline;
   return {
     concept: copy.concept[locale],
     why: copy.why[locale],
@@ -496,12 +512,12 @@ function localePack(family: StrategyFamily, intake: Intake, idea: CmoIdea | unde
       intake.audience.trim() ||
       factOr(locale, "", L("קהל לא צוין", "الجمهور غير مذكور", "Audience not specified")),
     angle: copy.angle[locale],
-    hook: copy.hook[locale],
-    headline: copy.headline[locale],
-    copy: copy.body[locale],
+    hook,
+    headline: gated.headline,
+    copy: gated.body,
     ...(offer ? { offer } : {}),
     ...(proof ? { proof } : {}),
-    cta: familyCta(family, intake, locale),
+    cta: gated.cta,
     visual: copy.visual[locale],
     format: copy.format[locale],
     platform: copy.platform[locale],

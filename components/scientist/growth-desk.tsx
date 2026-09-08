@@ -23,6 +23,8 @@ import {
   setMarketWatch,
 } from "@/lib/scientist/store";
 import type { GrowthWorkspace, KnowledgeKind, Uncertainty } from "@/lib/scientist/types";
+import { buildKnowledge } from "@/lib/scientist/engines";
+import { localizeTopicKey } from "@/lib/copy-purity";
 import { controlsFromWorkspace, hasMarketScanContext, scanIsStale, watchIsDue } from "@/lib/scientist/market-engines";
 import { defaultScanControls, type MarketScanControls } from "@/lib/scientist/market-types";
 import { requestMarketScan } from "@/lib/scientist/market-client";
@@ -104,7 +106,7 @@ export function GrowthDesk({ section = "home" }: { section?: GrowthSection }) {
       const packs = loadCampaigns().filter((p) => !p.demoMeta);
       for (const p of packs.slice(0, 8)) {
         try {
-          ingestPack(p);
+          ingestPack(p, locale);
         } catch {
           /* ignore */
         }
@@ -131,7 +133,7 @@ export function GrowthDesk({ section = "home" }: { section?: GrowthSection }) {
     return () => {
       cancelled = true;
     };
-  }, [ready, user?.id]);
+  }, [ready, user?.id, locale]);
 
   const dir = locale === "en" ? "ltr" : "rtl";
 
@@ -355,26 +357,27 @@ function HomeBoard({ ws }: { ws: GrowthWorkspace }) {
 }
 
 function KnowledgeBoard({ ws }: { ws: GrowthWorkspace }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const board = buildKnowledge(ws, locale);
   return (
     <div className="grid gap-3 md:grid-cols-3">
       <Panel title={t("sci.know.know")}>
         <ul className="space-y-1 text-sm">
-          {(ws.knowledge.know.slice(0, 8).length ? ws.knowledge.know.slice(0, 8) : [{ text: t("sci.unknown.know"), evidence: [] }]).map((k) => (
+          {(board.know.slice(0, 8).length ? board.know.slice(0, 8) : [{ text: t("sci.unknown.know"), evidence: [] }]).map((k) => (
             <li key={k.text}>{k.text}</li>
           ))}
         </ul>
       </Panel>
       <Panel title={t("sci.know.think")}>
         <ul className="space-y-1 text-sm">
-          {(ws.knowledge.think.slice(0, 8).length ? ws.knowledge.think.slice(0, 8) : [{ text: t("sci.unknown.think"), evidence: [] }]).map((k) => (
+          {(board.think.slice(0, 8).length ? board.think.slice(0, 8) : [{ text: t("sci.unknown.think"), evidence: [] }]).map((k) => (
             <li key={k.text}>{k.text}</li>
           ))}
         </ul>
       </Panel>
       <Panel title={t("sci.know.dont")}>
         <ul className="space-y-1 text-sm">
-          {(ws.knowledge.dontKnow.slice(0, 8).length ? ws.knowledge.dontKnow.slice(0, 8) : [{ text: t("sci.unknown.dont"), evidence: [] }]).map((k) => (
+          {(board.dontKnow.slice(0, 8).length ? board.dontKnow.slice(0, 8) : [{ text: t("sci.unknown.dont"), evidence: [] }]).map((k) => (
             <li key={k.text}>{k.text}</li>
           ))}
         </ul>
@@ -384,7 +387,7 @@ function KnowledgeBoard({ ws }: { ws: GrowthWorkspace }) {
 }
 
 function DnaBoard({ ws }: { ws: GrowthWorkspace }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const facts = ws.dna.traits.filter((tr) => tr.kind === "know");
   const insights = ws.dna.traits.filter((tr) => tr.kind !== "know");
   const learned = ws.learnings.slice(0, 6);
@@ -397,7 +400,7 @@ function DnaBoard({ ws }: { ws: GrowthWorkspace }) {
           {facts.map((tr) => (
             <li key={tr.id} className="py-3">
               <div className="flex flex-wrap items-center gap-2">
-                <p className="font-bold text-navy">{tr.topic}</p>
+                <p className="font-bold text-navy">{localizeTopicKey(tr.topic, locale)}</p>
                 <Unc level={tr.confidence} />
                 <Unc level={tr.kind} />
               </div>
@@ -417,7 +420,7 @@ function DnaBoard({ ws }: { ws: GrowthWorkspace }) {
           {insights.map((tr) => (
             <li key={tr.id} className="py-3">
               <div className="flex flex-wrap items-center gap-2">
-                <p className="font-bold text-navy">{tr.topic}</p>
+                <p className="font-bold text-navy">{localizeTopicKey(tr.topic, locale)}</p>
                 <Unc level={tr.confidence} />
                 <Unc level={tr.kind} />
               </div>

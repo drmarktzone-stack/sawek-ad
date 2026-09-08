@@ -12,6 +12,7 @@ import {
   stripUnsupportedClaims,
 } from "./facts";
 import { businessTruthBlob, type SourceLayers } from "./sources";
+import { customerCopyHasLeak, gateCustomerAd, localeScriptBleed } from "../../copy-purity";
 
 const HE = /[\u0590-\u05FF]/;
 const AR = /[\u0600-\u06FF]/;
@@ -106,6 +107,23 @@ export function runValidationGate(input: {
     }
     if (!rtlOk(locales[locale], locale)) {
       failures.push(`${locale}: language/RTL mismatch`);
+    }
+    const locBlob = `${locales[locale].headline}\n${locales[locale].copy}\n${locales[locale].cta}\n${locales[locale].hook}`;
+    if (customerCopyHasLeak(locBlob) || localeScriptBleed(locBlob, locale)) {
+      failures.push(`${locale}: copy purity / locale bleed`);
+      const gated = gateCustomerAd(
+        { headline: locales[locale].headline, body: locales[locale].copy, cta: locales[locale].cta },
+        input.intake,
+        locale,
+      );
+      locales[locale] = {
+        ...locales[locale],
+        headline: gated.headline,
+        copy: gated.body,
+        cta: gated.cta,
+        hook: customerCopyHasLeak(locales[locale].hook) ? gated.headline : locales[locale].hook,
+      };
+      repaired = true;
     }
     const missing = localeComplete(locales[locale]);
     if (missing.length) failures.push(`${locale}: incomplete ${missing.join(",")}`);

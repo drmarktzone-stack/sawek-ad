@@ -1,12 +1,13 @@
 import type { AdVariant, Intake, Locale, VariantKind } from "../types";
 import { canonicalDoctorName } from "../demo";
 import { buildSpokenVariant, clipAtWord } from "./spoken";
-import { detectVertical, isPediatrics, restaurantHungerLine, unknownProblemLabel } from "../vertical";
+import { detectVertical, isBakery, isPediatrics, restaurantHungerLine, unknownProblemLabel } from "../vertical";
 import { isNoOffer } from "../no-offer";
 import { OFFER_CHIPS, resolveChipLabel } from "../chips";
 import { coachIntake, isUnknownProblem } from "./coach";
 import { applyVoiceLockToText, voiceFromIntake, voiceIsLocked } from "./voice";
 import { offerLineForCopy } from "./offer-builder";
+import { customerCopyHasLeak, gateCustomerAd } from "../copy-purity";
 
 const KINDS: VariantKind[] = [
   "strong_offer",
@@ -41,6 +42,12 @@ export function generateVariants(intake: Intake): AdVariant[] {
           cta: applyVoiceLockToText(variant.cta, fixed),
         };
       }
+      const gated = gateCustomerAd(
+        { headline: variant.headline, body: variant.primaryText, cta: variant.cta },
+        fixed,
+        locale,
+      );
+      variant = { ...variant, headline: gated.headline, primaryText: gated.body, cta: gated.cta };
       out.push(variant);
     }
   }
@@ -75,7 +82,7 @@ function overlayCoachHeadline(
     } else if (p && proposed) {
       headline = clipAtWord(proposed, 48);
     }
-  } else if (variant.kind === "unique_advantage") {
+  } else if (variant.kind === "unique_advantage" && !isBakery(intake)) {
     const a = safe.find((s) => s.field === "uniqueAdvantage");
     if (a) headline = clipAtWord(a.proposed[locale], 48);
   } else if (variant.kind === "strong_offer" && !isNoOffer(intake.offer)) {
@@ -86,6 +93,6 @@ function overlayCoachHeadline(
     }
   }
 
-  if (!headline.trim()) return variant;
+  if (!headline.trim() || customerCopyHasLeak(headline)) return variant;
   return { ...variant, headline };
 }

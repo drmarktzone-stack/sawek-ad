@@ -55,6 +55,11 @@ export function composeCoreMessage(input: CoreMessageInput, fallbackLocale: Loca
   const dialect = input.dialect;
   const never = input.neverSay.trim();
 
+  if (dialect === "ar-palestinian" || (dialect === "" && fallbackLocale === "ar")) {
+    const who = audience || "ناس البلد";
+    const value = beliefs || niche || "اللي بنقدّمه";
+    return clip(`${who} — ${value}. هي الرسالة، زي ما بنحكي بالبلد — مش شعار جاهز.${never ? ` وما بنقول ${clip(never, 40)}.` : ""}`, 220);
+  }
   if (dialect === "ar-gulf") {
     const who = audience || "الناس";
     const what = niche || "هالخدمة";
@@ -91,7 +96,7 @@ function composePersonalVoice(input: CoreMessageInput, locale: Locale): string {
   if (locale === "ar") {
     return clip([input.niche && `التخصّص: ${input.niche}`, beliefs && `القيم: ${beliefs}`, neverLine(input.neverSay, "ar")]
       .filter(Boolean)
-      .join(" · ") || "صوت محفوظ من المدخلات.", 200);
+      .join(" · ") || "صوت محفوظ من اللي كتبتوه.", 200);
   }
   if (locale === "en") {
     return clip([input.niche && `Niche: ${input.niche}`, beliefs && `Values: ${beliefs}`, neverLine(input.neverSay, "en")]

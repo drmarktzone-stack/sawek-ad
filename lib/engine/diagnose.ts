@@ -52,17 +52,17 @@ export function diagnose(intake: Intake, report: IntakeReport): Diagnosis {
       confidence: hasPast ? "medium" : "low",
       finding: L(
         "אין מבצע — זה תקין. הערך חייב לבוא מהשירות ומהיתרון, לא מהנחה מומצאת.",
-        "لا يوجد عرض — وهذا سليم. القيمة يجب أن تأتي من الخدمة والميزة.",
+        "ما في عرض — وهي تمام. القيمة من الخدمة والميزة، مش من خصم من الرأس.",
         "No promo — that’s valid. Value must come from the service and the advantage, not a fake discount.",
       ),
       evidence: L(
         "שדה המבצע הוא «אין מבצע» או ריק.",
-        "حقل العرض «لا يوجد عرض» أو فارغ.",
+        "خانة العرض فاضية أو «ما في عرض».",
         "The offer field is “No offer” or empty.",
       ),
       recommendation: L(
         "אל תמציאו קופון. חזקו את ההוּק סביב הבעיה והיתרון הייחודי.",
-        "لا تخترعوا كوبوناً. قوّوا الخطاف حول المشكلة والميزة.",
+        "ما تخترعوا كوبون. خلّوا الجملة عالألم والميزة.",
         "Do not invent a coupon. Strengthen the hook around the problem and unique advantage.",
       ),
     });
@@ -74,17 +74,17 @@ export function diagnose(intake: Intake, report: IntakeReport): Diagnosis {
       confidence: hasPast ? "medium" : "low",
       finding: L(
         "ההוק צריך לפתוח בבעיה של הקהל, לא בשם העסק.",
-        "يجب أن يبدأ الخطاف بمشكلة الجمهور لا باسم النشاط.",
+        "الجملة الأولى عالألم اللي عند الناس — مش عاسم المحل.",
         "The hook should open on the audience’s problem, not the business name.",
       ),
       evidence: L(
         `קהל: ${intake.audience}. בעיה: ${intake.biggestProblem}.`,
-        `الجمهور: ${intake.audience}. المشكلة: ${intake.biggestProblem}.`,
+        `الناس: ${intake.audience}. الألم: ${intake.biggestProblem}.`,
         `Audience: ${intake.audience}. Problem: ${intake.biggestProblem}.`,
       ),
       recommendation: L(
         "משפט ראשון = כאב ספציפי. שם העסק בשורה השנייה או ב-CTA.",
-        "الجملة الأولى = ألم محدد. اسم النشاط في الثانية أو في CTA.",
+        "أول سطر = ألم واضح. اسم المحل بالتاني أو بزرّ التواصل.",
         "First line = specific pain. Business name on line two or in the CTA.",
       ),
     });
@@ -96,10 +96,10 @@ export function diagnose(intake: Intake, report: IntakeReport): Diagnosis {
       confidence: "high",
       finding: L(
         "בלי כתובת — מובילים בזווית מקום כשאלה, לא ברדיוס בדוי.",
-        "بلا عنوان — نقود بزاوية مكان كسؤال، مش بنطاق مختلق.",
+        "ما في عنوان — اسألوا عن البلد، مش تخترعوا دائرة كيلومترات.",
         "No address — lead with a place-angle question, never a fake radius.",
       ),
-      evidence: L("שדה מיקום ריק — לא יומצא רדיוס.", "حقل الموقع فارغ — لن يُخترع نطاق.", "Location field is empty — no radius will be invented."),
+      evidence: L("שדה מיקום ריק — לא יומצא רדיוס.", "خانة المكان فاضية — بلا نطاق من الرأس.", "Location field is empty — no radius will be invented."),
       recommendation: L(
         "לצלם חזית/רחוב (בלי פנים) או להוסיף עיר לפני קניית מדיה.",
         "صوّروا الواجهة/الشارع (بلا وجوه) أو أضيفوا بلدة قبل شراء الميديا.",
@@ -114,13 +114,13 @@ export function diagnose(intake: Intake, report: IntakeReport): Diagnosis {
       confidence: "low",
       finding: L(
         "אין היסטוריית מודעות — נבנה מכאן עם עובדות שיש, לא עם פסק דין.",
-        "لا تاريخ إعلانات — نبني من الحقائق الموجودة، مش حكم.",
+        "ما في تاريخ إعلانات — منبني من الحقائق اللي عندكم، مش حكم.",
         "No ad history — we build from facts you have, not a verdict.",
       ),
       evidence: L("מודעות קודמות לא מולאו — זה תקין לסריקה ראשונה.", "الإعلانات السابقة غير مملوءة — سليم لمسح أول.", "Past ads were not filled in — fine for a first scan."),
       recommendation: L(
         "לצלם מקום/מוצר השבוע; לשמור צילומי המודעות הבאות (טקסט, קהל, הוצאה, תוצאה).",
-        "صوّروا مكان/منتج هالأسبوع؛ احفظوا لقطات الإعلانات الجاية.",
+        "صوّروا المحل/المنتج هالأسبوع، واحفظوا لقطات الإعلانات الجاية.",
         "Photograph place/product this week; keep screenshots of the next ads (copy, audience, spend, result).",
       ),
     });
@@ -181,13 +181,13 @@ export function diagnose(intake: Intake, report: IntakeReport): Diagnosis {
       confidence: "medium",
       finding: L(
         "«כולם» הוא לא קהל. מודעה לכולם נשמעת לאף אחד.",
-        "«الجميع» ليس جمهوراً. إعلان للجميع لا يسمعه أحد.",
+        "«الكل» مش جمهور. إعلان للكل ما بسمعه حدا.",
         "“Everyone” is not an audience. An ad to everyone sounds like an ad to no one.",
       ),
       evidence: L(intake.audience, intake.audience, intake.audience),
       recommendation: L(
         "צמצמו לקבוצה עם בעיה משותפת ומקום משותף.",
-        "ضيّقوا إلى مجموعة بمشكلة ومكان مشتركين.",
+        "ضيّقوا عمجموعة بنفس الألم ونفس البلد.",
         "Narrow to a group with a shared problem and a shared place.",
       ),
     });
@@ -212,7 +212,7 @@ export function diagnose(intake: Intake, report: IntakeReport): Diagnosis {
       confidence: "low",
       finding: L(
         "אין ראיות לכישלון ספציפי — נבנה מהעובדות שיש, עם רשימת צילום במקום ניחוש מדדים.",
-        "لا أدلة على فشل محدد — نبني من الحقائق الموجودة، مع قائمة تصوير بدل تخمين مقاييس.",
+        "ما في دليل عفشل معيّن — منبني من الحقائق اللي عندكم، مع قائمة تصوير بدل تخمين أرقام.",
         "No evidence of a specific failure — we build from facts you have, with a shoot list instead of guessed metrics.",
       ),
       evidence: L("סריקה דקה — זה בסיס עבודה, לא פסק דין.", "مسح رقيق — أساس عمل لا حكم.", "Thin scan — a working base, not a verdict."),

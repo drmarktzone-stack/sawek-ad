@@ -10,6 +10,20 @@ export const VOICE_DIALECTS: { id: VoiceDialect; label: Tri; hint: Tri }[] = [
     hint: L("ישיר, פעולה, בלי סלנג מזויף", "مباشر، فعل، بلا عامية مختلقة", "Direct, action-first"),
   },
   {
+    id: "ar-palestinian",
+    label: L("ערבית فلسطينية מדוברת", "عربي عامّي فلسطيني", "Palestinian colloquial"),
+    hint: L(
+      "פלסטינית — هاليوم, تعوا, مش — נצרת / גדה / 48",
+      "فلسطيني — هاليوم، تعوا، مش — ناصرة / ضفّة / ٤٨",
+      "Palestinian — هاليوم، تعوا — Nazareth / West Bank / 48",
+    ),
+  },
+  {
+    id: "ar-levant",
+    label: L("ערבית شامية", "عامية شامية", "Levantine Arabic"),
+    hint: L("לבנט — شو, هلق, בלי תרגום מילולי", "شامية — شو، هلق، مش ترجمة حرفية", "Levant — spoken, not a calque"),
+  },
+  {
     id: "ar-gulf",
     label: L("ערבית خليجية", "خليجية", "Gulf Arabic"),
     hint: L("מפרץ — شلون, الحين", "خليج — شلون، الحين", "Gulf — spoken register"),
@@ -18,11 +32,6 @@ export const VOICE_DIALECTS: { id: VoiceDialect; label: Tri; hint: Tri }[] = [
     id: "ar-egyptian",
     label: L("ערבית מצרית", "مصري", "Egyptian Arabic"),
     hint: L("מצרי — إزيك, دلوقتي", "مصري — إزيك، دلوقتي", "Egyptian — spoken register"),
-  },
-  {
-    id: "ar-levant",
-    label: L("ערבית شامية", "عامية شامية", "Levantine Arabic"),
-    hint: L("לבנט — شو, هلق, בלי תרגום מילולי", "شامية — شو، هلق، مش ترجمة حرفية", "Levant — spoken, not a calque"),
   },
   {
     id: "ar-light",
@@ -43,6 +52,7 @@ export const VOICE_DIALECTS: { id: VoiceDialect; label: Tri; hint: Tri }[] = [
 
 const DIALECTS: VoiceDialect[] = [
   "he",
+  "ar-palestinian",
   "ar-levant",
   "ar-gulf",
   "ar-egyptian",
@@ -134,16 +144,64 @@ export function dialectToLocale(dialect: VoiceDialect | ""): Locale {
   return "ar";
 }
 
-/** Fact lines for Gemini / templates. Never invents a dialect the user did not pick. */
-export function voiceFactLines(intake: Intake): string[] {
+/** Default spoken register when the user has not locked a dialect. AR → Palestinian. */
+export function defaultDialectForLocale(locale: Locale): VoiceDialect {
+  if (locale === "ar") return "ar-palestinian";
+  if (locale === "en") return "en";
+  return "he";
+}
+
+export function effectiveDialect(
+  intake: Pick<Intake, "voice"> | undefined,
+  locale: Locale,
+): VoiceDialect {
+  const picked = normalizeVoice(intake?.voice).dialect;
+  if (picked) return picked;
+  return defaultDialectForLocale(locale);
+}
+
+export function isPalestinianArabic(dialect: VoiceDialect | "", locale?: Locale): boolean {
+  if (dialect === "ar-palestinian") return true;
+  return !dialect && locale === "ar";
+}
+
+const EGYPTIAN_MARK = /إزيك|ازيك|دلوقتي|دلوقتى|\bأوي\b|\bاوي\b|كده\b|مش كده|دي الرسالة|إزّيك/;
+const GULF_MARK = /شلون\b|الحين\b|هذي رسالتنا|مو شعار|هذي الخدمة/;
+
+/** Wrong Arabic register in customer/diagnosis prose (Egyptian/Gulf inside Palestinian/Levant). */
+export function arabicRegisterBleed(text: string, dialect: VoiceDialect | "", locale?: Locale): boolean {
+  const pal = isPalestinianArabic(dialect, locale) || dialect === "ar-levant";
+  if (!pal) return false;
+  const s = String(text ?? "");
+  if (!s.trim()) return false;
+  return EGYPTIAN_MARK.test(s) || GULF_MARK.test(s);
+}
+
+export function dialectInstruction(dialect: VoiceDialect | "", locale: Locale): string {
+  const d = dialect || defaultDialectForLocale(locale);
+  if (d === "ar-palestinian") {
+    return "Arabic register: Palestinian colloquial (عامّي فلسطيني — ناصرة / الضفة / ٤٨). Sound like a WhatsApp/Facebook post a person from Palestine would write. Use هاليوم، تعوا، مش، شو، هون، بدكم. NOT Gulf (شلون/الحين), NOT Egyptian (إزيك/دلوقتي), NOT stiff fusHa, NOT a Hebrew calque.";
+  }
+  if (d === "ar-levant") return "Arabic register: Levantine spoken (شو، هلق). Not Gulf, not Egyptian.";
+  if (d === "ar-gulf") return "Arabic register: Gulf spoken (شلون، الحين).";
+  if (d === "ar-egyptian") return "Arabic register: Egyptian spoken (إزيك، دلوقتي).";
+  if (d === "ar-light" || d === "ar-msa") return "Arabic register: light clear fusHa — not classical, not dialect mash-up.";
+  if (d === "en") return "English: modern, short, original — not a calque.";
+  return "Hebrew: direct, action-first.";
+}
+
+/** Fact lines for Gemini / templates. AR with no pick defaults to Palestinian. */
+export function voiceFactLines(intake: Intake, locale: Locale = "he"): string[] {
   const v = voiceFromIntake(intake);
+  const dialect = effectiveDialect(intake, locale);
   const beliefs = v.beliefs.filter((b) => filled(b));
   return [
     v.niche && `coreNiche: ${v.niche}`,
     v.audience && `voiceAudience: ${v.audience}`,
     v.coreMessage && `coreMessage: ${v.coreMessage}`,
     v.personalVoice && `personalVoice: ${v.personalVoice}`,
-    v.dialect && `voiceDialect: ${v.dialect}`,
+    `voiceDialect: ${dialect}`,
+    dialectInstruction(dialect, locale),
     beliefs.length ? `voiceBeliefs: ${beliefs.join(" | ")}` : "",
     v.neverSay && `neverSay: ${v.neverSay}`,
     v.locked && "voiceLocked: true",

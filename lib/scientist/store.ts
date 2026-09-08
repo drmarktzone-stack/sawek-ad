@@ -89,13 +89,13 @@ export function getPrimaryWorkspace(): GrowthWorkspace | null {
   return null;
 }
 
-export function ingestPack(pack: CampaignPack): GrowthWorkspace {
+export function ingestPack(pack: CampaignPack, locale: import("../types").Locale = "he"): GrowthWorkspace {
   const sample = Boolean(pack.demoMeta?.sample);
   const prior = getWorkspaceByBusiness(businessIdFromName(pack.intake.businessName || pack.name || pack.id), {
     sample,
     ownerId: pack.ownerId,
   });
-  const next = workspaceFromPack(pack, prior);
+  const next = workspaceFromPack(pack, prior, locale);
   upsertWorkspace(next);
   return next;
 }

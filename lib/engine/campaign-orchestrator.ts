@@ -30,7 +30,8 @@ import { buildSiteAudit } from "./site-audit";
 import { buildPastCampaignAudit } from "./past-campaign-audit";
 import { buildCmoIdeasPack, gapCompensation, refreshIdeaFromCatalog } from "./cmo-ideas";
 import { buildResearchSkeleton } from "./research-public";
-import { clipAtWord } from "./spoken";
+import { clipAtWord, spokenHeadline } from "./spoken";
+import { customerCopyHasLeak, gateCustomerAd } from "../copy-purity";
 import { buildCampaignBrief, contradictsVertical, localeViralIdea } from "./campaign-brief";
 import { applyResearchToPack } from "./research-overlay";
 import { attachCompleteAd } from "./ad-engine/complete-ad";
@@ -97,23 +98,25 @@ export function alignVariantsToBrief(
   const vertical = brief.vertical;
   return variants.map((v) => {
     const idea = ideaByKind(ideas, v.kind) ?? ideas[0];
-    const hook = idea?.hook[v.locale] || brief.coreMessage[v.locale] || "";
+    const rawHook = idea?.hook[v.locale] || brief.coreMessage[v.locale] || "";
+    const hook = rawHook && !customerCopyHasLeak(rawHook) ? rawHook : spokenHeadline(v.kind, intake, v.locale);
     let headline = v.headline;
     let body = v.primaryText;
-    if (contradictsVertical(`${headline} ${body}`, vertical) && hook && !contradictsVertical(hook, vertical)) {
+    if (contradictsVertical(`${headline} ${body}`, vertical) && hook && !contradictsVertical(hook, vertical) && !customerCopyHasLeak(hook)) {
       headline = clipAtWord(hook, 48);
-    } else if (headlineLooksGeneric(headline, intake) && hook) {
-      headline = clipAtWord(hook, 48);
+    } else if (headlineLooksGeneric(headline, intake) || customerCopyHasLeak(headline)) {
+      headline = clipAtWord(spokenHeadline(v.kind, intake, v.locale), 48);
     }
     headline = fillIncomplete(headline, v.locale, intake, hook || intake.businessName);
-    body = fillIncomplete(body, v.locale, intake, brief.coreMessage[v.locale] || intake.description || intake.businessName);
-    if (contradictsVertical(body, vertical) && idea) {
-      const safe = `${idea.hook[v.locale]} ${intake.uniqueAdvantage || intake.location || ""}`.trim();
+    body = fillIncomplete(body, v.locale, intake, intake.description || intake.businessName);
+    if (contradictsVertical(body, vertical)) {
+      const safe = [intake.uniqueAdvantage, intake.location, intake.businessName].filter(Boolean).join(" ");
       if (safe && !contradictsVertical(safe, vertical)) body = clipAtWord(safe, 280);
     }
     headline = stripInternalMetricTalk(headline);
     body = stripInternalMetricTalk(body);
-    return { ...v, headline, primaryText: body };
+    const gated = gateCustomerAd({ headline, body, cta: v.cta }, intake, v.locale);
+    return { ...v, headline: gated.headline, primaryText: gated.body, cta: gated.cta };
   });
 }
 

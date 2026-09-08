@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useI18n } from "@/components/i18n-provider";
 import { cn } from "@/lib/utils";
 import { OverlayStatus } from "@/components/command/primitives";
+import { customerCopyHasLeak, localeScriptBleed } from "@/lib/copy-purity";
 
 export function CompleteAdCard({
   completeAd,
@@ -24,7 +25,10 @@ export function CompleteAdCard({
   const [open, setOpen] = useState(false);
   const loc = completeAd.locales[locale] || completeAd.locales.he;
   const dir = locale === "en" ? "ltr" : "rtl";
-  const text = [loc.headline, loc.copy, loc.cta].filter(Boolean).join("\n");
+  const headline = customerCopyHasLeak(loc.headline) || localeScriptBleed(loc.headline, locale) ? loc.copy.split("\n")[0] || loc.headline : loc.headline;
+  const hook = customerCopyHasLeak(loc.hook) || localeScriptBleed(loc.hook, locale) ? headline : loc.hook;
+  const copy = customerCopyHasLeak(loc.copy) || localeScriptBleed(loc.copy, locale) ? "" : loc.copy;
+  const text = [headline, copy, loc.cta].filter(Boolean).join("\n");
   const novelty =
     completeAd.noveltyStatus === "original"
       ? t("complete.noveltyOriginal")
@@ -46,16 +50,16 @@ export function CompleteAdCard({
     >
       <p className="os-kicker">{t("complete.kicker")}</p>
       <p className="mt-2 os-meta">{t("os.studio.concept")} · {loc.concept}</p>
-      <h2 className="os-title mt-2 text-3xl sm:text-5xl">{loc.headline}</h2>
+      <h2 className="os-title mt-2 text-3xl sm:text-5xl">{headline}</h2>
 
       <div className="mt-6 space-y-4">
         <div>
           <p className="os-meta">{t("os.hook")}</p>
-          <p className="mt-1 text-xl font-semibold text-navy">{loc.hook}</p>
+          <p className="mt-1 text-xl font-semibold text-navy">{hook}</p>
         </div>
         <div>
           <p className="os-meta">{t("os.primaryCopy")}</p>
-          <p className="mt-1 whitespace-pre-wrap text-base leading-relaxed text-navy">{loc.copy}</p>
+          <p className="mt-1 whitespace-pre-wrap text-base leading-relaxed text-navy">{copy}</p>
         </div>
         <div>
           <p className="os-meta">{t("os.studio.export")}</p>
@@ -82,7 +86,7 @@ export function CompleteAdCard({
 
       <div className="mt-4 flex flex-wrap items-center gap-2">
         <span className="os-badge os-badge-warn">
-          {t("complete.fact")}: {completeAd.factStatus}
+          {t("complete.fact")}: {t(`complete.fact.${completeAd.factStatus}`)}
         </span>
         <span className="os-badge os-badge-ink">{novelty}</span>
         {completeAd.validation.passed ? (
