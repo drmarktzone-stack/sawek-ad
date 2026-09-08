@@ -17,6 +17,15 @@ import { AUDIENCE_CHIPS, ADVANTAGE_CHIPS, GOAL_CHIPS, PROBLEM_CHIPS, type ChipOp
 import { emptyIntake } from "./engine/validate";
 import { detectVertical } from "./vertical";
 import { uid } from "./utils";
+import {
+  isEcommerceChromeText,
+  isMerchUpsellText,
+  isPainStatement,
+  isPediatricBusinessHay,
+  isUiChromeText,
+  isUnknownSentinel,
+  isUsableLocationValue,
+} from "./scan-truth/patterns";
 
 export const DOC_MAX_BYTES = IMAGE_MAX_BYTES;
 
@@ -237,13 +246,8 @@ const PROMO_WORD = /מבצע(?:\s+חדש)?|חיסול|הנחה|خصم|تصفية
 const CATALOG_H1 = /חדשים על המדפים|hot sale|קטלוג|catalog|new in|on the shelves/i;
 const JUNK_UI_RE =
   /איפוס סיסמה|שחזור סיסמה|התחבר(?:ות)?|\bהרשם\b|הרשמה|skip to|\bcookie\b|forgot password|\blogin\b|\blog[- ]?in\b|\bcart\b|lost.?password|woocommerce-LostPassword|have an account|create (?:an )?account|already have an account|don['’]t have an account|sign[- ]?in|sign[- ]?up|my account|reset password|remember me|newsletter/i;
-const ECOMMERCE_CHROME_RE =
-  /unlock\s+free(?:\s+shipping)?|free\s*shipping|משלוח(?:ים)? חינם|add (?:a |the )?.{0,40}\btote\b|\btote\b.{0,80}(?:finishing touch|cart|bag)|add to (?:cart|bag|basket)|הוספה לסל/i;
-const LOCATION_MARKETING_RE =
-  /enhancing |gateway into|including proposed|streetscape|urban plan|public realm|supporting pedestrians|continuous podium|\bpodium\b|street level|important gateway|proposed (?:street|improvement)|campus restaurant/i;
 const SCHEMA_CATEGORY_LABEL =
   /(?:^|\n)\s*(?:תחום|קטגוריה|المجال|category)\s*[:：]\s*(MedicalClinic|MedicalOrganization|Physician|Hospital|Dentist|Bakery|CafeOrCoffeeShop|FoodEstablishment|FastFoodRestaurant|Restaurant|ClothingStore|GroceryStore|Store)\b/i;
-const SHIPPING_PROMO = /משלוח(?:ים)? חינם|free shipping/i;
 const MEDICAL_SCHEMA_RE = /\b(Hospital|MedicalClinic|MedicalOrganization|Physician|Dentist)\b/i;
 const FOOD_SCHEMA_RE = /\b(Restaurant|FoodEstablishment|FastFoodRestaurant|CafeOrCoffeeShop)\b/i;
 /** Advantage phrasing (no queues) — never the problem field. */
@@ -295,30 +299,26 @@ export function formatIlPhone(raw: string): string {
 }
 
 
-/** Shipping/tote/unlock-free merch chrome — never an offer or problem. */
+/** Generic ecommerce chrome (shipping unlock, merch upsell, add-to-cart) — never an offer or problem. */
 export function isChromePromoText(value: string): boolean {
-  const v = value.replace(/\s+/g, " ").trim();
-  if (!v) return false;
-  return ECOMMERCE_CHROME_RE.test(v) || SHIPPING_PROMO.test(v);
+  return isEcommerceChromeText(value) || isMerchUpsellText(value);
 }
 
 /** Login/cart/cookie/shipping chrome — never a business name, problem, or advantage. */
 export function isJunkUiText(value: string): boolean {
   const v = value.replace(/\s+/g, " ").trim();
   if (!v) return true;
-  if (isChromePromoText(v)) return true;
+  if (isChromePromoText(v) || isUiChromeText(v)) return true;
   const core = v.replace(/[?؟!.]+$/g, "").trim();
   if (core.length <= 80 && JUNK_UI_RE.test(core)) return true;
   if (v.length <= 80 && JUNK_UI_RE.test(v)) return true;
   return false;
 }
 
-/** Page-owned sale (מבצע / חיסול / 1+1), not H2 shipping/tote podium. */
+/** Page-owned sale (מבצע / חיסול / 1+1), not shipping/merch podium. */
 export function isPrimaryBusinessOffer(value: string): boolean {
   const v = cleanPromoLine(value);
-  if (!v || isChromePromoText(v) || isJunkUiText(v)) return false;
-  if (/tote|\bcart\b|account|login|unlock\s+free/i.test(v)) return false;
-  if (SHIPPING_PROMO.test(v)) return false;
+  if (!v || isChromePromoText(v) || isJunkUiText(v) || isMerchUpsellText(v)) return false;
   if (!PROMO_WORD.test(v) && !/מבצע|חיסול|הנחה|خصم|تصفية|1\s*\+\s*1|\d+\s*%/.test(v)) return false;
   const stripped = v.replace(PROMO_WORD, "").replace(/[!?.\s\-–—:*#]+/g, "").trim();
   if (!stripped && !/חיסול|מבצע(?:\s+חדש)?|hot\s*sale/i.test(v)) return false;
@@ -340,23 +340,11 @@ function looksLikePostalAddress(v: string): boolean {
 
 /** Prefer PostalAddress-shaped values. Reject long marketing / urban-planning paragraphs. */
 export function isUsableLocation(value: string): boolean {
-  const v = value.replace(/\s+/g, " ").trim();
-  if (!v || v.length < 3) return false;
-  if (LOCATION_MARKETING_RE.test(v)) return false;
-  if (/\b(?:including|proposed|supporting|enhancing|gateway into)\b/i.test(v)) return false;
-  if (v.length > 160) return false;
-  const longBits = v.split(/[.!?]+/).filter((s) => s.trim().length > 25);
-  if (longBits.length >= 2) return false;
-  if (looksLikePostalAddress(v)) return true;
-  if (v.length <= 80 && !/\b(?:cafeteria|women'?s health|parent organization)\b/i.test(v)) return true;
-  return false;
+  return isUsableLocationValue(value);
 }
 
 function pediatricAudienceContext(hay: string): boolean {
-  if (/parent organization|parent company|חברת אם|founding member/i.test(hay)) return false;
-  return /pediatric|מרפאת ילדים|عيادة طب الأطفال|רופא ילדים|طبيب أطفال|ילד עם|child is unwell|when your child|תינוק|infant|toddler|חום ב[־\-]3/i.test(
-    hay,
-  );
+  return isPediatricBusinessHay(hay);
 }
 
 /** Bare women/parents/men from incidental copy — not a labeled audience. */
@@ -366,7 +354,7 @@ export function isIncidentalDemographicAudience(value: string, pageText: string)
   const hay = pageText.replace(/\s+/g, " ");
   const pediatric = pediatricAudienceContext(hay);
   const explicitWomenMen =
-    /לנשים|\bfor women\b|קהל.?נשים|לגברים|\bfor men\b|קהל.?גברים|(?:audience|קהל יעד|target audience)\s*[:：]\s*(?:women|men|נשים|גברים)/i.test(
+    /לנשים|קהל.?נשים|לגברים|קהל.?גברים|(?:audience|קהל יעד|target audience)\s*[:：]\s*(?:women|men|נשים|גברים)/i.test(
       hay,
     );
   const explicitParents =
@@ -390,7 +378,8 @@ export function acceptScanBrandValue(fieldId: IngestFieldId, incoming: string, p
   if (isJunkUiText(v) || isChromePromoText(v)) return false;
   if (fieldId === "biggestProblem") {
     if (/^(unknown|לא מכירים|unknown problem)$/i.test(v)) return false;
-    if (isChromePromoText(v) || JUNK_UI_RE.test(v.replace(/[?؟!.]+$/g, "").trim())) return false;
+    if (isChromePromoText(v) || isMerchUpsellText(v) || !isPainStatement(v)) return false;
+    if (JUNK_UI_RE.test(v.replace(/[?؟!.]+$/g, "").trim())) return false;
   }
   if (fieldId === "audience" && isIncidentalDemographicAudience(v, pageHay)) return false;
   if (fieldId === "uniqueAdvantage" && isChromePromoText(v)) return false;
@@ -408,7 +397,10 @@ export function sanitizeExtractedFields(
     if (parts.length) out.offer = parts.join(", ");
     else delete out.offer;
   }
-  if (out.biggestProblem && (isJunkUiText(out.biggestProblem) || isChromePromoText(out.biggestProblem))) {
+  if (out.biggestProblem && (isJunkUiText(out.biggestProblem) || isChromePromoText(out.biggestProblem) || isMerchUpsellText(out.biggestProblem))) {
+    delete out.biggestProblem;
+  }
+  if (out.biggestProblem && !isUnknownSentinel(String(out.biggestProblem)) && !isPainStatement(out.biggestProblem)) {
     delete out.biggestProblem;
   }
   if (out.audience) {
@@ -456,7 +448,7 @@ export function extractUnlabeledPromo(text: string): string {
     let line = cleanPromoLine(raw);
     if (!line || /^H1\s*:/i.test(raw)) continue;
     if (/^(?:תיאור|כתובת|טלפון|שעות|וואטסאפ|שם העסק|CTA|description|title)\s*:/i.test(line)) continue;
-    if (isChromePromoText(line) || SHIPPING_PROMO.test(line)) continue;
+    if (isChromePromoText(line)) continue;
     if (/דירוג|\brating\b|\bstars?\b|כוכבים/i.test(line) && !/מבצע|הנחה|خصم/.test(line)) continue;
     if (!PROMO_WORD.test(line)) continue;
     let stripped = line.replace(PROMO_WORD, "").replace(/[!?.\s\-–—:*#]+/g, "").trim();
@@ -464,7 +456,7 @@ export function extractUnlabeledPromo(text: string): string {
       line = cleanPromoLine(`${line} ${lines[i + 1]}`.replace(/\s+/g, " "));
       stripped = line.replace(PROMO_WORD, "").replace(/[!?.\s\-–—:*#]+/g, "").trim();
     }
-    if (isChromePromoText(line) || SHIPPING_PROMO.test(line)) continue;
+    if (isChromePromoText(line)) continue;
     if (line.length < 4 || line.length > 240) continue;
     if (!stripped) continue;
     if (INSTAGRAM_BIO_JUNK.test(line) || /\$\{|whatsappDisplay|contentHe:|contentAr:/.test(line)) continue;
@@ -565,7 +557,7 @@ function extractLooseAddress(text: string): string {
   for (const line of lines) {
     if (line.length < 8 || line.length > 160) continue;
     if (/אימייל|email|סיסמה|password|כתובת אימייל|lost.?password|podium|street level|have an account/i.test(line)) continue;
-    if (LOCATION_MARKETING_RE.test(line)) continue;
+    if (!isUsableLocation(line) && !ADDRESS_HINT.test(line)) continue;
     if (/^H1\s*:/i.test(line)) continue;
     if (/[|]/.test(line) && !ADDRESS_HINT.test(line)) continue;
     if (ADDRESS_HINT.test(line)) {
@@ -709,7 +701,7 @@ function firstQuestionSentence(text: string): string {
   const re = /[^?؟\n]{8,280}[?؟]/g;
   for (const m of text.matchAll(re)) {
     const q = stripProseLead(m[0] || "");
-    if (q.length >= 8 && !isJunkUiText(q) && !isCatalogHeading(q)) return q;
+    if (q.length >= 8 && !isJunkUiText(q) && !isCatalogHeading(q) && isPainStatement(q)) return q;
   }
   return "";
 }
@@ -757,7 +749,8 @@ export function fillEmptyFromPageProse(
   const acceptProblem = (raw: string, sourceForRemainder: string): boolean => {
     const v = stripProseLead(raw);
     if (!v || isBrandHeading(v, brand, h1)) return false;
-    if (isJunkUiText(v) || isCatalogHeading(v) || isChromePromoText(v)) return false;
+    if (isJunkUiText(v) || isCatalogHeading(v) || isChromePromoText(v) || isMerchUpsellText(v)) return false;
+    if (!isPainStatement(v)) return false;
     if (/^(?:תחום|קטגוריה|שם העסק|טלפון|כתובת|שעות|תיאור|CTA)\s*:/i.test(v)) return false;
     if (/^(?:Physician|MedicalClinic|Store|Restaurant|LocalBusiness)$/i.test(v)) return false;
     out.biggestProblem = v;
@@ -771,7 +764,10 @@ export function fillEmptyFromPageProse(
   if (out.businessName && (isJunkUiText(out.businessName) || isCatalogHeading(out.businessName))) {
     delete out.businessName;
   }
-  if (out.biggestProblem && (isJunkUiText(out.biggestProblem) || isCatalogHeading(out.biggestProblem))) {
+  if (out.biggestProblem && (isJunkUiText(out.biggestProblem) || isCatalogHeading(out.biggestProblem) || isChromePromoText(out.biggestProblem))) {
+    delete out.biggestProblem;
+  }
+  if (out.biggestProblem && !isUnknownSentinel(out.biggestProblem) && !isPainStatement(out.biggestProblem)) {
     delete out.biggestProblem;
   }
   if (out.biggestProblem && /^(?:תחום|קטגוריה)\s*:/i.test(out.biggestProblem)) {
@@ -800,8 +796,8 @@ export function fillEmptyFromPageProse(
     const he = hay.match(/להורים|\bהורים\b/)?.[0];
     if (pediatric || /every parent|7000\s*\+?\s*parents/i.test(hay) || (he && pediatric)) ids.push("parents");
     else if (/\bparents?\b/i.test(hay) && pediatric) ids.push("parents");
-    if (/לנשים|\bfor women\b|קהל.?נשים/i.test(hay)) ids.push("women");
-    if (/לגברים|\bfor men\b|קהל.?גברים/i.test(hay)) ids.push("men");
+    if (/לנשים|קהל.?נשים|(?:audience|קהל יעד|target audience)\s*[:：]\s*(?:women|נשים)/i.test(hay)) ids.push("women");
+    if (/לגברים|קהל.?גברים|(?:audience|קהל יעד|target audience)\s*[:：]\s*(?:men|גברים)/i.test(hay)) ids.push("men");
     const kept = ids.filter((id) => !isIncidentalDemographicAudience(id, hay));
     if (kept.length) out.audience = kept.join(",");
     else if (he && pediatric && !/\bparents?\b/i.test(hay)) out.audience = "הורים";
@@ -816,7 +812,7 @@ export function fillEmptyFromPageProse(
         hay.match(/מרפאת ילדים/) ||
         hay.match(/רופא ילדים/) ||
         hay.match(/طبيب أطفال/) ||
-        hay.match(/\bpediatrics?\b/i) ||
+        (isPediatricBusinessHay(hay) ? hay.match(/\bpediatrics?\b/i) : null) ||
         hay.match(SCHEMA_CATEGORY_LABEL);
       if (catHit) {
         let cat = (catHit[1] || catHit[0]).trim();

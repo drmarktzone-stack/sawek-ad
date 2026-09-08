@@ -17,6 +17,13 @@ import type {
 import { isNoOffer } from "../../no-offer";
 import { filled } from "../../utils";
 
+function truthText(v: string): string {
+  const t = String(v ?? "").trim();
+  if (!t) return "";
+  if (/^(unknown|לא מכירים|unknown problem)$/i.test(t)) return "";
+  return t;
+}
+
 export interface BusinessTruth {
   layer: "business_truth";
   name: string;
@@ -104,17 +111,17 @@ export function businessKey(name: string): string {
 export function buildBusinessTruth(intake: Intake): BusinessTruth {
   return {
     layer: "business_truth",
-    name: intake.businessName.trim(),
-    category: intake.category.trim(),
-    description: intake.description.trim(),
-    location: intake.location.trim(),
-    website: intake.website.trim(),
-    whatsapp: intake.whatsapp.trim(),
-    hours: intake.clinicHours.trim(),
-    audience: intake.audience.trim(),
-    problem: intake.biggestProblem.trim(),
-    advantage: intake.uniqueAdvantage.trim(),
-    offer: intake.offer.trim(),
+    name: truthText(intake.businessName),
+    category: truthText(intake.category),
+    description: truthText(intake.description),
+    location: truthText(intake.location),
+    website: truthText(intake.website),
+    whatsapp: truthText(intake.whatsapp),
+    hours: truthText(intake.clinicHours),
+    audience: truthText(intake.audience),
+    problem: truthText(intake.biggestProblem),
+    advantage: truthText(intake.uniqueAdvantage),
+    offer: truthText(intake.offer),
     offerIsNone: isNoOffer(intake.offer),
     kupaFileBy: intake.kupaFileBy.trim(),
     kupaMemberFrom: intake.kupaMemberFrom.trim(),

@@ -2,26 +2,12 @@ import { NextResponse } from "next/server";
 import { ingestUrl, inspectUrl, type UrlIngestErrorCode, type UrlIngestFields, type UrlIngestOk } from "@/lib/url-ingest";
 import { buildPastCampaignAuditFromPosts, overlayPastCampaignAudit } from "@/lib/engine/past-campaign-audit";
 import { runGeminiGenerate, type GenerateBrand } from "@/lib/engine/gemini-generate";
-import { inventsForbidden } from "@/lib/engine/coach";
-import { emptyIntake } from "@/lib/engine/validate";
-import { isJunkUiText, acceptScanBrandValue, type IngestFieldId } from "@/lib/document-ingest";
-import { filled } from "@/lib/utils";
 import { isClinicLike } from "@/lib/vertical";
-import type { Intake } from "@/lib/types";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const SCAN_TIMEOUT_MS = 10_000;
-const PAGE_TEXT_SLICE = 3500;
-
-const BRAND_TO_FIELD = [
-  ["tone", "brandTone"],
-  ["positioning", "brandPositioning"],
-  ["problem", "biggestProblem"],
-  ["advantage", "uniqueAdvantage"],
-  ["audience", "audience"],
-] as const satisfies ReadonlyArray<readonly [keyof GenerateBrand, IngestFieldId]>;
 
 function selfHosts(req: Request): string[] {
   const out: string[] = [];
@@ -56,58 +42,12 @@ function labeledFields(fields: UrlIngestFields): string {
     .join("\n");
 }
 
-function pageIntake(result: UrlIngestOk): Intake {
-  const i = emptyIntake();
-  const f = result.fields;
-  i.businessName = f.businessName ?? "";
-  i.category = f.category ?? "";
-  i.description = [labeledFields(f), result.text].filter(Boolean).join("\n");
-  i.location = f.location ?? "";
-  i.website = f.website ?? "";
-  i.whatsapp = (f.whatsapp || f.phone || "").trim();
-  i.clinicHours = f.clinicHours ?? "";
-  i.offer = f.offer ?? i.offer;
-  i.audience = f.audience ?? "";
-  i.biggestProblem = f.biggestProblem ?? "";
-  i.uniqueAdvantage = f.uniqueAdvantage ?? "";
-  i.brandTone = f.brandTone ?? "";
-  i.brandPositioning = f.brandPositioning ?? "";
-  i.mainGoal = f.mainGoal ?? "";
-  return i;
-}
-
-function scanGroundHay(result: UrlIngestOk): string {
-  return `${labeledFields(result.fields)}\n${result.text || ""}`.replace(/\s+/g, " ").toLowerCase();
-}
-
-function groundedInScanText(value: string, hay: string): boolean {
-  const v = value.replace(/\s+/g, " ").trim();
-  if (v.length < 3) return false;
-  const low = v.toLowerCase();
-  if (hay.includes(low)) return true;
-  const tokens = low.split(/[,\s/]+/).filter((t) => t.length >= 4);
-  return tokens.length > 0 && tokens.every((t) => hay.includes(t));
-}
-
 function mergeScanBrand(result: UrlIngestOk, brand: GenerateBrand): UrlIngestOk {
-  const intake = pageIntake(result);
-  const joined = [brand.tone, brand.positioning, brand.problem, brand.advantage, brand.audience].join(" ");
-  if (!joined.trim()) return result;
-  if (inventsForbidden(joined, intake)) return result;
-
-  const hay = scanGroundHay(result);
-  const fields: UrlIngestFields = { ...result.fields };
-  for (const [brandKey, fieldId] of BRAND_TO_FIELD) {
-    const incoming = brand[brandKey]?.trim();
-    if (!incoming) continue;
-    if (filled(fields[fieldId])) continue;
-    if (isJunkUiText(incoming)) continue;
-    if (!acceptScanBrandValue(fieldId, incoming, hay)) continue;
-    if (fieldId === "biggestProblem" && /^(unknown|לא מכירים|unknown problem)$/i.test(incoming)) continue;
-    if (!groundedInScanText(incoming, hay)) continue;
-    fields[fieldId] = incoming;
-  }
-  return { ...result, fields };
+  const joined = [brand.tone, brand.positioning, brand.problem, brand.advantage, brand.audience]
+    .filter((s) => String(s || "").trim())
+    .map((s) => `INFERENCE · scan: ${s.trim()}`);
+  if (!joined.length) return result;
+  return { ...result, insights: [...(result.insights ?? []), ...joined] };
 }
 
 async function withTimeout<T>(work: Promise<T>, ms: number): Promise<T | null> {
@@ -126,20 +66,19 @@ async function withTimeout<T>(work: Promise<T>, ms: number): Promise<T | null> {
 
 async function enrichScanWithGemini(result: UrlIngestOk): Promise<UrlIngestOk> {
   const facts = labeledFields(result.fields);
-  const excerpt = (result.text || "").slice(0, PAGE_TEXT_SLICE);
   const generated = await withTimeout(
     runGeminiGenerate({
-      description: `Extracted fields (facts — do not invent over these):\n${facts}\n\nPage text (visible only, not HTML):\n${excerpt}`,
+      description: `LAYER A Business Truth only (already classified). Do not treat page chrome as facts:\n${facts}`,
       audience: result.fields.audience || "",
       language: "he",
       medical: isClinicLike({
         businessName: result.fields.businessName || "",
         category: result.fields.category || "",
-        description: excerpt,
+        description: result.fields.description || "",
       }),
       mode: "scan",
       prompt:
-        "mode=scan. Interpret the extracted text only. Fill brand from this page text; empty string if not in the text. Do not put prices in brand. Never overwrite phone/address/hours/offer/name/website.",
+        "mode=scan. Output is INFERENCE / AI insights only. NEVER write into Business Truth. Empty string if not an explicit business-owned fact. Do not use nav, footer, shipping banners, reviews, blogs, or third-party widgets.",
     }),
     SCAN_TIMEOUT_MS,
   );

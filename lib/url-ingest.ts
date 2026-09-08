@@ -3,7 +3,6 @@ import {
   advantageAfterQuestionSplit,
   distinctPageAdvantage,
   extractFieldsFromText,
-  fillEmptyFromPageProse,
   formatIlPhone,
   isCatalogHeading,
   isChromePromoText,
@@ -14,6 +13,9 @@ import {
   type IngestFieldId,
 } from "./document-ingest";
 import { extractCssColors, extractLogoUrl } from "./brand-kit";
+import { runScanTruthPipeline, extraPageMayFillTruth, EXTRA_CONTACT_FIELDS } from "./scan-truth/pipeline";
+import { isEcommerceChromeText, isPainStatement, isUiChromeText, splitSentences, tokenOverlap } from "./scan-truth/patterns";
+import type { FactEvidence } from "./scan-truth/types";
 import {
   detectSocialKind,
   facebookAboutUrl,
@@ -79,6 +81,13 @@ export interface UrlIngestOk {
   posts?: SocialPost[];
   sourceKind?: "website" | "facebook" | "instagram";
   pastCampaignAudit?: PastCampaignAudit;
+  /** INFERENCE only — never Business Truth. */
+  insights?: string[];
+  scanTruth?: {
+    identityName?: string;
+    accepted: Array<{ field: string; qualification: string; sourceType: string; snippet: string }>;
+    rejected: Array<{ field: string; qualification: string; snippet: string }>;
+  };
 }
 
 export interface UrlIngestErr {
@@ -544,6 +553,16 @@ function jsonLdSiteName(sites: Record<string, unknown>[]): string {
   return "";
 }
 
+function identityBoundNodes(nodes: Record<string, unknown>[], identityName: string): Record<string, unknown>[] {
+  const id = String(identityName || "").trim();
+  if (!id) return nodes;
+  return nodes.filter((n) => {
+    const name = asString(n.name);
+    if (!name) return false;
+    return tokenOverlap(name, id) >= 1;
+  });
+}
+
 function labeledFromJsonLd(nodes: Record<string, unknown>[]): string[] {
   const lines: string[] = [];
   const push = (label: string, value: string) => {
@@ -571,14 +590,14 @@ function labeledFromJsonLd(nodes: Record<string, unknown>[]): string[] {
 
 function jsonLdName(nodes: Record<string, unknown>[]): string {
   let best = "";
-  let bestRank = -1;
+  let bestScore = -1;
   for (const n of nodes) {
     const name = asString(n.name);
     if (!name || isJunkUiText(name) || isCatalogHeading(name)) continue;
     const types = schemaTypes(n["@type"]);
     const r = types.length ? Math.max(...types.map((t) => categoryRank(t))) : 20;
-    if (r > bestRank) {
-      bestRank = r;
+    if (r > bestScore) {
+      bestScore = r;
       best = name;
     }
   }
@@ -608,7 +627,15 @@ function jsonLdPostalAddress(nodes: Record<string, unknown>[]): string {
   }
   for (const n of nodes) {
     const a = formatAddress(n.address);
-    if (a) return a;
+    if (a && isUsableLocation(a)) return a;
+  }
+  return "";
+}
+
+function jsonLdDescription(nodes: Record<string, unknown>[]): string {
+  for (const n of nodes) {
+    const d = asString(n.description);
+    if (d && !isEcommerceChromeText(d) && !isUiChromeText(d) && !isChromePromoText(d)) return clip(d, 400);
   }
   return "";
 }
@@ -930,12 +957,24 @@ export function extractScriptBundleText(js: string): string {
 }
 
 const KEEP_HOME_FIELDS = new Set<IngestFieldId>(["website", "businessName"]);
+const EXTRA_NEVER_TRUTH = new Set<IngestFieldId>([
+  "offer",
+  "audience",
+  "biggestProblem",
+  "pastHeadline",
+  "pastBody",
+  "pastCta",
+  "uniqueAdvantage",
+  "brandTone",
+  "brandPositioning",
+]);
 
 /** Fill empty extract-only slots from another page. Never overwrite, never invent. */
 export function mergeExtractedFields(primary: UrlIngestFields, extra: UrlIngestFields): UrlIngestFields {
   const out: UrlIngestFields = { ...primary };
   for (const key of Object.keys(extra) as IngestFieldId[]) {
     if (KEEP_HOME_FIELDS.has(key)) continue;
+    if (EXTRA_NEVER_TRUTH.has(key)) continue;
     const add = String(extra[key] || "").trim();
     if (!add) continue;
     if (String(out[key] || "").trim()) continue;
@@ -1148,7 +1187,15 @@ export function parseFetchedHtml(
   const ogImageRaw = metaContent(raw, "og:image") || metaContent(raw, "twitter:image");
   const ogImage = absHttpUrl(ogImageRaw, finalUrl) || undefined;
   const { nodes, sites, types } = parseJsonLd(raw);
-  const labeled = labeledFromJsonLd(nodes);
+  const identityHint = [
+    ogSiteName,
+    jsonLdName(nodes),
+    jsonLdSiteName(sites),
+    tagText(raw, "h1"),
+    shortNameFromSeoTitle(ogTitle || title),
+  ].find((c) => c && !isJunkUiText(c) && !isCatalogHeading(c) && !looksLikeSeoBusinessName(c)) || shortNameFromSeoTitle(ogTitle || title) || ogSiteName || "";
+  const jsonLdPool = identityHint ? identityBoundNodes(nodes, identityHint) : nodes;
+  const labeled = labeledFromJsonLd(jsonLdPool);
   const telScan = raw + "\n" + String(extraText || "");
   const tels = [
     ...hrefs(raw, /href\s*=\s*["']tel:([^"']+)["']/gi),
@@ -1194,7 +1241,12 @@ export function parseFetchedHtml(
   for (const cta of extractCtaTexts(raw)) labeled.push(`CTA: ${cta}`);
   const slogan = extractSlogan(raw);
   if (slogan) labeled.push(`slogan: ${slogan}`);
-  if (ogDescription) labeled.push(`תיאור: ${clip(ogDescription, 500)}`);
+  if (ogDescription) {
+    const cleanOg = splitSentences(ogDescription)
+      .filter((s) => !isEcommerceChromeText(s) && !isUiChromeText(s))
+      .join(" ");
+    if (cleanOg) labeled.push(`תיאור: ${clip(cleanOg, 500)}`);
+  }
   const visible = visibleText(raw);
   if (!addr) {
     for (const line of visible.split(/\n/)) {
@@ -1215,28 +1267,75 @@ export function parseFetchedHtml(
     h2s.push(t);
     if (h2s.length >= 4) break;
   }
-  const headerP = firstHeaderOrSeoParagraph(raw);
-  const extraBits = [ogDescription, headerP].filter((s, i, a) => s && a.indexOf(s) === i);
-  const extraProse = extraBits.join("\n");
   const extraCorpus = String(extraText || "").trim();
   const blob = [...labeled, h1 && `H1: ${h1}`, ...h2s.map((t) => `H2: ${t}`), visible, extraCorpus].filter(Boolean).join("\n");
   if (!blob.trim() && !title && !ogTitle && !nodes.length) return { ok: false, error: "empty" };
 
-  const file = filenameFromUrl(finalUrl);
-  let fields = extractFieldsFromText(blob, file);
-
   const siteUrl = submittedUrl || finalUrl;
-  if (/^https?:\/\//i.test(siteUrl)) fields.website = stripTrackingParams(siteUrl.split("#")[0]) || siteUrl.split("#")[0];
+  const seed: UrlIngestFields = {};
+  if (/^https?:\/\//i.test(siteUrl)) seed.website = stripTrackingParams(siteUrl.split("#")[0]) || siteUrl.split("#")[0];
+  const fromLd = jsonLdName(jsonLdPool);
+  const fromSite = jsonLdSiteName(sites);
+  if (fromLd && !isJunkUiText(fromLd) && !looksLikeSeoBusinessName(fromLd)) seed.businessName = clip(fromLd, 80);
+  else if (ogSiteName && !isJunkUiText(ogSiteName) && !looksLikeSeoBusinessName(ogSiteName)) seed.businessName = clip(ogSiteName, 80);
+  else if (fromSite && !isJunkUiText(fromSite) && !looksLikeSeoBusinessName(fromSite)) seed.businessName = clip(fromSite, 80);
+  const rankedCat = jsonLdCategory(jsonLdPool);
+  if (rankedCat && !isJunkUiText(rankedCat) && !isCatalogHeading(rankedCat)) seed.category = rankedCat;
+  const fromLdAddr = jsonLdPostalAddress(jsonLdPool);
+  if (fromLdAddr) seed.location = fromLdAddr;
+  const seedPhone = tels.map((t) => formatIlPhone(t) || t).find((t) => t.replace(/\D/g, "").length >= 8) || "";
+  const seedWa = was.map((w) => formatIlPhone(w) || w).find((t) => String(t).replace(/\D/g, "").length >= 8) || "";
+  if (seedPhone) seed.phone = seedPhone;
+  if (seedWa) seed.whatsapp = seedWa;
+  else if (seedPhone) seed.whatsapp = seedPhone;
+  if (addr && isUsableLocation(addr) && !seed.location) seed.location = addr;
+  const ldDesc = jsonLdDescription(jsonLdPool);
+  if (ldDesc) seed.description = ldDesc;
+  if (ogDescription && !isEcommerceChromeText(ogDescription) && !isUiChromeText(ogDescription) && !isChromePromoText(ogDescription)) {
+    const ogQuestion = splitSentences(ogDescription).find((s) => isPainStatement(s)) || "";
+    const ogAdv = advantageAfterQuestionSplit(ogDescription, ogDescription, ogQuestion);
+    if (ogAdv && ogAdv !== ogDescription && !isEcommerceChromeText(ogAdv) && !isUiChromeText(ogAdv)) {
+      seed.uniqueAdvantage = clip(ogAdv, 160);
+    }
+  }
+
+  const pipeline = runScanTruthPipeline({
+    html: raw,
+    pageUrl: siteUrl.split("#")[0] || finalUrl,
+    extraText: extraCorpus,
+    fallbackName: identityHint || seed.businessName || "",
+    seedFields: seed,
+  });
+  let fields = pipeline.fields;
+  if (seed.website) fields.website = seed.website;
+  if (seedWa) {
+    const waDigits = String(fields.whatsapp || "").replace(/\D/g, "");
+    const phoneDigits = String(fields.phone || seedPhone || "").replace(/\D/g, "");
+    if (!waDigits || waDigits === phoneDigits) fields.whatsapp = seedWa;
+  }
+  if (seedPhone && !String(fields.phone || "").trim()) fields.phone = seedPhone;
+  if (seed.location && !String(fields.location || "").trim()) fields.location = seed.location;
+  if (seed.uniqueAdvantage && (!String(fields.uniqueAdvantage || "").trim() || fields.uniqueAdvantage === fields.description)) {
+    fields.uniqueAdvantage = seed.uniqueAdvantage;
+  }
+  if (ldDesc && (!String(fields.description || "").trim() || fields.description === fields.biggestProblem)) {
+    fields.description = clip(ldDesc, 220);
+  }
+  if (ogDescription && !isEcommerceChromeText(ogDescription) && !isUiChromeText(ogDescription) && !isChromePromoText(ogDescription)) {
+    const ogQuestion = String(fields.biggestProblem || "").trim() || splitSentences(ogDescription).find((s) => isPainStatement(s)) || "";
+    const fromOg = advantageAfterQuestionSplit(ogDescription, ogDescription, ogQuestion);
+    if (fromOg && fromOg !== ogDescription && !isEcommerceChromeText(fromOg) && !isUiChromeText(fromOg) && !isChromePromoText(fromOg)) {
+      fields.uniqueAdvantage = clip(fromOg, 160);
+    }
+  }
 
   const usableName = (v: string): boolean => {
     const s = clip(v, 120);
     return Boolean(s) && !isJunkUiText(s) && !isCatalogHeading(s);
   };
   const currentName = String(fields.businessName || "").trim();
-  // Prefer og:site_name / JSON-LD / short title over long ecommerce SEO titles.
+  // Prefer og:site_name / identity-bound JSON-LD / short title over long ecommerce SEO titles.
   if (!currentName || !usableName(currentName) || looksLikeSeoBusinessName(currentName)) {
-    const fromLd = jsonLdName(nodes);
-    const fromSite = jsonLdSiteName(sites);
     const fromOgShort = shortNameFromSeoTitle(ogTitle || "");
     const fromTitleShort = shortNameFromSeoTitle(title || "");
     const fromOgTitle = clip(ogTitle || "", 120);
@@ -1249,39 +1348,25 @@ export function parseFetchedHtml(
     else if (usableName(title) && !looksLikeSeoBusinessName(title)) fields.businessName = clip(title, 120);
     else if (!currentName || !usableName(currentName)) delete fields.businessName;
   }
-  if (ogDescription) {
-    const current = String(fields.description || "").trim();
-    if (!current || current.length < 40) fields.description = clip(ogDescription, 500);
-  }
-  const rankedCat = jsonLdCategory(nodes);
   if (rankedCat && !isJunkUiText(rankedCat) && !isCatalogHeading(rankedCat)) {
     const cur = String(fields.category || "").trim();
     if (!cur || categoryRank(rankedCat) > categoryRank(cur)) fields.category = rankedCat;
   }
-  const fromLdAddr = jsonLdPostalAddress(nodes);
   if (fromLdAddr) fields.location = fromLdAddr;
   else if (fields.location && !isUsableLocation(fields.location)) delete fields.location;
-  fields = fillEmptyFromPageProse(fields, blob, extraProse);
-  if (rankedCat && !isJunkUiText(rankedCat) && !isCatalogHeading(rankedCat)) {
-    const cur = String(fields.category || "").trim();
-    if (!cur || categoryRank(rankedCat) > categoryRank(cur)) fields.category = rankedCat;
-  }
-  if (fromLdAddr) fields.location = fromLdAddr;
-  fields = sanitizeExtractedFields(fields, blob);
+  fields = sanitizeExtractedFields(fields, pipeline.businessCorpus);
   if (fromLdAddr && !fields.location) fields.location = fromLdAddr;
   syncPhoneWhatsappFields(fields);
   if (!fields.uniqueAdvantage || fields.uniqueAdvantage === fields.description) {
-    const distinct = distinctPageAdvantage([ogDescription, extraProse, blob].filter(Boolean).join("\n"), fields.description || "");
+    const distinct = distinctPageAdvantage(pipeline.businessCorpus, fields.description || "");
     if (distinct) fields.uniqueAdvantage = distinct;
     else if (fields.uniqueAdvantage === fields.description) delete fields.uniqueAdvantage;
   }
-  if (slogan && !fields.brandPositioning) fields.brandPositioning = clip(slogan, 160);
-  if (ogDescription && fields.biggestProblem && !isJunkUiText(fields.biggestProblem || "")) {
-    const splitAdv = advantageAfterQuestionSplit(fields.uniqueAdvantage, ogDescription, fields.biggestProblem);
-    if (splitAdv && splitAdv !== fields.description && !/^[\s,،;:·]+/.test(splitAdv)) {
-      fields.uniqueAdvantage = splitAdv;
-    }
+  if (slogan && !fields.brandPositioning && !isEcommerceChromeText(slogan) && !isUiChromeText(slogan)) {
+    fields.brandPositioning = clip(slogan, 160);
   }
+
+  const file = filenameFromUrl(finalUrl);
 
   if (pageLooksLikeAd(finalUrl, blob)) {
     const adLines = [
@@ -1340,6 +1425,20 @@ export function parseFetchedHtml(
     title: title || ogTitle || "",
     text,
     fields,
+    scanTruth: {
+      identityName: pipeline.identity.name,
+      accepted: pipeline.accepted.map((e: FactEvidence) => ({
+        field: e.field,
+        qualification: e.qualification,
+        sourceType: e.sourceType,
+        snippet: e.snippet,
+      })),
+      rejected: pipeline.rejected.map((e: FactEvidence) => ({
+        field: e.field,
+        qualification: e.qualification,
+        snippet: e.snippet,
+      })),
+    },
   };
   if (ogImage) out.ogImage = ogImage;
   if (pageImages.length) out.images = pageImages.slice(0, URL_MAX_IMAGES);
@@ -1577,15 +1676,22 @@ async function fetchExtraPages(
 function mergeUrlIngestResults(home: UrlIngestOk, extras: UrlIngestOk[]): UrlIngestOk {
   let fields: UrlIngestFields = { ...home.fields };
   for (const ex of extras) {
-    fields = mergeExtractedFields(fields, ex.fields);
+    if (!extraPageMayFillTruth(ex.url)) continue;
+    const contactOnly: UrlIngestFields = {};
+    for (const k of EXTRA_CONTACT_FIELDS) {
+      const v = String(ex.fields[k] || "").trim();
+      if (v) contactOnly[k] = ex.fields[k];
+    }
+    fields = mergeExtractedFields(fields, contactOnly);
   }
   if (home.fields.website) fields.website = home.fields.website;
   if (home.fields.businessName) fields.businessName = home.fields.businessName;
   const text = clip([home.text, ...extras.map((e) => e.text)].filter(Boolean).join("\n"), URL_TEXT_CAP);
-  const fromAll = extractFieldsFromText(text, filenameFromUrl(home.url));
-  fields = mergeExtractedFields(fields, fromAll);
-  fields = fillEmptyFromPageProse(fields, text);
-  fields = sanitizeExtractedFields(fields, text);
+  const factsHay = Object.values(fields)
+    .map((v) => String(v || "").trim())
+    .filter(Boolean)
+    .join("\n");
+  fields = sanitizeExtractedFields(fields, factsHay);
   if (home.fields.website) fields.website = home.fields.website;
   if (home.fields.businessName) fields.businessName = home.fields.businessName;
   const ogImage = home.ogImage || extras.find((e) => e.ogImage)?.ogImage;
@@ -1598,6 +1704,7 @@ function mergeUrlIngestResults(home: UrlIngestOk, extras: UrlIngestOk[]): UrlIng
   if (ogImage && !images.includes(ogImage)) images.unshift(ogImage);
   const jsonLdHits: string[] = [...(home.jsonLdHits ?? [])];
   for (const e of extras) {
+    if (!extraPageMayFillTruth(e.url)) continue;
     for (const t of e.jsonLdHits ?? []) {
       if (!jsonLdHits.includes(t)) jsonLdHits.push(t);
     }
@@ -1607,7 +1714,13 @@ function mergeUrlIngestResults(home: UrlIngestOk, extras: UrlIngestOk[]): UrlIng
     const cur = String(fields.category || "").trim();
     if (!cur || categoryRank(bestHit) > categoryRank(cur)) fields.category = bestHit;
   }
-  fields = sanitizeExtractedFields(fields, text);
+  fields = sanitizeExtractedFields(
+    fields,
+    Object.values(fields)
+      .map((v) => String(v || "").trim())
+      .filter(Boolean)
+      .join("\n"),
+  );
   const colors: string[] = [...(home.colors ?? [])];
   for (const e of extras) {
     for (const c of e.colors ?? []) {
