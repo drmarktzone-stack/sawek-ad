@@ -18,6 +18,10 @@ import { pickHero } from "../../media-assets";
 const MAX_ATTEMPTS = 4;
 
 export function attachCompleteAd(pack: CampaignPack, opts?: { rotate?: boolean }): CampaignPack {
+  // Overlay / brief re-sync must not rebuild a package the novelty gate already accepted.
+  if (opts?.rotate === false && pack.completeAd?.family && pack.completeAd.fingerprint) {
+    return pack;
+  }
   const built = buildCompleteAd(pack, opts);
   if (!built) return pack;
   return { ...pack, completeAd: built, updatedAt: new Date().toISOString() };

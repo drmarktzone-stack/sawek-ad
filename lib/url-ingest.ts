@@ -545,11 +545,34 @@ function jsonLdName(nodes: Record<string, unknown>[]): string {
 }
 
 function jsonLdCategory(nodes: Record<string, unknown>[]): string {
+  const rank: Record<string, number> = {
+    hospital: 100,
+    medicalclinic: 95,
+    physician: 90,
+    dentist: 88,
+    medicalorganization: 85,
+    bakery: 80,
+    cafeorcoffeeshop: 78,
+    clothingstore: 70,
+    grocerystore: 68,
+    store: 50,
+    restaurant: 40,
+    foodestablishment: 38,
+    fastfoodrestaurant: 36,
+  };
+  let best = "";
+  let bestRank = -1;
   for (const n of nodes) {
     const types = schemaTypes(n["@type"]).filter((t) => !GENERIC_SCHEMA.has(t.toLowerCase()));
-    if (types[0]) return types[0];
+    for (const t of types) {
+      const r = rank[t.toLowerCase()] ?? 20;
+      if (r > bestRank) {
+        bestRank = r;
+        best = t;
+      }
+    }
   }
-  return "";
+  return best;
 }
 
 function pageLooksLikeAd(finalUrl: string, text: string): boolean {
