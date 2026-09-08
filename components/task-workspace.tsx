@@ -89,6 +89,11 @@ export function TaskWorkspace() {
 
   const palette = paletteForIntake(intake);
   const complete = pack?.completeAd;
+  const openHitl =
+    Boolean(pack) &&
+    (loadDraft().phase === "agents" ||
+      pack?.diagnosis.approved === false ||
+      pack?.agentStatus.diagnostic === "needs_approval");
 
   return (
     <OsPage data-testid="task-workspace" dir={locale === "en" ? "ltr" : "rtl"}>
@@ -235,7 +240,7 @@ export function TaskWorkspace() {
             </div>
           </OsSection>
 
-          <OsDisclosure summary={t("task.fullCampaign")}>
+          <OsDisclosure summary={t("task.fullCampaign")} defaultOpen={openHitl}>
             <WizardFlow embedded taskMode />
           </OsDisclosure>
         </>

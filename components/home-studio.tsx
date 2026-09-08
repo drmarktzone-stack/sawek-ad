@@ -185,7 +185,7 @@ export function HomeStudio() {
         </div>
       </OsDisclosure>
 
-      <div id="studio" className="relative mx-auto mt-4 max-w-4xl px-3 pb-24 sm:px-4 safe-pb">
+      <div id="studio" className="relative mx-auto mt-4 max-w-4xl px-3 pb-32 sm:px-4 safe-pb">
         <p className="os-kicker mb-3">{t("os.buildCampaign")}</p>
         <div className="overflow-hidden border-t border-[var(--line)] pt-4">
           <WizardFlow key={wizardKey} embedded />

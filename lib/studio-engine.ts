@@ -1,13 +1,30 @@
-import type { Locale, SelfPlan, SelfProfile, StudioPiece } from "./types";
+import type { Intake, Locale, SelfPlan, SelfProfile, StudioPiece } from "./types";
 import { uid } from "./utils";
 import { isNoOffer } from "./no-offer";
+import { copyLeaksClinic, scrubClinicCopy } from "./clinic-leak";
+import { sanitizeForLocale } from "./channel-copy";
+
+function seedFromIntake(intake: Intake | undefined, locale: Locale): string {
+  if (!intake) return "";
+  const bits = [intake.uniqueAdvantage, intake.biggestProblem, intake.businessName, intake.category];
+  for (const bit of bits) {
+    const s = String(bit ?? "").trim();
+    if (s && !copyLeaksClinic(s)) return s;
+  }
+  return intake.businessName.trim();
+}
 
 export function generateStudioVariants(
   kind: StudioPiece["kind"],
   idea: string,
   locale: Locale,
+  intake?: Intake,
 ): { title: string; body: string }[] {
-  const seed = idea.trim() || (locale === "he" ? "רעיון לא מולא" : locale === "ar" ? "الفكرة غير مملوءة" : "Idea not filled");
+  const requested = idea.trim();
+  const usable = requested && !copyLeaksClinic(requested) ? requested : seedFromIntake(intake, locale);
+  const seed =
+    scrubClinicCopy(usable, intake ?? {}) ||
+    (locale === "he" ? "רעיון לא מולא" : locale === "ar" ? "الفكرة غير مملوءة" : "Idea not filled");
   if (locale === "he") {
     const map: Record<StudioPiece["kind"], { title: string; body: string }[]> = {
       headline: [
@@ -36,20 +53,29 @@ export function generateStudioVariants(
         { title: "PS", body: isNoOffer("") ? "אין מבצע בשורת הסיום אלא אם באמת יש." : "" },
       ],
     };
-    return map[kind];
+    return map[kind].map((row) => ({
+      title: row.title,
+      body: sanitizeForLocale(scrubClinicCopy(row.body, intake ?? {}) || seed, locale),
+    }));
   }
   if (locale === "ar") {
     return [
       { title: "مباشر", body: seed },
       { title: "أقصر", body: seed.slice(0, 140) },
       { title: "CTA", body: `${seed}\n\nإذا كان مناسباً — اكتبوا، لا «لايك للتفاصيل».` },
-    ];
+    ].map((row) => ({
+      title: row.title,
+      body: sanitizeForLocale(scrubClinicCopy(row.body, intake ?? {}) || seed, locale),
+    }));
   }
   return [
     { title: "Direct", body: seed },
     { title: "Shorter", body: seed.slice(0, 140) },
     { title: "CTA", body: `${seed}\n\nIf this is relevant — write back. No “like for details”.` },
-  ];
+  ].map((row) => ({
+    title: row.title,
+    body: sanitizeForLocale(scrubClinicCopy(row.body, intake ?? {}) || seed, locale),
+  }));
 }
 
 export function weekPlan(profile: SelfProfile): SelfPlan {

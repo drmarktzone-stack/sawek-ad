@@ -244,7 +244,7 @@ export function Footer() {
   const pathname = usePathname();
   if (pathname.startsWith("/lp/")) return null;
   return (
-    <footer className="safe-pb mt-auto border-t border-white/10 bg-[#08111F] py-10 text-center text-sm text-[#C9D0D8]">
+    <footer className="has-dock mt-auto border-t border-white/10 bg-[#08111F] py-10 text-center text-sm text-[#C9D0D8]">
       <p className="mb-1 font-[family-name:var(--font-display-he)] text-lg font-bold text-[#F7F3EA]">
         {t("brand.name")} · {t("os.kicker")}
       </p>

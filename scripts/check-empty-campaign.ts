@@ -163,6 +163,8 @@ if (src.wizard.includes('channelNotes: "facebook, instagram"')) fail("wizard mus
 if (!src.active.includes("isPublishedDemoId")) fail("latestPack must skip published demo packs");
 if (!src.empty.includes("clearPediatricMedicalLeftovers")) fail("new campaign must wipe pediatric medical leftovers");
 if (!src.empty.includes("clearDemoScientistWorkspaces")) fail("new campaign must wipe demo scientist leftovers");
+if (!src.empty.includes("isolateStudioToIntake")) fail("new campaign must isolate studio library from clinic leftovers");
+if (!src.active.includes("loadDraft")) fail("latestPack must follow the current draft business");
 if (!src.active.includes("wantsEmptyCampaign")) fail("latestPack must stay empty during New Campaign");
 const leak = readFileSync(join(process.cwd(), "lib/clinic-leak.ts"), "utf8");
 if (!leak.includes("Olive Kitchen") || !leak.includes("Sand Boutique")) fail("empty-session blocklist must include olive/sand demos");

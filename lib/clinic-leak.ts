@@ -1,3 +1,5 @@
+import { detectVertical } from "./vertical";
+
 /** Demo identity markers. Used to keep New Campaign from restoring any sample demo. */
 const CLINIC_NAME_RE =
   /052-?8885800|drsamerped|אבו מוך|أبو مخ|أبو موخ|Abu Mokh|סאמר|سامر|Samer Abu|Al-Nour|مجمع النور|אל-נור/i;
@@ -50,11 +52,46 @@ export function intakeIsDemoBusiness(intake: {
   return intakeIsClinicDemo(intake) || PUBLISHED_DEMO_RE.test(blob);
 }
 
+/** Pediatric / clinic demo copy that must never seed a different business. */
+export const PEDIATRIC_CLINIC_COPY_RE =
+  /فحص شامل لكل طفل|واعطاءه الوقت الكافي|واعطائه الوقت الكافي|الوقت الكافي لكل|لكل طفل|طبيب أطفال|عيادة أطفال|عيادة طب الأطفال|رعاية طبية|الولد مريض|جيبوه عالعيادة|بدون طوابير|بدون انتظار|كلاليت|מרפאת ילדים|רופא ילדים|הילד חולה|סדר הגעה|לפי סדר הגעה|drsamerped|أبو مخ|אבו מוך|052-?8885800|סאמר|سامر أبو مخ/i;
+
 export function draftLeaksClinic(value: unknown): boolean {
   try {
     const blob = typeof value === "string" ? value : JSON.stringify(value ?? "");
-    return /052-?8885800|drsamerped|אבו מוך/.test(blob);
+    return /052-?8885800|drsamerped|אבו מוך/.test(blob) || PEDIATRIC_CLINIC_COPY_RE.test(blob);
   } catch {
     return false;
   }
+}
+
+export function copyLeaksClinic(text: string): boolean {
+  const blob = String(text ?? "");
+  if (!blob.trim()) return false;
+  return PEDIATRIC_CLINIC_COPY_RE.test(blob);
+}
+
+/** Drop pediatric/clinic leftover sentences when the current business is not a clinic. */
+export function scrubClinicCopy(
+  text: string,
+  intake: {
+    businessName?: string;
+    category?: string;
+    description?: string;
+    website?: string;
+    location?: string;
+  },
+): string {
+  const raw = String(text ?? "");
+  if (!raw.trim()) return "";
+  if (
+    detectVertical({
+      businessName: intake.businessName ?? "",
+      category: intake.category ?? "",
+      description: intake.description ?? "",
+    }) === "clinic"
+  )
+    return raw;
+  if (!copyLeaksClinic(raw)) return raw;
+  return "";
 }
