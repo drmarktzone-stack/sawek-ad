@@ -86,8 +86,8 @@ export function buildPostingCalendar(pack: CampaignPack, locale: Locale, days = 
     kind: PostingKind;
   }> = [
     { day: 1, channel: "facebook", formatId: "feed_191", formatLabel: { he: "פיד 1.91:1", ar: "خلاصة 1.91:1", en: "Feed 1.91:1" }, src: piece(strong), ideaIndex: 0, kind: "post" },
-    { day: 2, channel: "instagram", formatId: "ig_1x1", formatLabel: { he: "פוסט 1:1", ar: "منشور 1:1", en: "Post 1:1" }, src: piece(strong), ideaIndex: 0, kind: "post" },
-    { day: 3, channel: "instagram", formatId: "ig_4x5", formatLabel: { he: "4:5", ar: "4:5", en: "4:5" }, src: piece(emotion), ideaIndex: 1, kind: "post" },
+    { day: 2, channel: "instagram", formatId: "ig_1x1", formatLabel: { he: "פוסט 1:1", ar: "منشور 1:1", en: "Post 1:1" }, src: piece(emotion), ideaIndex: 1, kind: "post" },
+    { day: 3, channel: "instagram", formatId: "ig_4x5", formatLabel: { he: "4:5", ar: "4:5", en: "4:5" }, src: piece(edge), ideaIndex: 2, kind: "post" },
     { day: 4, channel: "tiktok", formatId: "story_9x16", formatLabel: { he: "9:16", ar: "9:16", en: "9:16" }, src: piece(short), ideaIndex: 1, kind: "script" },
     { day: 5, channel: "whatsapp", formatId: "whatsapp", formatLabel: { he: "הודעה", ar: "رسالة", en: "Message" }, src: { headline: fields.pageName, body: fields.waScript, cta: fields.cta }, ideaIndex: 2, kind: "post" },
     { day: 6, channel: "facebook", formatId: "feed_191", formatLabel: { he: "פיד — זווית יתרון", ar: "خلاصة — زاوية الميزة", en: "Feed — advantage angle" }, src: piece(edge), ideaIndex: 2, kind: "post" },

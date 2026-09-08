@@ -1,12 +1,13 @@
 "use client";
 
-import type { Locale, MediaAssetMeta } from "@/lib/types";
+import type { ImageCompositionDecision, ImageCompositionMode, Locale, MediaAssetMeta } from "@/lib/types";
 import { isOfferedAsset, pickAsset, pickHero } from "@/lib/media-assets";
 import { useResolvedAssets } from "@/lib/use-resolved-assets";
 import { sampleLabel } from "@/lib/operating-model";
 import { dirFor } from "@/lib/i18n";
 import { isRedundantKicker } from "@/lib/channel-copy";
 import { cn } from "@/lib/utils";
+import { decideComposition } from "@/lib/engine/image-composition";
 
 export type AdPosterChannel = "facebook" | "instagram" | "tiktok" | "whatsapp";
 
@@ -115,6 +116,7 @@ function TypeBlock({
   ink,
   accent,
   onPhoto,
+  safeTop,
 }: {
   locale: Locale;
   channel?: AdPosterChannel;
@@ -126,6 +128,7 @@ function TypeBlock({
   ink: string;
   accent: string;
   onPhoto: boolean;
+  safeTop?: boolean;
 }) {
   const dir = dirFor(locale);
   const ctaColor = inkOn(accent);
@@ -145,7 +148,8 @@ function TypeBlock({
         "relative z-[1] box-border flex h-full min-h-0 w-full flex-col text-start",
         // Safe padding on all four Magic Resize frames (1.91 / 1:1 / 4:5 / 9:16).
         tt && "justify-end gap-2 pb-[38%] ps-5 pe-[4.75rem] pt-14",
-        onPhoto && !tt && "justify-end gap-3 px-6 py-7",
+        onPhoto && !tt && !safeTop && "justify-end gap-3 px-6 py-7",
+        onPhoto && !tt && safeTop && "justify-start gap-3 px-6 pb-7 pt-7",
         !onPhoto && fb && "justify-between gap-2 px-6 py-4 ps-7",
         !onPhoto && ig && "justify-between gap-2.5 px-6 py-6",
         !onPhoto && wa && "justify-end gap-2.5 p-5",
@@ -223,6 +227,7 @@ export function AdVisual({
   hoursChips,
   channel,
   fallbackSrc,
+  composition,
 }: {
   locale: Locale;
   palette: string[];
@@ -240,6 +245,7 @@ export function AdVisual({
   hoursChips?: string[];
   channel?: AdPosterChannel;
   fallbackSrc?: string | null;
+  composition?: ImageCompositionDecision;
 }) {
   void _unusedGraphicLabel;
   const assetUrl = asset?.publicSrc || (asset ? urls[asset.id] : undefined);
@@ -252,36 +258,71 @@ export function AdVisual({
   const hasPlate = Boolean(showPhoto || showVideo);
   const posterHeadline = (headline ?? "").trim();
   const hasPosterType = Boolean(posterHeadline);
+  const decided = composition ?? decideComposition({ asset });
+  let mode: ImageCompositionMode = hasPlate ? decided.mode : "overlay_safe";
+  // Feed/chat chrome already prints headline under the media — don't add a second type plate.
+  if (
+    hasPlate &&
+    (channel === "facebook" || channel === "instagram" || channel === "whatsapp") &&
+    (mode === "separate_headline" || mode === "image_only")
+  ) {
+    mode = "image_only";
+  }
+  const overlayOnPhoto =
+    hasPlate &&
+    hasPosterType &&
+    (mode === "overlay_safe" || mode === "safe_zone_top" || mode === "safe_zone_bottom");
+  const separateHeadline = hasPlate && hasPosterType && (mode === "separate_headline" || mode === "image_only");
+  const imageOnly = mode === "image_only";
   const bg = palette[0] ?? "#F6F1E8";
   const accent = palette[1] ?? "#2A6F6A";
-  const ink = posterInk(bg, hasPlate);
+  const ink = posterInk(bg, overlayOnPhoto);
   const emptySample = !hasPlate && !hasPosterType && !children;
 
   return (
     <div
       className={cn(
         "relative box-border overflow-hidden",
-        !hasPosterType && "flex flex-col justify-end p-3",
+        separateHeadline && "flex flex-col",
+        !hasPosterType && !separateHeadline && "flex flex-col justify-end p-3",
         className ?? "h-36",
       )}
-      style={hasPlate ? undefined : { background: bg }}
+      style={hasPlate && !separateHeadline ? undefined : { background: bg }}
+      data-image-composition={mode}
+      data-image-collision={decided.collision ? "1" : "0"}
     >
       {!hasPlate ? <Atmosphere palette={palette} channel={channel} /> : null}
       {showPhoto && url && (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={url} alt={asset?.name || ""} className="absolute inset-0 h-full w-full object-cover" />
+        <img
+          src={url}
+          alt={asset?.name || ""}
+          className={cn(
+            separateHeadline ? "relative h-[68%] w-full object-cover" : "absolute inset-0 h-full w-full object-cover",
+          )}
+        />
       )}
       {showVideo && assetUrl && (
-        <video src={assetUrl} className="absolute inset-0 h-full w-full object-cover" muted playsInline loop />
+        <video
+          src={assetUrl}
+          className={cn(
+            separateHeadline ? "relative h-[68%] w-full object-cover" : "absolute inset-0 h-full w-full object-cover",
+          )}
+          muted
+          playsInline
+          loop
+        />
       )}
-      {hasPlate && (
+      {overlayOnPhoto && (
         <div
           className="absolute inset-0"
           style={{
             background:
-              channel === "tiktok"
-                ? "linear-gradient(to bottom, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.12) 42%, rgba(0,0,0,0.78) 100%)"
-                : "linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.28) 42%, rgba(0,0,0,0.12) 100%)",
+              mode === "safe_zone_top"
+                ? "linear-gradient(to bottom, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.22) 38%, rgba(0,0,0,0.08) 100%)"
+                : channel === "tiktok"
+                  ? "linear-gradient(to bottom, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.12) 42%, rgba(0,0,0,0.78) 100%)"
+                  : "linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.28) 42%, rgba(0,0,0,0.12) 100%)",
           }}
         />
       )}
@@ -290,7 +331,7 @@ export function AdVisual({
           {sample}
         </span>
       ) : null}
-      {hasPosterType ? (
+      {overlayOnPhoto ? (
         <TypeBlock
           locale={locale}
           channel={channel}
@@ -301,7 +342,38 @@ export function AdVisual({
           hoursChips={hoursChips}
           ink={ink}
           accent={accent}
-          onPhoto={hasPlate}
+          onPhoto
+          safeTop={mode === "safe_zone_top"}
+        />
+      ) : null}
+      {separateHeadline && hasPosterType && !imageOnly ? (
+        <div className="relative z-[1] min-h-[32%] w-full" style={{ background: bg }}>
+          <TypeBlock
+            locale={locale}
+            channel={channel}
+            kicker={kicker}
+            headline={posterHeadline}
+            body={body}
+            cta={cta}
+            hoursChips={hoursChips}
+            ink={posterInk(bg, false)}
+            accent={accent}
+            onPhoto={false}
+          />
+        </div>
+      ) : null}
+      {!hasPlate && hasPosterType ? (
+        <TypeBlock
+          locale={locale}
+          channel={channel}
+          kicker={kicker}
+          headline={posterHeadline}
+          body={body}
+          cta={cta}
+          hoursChips={hoursChips}
+          ink={ink}
+          accent={accent}
+          onPhoto={false}
         />
       ) : null}
       {children ? <div className="relative z-[1]">{children}</div> : null}
@@ -319,6 +391,7 @@ export function CampaignAdVisual({
   headline,
   cta,
   fallbackSrc,
+  composition,
 }: {
   locale: Locale;
   palette: string[];
@@ -329,12 +402,23 @@ export function CampaignAdVisual({
   headline?: string;
   cta?: string;
   fallbackSrc?: string | null;
+  composition?: ImageCompositionDecision;
 }) {
   const urls = useResolvedAssets(assets);
   const offered = (assets ?? []).find((a) => a.kind === "image" && a.label !== "logo" && isOfferedAsset(a));
   const asset = offered ?? pickHero(assets) ?? pickAsset(assets, index);
   return (
-    <AdVisual locale={locale} palette={palette} asset={asset} urls={urls} className={className} headline={headline} cta={cta} fallbackSrc={fallbackSrc}>
+    <AdVisual
+      locale={locale}
+      palette={palette}
+      asset={asset}
+      urls={urls}
+      className={className}
+      headline={headline}
+      cta={cta}
+      fallbackSrc={fallbackSrc}
+      composition={composition}
+    >
       {headline ? null : children}
     </AdVisual>
   );

@@ -20,10 +20,11 @@ function factsFromIntake(pack: CampaignPack) {
     location: i.location,
     website: i.website,
     niche: i.voice?.niche,
+    mainGoal: i.mainGoal,
   };
 }
 
-function SourceCard({ card, locale }: { card: ResearchSourceCard; locale: Locale }) {
+function SourceCard({ card, locale, onRetry }: { card: ResearchSourceCard; locale: Locale; onRetry?: () => void }) {
   const { t } = useI18n();
   const empty = !card.examples.length && !card.notes.length;
   return (
@@ -40,14 +41,38 @@ function SourceCard({ card, locale }: { card: ResearchSourceCard; locale: Locale
         </span>
       </div>
       {empty ? (
-        <p className="mt-3 text-sm leading-relaxed text-[#C9D0D8]">
-          {card.emptyReason?.[locale] || card.emptyReason?.en || t("research.empty")}
-        </p>
+        <div className="mt-3">
+          <p className="text-sm leading-relaxed text-[#C9D0D8]">
+            {card.emptyReason?.[locale] || card.emptyReason?.en || t("research.empty")}
+          </p>
+          <p className="mt-2 text-[11px] font-bold uppercase tracking-wide text-[#C9B896]">{t("research.unknownHonest")}</p>
+          {card.alternateSources?.length ? (
+            <ul className="mt-2 space-y-1">
+              {card.alternateSources.map((alt) => (
+                <li key={alt.url}>
+                  <a href={alt.url} target="_blank" rel="noreferrer" className="text-[12px] font-bold text-[#9FD4C8]">
+                    {t("research.alternate")}: {alt.label[locale] || alt.label.en}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          {onRetry && (card.retryable || empty) ? (
+            <button type="button" className="mt-3 text-[12px] font-black text-[#F5C518] underline-offset-2 hover:underline" onClick={onRetry}>
+              {t("research.retry")}
+            </button>
+          ) : null}
+        </div>
       ) : (
         <ul className="mt-3 space-y-3">
           {card.examples.map((ex) => (
             <li key={ex.id} className="text-sm leading-relaxed text-[#F7F3EA]">
               <p className="font-black">{ex.title[locale] || ex.title.en}</p>
+              <p className="mt-0.5 text-[11px] font-bold uppercase tracking-wide text-[#9FD4C8]">
+                {t("research.source")}: {card.label[locale] || card.id}
+                {ex.kind === "search_suggestion" ? ` · ${t("research.searchIdea")}` : ""}
+                {ex.queryUsed ? ` · ${t("research.queryUsed")}: ${ex.queryUsed}` : ""}
+              </p>
               {ex.advertiser || ex.page ? (
                 <p className="mt-0.5 text-xs text-[#9FD4C8]">
                   {t("research.advertiser")}: {ex.advertiser || ex.page}
@@ -142,6 +167,16 @@ export function ResearchDesk({
   }, [pack.id, pack.research?.fetched]);
 
   const notes = research?.notes ?? pack.cmoIdeas?.groundedNotes ?? [];
+  const sources = [...(research?.sources ?? [])].sort((a, b) => {
+    const rank = (id: string) => (id === "google_suggest" ? 0 : id === "youtube_suggest" ? 1 : 2);
+    return rank(a.id) - rank(b.id);
+  });
+
+  function retry() {
+    if (!onPack) return;
+    const skeleton = buildResearchSkeleton(pack.intake);
+    onPack({ ...pack, research: { ...skeleton, fetched: false }, updatedAt: new Date().toISOString() });
+  }
 
   return (
     <section
@@ -158,15 +193,30 @@ export function ResearchDesk({
           {research.asOf ? ` · ${t("research.asOf")} ${research.asOf.slice(0, 10)}` : ""}
         </p>
       ) : null}
+      {research?.queries?.length ? (
+        <p className="mt-1 text-[11px] text-[#C9B896]" data-testid="research-queries">
+          {t("research.queries")}: {research.queries.join(" · ")}
+        </p>
+      ) : null}
       <p className="mt-2 text-xs font-semibold text-[#C9B896]">
         {research?.disclaimer?.[locale] || t("research.disclaimer")}
       </p>
+      {onPack ? (
+        <button
+          type="button"
+          data-testid="research-retry"
+          className="mt-3 text-[12px] font-black text-[#F5C518] underline-offset-2 hover:underline"
+          onClick={retry}
+        >
+          {t("research.retry")}
+        </button>
+      ) : null}
       {busy && !research?.fetched ? (
         <p className="mt-4 text-sm text-[#9FD4C8]">{t("research.loading")}</p>
       ) : null}
       <div className={`mt-5 grid gap-3 ${compact ? "grid-cols-1" : "md:grid-cols-2"}`}>
-        {(research?.sources ?? []).map((card) => (
-          <SourceCard key={card.id} card={card} locale={locale} />
+        {sources.map((card) => (
+          <SourceCard key={card.id} card={card} locale={locale} onRetry={onPack ? retry : undefined} />
         ))}
       </div>
       {notes.length ? (

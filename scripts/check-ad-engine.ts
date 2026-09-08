@@ -10,6 +10,7 @@ import { generateVariants } from "../lib/engine/copy";
 import { extractDna, workspaceFromPack } from "../lib/scientist/engines";
 import { hasSocialProofFacts } from "../lib/engine/angles";
 import { buildUserMessage } from "../lib/engine/gemini-generate";
+import { buildPostingCalendar } from "../lib/engine/posting-calendar";
 import {
   resetCreativeMemory,
   loadCreativeHistory,
@@ -70,11 +71,27 @@ for (let i = 0; i < 5; i++) {
 const families = bakeryPacks.map((p) => p.completeAd?.family);
 const hashes = bakeryPacks.map((p) => p.completeAd?.fingerprint.hash);
 if (bakeryPacks.some((p) => !p.completeAd)) fail("each generation must produce a complete ad");
-if (new Set(families).size < 3) fail(`5 consecutive generations not diverse enough: ${families.join(",")}`);
-if (new Set(hashes).size < 3) fail(`5 consecutive fingerprint hashes too similar: ${hashes.join(",")}`);
+if (new Set(families).size < 5) fail(`5 consecutive generations not diverse enough: ${families.join(",")}`);
+if (new Set(hashes).size < 5) fail(`5 consecutive fingerprint hashes too similar: ${hashes.join(",")}`);
 const noveltyLater = bakeryPacks.slice(1).map((p) => p.completeAd?.noveltyStatus);
 if (noveltyLater.every((n) => n === "original") && new Set(families).size === 1) {
   fail("later generations did not evolve or rotate");
+}
+for (let i = 1; i < families.length; i++) {
+  if (families[i] && families[i] === families[i - 1]) {
+    fail(`Day${i}→Day${i + 1} recycled family ${families[i]}`);
+  }
+}
+const week = buildPostingCalendar(bakeryPacks[0]!, "he", 7);
+const d1 = week.find((d) => d.day === 1);
+const d2 = week.find((d) => d.day === 2);
+const d3 = week.find((d) => d.day === 3);
+if (!d1 || !d2 || !d3) fail("calendar missing day 1/2/3");
+if (d1 && d2 && d3 && d1.headline === d2.headline && d2.headline === d3.headline) {
+  fail(`Day1/2/3 recycled the same headline: ${d1.headline}`);
+}
+if (d1 && d2 && d1.ideaName && d1.ideaName === d2.ideaName && d2.ideaName === d3?.ideaName) {
+  fail(`Day1/2/3 recycled the same idea: ${d1.ideaName}`);
 }
 
 resetCreativeMemory();

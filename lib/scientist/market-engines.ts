@@ -145,7 +145,7 @@ function claimForExample(card: ResearchSourceCard, kind: MarketCreative["kind"])
 }
 
 function kindForSource(platform: MarketPlatform): MarketCreative["kind"] {
-  if (platform === "youtube_suggest") return "search_suggestion";
+  if (platform === "youtube_suggest" || platform === "google_suggest") return "search_suggestion";
   if (platform === "pinterest_trends" || platform === "google_trends" || platform === "gemini_search_grounding") {
     return "grounded_note";
   }

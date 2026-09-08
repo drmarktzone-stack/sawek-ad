@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Globe, Link2 } from "lucide-react";
 import type { ClientBrandKit, IngestedDocument, IngestTag, MediaAssetMeta } from "@/lib/types";
 import {
@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { assetsFromPublicUrls } from "@/lib/media-assets";
 import { stripTrackingParams } from "@/lib/url-clean";
+import { withLang } from "@/lib/locale-url";
 
 /** Ecommerce homepage + Gemini enrich regularly exceeds 15–30s; do not abort early. */
 const CLIENT_INGEST_TIMEOUT_MS = 90_000;
@@ -64,8 +65,9 @@ function isErrorCode(v: string): v is ErrorCode {
 }
 
 export function UrlIngest() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const pathname = usePathname();
+  const router = useRouter();
   const home = pathname === "/";
   const [value, setValue] = useState("");
   const [busy, setBusy] = useState(false);
@@ -276,6 +278,9 @@ export function UrlIngest() {
     setAssets([]);
     setPosts([]);
     setBrandKit({ colors: [], source: "none" });
+    if (!pathname.startsWith("/task")) {
+      router.push(withLang("/task/ad", locale));
+    }
   }
 
   return (

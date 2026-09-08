@@ -421,7 +421,9 @@ export type StrategyFamily =
   | "curiosity"
   | "reframing"
   | "market_gap"
-  | "discovered";
+  | "discovered"
+  | "story"
+  | "offer_led";
 
 export type NoveltyStatus = "original" | "evolved" | "saturated" | "unknown";
 
@@ -465,6 +467,8 @@ export interface CompleteAdLocale {
   format: string;
   platform: string;
   imagePrompt?: string;
+  /** How the image is treated — overlay / separate headline / image only. */
+  imageTreatment?: string;
 }
 
 export interface CompleteAdScores {
@@ -493,11 +497,45 @@ export interface CompleteAdPackage {
   validation: { passed: boolean; repaired: boolean; attempts: number; failures: string[] };
   marketUsed: boolean;
   marketEvidence?: string;
+  /** True when every strategic direction was already used and no safe new framing exists. */
+  directionsExhausted?: boolean;
+  noveltyReason?: string;
+  imageComposition?: ImageCompositionDecision;
   metadata?: {
     scores: CompleteAdScores;
     candidateFamilies: StrategyFamily[];
     sourceLayers: SourceLayerId[];
+    rejectedFamilies?: StrategyFamily[];
+    selectedFrom?: StrategyFamily[];
   };
+}
+
+export type ImageCompositionMode =
+  | "overlay_safe"
+  | "safe_zone_top"
+  | "safe_zone_bottom"
+  | "separate_headline"
+  | "image_only";
+
+export interface ImageBandAnalysis {
+  id: "top" | "middle" | "bottom";
+  edgeDensity: number;
+  contrast: number;
+  likelyText: boolean;
+  likelyFace: boolean;
+  likelyLogo: boolean;
+}
+
+export interface ImageCompositionDecision {
+  mode: ImageCompositionMode;
+  collision: boolean;
+  hasExistingText: boolean;
+  hasLogo: boolean;
+  hasFaceHint: boolean;
+  hasProductHint: boolean;
+  safeBands: Array<"top" | "middle" | "bottom">;
+  reason: string;
+  source: "heuristic" | "pixels" | "vision" | "unknown";
 }
 
 export interface CampaignPack {
@@ -782,7 +820,8 @@ export type ResearchSourceId =
   | "google_ads_transparency"
   | "pinterest_trends"
   | "youtube_suggest"
-  | "linkedin_ad_library";
+  | "linkedin_ad_library"
+  | "google_suggest";
 
 export type ResearchSourceStatus =
   | "ok"
@@ -802,6 +841,9 @@ export interface PublicAdExample {
   snippet: Tri;
   url: string;
   asOf: string;
+  /** Observed search idea / keyword pattern — never an invented volume. */
+  kind?: "public_ad" | "search_suggestion" | "keyword_pattern";
+  queryUsed?: string;
 }
 
 export interface GroundedNote {
@@ -819,11 +861,15 @@ export interface ResearchSourceCard {
   examples: PublicAdExample[];
   notes: GroundedNote[];
   emptyReason?: Tri;
+  alternateSources?: Array<{ label: Tri; url: string }>;
+  retryable?: boolean;
 }
 
 export interface MarketResearch {
   asOf: string;
   query: string;
+  /** All queries actually sent to suggest/search endpoints. */
+  queries?: string[];
   geo: string;
   sources: ResearchSourceCard[];
   notes: GroundedNote[];

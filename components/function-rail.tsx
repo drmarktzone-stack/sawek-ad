@@ -19,8 +19,8 @@ export const PRODUCT_FUNCTIONS = [
   {
     id: "marketing",
     href: "/",
-    extraHref: undefined,
-    extraKey: undefined,
+    extraHref: "/task/ad",
+    extraKey: "nav.task" as const,
     key: "fn.marketing" as const,
     hint: "fn.marketingHint" as const,
     icon: Store,

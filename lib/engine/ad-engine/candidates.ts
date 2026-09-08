@@ -39,6 +39,8 @@ export const STRATEGY_FAMILIES: StrategyFamily[] = [
   "reframing",
   "market_gap",
   "discovered",
+  "story",
+  "offer_led",
 ];
 
 const IDEA_FAMILY: Record<string, StrategyFamily> = {
@@ -382,6 +384,50 @@ export function familyCopy(family: StrategyFamily, intake: Intake, idea?: CmoIde
         format: named("מודעת פיד", "إعلان فيد", "Feed ad"),
         platform: named("פייסבוק", "فيسبوك", "Facebook"),
       };
+    case "story":
+      return {
+        concept: named("סיפור", "قصة", "Story"),
+        why: named("סיפור קצר מהעובדות — בלי מלודרמה מומצאת.", "قصة قصيرة من الحقائق — بلا دراما مختلقة.", "A short story from supplied facts — no invented drama."),
+        angle: ideaName || named("רגע אחד", "لحظة واحدة", "One moment"),
+        hook: ideaHook || named(
+          audience ? `${audience} מגיעים ל${name}` : `${name} — רגע אמיתי`,
+          audience ? `${audience} بيوصلوا لـ ${name}` : `${name} — لحظة حقيقية`,
+          audience ? `${audience} arrive at ${name}` : `${name} — a real moment`,
+        ),
+        headline: withName(audience || place || "רגע מהמקום", audience || place || "لحظة من المكان", audience || place || "A moment from the place"),
+        body: named(
+          [audience && `מי: ${audience}`, problem && `מה קורה: ${problem}`, adv && `מה יש בפועל: ${adv}`, place && `איפה: ${place}`].filter(Boolean).join(" — ") || name,
+          [audience && `مين: ${audience}`, problem && `شو يصير: ${problem}`, adv && `الواقع: ${adv}`].filter(Boolean).join(" — ") || name,
+          [audience && `Who: ${audience}`, problem && `What happens: ${problem}`, adv && `What exists: ${adv}`, place && `Where: ${place}`].filter(Boolean).join(" — ") || name,
+        ),
+        visual: named("רצף שני פריימים, בלי פנים מזוהות", "تسلسل فريمتين بلا وجوه", "Two-frame sequence, no identifiable faces"),
+        format: named("רילס / סטורי", "ريلز / ستوري", "Reel / story"),
+        platform: named("אינסטגרם", "إنستغرام", "Instagram"),
+      };
+    case "offer_led": {
+      const hasOffer = Boolean(offer);
+      return {
+        concept: named("הצעה-קודם", "العرض أولاً", "Offer-led"),
+        why: named(
+          hasOffer ? "ההצעה שסופקה בקליטה היא המסר — בלי הנחה מומצאת." : "אין הצעה בקליטה — לא ממציאים מבצע.",
+          hasOffer ? "العرض المعطى هو الرسالة — بلا خصم مختلق." : "ما في عرض — لن نخترع خصماً.",
+          hasOffer ? "The supplied offer is the message — no invented discount." : "No offer in intake — we will not invent a promo.",
+        ),
+        angle: ideaName || named(hasOffer ? "ההצעה הכתובה" : "בלי מבצע מדומה", hasOffer ? "العرض المكتوب" : "بلا عرض وهمي", hasOffer ? "The written offer" : "No fake promo"),
+        hook: ideaHook || named(hasOffer ? offer : `${name} בלי מבצע מומצא`, hasOffer ? offer : `${name} بلا عرض مختلق`, hasOffer ? offer : `${name} without an invented promo`),
+        headline: withName(hasOffer ? offer : "בלי מבצע שלא נכתב", hasOffer ? offer : "بلا عرض ما انكتب", hasOffer ? offer : "No unwritten promo"),
+        body: named(
+          hasOffer
+            ? [offer, place && `איפה: ${place}`, intake.whatsapp && `וואטסאפ ${intake.whatsapp}`].filter(Boolean).join(" · ")
+            : `${name}${place ? ` · ${place}` : ""}. אין מבצע בקליטה — לא יומצא.`,
+          hasOffer ? [offer, place].filter(Boolean).join(" · ") : `${name}. ما في عرض مختلق.`,
+          hasOffer ? [offer, place && `Where: ${place}`].filter(Boolean).join(" · ") : `${name}. No invented promo.`,
+        ),
+        visual: named("פריים של ההצעה הכתובה / המוצר", "فريمة العرض المكتوب", "Frame of the written offer / product"),
+        format: named("מודעת פיד", "إعلان فيد", "Feed ad"),
+        platform: named("פייסבוק / אינסטגרם", "فيسبوك / إنستغرام", "Facebook / Instagram"),
+      };
+    }
     case "market_gap":
     case "discovered":
       return {
@@ -455,12 +501,33 @@ function localePack(family: StrategyFamily, intake: Intake, idea: CmoIdea | unde
     copy: copy.body[locale],
     ...(offer ? { offer } : {}),
     ...(proof ? { proof } : {}),
-    cta: spokenCta(intake, locale),
+    cta: familyCta(family, intake, locale),
     visual: copy.visual[locale],
     format: copy.format[locale],
     platform: copy.platform[locale],
     imagePrompt: `${intake.businessName} ${copy.visual.en}`.trim(),
+    imageTreatment: copy.format[locale],
   };
+}
+
+function familyCta(family: StrategyFamily, intake: Intake, locale: Locale): string {
+  const base = spokenCta(intake, locale);
+  if (family === "curiosity") {
+    return locale === "he" ? "גלו את הפרט" : locale === "ar" ? "اكتشفوا التفصيل" : "See the detail";
+  }
+  if (family === "educational") {
+    return locale === "he" ? "למדו מה נכון אצלנו" : locale === "ar" ? "اعرفوا شو الصحيح عندنا" : "Learn what is true here";
+  }
+  if (family === "demo") {
+    return locale === "he" ? "ראו את המקום" : locale === "ar" ? "شوفوا المكان" : "See the place";
+  }
+  if (family === "story") {
+    return locale === "he" ? "המשיכו את הרגע" : locale === "ar" ? "كمّلوا اللحظة" : "Continue the moment";
+  }
+  if (family === "objection") {
+    return locale === "he" ? "שאלו אותנו" : locale === "ar" ? "اسألونا" : "Ask us";
+  }
+  return base;
 }
 
 function clamp(n: number): number {
@@ -553,16 +620,16 @@ export function scoreCandidate(
     marketOpportunity: clamp(marketOpportunity),
   };
   const total = clamp(
-    parts.relevance * 0.12 +
-      parts.objective * 0.08 +
-      parts.audience * 0.08 +
-      parts.evidence * 0.12 +
-      parts.novelty * 0.12 +
-      parts.clarity * 0.08 +
-      parts.persuasion * 0.08 +
-      parts.platform * 0.05 +
-      parts.factualSafety * 0.15 +
-      parts.saturation * 0.07 +
+    parts.relevance * 0.1 +
+      parts.objective * 0.07 +
+      parts.audience * 0.07 +
+      parts.evidence * 0.1 +
+      parts.novelty * 0.2 +
+      parts.clarity * 0.07 +
+      parts.persuasion * 0.07 +
+      parts.platform * 0.04 +
+      parts.factualSafety * 0.13 +
+      parts.saturation * 0.1 +
       parts.marketOpportunity * 0.05,
   );
   return { ...parts, total };

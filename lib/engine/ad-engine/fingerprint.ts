@@ -76,14 +76,15 @@ export function buildFingerprint(input: {
 export function fingerprintsSimilar(a: CreativeFingerprint, b: CreativeFingerprint): boolean {
   if (a.hash === b.hash) return true;
   if (a.family === b.family && a.ideaId && a.ideaId === b.ideaId) return true;
+  if (a.family === b.family && a.hook && a.hook === b.hook) return true;
   let same = 0;
-  const keys: Array<keyof CreativeFingerprint> = ["angle", "hook", "cta", "structure", "visual", "framing"];
+  const keys: Array<keyof CreativeFingerprint> = ["angle", "hook", "cta", "structure", "visual", "framing", "format"];
   for (const k of keys) {
     const av = String(a[k] || "");
     const bv = String(b[k] || "");
     if (av && bv && av === bv) same += 1;
   }
-  return same >= 3;
+  return same >= 2;
 }
 
 export function noveltyAgainst(
@@ -97,8 +98,8 @@ export function noveltyAgainst(
     if (fingerprintsSimilar(candidate, prev)) matches += 1;
     if (prev.family === candidate.family) familyHits += 1;
   }
-  if (matches >= 2 || familyHits >= 3) return { status: "saturated", matches };
-  if (matches === 1 || familyHits >= 1) return { status: "evolved", matches };
+  if (matches >= 1 || familyHits >= 2) return { status: "saturated", matches };
+  if (familyHits >= 1) return { status: "evolved", matches };
   return { status: "original", matches };
 }
 

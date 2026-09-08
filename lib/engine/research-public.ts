@@ -3,7 +3,7 @@
  * Used by the Research desk UI and by the server engine.
  */
 import type { Intake, MarketResearch, ResearchSourceCard, ResearchSourceId, ResearchSourceStatus, Tri } from "../types";
-import { isNoOffer } from "../no-offer";
+import { researchQueryFromFacts } from "./search-suggest";
 
 const L = (he: string, ar: string, en: string): Tri => ({ he, ar, en });
 
@@ -13,6 +13,7 @@ export const RESEARCH_SOURCE_LABEL: Record<ResearchSourceId, Tri> = {
   google_ads_transparency: L("מרכז השקיפות של Google Ads", "مركز شفافية إعلانات Google", "Google Ads Transparency"),
   pinterest_trends: L("טרנדים בפינטרסט", "ترندات بنترست", "Pinterest Trends"),
   youtube_suggest: L("הצעות חיפוש יוטיוב", "اقتراحات بحث يوتيوب", "YouTube search suggest"),
+  google_suggest: L("הצעות חיפוש Google", "اقتراحات بحث Google", "Google search suggest"),
   linkedin_ad_library: L("ספריית המודעות של LinkedIn", "مكتبة إعلانات LinkedIn", "LinkedIn Ad Library"),
 };
 
@@ -38,11 +39,7 @@ export function researchGeo(intake: Intake): string {
 }
 
 export function researchQuery(intake: Intake): string {
-  const offer = isNoOffer(intake.offer) ? "" : intake.offer.trim();
-  const bits = [intake.voice?.niche, intake.category, offer, intake.businessName]
-    .map((s) => (s || "").trim())
-    .filter(Boolean);
-  return (bits.join(" ") || "local business advertising").replace(/\s+/g, " ").trim().slice(0, 80);
+  return researchQueryFromFacts(intake);
 }
 
 export function tiktokPeriodDays(lookbackDays?: number): 7 | 30 {
@@ -60,6 +57,7 @@ export function publicResearchUrls(query: string, geo: string, lookbackDays?: nu
     google_ads_transparency: `https://adstransparency.google.com/?region=${g}&preset-id=ft&q=${q}`,
     pinterest_trends: `https://trends.pinterest.com/explore?country=${g}&period=${pinPeriod}&terms=${q}`,
     youtube_suggest: `https://www.youtube.com/results?search_query=${q}`,
+    google_suggest: `https://www.google.com/search?q=${q}`,
     linkedin_ad_library: `https://www.linkedin.com/ad-library/search?accountOwner=&countries=${g}&keyword=${q}`,
   };
 }
