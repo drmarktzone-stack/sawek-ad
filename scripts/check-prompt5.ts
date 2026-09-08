@@ -13,6 +13,7 @@ import {
   loadCreativeHistory,
   separateSources,
   containsNamedCompetitorOffer,
+  attachCompleteAd,
 } from "../lib/engine/ad-engine";
 import { jaccard, noveltyGate, selectStrategicDirections } from "../lib/engine/ad-engine/diversity";
 import { buildCandidates } from "../lib/engine/ad-engine/candidates";
@@ -223,6 +224,13 @@ const cands = buildCandidates(bakery(), layers, [], []);
 if (cands.length < 10) fail("test10 too few candidates");
 const gate = noveltyGate(cands[0]!, []);
 if (!gate.pass) fail("test10 first candidate blocked with empty history");
+
+const kept = attachCompleteAd(packs[0]!, { rotate: false });
+if (kept.completeAd?.family !== packs[0]!.completeAd?.family) fail("test10 overlay rebuild changed family");
+if (kept.completeAd?.noveltyStatus !== packs[0]!.completeAd?.noveltyStatus) fail("test10 overlay rebuild wiped novelty");
+if (kept.completeAd?.fingerprint?.hash !== packs[0]!.completeAd?.fingerprint?.hash) {
+  fail("test10 overlay rebuild replaced fingerprint");
+}
 
 // similarity of reword vs new family
 if (jaccard("תנור אבן כל בוקר", "תנור אבן כל בוקר היום") < 0.5) fail("test10 reword should be similar");
