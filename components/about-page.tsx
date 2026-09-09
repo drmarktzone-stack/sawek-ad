@@ -97,18 +97,18 @@ export function AboutPage() {
         <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-[#F3EFE6]" />
 
         <div className="relative mx-auto max-w-6xl px-4 pb-16 pt-10 sm:pb-20 sm:pt-16">
-          <p className="agency-kicker mb-4 text-center text-[#9FD4C8]">{t("about.kicker")}</p>
-          <span className="agency-rule mx-auto mb-6 bg-[#9FD4C8]" />
+          <p className="agency-kicker mb-4 text-center text-teal">{t("about.kicker")}</p>
+          <span className="agency-rule mx-auto mb-6" />
           <h1
             className="agency-display-cream agency-fade-up mx-auto max-w-5xl text-center text-[2.35rem] leading-[1.1] sm:text-6xl lg:text-[4.2rem]"
             style={{ fontFamily: "var(--font-display-he), ui-serif, Georgia, serif" }}
           >
             {t("about.hero")}
           </h1>
-          <p className="mobile-readable mx-auto mt-6 max-w-3xl text-center text-base font-semibold leading-relaxed text-[#E8E2D4] sm:mt-7 sm:text-xl">
+          <p className="mobile-readable mx-auto mt-6 max-w-3xl text-center text-base font-semibold leading-relaxed text-muted sm:mt-7 sm:text-xl">
             {t("about.heroLead")}
           </p>
-          <p className="mx-auto mt-5 max-w-xl rounded-[12px] border border-white/12 bg-white/8 px-4 py-2.5 text-center text-sm font-bold text-[#F7F3EA] backdrop-blur-sm sm:px-5 sm:text-base">
+          <p className="mx-auto mt-5 max-w-xl rounded-[12px] border border-[var(--line)] bg-white px-4 py-2.5 text-center text-sm font-bold text-navy backdrop-blur-sm sm:px-5 sm:text-base">
             {t("home.vertex")}
           </p>
 
@@ -119,11 +119,11 @@ export function AboutPage() {
                   {t("about.ctaApp")}
                 </LangLink>
               </Button>
-              <Button asChild size="lg" variant="outline" className="btn-mobile-full border-white/20 bg-white/8 text-base font-black text-[#F7F3EA] hover:bg-white hover:text-ink sm:text-lg">
+              <Button asChild size="lg" variant="outline" className="btn-mobile-full border-[var(--line)] bg-white text-base font-black text-navy hover:bg-mint/50 hover:text-navy sm:text-lg">
                 <LangLink href="/pricing">{t("home.cta.pricing")}</LangLink>
               </Button>
             </div>
-            <p className="max-w-lg text-center text-sm font-semibold text-[#C9D0D8]">{t("about.ctaDemo")}</p>
+            <p className="max-w-lg text-center text-sm font-semibold text-muted">{t("about.ctaDemo")}</p>
             <DemoPicker tone="ink" />
           </div>
           <p className="mx-auto mt-6 max-w-2xl text-center text-base leading-relaxed text-[#C9B896]">{t("about.truth")}</p>
@@ -159,8 +159,8 @@ export function AboutPage() {
         </ul>
         <p className="mx-auto mt-5 max-w-2xl text-center text-sm font-semibold text-navy/70">{t("about.who.notOnly")}</p>
         <article className="agency-ink mt-8 rounded-[20px] p-6 text-start shadow-[var(--shadow-lift)] sm:p-8">
-          <p className="text-xs font-black uppercase tracking-[0.22em] text-[#9FD4C8]">{t("about.demos.h")}</p>
-          <p className="mt-3 text-base leading-relaxed text-[#E8E2D4] sm:text-lg">{t("about.demos.p")}</p>
+          <p className="text-xs font-black uppercase tracking-[0.22em] text-teal">{t("about.demos.h")}</p>
+          <p className="mt-3 text-base leading-relaxed text-muted sm:text-lg">{t("about.demos.p")}</p>
         </article>
       </section>
 
@@ -223,18 +223,18 @@ export function AboutPage() {
             <p className="mt-3 text-base leading-relaxed text-navy/80">{t("about.vs.ordinary")}</p>
           </article>
           <article className="agency-ink rounded-[20px] p-6 text-start shadow-[var(--shadow-lift)]">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-[#9FD4C8]">{t("about.vs.sawekName")}</p>
-            <p className="mt-3 text-base font-semibold leading-relaxed text-[#F7F3EA]">{t("about.vs.sawek")}</p>
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-teal">{t("about.vs.sawekName")}</p>
+            <p className="mt-3 text-base font-semibold leading-relaxed text-navy">{t("about.vs.sawek")}</p>
           </article>
         </div>
         <div className="agency-board mt-6 overflow-x-auto p-0">
           <table className="w-full min-w-[40rem] text-start text-sm">
             <thead>
-              <tr className="border-b border-[rgba(8,17,31,0.08)] bg-[#08111F] text-[11px] font-black uppercase tracking-wide text-[#C9D0D8]">
+              <tr className="border-b border-[rgba(8,17,31,0.08)] bg-white text-[11px] font-black uppercase tracking-wide text-muted">
                 <th className="px-4 py-3.5" />
                 <th className="px-4 py-3.5">{t("about.vs.chatgptName")}</th>
                 <th className="px-4 py-3.5">{t("about.vs.ordinaryName")}</th>
-                <th className="px-4 py-3.5 text-[#9FD4C8]">{t("about.vs.sawekName")}</th>
+                <th className="px-4 py-3.5 text-teal">{t("about.vs.sawekName")}</th>
               </tr>
             </thead>
             <tbody className="text-navy">
@@ -293,15 +293,15 @@ export function AboutPage() {
             </Button>
           </article>
           <article className="agency-ink p-7 text-start shadow-[var(--shadow-lift)]">
-            <p className="text-xs font-black uppercase tracking-[0.26em] text-[#9FD4C8]">{t("pricing.proName")}</p>
+            <p className="text-xs font-black uppercase tracking-[0.26em] text-teal">{t("pricing.proName")}</p>
             <p className="agency-display-cream mt-3 text-5xl">
               ₪{PRICE_MONTHLY_ILS}{" "}
-              <span className="text-base font-bold text-[#C9D0D8]">{t("home.plans.month")}</span>
+              <span className="text-base font-bold text-muted">{t("home.plans.month")}</span>
             </p>
-            <p className="text-xl font-black text-[#F7F3EA]">
-              ₪{PRICE_YEARLY_ILS} <span className="text-sm font-bold text-[#C9D0D8]">{t("home.plans.year")}</span>
+            <p className="text-xl font-black text-navy">
+              ₪{PRICE_YEARLY_ILS} <span className="text-sm font-bold text-muted">{t("home.plans.year")}</span>
             </p>
-            <ul className="mt-6 space-y-2.5 text-base text-[#E8E2D4]">
+            <ul className="mt-6 space-y-2.5 text-base text-muted">
               {PRO_ITEMS.map((k) => (
                 <li key={k} className="flex gap-2">
                   <span className="mt-2 size-1.5 shrink-0 rounded-full bg-[#E24B3A]" />
@@ -334,27 +334,27 @@ export function AboutPage() {
         <div className="agency-ink relative overflow-hidden rounded-[24px] px-6 py-12 text-center shadow-[var(--shadow-lift)] sm:px-10 sm:py-16">
           <div aria-hidden className="agency-grain absolute inset-0 opacity-20" />
           <div className="relative">
-            <p className="agency-kicker text-[#9FD4C8]">{t("about.kicker")}</p>
+            <p className="agency-kicker text-teal">{t("about.kicker")}</p>
             <h2 className="agency-display-cream mt-4 text-3xl sm:text-5xl">{t("about.end.h")}</h2>
-            <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-[#C9D0D8] sm:text-lg">{t("about.end.p")}</p>
+            <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-muted sm:text-lg">{t("about.end.p")}</p>
             <div className="mobile-stack mx-auto mt-8 w-full max-w-lg justify-center">
               <Button asChild size="lg" variant="coral" className="btn-mobile-full text-base font-black">
                 <LangLink href="/" onClick={(e) => beginNewCampaign(e)}>
                   {t("about.ctaApp")}
                 </LangLink>
               </Button>
-              <Button asChild size="lg" variant="outline" className="btn-mobile-full border-white/20 bg-white/8 text-base font-black text-[#F7F3EA] hover:bg-white hover:text-ink">
+              <Button asChild size="lg" variant="outline" className="btn-mobile-full border-[var(--line)] bg-white text-base font-black text-navy hover:bg-mint/50 hover:text-navy">
                 <LangLink href="/pricing">{t("home.cta.pricing")}</LangLink>
               </Button>
             </div>
-            <p className="mx-auto mt-8 max-w-xl text-center text-sm font-semibold leading-relaxed text-[#C9D0D8]">
+            <p className="mx-auto mt-8 max-w-xl text-center text-sm font-semibold leading-relaxed text-muted">
               {t("about.legal.p")}
             </p>
             <p className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm font-black">
-              <LangLink href="/privacy" className="tap-target inline-flex items-center text-[#F7F3EA] underline decoration-teal underline-offset-4 hover:text-white">
+              <LangLink href="/privacy" className="tap-target inline-flex items-center text-navy underline decoration-teal underline-offset-4 hover:text-teal">
                 {t("nav.privacy")}
               </LangLink>
-              <LangLink href="/terms" className="tap-target inline-flex items-center text-[#F7F3EA] underline decoration-teal underline-offset-4 hover:text-white">
+              <LangLink href="/terms" className="tap-target inline-flex items-center text-navy underline decoration-teal underline-offset-4 hover:text-teal">
                 {t("nav.terms")}
               </LangLink>
             </p>

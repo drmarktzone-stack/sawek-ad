@@ -30,24 +30,24 @@ function SourceCard({ card, locale, onRetry }: { card: ResearchSourceCard; local
   return (
     <article
       data-research-source={card.id}
-      className="rounded-[16px] border border-white/10 bg-white/[0.05] p-4"
+      className="rounded-[16px] border border-[var(--line)] bg-white/[0.05] p-4"
     >
       <div className="flex items-start justify-between gap-2">
         <p className="text-[12px] font-black uppercase tracking-wide text-[#F5C518]">
           {card.label[locale] || card.label.en}
         </p>
-        <span className="rounded-full border border-white/15 px-2 py-0.5 text-[10px] font-bold text-[#C9D0D8]">
+        <span className="rounded-full border border-[var(--line)] px-2 py-0.5 text-[10px] font-bold text-muted">
           {t(`research.status.${card.status}` as "research.status.ok")}
         </span>
       </div>
       {empty ? (
         <div className="mt-3">
-          <p className="text-sm leading-relaxed text-[#C9D0D8]">
+          <p className="text-sm leading-relaxed text-muted">
             {card.emptyReason?.[locale] || card.emptyReason?.en || t("research.empty")}
           </p>
           <p className="mt-2 text-[11px] font-bold uppercase tracking-wide text-[#C9B896]">{t("research.unknownHonest")}</p>
           {card.queryUsed ? (
-            <p className="mt-1 text-[11px] text-[#9FD4C8]" data-testid="research-query-used">
+            <p className="mt-1 text-[11px] text-teal" data-testid="research-query-used">
               {t("research.queryUsed")}: {card.queryUsed}
             </p>
           ) : null}
@@ -55,7 +55,7 @@ function SourceCard({ card, locale, onRetry }: { card: ResearchSourceCard; local
             <ul className="mt-2 space-y-1">
               {card.alternateSources.map((alt) => (
                 <li key={alt.url}>
-                  <a href={alt.url} target="_blank" rel="noreferrer" className="text-[12px] font-bold text-[#9FD4C8]">
+                  <a href={alt.url} target="_blank" rel="noreferrer" className="text-[12px] font-bold text-teal">
                     {t("research.alternate")}: {alt.label[locale] || alt.label.en}
                   </a>
                 </li>
@@ -71,19 +71,19 @@ function SourceCard({ card, locale, onRetry }: { card: ResearchSourceCard; local
       ) : (
         <ul className="mt-3 space-y-3">
           {card.examples.map((ex) => (
-            <li key={ex.id} className="text-sm leading-relaxed text-[#F7F3EA]">
+            <li key={ex.id} className="text-sm leading-relaxed text-navy">
               <p className="font-black">{ex.title[locale] || ex.title.en}</p>
-              <p className="mt-0.5 text-[11px] font-bold uppercase tracking-wide text-[#9FD4C8]">
+              <p className="mt-0.5 text-[11px] font-bold uppercase tracking-wide text-teal">
                 {t("research.source")}: {card.label[locale] || card.id}
                 {ex.kind === "search_suggestion" ? ` · ${t("research.searchIdea")}` : ""}
                 {ex.queryUsed ? ` · ${t("research.queryUsed")}: ${ex.queryUsed}` : ""}
               </p>
               {ex.advertiser || ex.page ? (
-                <p className="mt-0.5 text-xs text-[#9FD4C8]">
+                <p className="mt-0.5 text-xs text-teal">
                   {t("research.advertiser")}: {ex.advertiser || ex.page}
                 </p>
               ) : null}
-              <p className="mt-1 text-[13px] text-[#C9D0D8]">{ex.snippet[locale] || ex.snippet.en}</p>
+              <p className="mt-1 text-[13px] text-muted">{ex.snippet[locale] || ex.snippet.en}</p>
               <p className="mt-1 text-[11px] text-[#C9B896]">
                 {t("research.asOf")} {ex.asOf.slice(0, 10)}
               </p>
@@ -98,8 +98,8 @@ function SourceCard({ card, locale, onRetry }: { card: ResearchSourceCard; local
             </li>
           ))}
           {card.notes.map((n, i) => (
-            <li key={`${card.id}-n-${i}`} className="text-sm leading-relaxed text-[#E8E2D4]">
-              <p className="font-black text-[#F7F3EA]">{n.title[locale] || n.title.en}</p>
+            <li key={`${card.id}-n-${i}`} className="text-sm leading-relaxed text-muted">
+              <p className="font-black text-navy">{n.title[locale] || n.title.en}</p>
               <p className="mt-1">{n.note[locale] || n.note.en}</p>
               <p className="mt-1 text-[11px] text-[#C9B896]">
                 {t("research.asOf")} {n.asOf.slice(0, 10)}
@@ -120,7 +120,7 @@ function SourceCard({ card, locale, onRetry }: { card: ResearchSourceCard; local
         href={card.exploreUrl}
         target="_blank"
         rel="noreferrer"
-        className="mt-3 inline-flex items-center gap-1 text-[12px] font-bold text-[#9FD4C8]"
+        className="mt-3 inline-flex items-center gap-1 text-[12px] font-bold text-teal"
       >
         {t("research.explore")} <ExternalLink className="size-3" />
       </a>
@@ -193,9 +193,9 @@ export function ResearchDesk({
     >
       <p className="text-[13px] font-black uppercase tracking-[0.22em] text-[#F5C518]">{t("research.kicker")}</p>
       <h2 className="agency-display-cream mt-2 text-2xl sm:text-3xl">{t("research.title")}</h2>
-      <p className="mt-2 text-sm leading-relaxed text-[#C9D0D8]">{t("research.lead")}</p>
+      <p className="mt-2 text-sm leading-relaxed text-muted">{t("research.lead")}</p>
       {research?.query ? (
-        <p className="mt-2 text-xs text-[#9FD4C8]">
+        <p className="mt-2 text-xs text-teal">
           {t("research.query")}: {research.query} · {t("research.geo")}: {research.geo}
           {research.asOf ? ` · ${t("research.asOf")} ${research.asOf.slice(0, 10)}` : ""}
         </p>
@@ -219,7 +219,7 @@ export function ResearchDesk({
         </button>
       ) : null}
       {busy && !research?.fetched ? (
-        <p className="mt-4 text-sm text-[#9FD4C8]">{t("research.loading")}</p>
+        <p className="mt-4 text-sm text-teal">{t("research.loading")}</p>
       ) : null}
       <div className={`mt-5 grid gap-3 ${compact ? "grid-cols-1 sm:grid-cols-2" : "md:grid-cols-2"}`}>
         {sources.map((card) => (
@@ -227,12 +227,12 @@ export function ResearchDesk({
         ))}
       </div>
       {notes.length ? (
-        <div className="mt-5 rounded-[14px] border border-dashed border-white/15 bg-white/5 p-4">
+        <div className="mt-5 rounded-[14px] border border-dashed border-[var(--line)] bg-white/5 p-4">
           <p className="text-xs font-black uppercase tracking-wide text-[#F5C518]">{t("research.groundedNotes")}</p>
           <ul className="mt-2 space-y-2">
             {notes.slice(0, 6).map((n, i) => (
-              <li key={`note-${i}`} className="text-sm text-[#E8E2D4]">
-                <span className="font-black text-[#F7F3EA]">{n.title[locale] || n.title.en}</span>
+              <li key={`note-${i}`} className="text-sm text-muted">
+                <span className="font-black text-navy">{n.title[locale] || n.title.en}</span>
                 {" — "}
                 {n.note[locale] || n.note.en}
                 <span className="mt-1 block text-[11px] text-[#C9B896]">

@@ -208,11 +208,11 @@ export function ResultView({
       <div className="agency-ink mb-8 overflow-hidden p-6 sm:p-8" data-campaign-brain="brief">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="text-[12px] font-black uppercase tracking-[0.22em] text-[#9FD4C8]">{tr("result.ready")}</p>
+            <p className="text-[12px] font-black uppercase tracking-[0.22em] text-teal">{tr("result.ready")}</p>
             <p className="mt-2 text-[12px] font-bold uppercase tracking-[0.18em] text-[#F5C518]">{tr("result.story")}</p>
             <h1 className="agency-display-cream mt-2 text-3xl sm:text-5xl">{pack.name}</h1>
             {pack.brief?.coreMessage[packLang] ? (
-              <p className="mt-3 max-w-2xl text-base leading-relaxed text-[#C9D0D8]" data-brief-core>
+              <p className="mt-3 max-w-2xl text-base leading-relaxed text-muted" data-brief-core>
                 {pack.brief.coreMessage[packLang]}
               </p>
             ) : null}
@@ -236,7 +236,7 @@ export function ResultView({
             </LangLink>
             </div>
           </div>
-          <NewCampaignCta other hint className="items-end text-end [&_p]:text-[#C9D0D8]" />
+          <NewCampaignCta other hint className="items-end text-end [&_p]:text-muted" />
         </div>
       </div>
 
@@ -255,14 +255,14 @@ export function ResultView({
           data-testid="hero-idea"
           data-hero-idea-id={hero.id}
         >
-          <p className="text-[12px] font-black uppercase tracking-[0.22em] text-[#9FD4C8]">{tr("result.heroIdea")}</p>
+          <p className="text-[12px] font-black uppercase tracking-[0.22em] text-teal">{tr("result.heroIdea")}</p>
           <h2 className="agency-display-cream mt-2 text-2xl sm:text-4xl">{hero.name[packLang] || hero.name.he}</h2>
-          <p className="mt-3 text-lg font-semibold text-[#F7F3EA]">{hero.hook[packLang] || hero.hook.he}</p>
-          <p className="mt-3 text-sm text-[#C9D0D8]">
-            <span className="font-black text-[#9FD4C8]">{tr("result.whyWins")}: </span>
+          <p className="mt-3 text-lg font-semibold text-navy">{hero.hook[packLang] || hero.hook.he}</p>
+          <p className="mt-3 text-sm text-muted">
+            <span className="font-black text-teal">{tr("result.whyWins")}: </span>
             {hero.whyItWins[packLang] || hero.whyItWins.he}
           </p>
-          <p className="mt-2 text-sm text-[#C9D0D8]">{hero.narrativeArc[packLang] || hero.narrativeArc.he}</p>
+          <p className="mt-2 text-sm text-muted">{hero.narrativeArc[packLang] || hero.narrativeArc.he}</p>
         </section>
       ) : null}
 
@@ -404,20 +404,20 @@ export function ResultView({
 
       <div className="mb-8 grid gap-4 md:grid-cols-2">
         <div className="agency-ink p-6">
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#9FD4C8]">
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-teal">
             {tr("result.score")}
           </p>
           <p className="agency-display-cream mt-2 text-5xl">
             {pack.intakeReport.completeness}
-            <span className="text-2xl text-[#C9D0D8]">/100</span>
+            <span className="text-2xl text-muted">/100</span>
           </p>
-          <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10">
+          <div className="mt-4 h-2 overflow-hidden rounded-full bg-mint/40">
             <div
               className="h-full bg-teal"
               style={{ width: `${pack.intakeReport.completeness}%` }}
             />
           </div>
-          <p className="mt-3 text-sm text-[#C9D0D8]">
+          <p className="mt-3 text-sm text-muted">
             {tr("result.scoreHint")}
           </p>
         </div>
@@ -788,15 +788,15 @@ function AdCard({
       )}
     >
       <div className="mb-3 flex items-center justify-between gap-2">
-        <p className={cn("text-xs font-bold uppercase tracking-[0.16em]", featured ? "text-[#9FD4C8]" : "text-teal")}>{label}</p>
-        <Button type="button" size="sm" variant={featured ? "outline" : "ghost"} onClick={onCopy} className={featured ? "border-white/20 bg-white/8 text-[#F7F3EA] hover:bg-white hover:text-ink" : undefined}>
+        <p className={cn("text-xs font-bold uppercase tracking-[0.16em]", featured ? "text-teal" : "text-teal")}>{label}</p>
+        <Button type="button" size="sm" variant={featured ? "outline" : "ghost"} onClick={onCopy} className={featured ? "border-[var(--line)] bg-white text-navy hover:bg-mint/50 hover:text-navy" : undefined}>
           <Copy className="size-3.5" />
           {copied ? t(locale, "cta.copied") : t(locale, "cta.copy")}
         </Button>
       </div>
       <h3 className={cn("text-2xl font-black", featured ? "agency-display-cream" : "agency-display")}>{headline}</h3>
-      <p className={cn("mt-3 whitespace-pre-wrap text-base leading-relaxed", featured ? "text-[#E8E2D4]" : "text-muted")}>{body}</p>
-      <span className={cn("mt-5 inline-block rounded-[10px] px-3 py-1.5 text-xs font-black", featured ? "bg-coral text-white" : "bg-ink text-[#F7F3EA]")}>
+      <p className={cn("mt-3 whitespace-pre-wrap text-base leading-relaxed", featured ? "text-muted" : "text-muted")}>{body}</p>
+      <span className={cn("mt-5 inline-block rounded-[10px] px-3 py-1.5 text-xs font-black", featured ? "bg-coral text-white" : "bg-ink text-navy")}>
         {cta}
       </span>
     </article>

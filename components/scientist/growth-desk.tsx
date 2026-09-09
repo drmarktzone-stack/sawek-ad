@@ -287,7 +287,7 @@ export function GrowthDesk({ section = "home" }: { section?: GrowthSection }) {
 function Panel({ title, children, dark = false }: { title: string; children: React.ReactNode; dark?: boolean }) {
   return (
     <section className={cn("os-section", dark && "agency-ink px-4 py-5")}>
-      <h2 className={cn("os-kicker mb-3", dark && "text-[#9FD4C8]")}>{title}</h2>
+      <h2 className={cn("os-kicker mb-3", dark && "text-teal")}>{title}</h2>
       {children}
     </section>
   );
@@ -333,12 +333,12 @@ function HomeBoard({ ws }: { ws: GrowthWorkspace }) {
       </Panel>
       <Panel title={t("sci.home.next")} dark>
         <p className="text-lg font-black">{ws.nba.action || t("sci.unknown.nba")}</p>
-        <p className="mt-2 text-sm text-[#C9D0D8]">{ws.nba.reason}</p>
+        <p className="mt-2 text-sm text-muted">{ws.nba.reason}</p>
         <div className="mt-3">
           <Unc level={ws.nba.uncertainty} />
         </div>
         {ws.market?.nextBestExperiment && (
-          <p className="mt-3 text-xs text-[#C9D0D8]">
+          <p className="mt-3 text-xs text-muted">
             {t("sci.mkt.nbe")}: {ws.market.nextBestExperiment.title}
           </p>
         )}

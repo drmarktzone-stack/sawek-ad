@@ -23,18 +23,18 @@ export function LegalPage({ kind }: { kind: "privacy" | "terms" }) {
         />
         <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-[#F3EFE6]" />
         <div className="relative mx-auto max-w-3xl px-4 pb-14 pt-10 sm:pb-16 sm:pt-16">
-          <p className="agency-kicker mb-4 text-center text-[#9FD4C8]">{t("brand.name")}</p>
-          <span className="agency-rule mx-auto mb-6 bg-[#9FD4C8]" />
+          <p className="agency-kicker mb-4 text-center text-teal">{t("brand.name")}</p>
+          <span className="agency-rule mx-auto mb-6" />
           <h1
             className="agency-display-cream mx-auto max-w-4xl text-center text-[2.2rem] leading-[1.15] sm:text-5xl"
             style={{ fontFamily: "var(--font-display-he), ui-serif, Georgia, serif" }}
           >
             {doc.title[locale]}
           </h1>
-          <p className="mx-auto mt-5 max-w-2xl text-center text-base font-semibold leading-relaxed text-[#E8E2D4] sm:text-lg">
+          <p className="mx-auto mt-5 max-w-2xl text-center text-base font-semibold leading-relaxed text-muted sm:text-lg">
             {doc.lead[locale]}
           </p>
-          <p className="mt-4 text-center text-sm font-bold text-[#9FD4C8]">{doc.updated[locale]}</p>
+          <p className="mt-4 text-center text-sm font-bold text-teal">{doc.updated[locale]}</p>
         </div>
       </section>
 
@@ -54,11 +54,11 @@ export function LegalPage({ kind }: { kind: "privacy" | "terms" }) {
         </div>
 
         <aside className="agency-ink mt-8 rounded-[20px] p-6 text-start shadow-[var(--shadow-lift)] sm:p-8">
-          <p className="text-xs font-black uppercase tracking-[0.22em] text-[#9FD4C8]">{t("legal.contact")}</p>
-          <p className="mt-3 text-base leading-relaxed text-[#E8E2D4]">{t("legal.contactLead")}</p>
+          <p className="text-xs font-black uppercase tracking-[0.22em] text-teal">{t("legal.contact")}</p>
+          <p className="mt-3 text-base leading-relaxed text-muted">{t("legal.contactLead")}</p>
           <a
             href={`mailto:${CONTACT_EMAIL}`}
-            className="mt-4 inline-flex min-h-12 items-center text-lg font-black text-[#F7F3EA] underline decoration-teal underline-offset-4 hover:text-white"
+            className="mt-4 inline-flex min-h-12 items-center text-lg font-black text-navy underline decoration-teal underline-offset-4 hover:text-teal"
           >
             {CONTACT_EMAIL}
           </a>

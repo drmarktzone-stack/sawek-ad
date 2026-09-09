@@ -173,9 +173,9 @@ export function TaskWorkspace() {
           </OsSection>
 
           <section className="agency-ink mt-2 p-5 sm:p-6" data-testid="task-detected">
-            <p className="text-[12px] font-black uppercase tracking-[0.18em] text-[#9FD4C8]">{t("task.detected")}</p>
+            <p className="os-kicker">{t("task.detected")}</p>
             <h2 className="agency-display-cream mt-2 text-3xl">{t("complete.kicker")}</h2>
-            <p className="mt-2 text-sm text-[#C9D0D8]">{t("task.createAdLead")}</p>
+            <p className="mt-2 text-sm text-muted">{t("task.createAdLead")}</p>
             <Button
               type="button"
               size="lg"
@@ -198,22 +198,22 @@ export function TaskWorkspace() {
               />
             ) : null}
             <div className="mt-4 flex flex-wrap gap-2">
-              <Button asChild size="sm" variant="outline" className="border-white/20 bg-white/8 text-[#F7F3EA] hover:bg-white hover:text-ink">
+              <Button asChild size="sm" variant="outline">
                 <LangLink href="/tools/hso">{t("nav.hso")}</LangLink>
               </Button>
-              <Button asChild size="sm" variant="outline" className="border-white/20 bg-white/8 text-[#F7F3EA] hover:bg-white hover:text-ink">
+              <Button asChild size="sm" variant="outline">
                 <LangLink href="/tools/offer">{t("nav.offerTool")}</LangLink>
               </Button>
-              <Button asChild size="sm" variant="outline" className="border-white/20 bg-white/8 text-[#F7F3EA] hover:bg-white hover:text-ink">
+              <Button asChild size="sm" variant="outline">
                 <LangLink href="/growth/market">{t("os.findOpp")}</LangLink>
               </Button>
-              <Button asChild size="sm" variant="outline" className="border-white/20 bg-white/8 text-[#F7F3EA] hover:bg-white hover:text-ink">
+              <Button asChild size="sm" variant="outline">
                 <LangLink href="/">{t("os.buildCampaign")}</LangLink>
               </Button>
-              <Button asChild size="sm" variant="outline" className="border-white/20 bg-white/8 text-[#F7F3EA] hover:bg-white hover:text-ink">
+              <Button asChild size="sm" variant="outline">
                 <LangLink href="/growth/market">{t("os.analyzeMarket")}</LangLink>
               </Button>
-              <Button asChild size="sm" variant="outline" className="border-white/20 bg-white/8 text-[#F7F3EA] hover:bg-white hover:text-ink">
+              <Button asChild size="sm" variant="outline">
                 <LangLink href="/growth/experiments">{t("os.runExperiment")}</LangLink>
               </Button>
             </div>

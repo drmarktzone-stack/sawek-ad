@@ -82,9 +82,9 @@ export default function BankBillingPage() {
       <div aria-hidden className="agency-grain absolute inset-0" />
       <div className="relative">
         <div className="agency-ink p-6 shadow-[var(--shadow-lift)]">
-          <p className="text-xs font-black uppercase tracking-[0.22em] text-[#9FD4C8]">Desk Noir</p>
+          <p className="text-xs font-black uppercase tracking-[0.22em] text-teal">Verde Clear</p>
           <h1 className="agency-display-cream mt-2 text-3xl">{t("bank.title")}</h1>
-          <p className="mt-2 text-sm text-[#E8E2D4]">{t("bank.lead")}</p>
+          <p className="mt-2 text-sm text-muted">{t("bank.lead")}</p>
         </div>
 
         {msg ? <p className="mt-4 text-sm font-semibold text-navy">{msg}</p> : null}

@@ -250,6 +250,45 @@ async function fetchResearch(intake: Intake, brief?: CampaignBrief): Promise<Ret
   }
 }
 
+async function fetchImagenVisual(pack: CampaignPack): Promise<{ src: string; publicUrl?: string } | null> {
+  const loc = pack.completeAd?.locales.en || pack.completeAd?.locales.he;
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 45_000);
+  try {
+    const res = await fetch("/api/imagen", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        businessName: pack.intake.businessName,
+        category: pack.intake.category,
+        description: pack.intake.description,
+        location: pack.intake.location,
+        offer: pack.intake.offer,
+        headline: loc?.headline,
+        scene: loc?.imagePrompt || loc?.visual || pack.brief?.coreMessage.en,
+        vertical: pack.brief?.vertical,
+        locale: "en",
+      }),
+      signal: ctrl.signal,
+    });
+    if (!res.ok) return null;
+    const data = (await res.json()) as {
+      ok?: boolean;
+      mime?: string;
+      imageBase64?: string;
+      publicUrl?: string;
+    };
+    if (!data?.ok || !data.imageBase64) return null;
+    const mime = data.mime && data.mime.startsWith("image/") ? data.mime : "image/png";
+    const src = `data:${mime};base64,${data.imageBase64}`;
+    return { src, ...(data.publicUrl ? { publicUrl: data.publicUrl } : {}) };
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 /** Overlay Gemini channel copy onto agency creative pieces (he+ar+en). No-op if Gemini unavailable. */
 export async function overlayPackAgency(pack: CampaignPack): Promise<CampaignPack> {
   let next = pack;
@@ -270,7 +309,8 @@ export async function overlayPackAgency(pack: CampaignPack): Promise<CampaignPac
   })();
   const proOverlay = fetchProDesk(pack.intake, pack.brief);
   const researchOverlay = fetchResearch(pack.intake, pack.brief);
-  const [flashed, desk, research] = await Promise.all([flashOverlay, proOverlay, researchOverlay]);
+  const imagenOverlay = fetchImagenVisual(pack);
+  const [flashed, desk, research, imagen] = await Promise.all([flashOverlay, proOverlay, researchOverlay, imagenOverlay]);
   next = attachResearchAndSync(flashed, research);
   // Re-apply Flash pieces after sync rebuilds agency from the shared brief.
   if (flashed.agency?.creative.pieces?.length && next.agency) {
@@ -283,6 +323,17 @@ export async function overlayPackAgency(pack: CampaignPack): Promise<CampaignPac
     };
   }
   next = overlayProOnAgency(next, desk);
+  if (imagen && next.completeAd) {
+    next = {
+      ...next,
+      completeAd: {
+        ...next.completeAd,
+        visualSrc: imagen.src,
+        visualPublicUrl: imagen.publicUrl || imagen.src,
+        visualSource: "imagen",
+      },
+    };
+  }
   const audit = next.pastCampaignAudit ?? buildPastCampaignAudit(next.intake);
   if (audit) {
     try {

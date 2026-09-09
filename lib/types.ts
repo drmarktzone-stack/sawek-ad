@@ -505,6 +505,10 @@ export interface CompleteAdPackage {
   directionsExhausted?: boolean;
   noveltyReason?: string;
   imageComposition?: ImageCompositionDecision;
+  /** Persisted Imagen / composition still — data URL or /api/imagen/:id. */
+  visualSrc?: string;
+  visualPublicUrl?: string;
+  visualSource?: "imagen" | "asset" | "composition";
   metadata?: {
     scores: CompleteAdScores;
     candidateFamilies: StrategyFamily[];

@@ -37,34 +37,42 @@ export function CompleteAdCard({
         : completeAd.noveltyStatus === "saturated"
           ? t("complete.noveltySaturated")
           : t("complete.noveltyUnknown");
+  const visual = completeAd.visualPublicUrl || completeAd.visualSrc;
 
   return (
     <section
-      className={cn("mb-8 border-t border-[var(--line)] pt-5", compact && "mb-4")}
+      className={cn(
+        "mb-8 overflow-hidden rounded-[16px] border border-[var(--line)] bg-white p-5 shadow-[var(--shadow-card)] sm:p-7",
+        compact && "mb-4 p-4",
+      )}
       data-testid="complete-ad"
       data-complete-family={completeAd.family}
       data-fact-status={completeAd.factStatus}
       data-novelty={completeAd.noveltyStatus}
       data-validation={completeAd.validation.passed ? "pass" : "fail"}
+      data-visual-source={completeAd.visualSource || "composition"}
       dir={dir}
     >
       <p className="os-kicker">{t("complete.kicker")}</p>
-      <p className="mt-2 os-meta">{t("os.studio.concept")} · {loc.concept}</p>
       <h2 className="os-title mt-2 text-3xl sm:text-5xl">{headline}</h2>
+      {hook && hook !== headline ? (
+        <p className="mt-3 text-xl font-semibold text-navy">{hook}</p>
+      ) : null}
+
+      {visual ? (
+        <figure className="mt-6 overflow-hidden rounded-[14px] border border-[var(--line)] bg-[#f3f8f1]" data-testid="complete-ad-visual">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={visual} alt="" className="aspect-[1.91/1] w-full object-cover" />
+        </figure>
+      ) : null}
 
       <div className="mt-6 space-y-4">
-        <div>
-          <p className="os-meta">{t("os.hook")}</p>
-          <p className="mt-1 text-xl font-semibold text-navy">{hook}</p>
-        </div>
-        <div>
-          <p className="os-meta">{t("os.primaryCopy")}</p>
-          <p className="mt-1 whitespace-pre-wrap text-base leading-relaxed text-navy">{copy}</p>
-        </div>
-        <div>
-          <p className="os-meta">{t("os.studio.export")}</p>
-          <span className="mt-2 inline-block bg-coral px-4 py-2 text-sm font-black text-white">{loc.cta}</span>
-        </div>
+        {copy ? (
+          <p className="whitespace-pre-wrap text-base leading-relaxed text-navy">{copy}</p>
+        ) : null}
+        <span className="inline-block rounded-[10px] bg-lime px-5 py-2.5 text-sm font-black text-[var(--lime-ink)]">
+          {loc.cta}
+        </span>
       </div>
 
       {loc.offer ? (
@@ -74,14 +82,6 @@ export function CompleteAdCard({
         </p>
       ) : (
         <p className="mt-4 text-sm text-muted">{t("complete.offerUnknown")}</p>
-      )}
-      {loc.proof ? (
-        <p className="mt-1 text-sm text-navy">
-          <span className="font-black">{t("complete.proof")}: </span>
-          {loc.proof}
-        </p>
-      ) : (
-        <p className="mt-1 text-sm text-muted">{t("complete.proofUnknown")}</p>
       )}
 
       <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -101,7 +101,6 @@ export function CompleteAdCard({
         ) : null}
       </div>
       <OverlayStatus composition={completeAd.imageComposition} />
-      <p className="mt-3 text-sm text-muted">{t("complete.visual")}: {loc.visual}</p>
 
       {!compact ? (
         <div className="mt-4">
@@ -115,6 +114,10 @@ export function CompleteAdCard({
           {open ? (
             <dl className="mt-3 divide-y divide-[var(--line)] text-sm">
               <div className="os-row">
+                <dt className="os-meta">{t("os.studio.concept")}</dt>
+                <dd>{loc.concept}</dd>
+              </div>
+              <div className="os-row">
                 <dt className="os-meta">{t("complete.why")}</dt>
                 <dd>{loc.why}</dd>
               </div>
@@ -126,30 +129,22 @@ export function CompleteAdCard({
                 <dt className="os-meta">{t("complete.angle")}</dt>
                 <dd>{loc.angle}</dd>
               </div>
-              <div className="os-row">
-                <dt className="os-meta">{t("complete.family")}</dt>
-                <dd>{completeAd.family}</dd>
-              </div>
-              <div className="os-row">
-                <dt className="os-meta">{loc.platform}</dt>
-                <dd>{loc.format} · {locale.toUpperCase()}</dd>
-              </div>
-              {loc.imagePrompt ? (
+              {loc.proof ? (
                 <div className="os-row">
-                  <dt className="os-meta">{t("complete.imagePrompt")}</dt>
-                  <dd>{loc.imagePrompt}</dd>
+                  <dt className="os-meta">{t("complete.proof")}</dt>
+                  <dd>{loc.proof}</dd>
+                </div>
+              ) : null}
+              {loc.visual ? (
+                <div className="os-row">
+                  <dt className="os-meta">{t("complete.visual")}</dt>
+                  <dd>{loc.visual}</dd>
                 </div>
               ) : null}
               {completeAd.marketUsed ? (
                 <div className="os-row">
                   <dt className="os-meta">{t("complete.market")}</dt>
                   <dd>{completeAd.marketEvidence || t("complete.marketStrategy")}</dd>
-                </div>
-              ) : null}
-              {completeAd.metadata?.scores ? (
-                <div className="os-row">
-                  <dt className="os-meta">{t("complete.scores")}</dt>
-                  <dd>total {completeAd.metadata.scores.total} · novelty {completeAd.metadata.scores.novelty} · safety {completeAd.metadata.scores.factualSafety}</dd>
                 </div>
               ) : null}
             </dl>

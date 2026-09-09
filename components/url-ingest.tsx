@@ -286,7 +286,7 @@ export function UrlIngest() {
   return (
     <div
       className={cn(
-        "border-b border-white/10 bg-[#08111F]",
+        "border-b border-[var(--line)] bg-[#f3f8f1]",
         home ? "px-3 py-3" : "px-3 py-2 sm:py-1.5",
       )}
     >
@@ -297,17 +297,17 @@ export function UrlIngest() {
           home ? "gap-2" : "gap-1.5",
         )}
       >
-        <label htmlFor="scan-url" className="text-start text-sm font-black text-[#F7F3EA]">
+        <label htmlFor="scan-url" className="text-start text-sm font-black text-navy">
           {t("url.label")}
         </label>
         <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center">
           <div className="flex min-w-0 flex-1 items-center gap-2">
-            <Globe className={cn("shrink-0 text-[#9FD4C8]", home ? "size-5" : "size-4")} aria-hidden />
+            <Globe className={cn("shrink-0 text-teal", home ? "size-5" : "size-4")} aria-hidden />
             <input
               id="scan-url"
               dir="ltr"
               className={cn(
-                "w-full min-w-0 rounded-[12px] border border-white/15 bg-white px-4 text-[16px] text-ink placeholder:text-[#8794A3] outline-none focus:border-teal focus:shadow-[0_0_0_4px_rgba(12,122,107,0.22)]",
+                "w-full min-w-0 rounded-[12px] border border-[var(--line)] bg-white px-4 text-[16px] text-ink placeholder:text-muted-soft outline-none focus:border-teal focus:shadow-[0_0_0_4px_rgba(200,224,74,0.35)]",
                 home ? "h-12" : "h-11 sm:h-10 sm:text-sm",
               )}
               value={value}
@@ -332,7 +332,7 @@ export function UrlIngest() {
           </Button>
         </div>
       </form>
-      <p id="scan-url-hint" className={cn("mx-auto max-w-[92rem] text-sm text-[#C9D0D8]", home ? "mt-1.5" : "mt-1 hidden sm:block")}>
+      <p id="scan-url-hint" className={cn("mx-auto max-w-[92rem] text-sm text-muted", home ? "mt-1.5" : "mt-1 hidden sm:block")}>
         {t("url.hint")}
       </p>
       {error && <p className="mx-auto mt-1 max-w-[92rem] whitespace-pre-line text-xs font-semibold text-danger">{error}</p>}
