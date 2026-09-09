@@ -7,7 +7,17 @@ import type { AgentId, AgentStatus, CampaignPack, Competitor, Intake, WizardStep
 import { demoIntake, clearPendingDemo, applyPediatricDemoDraft, applyCatalogDemoDraft, isPediatricDemo, isAnyDemoIntake, relocalizePediatricIntake, relocalizeCatalogIntake, canonicalDoctorName } from "@/lib/demo";
 import { installDemoPack } from "@/lib/active-pack";
 import { DemoPicker } from "@/components/demo-picker";
-import { cmoFieldsMissing, emptyIntake, wizardMissingFields, wizardReady } from "@/lib/engine/validate";
+import {
+  cmoFieldsMissing,
+  emptyIntake,
+  intakeLandingStep,
+  WIZARD_PICK_FIELDS,
+  wizardFieldDomId,
+  wizardMissingFields,
+  wizardReady,
+  wizardSectionDomId,
+  type WizardRequiredField,
+} from "@/lib/engine/validate";
 import { assemblePack, idleStatus, overlayPackAgency, runIntakeAndDiagnosis, runMedia, runOptimizerStage, runStrategic } from "@/lib/engine/run";
 import { loadDraft, saveDraft, getCampaign, INGEST_APPLIED_EVENT } from "@/lib/storage";
 import { nextHitlGate } from "@/lib/engine/hitl";
@@ -61,15 +71,30 @@ import { useIsClient } from "@/lib/use-is-client";
 import { cn } from "@/lib/utils";
 import { CompleteAdCard } from "@/components/complete-ad-card";
 
-function attachFieldId(node: ReactNode, id: string, describedBy?: string): ReactNode {
+function attachFieldId(
+  node: ReactNode,
+  id: string,
+  describedBy?: string,
+  invalid?: boolean,
+): ReactNode {
   if (!isValidElement(node)) return node;
   const type = node.type;
   const isControl = type === Input || type === Textarea || type === "input" || type === "textarea";
   if (!isControl) return node;
-  const prev = node as ReactElement<{ id?: string; "aria-describedby"?: string }>;
+  const prev = node as ReactElement<{
+    id?: string;
+    className?: string;
+    "aria-describedby"?: string;
+    "aria-invalid"?: boolean;
+  }>;
   return cloneElement(prev, {
     id,
     ...(describedBy ? { "aria-describedby": describedBy } : {}),
+    ...(invalid ? { "aria-invalid": true } : {}),
+    className: cn(
+      prev.props.className,
+      invalid && "border-danger focus:border-danger focus:shadow-[0_0_0_4px_rgba(196,74,58,0.18)]",
+    ),
   });
 }
 
@@ -77,19 +102,31 @@ function Field({
   label,
   hint,
   filled,
+  error,
+  fieldId,
+  flash,
   children,
 }: {
   label: string;
   hint?: string;
   filled?: boolean;
+  error?: string;
+  fieldId?: string;
+  flash?: boolean;
   children: React.ReactNode;
 }) {
-  const id = useId();
+  const autoId = useId();
+  const id = fieldId ?? autoId;
   const hintId = hint ? `${id}-hint` : undefined;
-  const labeled = Children.map(children, (child) => attachFieldId(child, id, hintId));
+  const errorId = error ? `${id}-error` : undefined;
+  const describedBy = [errorId, hintId].filter(Boolean).join(" ") || undefined;
+  const labeled = Children.map(children, (child) => attachFieldId(child, id, describedBy, Boolean(error)));
   return (
-    <div className="mb-5">
-      <Label htmlFor={id} className={filled ? "text-teal" : "text-navy"}>
+    <div
+      className={cn("mb-5 rounded-[14px]", flash && "ring-2 ring-danger ring-offset-2 ring-offset-[#EFEAE0]")}
+      data-wizard-field={fieldId}
+    >
+      <Label htmlFor={id} className={error ? "text-danger" : filled ? "text-teal" : "text-navy"}>
         {label}
       </Label>
       {hint ? (
@@ -97,7 +134,50 @@ function Field({
           {hint}
         </p>
       ) : null}
-      <div className={filled ? "agency-field-wrap-filled" : undefined}>{labeled}</div>
+      <div className={filled && !error ? "agency-field-wrap-filled" : undefined}>{labeled}</div>
+      {error ? (
+        <p id={errorId} className="mt-2 text-sm font-semibold text-danger" role="alert">
+          {error}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+function ChipField({
+  label,
+  hint,
+  fieldId,
+  error,
+  flash,
+  children,
+}: {
+  label: string;
+  hint?: ReactNode;
+  fieldId: string;
+  error?: string;
+  flash?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <div
+      id={fieldId}
+      tabIndex={-1}
+      data-wizard-field={fieldId}
+      className={cn(
+        "rounded-[16px] outline-none",
+        error && "ring-2 ring-danger/70 ring-offset-2 ring-offset-[#EFEAE0]",
+        flash && "ring-2 ring-danger ring-offset-2 ring-offset-[#EFEAE0]",
+      )}
+    >
+      <Label className={error ? "text-danger" : undefined}>{label}</Label>
+      {hint}
+      <div className={error ? "rounded-[14px] border border-danger p-2" : undefined}>{children}</div>
+      {error ? (
+        <p className="mt-2 text-sm font-semibold text-danger" role="alert">
+          {error}
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -118,6 +198,7 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
   const [offerBlocked, setOfferBlocked] = useState(false);
   const [compOpen, setCompOpen] = useState(false);
   const [compDraft, setCompDraft] = useState<Competitor>({ id: "", name: "", url: "", notes: "" });
+  const [flashField, setFlashField] = useState("");
   const [custom, setCustom] = useState({
     audience: false,
     problem: false,
@@ -153,7 +234,7 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
     } else if (emptyWanted) {
       const blankState = applyEmptyCampaignHydrate();
       setIntake(blankState.intake);
-      setStep(1);
+      setStep(2);
       setCustom({ audience: false, problem: false, advantage: false, goal: false, offer: false });
       setPhase("wizard");
       setPack(null);
@@ -170,7 +251,7 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
               locale,
             );
       setIntake(intake);
-      setStep(d.step);
+      setStep(intakeLandingStep(intake, d.step));
       setCustom({
         audience: intake.audienceCustom,
         problem: intake.problemCustom,
@@ -203,7 +284,7 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
     const onEmpty = () => {
       const blankState = applyEmptyCampaignHydrate();
       setIntake(blankState.intake);
-      setStep(1);
+      setStep(2);
       setCustom({ audience: false, problem: false, advantage: false, goal: false, offer: false });
       setPhase("wizard");
       setPack(null);
@@ -225,7 +306,7 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
     const onApplied = () => {
       const d = loadDraft();
       setIntake(d.intake);
-      setStep(d.step);
+      setStep(intakeLandingStep(d.intake, d.step));
       setCustom({
         audience: d.intake.audienceCustom,
         problem: d.intake.problemCustom,
@@ -286,6 +367,35 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
   }, [phase]);
 
   const patch = (p: Partial<Intake>) => setIntake((s) => ({ ...s, ...p }));
+
+  const missingRequired = wizardMissingFields(intake);
+  const missingSet = new Set(missingRequired.map((m) => m.field));
+
+  function requiredError(field: WizardRequiredField): string | undefined {
+    if (!missingSet.has(field)) return undefined;
+    return WIZARD_PICK_FIELDS.has(field) ? t("wizard.needPick") : t("wizard.needText");
+  }
+
+  function goSection(n: WizardStep) {
+    setStep(n);
+    document.getElementById(wizardSectionDomId(n))?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function focusWizardField(field: WizardRequiredField) {
+    setFlashField(field);
+    const id = wizardFieldDomId(field);
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      const focusable = el.matches("input, textarea, button")
+        ? el
+        : el.querySelector<HTMLElement>("input, textarea, button");
+      focusable?.focus();
+    }
+    window.setTimeout(() => {
+      setFlashField((cur) => (cur === field ? "" : cur));
+    }, 1600);
+  }
 
   const coachReport = useMemo(() => coachIntake(intake), [intake]);
 
@@ -372,7 +482,7 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
     markEmptyCampaign();
     const blank = emptyIntake();
     setIntake(blank);
-    setStep(1);
+    setStep(2);
     setPhase("wizard");
     setPack(null);
     setAgentStatus(idleStatus());
@@ -570,20 +680,14 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
 
       {phase === "wizard" && (
         <>
-          <Stepper step={step} onStep={(n) => setStep(n)} />
+          <Stepper step={step} onStep={goSection} />
           <CoachPanel report={coachReport} onApply={applyCoach} />
-          {step > 1 && (
-            <div className="mb-4 flex justify-center">
-              <DocumentIngest intake={intake} onApply={applyIngest} variant="compact" />
-            </div>
-          )}
-          {!embedded && <ConquerHeadline subtitle={step === 4 ? t("hero.review") : undefined} />}
-          {embedded && step === 4 && (
-            <p className="mb-6 text-center text-sm font-medium text-muted">{t("hero.review")}</p>
+          {!embedded && <ConquerHeadline subtitle={t("wizard.requiredHint")} />}
+          {embedded && (
+            <p className="mb-6 text-center text-sm font-medium text-muted">{t("wizard.requiredHint")}</p>
           )}
 
-          {step === 1 && (
-            <section>
+          <section id={wizardSectionDomId(1)}>
               <h2 className="mb-2 text-center text-lg font-bold">{t("type.prompt")}</h2>
               <p className="mb-6 text-center text-base text-muted">{t("type.hint")}</p>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -630,32 +734,194 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
                 <DocumentIngest intake={intake} onApply={applyIngest} variant="primary" />
               </div>
             </section>
-          )}
 
-          {step === 2 && (
-            <section className="agency-board p-5 sm:p-8">
+            <section id={wizardSectionDomId(2)} className="agency-board mt-8 p-5 sm:p-8">
+              <h2 className="mb-2 text-center text-lg font-black text-navy">{t("wizard.requiredHeading")}</h2>
               <div className="agency-guidance mb-6 rounded-[14px] px-4 py-3 text-sm font-semibold">
-                {t("wizard.formHint")}
+                {t("wizard.requiredHint")}
               </div>
-              <Field label={t("biz.name")} filled={Boolean(intake.businessName.trim())}>
+              <Field
+                label={t("biz.name")}
+                filled={Boolean(intake.businessName.trim())}
+                error={requiredError("businessName")}
+                fieldId={wizardFieldDomId("businessName")}
+                flash={flashField === "businessName"}
+              >
                 <Input
                   value={intake.businessName}
                   placeholder={t("biz.namePh")}
                   onChange={(e) => patch({ businessName: e.target.value })}
                 />
               </Field>
+              <Field
+                label={t("biz.description")}
+                filled={Boolean(intake.description.trim())}
+                error={requiredError("description")}
+                fieldId={wizardFieldDomId("description")}
+                flash={flashField === "description"}
+              >
+                <Textarea
+                  value={intake.description}
+                  placeholder={t("biz.descPh")}
+                  onChange={(e) => patch({ description: e.target.value })}
+                />
+              </Field>
+              <div className="mb-5">
+                <ChipField
+                  label={t("details.audience")}
+                  fieldId={wizardFieldDomId("audience")}
+                  error={requiredError("audience")}
+                  flash={flashField === "audience"}
+                >
+                  <ChipGroup
+                    invalid={Boolean(requiredError("audience"))}
+                    options={audienceChipsFor(intake)}
+                    value={intake.audience}
+                    multi
+                    showCustomField={custom.audience}
+                    onChange={(_, opt) => {
+                      const opts = audienceChipsFor(intake);
+                      if (opt.custom) {
+                        const nextOn = !custom.audience;
+                        setCustom((c) => ({ ...c, audience: nextOn }));
+                        if (!nextOn) {
+                          const { ids } = parseChipField(intake.audience, opts);
+                          patch({ audience: formatChipField(ids, ""), audienceCustom: false });
+                        } else {
+                          patch({ audienceCustom: true });
+                        }
+                      } else {
+                        patch({ audience: toggleChipValue(intake.audience, opt, opts, true), audienceCustom: custom.audience });
+                      }
+                    }}
+                    customValue={parseChipField(intake.audience, audienceChipsFor(intake)).customText}
+                    onCustom={(v) => {
+                      const { ids } = parseChipField(intake.audience, audienceChipsFor(intake));
+                      patch({ audience: formatChipField(ids, v), audienceCustom: true });
+                    }}
+                  />
+                </ChipField>
+              </div>
+              <div className="mb-5">
+                <ChipField
+                  label={t("details.problem")}
+                  fieldId={wizardFieldDomId("biggestProblem")}
+                  error={requiredError("biggestProblem")}
+                  flash={flashField === "biggestProblem"}
+                >
+                  <ChipGroup
+                    invalid={Boolean(requiredError("biggestProblem"))}
+                    options={problemChipsFor(intake)}
+                    value={intake.biggestProblem}
+                    multi
+                    showCustomField={custom.problem}
+                    onChange={(_, opt) => {
+                      const opts = problemChipsFor(intake);
+                      if (opt.custom) {
+                        const nextOn = !custom.problem;
+                        setCustom((c) => ({ ...c, problem: nextOn }));
+                        if (!nextOn) {
+                          const { ids } = parseChipField(intake.biggestProblem, opts);
+                          patch({ biggestProblem: formatChipField(ids, ""), problemCustom: false });
+                        } else {
+                          patch({ problemCustom: true });
+                        }
+                      } else {
+                        patch({ biggestProblem: toggleChipValue(intake.biggestProblem, opt, opts, true), problemCustom: custom.problem });
+                      }
+                    }}
+                    customValue={parseChipField(intake.biggestProblem, problemChipsFor(intake)).customText}
+                    onCustom={(v) => {
+                      const { ids } = parseChipField(intake.biggestProblem, problemChipsFor(intake));
+                      patch({ biggestProblem: formatChipField(ids, v), problemCustom: true });
+                    }}
+                  />
+                </ChipField>
+              </div>
+              <div className="mb-5">
+                <ChipField
+                  label={t("details.advantage")}
+                  fieldId={wizardFieldDomId("uniqueAdvantage")}
+                  error={requiredError("uniqueAdvantage")}
+                  flash={flashField === "uniqueAdvantage"}
+                >
+                  <ChipGroup
+                    invalid={Boolean(requiredError("uniqueAdvantage"))}
+                    options={ADVANTAGE_CHIPS}
+                    value={intake.uniqueAdvantage}
+                    multi
+                    showCustomField={custom.advantage}
+                    onChange={(_, opt) => {
+                      if (opt.custom) {
+                        const nextOn = !custom.advantage;
+                        setCustom((c) => ({ ...c, advantage: nextOn }));
+                        if (!nextOn) {
+                          const { ids } = parseChipField(intake.uniqueAdvantage, ADVANTAGE_CHIPS);
+                          patch({ uniqueAdvantage: formatChipField(ids, ""), advantageCustom: false });
+                        } else {
+                          patch({ advantageCustom: true });
+                        }
+                      } else {
+                        patch({ uniqueAdvantage: toggleChipValue(intake.uniqueAdvantage, opt, ADVANTAGE_CHIPS, true), advantageCustom: custom.advantage });
+                      }
+                    }}
+                    customValue={parseChipField(intake.uniqueAdvantage, ADVANTAGE_CHIPS).customText}
+                    onCustom={(v) => {
+                      const { ids } = parseChipField(intake.uniqueAdvantage, ADVANTAGE_CHIPS);
+                      patch({ uniqueAdvantage: formatChipField(ids, v), advantageCustom: true });
+                    }}
+                  />
+                </ChipField>
+              </div>
+              <div className="mb-2">
+                <ChipField
+                  label={t("details.goal")}
+                  fieldId={wizardFieldDomId("mainGoal")}
+                  error={requiredError("mainGoal")}
+                  flash={flashField === "mainGoal"}
+                  hint={isFreeService(intake) ? <p className="mb-2 text-xs text-muted">{t("details.goalFreeHint")}</p> : undefined}
+                >
+                  <ChipGroup
+                    invalid={Boolean(requiredError("mainGoal"))}
+                    options={goalChipsFor(intake)}
+                    value={intake.mainGoal}
+                    multi
+                    showCustomField={custom.goal}
+                    onChange={(_, opt) => {
+                      const opts = goalChipsFor(intake);
+                      if (opt.custom) {
+                        const nextOn = !custom.goal;
+                        setCustom((c) => ({ ...c, goal: nextOn }));
+                        if (!nextOn) {
+                          const { ids } = parseChipField(intake.mainGoal, opts);
+                          patch({ mainGoal: formatChipField(ids, ""), goalCustom: false });
+                        } else {
+                          patch({ goalCustom: true });
+                        }
+                      } else {
+                        patch({ mainGoal: toggleChipValue(intake.mainGoal, opt, opts, true), goalCustom: custom.goal });
+                      }
+                    }}
+                    customValue={parseChipField(intake.mainGoal, goalChipsFor(intake)).customText}
+                    onCustom={(v) => {
+                      const { ids } = parseChipField(intake.mainGoal, goalChipsFor(intake));
+                      patch({ mainGoal: formatChipField(ids, v), goalCustom: true });
+                    }}
+                  />
+                </ChipField>
+              </div>
+            </section>
+
+            <section id={wizardSectionDomId(3)} className="agency-board mt-8 space-y-8 p-5 sm:p-8">
+              <h2 className="text-center text-lg font-black text-navy">{t("wizard.optionalHeading")}</h2>
+              <div className="agency-guidance rounded-[14px] px-4 py-3 text-sm font-semibold">
+                {t("wizard.formHint")}
+              </div>
               <Field label={t("biz.category")} filled={Boolean(intake.category.trim())}>
                 <Input
                   value={intake.category}
                   placeholder={t("biz.categoryPh")}
                   onChange={(e) => patch({ category: e.target.value })}
-                />
-              </Field>
-              <Field label={t("biz.description")} filled={Boolean(intake.description.trim())}>
-                <Textarea
-                  value={intake.description}
-                  placeholder={t("biz.descPh")}
-                  onChange={(e) => patch({ description: e.target.value })}
                 />
               </Field>
               <div className="mb-6 rounded-[16px] border border-[rgba(8,17,31,0.08)] bg-ivory p-4">
@@ -697,14 +963,6 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
                   onChange={(e) => patch({ clinicHours: e.target.value })}
                 />
               </Field>
-            </section>
-          )}
-
-          {step === 3 && (
-            <section className="agency-board space-y-8 p-5 sm:p-8">
-              <div className="agency-guidance rounded-[14px] px-4 py-3 text-sm font-semibold">
-                {t("wizard.formHint")}
-              </div>
               <div>
                 <Label>{t("details.depth")}</Label>
                 <ChipGroup
@@ -712,124 +970,6 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
                   value={intake.depth}
                   multi={false}
                   onChange={(_, opt) => patch({ depth: opt.id as Intake["depth"] })}
-                />
-              </div>
-              <div>
-                <Label>{t("details.audience")}</Label>
-                <ChipGroup
-                  options={audienceChipsFor(intake)}
-                  value={intake.audience}
-                  multi
-                  showCustomField={custom.audience}
-                  onChange={(_, opt) => {
-                    const opts = audienceChipsFor(intake);
-                    if (opt.custom) {
-                      const nextOn = !custom.audience;
-                      setCustom((c) => ({ ...c, audience: nextOn }));
-                      if (!nextOn) {
-                        const { ids } = parseChipField(intake.audience, opts);
-                        patch({ audience: formatChipField(ids, ""), audienceCustom: false });
-                      } else {
-                        patch({ audienceCustom: true });
-                      }
-                    } else {
-                      patch({ audience: toggleChipValue(intake.audience, opt, opts, true), audienceCustom: custom.audience });
-                    }
-                  }}
-                  customValue={parseChipField(intake.audience, audienceChipsFor(intake)).customText}
-                  onCustom={(v) => {
-                    const { ids } = parseChipField(intake.audience, audienceChipsFor(intake));
-                    patch({ audience: formatChipField(ids, v), audienceCustom: true });
-                  }}
-                />
-              </div>
-              <div>
-                <Label>{t("details.problem")}</Label>
-                <ChipGroup
-                  options={problemChipsFor(intake)}
-                  value={intake.biggestProblem}
-                  multi
-                  showCustomField={custom.problem}
-                  onChange={(_, opt) => {
-                    const opts = problemChipsFor(intake);
-                    if (opt.custom) {
-                      const nextOn = !custom.problem;
-                      setCustom((c) => ({ ...c, problem: nextOn }));
-                      if (!nextOn) {
-                        const { ids } = parseChipField(intake.biggestProblem, opts);
-                        patch({ biggestProblem: formatChipField(ids, ""), problemCustom: false });
-                      } else {
-                        patch({ problemCustom: true });
-                      }
-                    } else {
-                      patch({ biggestProblem: toggleChipValue(intake.biggestProblem, opt, opts, true), problemCustom: custom.problem });
-                    }
-                  }}
-                  customValue={parseChipField(intake.biggestProblem, problemChipsFor(intake)).customText}
-                  onCustom={(v) => {
-                    const { ids } = parseChipField(intake.biggestProblem, problemChipsFor(intake));
-                    patch({ biggestProblem: formatChipField(ids, v), problemCustom: true });
-                  }}
-                />
-              </div>
-              <div>
-                <Label>{t("details.advantage")}</Label>
-                <ChipGroup
-                  options={ADVANTAGE_CHIPS}
-                  value={intake.uniqueAdvantage}
-                  multi
-                  showCustomField={custom.advantage}
-                  onChange={(_, opt) => {
-                    if (opt.custom) {
-                      const nextOn = !custom.advantage;
-                      setCustom((c) => ({ ...c, advantage: nextOn }));
-                      if (!nextOn) {
-                        const { ids } = parseChipField(intake.uniqueAdvantage, ADVANTAGE_CHIPS);
-                        patch({ uniqueAdvantage: formatChipField(ids, ""), advantageCustom: false });
-                      } else {
-                        patch({ advantageCustom: true });
-                      }
-                    } else {
-                      patch({ uniqueAdvantage: toggleChipValue(intake.uniqueAdvantage, opt, ADVANTAGE_CHIPS, true), advantageCustom: custom.advantage });
-                    }
-                  }}
-                  customValue={parseChipField(intake.uniqueAdvantage, ADVANTAGE_CHIPS).customText}
-                  onCustom={(v) => {
-                    const { ids } = parseChipField(intake.uniqueAdvantage, ADVANTAGE_CHIPS);
-                    patch({ uniqueAdvantage: formatChipField(ids, v), advantageCustom: true });
-                  }}
-                />
-              </div>
-              <div>
-                <Label>{t("details.goal")}</Label>
-                {isFreeService(intake) && (
-                  <p className="mb-2 text-xs text-muted">{t("details.goalFreeHint")}</p>
-                )}
-                <ChipGroup
-                  options={goalChipsFor(intake)}
-                  value={intake.mainGoal}
-                  multi
-                  showCustomField={custom.goal}
-                  onChange={(_, opt) => {
-                    const opts = goalChipsFor(intake);
-                    if (opt.custom) {
-                      const nextOn = !custom.goal;
-                      setCustom((c) => ({ ...c, goal: nextOn }));
-                      if (!nextOn) {
-                        const { ids } = parseChipField(intake.mainGoal, opts);
-                        patch({ mainGoal: formatChipField(ids, ""), goalCustom: false });
-                      } else {
-                        patch({ goalCustom: true });
-                      }
-                    } else {
-                      patch({ mainGoal: toggleChipValue(intake.mainGoal, opt, opts, true), goalCustom: custom.goal });
-                    }
-                  }}
-                  customValue={parseChipField(intake.mainGoal, goalChipsFor(intake)).customText}
-                  onCustom={(v) => {
-                    const { ids } = parseChipField(intake.mainGoal, goalChipsFor(intake));
-                    patch({ mainGoal: formatChipField(ids, v), goalCustom: true });
-                  }}
                 />
               </div>
               <div>
@@ -920,10 +1060,8 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
                 </>
               )}
             </section>
-          )}
 
-          {step === 4 && (
-            <section>
+            <section id={wizardSectionDomId(4)} className="mt-8">
               <div className="overflow-hidden rounded-2xl border border-navy/10 bg-white">
                 <div className="border-b border-navy/10 px-5 py-4 text-center text-base font-bold text-teal">
                   {t("review.heading")}
@@ -1024,27 +1162,22 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
                 >
                   <p className="font-bold">{t("wizard.missingHeading")}</p>
                   <ul className="mt-1 list-disc ps-5">
-                    {wizardMissingFields(intake).map((f) => (
-                      <li key={String(f.field)}>{f.label[locale]}</li>
+                    {missingRequired.map((f) => (
+                      <li key={String(f.field)}>
+                        <button
+                          type="button"
+                          className="font-semibold underline decoration-danger/50 underline-offset-4"
+                          onClick={() => focusWizardField(f.field)}
+                        >
+                          {f.label[locale]}
+                          <span className="sr-only"> — {t("wizard.goToField")}</span>
+                        </button>
+                      </li>
                     ))}
                   </ul>
                 </div>
               )}
             </section>
-          )}
-
-          <div className="mt-8 flex justify-center gap-6">
-            {step > 1 && (
-              <button type="button" className="text-sm text-muted hover:text-navy" onClick={() => setStep((s) => (s - 1) as WizardStep)}>
-                {t("cta.back")}
-              </button>
-            )}
-            {step < 4 && (
-              <Button type="button" onClick={() => setStep((s) => (s + 1) as WizardStep)}>
-                {t("cta.next")}
-              </Button>
-            )}
-          </div>
         </>
       )}
 

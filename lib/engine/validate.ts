@@ -1,4 +1,4 @@
-import type { Intake, IntakeReport, Locale, MissingFlag } from "../types";
+import type { Intake, IntakeReport, Locale, MissingFlag, WizardStep } from "../types";
 import { filled, parseNumber } from "../utils";
 import { isNoOffer } from "../no-offer";
 import { isFreeService } from "../operating-model";
@@ -152,7 +152,15 @@ export function cmoFieldsMissing(intake: Intake): boolean {
   return !filled(intake.businessModel) || !filled(intake.monthlyBudget) || !filled(intake.targetCac) || !filled(intake.pastAds);
 }
 
-const WIZARD_REQUIRED: { field: keyof Intake; label: Record<Locale, string> }[] = [
+export type WizardRequiredField =
+  | "businessName"
+  | "description"
+  | "audience"
+  | "biggestProblem"
+  | "uniqueAdvantage"
+  | "mainGoal";
+
+export const WIZARD_REQUIRED: { field: WizardRequiredField; label: Record<Locale, string> }[] = [
   { field: "businessName", label: L("שם העסק", "اسم العمل", "Business name") },
   { field: "description", label: L("תיאור העסק", "وصف النشاط", "Description") },
   { field: "audience", label: L("קהל", "الجمهور", "Audience") },
@@ -161,7 +169,28 @@ const WIZARD_REQUIRED: { field: keyof Intake; label: Record<Locale, string> }[] 
   { field: "mainGoal", label: L("מטרה", "الهدف", "Goal") },
 ];
 
-export function wizardMissingFields(intake: Intake): { field: keyof Intake; label: Record<Locale, string> }[] {
+export const WIZARD_PICK_FIELDS = new Set<WizardRequiredField>([
+  "audience",
+  "biggestProblem",
+  "uniqueAdvantage",
+  "mainGoal",
+]);
+
+export function wizardFieldDomId(field: WizardRequiredField | string): string {
+  return `wizard-field-${String(field)}`;
+}
+
+export function wizardSectionDomId(step: WizardStep): string {
+  return `wizard-section-${step}`;
+}
+
+/** Land on the required block — never on competitors/build — while required fields are empty. */
+export function intakeLandingStep(intake: Intake, requested: WizardStep): WizardStep {
+  if (wizardReady(intake)) return requested;
+  return 2;
+}
+
+export function wizardMissingFields(intake: Intake): { field: WizardRequiredField; label: Record<Locale, string> }[] {
   return WIZARD_REQUIRED.filter((c) => !filled(String(intake[c.field] ?? "")));
 }
 

@@ -27,6 +27,7 @@
     "check:hitl-advance": "npx --yes tsx scripts/check-hitl-advance.ts",
     "check:clinic-isolation": "npx --yes tsx scripts/check-clinic-isolation.ts",
     "check:sprint1": "npx --yes tsx scripts/check-sprint1-tools.ts",
+    "check:wizard-intake": "npx --yes tsx scripts/check-wizard-intake.ts",
     "check:copy-quality": "npx --yes tsx scripts/check-copy-quality.ts",
     "verify:rls": "npx --yes tsx scripts/verify-rls.ts"
   },

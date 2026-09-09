@@ -13,6 +13,7 @@ export function ChipGroup({
   onCustom,
   showCustomField,
   multi = true,
+  invalid = false,
 }: {
   options: ChipOption[];
   value: string;
@@ -22,6 +23,7 @@ export function ChipGroup({
   showCustomField?: boolean;
   /** Default true for audience/problem/advantage/goal/offer/channels. Pass false for depth. */
   multi?: boolean;
+  invalid?: boolean;
 }) {
   const { locale, t } = useI18n();
   return (
@@ -39,12 +41,15 @@ export function ChipGroup({
             <button
               key={opt.id}
               type="button"
+              aria-invalid={invalid && !selected ? true : undefined}
               onClick={() => onChange(label, opt)}
               className={cn(
                 "rounded-[12px] border px-3.5 py-2 text-sm font-semibold transition-colors",
                 selected
                   ? "border-ink bg-ink text-[#F7F3EA]"
-                  : "border-[rgba(8,17,31,0.14)] bg-white text-navy hover:border-teal",
+                  : invalid
+                    ? "border-danger bg-danger/5 text-navy hover:border-danger"
+                    : "border-[rgba(8,17,31,0.14)] bg-white text-navy hover:border-teal",
               )}
             >
               {label}
@@ -54,9 +59,15 @@ export function ChipGroup({
       </div>
       {showCustomField && (
         <input
-          className="mt-3 h-12 w-full rounded-[12px] border border-teal/45 bg-white px-4 text-base text-ink outline-none focus:border-teal focus:shadow-[0_0_0_4px_rgba(12,122,107,0.16)]"
+          className={cn(
+            "mt-3 h-12 w-full rounded-[12px] border bg-white px-4 text-base text-ink outline-none",
+            invalid
+              ? "border-danger focus:border-danger focus:shadow-[0_0_0_4px_rgba(196,74,58,0.18)]"
+              : "border-teal/45 focus:border-teal focus:shadow-[0_0_0_4px_rgba(12,122,107,0.16)]",
+          )}
           placeholder={t("details.writeOwn")}
           aria-label={t("details.writeOwn")}
+          aria-invalid={invalid || undefined}
           value={customValue ?? value}
           onChange={(e) => onCustom?.(e.target.value)}
         />
