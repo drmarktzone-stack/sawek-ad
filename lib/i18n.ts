@@ -313,6 +313,36 @@ export const copy: Dict = {
     ar: "لبناء حملة كاملة، لساته ناقص:",
     en: "To build a full campaign, still missing:",
   },
+  "wizard.needText": {
+    he: "שדה חובה — מלאו אותו כאן לפני בניית הקמפיין.",
+    ar: "حقل إلزامي — عبّوه هون قبل بناء الحملة.",
+    en: "Required — fill this here before building the campaign.",
+  },
+  "wizard.needPick": {
+    he: "בחירה חובה — בחרו לפחות אפשרות אחת.",
+    ar: "اختيار إلزامي — اختاروا خيار واحد على الأقل.",
+    en: "Required — pick at least one option.",
+  },
+  "wizard.requiredHeading": {
+    he: "חובה לקמפיין מלא",
+    ar: "إلزامي لحملة كاملة",
+    en: "Required for a full campaign",
+  },
+  "wizard.requiredHint": {
+    he: "השדות האדומים חובה ונשארים על המסך. בלי תיאור ומטרה לא בונים.",
+    ar: "الحقول الحمرا إلزامية וبتضلّ على الصفحة. بلا وصف النشاط والهدف ما منبني.",
+    en: "Red fields are required and stay on this page. No build without description and goal.",
+  },
+  "wizard.optionalHeading": {
+    he: "אופציונלי — לא חוסם בנייה",
+    ar: "اختياري — مش بوقف البناء",
+    en: "Optional — does not block the build",
+  },
+  "wizard.goToField": {
+    he: "עברו לשדה החסר",
+    ar: "روحوا للحقل الناقص",
+    en: "Go to the missing field",
+  },
   "result.scoreHint": {
     he: "כמה מהשדות מולאו — לא ציון ביצועים.",
     ar: "كم من الحقول مُلئت — ليس درجة أداء.",

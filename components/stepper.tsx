@@ -21,7 +21,7 @@ export function Stepper({
         const n = (i + 1) as WizardStep;
         const done = step > n;
         const active = step === n;
-        const canJump = Boolean(onStep) && n <= step;
+        const canJump = Boolean(onStep);
         return (
           <li key={key} className="flex flex-1 flex-col items-center gap-2.5">
             <div className="flex w-full items-center">
