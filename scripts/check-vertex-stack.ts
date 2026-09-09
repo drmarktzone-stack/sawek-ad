@@ -84,6 +84,8 @@ if (!generateRoute.includes("checkAiRateLimit") || !generateRoute.includes("useT
 }
 const imagenRoute = readFileSync(join(root, "app/api/imagen/route.ts"), "utf8");
 if (!imagenRoute.includes("checkAiRateLimit")) fail("imagen route must rate-limit");
+const proxy = readFileSync(join(root, "proxy.ts"), "utf8");
+if (/reason:\s*"plan_required"/.test(proxy)) fail("Imagen must not be paywalled on the complete-ad path");
 const translateRoute = readFileSync(join(root, "app/api/translate/route.ts"), "utf8");
 if (!translateRoute.includes("checkAiRateLimit")) fail("translate route must rate-limit");
 const proRoute = readFileSync(join(root, "app/api/generate/pro-desk/route.ts"), "utf8");

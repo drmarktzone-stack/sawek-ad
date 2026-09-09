@@ -52,7 +52,16 @@ Create Complete Ad (`overlayPackAgency`) now fires the $300 pack in one path:
 - Cloud Translation (`/api/translate` fills weak HE/AR/EN slots; does **not** overwrite good Palestinian copy)
 - Public ad intel (`/api/research`) as strategy only
 
-Honest `completeAd.metadata.gcp` badges show which services actually returned. Templates stay intake-driven when a Google API is down. This Cloud Agent VM has **no ADC** — local overlay will record templates. Cloud Run has ADC (`hasAdc: true` on `/api/gemini-status`). No empty SVG counted as success.
+Honest `completeAd.metadata.gcp` badges show which services actually returned. Templates stay intake-driven when a Google API is down. This Cloud Agent VM has **no ADC** — local overlay will record templates. Cloud Run `/api/gemini-status` reports `hasAdc: true`.
+
+Live Cloud Run probes (2026-09-09, **before** this PR is deployed):
+
+- Flash `/api/generate/variations` — fired (`gemini-3.5-flash`, 8 Meshhdawi variants, facts only)
+- Pro desk `/api/generate/pro-desk` — fired via AI Studio fallback (`gemini-3.1-flash-lite`, `grounded: false`), not Vertex Pro
+- Cloud Translation — `vertex_denied` (enable the API / grant `roles/cloudtranslate.user` on the Cloud Run SA)
+- Imagen — was `plan_required` from `proxy.ts`. That paywall is removed here so one still can fire after deploy. Rate limits stay.
+
+No empty SVG counted as success.
 
 ## Human flow
 
