@@ -44,14 +44,14 @@ export function PricingPage() {
           </article>
 
           <article className="agency-ink p-7 shadow-[var(--shadow-lift)] ring-1 ring-white/10" data-testid="pricing-pro">
-            <p className="text-xs font-black uppercase tracking-[0.26em] text-[#9FD4C8]">{t("pricing.proName")}</p>
+            <p className="text-xs font-black uppercase tracking-[0.26em] text-teal">{t("pricing.proName")}</p>
             <p className="agency-display-cream mt-2 text-4xl">₪{PRICE_MONTHLY_ILS}</p>
-            <p className="text-sm text-[#C9D0D8]">{t("pricing.month")}</p>
-            <p className="mt-1 text-lg font-black text-[#F7F3EA]">
+            <p className="text-sm text-muted">{t("pricing.month")}</p>
+            <p className="mt-1 text-lg font-black text-navy">
               ₪{PRICE_YEARLY_ILS} · {t("pricing.year")}
             </p>
-            <p className="text-sm text-[#C9D0D8]">{t("pricing.yearHint")}</p>
-            <ul className="mt-5 space-y-2 text-base text-[#E8E2D4]">
+            <p className="text-sm text-muted">{t("pricing.yearHint")}</p>
+            <ul className="mt-5 space-y-2 text-base text-muted">
               {proItems.map((k) => (
                 <li key={k}>• {t(k)}</li>
               ))}
@@ -59,10 +59,10 @@ export function PricingPage() {
             <Button asChild variant="coral" className="mt-6 w-full" data-testid="pricing-upgrade">
               <LangLink href="/checkout?interval=monthly">{t("pricing.cta.upgrade")}</LangLink>
             </Button>
-            <Button asChild variant="outline" className="mt-2 w-full border-white/20 bg-transparent text-[#F7F3EA] hover:bg-white/8">
+            <Button asChild variant="outline" className="mt-2 w-full border-[var(--line)] bg-transparent text-navy hover:bg-white">
               <LangLink href="/checkout?interval=yearly">{t("pricing.cta.year")}</LangLink>
             </Button>
-            <p className="mt-4 text-center text-xs font-semibold text-[#C9D0D8]">{t("pricing.checkoutHint")}</p>
+            <p className="mt-4 text-center text-xs font-semibold text-muted">{t("pricing.checkoutHint")}</p>
           </article>
         </div>
       </div>

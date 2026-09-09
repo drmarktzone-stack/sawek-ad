@@ -51,7 +51,7 @@ export function TodayBoard({ signals }: { signals: CommandSignals }) {
           {opportunity ? (
             <span>
               {opportunity.title}
-              {opportunity.confidence === "unknown" ? <span className="os-unknown"> · UNKNOWN</span> : null}
+              {opportunity.confidence === "unknown" ? <span className="os-unknown"> · {t("os.unknown")}</span> : null}
             </span>
           ) : (
             <OsUnknown />
@@ -143,34 +143,34 @@ export function CommandHero({
   const { t } = useI18n();
   return (
     <section className="agency-hero-glow relative isolate overflow-hidden">
-      <div aria-hidden className="agency-grain absolute inset-0 opacity-16" />
+      <div aria-hidden className="agency-grain absolute inset-0 opacity-10" />
       <div className="relative mx-auto max-w-6xl px-4 pb-12 pt-8 sm:pb-14 sm:pt-12">
-        <p className="agency-kicker mb-3 text-center text-[#9FD4C8]">{t("os.kicker")}</p>
+        <p className="agency-kicker mb-3 text-center">{t("os.kicker")}</p>
         <h1 className="agency-display-cream mx-auto max-w-4xl text-center text-[2.1rem] leading-[1.12] sm:text-5xl lg:text-[3.6rem]">
           {t("os.headline")}
         </h1>
-        <p className="mx-auto mt-4 max-w-2xl text-center text-base font-semibold text-[#E8E2D4] sm:text-lg">
+        <p className="mx-auto mt-4 max-w-2xl text-center text-base font-semibold text-muted sm:text-lg">
           {t("os.pitch")}
         </p>
         <div className="mt-8 flex flex-col items-center gap-3">
           <div className="mobile-stack w-full justify-center">
-            <Button asChild size="lg" variant="coral" className="btn-mobile-full text-base font-black">
-              <LangLink href="/task/ad">{t("complete.kicker")}</LangLink>
-            </Button>
-            <Button type="button" size="lg" variant="outline" className="btn-mobile-full border-white/20 bg-white/8 text-[#F7F3EA] hover:bg-white hover:text-ink" onClick={onScan}>
+            <Button type="button" size="lg" variant="coral" className="btn-mobile-full text-base font-black" onClick={onScan}>
               {t("home.cta.primary")}
             </Button>
-            <Button type="button" size="lg" variant="outline" className="btn-mobile-full border-white/20 bg-white/8 text-[#F7F3EA] hover:bg-white hover:text-ink" onClick={onEmpty}>
+            <Button asChild size="lg" variant="gold" className="btn-mobile-full text-base font-black">
+              <LangLink href="/task/ad">{t("complete.kicker")}</LangLink>
+            </Button>
+            <Button type="button" size="lg" variant="outline" className="btn-mobile-full" onClick={onEmpty}>
               {t("cta.new")}
             </Button>
           </div>
           {signals.hasBusiness ? (
-            <p className="text-sm text-[#C9D0D8]">
+            <p className="text-sm text-muted">
               {t("os.context")}: {signals.businessName}
               {signals.completeness != null ? ` · ${signals.completeness}/100` : ""}
             </p>
           ) : (
-            <p className="text-sm text-[#C9D0D8]">{t("os.noBusiness")}</p>
+            <p className="text-sm text-muted">{t("os.noBusiness")}</p>
           )}
         </div>
       </div>

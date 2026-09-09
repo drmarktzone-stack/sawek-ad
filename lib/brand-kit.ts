@@ -1,5 +1,5 @@
 import type { ClientBrandKit, Intake, Locale, MediaAssetMeta } from "./types";
-import { stylesForVertical, CLINIC_POSTER_PALETTE, isNeonPosterHex } from "./design-styles";
+import { stylesForVertical, CLINIC_POSTER_PALETTE, VERDE_CLEAR_PALETTE, isNeonPosterHex } from "./design-styles";
 import { detectVertical } from "./vertical";
 
 export function emptyBrandKit(): ClientBrandKit {
@@ -209,7 +209,7 @@ export function paletteForIntake(intake: Intake): [string, string, string] {
   const vertical = detectVertical(intake);
   const styles = stylesForVertical(vertical);
   if (vertical === "clinic") return styles[0]?.palette ?? CLINIC_POSTER_PALETTE;
-  return (styles[0]?.palette ?? CLINIC_POSTER_PALETTE) as [string, string, string];
+  return (styles[0]?.palette ?? VERDE_CLEAR_PALETTE) as [string, string, string];
 }
 
 export function inkOn(bg: string): string {

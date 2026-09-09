@@ -22,7 +22,17 @@ const CLINIC: Vertical[] = ["clinic"];
 const PRODUCT: Vertical[] = ["product"];
 const SCHOOL: Vertical[] = ["school"];
 
+export const VERDE_CLEAR_PALETTE: [string, string, string] = ["#E6F0E4", "#154734", "#C8E04A"];
+
 export const DESIGN_STYLES: DesignStyle[] = [
+  {
+    id: "verde-clear",
+    name: L("ורדה קליר", "فيردي كلير", "Verde Clear"),
+    description: L("מנטה רכה, לבן, ליים — יוקרה שקטה כמו חלון ראווה.", "نعناع فاتح وأبيض ولايم — فخامة هادية زي واجهة محل.", "Soft mint, white, lime — calm luxury vitrine."),
+    palette: VERDE_CLEAR_PALETTE,
+    mood: "calm luxury",
+    verticals: G,
+  },
   {
     id: "lifestyle",
     name: L("לייפסטייל", "لايف ستايل", "Lifestyle"),
@@ -307,8 +317,8 @@ export function isNeonPosterHex(hex: string): boolean {
   return NEON_POSTER.test(hex);
 }
 
-/** Clinic poster default: cream, soft teal, navy. Never neon yellow/red. */
-export const CLINIC_POSTER_PALETTE: [string, string, string] = ["#F6F1E8", "#2A6F6A", "#1B2A4A"];
+/** Clinic poster default: mint, forest, lime. Never neon yellow/red. */
+export const CLINIC_POSTER_PALETTE: [string, string, string] = ["#E6F0E4", "#154734", "#C8E04A"];
 
 /** Styles tagged for this vertical first, then generic. Clinic-only never leaks. */
 export function stylesForVertical(v: Vertical): DesignStyle[] {

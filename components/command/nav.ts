@@ -57,16 +57,16 @@ export type NavItem = {
 export const PRIMARY_NAV: NavItem[] = [
   { href: "/dashboard", key: "nav.command", icon: LayoutDashboard },
   { href: "/task/ad", key: "nav.create", icon: WandSparkles },
-  { href: "/campaigns", key: "nav.campaigns", icon: Folder },
+  { href: "/tools/offer", key: "nav.offerTool", icon: Compass },
   { href: "/studio", key: "nav.studio", icon: Pencil },
-  { href: "/growth/market", key: "nav.intel", icon: Radar },
+  { href: "/campaigns", key: "nav.campaigns", icon: Folder },
 ];
 
 export const MORE_NAV: NavItem[] = [
   { href: "/tools/core-message", key: "nav.voice", icon: Fingerprint },
-  { href: "/tools/offer", key: "nav.offerTool", icon: Compass },
   { href: "/tools/hso", key: "nav.hso", icon: Megaphone },
   { href: "/", key: "nav.build", icon: WandSparkles },
+  { href: "/growth/market", key: "nav.intel", icon: Radar },
   { href: "/growth/dna", key: "nav.dna", icon: Fingerprint },
   { href: "/growth/experiments", key: "nav.experiments", icon: FlaskConical },
   { href: "/leads", key: "nav.leads", icon: Users },
@@ -88,8 +88,8 @@ export const MORE_NAV: NavItem[] = [
 export const DOCK_NAV: NavItem[] = [
   { href: "/dashboard", key: "nav.command", icon: LayoutDashboard },
   { href: "/task/ad", key: "nav.create", icon: WandSparkles },
-  { href: "/campaigns", key: "nav.campaigns", icon: Folder },
-  { href: "/growth/market", key: "nav.intel", icon: Radar },
+  { href: "/tools/offer", key: "nav.offerTool", icon: Compass },
+  { href: "/studio", key: "nav.studio", icon: Pencil },
 ];
 
 export const ALL_NAV: NavItem[] = [...PRIMARY_NAV, ...MORE_NAV];

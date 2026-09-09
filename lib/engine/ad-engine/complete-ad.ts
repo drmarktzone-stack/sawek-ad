@@ -137,6 +137,9 @@ export function buildCompleteAd(pack: CampaignPack, opts?: { rotate?: boolean })
     noveltyReason: diversity.noveltyReason,
     directionsExhausted: diversity.exhausted,
     imageComposition,
+    ...(heroAsset?.publicSrc
+      ? { visualSrc: heroAsset.publicSrc, visualPublicUrl: heroAsset.publicSrc, visualSource: "asset" as const }
+      : { visualSource: "composition" as const }),
     compliance: {
       ok: passed,
       notes: [

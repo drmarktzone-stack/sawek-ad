@@ -95,10 +95,15 @@ if (!clinicPack.brief?.heroIdeaId) fail("clinic pack missing CampaignBrief.heroI
 if (clinicPack.brief?.vertical !== "clinic") fail(`clinic vertical ${clinicPack.brief?.vertical}`);
 const clinicHero = heroIdeaOf(clinicPack);
 if (!clinicHero) fail("clinic missing hero idea");
-if (clinicPack.viral?.idea && clinicHero && !clinicPack.viral.idea.includes(clinicHero.name.he.split(" ")[0]!)) {
-  // viral idea should carry the hero name or hook
-  if (!clinicPack.viral.idea.includes(clinicHero.hook.he.slice(0, 12))) {
-    fail(`clinic viral idea not from hero: ${clinicPack.viral.idea} vs ${clinicHero.name.he}`);
+if (clinicPack.viral?.idea) {
+  if (!clinicPack.viral.idea.includes(clinic.businessName.split(" ")[0]!)) {
+    fail(`clinic viral idea missing business name: ${clinicPack.viral.idea}`);
+  }
+  if (!clinicPack.viral.idea.includes(clinic.uniqueAdvantage.split(" ")[0]!)) {
+    fail(`clinic viral idea missing fact: ${clinicPack.viral.idea}`);
+  }
+  if (clinicHero && clinicPack.viral.idea.includes(clinicHero.name.he)) {
+    fail(`clinic viral idea leaked CMO label: ${clinicPack.viral.idea}`);
   }
 }
 if (clinicPack.brief?.heroIdeaId !== clinicPack.cmoIdeas?.selected[0]?.id) {

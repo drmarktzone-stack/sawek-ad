@@ -84,6 +84,8 @@ if (!generateRoute.includes("checkAiRateLimit") || !generateRoute.includes("useT
 }
 const imagenRoute = readFileSync(join(root, "app/api/imagen/route.ts"), "utf8");
 if (!imagenRoute.includes("checkAiRateLimit")) fail("imagen route must rate-limit");
+const proxy = readFileSync(join(root, "proxy.ts"), "utf8");
+if (/reason:\s*"plan_required"/.test(proxy)) fail("Imagen must not be paywalled on the complete-ad path");
 const translateRoute = readFileSync(join(root, "app/api/translate/route.ts"), "utf8");
 if (!translateRoute.includes("checkAiRateLimit")) fail("translate route must rate-limit");
 const proRoute = readFileSync(join(root, "app/api/generate/pro-desk/route.ts"), "utf8");
@@ -107,6 +109,12 @@ const run = readFileSync(join(root, "lib/engine/run.ts"), "utf8");
 if (!run.includes("/api/generate/pro-desk")) fail("pipeline must call Pro desk API");
 if (!run.includes("overlayProOnAgency")) fail("pipeline must overlay Pro desk");
 if (!run.includes("/api/research")) fail("pipeline must call research API");
+if (!run.includes("/api/imagen")) fail("pipeline must call Imagen for complete-ad stills");
+if (!run.includes("/api/generate/variations")) fail("pipeline must call Flash variations");
+if (!run.includes("/api/translate")) fail("pipeline must call Cloud Translation");
+if (!run.includes("visualSource: \"imagen\"") && !run.includes('visualSource: "imagen"')) {
+  fail("pipeline must persist Imagen visual on complete ad");
+}
 if (!run.includes("attachResearchAndSync") && !run.includes("applyResearchToPack")) {
   fail("pipeline must overlay research");
 }

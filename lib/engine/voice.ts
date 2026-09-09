@@ -208,6 +208,16 @@ export function voiceFactLines(intake: Intake, locale: Locale = "he"): string[] 
   ].filter(Boolean) as string[];
 }
 
+/** AR campaigns lock Palestinian unless the user already picked another dialect. */
+export function lockDefaultDialect(intake: Intake, locale: Locale): Intake {
+  const current = normalizeVoice(intake.voice);
+  if (current.dialect) return { ...intake, voice: current };
+  return {
+    ...intake,
+    voice: { ...current, dialect: defaultDialectForLocale(locale) },
+  };
+}
+
 export function applyVoiceToIntake(intake: Intake, voice: VoiceProfile): Intake {
   const next = normalizeVoice(voice);
   return {

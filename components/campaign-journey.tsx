@@ -11,18 +11,23 @@ import { voiceIsLocked } from "@/lib/engine/voice";
 import { cn } from "@/lib/utils";
 
 const STEPS = [
-  { id: "start", href: "/", key: "journey.start" as const },
+  { id: "scan", href: "/", key: "journey.scan" as const },
+  { id: "truth", href: "/#studio", key: "journey.truth" as const },
+  { id: "message", href: "/tools/core-message", key: "journey.message" as const },
   { id: "offer", href: "/tools/offer", key: "journey.offer" as const },
-  { id: "ads", href: "/tools/hso", key: "journey.ads" as const },
-  { id: "content", href: "/studio", key: "journey.content" as const },
-  { id: "track", href: "/growth/performance", key: "journey.track" as const },
+  { id: "create", href: "/task/ad", key: "journey.create" as const },
+  { id: "visual", href: "/studio", key: "journey.visual" as const },
+  { id: "variants", href: "/tools/hso", key: "journey.variants" as const },
+  { id: "export", href: "/campaigns", key: "journey.export" as const },
 ] as const;
 
 function stepActive(pathname: string, href: string): boolean {
-  if (href === "/") return pathname === "/" || pathname.startsWith("/task");
-  if (href === "/tools/hso") return pathname.startsWith("/tools/hso") || pathname.startsWith("/task/ad");
-  if (href === "/studio") return pathname.startsWith("/studio") || pathname.startsWith("/viral");
-  if (href === "/growth/performance") return pathname.startsWith("/growth") || pathname.startsWith("/campaigns");
+  if (href === "/") return pathname === "/";
+  if (href === "/#studio") return pathname === "/" || pathname.startsWith("/task");
+  if (href === "/task/ad") return pathname.startsWith("/task/ad");
+  if (href === "/studio") return pathname.startsWith("/studio");
+  if (href === "/tools/hso") return pathname.startsWith("/tools/hso");
+  if (href === "/campaigns") return pathname.startsWith("/campaigns") || pathname.startsWith("/growth/performance");
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
@@ -34,10 +39,18 @@ export function CampaignJourney({ compact = false }: { compact?: boolean }) {
   const locked = snap ? voiceIsLocked(snap.intake.voice) : false;
   const offerSaved = snap ? offerBlueprintIsSaved(snap.intake.offerBlueprint ?? snap.pack?.offerBlueprint) : false;
   const skipped = Boolean(snap?.intake.offerSkipConfirmed || snap?.intake.offerBlueprint?.skipped);
+  const hasTruth = Boolean(snap?.intake.businessName.trim() && snap?.intake.description.trim());
+  const hasCreate = Boolean(snap?.pack?.completeAd);
+  const hasVisual = Boolean(
+    snap?.pack?.completeAd?.visualSrc ||
+      snap?.pack?.completeAd?.visualPublicUrl ||
+      (snap?.intake.mediaAssets ?? []).some((a) => a.kind === "image"),
+  );
+  const hasVariants = Boolean(snap?.pack?.hsoStudio?.variants.length || snap?.pack?.flashVariations?.variations.length);
 
   return (
     <nav
-      className={cn("mb-5 rounded-[14px] border border-[var(--line)] bg-[var(--paper)] px-3 py-3", compact && "mb-3 py-2")}
+      className={cn("mb-5 rounded-[16px] border border-[var(--line)] bg-white px-3 py-3 shadow-[var(--shadow-card)]", compact && "mb-3 py-2")}
       aria-label={t("journey.kicker")}
       data-testid="campaign-journey"
       dir={locale === "en" ? "ltr" : "rtl"}
@@ -48,7 +61,7 @@ export function CampaignJourney({ compact = false }: { compact?: boolean }) {
           href="/tools/core-message"
           className={cn(
             "rounded-full px-2.5 py-1 text-xs font-black",
-            locked ? "bg-teal text-white" : "border border-navy/15 text-navy hover:border-teal",
+            locked ? "bg-lime text-[var(--lime-ink)]" : "border border-[var(--line)] text-navy hover:border-teal",
           )}
           data-testid="journey-voice"
         >
@@ -59,8 +72,14 @@ export function CampaignJourney({ compact = false }: { compact?: boolean }) {
         {STEPS.map((step, i) => {
           const active = stepActive(pathname, step.href);
           const done =
+            (step.id === "scan" && hasTruth) ||
+            (step.id === "truth" && hasTruth) ||
+            (step.id === "message" && locked) ||
             (step.id === "offer" && (offerSaved || skipped)) ||
-            (step.id === "ads" && Boolean(snap?.pack?.hsoStudio?.variants.length || snap?.pack?.completeAd));
+            (step.id === "create" && hasCreate) ||
+            (step.id === "visual" && hasVisual) ||
+            (step.id === "variants" && hasVariants) ||
+            (step.id === "export" && Boolean(snap?.pack?.saved));
           return (
             <li key={step.id} className="flex shrink-0 items-center gap-1">
               {i > 0 ? <span className="px-0.5 text-muted" aria-hidden>→</span> : null}
@@ -69,7 +88,7 @@ export function CampaignJourney({ compact = false }: { compact?: boolean }) {
                 data-testid={`journey-${step.id}`}
                 className={cn(
                   "tap-row rounded-[10px] px-2.5 py-1.5 text-sm font-bold",
-                  active ? "bg-ink text-[#F7F3EA]" : done ? "bg-teal/15 text-navy" : "text-muted hover:text-navy",
+                  active ? "bg-teal text-white" : done ? "bg-lime/35 text-navy" : "text-muted hover:text-navy",
                 )}
               >
                 {t(step.key)}

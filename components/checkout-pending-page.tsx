@@ -23,13 +23,13 @@ export function CheckoutPendingPage() {
       <div aria-hidden className="agency-grain absolute inset-0" />
       <div className="relative">
         <div className="agency-ink p-8 shadow-[var(--shadow-lift)]">
-          <p className="text-xs font-black uppercase tracking-[0.22em] text-[#9FD4C8]">{t("checkout.pendingKicker")}</p>
+          <p className="text-xs font-black uppercase tracking-[0.22em] text-teal">{t("checkout.pendingKicker")}</p>
           <h1 className="agency-display-cream mt-2 text-4xl">{t("checkout.pendingTitle")}</h1>
-          <p className="mt-3 text-base leading-relaxed text-[#E8E2D4]">
+          <p className="mt-3 text-base leading-relaxed text-muted">
             {stripeOk ? t("pricing.success") : t("checkout.pendingLead")}
           </p>
           {orderCode ? (
-            <p className="mt-4 rounded-[14px] border border-white/15 bg-white/8 px-4 py-3 font-black tracking-[0.14em] text-[#F7F3EA]" dir="ltr" data-testid="pending-order-code">
+            <p className="mt-4 rounded-[14px] border border-[var(--line)] bg-white px-4 py-3 font-black tracking-[0.14em] text-navy" dir="ltr" data-testid="pending-order-code">
               {orderCode}
             </p>
           ) : null}

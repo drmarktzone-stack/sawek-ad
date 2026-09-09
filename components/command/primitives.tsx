@@ -136,17 +136,19 @@ export function OverlayStatus({
 }: {
   composition?: ImageCompositionDecision;
 }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const tone = overlayTone(composition?.mode, composition?.collision);
   const label =
     tone === "ok" ? t("os.overlay.safe") : tone === "warn" ? t("os.overlay.limited") : t("os.overlay.not");
+  const reason = composition?.reason?.trim() || "";
+  const reasonOk = reason && (locale === "en" ? /[A-Za-z]/.test(reason) : !/[A-Za-z]{4,}/.test(reason));
   return (
     <div className="mt-2 flex flex-wrap items-center gap-2" data-testid="overlay-status" data-overlay={tone}>
       <span className={cn("os-badge", tone === "ok" ? "os-badge-ok" : tone === "warn" ? "os-badge-warn" : "os-badge-danger")}>
         {label}
       </span>
       {composition?.hasExistingText ? <span className="os-badge os-badge-line">{t("os.overlay.hasText")}</span> : null}
-      {composition?.reason ? <span className="text-xs text-muted">{composition.reason}</span> : null}
+      {reasonOk ? <span className="text-xs text-muted">{reason}</span> : null}
     </div>
   );
 }

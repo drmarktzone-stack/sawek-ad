@@ -182,40 +182,40 @@ export function CheckoutPage() {
 
         <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
           <aside className="agency-ink p-6 shadow-[var(--shadow-lift)]">
-            <p className="text-xs font-black uppercase tracking-[0.22em] text-[#9FD4C8]">{t("checkout.summary")}</p>
+            <p className="text-xs font-black uppercase tracking-[0.22em] text-teal">{t("checkout.summary")}</p>
             <h2 className="agency-display-cream mt-2 text-3xl">{t("checkout.plan")}</h2>
             <div className="mt-4 grid grid-cols-2 gap-2">
               <button
                 type="button"
                 className={cn(
                   "rounded-[14px] border px-3 py-3 text-start",
-                  interval === "monthly" ? "border-[#9FD4C8] bg-white/10" : "border-white/15 bg-transparent",
+                  interval === "monthly" ? "border-teal bg-mint/40" : "border-[var(--line)] bg-transparent",
                 )}
                 onClick={() => setInterval("monthly")}
               >
-                <p className="text-xs font-bold text-[#C9D0D8]">{t("checkout.monthly")}</p>
-                <p className="mt-1 text-lg font-black text-[#F7F3EA]">₪{PRICE_MONTHLY_ILS}</p>
+                <p className="text-xs font-bold text-muted">{t("checkout.monthly")}</p>
+                <p className="mt-1 text-lg font-black text-navy">₪{PRICE_MONTHLY_ILS}</p>
               </button>
               <button
                 type="button"
                 className={cn(
                   "rounded-[14px] border px-3 py-3 text-start",
-                  interval === "yearly" ? "border-[#9FD4C8] bg-white/10" : "border-white/15 bg-transparent",
+                  interval === "yearly" ? "border-teal bg-mint/40" : "border-[var(--line)] bg-transparent",
                 )}
                 onClick={() => setInterval("yearly")}
               >
-                <p className="text-xs font-bold text-[#C9D0D8]">{t("checkout.yearly")}</p>
-                <p className="mt-1 text-lg font-black text-[#F7F3EA]">₪{PRICE_YEARLY_ILS}</p>
+                <p className="text-xs font-bold text-muted">{t("checkout.yearly")}</p>
+                <p className="mt-1 text-lg font-black text-navy">₪{PRICE_YEARLY_ILS}</p>
               </button>
             </div>
-            <p className="mt-4 text-sm text-[#C9D0D8]">{t("checkout.due")}</p>
-            <p className="text-3xl font-black text-[#F7F3EA]">₪{amount}</p>
-            <ul className="mt-5 space-y-2 text-sm text-[#E8E2D4]">
+            <p className="mt-4 text-sm text-muted">{t("checkout.due")}</p>
+            <p className="text-3xl font-black text-navy">₪{amount}</p>
+            <ul className="mt-5 space-y-2 text-sm text-muted">
               {proItems.map((k) => (
                 <li key={k}>• {t(k)}</li>
               ))}
             </ul>
-            <p className="mt-6 text-xs leading-relaxed text-[#C9D0D8]">
+            <p className="mt-6 text-xs leading-relaxed text-muted">
               {t("checkout.legal")}{" "}
               <LangLink href="/terms" className="underline">
                 {t("nav.terms")}
@@ -225,7 +225,7 @@ export function CheckoutPage() {
                 {t("nav.privacy")}
               </LangLink>
             </p>
-            <p className="mt-2 text-xs font-semibold text-[#9FD4C8]">{t("checkout.honest")}</p>
+            <p className="mt-2 text-xs font-semibold text-teal">{t("checkout.honest")}</p>
           </aside>
 
           <section className="agency-board p-6">

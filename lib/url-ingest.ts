@@ -1010,6 +1010,46 @@ function extractSlogan(html: string): string {
   return "";
 }
 
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
+ * On-page identity line when JSON-LD / og:description never made it into Truth.
+ * Title remainders and slogans are page facts — not invented copy.
+ */
+function pageIdentityDescription(opts: {
+  title?: string;
+  ogTitle?: string;
+  ogDescription?: string;
+  slogan?: string;
+  businessName?: string;
+}): string {
+  const name = String(opts.businessName || "").trim();
+  const tryLine = (raw: string): string => {
+    let s = String(raw || "").replace(/\s+/g, " ").trim();
+    if (!s) return "";
+    if (isEcommerceChromeText(s) || isUiChromeText(s) || isChromePromoText(s) || isJunkUiText(s)) return "";
+    if (looksLikeSeoBusinessName(s) && s.length > 90) return "";
+    if (name) {
+      const wrapped = escapeRegExp(name);
+      s = s
+        .replace(new RegExp(`^${wrapped}\\s*[-–—|:·]+\\s*`, "i"), "")
+        .replace(new RegExp(`\\s*[-–—|:·]+\\s*${wrapped}$`, "i"), "")
+        .trim();
+      if (s.startsWith(name)) s = s.slice(name.length).replace(/^[\s\-–—|:·]+/, "").trim();
+    }
+    if (!s || s === name || s.length < 8) return "";
+    return clip(s, 220);
+  };
+  return (
+    tryLine(opts.ogDescription || "") ||
+    tryLine(opts.slogan || "") ||
+    tryLine(opts.ogTitle || "") ||
+    tryLine(opts.title || "")
+  );
+}
+
 function addressFromHtml(html: string): string {
   const m = html.match(/<address\b[^>]*>([\s\S]*?)<\/address>/i);
   if (!m) return "";
@@ -1357,10 +1397,29 @@ export function parseFetchedHtml(
   fields = sanitizeExtractedFields(fields, pipeline.businessCorpus);
   if (fromLdAddr && !fields.location) fields.location = fromLdAddr;
   syncPhoneWhatsappFields(fields);
+  if (!String(fields.description || "").trim()) {
+    const fromPage = pageIdentityDescription({
+      title,
+      ogTitle,
+      ogDescription,
+      slogan,
+      businessName: fields.businessName,
+    });
+    if (fromPage) fields.description = fromPage;
+  }
   if (!fields.uniqueAdvantage || fields.uniqueAdvantage === fields.description) {
     const distinct = distinctPageAdvantage(pipeline.businessCorpus, fields.description || "");
     if (distinct) fields.uniqueAdvantage = distinct;
     else if (fields.uniqueAdvantage === fields.description) delete fields.uniqueAdvantage;
+  }
+  if (!String(fields.uniqueAdvantage || "").trim()) {
+    const desc = String(fields.description || "").trim();
+    const first = desc.split(/\s*[-–—|·]\s*/)[0]?.trim() || "";
+    if (first && first.length >= 8 && first !== desc && !isEcommerceChromeText(first) && !isUiChromeText(first)) {
+      fields.uniqueAdvantage = clip(first, 160);
+    } else if (slogan && slogan !== desc && !isEcommerceChromeText(slogan) && !isUiChromeText(slogan)) {
+      fields.uniqueAdvantage = clip(slogan, 160);
+    }
   }
   if (slogan && !fields.brandPositioning && !isEcommerceChromeText(slogan) && !isUiChromeText(slogan)) {
     fields.brandPositioning = clip(slogan, 160);

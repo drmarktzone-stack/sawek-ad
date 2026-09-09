@@ -14,10 +14,10 @@ function Claim({ label }: { label: ClaimLabel }) {
     label === "OBSERVED_FACT"
       ? "bg-[#F5C518] text-black"
       : label === "INFERENCE"
-        ? "bg-white/10 text-[#F7F3EA]"
+        ? "bg-mint/60 text-navy"
         : label === "ESTIMATE"
-          ? "border border-white/20 text-[#C9D0D8]"
-          : "border border-dashed border-white/25 text-[#C9D0D8]";
+          ? "border border-[var(--line)] text-muted"
+          : "border border-dashed border-[var(--line)] text-muted";
   return (
     <span className={cn("inline-flex rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wide", tone)}>
       {label.replace("_", " ")}
@@ -28,7 +28,7 @@ function Claim({ label }: { label: ClaimLabel }) {
 function Panel({ title, children, dark = false }: { title: string; children: React.ReactNode; dark?: boolean }) {
   return (
     <section className={cn("os-section", dark && "agency-ink px-4 py-5")}>
-      <h2 className={cn("os-kicker mb-3", dark && "text-[#9FD4C8]")}>{title}</h2>
+      <h2 className={cn("os-kicker mb-3", dark && "text-teal")}>{title}</h2>
       {children}
     </section>
   );
@@ -110,7 +110,7 @@ export function MarketBoard({
     <div className="space-y-4">
       <div className="grid gap-4 md:grid-cols-2">
         <Panel title={t("sci.mkt.happening")} dark>
-          {!m?.scans.length && <p className="text-sm text-[#C9D0D8]">{t("sci.mkt.empty")}</p>}
+          {!m?.scans.length && <p className="text-sm text-muted">{t("sci.mkt.empty")}</p>}
           {m?.scans[0] && (
             <>
               <p className="text-sm">
@@ -167,7 +167,7 @@ export function MarketBoard({
           </ul>
         </Panel>
         <Panel title={t("sci.mkt.new")} dark>
-          {!newest.length && <p className="text-sm text-[#C9D0D8]">{t("sci.mkt.noNew")}</p>}
+          {!newest.length && <p className="text-sm text-muted">{t("sci.mkt.noNew")}</p>}
           <ul className="space-y-2 text-sm">
             {newest.map((n) => (
               <li key={n.id}>{n.text}</li>
@@ -193,7 +193,7 @@ export function MarketBoard({
           {nbe ? (
             <>
               <p className="text-lg font-black">{nbe.title}</p>
-              <p className="mt-2 text-sm text-[#C9D0D8]">{nbe.why}</p>
+              <p className="mt-2 text-sm text-muted">{nbe.why}</p>
               <div className="mt-2">
                 <Claim label={nbe.claim} />
               </div>

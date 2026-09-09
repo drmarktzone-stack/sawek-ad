@@ -87,9 +87,9 @@ export function CmoIdeasStrip({ cmoIdeas, locale, className, compact, heroId }: 
       data-cmo-ideas="platforms"
       className={cn("agency-ink mb-8 p-5 sm:p-7", className)}
     >
-      <p className="text-[13px] font-black uppercase tracking-[0.22em] text-[#9FD4C8]">{TITLE[locale]}</p>
+      <p className="text-[13px] font-black uppercase tracking-[0.22em] text-teal">{TITLE[locale]}</p>
       <h2 className="agency-display-cream mt-2 text-2xl sm:text-3xl">{LEAD[locale]}</h2>
-      <p className="mt-3 text-sm font-semibold text-[#C9D0D8]">
+      <p className="mt-3 text-sm font-semibold text-muted">
         {cmoIdeas.planningDisclaimer[locale] || cmoIdeas.planningDisclaimer.en}
       </p>
 
@@ -103,42 +103,42 @@ export function CmoIdeasStrip({ cmoIdeas, locale, className, compact, heroId }: 
             data-hero-idea={isHero ? "true" : undefined}
             className={cn(
               "rounded-[18px] border bg-white/[0.06] p-5 backdrop-blur-sm",
-              isHero ? "border-[#9FD4C8] ring-1 ring-[#9FD4C8]/40" : "border-white/10",
+              isHero ? "border-teal ring-1 ring-teal/30" : "border-[var(--line)]",
             )}
           >
             <div className="flex items-start justify-between gap-3">
-              <p className="inline-flex rounded-[8px] border border-white/15 bg-white/10 px-2.5 py-0.5 text-[11px] font-black uppercase tracking-wide text-[#F7F3EA]">
+              <p className="inline-flex rounded-[8px] border border-[var(--line)] bg-mint/50 px-2.5 py-0.5 text-[11px] font-black uppercase tracking-wide text-navy">
                 {PLATFORM[locale]} · {idea.platform[locale] || idea.platform.he}
               </p>
               <div
                 className="agency-score grid size-14 shrink-0 place-items-center rounded-full p-[3px]"
                 style={{ ["--score" as string]: idea.planningScore }}
               >
-                <span className="grid size-full place-items-center rounded-full bg-[#08111F] text-sm font-black text-[#F7F3EA]">
+                <span className="grid size-full place-items-center rounded-full bg-teal text-sm font-black text-navy">
                   {idea.planningScore}
                 </span>
               </div>
             </div>
             <p className="agency-display-cream mt-3 text-xl">{idea.name[locale] || idea.name.he}</p>
-            <p className="mt-2 text-[15px] font-semibold text-[#F7F3EA]">
+            <p className="mt-2 text-[15px] font-semibold text-navy">
               {idea.hook[locale] || idea.hook.he}
             </p>
-            <p className="mt-3 text-[13px] text-[#C9D0D8]">
-              <span className="font-black text-[#9FD4C8]">{WHY[locale]}: </span>
+            <p className="mt-3 text-[13px] text-muted">
+              <span className="font-black text-teal">{WHY[locale]}: </span>
               {idea.whyItWins[locale] || idea.whyItWins.he}
             </p>
-            <p className="mt-1 text-[13px] text-[#C9D0D8]">
-              <span className="font-black text-[#9FD4C8]">{ARC[locale]}: </span>
+            <p className="mt-1 text-[13px] text-muted">
+              <span className="font-black text-teal">{ARC[locale]}: </span>
               {idea.narrativeArc[locale] || idea.narrativeArc.he}
             </p>
             <ul className="mt-4 space-y-2">
               {idea.scorecard.map((d) => (
                 <li key={d.id} title={d.note[locale] || d.note.en}>
-                  <div className="flex items-center justify-between gap-2 text-[12px] font-bold text-[#F7F3EA]">
+                  <div className="flex items-center justify-between gap-2 text-[12px] font-bold text-navy">
                     <span>{(d.label[locale] || d.label.en).split("(")[0].trim()}</span>
                     <span>{d.score}</span>
                   </div>
-                  <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-white/10">
+                  <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-mint/50">
                     <div className={cn("h-full", barColor(d.score))} style={{ width: `${d.score}%` }} />
                   </div>
                 </li>
@@ -160,7 +160,7 @@ export function CmoIdeasStrip({ cmoIdeas, locale, className, compact, heroId }: 
           <ul className="space-y-2">
             {cmoIdeas.groundedNotes.slice(0, 5).map((n, i) => (
               <li key={`g-${i}`} className="text-[13px] leading-relaxed text-[#E8E2D4]">
-                <span className="font-black text-[#F7F3EA]">{n.title[locale] || n.title.en}</span>
+                <span className="font-black text-navy">{n.title[locale] || n.title.en}</span>
                 {" — "}
                 {n.note[locale] || n.note.en}
                 <span className="mt-1 block text-[11px] text-[#C9B896]">
@@ -188,11 +188,11 @@ export function CmoIdeasStrip({ cmoIdeas, locale, className, compact, heroId }: 
 function GapPlan({ locale, moves }: { locale: Locale; moves: CmoGapMove[] }) {
   return (
     <div className="mt-6 rounded-[16px] border border-dashed border-white/20 bg-white/5 p-5">
-      <p className="mb-3 text-xs font-black uppercase tracking-wide text-[#9FD4C8]">{GAP[locale]}</p>
+      <p className="mb-3 text-xs font-black uppercase tracking-wide text-teal">{GAP[locale]}</p>
       <ul className="space-y-2">
         {moves.map((m) => (
           <li key={m.missingField} className="text-[14px] leading-relaxed text-[#E8E2D4]">
-            <span className="font-black text-[#F7F3EA]">{fieldLabel(m.missingField, locale)}</span>
+            <span className="font-black text-navy">{fieldLabel(m.missingField, locale)}</span>
             {" — "}
             {m.move[locale] || m.move.he}
           </li>

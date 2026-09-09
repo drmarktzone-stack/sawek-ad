@@ -416,7 +416,7 @@ export function ViralDesk({
               onClick={() => setTab(tabRow.id)}
               className={cn(
                 "rounded-full px-3 py-1.5 text-sm font-bold",
-                tab === tabRow.id ? "bg-ink text-[#F7F3EA]" : "bg-ivory text-navy hover:bg-sand/40",
+                tab === tabRow.id ? "bg-teal text-white" : "bg-white text-navy hover:bg-mint/70",
               )}
             >
               {t(tabRow.key as "viral.tabScripts")}

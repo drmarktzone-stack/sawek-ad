@@ -19,6 +19,7 @@ Code constants: `VERTEX_MODEL_MAPPING`, `VERTEX_GEMINI_PRO_MODELS`, `VERTEX_GEMI
 - `POST /api/generate/variations` is the dedicated Flash path.
 - `POST /api/translate` is Cloud Translation only.
 - `POST /api/imagen` calls Imagen 3; success requires real image bytes (no empty SVG as ok).
+- `overlayPackAgency` (Create Complete Ad) calls Pro desk, Flash pieces, Flash variations, Imagen, Cloud Translation, and research. Persists `completeAd.visualSrc`, `flashVariations`, and `completeAd.metadata.gcp`.
 - `GET /api/gemini-status` returns all four services + the 1.5 → 2.5 mapping.
 - UI: `/status`
 

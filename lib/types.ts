@@ -505,12 +505,24 @@ export interface CompleteAdPackage {
   directionsExhausted?: boolean;
   noveltyReason?: string;
   imageComposition?: ImageCompositionDecision;
+  /** Persisted Imagen / composition still — data URL or /api/imagen/:id. */
+  visualSrc?: string;
+  visualPublicUrl?: string;
+  visualSource?: "imagen" | "asset" | "composition";
   metadata?: {
     scores: CompleteAdScores;
     candidateFamilies: StrategyFamily[];
     sourceLayers: SourceLayerId[];
     rejectedFamilies?: StrategyFamily[];
     selectedFrom?: StrategyFamily[];
+    /** Honest stack trace from Create Complete Ad — never invents live metrics. */
+    gcp?: {
+      pro?: boolean;
+      flash?: boolean;
+      imagen?: boolean;
+      translation?: boolean;
+      grounding?: boolean;
+    };
   };
 }
 

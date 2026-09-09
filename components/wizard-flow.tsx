@@ -123,7 +123,7 @@ function Field({
   const labeled = Children.map(children, (child) => attachFieldId(child, id, describedBy, Boolean(error)));
   return (
     <div
-      className={cn("mb-5 rounded-[14px]", flash && "ring-2 ring-danger ring-offset-2 ring-offset-[#EFEAE0]")}
+      className={cn("mb-5 rounded-[14px]", flash && "ring-2 ring-danger ring-offset-2 ring-offset-[var(--ivory)]")}
       data-wizard-field={fieldId}
     >
       <Label htmlFor={id} className={error ? "text-danger" : filled ? "text-teal" : "text-navy"}>
@@ -166,8 +166,8 @@ function ChipField({
       data-wizard-field={fieldId}
       className={cn(
         "rounded-[16px] outline-none",
-        error && "ring-2 ring-danger/70 ring-offset-2 ring-offset-[#EFEAE0]",
-        flash && "ring-2 ring-danger ring-offset-2 ring-offset-[#EFEAE0]",
+        error && "ring-2 ring-danger/70 ring-offset-2 ring-offset-[var(--ivory)]",
+        flash && "ring-2 ring-danger ring-offset-2 ring-offset-[var(--ivory)]",
       )}
     >
       <Label className={error ? "text-danger" : undefined}>{label}</Label>
@@ -591,7 +591,7 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
             media: "blocked",
             optimizer: "blocked",
           },
-        }));
+        }), { locale });
         void syncCampaign(next);
         setPack(next);
         setAgentStatus(next.agentStatus);
@@ -612,7 +612,7 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
             media: "needs_approval",
             optimizer: "blocked",
           },
-        }));
+        }), { locale });
         void syncCampaign(next);
         setPack(next);
         setAgentStatus(next.agentStatus);
@@ -634,7 +634,7 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
             media: "approved",
             optimizer: "complete",
           },
-        }));
+        }), { locale });
         const saved = { ...next, saved: true };
         void syncCampaign(saved);
         setPack(saved);
@@ -698,8 +698,8 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
                     onClick={() => patch({ type: opt.id as Intake["type"] })}
                     className={`rounded-[20px] border p-6 text-start text-xl font-black transition-all ${
                       intake.type === opt.id
-                        ? "border-ink bg-ink text-[#F7F3EA] shadow-[var(--shadow-lift)]"
-                        : "border-[rgba(8,17,31,0.1)] bg-white text-navy hover:border-teal hover:shadow-[var(--shadow-card)]"
+                        ? "border-teal bg-teal text-white shadow-[var(--shadow-card)]"
+                        : "border-[rgba(21,71,52,0.14)] bg-white text-navy hover:border-teal hover:shadow-[var(--shadow-card)]"
                     }`}
                   >
                     {opt.label[locale]}
@@ -719,13 +719,13 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
                     onClick={() => setIntake((s) => applyOperatingModel(s, opt.id))}
                     className={`rounded-[20px] border p-6 text-start transition-all ${
                       (intake.operatingModel ?? "paid") === opt.id
-                        ? "border-ink bg-ink text-[#F7F3EA] shadow-[var(--shadow-lift)]"
-                        : "border-[rgba(8,17,31,0.1)] bg-white text-navy hover:border-teal hover:shadow-[var(--shadow-card)]"
+                        ? "border-teal bg-teal text-white shadow-[var(--shadow-card)]"
+                        : "border-[rgba(21,71,52,0.14)] bg-white text-navy hover:border-teal hover:shadow-[var(--shadow-card)]"
                     }`}
                   >
                     <span className="block text-xl font-black">{opt.title}</span>
                     <span className={`mt-2 block text-sm font-medium ${
-                      (intake.operatingModel ?? "paid") === opt.id ? "text-[#C9D0D8]" : "text-muted"
+                      (intake.operatingModel ?? "paid") === opt.id ? "text-white/80" : "text-muted"
                     }`}>{opt.hint}</span>
                   </button>
                 ))}
@@ -1463,12 +1463,12 @@ function StatusPill({ status }: { status: AgentStatus }) {
   const { t } = useI18n();
   const key = STATUS_I18N[status];
   const colors: Record<AgentStatus, string> = {
-    idle: "bg-navy/10 text-muted",
-    running: "bg-gold/20 text-gold animate-pulse",
-    blocked: "bg-navy/5 text-muted",
+    idle: "bg-mint text-muted",
+    running: "bg-lime/40 text-[var(--lime-ink)] animate-pulse",
+    blocked: "bg-sand text-muted",
     needs_approval: "bg-danger/20 text-danger",
-    approved: "bg-navy text-white",
-    complete: "bg-navy text-white",
+    approved: "bg-teal text-white",
+    complete: "bg-teal text-white",
     refused: "bg-danger text-white",
   };
   return (

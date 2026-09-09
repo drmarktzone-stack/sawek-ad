@@ -10,8 +10,8 @@
   "display": "standalone",
   "orientation": "any",
   "prefer_related_applications": false,
-  "background_color": "#FAFBFC",
-  "theme_color": "#1B2A4A",
+  "background_color": "#E6F0E4",
+  "theme_color": "#154734",
   "icons": [
     {
       "src": "/icons/icon-192.png",
