@@ -58,9 +58,19 @@ export function HomeStudio() {
 
       <div className="relative mx-auto max-w-6xl px-4 py-6">
         <CampaignJourney />
+        <p className="mx-auto mb-4 max-w-xl text-center text-sm text-muted">{t("home.truth")}</p>
+      </div>
+
+      <div id="studio" className="relative mx-auto max-w-4xl px-3 pb-8 sm:px-4">
+        <p className="os-kicker mb-3">{t("os.buildCampaign")}</p>
+        <div className="overflow-hidden border-t border-[var(--line)] pt-4">
+          <WizardFlow key={wizardKey} embedded />
+        </div>
+      </div>
+
+      <div className="relative mx-auto max-w-6xl px-4 pb-6">
         <p className="mb-3 text-center text-sm font-semibold text-muted">{t("home.demos.secondary")}</p>
         <DemoPicker />
-        <p className="mx-auto mt-3 max-w-xl text-center text-sm text-muted">{t("home.truth")}</p>
         <p className="mx-auto mt-2 max-w-md text-center text-xs font-bold text-navy">{t("home.vertex")}</p>
         <div className="mt-3 flex justify-center gap-3">
           <Button asChild variant="ghost" size="sm">
@@ -186,12 +196,6 @@ export function HomeStudio() {
         </div>
       </OsDisclosure>
 
-      <div id="studio" className="relative mx-auto mt-4 max-w-4xl px-3 pb-32 sm:px-4 safe-pb">
-        <p className="os-kicker mb-3">{t("os.buildCampaign")}</p>
-        <div className="overflow-hidden border-t border-[var(--line)] pt-4">
-          <WizardFlow key={wizardKey} embedded />
-        </div>
-      </div>
     </div>
   );
 }

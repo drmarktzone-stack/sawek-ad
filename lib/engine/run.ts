@@ -1,4 +1,4 @@
-import type { AgentId, AgentStatus, CampaignAngles, CampaignBrief, CampaignPack, Diagnosis, Intake, Locale } from "../types";
+import type { AgentId, AgentStatus, CampaignAngles, CampaignBrief, CampaignPack, CompleteAdPackage, Diagnosis, Intake, Locale } from "../types";
 import { sleep } from "../utils";
 import { validateIntake } from "./validate";
 import { diagnose } from "./diagnose";
@@ -15,6 +15,8 @@ import { loadLocale } from "../storage";
 import { ideaNamesForLocale } from "./cmo-ideas";
 import { buildResearchSkeleton, runMarketResearch } from "./ad-research";
 import { attachResearchAndSync, orchestrateAssemble } from "./campaign-orchestrator";
+import { gateCustomerAd, localeScriptBleed } from "../copy-purity";
+import { lockDefaultDialect } from "./voice";
 
 export const AGENT_ORDER: AgentId[] = [
   "intake",
@@ -119,7 +121,7 @@ export async function runFullPipeline(
       optimizer: "complete",
     },
   });
-  const overlaid = await overlayPackAgency(pack);
+  const overlaid = await overlayPackAgency(pack, { locale: loadLocale() });
   return { ...overlaid, saved: true };
 }
 
@@ -250,12 +252,12 @@ async function fetchResearch(intake: Intake, brief?: CampaignBrief): Promise<Ret
   }
 }
 
-async function fetchImagenVisual(pack: CampaignPack): Promise<{ src: string; publicUrl?: string } | null> {
-  const loc = pack.completeAd?.locales.en || pack.completeAd?.locales.he;
+async function fetchImagenVisual(pack: CampaignPack, locale: Locale): Promise<{ src: string; publicUrl?: string } | null> {
+  const loc = pack.completeAd?.locales[locale] || pack.completeAd?.locales.ar || pack.completeAd?.locales.en || pack.completeAd?.locales.he;
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), 45_000);
   try {
-    const res = await fetch("/api/imagen", {
+    const res = await fetch(apiUrl("/api/imagen"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -265,9 +267,9 @@ async function fetchImagenVisual(pack: CampaignPack): Promise<{ src: string; pub
         location: pack.intake.location,
         offer: pack.intake.offer,
         headline: loc?.headline,
-        scene: loc?.imagePrompt || loc?.visual || pack.brief?.coreMessage.en,
+        scene: loc?.imagePrompt || loc?.visual || pack.brief?.coreMessage[locale] || pack.brief?.coreMessage.en,
         vertical: pack.brief?.vertical,
-        locale: "en",
+        locale,
       }),
       signal: ctrl.signal,
     });
@@ -289,28 +291,154 @@ async function fetchImagenVisual(pack: CampaignPack): Promise<{ src: string; pub
   }
 }
 
+async function fetchFlashVariations(
+  intake: Intake,
+  locale: Locale,
+): Promise<NonNullable<CampaignPack["flashVariations"]> | null> {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 28_000);
+  try {
+    const res = await fetch(apiUrl("/api/generate/variations"), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        description: factsFromIntake(intake),
+        audience: intake.audience,
+        language: locale,
+        mode: "variations",
+        facts: {
+          businessName: intake.businessName,
+          category: intake.category,
+          description: intake.description,
+          audience: intake.audience,
+          uniqueAdvantage: intake.uniqueAdvantage,
+          biggestProblem: intake.biggestProblem,
+          offer: intake.offer,
+          location: intake.location,
+          website: intake.website,
+          whatsapp: intake.whatsapp,
+          voiceDialect: intake.voice?.dialect,
+        },
+        count: 12,
+      }),
+      signal: ctrl.signal,
+    });
+    if (!res.ok) return null;
+    const data = (await res.json()) as {
+      ok?: boolean;
+      variations?: NonNullable<CampaignPack["flashVariations"]>["variations"];
+      model?: string;
+      localized?: boolean;
+      translationDown?: boolean;
+    };
+    if (!data?.ok || !data.variations?.length) return null;
+    return {
+      variations: data.variations,
+      model: data.model,
+      localized: data.localized,
+      translationDown: data.translationDown,
+    };
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function fetchCompleteAdTranslation(
+  complete: CompleteAdPackage,
+  locale: Locale,
+): Promise<{ locales: CompleteAdPackage["locales"]; fired: boolean; down: boolean }> {
+  const src = complete.locales[locale] || complete.locales.ar || complete.locales.he || complete.locales.en;
+  if (!src?.headline && !src?.copy) return { locales: complete.locales, fired: false, down: false };
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 20_000);
+  try {
+    const res = await fetch(apiUrl("/api/translate"), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        source: locale,
+        [locale]: src.headline,
+        he: locale === "he" ? src.headline : undefined,
+        ar: locale === "ar" ? src.headline : undefined,
+        en: locale === "en" ? src.headline : undefined,
+      }),
+      signal: ctrl.signal,
+    });
+    if (!res.ok) return { locales: complete.locales, fired: true, down: true };
+    const data = (await res.json()) as { he?: string; ar?: string; en?: string; reason?: string };
+    const next = { ...complete.locales };
+    for (const target of ["he", "ar", "en"] as const) {
+      if (target === locale) continue;
+      const translated = String(data[target] || "").trim();
+      if (!translated) continue;
+      const cur = next[target];
+      if (!cur) continue;
+      const weak = !cur.headline?.trim() || localeScriptBleed(cur.headline, target) || localeScriptBleed(cur.copy || "", target);
+      if (weak) {
+        next[target] = {
+          ...cur,
+          headline: translated,
+          hook: cur.hook || translated,
+        };
+      }
+    }
+    return { locales: next, fired: true, down: Boolean(data.reason) };
+  } catch {
+    return { locales: complete.locales, fired: true, down: true };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function gateCompleteAdLocales(pack: CampaignPack): CampaignPack {
+  if (!pack.completeAd) return pack;
+  const locales = { ...pack.completeAd.locales };
+  for (const loc of ["he", "ar", "en"] as const) {
+    const row = locales[loc];
+    if (!row) continue;
+    const gated = gateCustomerAd({ headline: row.headline, body: row.copy, cta: row.cta }, pack.intake, loc);
+    locales[loc] = { ...row, headline: gated.headline, copy: gated.body, cta: gated.cta };
+  }
+  return { ...pack, completeAd: { ...pack.completeAd, locales } };
+}
+
 /** Overlay Gemini channel copy onto agency creative pieces (he+ar+en). No-op if Gemini unavailable. */
-export async function overlayPackAgency(pack: CampaignPack): Promise<CampaignPack> {
-  let next = pack;
+export async function overlayPackAgency(pack: CampaignPack, opts?: { locale?: Locale }): Promise<CampaignPack> {
+  const locale = opts?.locale ?? "he";
+  const intake = lockDefaultDialect(pack.intake, locale);
+  let next: CampaignPack = intake === pack.intake ? pack : { ...pack, intake };
   const flashOverlay = (async () => {
-    if (!pack.agency?.creative.pieces.length) return pack;
+    if (!next.agency?.creative.pieces.length) return next;
     try {
-      const pieces = await overlayAgencyPieces(pack.intake, pack.agency.creative.pieces);
+      const pieces = await overlayAgencyPieces(next.intake, next.agency.creative.pieces);
       return {
-        ...pack,
+        ...next,
         agency: {
-          ...pack.agency,
-          creative: { ...pack.agency.creative, pieces },
+          ...next.agency,
+          creative: { ...next.agency.creative, pieces },
         },
       };
     } catch {
-      return pack;
+      return next;
     }
   })();
-  const proOverlay = fetchProDesk(pack.intake, pack.brief);
-  const researchOverlay = fetchResearch(pack.intake, pack.brief);
-  const imagenOverlay = fetchImagenVisual(pack);
-  const [flashed, desk, research, imagen] = await Promise.all([flashOverlay, proOverlay, researchOverlay, imagenOverlay]);
+  const proOverlay = fetchProDesk(next.intake, next.brief);
+  const researchOverlay = fetchResearch(next.intake, next.brief);
+  const imagenOverlay = fetchImagenVisual(next, locale);
+  const flashVarsOverlay = fetchFlashVariations(next.intake, locale);
+  const translateOverlay = next.completeAd
+    ? fetchCompleteAdTranslation(next.completeAd, locale)
+    : Promise.resolve({ locales: undefined as CompleteAdPackage["locales"] | undefined, fired: false, down: false });
+  const [flashed, desk, research, imagen, flashVars, translated] = await Promise.all([
+    flashOverlay,
+    proOverlay,
+    researchOverlay,
+    imagenOverlay,
+    flashVarsOverlay,
+    translateOverlay,
+  ]);
   next = attachResearchAndSync(flashed, research);
   // Re-apply Flash pieces after sync rebuilds agency from the shared brief.
   if (flashed.agency?.creative.pieces?.length && next.agency) {
@@ -323,17 +451,42 @@ export async function overlayPackAgency(pack: CampaignPack): Promise<CampaignPac
     };
   }
   next = overlayProOnAgency(next, desk);
-  if (imagen && next.completeAd) {
+  if (flashVars) {
+    next = { ...next, flashVariations: flashVars };
+  }
+  if (next.completeAd) {
+    const locales = translated.locales || next.completeAd.locales;
     next = {
       ...next,
       completeAd: {
         ...next.completeAd,
-        visualSrc: imagen.src,
-        visualPublicUrl: imagen.publicUrl || imagen.src,
-        visualSource: "imagen",
+        locales,
+        language: locale,
+        ...(imagen
+          ? {
+              visualSrc: imagen.src,
+              visualPublicUrl: imagen.publicUrl || imagen.src,
+              visualSource: "imagen" as const,
+            }
+          : {}),
+        ...(next.completeAd.metadata
+          ? {
+              metadata: {
+                ...next.completeAd.metadata,
+                gcp: {
+                  pro: Boolean(desk && !desk.down),
+                  flash: Boolean(flashVars?.variations.length),
+                  imagen: Boolean(imagen),
+                  translation: translated.fired && !translated.down,
+                  grounding: Boolean(research.grounded || desk.grounded),
+                },
+              },
+            }
+          : {}),
       },
     };
   }
+  next = gateCompleteAdLocales(next);
   const audit = next.pastCampaignAudit ?? buildPastCampaignAudit(next.intake);
   if (audit) {
     try {

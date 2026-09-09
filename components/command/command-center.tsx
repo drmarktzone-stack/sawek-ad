@@ -51,7 +51,7 @@ export function TodayBoard({ signals }: { signals: CommandSignals }) {
           {opportunity ? (
             <span>
               {opportunity.title}
-              {opportunity.confidence === "unknown" ? <span className="os-unknown"> · UNKNOWN</span> : null}
+              {opportunity.confidence === "unknown" ? <span className="os-unknown"> · {t("os.unknown")}</span> : null}
             </span>
           ) : (
             <OsUnknown />
@@ -154,11 +154,11 @@ export function CommandHero({
         </p>
         <div className="mt-8 flex flex-col items-center gap-3">
           <div className="mobile-stack w-full justify-center">
-            <Button asChild size="lg" variant="coral" className="btn-mobile-full text-base font-black">
-              <LangLink href="/task/ad">{t("complete.kicker")}</LangLink>
-            </Button>
-            <Button type="button" size="lg" variant="outline" className="btn-mobile-full" onClick={onScan}>
+            <Button type="button" size="lg" variant="coral" className="btn-mobile-full text-base font-black" onClick={onScan}>
               {t("home.cta.primary")}
+            </Button>
+            <Button asChild size="lg" variant="gold" className="btn-mobile-full text-base font-black">
+              <LangLink href="/task/ad">{t("complete.kicker")}</LangLink>
             </Button>
             <Button type="button" size="lg" variant="outline" className="btn-mobile-full" onClick={onEmpty}>
               {t("cta.new")}

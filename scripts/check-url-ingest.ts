@@ -884,6 +884,19 @@ function finish() {
         .join("\n") || "(none)",
     );
   }
+const taglineHtml =
+  '<!doctype html><html lang="ar"><head><title>مخبز الفجر – أكثر من مجرد مخبز – طعم البيت</title><meta property="og:site_name" content="مخبز الفجر"/></head><body><h1>مخبز الفجر</h1><p>خبز يومي من الفرن</p></body></html>';
+const taglineParsed = parseFetchedHtml(taglineHtml, "https://bakery-tagline.example/", "https://bakery-tagline.example/");
+if (!taglineParsed.ok) fail(`tagline parse ${taglineParsed.error}`);
+else {
+  if (!/مخبز الفجر/.test(String(taglineParsed.fields.businessName || ""))) {
+    fail(`tagline name ${JSON.stringify(taglineParsed.fields.businessName)}`);
+  }
+  if (!/مجرد مخبز|طعم البيت/.test(String(taglineParsed.fields.description || ""))) {
+    fail(`title tagline must become description, got ${JSON.stringify(taglineParsed.fields.description)}`);
+  }
+}
+
   if (failures.length) {
     console.error("FAIL\n" + failures.join("\n"));
     process.exit(1);

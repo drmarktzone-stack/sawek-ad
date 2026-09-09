@@ -46,10 +46,10 @@ export function ChipGroup({
               className={cn(
                 "rounded-[12px] border px-3.5 py-2 text-sm font-semibold transition-colors",
                 selected
-                  ? "border-ink bg-ink text-[#F7F3EA]"
+                  ? "border-teal bg-teal text-white"
                   : invalid
                     ? "border-danger bg-danger/5 text-navy hover:border-danger"
-                    : "border-[rgba(8,17,31,0.14)] bg-white text-navy hover:border-teal",
+                    : "border-[rgba(21,71,52,0.14)] bg-white text-navy hover:border-teal",
               )}
             >
               {label}

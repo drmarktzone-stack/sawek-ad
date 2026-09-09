@@ -515,6 +515,14 @@ export interface CompleteAdPackage {
     sourceLayers: SourceLayerId[];
     rejectedFamilies?: StrategyFamily[];
     selectedFrom?: StrategyFamily[];
+    /** Honest stack trace from Create Complete Ad — never invents live metrics. */
+    gcp?: {
+      pro?: boolean;
+      flash?: boolean;
+      imagen?: boolean;
+      translation?: boolean;
+      grounding?: boolean;
+    };
   };
 }
 

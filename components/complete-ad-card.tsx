@@ -94,6 +94,19 @@ export function CompleteAdCard({
         ) : (
           <span className="os-badge os-badge-danger">{t("complete.repaired")}</span>
         )}
+        {completeAd.metadata?.gcp ? (
+          <span className="os-badge os-badge-line" data-testid="complete-ad-gcp">
+            {[
+              completeAd.metadata.gcp.pro ? t("complete.gcp.pro") : null,
+              completeAd.metadata.gcp.flash ? t("complete.gcp.flash") : null,
+              completeAd.metadata.gcp.imagen ? t("complete.gcp.imagen") : null,
+              completeAd.metadata.gcp.translation ? t("complete.gcp.translation") : null,
+              completeAd.metadata.gcp.grounding ? t("complete.gcp.grounding") : null,
+            ]
+              .filter(Boolean)
+              .join(" · ") || t("complete.gcp.templates")}
+          </span>
+        ) : null}
         {onCopy ? (
           <Button type="button" size="sm" variant="outline" onClick={() => onCopy(text)}>
             {copied ? t("cta.copied") : t("cta.copy")}

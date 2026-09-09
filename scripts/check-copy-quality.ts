@@ -24,7 +24,7 @@ import {
   factSpamHits,
 } from "../lib/copy-purity";
 import { composeCoreMessage } from "../lib/engine/core-message";
-import { VOICE_DIALECTS, defaultDialectForLocale, effectiveDialect } from "../lib/engine/voice";
+import { VOICE_DIALECTS, defaultDialectForLocale, effectiveDialect, lockDefaultDialect } from "../lib/engine/voice";
 import { pickIdeas } from "../lib/engine/cmo-ideas";
 import type { CampaignPack, Intake, Locale } from "../lib/types";
 
@@ -233,6 +233,8 @@ for (const v of hso.variants) {
 // --- Palestinian dialect is first-class + AR default ---
 if (defaultDialectForLocale("ar") !== "ar-palestinian") fail("AR default dialect must be Palestinian");
 if (effectiveDialect(meshhdawi(), "ar") !== "ar-palestinian") fail("empty-voice AR intake must resolve Palestinian");
+const lockedAr = lockDefaultDialect(meshhdawi(), "ar");
+if (lockedAr.voice?.dialect !== "ar-palestinian") fail("lockDefaultDialect AR must write ar-palestinian");
 const palRow = VOICE_DIALECTS.find((d) => d.id === "ar-palestinian");
 if (!palRow) fail("VOICE_DIALECTS missing ar-palestinian");
 else {

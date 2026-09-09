@@ -44,7 +44,15 @@ intake facts
   → public ad intel (Meta Ad Library / TikTok Creative Center / Google Transparency) as strategy patterns only
 ```
 
-`overlayPackAgency` already called Pro desk + Flash pieces + research. This rebuild **also** calls `POST /api/imagen` and writes `completeAd.visualSrc` / `visualPublicUrl` / `visualSource: "imagen"` so the still shows in the result. Templates stay intake-driven when a Google API is down. No empty SVG counted as success.
+Create Complete Ad (`overlayPackAgency`) now fires the $300 pack in one path:
+
+- Gemini 2.5 Pro (`/api/generate/pro-desk`, Search Grounding)
+- Gemini 2.5 Flash (`overlayAgencyPieces` + `/api/generate/variations` persisted on `flashVariations`)
+- Imagen 3 (`/api/imagen` → `completeAd.visualSrc`)
+- Cloud Translation (`/api/translate` fills weak HE/AR/EN slots; does **not** overwrite good Palestinian copy)
+- Public ad intel (`/api/research`) as strategy only
+
+Honest `completeAd.metadata.gcp` badges show which services actually returned. Templates stay intake-driven when a Google API is down. This Cloud Agent VM has **no ADC** — local overlay will record templates. Cloud Run has ADC (`hasAdc: true` on `/api/gemini-status`). No empty SVG counted as success.
 
 ## Human flow
 

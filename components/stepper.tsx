@@ -38,9 +38,9 @@ export function Stepper({
                   canJump && "cursor-pointer hover:scale-105",
                   !canJump && "cursor-default",
                   active
-                    ? "size-12 bg-ink text-[#F7F3EA] shadow-[0_12px_28px_rgba(8,17,31,0.22)] ring-4 ring-teal/20"
+                    ? "size-12 bg-teal text-white shadow-[var(--shadow-card)] ring-4 ring-lime/50"
                     : "size-10",
-                  !active && (done ? "bg-teal text-white" : "bg-navy/8 text-muted"),
+                  !active && (done ? "bg-lime text-[var(--lime-ink)]" : "bg-mint text-muted"),
                 )}
               >
                 {done ? <Check className="size-4" strokeWidth={3} /> : n}

@@ -19,12 +19,13 @@
   --teal: #154734;
   --teal-soft: #1c5c42;
   --teal-mist: rgba(21, 71, 52, 0.1);
-  --lime: #c8e04a;
-  --lime-deep: #b5d12a;
-  --lime-ink: #1a2e12;
-  --gold: var(--lime);
-  --gold-soft: #dce88a;
-  --gold-mist: rgba(200, 224, 74, 0.22);
+  --lime: #e4d24a;
+  --lime-deep: #d4c028;
+  --lime-ink: #2a2610;
+  --yellow: #f0d24a;
+  --gold: var(--yellow);
+  --gold-soft: #f6e48a;
+  --gold-mist: rgba(240, 210, 74, 0.28);
   --sand: #e4edd8;
   --mint: #d8ead4;
   --lavender: #d8ead4;
@@ -63,6 +64,7 @@
   --color-gold-soft: var(--gold-soft);
   --color-lime: var(--lime);
   --color-lime-deep: var(--lime-deep);
+  --color-yellow: var(--yellow);
   --color-teal: var(--teal);
   --color-teal-soft: var(--teal-soft);
   --color-sand: var(--sand);

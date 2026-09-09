@@ -11,7 +11,8 @@ import {
   type IngestReviewRow,
 } from "@/lib/document-ingest";
 import { applyIntakeToDraft } from "@/lib/storage";
-import { emptyIntake } from "@/lib/engine/validate";
+import { emptyIntake, wizardReady } from "@/lib/engine/validate";
+import { lockDefaultDialect } from "@/lib/engine/voice";
 import { clearPendingDemo } from "@/lib/demo";
 import { clearEmptyCampaign } from "@/lib/empty-campaign";
 import { uid } from "@/lib/utils";
@@ -268,7 +269,7 @@ export function UrlIngest() {
   function confirm() {
     if (!doc) return;
     const selected = posts.filter((p) => p.include).map((p) => ({ text: p.text, image: p.image }));
-    const next = applyIngestReview(emptyIntake(), rows, doc, assets, selected);
+    const next = lockDefaultDialect(applyIngestReview(emptyIntake(), rows, doc, assets, selected), locale);
     next.brandKit = brandKit;
     clearEmptyCampaign();
     clearPendingDemo();
@@ -278,9 +279,12 @@ export function UrlIngest() {
     setAssets([]);
     setPosts([]);
     setBrandKit({ colors: [], source: "none" });
-    if (!pathname.startsWith("/task")) {
-      router.push(withLang("/task/ad", locale));
+    if (pathname.startsWith("/task")) return;
+    if (!wizardReady(next)) {
+      router.push(withLang("/#studio", locale));
+      return;
     }
+    router.push(withLang("/tools/core-message", locale));
   }
 
   return (

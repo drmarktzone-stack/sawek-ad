@@ -108,6 +108,8 @@ if (!run.includes("/api/generate/pro-desk")) fail("pipeline must call Pro desk A
 if (!run.includes("overlayProOnAgency")) fail("pipeline must overlay Pro desk");
 if (!run.includes("/api/research")) fail("pipeline must call research API");
 if (!run.includes("/api/imagen")) fail("pipeline must call Imagen for complete-ad stills");
+if (!run.includes("/api/generate/variations")) fail("pipeline must call Flash variations");
+if (!run.includes("/api/translate")) fail("pipeline must call Cloud Translation");
 if (!run.includes("visualSource: \"imagen\"") && !run.includes('visualSource: "imagen"')) {
   fail("pipeline must persist Imagen visual on complete ad");
 }
