@@ -87,7 +87,8 @@ npx tsx scripts/check-vertex-stack.ts
 npx tsx scripts/check-orchestrator.ts
 ```
 
-Results recorded at PR time.
+**Automated (PASS on this revision):**
+`check-copy-quality`, `check-wizard-intake`, `check-ad-engine`, `check-prompt5`, `check-clinic-isolation`, `check-sprint1-tools`, `check-vertex-stack`, `check-orchestrator`, `check-scan-truth`.
 
 ## Not in this PR
 
