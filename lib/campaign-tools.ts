@@ -112,6 +112,6 @@ export function persistSkipOffer(locale: OfferBlueprint["locale"]): CampaignTool
 
 export function persistViral(viral: ViralDeskState): CampaignToolSnapshot {
   const { intake, pack, viral: existing } = loadCampaignTools();
-  const merged: ViralDeskState = { idea: "", ...existing, ...viral };
+  const merged: ViralDeskState = { ...existing, ...viral, idea: viral.idea ?? existing?.idea ?? "" };
   return writeSnapshot(intake, pack, { viral: merged });
 }

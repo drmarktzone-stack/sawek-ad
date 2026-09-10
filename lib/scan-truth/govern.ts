@@ -225,9 +225,7 @@ export function qualifyField(
       q = "VERIFIED_BUSINESS_FACT";
     }
   } else {
-    if (unit && unit.contentClass === "THIRD_PARTY" && (field === "businessName" || field === "category")) {
-      q = "UNRELATED";
-    } else if (unit?.contentClass === "BUSINESS_FACTS" || !unit) {
+    if (unit?.contentClass === "BUSINESS_FACTS" || !unit) {
       q = unit?.sourceType === "jsonld" ? "SOURCE_VERIFIED_FACT" : "VERIFIED_BUSINESS_FACT";
     } else if (unit && REJECT_CLASSES.has(unit.contentClass)) {
       q = classToRejection(unit.contentClass) || "UNRELATED";
