@@ -230,14 +230,14 @@ export function audienceChipsFor(intake: Pick<Intake, "businessName" | "category
     return AUDIENCE_CHIPS.filter((c) => PRODUCT_AUDIENCE_IDS.has(c.id));
   }
   const niche = resolveOperatingNiche(intake);
-  if (niche === "beauty_salon") {
-    return AUDIENCE_CHIPS.filter((c) => ["women", "men", "young", "local_families", "custom"].includes(c.id));
+  if (niche === "home_trades") {
+    return AUDIENCE_CHIPS.filter((c) => ["homeowners", "local_families", "owners", "custom"].includes(c.id));
   }
-  if (niche === "local_retail") {
-    return AUDIENCE_CHIPS.filter((c) => ["local_families", "young", "women", "men", "custom"].includes(c.id));
+  if (niche === "fitness_studio") {
+    return AUDIENCE_CHIPS.filter((c) => ["young", "women", "men", "local_families", "custom"].includes(c.id));
   }
-  if (niche === "real_estate") {
-    return AUDIENCE_CHIPS.filter((c) => ["homeowners", "owners", "local_families", "custom"].includes(c.id));
+  if (niche === "education") {
+    return AUDIENCE_CHIPS.filter((c) => ["parents", "local_families", "custom"].includes(c.id));
   }
   if (niche === "restaurant") {
     return AUDIENCE_CHIPS.filter((c) => ["local_families", "young", "women", "men", "custom"].includes(c.id));

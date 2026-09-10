@@ -68,9 +68,9 @@ export const copy: Dict = {
     en: "Powered by Google Cloud Vertex (credit pack)",
   },
   "home.demos.secondary": {
-    he: "רוצים לטעום? דמו מרפאה אמיתית, מטבח הזית, ובוטיק. המוצר עצמו רק לחמש הנישות.",
-    ar: "بدكم تتذوقوا؟ ديمو عيادة حقيقية، مطبخ الزيتون، وبوتيك. المنتج نفسه بس للخمس تخصّصات.",
-    en: "Want a taste? Real clinic demo, Olive Kitchen, and a boutique. The product itself only runs the five niches.",
+    he: "רוצים לטעום? דמו מרפאה אמיתית + מטבח הזית. המוצר עצמו רק לחמש הנישות.",
+    ar: "بدكم تتذوقوا؟ ديمو عيادة حقيقية + مطبخ الزيتون. المنتج نفسه بس للخمس تخصّصات.",
+    en: "Want a taste? Real clinic demo + Olive Kitchen. The product itself only runs the five niches.",
   },
   "home.cta.pricing": { he: "מחירון", ar: "الأسعار", en: "Pricing" },
   "home.cta.about": { he: "מה זה SAWEK", ar: "ما هو SAWEK", en: "What is SAWEK" },
@@ -2125,9 +2125,9 @@ export const copy: Dict = {
 
   "nicheGate.title": { he: "SAWEK AD לחמש נישות בלבד", ar: "SAWEK AD لخمس تخصّصات بس", en: "SAWEK AD is for five niches only" },
   "nicheGate.body": {
-    he: "המפעיל המומחה עובד רק על: מרפאות מקומיות, מסעדות/בתי קפה/מאפיות, מספרות וברברים, קמעונאות מקומית (מכולת/בוטיק/מכשירים), ותיווך נדל״ן מקומי. לא ממציאים קמפיין לעסק מחוץ לרשימה.",
-    ar: "المشغّل المتخصّص بشغل بس: عيادات محلية، مطاعم/مقاهي/مخابز، صالونات وحلاقين، تجزئة محلية (بقالة/بوتيك/أجهزة)، ومكاتب عقارية محلية. مش منلفّق حملة لمحل برّات القائمة.",
-    en: "This specialist operator only runs: local medical clinics, restaurants/cafés/bakeries, beauty salons/barbers, local retail (grocery/boutique/appliances), and local real estate brokers. We will not invent a campaign outside that list.",
+    he: "המפעיל המומחה עובד רק על: מרפאות (רפואה/שיניים/אסתטיקה), מרכזי למידה, מסעדות ובתי קפה (רכישה בבעלות), שיפוצים ומקצועות הבית, וסטודיו כושר בוטיק. לא מספרות, לא תיווך נדל״ן, לא יוצרים כלליים.",
+    ar: "المشغّل المتخصّص بشغل بس: عيادات (طب/أسنان/تجميل طبي)، مراكز تعليم، مطاعم ومقاهي (اكتساب نملكه)، ترميم وحرف البيت، وستوديو لياقة مستقل. مش صالونات، مش مكاتب عقارية، مش صنّاع محتوى عامّين.",
+    en: "This specialist operator only runs: medical/dental/aesthetic clinics, tutoring and local education, restaurants and cafés (owned acquisition), renovation/home trades, and boutique fitness studios. Not salon ops, not real-estate brokerages, not generic creators.",
   },
   "nicheGate.allowed": { he: "חמש הנישות", ar: "التخصّصات الخمس", en: "The five niches" },
   "nicheGate.scanOther": { he: "סרקו עסק אחר מהרשימה", ar: "امسحوا شغل ثاني من القائمة", en: "Scan a business on the list" },

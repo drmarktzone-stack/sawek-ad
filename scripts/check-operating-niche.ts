@@ -21,8 +21,11 @@ function facts(name: string, category: string, description: string) {
 if (resolveOperatingNiche(facts("מרפאת שיניים נווה", "dental clinic", "טיפולי שיניים בבאקה")) !== "medical_clinic") {
   fail("dental clinic should be medical_clinic");
 }
-if (resolveOperatingNiche(facts("عيادة أطفال", "clinic", "طبيب أطفال في باقة")) !== "medical_clinic") {
-  fail("local medical clinic should be medical_clinic");
+if (resolveOperatingNiche(facts("عيادة تجميل", "aesthetic clinic", "بوتوكس وفلر طبي")) !== "medical_clinic") {
+  fail("aesthetic clinic should be medical_clinic");
+}
+if (resolveOperatingNiche(facts("מרכז למידה הדר", "tutoring", "שיעורי עזר לבגרות")) !== "education") {
+  fail("tutoring center should be education");
 }
 if (resolveOperatingNiche(facts("מסעדת הזית", "מסעדה", "מטבח ים-תיכוני בבאקה")) !== "restaurant") {
   fail("restaurant should be restaurant");
@@ -30,41 +33,35 @@ if (resolveOperatingNiche(facts("מסעדת הזית", "מסעדה", "מטבח �
 if (resolveOperatingNiche(facts("קפה גבעה", "cafe", "מקום שקט עם אספרסו")) !== "restaurant") {
   fail("cafe should be restaurant");
 }
-if (resolveOperatingNiche(facts("مخبز المشهداوي", "bakery", "خبز طازج هاليوم")) !== "restaurant") {
-  fail("bakery should be restaurant (food niche)");
+if (resolveOperatingNiche(facts("שיפוצי הבית", "קבלן שיפוצים", "שיפוץ דירות, אינסטלציה וחשמל")) !== "home_trades") {
+  fail("renovation contractor should be home_trades");
 }
-if (resolveOperatingNiche(facts("מספרת נור", "salon", "תספורת וצבע בבאקה")) !== "beauty_salon") {
-  fail("hair salon should be beauty_salon");
+if (resolveOperatingNiche(facts("ستوديو قوة", "pilates studio", "פילאטיס ומאמן אישי בשכונה")) !== "fitness_studio") {
+  fail("pilates studio should be fitness_studio");
 }
-if (resolveOperatingNiche(facts("حلاق البلد", "barber", "قص شعر وذقن")) !== "beauty_salon") {
-  fail("barber should be beauty_salon");
-}
-if (resolveOperatingNiche(facts("سوبر ماركت الكرامة", "GroceryStore", "بيض حليب أجبان")) !== "local_retail") {
-  fail("grocery must be local_retail charter niche");
-}
-if (resolveOperatingNiche(facts("بوتيك الرمل", "fashion boutique", "ملابس وأحذية")) !== "local_retail") {
-  fail("fashion boutique should be local_retail");
-}
-if (resolveOperatingNiche(facts("חנות חשמל הגליל", "appliances", "מכשירי חשמל וכלי בית")) !== "local_retail") {
-  fail("appliances store should be local_retail");
-}
-if (resolveOperatingNiche(facts("משרד תיווך הגבעה", "real estate", "דירות למכירה ולהשכרה בבאקה")) !== "real_estate") {
-  fail("broker should be real_estate");
-}
-if (resolveOperatingNiche(facts("مكتب عقاري النور", "realtor", "شقق للبيع والإيجار")) !== "real_estate") {
-  fail("Arabic realtor should be real_estate");
-}
-if (resolveOperatingNiche(facts("מרכז למידה הדר", "tutoring", "שיעורי עזר לבגרות")) !== "unsupported") {
-  fail("tutoring is outside the five niches");
-}
-if (resolveOperatingNiche(facts("שיפוצי הבית", "קבלן שיפוצים", "שיפוץ דירות, אינסטלציה וחשמל")) !== "unsupported") {
-  fail("renovation contractor is outside the five niches");
-}
-if (resolveOperatingNiche(facts("ستوديو قوة", "pilates studio", "פילאטיס ומאמן אישי בשכונה")) !== "unsupported") {
-  fail("pilates studio is outside the five niches");
+if (resolveOperatingNiche(facts("سوبر ماركت الكرامة", "GroceryStore", "بيض حليب أجبان")) !== "unsupported") {
+  fail("grocery must be unsupported (not a charter niche)");
 }
 if (detectVertical(facts("ستوديو قوة", "pilates studio", "פילאטיס")) === "retail") {
   fail("fitness studio must not classify as retail");
+}
+if (resolveOperatingNiche(facts("מספרת נור", "salon", "תספורת וצבע בבאקה")) !== "unsupported") {
+  fail("beauty salon ops must be gated");
+}
+if (resolveOperatingNiche(facts("حلاق البلد", "barber", "قص شعر وذقن")) !== "unsupported") {
+  fail("barber ops must be gated");
+}
+if (resolveOperatingNiche(facts("Dubai Properties Broker", "UAE real estate", "villas in Dubai Marina")) !== "unsupported") {
+  fail("UAE real-estate brokerage must be gated");
+}
+if (resolveOperatingNiche(facts("مكتب عقاري النور", "realtor", "شقق للبيع في دبي")) !== "unsupported") {
+  fail("real-estate brokerage must be gated");
+}
+if (resolveOperatingNiche(facts("Creator Hub", "content creator", "YouTube and TikTok fame")) !== "unsupported") {
+  fail("generic creators must be gated");
+}
+if (resolveOperatingNiche(facts("Talabat", "delivery aggregator", "food delivery app")) !== "unsupported") {
+  fail("delivery aggregator as the business must be gated");
 }
 
 const clinicDemo = demoIntake("ar");
@@ -76,8 +73,8 @@ if (!olive || resolveOperatingNiche(olive) !== "restaurant" || !charterAllowsCam
   fail("olive kitchen demo must be restaurant charter niche");
 }
 const sand = catalogIntake(DEMO_SAND_ID, "he");
-if (!sand || resolveOperatingNiche(sand) !== "local_retail" || !charterAllowsCampaign(sand)) {
-  fail("sand boutique (fashion retail) must be allowed as local_retail");
+if (!sand || resolveOperatingNiche(sand) !== "unsupported" || charterAllowsCampaign(sand)) {
+  fail("sand boutique (fashion retail) must be gated");
 }
 
 const blank = emptyIntake();
@@ -86,7 +83,7 @@ if (!charterAllowsCampaign(blank)) fail("empty intake must not block the scan st
 const groceryFacts = factsToIntake({
   facts: { businessName: "سوبر ماركت الكرامة", category: "GroceryStore", description: "بيض حليب أجبان" },
 });
-if (!charterAllowsCampaign(groceryFacts)) fail("generate facts for grocery must be allowed");
+if (charterAllowsCampaign(groceryFacts)) fail("generate facts for grocery must be niche-gated");
 
 const clinicFacts = factsToIntake({
   facts: { businessName: "عيادة أسنان النور", category: "dental clinic", description: "טיפולי שיניים" },
@@ -96,7 +93,7 @@ if (!charterAllowsCampaign(clinicFacts)) fail("generate facts for dental clinic 
 const tutorFacts = factsToIntake({
   facts: { businessName: "מרכז למידה הדר", category: "tutoring", description: "שיעורי עזר" },
 });
-if (charterAllowsCampaign(tutorFacts)) fail("tutoring generate facts must be niche-gated");
+if (!charterAllowsCampaign(tutorFacts)) fail("tutoring generate facts must be allowed");
 
 if (failures.length) {
   console.error("FAIL\n" + failures.join("\n"));
@@ -105,6 +102,6 @@ if (failures.length) {
 console.log("PASS operating-niche", {
   dental: resolveOperatingNiche(facts("מרפאת שיניים נווה", "dental clinic", "")),
   grocery: resolveOperatingNiche(facts("سوبر ماركت الكرامة", "GroceryStore", "بيض")),
+  pilates: resolveOperatingNiche(facts("ستوديو قوة", "pilates studio", "פילאטיס")),
   salon: resolveOperatingNiche(facts("מספרת נור", "salon", "תספורת")),
-  realtor: resolveOperatingNiche(facts("مكتب عقاري النور", "realtor", "شقق للبيع")),
 });
