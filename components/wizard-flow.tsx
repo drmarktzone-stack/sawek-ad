@@ -774,6 +774,15 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
                       ...(parsed.website ? { website: parsed.website } : {}),
                     });
                   }}
+                  onBlur={() => {
+                    const parsed = interpretCampaignPaste(intake.businessName);
+                    if (parsed.name !== intake.businessName || parsed.website) {
+                      patch({
+                        businessName: parsed.name,
+                        ...(parsed.website ? { website: parsed.website } : {}),
+                      });
+                    }
+                  }}
                 />
               </Field>
               <Field
