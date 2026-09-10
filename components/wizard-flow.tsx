@@ -1466,7 +1466,7 @@ function StatusPill({ status }: { status: AgentStatus }) {
   const key = STATUS_I18N[status];
   const colors: Record<AgentStatus, string> = {
     idle: "bg-mint text-muted",
-    running: "bg-lime/40 text-[var(--lime-ink)] animate-pulse",
+    running: "bg-teal/15 text-teal animate-pulse",
     blocked: "bg-sand text-muted",
     needs_approval: "bg-danger/20 text-danger",
     approved: "bg-teal text-white",

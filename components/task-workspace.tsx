@@ -132,7 +132,10 @@ export function TaskWorkspace() {
         </LangLink>
       </div>
 
-      <p className="os-kicker">{t("task.kicker")}</p>
+      <p className="hub-badge mb-2">
+        <span className="hub-badge-dot" aria-hidden />
+        {t("task.kicker")}
+      </p>
       <h1 className="os-title mt-2 text-3xl sm:text-5xl">{t("task.title")}</h1>
       <p className="mt-3 max-w-2xl text-base text-muted">{t("task.lead")}</p>
 

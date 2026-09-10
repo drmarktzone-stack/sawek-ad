@@ -23,7 +23,10 @@ export function ToolsShell({
   return (
     <OsPage data-testid={testId} dir={locale === "en" ? "ltr" : "rtl"}>
       <CampaignJourney />
-      <p className="os-kicker">{kicker}</p>
+      <p className="hub-badge mb-2">
+        <span className="hub-badge-dot" aria-hidden />
+        {kicker}
+      </p>
       <h1 className="os-title mt-2 text-3xl sm:text-4xl">{title}</h1>
       <p className="mt-3 max-w-2xl text-base text-muted">{lead}</p>
       <div className="mt-4">

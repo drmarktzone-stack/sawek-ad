@@ -145,11 +145,14 @@ export function CommandHero({
     <section className="agency-hero-glow relative isolate overflow-hidden">
       <div aria-hidden className="agency-grain absolute inset-0 opacity-10" />
       <div className="relative mx-auto max-w-6xl px-4 pb-12 pt-8 sm:pb-14 sm:pt-12">
-        <p className="agency-kicker mb-3 text-center">{t("os.kicker")}</p>
-        <h1 className="agency-display-cream mx-auto max-w-4xl text-center text-[2.1rem] leading-[1.12] sm:text-5xl lg:text-[3.6rem]">
+        <p className="hub-badge mx-auto mb-5">
+          <span className="hub-badge-dot" aria-hidden />
+          {t("os.kicker")}
+        </p>
+        <h1 className="agency-display-cream mx-auto max-w-4xl text-center text-[2.2rem] leading-[1.12] sm:text-5xl lg:text-[3.7rem]">
           {t("os.headline")}
         </h1>
-        <p className="mx-auto mt-4 max-w-2xl text-center text-base font-semibold text-muted sm:text-lg">
+        <p className="mx-auto mt-4 max-w-2xl text-center text-base font-medium text-muted sm:text-lg">
           {t("os.pitch")}
         </p>
         <div className="mt-8 flex flex-col items-center gap-3">
@@ -160,7 +163,7 @@ export function CommandHero({
             <Button asChild size="lg" variant="gold" className="btn-mobile-full text-base font-black">
               <LangLink href="/task/ad">{t("complete.kicker")}</LangLink>
             </Button>
-            <Button type="button" size="lg" variant="outline" className="btn-mobile-full" onClick={onEmpty}>
+            <Button type="button" size="lg" variant="outline" className="btn-mobile-full rounded-[22px]" onClick={onEmpty}>
               {t("cta.new")}
             </Button>
           </div>

@@ -168,7 +168,7 @@ export function HomeStudio() {
 
         <h3 className="os-title mt-8 text-2xl">{t("home.plans.title")}</h3>
         <div className="mt-4 grid gap-6 md:grid-cols-2">
-          <article className="text-start">
+          <article className="rounded-[22px] border border-[var(--line)] bg-white p-5 text-start shadow-[var(--shadow-card)]">
             <p className="os-kicker">{t("pricing.freeName")}</p>
             <p className="os-title mt-2 text-4xl">{t("pricing.freePrice")}</p>
             <p className="text-sm text-muted">{t("pricing.freeForever")}</p>
@@ -178,16 +178,16 @@ export function HomeStudio() {
               ))}
             </ul>
           </article>
-          <article className="text-start">
-            <p className="os-kicker">{t("pricing.proName")}</p>
-            <p className="os-title mt-2 text-4xl">
+          <article className="rounded-[22px] bg-[var(--store)] p-5 text-start text-white shadow-[var(--shadow-lift)]">
+            <p className="text-xs font-extrabold tracking-wide text-white/70">{t("pricing.proName")}</p>
+            <p className="os-title mt-2 text-4xl text-white">
               ₪{PRICE_MONTHLY_ILS}{" "}
-              <span className="text-base font-bold text-muted">{t("home.plans.month")}</span>
+              <span className="text-base font-bold text-white/65">{t("home.plans.month")}</span>
             </p>
-            <p className="text-lg font-black text-navy">
-              ₪{PRICE_YEARLY_ILS} <span className="text-sm font-bold text-muted">{t("home.plans.year")}</span>
+            <p className="text-lg font-black text-white">
+              ₪{PRICE_YEARLY_ILS} <span className="text-sm font-bold text-white/65">{t("home.plans.year")}</span>
             </p>
-            <ul className="mt-4 space-y-2 text-base text-navy">
+            <ul className="mt-4 space-y-2 text-base text-white/90">
               {proItems.map((k) => (
                 <li key={k}>{t(k)}</li>
               ))}
