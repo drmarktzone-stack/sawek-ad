@@ -50,7 +50,7 @@ export function CampaignJourney({ compact = false }: { compact?: boolean }) {
 
   return (
     <nav
-      className={cn("mb-5 rounded-[16px] border border-[var(--line)] bg-white px-3 py-3 shadow-[var(--shadow-card)]", compact && "mb-3 py-2")}
+      className={cn("mb-5 rounded-[22px] border-2 border-[var(--ink)] bg-white px-3 py-3 shadow-[var(--shadow-card)]", compact && "mb-3 py-2")}
       aria-label={t("journey.kicker")}
       data-testid="campaign-journey"
       dir={locale === "en" ? "ltr" : "rtl"}

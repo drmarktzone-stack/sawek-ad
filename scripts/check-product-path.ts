@@ -140,8 +140,9 @@ for (const dead of ["/growth/market", "/growth/dna", "/growth/experiments", "/la
 
 const root = process.cwd();
 const css = readFileSync(join(root, "app/globals.css"), "utf8");
-if (/Hub Clear|pale sky \/ cobalt/.test(css)) fail("mohtwa.ai chrome leaked into tokens");
-if (!/Verde Clear/.test(css)) fail("Verde Clear tokens missing after Mohtawak correction");
+if (/Hub Clear|pale sky \/ cobalt|#2563eb|#2563EB/.test(css)) fail("mohtwa.ai chrome leaked into tokens");
+if (!/Mohtawak operator/.test(css)) fail("Mohtawak lime/dark tokens missing");
+if (!/mw-hero/.test(css)) fail("dark Mohtawak hero class missing");
 const jobsUi = readFileSync(join(root, "components/content-jobs.tsx"), "utf8");
 for (const job of ["scripts", "hooks", "analyze", "remix", "carousel", "calendar", "trends", "voice"]) {
   if (!jobsUi.includes(`job: "${job}"`)) fail(`content jobs missing ${job}`);

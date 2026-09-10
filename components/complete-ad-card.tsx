@@ -60,7 +60,7 @@ export function CompleteAdCard({
       ) : null}
 
       {visual ? (
-        <figure className="mt-6 overflow-hidden rounded-[14px] border border-[var(--line)] bg-[#f3f8f1]" data-testid="complete-ad-visual">
+        <figure className="mt-6 overflow-hidden rounded-[18px] border-2 border-[var(--ink)] bg-[var(--ivory)]" data-testid="complete-ad-visual">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={visual} alt="" className="aspect-[1.91/1] w-full object-cover" />
         </figure>
@@ -70,7 +70,7 @@ export function CompleteAdCard({
         {copy ? (
           <p className="whitespace-pre-wrap text-base leading-relaxed text-navy">{copy}</p>
         ) : null}
-        <span className="inline-block rounded-[10px] bg-lime px-5 py-2.5 text-sm font-black text-[var(--lime-ink)]">
+        <span className="inline-block rounded-[18px] bg-lime px-5 py-2.5 text-sm font-black text-[var(--lime-ink)]">
           {loc.cta}
         </span>
       </div>

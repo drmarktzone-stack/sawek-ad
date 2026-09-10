@@ -40,7 +40,7 @@ export function LanguageToggle({
           onClick={() => setLocale(l.id)}
           className={cn(
             "tap-target inline-flex items-center justify-center rounded-[8px] px-3 py-1.5 text-sm font-semibold transition-colors",
-            locale === l.id ? "bg-teal text-white" : "text-muted hover:text-navy",
+            locale === l.id ? "bg-lime text-[var(--lime-ink)]" : "text-muted hover:text-navy",
           )}
         >
           {l.label}
@@ -59,7 +59,7 @@ function AuthChip({ tone = "light" }: { tone?: "light" | "ink" }) {
     return (
       <LangLink
         href="/login"
-        className="shrink-0 rounded-[10px] bg-teal px-3.5 py-1.5 text-sm font-black text-white hover:bg-teal-soft"
+        className="shrink-0 rounded-[18px] bg-lime px-3.5 py-1.5 text-sm font-black text-[var(--lime-ink)] hover:bg-[var(--lime-deep)]"
       >
         {t("nav.login")}
       </LangLink>
@@ -236,25 +236,25 @@ export function Footer() {
   const pathname = usePathname();
   if (pathname.startsWith("/lp/")) return null;
   return (
-    <footer className="has-dock mt-auto border-t border-[var(--line)] bg-white py-10 text-center text-sm text-muted">
-      <p className="mb-1 font-[family-name:var(--font-display-he)] text-lg font-bold text-ink">
-        {t("brand.name")} · {t("os.kicker")}
+    <footer className="has-dock mt-auto bg-[var(--navy-deep)] py-12 text-center text-sm text-white/60">
+      <p className="mb-2 font-[family-name:var(--font-display-he)] text-xl font-bold text-white">
+        {t("brand.name")}
       </p>
-      {t("footer.line")}
-      <p className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
-        <LangLink href="/about" className="tap-target inline-flex items-center font-semibold text-navy hover:text-teal hover:underline">
+      <p className="mx-auto max-w-xl px-4">{t("footer.line")}</p>
+      <p className="mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+        <LangLink href="/about" className="tap-target inline-flex items-center font-semibold text-white/80 hover:text-lime hover:underline">
           {t("nav.about")}
         </LangLink>
-        <LangLink href="/privacy" className="tap-target inline-flex items-center font-semibold text-navy hover:text-teal hover:underline">
+        <LangLink href="/privacy" className="tap-target inline-flex items-center font-semibold text-white/80 hover:text-lime hover:underline">
           {t("nav.privacy")}
         </LangLink>
-        <LangLink href="/terms" className="tap-target inline-flex items-center font-semibold text-navy hover:text-teal hover:underline">
+        <LangLink href="/terms" className="tap-target inline-flex items-center font-semibold text-white/80 hover:text-lime hover:underline">
           {t("nav.terms")}
         </LangLink>
-        <LangLink href="/pricing" className="tap-target inline-flex items-center font-semibold text-navy hover:text-teal hover:underline">
+        <LangLink href="/pricing" className="tap-target inline-flex items-center font-semibold text-white/80 hover:text-lime hover:underline">
           {t("home.cta.pricing")}
         </LangLink>
-        <LangLink href="/status" className="tap-target inline-flex items-center font-semibold text-teal hover:text-navy hover:underline">
+        <LangLink href="/status" className="tap-target inline-flex items-center font-semibold text-white/80 hover:text-lime hover:underline">
           {t("nav.status")}
         </LangLink>
       </p>
