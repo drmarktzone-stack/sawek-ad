@@ -109,6 +109,7 @@ export function emptyIntake(): Intake {
     description: "",
     location: "",
     website: "",
+    phone: "",
     whatsapp: "",
     clinicHours: "",
     kupaFileBy: "",
@@ -205,11 +206,12 @@ export function validateIntake(intake: Intake): IntakeReport {
   const skipPaidUnit = isFreeService(intake)
     ? new Set(["avgOrderValue", "marginPercent", "targetCac"])
     : new Set<string>();
+  const optionalEmpty = new Set(["businessModel", "monthlyBudget", "targetCac", "avgOrderValue", "marginPercent", "pastAds"]);
   for (const c of CHECKS) {
     if (skipPaidUnit.has(c.field)) continue;
     total += c.weight;
     if (filled(String(intake[c.field] ?? ""))) earned += c.weight;
-    else {
+    else if (!optionalEmpty.has(c.field)) {
       missing.push({
         field: c.field,
         label: c.label,

@@ -19,6 +19,8 @@ import {
   type WizardRequiredField,
 } from "@/lib/engine/validate";
 import { assemblePack, idleStatus, overlayPackAgency, runIntakeAndDiagnosis, runMedia, runOptimizerStage, runStrategic } from "@/lib/engine/run";
+import { hydrateScanIntake } from "@/lib/intake-locale";
+import { businessKey } from "@/lib/engine/ad-engine/sources";
 import { loadDraft, saveDraft, INGEST_APPLIED_EVENT } from "@/lib/storage";
 import { loadCampaignTools } from "@/lib/campaign-tools";
 import { charterAllowsCampaign } from "@/lib/operating-niche";
@@ -350,15 +352,25 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
 
   useEffect(() => {
     if (!hydrated) return;
+    const samePack = Boolean(
+      pack && businessKey(pack.intake.businessName) === businessKey(intake.businessName),
+    );
+    const persist = () =>
+      saveDraft({
+        intake,
+        step,
+        phase,
+        packId: samePack ? pack?.id : undefined,
+        coach: coachIntake(intake),
+        hsoStudio: samePack ? loadDraft().hsoStudio : undefined,
+        viral: samePack ? loadDraft().viral : undefined,
+      });
     if (wantsEmptyCampaign()) {
-      if (releaseEmptyIfTypedName(intake.businessName)) {
-        saveDraft({ intake, step, phase, packId: pack?.id, coach: coachIntake(intake) });
-      } else {
-        saveDraft({ intake: emptyIntake(), step: 1, phase: "wizard" });
-      }
+      if (releaseEmptyIfTypedName(intake.businessName)) persist();
+      else saveDraft({ intake: emptyIntake(), step: 1, phase: "wizard" });
       return;
     }
-    saveDraft({ intake, step, phase, packId: pack?.id, coach: coachIntake(intake) });
+    persist();
   }, [intake, step, phase, pack?.id, hydrated]);
 
   useEffect(() => {
@@ -367,6 +379,8 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
     if (!intake.businessName.trim()) return;
     if (isPediatricDemo(intake) || isAnyDemoIntake(intake)) {
       setIntake((prev) => relocalizeCatalogIntake(prev, locale));
+    } else {
+      setIntake((prev) => hydrateScanIntake(prev, locale));
     }
   }, [locale, hydrated]);
 
@@ -664,7 +678,9 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
       {!embedded && <DepartmentRail />}
       {taskMode ? null : embedded ? (
         <div className="mb-6 flex flex-col items-center gap-3">
-          <DemoPicker onSelect={(id) => applyDemo(id)} />
+          {!intake.businessName.trim() || isAnyDemoIntake(intake) ? (
+            <DemoPicker onSelect={(id) => applyDemo(id)} />
+          ) : null}
           <Button type="button" size="lg" onClick={newCampaign}>
             {t("cta.new")}
           </Button>
@@ -672,7 +688,9 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
         </div>
       ) : (
         <div className="mb-6 flex flex-col items-center gap-3">
-          <DemoPicker onSelect={(id) => applyDemo(id)} />
+          {!intake.businessName.trim() || isAnyDemoIntake(intake) ? (
+            <DemoPicker onSelect={(id) => applyDemo(id)} />
+          ) : null}
           <Button type="button" size="lg" onClick={newCampaign}>
             {t("cta.new")}
           </Button>
@@ -987,6 +1005,12 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
                   }}
                 />
               </Field>
+              {intake.phone?.trim() &&
+              intake.phone.replace(/\D/g, "") !== (intake.whatsapp || "").replace(/\D/g, "") ? (
+                <Field label={t("biz.phone")} filled>
+                  <Input value={intake.phone} dir="ltr" onChange={(e) => patch({ phone: e.target.value })} inputMode="tel" />
+                </Field>
+              ) : null}
               <Field label={t("biz.whatsapp")} filled={Boolean((intake.whatsapp ?? "").trim())}>
                 <Input
                   value={intake.whatsapp ?? ""}

@@ -15,6 +15,7 @@ import { applyOperatingModel, coerceGoalForFreeService, isFreeService } from "./
 import { isPediatricDemo } from "./demo";
 import { AUDIENCE_CHIPS, ADVANTAGE_CHIPS, GOAL_CHIPS, PROBLEM_CHIPS, type ChipOption } from "./chips";
 import { emptyIntake } from "./engine/validate";
+import { emptyVoice, normalizeVoice } from "./engine/voice";
 import { detectVertical } from "./vertical";
 import { isNoOffer } from "./no-offer";
 import { isPlaceholderPhone } from "./campaign-prefill";
@@ -27,6 +28,8 @@ import {
   isUiChromeText,
   isUnknownSentinel,
   isUsableLocationValue,
+  extractPostalAddressFromText,
+  cleanLocationValue,
 } from "./scan-truth/patterns";
 
 export const DOC_MAX_BYTES = IMAGE_MAX_BYTES;
@@ -153,7 +156,7 @@ export const INGEST_FIELD_META: Record<
   audience: { stage: "wizard_details", label: { he: "קהל", ar: "الجمهور", en: "Audience" } },
   biggestProblem: { stage: "wizard_details", label: { he: "בעיה / כאב", ar: "المشكلة", en: "Problem" } },
   mainGoal: { stage: "wizard_details", label: { he: "מטרת קמפיין", ar: "هدف الحملة", en: "Campaign goal" } },
-  uniqueAdvantage: { stage: "discovery_strategy", label: { he: "יתרון ייחודי", ar: "الميزة الفريدة", en: "Unique advantage" } },
+  uniqueAdvantage: { stage: "wizard_details", label: { he: "יתרון ייחודי", ar: "الميزة الفريدة", en: "Unique advantage" } },
   brandTone: { stage: "discovery_strategy", label: { he: "טון מותג", ar: "نبرة العلامة", en: "Brand tone" } },
   brandPositioning: { stage: "discovery_strategy", label: { he: "פוזישנינג", ar: "التموضع", en: "Positioning" } },
   channelNotes: { stage: "media_plan", label: { he: "ערוצים (PLAN)", ar: "قنوات (خطة)", en: "Channels (PLAN)" } },
@@ -415,7 +418,11 @@ export function sanitizeExtractedFields(
     if (kept.length) out.audience = kept.join(",");
     else delete out.audience;
   }
-  if (out.location && !isUsableLocation(out.location)) delete out.location;
+  if (out.location) {
+    const cleaned = cleanLocationValue(out.location) || extractPostalAddressFromText(out.location);
+    if (cleaned && isUsableLocation(cleaned)) out.location = cleaned;
+    else if (!isUsableLocation(out.location)) delete out.location;
+  }
   if (out.phone && isPlaceholderPhone(out.phone)) delete out.phone;
   if (out.whatsapp && isPlaceholderPhone(out.whatsapp)) delete out.whatsapp;
   if (out.category && FOOD_SCHEMA_RE.test(out.category) && MEDICAL_SCHEMA_RE.test(hay)) {
@@ -486,6 +493,7 @@ export function extractUnlabeledPromo(text: string): string {
 export function distinctPageAdvantage(hay: string, description: string): string {
   const desc = description.replace(/\s+/g, " ").trim().toLowerCase();
   const patterns = [
+    /המרכז ל[^\n.]{4,80}/g,
     /היעד המוביל[^\n.]{0,80}/g,
     /מותגים עולמיים[^\n.]{0,120}קורת גג אחת/g,
     /מתחת לקורת גג אחת/g,
@@ -557,16 +565,23 @@ const ADDRESS_HINT =
   /(?:מחלף|רחוב\s+\S|שדרות\s+\S|כביש\s*\d|الشارع|شارع\s+|مجمع|الطابق|קומה|בצד|بجانب|\d+(?:st|nd|rd|th)\s+(?:street|st\.?|avenue|ave\.?)\b|\d+\s+[\w.'-]+\s+(?:street|st\.?|avenue|ave\.?|road|rd\.?|blvd)\b)/i;
 
 function extractLooseAddress(text: string): string {
+  const extracted = extractPostalAddressFromText(text);
+  if (extracted && isUsableLocation(extracted)) return extracted;
   const lines = text.split(/\r?\n/).map((l) => l.replace(/\s+/g, " ").trim());
   const hits: string[] = [];
   for (const line of lines) {
     if (line.length < 8 || line.length > 160) continue;
     if (/אימייל|email|סיסמה|password|כתובת אימייל|lost.?password|podium|street level|have an account/i.test(line)) continue;
+    if (/^(?:תיאור|description|about|העסק בקצרה|H1|title|CTA|slogan)\s*[:：]/i.test(line)) {
+      const fromDesc = extractPostalAddressFromText(line);
+      if (fromDesc && isUsableLocation(fromDesc) && !hits.includes(fromDesc)) hits.push(fromDesc);
+      continue;
+    }
     if (!isUsableLocation(line) && !ADDRESS_HINT.test(line)) continue;
     if (/^H1\s*:/i.test(line)) continue;
     if (/[|]/.test(line) && !ADDRESS_HINT.test(line)) continue;
     if (ADDRESS_HINT.test(line)) {
-      const v = clip(line.replace(/^(?:כתובת|מיקום|العنوان|الموقع|عنوان|address|location)\s*[:：]\s*/i, ""), 160);
+      const v = cleanLocationValue(line) || clip(line.replace(/^(?:כתובת|מיקום|العنوان|الموقع|عنوان|address|location)\s*[:：]\s*/i, ""), 160);
       if (isUsableLocation(v) && !hits.includes(v)) hits.push(v);
     }
   }
@@ -574,7 +589,7 @@ function extractLooseAddress(text: string): string {
     const score = (s: string) => (looksLikePostalAddress(s) ? 50 : 0) + (/\d/.test(s) ? 20 : 0) - s.length / 20;
     return score(b) - score(a);
   });
-  return hits[0] || "";
+  return hits[0] || extracted || "";
 }
 
 function extractMenuOrServices(text: string): string {
@@ -821,6 +836,8 @@ export function fillEmptyFromPageProse(
         hay.match(/רופא ילדים/) ||
         hay.match(/طبيب أطفال/) ||
         (isPediatricBusinessHay(hay) ? hay.match(/\bpediatrics?\b/i) : null) ||
+        hay.match(/\bDentist\b/i) ||
+        hay.match(/מרפאת שיניים|רופא שיניים|השתלות שיניים|אסתטיקה דנטלית|عيادة أسنان/) ||
         hay.match(SCHEMA_CATEGORY_LABEL);
       if (catHit) {
         let cat = (catHit[1] || catHit[0]).trim();
@@ -829,7 +846,13 @@ export function fillEmptyFromPageProse(
           if (med?.[1]) cat = med[1];
           else cat = "";
         }
-        if (cat) out.category = cat;
+        if (cat) {
+          if (/מרפאת שיניים|רופא שיניים|השתלות שיניים|אסתטיקה דנטלית|عيادة أسنان|\bdentist\b|\bdental\b/i.test(cat)) {
+            out.category = /Dentist/i.test(cat) ? "Dentist" : "מרפאת שיניים";
+          } else {
+            out.category = cat;
+          }
+        }
       }
     }
   }
@@ -861,8 +884,8 @@ export function fillEmptyFromPageProse(
       }
     }
   }
-  if (!String(out.biggestProblem || "").trim() && hay.length > 40) {
-    out.biggestProblem = "unknown";
+  if (out.biggestProblem && isUnknownSentinel(String(out.biggestProblem))) {
+    delete out.biggestProblem;
   }
 
   if (out.uniqueAdvantage && out.description && out.uniqueAdvantage.trim() === out.description.trim()) {
@@ -976,8 +999,8 @@ export function fillEmptyFromPageProse(
   }
 
   const cleaned = sanitizeExtractedFields(out, hay);
-  if (!String(cleaned.biggestProblem || "").trim() && hay.length > 40) {
-    cleaned.biggestProblem = "unknown";
+  if (cleaned.biggestProblem && isUnknownSentinel(String(cleaned.biggestProblem))) {
+    delete cleaned.biggestProblem;
   }
   return cleaned;
 }
@@ -1017,16 +1040,47 @@ export function firstContactNumber(raw: string): string {
   return formatIlPhone(part) || part;
 }
 
-/** Keep phone + whatsapp aligned: empty phone copies whatsapp (and reverse). */
-export function syncPhoneWhatsappFields<T extends { phone?: string; whatsapp?: string }>(fields: T): T {
-  const phone = String(fields.phone || "").trim();
-  const wa = String(fields.whatsapp || "").trim();
-  if (!phone && wa) {
-    const first = firstContactNumber(wa);
-    if (first) fields.phone = first;
-  } else if (phone && !wa) {
-    fields.whatsapp = phone;
+function ilDigits(raw: string): string {
+  let d = foldIndicDigits(String(raw || "")).replace(/\D/g, "");
+  if (d.startsWith("972")) d = `0${d.slice(3)}`;
+  return d;
+}
+
+function isIlMobile(raw: string): boolean {
+  return /^05\d{8}$/.test(ilDigits(raw));
+}
+
+function isIlVoipJunk(raw: string): boolean {
+  const d = ilDigits(raw);
+  if (d.length < 8) return true;
+  return /^0(?:72|73|74|76|77|78)\d{0,7}$/.test(d) && !isIlMobile(raw);
+}
+
+/** Landline for phone, mobile for WhatsApp. Never copy 07x plugin stubs. */
+export function pickContactPair(phones: string[], whatsapp: string[] = []): { phone: string; whatsapp: string } {
+  const all = [...phones, ...whatsapp].map((p) => formatIlPhone(p) || p.trim()).filter((p) => p && !isIlVoipJunk(p));
+  const unique: string[] = [];
+  for (const p of all) {
+    const d = ilDigits(p);
+    if (!d || unique.some((u) => ilDigits(u) === d)) continue;
+    unique.push(p);
   }
+  const mobile = unique.find((p) => isIlMobile(p)) || "";
+  const landline = unique.find((p) => !isIlMobile(p)) || "";
+  const waHint = whatsapp.map((p) => formatIlPhone(p) || p.trim()).find((p) => p && isIlMobile(p) && !isIlVoipJunk(p)) || "";
+  const whatsappOut = waHint || mobile || landline;
+  const phoneOut = landline || mobile || whatsappOut;
+  return { phone: phoneOut, whatsapp: whatsappOut };
+}
+
+/** Keep phone + whatsapp aligned without duplicating a landline onto WhatsApp when a mobile exists. */
+export function syncPhoneWhatsappFields<T extends { phone?: string; whatsapp?: string }>(fields: T): T {
+  const pair = pickContactPair(
+    [String(fields.phone || "").trim()].filter(Boolean),
+    [String(fields.whatsapp || "").trim()].filter(Boolean),
+  );
+  if (pair.phone) fields.phone = pair.phone;
+  if (pair.whatsapp) fields.whatsapp = pair.whatsapp;
   return fields;
 }
 
@@ -1068,7 +1122,10 @@ export function extractFieldsFromText(text: string, filename: string): Partial<R
   if (name) out.businessName = name;
 
   const locHits = labeledValues(text, ["כתובת", "מיקום", "العنوان", "عنوان", "الموقع", "address", "location"]);
-  const locUsable = locHits.filter((h) => isUsableLocation(h)).sort((a, b) => {
+  const locUsable = locHits
+    .map((h) => cleanLocationValue(h) || h)
+    .filter((h) => isUsableLocation(h))
+    .sort((a, b) => {
     const score = (s: string) =>
       (looksLikePostalAddress(s) ? 80 : 0) + (/\d/.test(s) ? 30 : 0) + (s.length <= 80 ? 20 : 0) - s.length / 10;
     return score(b) - score(a);
@@ -1225,7 +1282,7 @@ export function extractFieldsFromText(text: string, filename: string): Partial<R
 
   const land = labeledValue(
     text,
-    ["דף נחיתה", "שורות נחיתה", "עמוד נחיתה", "صفحة الهبوط", "صفحة هبوط", "landing page", "landing lines", "landing"],
+    ["שורות נחיתה", "עמוד נחיתה", "صفحة الهبوط", "صفحة هبوط", "landing lines", "landing copy"],
     600,
   );
   if (land) out.landingLines = land;
@@ -1278,6 +1335,7 @@ function rowFor(
 const ALWAYS_SHOW: IngestFieldId[] = [
   "businessName",
   "category",
+  "description",
   "location",
   "phone",
   "whatsapp",
@@ -1300,6 +1358,9 @@ export function rowsFromExtracted(
   fromImage: boolean,
 ): IngestReviewRow[] {
   const fields = new Set<IngestFieldId>([...ALWAYS_SHOW, ...(Object.keys(extracted) as IngestFieldId[])]);
+  const phoneDigits = String(extracted.phone || "").replace(/\D/g, "");
+  const waDigits = String(extracted.whatsapp || "").replace(/\D/g, "");
+  if (phoneDigits && waDigits && phoneDigits === waDigits) fields.delete("whatsapp");
   const order = Object.keys(INGEST_FIELD_META) as IngestFieldId[];
   return order
     .filter((f) => fields.has(f))
@@ -1460,12 +1521,13 @@ export function applyIngestReview(
   if (loc && allowed(loc)) next.location = loc.value.trim();
   const phoneRow = take("phone");
   const wa = take("whatsapp");
-  if (wa && allowed(wa)) next.whatsapp = wa.value.trim();
-  else if (phoneRow && allowed(phoneRow)) next.whatsapp = phoneRow.value.trim();
-  else if (!next.whatsapp) {
-    const fallback = firstContactNumber(String(phoneRow?.value || wa?.value || ""));
-    if (fallback) next.whatsapp = fallback;
-  }
+  const pair = pickContactPair(
+    [phoneRow && allowed(phoneRow) ? phoneRow.value : ""].filter(Boolean),
+    [wa && allowed(wa) ? wa.value : ""].filter(Boolean),
+  );
+  if (pair.phone) next.phone = pair.phone;
+  if (pair.whatsapp) next.whatsapp = pair.whatsapp;
+  else if (pair.phone) next.whatsapp = pair.phone;
   const hours = take("clinicHours");
   if (hours && allowed(hours)) next.clinicHours = hours.value.trim();
   const site = take("website");
@@ -1595,6 +1657,28 @@ export function applyIngestReview(
     else next.type = "business";
     if (isNoOffer(next.offer) || !String(next.offer || "").trim()) {
       next.offer = "no_offer";
+      next.offerSkipConfirmed = true;
+    }
+    const voice = normalizeVoice(next.voice);
+    next.voice = {
+      ...emptyVoice(),
+      ...voice,
+      niche: voice.niche || next.category,
+      audience: voice.audience || next.audience,
+      coreMessage: voice.coreMessage || next.uniqueAdvantage,
+      personalVoice: voice.personalVoice || next.brandTone,
+    };
+    const offerText = String(next.offer || "").trim();
+    const problem = String(next.biggestProblem || "").trim();
+    if (
+      offerText &&
+      problem &&
+      (offerText === problem ||
+        offerText.includes(problem) ||
+        /الناس مش عارفين|לא מכירים את/.test(offerText))
+    ) {
+      next.offer = "no_offer";
+      next.offerCustom = false;
       next.offerSkipConfirmed = true;
     }
   }

@@ -4,6 +4,7 @@ import {
   distinctPageAdvantage,
   extractFieldsFromText,
   formatIlPhone,
+  pickContactPair,
   isCatalogHeading,
   isChromePromoText,
   isJunkUiText,
@@ -14,7 +15,7 @@ import {
 } from "./document-ingest";
 import { extractCssColors, extractLogoUrl } from "./brand-kit";
 import { runScanTruthPipeline, extraPageMayFillTruth, EXTRA_CONTACT_FIELDS } from "./scan-truth/pipeline";
-import { isEcommerceChromeText, isPainStatement, isUiChromeText, splitSentences, tokenOverlap } from "./scan-truth/patterns";
+import { isEcommerceChromeText, isPainStatement, isUiChromeText, splitSentences, tokenOverlap, extractPostalAddressFromText, cleanLocationValue } from "./scan-truth/patterns";
 import type { FactEvidence } from "./scan-truth/types";
 import {
   detectSocialKind,
@@ -642,6 +643,19 @@ function jsonLdDescription(nodes: Record<string, unknown>[]): string {
   return "";
 }
 
+function jsonLdTagline(nodes: Record<string, unknown>[], sites: Record<string, unknown>[]): string {
+  const pool = [...sites, ...nodes];
+  let best = "";
+  for (const n of pool) {
+    const d = asString(n.description);
+    if (!d || isEcommerceChromeText(d) || isUiChromeText(d) || isChromePromoText(d)) continue;
+    const t = clip(d, 160);
+    if (t.length < 8 || t.length > 90) continue;
+    if (t.length < (best ? best.length : 999)) best = t;
+  }
+  return best;
+}
+
 function preferredCategoryFromTypes(types: string[]): string {
   let best = "";
   let bestRank = -1;
@@ -1080,7 +1094,7 @@ function jsonLdImageUrls(nodes: Record<string, unknown>[]): string[] {
   return out;
 }
 
-const TRACKER_IMG = /sprite|favicon|pixel|1x1|tracking|spacer|blank\.gif|data:image\/gif|gravatar|emoji|icon-?\d{2}|woocommerce-placeholder|spinner|loader|apple-touch|\/icons?\/|wp-includes\/images|logo-mark/i;
+const TRACKER_IMG = /sprite|favicon|pixel|1x1|tracking|spacer|blank\.gif|data:image\/gif|gravatar|emoji|icon-?\d{2}|woocommerce-placeholder|spinner|loader|apple-touch|\/icons?\/|wp-includes\/images|logo-mark|\.woff2?(?:\?|$)|\.ttf(?:\?|$)|\.eot(?:\?|$)|\.otf(?:\?|$)|fonts?\//i;
 
 function srcsetLargest(srcset: string, base: string): string {
   let best = "";
@@ -1357,17 +1371,14 @@ export function parseFetchedHtml(
   if (rankedCat && !isJunkUiText(rankedCat) && !isCatalogHeading(rankedCat)) seed.category = rankedCat;
   const fromLdAddr = jsonLdPostalAddress(jsonLdPool);
   if (fromLdAddr) seed.location = fromLdAddr;
-  const seedPhone =
-    tels
-      .map((t) => formatIlPhone(t) || t)
-      .find((t) => t.replace(/\D/g, "").length >= 8 && !isPlaceholderPhone(t)) || "";
-  const seedWa =
-    was
-      .map((w) => formatIlPhone(w) || w)
-      .find((t) => String(t).replace(/\D/g, "").length >= 8 && !isPlaceholderPhone(t)) || "";
+  const contacts = pickContactPair(
+    tels.filter((t) => t.replace(/\D/g, "").length >= 8 && !isPlaceholderPhone(t)),
+    was.filter((t) => String(t).replace(/\D/g, "").length >= 8 && !isPlaceholderPhone(t)),
+  );
+  const seedPhone = contacts.phone;
+  const seedWa = contacts.whatsapp;
   if (seedPhone) seed.phone = seedPhone;
   if (seedWa) seed.whatsapp = seedWa;
-  else if (seedPhone) seed.whatsapp = seedPhone;
   if (addr && isUsableLocation(addr) && !seed.location) seed.location = addr;
   const ldDesc = jsonLdDescription(jsonLdPool);
   if (ldDesc) seed.description = ldDesc;
@@ -1388,12 +1399,14 @@ export function parseFetchedHtml(
   });
   let fields = pipeline.fields;
   if (seed.website) fields.website = seed.website;
-  if (seedWa) {
-    const waDigits = String(fields.whatsapp || "").replace(/\D/g, "");
-    const phoneDigits = String(fields.phone || seedPhone || "").replace(/\D/g, "");
-    if (!waDigits || waDigits === phoneDigits) fields.whatsapp = seedWa;
+  if (seedPhone || seedWa) {
+    const pair = pickContactPair(
+      [fields.phone, seedPhone].filter(Boolean) as string[],
+      [fields.whatsapp, seedWa].filter(Boolean) as string[],
+    );
+    if (pair.phone) fields.phone = pair.phone;
+    if (pair.whatsapp) fields.whatsapp = pair.whatsapp;
   }
-  if (seedPhone && !String(fields.phone || "").trim()) fields.phone = seedPhone;
   if (seed.location && !String(fields.location || "").trim()) fields.location = seed.location;
   if (seed.uniqueAdvantage && (!String(fields.uniqueAdvantage || "").trim() || fields.uniqueAdvantage === fields.description)) {
     fields.uniqueAdvantage = seed.uniqueAdvantage;
@@ -1433,14 +1446,23 @@ export function parseFetchedHtml(
     if (!cur || categoryRank(rankedCat) > categoryRank(cur)) fields.category = rankedCat;
   }
   if (fromLdAddr) fields.location = fromLdAddr;
-  else if (fields.location && !isUsableLocation(fields.location)) delete fields.location;
-  if (!String(fields.location || "").trim()) {
-    const zones = deliveryZonesFromText(raw, visible);
-    if (zones && isUsableLocation(zones)) fields.location = zones;
+  else if (fields.location) {
+    const cleaned = cleanLocationValue(fields.location) || extractPostalAddressFromText(fields.location);
+    if (cleaned && isUsableLocation(cleaned)) fields.location = cleaned;
+    else if (!isUsableLocation(fields.location)) delete fields.location;
+  }
+  if (!String(fields.location || "").trim() || !isUsableLocation(String(fields.location))) {
+    const fromVisible = extractPostalAddressFromText([addr || "", visible, pipeline.businessCorpus, extraCorpus].filter(Boolean).join("\n"));
+    if (fromVisible && isUsableLocation(fromVisible)) fields.location = fromVisible;
+    else {
+      const zones = deliveryZonesFromText(raw, visible);
+      if (zones && isUsableLocation(zones)) fields.location = zones;
+    }
   }
   fields = sanitizeExtractedFields(fields, pipeline.businessCorpus);
   if (fromLdAddr && !fields.location) fields.location = fromLdAddr;
   syncPhoneWhatsappFields(fields);
+  const tagline = jsonLdTagline(jsonLdPool, sites);
   if (!String(fields.description || "").trim()) {
     const fromPage = pageIdentityDescription({
       title,
@@ -1454,19 +1476,24 @@ export function parseFetchedHtml(
   if (!fields.uniqueAdvantage || fields.uniqueAdvantage === fields.description) {
     const distinct = distinctPageAdvantage(pipeline.businessCorpus, fields.description || "");
     if (distinct) fields.uniqueAdvantage = distinct;
+    else if (tagline && tagline !== fields.description) fields.uniqueAdvantage = tagline;
     else if (fields.uniqueAdvantage === fields.description) delete fields.uniqueAdvantage;
   }
   if (!String(fields.uniqueAdvantage || "").trim()) {
     const desc = String(fields.description || "").trim();
     const first = desc.split(/\s*[-–—|·]\s*/)[0]?.trim() || "";
-    if (first && first.length >= 8 && first !== desc && !isEcommerceChromeText(first) && !isUiChromeText(first)) {
+    if (tagline && tagline !== desc) fields.uniqueAdvantage = clip(tagline, 160);
+    else if (first && first.length >= 8 && first !== desc && !isEcommerceChromeText(first) && !isUiChromeText(first)) {
       fields.uniqueAdvantage = clip(first, 160);
     } else if (slogan && slogan !== desc && !isEcommerceChromeText(slogan) && !isUiChromeText(slogan)) {
       fields.uniqueAdvantage = clip(slogan, 160);
     }
   }
-  if (slogan && !fields.brandPositioning && !isEcommerceChromeText(slogan) && !isUiChromeText(slogan)) {
-    fields.brandPositioning = clip(slogan, 160);
+  if (!fields.brandPositioning) {
+    if (tagline && tagline !== fields.description) fields.brandPositioning = clip(tagline, 160);
+    else if (slogan && !isEcommerceChromeText(slogan) && !isUiChromeText(slogan)) {
+      fields.brandPositioning = clip(slogan, 160);
+    }
   }
   if (fields.phone && isPlaceholderPhone(fields.phone)) delete fields.phone;
   if (fields.whatsapp && isPlaceholderPhone(fields.whatsapp)) delete fields.whatsapp;

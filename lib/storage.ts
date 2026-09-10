@@ -96,6 +96,7 @@ export function loadDraft(): DraftState {
       channelNotes: typeof d.intake?.channelNotes === "string" ? d.intake.channelNotes : "",
       whatsappTemplates: typeof d.intake?.whatsappTemplates === "string" ? d.intake.whatsappTemplates : "",
       landingLines: typeof d.intake?.landingLines === "string" ? d.intake.landingLines : "",
+      phone: typeof d.intake?.phone === "string" ? d.intake.phone : "",
       brandKit:
         d.intake?.brandKit && typeof d.intake.brandKit === "object"
           ? {
@@ -161,7 +162,7 @@ export function applyIntakeToDraft(intake: Intake, opts?: { resetWizard?: boolea
   const clean = scrubIntakeChrome(intake);
   const coach = coachIntake(clean);
   const next: DraftState = opts?.resetWizard
-    ? { intake: clean, step: 2, phase: "wizard", coach }
+    ? { intake: clean, step: 2, phase: "wizard", coach, packId: undefined, hsoStudio: undefined, viral: undefined }
     : { ...d, intake: clean, coach };
   saveDraft(next);
   if (opts?.resetWizard) isolateStudioToIntake(clean);

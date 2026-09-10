@@ -18,6 +18,7 @@ import { CampaignJourney } from "@/components/campaign-journey";
 import { ContentJobsStrip } from "@/components/content-jobs";
 import { NextStepCard } from "@/components/next-step-card";
 import { wizardReady } from "@/lib/engine/validate";
+import { isAnyDemoIntake } from "@/lib/demo";
 
 export function HomeStudio() {
   const { t } = useI18n();
@@ -75,7 +76,7 @@ export function HomeStudio() {
 
       <div className="relative mx-auto max-w-6xl px-4 pb-6">
         <p className="mb-3 text-center text-sm font-semibold text-muted">{t("home.demos.secondary")}</p>
-        <DemoPicker />
+        {!signals.hasBusiness || isAnyDemoIntake(signals.intake) ? <DemoPicker /> : null}
         <p className="mx-auto mt-2 max-w-md text-center text-xs font-bold text-navy">{t("home.vertex")}</p>
         <div className="mt-3 flex justify-center gap-3">
           <Button asChild variant="ghost" size="sm">

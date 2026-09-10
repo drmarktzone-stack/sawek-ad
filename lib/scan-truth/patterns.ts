@@ -55,10 +55,109 @@ export const PEDIATRIC_CONTEXT_RE =
   /pediatric|מרפאת ילדים|عيادة طب الأطفال|רופא ילדים|طبيب أطفال|ילד עם|child is unwell|when your child|תינוק|infant|toddler|חום ב[־\-]3/i;
 
 export const MARKETING_PROSE_LOCATION_RE =
-  /enhancing |gateway into|including proposed|streetscape|urban plan|public realm|supporting pedestrians|continuous podium|\bpodium\b|street level|important gateway|proposed (?:street|improvement)/i;
+  /enhancing |gateway into|including proposed|streetscape|urban plan|public realm|supporting pedestrians|continuous podium|\bpodium\b|street level|important gateway|proposed (?:street|improvement)|השאירו פרטים|או התקשרו|בשירות איכותי|השתלות שיניים ואסתטיקה/i;
+
+/** Field labels that must never remain as the location value (OG/JSON-LD description blobs). */
+export const LOCATION_FIELD_LABEL_RE =
+  /^(?:תיאור|העסק בקצרה|כתובת|מיקום|وصف|العنوان|الموقع|عنوان|description|about|address|location|title|H[1-6]|CTA|slogan)\s*[:：]\s*/i;
 
 export const POSTAL_ADDRESS_RE =
   /\d+(?:st|nd|rd|th)\s+(?:street|st\.?|avenue|ave\.?)\b|\d+\s+[\w.'-]+\s+(?:street|st\.?|avenue|ave\.?|road|rd\.?|blvd)\b|רחוב\s+\S+|שדרות\s+\S+|מחלף|כביש\s*\d|شارع\s+|الشارع|مجمع|الطابق|קומה/i;
+
+const HE_STREET_RE = /(?:שדרות|רחוב)\s+[א-ת"'״][א-ת"'״\s]{0,40}?\s+\d{1,4}/;
+const AR_STREET_RE = /شارع\s+\S+(?:\s+\S+){0,4}(?:\s+\d{1,4})?/;
+const EN_STREET_RE =
+  /\d{1,5}\s+[\w.'-]+(?:\s+[\w.'-]+)?\s+(?:street|st\.?|avenue|ave\.?|road|rd\.?|blvd|boulevard)\b/i;
+
+function stripLocationFieldLabel(value: string): string {
+  return value.replace(/\s+/g, " ").trim().replace(LOCATION_FIELD_LABEL_RE, "").trim();
+}
+
+function cityNearStreet(hay: string, street: string): string {
+  const around = hay.replace(/\s+/g, " ");
+  const idx = around.indexOf(street);
+  const window = idx >= 0 ? around.slice(Math.max(0, idx - 40), idx + street.length + 40) : around;
+  const heCity =
+    window.match(/,\s*([א-ת]{3,15})\s*$/) ||
+    window.match(/,\s*([א-ת]{3,15})\s*[,.]/) ||
+    window.match(/\bב([א-ת]{3,15})\s+(?:ב)?(?:שדרות|רחוב)/);
+  if (heCity?.[1]) return heCity[1];
+  const arCity = window.match(/،\s*([\u0600-\u06FF]{3,20})/);
+  if (arCity?.[1]) return arCity[1];
+  const enCity = window.match(/,\s*([A-Z][a-zA-Z]{2,20})(?:\s*,|\s+[A-Z]{2}\b|$)/);
+  if (enCity?.[1] && !/street|avenue|road|blvd/i.test(enCity[1])) return enCity[1];
+  return "";
+}
+
+function composeStreetCity(street: string, city: string): string {
+  const s = street.replace(/\s+/g, " ").trim();
+  const c = city.replace(/\s+/g, " ").trim();
+  if (!s) return "";
+  if (c && !s.includes(c)) return `${s}, ${c}`;
+  return s;
+}
+
+function locationHasMarketingPayload(value: string): boolean {
+  const v = stripLocationFieldLabel(value);
+  if (MARKETING_PROSE_LOCATION_RE.test(v)) return true;
+  if (/(?:השאירו|התקשרו|leave details|call (?:us|now)|professional service)/i.test(v)) return true;
+  // OG/description blobs: many clauses AND sales copy. Street + building + floor is not marketing.
+  if (
+    v.split(/[,،]/).length >= 3 &&
+    v.length > 70 &&
+    /השתלות שיניים|אסתטיקה דנטלית|בשירות איכותי|השאירו פרטים/.test(v)
+  ) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Pull a short postal fragment (street + city) out of prose or a labeled description.
+ * Returns empty when no street-shaped evidence exists — never invents a city.
+ */
+export function extractPostalAddressFromText(text: string): string {
+  const raw = String(text || "");
+  if (!raw.trim()) return "";
+  const lines = raw.split(/\r?\n/).map((l) => stripLocationFieldLabel(l.replace(/\s+/g, " ")));
+  const hits: string[] = [];
+  const push = (s: string) => {
+    const v = s.replace(/\s+/g, " ").trim();
+    if (!v || v.length < 6 || v.length > 80) return;
+    if (locationHasMarketingPayload(v) && v.length > 48) return;
+    if (!hits.includes(v)) hits.push(v);
+  };
+  for (const line of lines) {
+    if (!line || line.length < 6) continue;
+    if (/אימייל|email|סיסמה|password|podium|street level/i.test(line)) continue;
+    if (HE_STREET_RE.test(line) && line.length <= 80 && !locationHasMarketingPayload(line)) {
+      push(line);
+    }
+    const he = line.match(HE_STREET_RE);
+    if (he) push(composeStreetCity(he[0], cityNearStreet(line, he[0])));
+    const ar = line.match(AR_STREET_RE);
+    if (ar) push(composeStreetCity(ar[0], cityNearStreet(line, ar[0])));
+    const en = line.match(EN_STREET_RE);
+    if (en) push(composeStreetCity(en[0], cityNearStreet(line, en[0])));
+  }
+  hits.sort((a, b) => {
+    const score = (s: string) =>
+      (looksLikePostalAddress(s) ? 80 : 0) + (/,/.test(s) ? 15 : 0) + (/\d/.test(s) ? 20 : 0) - s.length / 8;
+    return score(b) - score(a);
+  });
+  return hits[0] || "";
+}
+
+/** Strip description labels and marketing sentences; keep only a postal fragment when present. */
+export function cleanLocationValue(value: string): string {
+  const stripped = stripLocationFieldLabel(value);
+  if (!stripped) return "";
+  if (looksLikePostalAddress(stripped) && stripped.length <= 180 && !locationHasMarketingPayload(stripped)) {
+    return stripped;
+  }
+  if (isUsableLocationValue(stripped) && stripped.length <= 180) return stripped;
+  return extractPostalAddressFromText(stripped) || extractPostalAddressFromText(value);
+}
 
 export const EDITORIAL_PATH_RE = /\/(blog|news|article|press|stories|insights?|magazine)(\/|$)/i;
 export const REVIEW_PATH_RE = /\/(reviews?|testimonials?)(\/|$)/i;
@@ -166,24 +265,28 @@ export function isUnknownSentinel(value: string): boolean {
 }
 
 export function looksLikePostalAddress(value: string): boolean {
-  const v = value.replace(/\s+/g, " ").trim();
-  if (!v || v.length > 160) return false;
+  const v = stripLocationFieldLabel(value);
+  if (!v || v.length > 180) return false;
+  if (LOCATION_FIELD_LABEL_RE.test(value.replace(/\s+/g, " ").trim())) return false;
+  if (locationHasMarketingPayload(v)) return false;
   if (MARKETING_PROSE_LOCATION_RE.test(v)) return false;
-  if (POSTAL_ADDRESS_RE.test(v)) return true;
-  if (/\d{5}(?:-\d{4})?/.test(v) && v.length <= 140) return true;
+  if (POSTAL_ADDRESS_RE.test(v)) return v.length <= 120 || (v.length <= 180 && !locationHasMarketingPayload(v));
+  if (/\d{5}(?:-\d{4})?/.test(v) && v.length <= 80) return true;
   return v.length <= 80 && /\d/.test(v) && /street|st\b|avenue|רחוב|שדרות|מחלף|כביש|شارع/i.test(v);
 }
 
 export function isUsableLocationValue(value: string): boolean {
-  const v = value.replace(/\s+/g, " ").trim();
-  if (!v || v.length < 3) return false;
-  if (MARKETING_PROSE_LOCATION_RE.test(v)) return false;
+  const raw = value.replace(/\s+/g, " ").trim();
+  if (!raw || raw.length < 3) return false;
+  if (LOCATION_FIELD_LABEL_RE.test(raw)) return false;
+  const v = stripLocationFieldLabel(raw);
+  if (MARKETING_PROSE_LOCATION_RE.test(v) || locationHasMarketingPayload(v)) return false;
   if (/\b(?:including|proposed|supporting|enhancing|gateway into)\b/i.test(v)) return false;
-  if (v.length > 160) return false;
+  if (v.length > 180) return false;
   const longBits = v.split(/[.!?]+/).filter((s) => s.trim().length > 25);
-  if (longBits.length >= 2) return false;
+  if (longBits.length >= 2 && locationHasMarketingPayload(v)) return false;
   if (looksLikePostalAddress(v)) return true;
-  return v.length <= 80;
+  return v.length <= 80 && !locationHasMarketingPayload(v);
 }
 
 export function isContactFact(value: string): boolean {

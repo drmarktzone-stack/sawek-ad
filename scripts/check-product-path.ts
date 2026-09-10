@@ -144,8 +144,8 @@ for (const dead of [...DEAD_JOURNEY_HREFS, "/growth/market", "/growth/dna", "/gr
 
 const emptyPath = resolveCampaignPath({ intake: emptyIntake(), pack: null });
 if (emptyPath.current !== "scan") fail(`empty campaign current=${emptyPath.current}, expected scan`);
-if (CAMPAIGN_STEPS.map((s) => s.id).join(">") !== "scan>client>offer>trust>list") {
-  fail(`campaign steps drifted: ${CAMPAIGN_STEPS.map((s) => s.id).join(">")}`);
+if (CAMPAIGN_STEPS.find((s) => s.id === "client")?.href !== "/tools/core-message") {
+  fail("ideal client step must open /tools/core-message, not /#studio");
 }
 
 const root = process.cwd();

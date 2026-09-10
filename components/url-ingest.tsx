@@ -13,6 +13,7 @@ import {
 import { applyIntakeToDraft } from "@/lib/storage";
 import { emptyIntake } from "@/lib/engine/validate";
 import { lockDefaultDialect } from "@/lib/engine/voice";
+import { hydrateScanIntake } from "@/lib/intake-locale";
 import { clearPendingDemo } from "@/lib/demo";
 import { clearEmptyCampaign } from "@/lib/empty-campaign";
 import { uid } from "@/lib/utils";
@@ -269,7 +270,7 @@ export function UrlIngest() {
   function confirm() {
     if (!doc) return;
     const selected = posts.filter((p) => p.include).map((p) => ({ text: p.text, image: p.image }));
-    const next = lockDefaultDialect(applyIngestReview(emptyIntake(), rows, doc, assets, selected), locale);
+    const next = hydrateScanIntake(lockDefaultDialect(applyIngestReview(emptyIntake(), rows, doc, assets, selected), locale), locale);
     next.brandKit = brandKit;
     clearEmptyCampaign();
     clearPendingDemo();

@@ -8,7 +8,7 @@ import { ownedListIsReady, loadOwnedList } from "./owned-list";
 /** Canonical campaign path — scan, then the 4 Mohtawak pillars. */
 export const CAMPAIGN_STEPS = [
   { id: "scan", href: "/", key: "journey.scan" as const, cta: "path.scanNow" as const },
-  { id: "client", href: "/#studio", key: "journey.client" as const, cta: "path.lockClient" as const },
+  { id: "client", href: "/tools/core-message", key: "journey.client" as const, cta: "path.lockClient" as const },
   { id: "offer", href: "/tools/offer", key: "journey.offer" as const, cta: "path.saveOffer" as const },
   { id: "trust", href: "/task/ad", key: "journey.trust" as const, cta: "path.makeAd" as const },
   { id: "list", href: "/tools/list", key: "journey.list" as const, cta: "path.captureList" as const },

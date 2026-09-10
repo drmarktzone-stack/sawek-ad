@@ -25,10 +25,19 @@ export function CompleteAdCard({
   const [open, setOpen] = useState(false);
   const loc = completeAd.locales[locale] || completeAd.locales.he;
   const dir = locale === "en" ? "ltr" : "rtl";
-  const headline = customerCopyHasLeak(loc.headline) || localeScriptBleed(loc.headline, locale) ? loc.copy.split("\n")[0] || loc.headline : loc.headline;
-  const hook = customerCopyHasLeak(loc.hook) || localeScriptBleed(loc.hook, locale) ? headline : loc.hook;
-  const copy = customerCopyHasLeak(loc.copy) || localeScriptBleed(loc.copy, locale) ? "" : loc.copy;
-  const text = [headline, copy, loc.cta].filter(Boolean).join("\n");
+  const fallbackLocale = locale === "ar" ? completeAd.locales.ar : locale === "en" ? completeAd.locales.en : completeAd.locales.he;
+  const row = fallbackLocale && !(customerCopyHasLeak(fallbackLocale.headline) || localeScriptBleed(fallbackLocale.headline, locale))
+    ? fallbackLocale
+    : loc;
+  const headlineRaw = row.headline?.trim() || "";
+  const copyRaw = row.copy?.trim() || "";
+  const headlineBleed = customerCopyHasLeak(headlineRaw) || localeScriptBleed(headlineRaw, locale) || /^(intro|no_offer|unknown)\b/i.test(headlineRaw);
+  const copyBleed = customerCopyHasLeak(copyRaw) || localeScriptBleed(copyRaw, locale);
+  const headline = headlineBleed ? (!copyBleed ? copyRaw.split("\n")[0] || "" : "") : headlineRaw;
+  const hookRaw = row.hook?.trim() || "";
+  const hook = customerCopyHasLeak(hookRaw) || localeScriptBleed(hookRaw, locale) ? headline : hookRaw;
+  const copy = copyBleed ? "" : copyRaw;
+  const text = [headline, copy, row.cta].filter(Boolean).join("\n");
   const novelty =
     completeAd.noveltyStatus === "original"
       ? t("complete.noveltyOriginal")
@@ -71,14 +80,14 @@ export function CompleteAdCard({
           <p className="whitespace-pre-wrap text-base leading-relaxed text-navy">{copy}</p>
         ) : null}
         <span className="inline-block rounded-[18px] bg-lime px-5 py-2.5 text-sm font-black text-[var(--lime-ink)]">
-          {loc.cta}
+          {localeScriptBleed(row.cta, locale) ? "" : row.cta}
         </span>
       </div>
 
-      {loc.offer ? (
+      {row.offer && !/^(intro|no_offer|unknown)$/i.test(row.offer) ? (
         <p className="mt-4 text-sm text-navy">
           <span className="font-black">{t("complete.offer")}: </span>
-          {loc.offer}
+          {row.offer}
         </p>
       ) : (
         <p className="mt-4 text-sm text-muted">{t("complete.offerUnknown")}</p>

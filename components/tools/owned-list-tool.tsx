@@ -29,6 +29,8 @@ export function OwnedListTool() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [note, setNote] = useState("");
+  const [leadError, setLeadError] = useState(false);
+  const [copiedWa, setCopiedWa] = useState(false);
 
   useEffect(() => {
     if (!client) return;
@@ -62,13 +64,25 @@ export function OwnedListTool() {
   const owned = list;
   const script = whatsappScript(live, locale);
 
-  function markReady() {
-    const next = { ...owned, whatsappReady: !owned.whatsappReady };
+  async function markReady() {
+    const next = { ...owned, whatsappReady: true };
     saveOwnedList(live.businessName, next);
     setList(next);
+    try {
+      await navigator.clipboard.writeText(script);
+      setCopiedWa(true);
+      setTimeout(() => setCopiedWa(false), 1600);
+    } catch {
+      /* clipboard may be blocked */
+    }
   }
 
   function saveLead() {
+    if (!name.trim() && !phone.trim()) {
+      setLeadError(true);
+      return;
+    }
+    setLeadError(false);
     const next = addCampaignLead(live.businessName, { name, phone, note });
     setList(next);
     setName("");
@@ -90,7 +104,7 @@ export function OwnedListTool() {
           data-testid="list-wa-ready"
           onClick={markReady}
         >
-          {t("list.waReady")}
+          {copiedWa ? t("tools.copied") : t("list.waReady")}
         </Button>
       </section>
 
@@ -113,6 +127,11 @@ export function OwnedListTool() {
         <Button type="button" className="mt-4 font-black" data-testid="list-save-lead" onClick={saveLead}>
           {t("list.saveLead")}
         </Button>
+        {leadError ? (
+          <p className="mt-3 text-sm font-bold text-danger" data-testid="list-lead-need">
+            {t("list.needLead")}
+          </p>
+        ) : null}
         {!ownedListIsReady(owned) ? <p className="mt-3 text-sm text-muted">{t("list.empty")}</p> : null}
       </section>
 
