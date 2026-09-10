@@ -4,21 +4,21 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[18px] text-base font-bold tracking-tight transition-colors duration-150 disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--ivory)]",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[10px] text-base font-bold tracking-tight transition-colors duration-150 disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--ivory)]",
   {
     variants: {
       variant: {
         default:
           "bg-teal text-white hover:bg-teal-soft",
         gold:
-          "store-cta",
+          "bg-lime text-[var(--lime-ink)] hover:bg-[var(--lime-deep)]",
         coral:
-          "store-cta",
+          "bg-lime text-[var(--lime-ink)] hover:bg-[var(--lime-deep)]",
         red: "bg-danger text-white hover:bg-[#b35242]",
         outline:
           "border border-[var(--line)] bg-white text-navy hover:border-teal",
         ghost: "text-muted hover:bg-teal/8 hover:text-navy",
-        dark: "bg-[var(--store)] text-white border border-white/10 hover:bg-[var(--store-soft)]",
+        dark: "bg-teal text-white border border-teal/30 hover:bg-teal-soft",
       },
       size: {
         default: "h-12 px-6",

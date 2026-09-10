@@ -43,8 +43,8 @@ export const metadata: Metadata = rootMetadata();
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#F4F8FC" },
-    { media: "(prefers-color-scheme: dark)", color: "#F4F8FC" },
+    { media: "(prefers-color-scheme: light)", color: "#E6F0E4" },
+    { media: "(prefers-color-scheme: dark)", color: "#E6F0E4" },
   ],
   width: "device-width",
   initialScale: 1,
@@ -61,7 +61,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <head>
         <link rel="manifest" href="/manifest.webmanifest" />
-        <meta name="theme-color" content="#F4F8FC" />
+        <meta name="theme-color" content="#E6F0E4" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />

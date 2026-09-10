@@ -136,10 +136,7 @@ export function DashboardPage() {
 
   return (
     <OsPage dir={locale === "en" ? "ltr" : "rtl"}>
-      <p className="hub-badge mb-3">
-        <span className="hub-badge-dot" aria-hidden />
-        {t("os.kicker")}
-      </p>
+      <p className="os-kicker">{t("os.kicker")}</p>
       <h1 className="os-title mt-1 text-3xl sm:text-4xl">{t("nav.command")}</h1>
       <p className="mt-2 mb-6 max-w-2xl text-sm text-muted">{t("os.todayTitle")}</p>
 

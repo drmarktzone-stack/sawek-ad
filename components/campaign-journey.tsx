@@ -50,7 +50,7 @@ export function CampaignJourney({ compact = false }: { compact?: boolean }) {
 
   return (
     <nav
-      className={cn("mb-5 rounded-[22px] border border-[var(--line)] bg-white px-3 py-3 shadow-[var(--shadow-card)]", compact && "mb-3 py-2")}
+      className={cn("mb-5 rounded-[16px] border border-[var(--line)] bg-white px-3 py-3 shadow-[var(--shadow-card)]", compact && "mb-3 py-2")}
       aria-label={t("journey.kicker")}
       data-testid="campaign-journey"
       dir={locale === "en" ? "ltr" : "rtl"}
@@ -61,7 +61,7 @@ export function CampaignJourney({ compact = false }: { compact?: boolean }) {
           href="/tools/core-message"
           className={cn(
             "rounded-full px-2.5 py-1 text-xs font-black",
-            locked ? "bg-[var(--store)] text-white" : "border border-[var(--line)] text-navy hover:border-teal",
+            locked ? "bg-lime text-[var(--lime-ink)]" : "border border-[var(--line)] text-navy hover:border-teal",
           )}
           data-testid="journey-voice"
         >
@@ -87,8 +87,8 @@ export function CampaignJourney({ compact = false }: { compact?: boolean }) {
                 href={step.href}
                 data-testid={`journey-${step.id}`}
                 className={cn(
-                  "tap-row rounded-[14px] px-2.5 py-1.5 text-sm font-bold",
-                  active ? "bg-teal text-white" : done ? "bg-[var(--store)] text-white" : "text-muted hover:text-navy",
+                  "tap-row rounded-[10px] px-2.5 py-1.5 text-sm font-bold",
+                  active ? "bg-teal text-white" : done ? "bg-lime/35 text-navy" : "text-muted hover:text-navy",
                 )}
               >
                 {t(step.key)}

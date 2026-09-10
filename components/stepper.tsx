@@ -38,9 +38,9 @@ export function Stepper({
                   canJump && "cursor-pointer hover:scale-105",
                   !canJump && "cursor-default",
                   active
-                    ? "size-12 bg-teal text-white shadow-[var(--shadow-card)] ring-4 ring-teal/20"
+                    ? "size-12 bg-teal text-white shadow-[var(--shadow-card)] ring-4 ring-lime/50"
                     : "size-10",
-                  !active && (done ? "bg-[var(--store)] text-white" : "bg-mint text-muted"),
+                  !active && (done ? "bg-lime text-[var(--lime-ink)]" : "bg-mint text-muted"),
                 )}
               >
                 {done ? <Check className="size-4" strokeWidth={3} /> : n}
@@ -63,10 +63,7 @@ export function ConquerHeadline({ subtitle }: { subtitle?: string }) {
   const { t } = useI18n();
   return (
     <div className="mb-8 text-center">
-      <p className="hub-badge mx-auto mb-3">
-        <span className="hub-badge-dot" aria-hidden />
-        {t("os.kicker")}
-      </p>
+      <p className="os-kicker mb-2">{t("os.kicker")}</p>
       <h1 className="os-title text-3xl sm:text-4xl">
         {t("hero.titlePrefix")}{" "}
         <span className="text-teal">{t("hero.conquer")}</span>{" "}

@@ -40,7 +40,7 @@ export function LanguageToggle({
           onClick={() => setLocale(l.id)}
           className={cn(
             "tap-target inline-flex items-center justify-center rounded-[8px] px-3 py-1.5 text-sm font-semibold transition-colors",
-            locale === l.id ? "bg-[var(--store)] text-white" : "text-muted hover:text-navy",
+            locale === l.id ? "bg-teal text-white" : "text-muted hover:text-navy",
           )}
         >
           {l.label}
@@ -59,7 +59,7 @@ function AuthChip({ tone = "light" }: { tone?: "light" | "ink" }) {
     return (
       <LangLink
         href="/login"
-        className="shrink-0 rounded-[18px] bg-[var(--store)] px-3.5 py-1.5 text-sm font-black text-white hover:bg-[var(--store-soft)]"
+        className="shrink-0 rounded-[10px] bg-teal px-3.5 py-1.5 text-sm font-black text-white hover:bg-teal-soft"
       >
         {t("nav.login")}
       </LangLink>
@@ -121,7 +121,7 @@ export function Header() {
     <>
     <header className="scan-sticky safe-pt border-b border-[var(--line)] bg-white/92 text-navy backdrop-blur-xl">
       <UrlIngest />
-      <div className="h-px w-full bg-gradient-to-r from-transparent via-teal/50 to-transparent" />
+      <div className="h-px w-full bg-gradient-to-r from-transparent via-lime to-transparent" />
       <div className="mx-auto flex max-w-[92rem] min-w-0 items-center gap-2 px-3 py-2 sm:py-2.5">
         <LangLink href="/dashboard" className="flex min-w-0 shrink flex-col leading-tight pe-1">
           <span className="truncate font-[family-name:var(--font-display-he)] text-lg font-bold tracking-tight text-ink sm:text-xl">
@@ -236,25 +236,25 @@ export function Footer() {
   const pathname = usePathname();
   if (pathname.startsWith("/lp/")) return null;
   return (
-    <footer className="has-dock mt-auto bg-[var(--navy-deep)] py-12 text-center text-sm text-white/60">
-      <p className="mb-2 font-[family-name:var(--font-display-he)] text-xl font-bold text-white">
-        {t("brand.name")}
+    <footer className="has-dock mt-auto border-t border-[var(--line)] bg-white py-10 text-center text-sm text-muted">
+      <p className="mb-1 font-[family-name:var(--font-display-he)] text-lg font-bold text-ink">
+        {t("brand.name")} · {t("os.kicker")}
       </p>
-      <p className="mx-auto max-w-xl px-4">{t("footer.line")}</p>
-      <p className="mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
-        <LangLink href="/about" className="tap-target inline-flex items-center font-semibold text-white/80 hover:text-white hover:underline">
+      {t("footer.line")}
+      <p className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+        <LangLink href="/about" className="tap-target inline-flex items-center font-semibold text-navy hover:text-teal hover:underline">
           {t("nav.about")}
         </LangLink>
-        <LangLink href="/privacy" className="tap-target inline-flex items-center font-semibold text-white/80 hover:text-white hover:underline">
+        <LangLink href="/privacy" className="tap-target inline-flex items-center font-semibold text-navy hover:text-teal hover:underline">
           {t("nav.privacy")}
         </LangLink>
-        <LangLink href="/terms" className="tap-target inline-flex items-center font-semibold text-white/80 hover:text-white hover:underline">
+        <LangLink href="/terms" className="tap-target inline-flex items-center font-semibold text-navy hover:text-teal hover:underline">
           {t("nav.terms")}
         </LangLink>
-        <LangLink href="/pricing" className="tap-target inline-flex items-center font-semibold text-white/80 hover:text-white hover:underline">
+        <LangLink href="/pricing" className="tap-target inline-flex items-center font-semibold text-navy hover:text-teal hover:underline">
           {t("home.cta.pricing")}
         </LangLink>
-        <LangLink href="/status" className="tap-target inline-flex items-center font-semibold text-white/80 hover:text-white hover:underline">
+        <LangLink href="/status" className="tap-target inline-flex items-center font-semibold text-teal hover:text-navy hover:underline">
           {t("nav.status")}
         </LangLink>
       </p>

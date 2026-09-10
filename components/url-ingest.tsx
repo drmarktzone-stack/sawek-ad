@@ -290,7 +290,7 @@ export function UrlIngest() {
   return (
     <div
       className={cn(
-        "border-b border-[var(--line)] bg-[var(--ivory)]",
+        "border-b border-[var(--line)] bg-[#f3f8f1]",
         home ? "px-3 py-3" : "px-3 py-2 sm:py-1.5",
       )}
     >
@@ -305,14 +305,14 @@ export function UrlIngest() {
         <label htmlFor="scan-url" className="text-start text-sm font-black text-navy">
           {t("url.label")}
         </label>
-        <div className="scan-url-shell flex min-w-0 flex-col gap-2 p-1.5 sm:flex-row sm:items-center sm:ps-3">
+        <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center">
           <div className="flex min-w-0 flex-1 items-center gap-2">
             <Globe className={cn("shrink-0 text-teal", home ? "size-5" : "size-4")} aria-hidden />
             <input
               id="scan-url"
               dir="ltr"
               className={cn(
-                "w-full min-w-0 rounded-[16px] border-0 bg-transparent px-2 text-[16px] text-ink placeholder:text-muted-soft outline-none focus:shadow-none",
+                "w-full min-w-0 rounded-[12px] border border-[var(--line)] bg-white px-4 text-[16px] text-ink placeholder:text-muted-soft outline-none focus:border-teal focus:shadow-[0_0_0_4px_rgba(200,224,74,0.35)]",
                 home ? "h-12" : "h-11 sm:h-10 sm:text-sm",
               )}
               value={value}
