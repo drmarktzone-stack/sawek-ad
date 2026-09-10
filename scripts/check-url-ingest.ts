@@ -1024,6 +1024,9 @@ else {
   if (!/שתל|כתר|אסתטיקה/.test(String(f.landingLines || f.description || ""))) {
     fail(`halloun services empty ${JSON.stringify(f.landingLines)}`);
   }
+  if (!/ביום אחד/.test(String(f.landingLines || f.description || f.uniqueAdvantage || ""))) {
+    fail(`halloun missed published same-day implant service ${JSON.stringify(f.landingLines)}`);
+  }
   if (!String(f.audience || "").trim()) fail("halloun audience empty");
   if (String(f.mainGoal || "") !== "leads") fail(`halloun goal ${JSON.stringify(f.mainGoal)}`);
   if (String(f.biggestProblem || "") !== "unknown") fail(`halloun problem should be unknown chip, got ${JSON.stringify(f.biggestProblem)}`);
@@ -1094,6 +1097,15 @@ else {
   }
   const imgs = halloun.images || [];
   if (imgs.some((u: string) => /\.woff2?/i.test(u))) fail(`halloun kept font asset ${JSON.stringify(imgs)}`);
+  if (imgs.some((u: string) => /upscalemedia|group-\d+\.png/i.test(u))) {
+    fail(`halloun kept decorative graphic ${JSON.stringify(imgs)}`);
+  }
+  if (halloun.ogImage && /upscalemedia|group-\d+\.png|\.woff2?/i.test(halloun.ogImage)) {
+    fail(`halloun kept junk og:image ${JSON.stringify(halloun.ogImage)}`);
+  }
+  if (hallounOffer && !/ביום אחד|في يوم واحد|same-day/i.test(`${hallounOffer.timeToResult} ${hallounOffer.dreamOutcome} ${hallounOffer.headline}`)) {
+    fail(`halloun offer missed evidenced same-day implant line ${hallounOffer.timeToResult}`);
+  }
 }
 
 const ogBlobOnly = parseFetchedHtml(

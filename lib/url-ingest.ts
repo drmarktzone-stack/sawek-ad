@@ -39,6 +39,7 @@ import {
 import type { PastCampaignAudit } from "./types";
 import { sanitizePastedUrl, stripTrackingParams } from "./url-clean";
 import { isErrorPageTitle, isPlaceholderPhone, prefillCampaignFields } from "./campaign-prefill";
+import { isJunkCreativeSrc } from "./creative-junk";
 export { stripTrackingParams, sanitizePastedUrl } from "./url-clean";
 
 /** Extra-page per-request timeout. Homepage uses URL_HOMEPAGE_TIMEOUT_MS. */
@@ -1094,7 +1095,7 @@ function jsonLdImageUrls(nodes: Record<string, unknown>[]): string[] {
   return out;
 }
 
-const TRACKER_IMG = /sprite|favicon|pixel|1x1|tracking|spacer|blank\.gif|data:image\/gif|gravatar|emoji|icon-?\d{2}|woocommerce-placeholder|spinner|loader|apple-touch|\/icons?\/|wp-includes\/images|logo-mark|\.woff2?(?:\?|$)|\.ttf(?:\?|$)|\.eot(?:\?|$)|\.otf(?:\?|$)|fonts?\/|formula|equation|math[-_ ]?(poster|board)?|geometric|abstract[-_ ]?(shape|blue)/i;
+const TRACKER_IMG = /sprite|favicon|pixel|1x1|tracking|spacer|blank\.gif|data:image\/gif|gravatar|emoji|icon-?\d{2}|woocommerce-placeholder|spinner|loader|apple-touch|\/icons?\/|wp-includes\/images|logo-mark|\.woff2?(?:\?|$)|\.ttf(?:\?|$)|\.eot(?:\?|$)|\.otf(?:\?|$)|fonts?\/|formula|equation|math[-_ ]?(poster|board)?|geometric|abstract[-_ ]?(shape|blue)|upscalemedia|group-\d+\.png/i;
 
 function srcsetLargest(srcset: string, base: string): string {
   let best = "";
@@ -1125,7 +1126,7 @@ export function collectPageImages(html: string, baseUrl: string, jsonLdNodes: Re
   const push = (raw: string) => {
     const abs = absHttpUrl(raw, baseUrl);
     if (!abs || out.includes(abs)) return;
-    if (TRACKER_IMG.test(abs)) return;
+    if (TRACKER_IMG.test(abs) || isJunkCreativeSrc(abs)) return;
     out.push(abs);
   };
   for (const u of jsonLdImageUrls(jsonLdNodes)) push(u);
@@ -1165,7 +1166,7 @@ export function collectBundleImageUrls(raw: string, baseUrl: string, cap = 12): 
     const src = maybe.startsWith("//") ? `https:${maybe}` : maybe;
     const abs = absHttpUrl(src, baseUrl);
     if (!abs || out.includes(abs)) return;
-    if (TRACKER_IMG.test(abs)) return;
+    if (TRACKER_IMG.test(abs) || isJunkCreativeSrc(abs)) return;
     const path = abs.split("?")[0] ?? "";
     if (!/\.(?:jpe?g|png|webp|gif|svg|avif)$/i.test(path)) return;
     out.push(abs);
@@ -1273,7 +1274,9 @@ export function parseFetchedHtml(
   const ogDescription =
     metaContent(raw, "og:description") || metaContent(raw, "twitter:description") || metaContent(raw, "description");
   const ogImageRaw = metaContent(raw, "og:image") || metaContent(raw, "twitter:image");
-  const ogImage = absHttpUrl(ogImageRaw, finalUrl) || undefined;
+  const ogImageAbs = absHttpUrl(ogImageRaw, finalUrl) || undefined;
+  const ogImage =
+    ogImageAbs && !TRACKER_IMG.test(ogImageAbs) && !isJunkCreativeSrc(ogImageAbs) ? ogImageAbs : undefined;
   const { nodes, sites, types } = parseJsonLd(raw);
   const identityHint = [
     ogSiteName,
@@ -1502,7 +1505,8 @@ export function parseFetchedHtml(
   if (fields.phone && isPlaceholderPhone(fields.phone)) delete fields.phone;
   if (fields.whatsapp && isPlaceholderPhone(fields.whatsapp)) delete fields.whatsapp;
   syncPhoneWhatsappFields(fields);
-  fields = prefillCampaignFields(fields, [pipeline.businessCorpus, visible, extraCorpus].filter(Boolean).join("\n"));
+  const htmlAsText = String(raw || "").replace(/<br\s*\/?>/gi, "\n").replace(/<[^>]+>/g, " ");
+  fields = prefillCampaignFields(fields, [pipeline.businessCorpus, visible, extraCorpus, htmlAsText].filter(Boolean).join("\n"));
   if (isErrorPageTitle(String(fields.businessName || ""))) delete fields.businessName;
 
   const file = filenameFromUrl(finalUrl);
@@ -1843,10 +1847,13 @@ function mergeUrlIngestResults(home: UrlIngestOk, extras: UrlIngestOk[]): UrlIng
     }
   }
   fields = prefillCampaignFields(fields, [home.text, ...extras.map((e) => e.text)].filter(Boolean).join("\n"));
-  const ogImage = home.ogImage || extras.find((e) => e.ogImage)?.ogImage;
-  const images: string[] = [...(home.images ?? [])];
+  const ogImageRaw = home.ogImage || extras.find((e) => e.ogImage)?.ogImage;
+  const ogImage =
+    ogImageRaw && !TRACKER_IMG.test(ogImageRaw) && !isJunkCreativeSrc(ogImageRaw) ? ogImageRaw : undefined;
+  const images: string[] = [...(home.images ?? [])].filter((u) => !TRACKER_IMG.test(u) && !isJunkCreativeSrc(u));
   for (const e of extras) {
     for (const u of e.images ?? []) {
+      if (TRACKER_IMG.test(u) || isJunkCreativeSrc(u)) continue;
       if (!images.includes(u)) images.push(u);
     }
   }
