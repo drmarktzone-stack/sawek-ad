@@ -22,6 +22,8 @@ import {
   HE_SCRIPT,
   localeScriptBleed,
   factSpamHits,
+  isCannedClinicSlogan,
+  templateLoopHits,
 } from "../lib/copy-purity";
 import { composeCoreMessage } from "../lib/engine/core-message";
 import { VOICE_DIALECTS, defaultDialectForLocale, effectiveDialect, lockDefaultDialect } from "../lib/engine/voice";
@@ -268,6 +270,43 @@ const plantedEg = gateCustomerAd(
 );
 if (/إزيك|دلوقتي/.test(plantedEg.headline + plantedEg.body)) {
   fail(`gate kept Egyptian register: ${plantedEg.headline}`);
+}
+
+const govrinIntake: Intake = {
+  ...emptyIntake(),
+  businessName: "الدكتور جوفرين جاكي",
+  category: "جراح تجميل",
+  description: "جراح تجميل متمرس في حيفا — جراحة تجميل الأنف والجسم",
+  location: "شارع بن غوريون 4، حيفا",
+  website: "https://www.govrin.co.il/ar",
+  phone: "04-8550930",
+  whatsapp: "04-8550930",
+  audience: "مرضى في حيفا",
+  biggestProblem: "unknown",
+  uniqueAdvantage: "خبرة في جراحة تجميل الأنف وزرعات B-Lite",
+  mainGoal: "leads",
+  brandTone: "لهجة فلسطينية بيتيّة، دافية، بلا فصحى ثقيلة وبلا إنجليزي",
+};
+const plantedPedi = gateCustomerAd(
+  { headline: "لما الولد مريض، مش شعار طبي", body: "جيبوه عالعيادة", cta: "واتساب" },
+  govrinIntake,
+  "ar",
+);
+if (isCannedClinicSlogan(`${plantedPedi.headline}\n${plantedPedi.body}`, govrinIntake)) {
+  fail(`gate kept pediatric slogan on plastic surgeon: ${plantedPedi.headline}`);
+}
+const govrinPack = packOf(govrinIntake, "govrin-ar");
+const govrinAr = govrinPack.variants.filter((v) => v.locale === "ar");
+const govrinHeads = govrinAr.map((v) => v.headline);
+if (templateLoopHits(govrinHeads).length && new Set(govrinHeads).size < 2) {
+  fail(`govrin template loop ${JSON.stringify(govrinHeads)}`);
+}
+const govrinBlob = govrinAr.map((v) => `${v.headline}\n${v.primaryText}`).join("\n");
+if (/لما الولد مريض|جيبوه عالعيادة|التخصّصات الخمس/.test(govrinBlob)) {
+  fail(`govrin ads used canned pediatric / five-niche dump: ${govrinBlob.slice(0, 280)}`);
+}
+if (!/تجميل|جوفرين|أنف|حيفا|B-Lite/i.test(govrinBlob)) {
+  fail(`govrin ads missing this clinic’s facts: ${govrinHeads.join(" | ")}`);
 }
 
 // --- Blocklist completeness vs user screenshots ---

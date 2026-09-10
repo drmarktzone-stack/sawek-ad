@@ -81,6 +81,11 @@ for (const loc of ["he", "ar", "en"] as const) {
     "wizard.optionalHeading",
     "wizard.goToField",
     "wizard.missingHeading",
+    "wizard.missingPillar",
+    "cta.build",
+    "cta.buildReady",
+    "nicheGate.title",
+    "nicheGate.body",
   ] as const) {
     const v = t(loc, key);
     if (!v || v === key) fail(`i18n ${key} missing ${loc}`);
@@ -88,6 +93,22 @@ for (const loc of ["he", "ar", "en"] as const) {
   if (!/חובה|إلزامي|Required/i.test(t(loc, "wizard.needText"))) {
     fail(`wizard.needText ${loc} should say required: ${t(loc, "wizard.needText")}`);
   }
+}
+
+if (t("ar", "cta.buildReady") !== "يلا نكمّل — الأركان جاهزة") {
+  fail(`AR ready CTA is ${JSON.stringify(t("ar", "cta.buildReady"))}`);
+}
+if (t("ar", "cta.build") !== "ابنِ لي حملة كاملة") {
+  fail(`AR build alias is ${JSON.stringify(t("ar", "cta.build"))}`);
+}
+if (t("ar", "wizard.missingPillar") !== "لسه ناقص: {name} — كمّله من المسح أو عدّله إيد") {
+  fail(`AR missingPillar is ${JSON.stringify(t("ar", "wizard.missingPillar"))}`);
+}
+if (t("ar", "nicheGate.title") !== "هالموقع برا نطاق شغلنا الحالي.") {
+  fail(`AR nicheGate.title is ${JSON.stringify(t("ar", "nicheGate.title"))}`);
+}
+if (t("ar", "nicheGate.body") !== "منخدم قطاعات محلية محددة — ابعت الرابط الصحيح أو تواصل معنا") {
+  fail(`AR nicheGate.body is ${JSON.stringify(t("ar", "nicheGate.body"))}`);
 }
 
 if (!/هون|إلزامي/.test(t("ar", "wizard.needText"))) fail("AR needText should stay Palestinian/local");
@@ -115,6 +136,10 @@ for (const f of WIZARD_REQUIRED) {
   }
 }
 if (!flow.includes("focusWizardField")) fail("missing same-page focusWizardField");
+if (!flow.includes('t("wizard.missingPillar")')) fail("missing-pillar copy not wired");
+if (!flow.includes('t("cta.buildReady")')) fail("ready CTA copy not wired");
+if (!flow.includes('t("cta.build")')) fail("build alias not wired");
+if (/disabled=\{!wizardReady\(intake\)/.test(flow)) fail("CTA must stay clickable to scroll when fields are missing");
 if (!flow.includes('t("wizard.needText")') && !flow.includes("wizard.needText")) {
   fail("required text error not wired");
 }

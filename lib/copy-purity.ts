@@ -12,6 +12,7 @@ import type { Intake, Locale } from "./types";
 import { isNoOffer } from "./no-offer";
 import { ADVANTAGE_CHIPS, AUDIENCE_CHIPS, GOAL_CHIPS, OFFER_CHIPS, PROBLEM_CHIPS, resolveChipLabel } from "./chips";
 import { arabicRegisterBleed, effectiveDialect } from "./engine/voice";
+import { isPediatrics, isPlasticAestheticClinic } from "./vertical";
 
 export const HE_SCRIPT = /[\u0590-\u05FF]/;
 export const AR_SCRIPT = /[\u0600-\u06FF]/;
@@ -109,6 +110,75 @@ export function customerCopyLeakHits(text: string): string[] {
 
 export function customerCopyHasLeak(text: string): boolean {
   return customerCopyLeakHits(text).length > 0;
+}
+
+/** Stored clinic slogans that must not loop across ads for a different business. */
+export const CANNED_CLINIC_SLOGANS = [
+  "لما الولد مريض",
+  "جيبوه عالعيادة",
+  "כשהילד חולה",
+  "הילד חולה",
+  "when the child is sick",
+  "مش شعار طبي",
+  "לא סלוגן רפואי",
+  "جت أولاً، بلا دور مختلق",
+  "לפי סדר הגעה, בלי תור מדומה",
+] as const;
+
+export function isCannedClinicSlogan(text: string, intake?: Intake): boolean {
+  const src = String(text ?? "");
+  if (!src.trim()) return false;
+  if (intake && isPediatrics(intake)) return false;
+  return CANNED_CLINIC_SLOGANS.some((p) => src.includes(p));
+}
+
+const TOKEN_RE = /[\w\u0590-\u05ff\u0600-\u06ff]+/g;
+
+function copyTokens(s: string): Set<string> {
+  const out = new Set<string>();
+  for (const t of String(s || "").toLowerCase().match(TOKEN_RE) || []) {
+    if (t.length >= 3) out.add(t);
+  }
+  return out;
+}
+
+function copyJaccard(a: string, b: string): number {
+  const A = copyTokens(a);
+  const B = copyTokens(b);
+  if (!A.size && !B.size) return 1;
+  if (!A.size || !B.size) return 0;
+  let inter = 0;
+  for (const t of A) if (B.has(t)) inter += 1;
+  return inter / (A.size + B.size - inter);
+}
+
+/** Same two headlines recycled = template loop. */
+export function templateLoopHits(headlines: string[]): string[] {
+  const hits: string[] = [];
+  const cleaned = headlines.map((h) => h.replace(/\s+/g, " ").trim()).filter((h) => h.length >= 6);
+  for (let i = 0; i < cleaned.length; i++) {
+    for (let j = i + 1; j < cleaned.length; j++) {
+      if (cleaned[i] === cleaned[j] || copyJaccard(cleaned[i], cleaned[j]) >= 0.72) {
+        hits.push(cleaned[i]);
+      }
+    }
+  }
+  return [...new Set(hits)];
+}
+
+export function copyGroundedInFacts(text: string, intake: Intake): boolean {
+  const src = String(text ?? "").toLowerCase();
+  if (!src.trim()) return false;
+  const name = intake.businessName.trim();
+  if (name && src.includes(name.toLowerCase())) return true;
+  const loc = intake.location.trim();
+  if (loc.length >= 4 && src.includes(loc.toLowerCase().slice(0, 12))) return true;
+  const adv = intake.uniqueAdvantage.trim();
+  if (adv.length >= 8 && src.includes(adv.toLowerCase().slice(0, 16))) return true;
+  const cat = intake.category.trim();
+  if (cat.length >= 4 && src.includes(cat.toLowerCase())) return true;
+  if (isPlasticAestheticClinic(intake) && /تجميل|פלסט|aesthetic|plastic|أنف|אף|ثدي|חזה/i.test(src)) return true;
+  return false;
 }
 
 /** Strategy-label line: short internal name, not a marketing sentence. */
@@ -248,15 +318,19 @@ export function intakeLooksBakery(intake: Pick<Intake, "businessName" | "categor
 function fallbackHeadline(intake: Intake, locale: Locale): string {
   const name = intake.businessName.trim();
   const bakery = intakeLooksBakery(intake);
+  const plastic = isPlasticAestheticClinic(intake);
   if (locale === "ar") {
     if (bakery) return name ? `${name} — خبز طازج هاليوم` : "خبز طازج هاليوم";
+    if (plastic) return name ? `${name} — جراحة تجميل من العيادة` : "جراحة تجميل من العيادة";
     return name || "المحل قريب منكم";
   }
   if (locale === "he") {
     if (bakery) return name ? `${name} — לחם חם מהתנור` : "לחם חם מהתנור";
+    if (plastic) return name ? `${name} — כירורגיה פלסטית מהמרפאה` : "כירורגיה פלסטית מהמרפאה";
     return name || "העסק לידכם";
   }
   if (bakery) return name ? `${name} — fresh bread today` : "Fresh bread today";
+  if (plastic) return name ? `${name} — plastic surgery at the clinic` : "Plastic surgery at the clinic";
   return name || "Visit us";
 }
 
@@ -266,13 +340,20 @@ function fallbackBenefit(intake: Intake, locale: Locale): string {
     return adv.length > 80 ? `${adv.slice(0, 78).trim()}…` : adv;
   }
   const bakery = intakeLooksBakery(intake);
+  const plastic = isPlasticAestheticClinic(intake);
   if (locale === "ar") {
-    return bakery ? "خبز طازج من الفرن — تعوا خدوا هاليوم." : "خدمة واضحة من المحل — تعوا أو احكوا معنا.";
+    if (bakery) return "خبز طازج من الفرن — تعوا خدوا هاليوم.";
+    if (plastic) return "جراح تجميل من حقائق الموقع — موعد من واتساب أو الهاتف.";
+    return "خدمة واضحة من المحل — تعوا أو احكوا معنا.";
   }
   if (locale === "he") {
-    return bakery ? "לחם חם מהתנור — בואו לקחת היום." : "שירות ברור מהעסק — בואו או כתבו.";
+    if (bakery) return "לחם חם מהתנור — בואו לקחת היום.";
+    if (plastic) return "כירורגיה פלסטית מעובדות האתר — תור בוואטסאפ או בטלפון.";
+    return "שירות ברור מהעסק — בואו או כתבו.";
   }
-  return bakery ? "Fresh bread from the oven — come take some today." : "Clear service from the shop — visit or write.";
+  if (bakery) return "Fresh bread from the oven — come take some today.";
+  if (plastic) return "Plastic surgery from the published facts — book on WhatsApp or phone.";
+  return "Clear service from the shop — visit or write.";
 }
 
 function fallbackCta(intake: Intake, locale: Locale): string {
@@ -334,15 +415,26 @@ export function gateCustomerAd(
   const register = locale === "ar" && arabicRegisterBleed(blob, dialect, locale);
   const spam = factSpamHits(body, facts);
   const empty = !headline.trim() || headline.length < 3;
+  const canned = isCannedClinicSlogan(blob, intake);
+  const ungrounded =
+    headline.trim().length >= 8 &&
+    !copyGroundedInFacts(headline, intake) &&
+    isCannedClinicSlogan(headline, intake);
 
-  if (hits.length || bleed || register || empty || customerCopyHasLeak(headline) || customerCopyHasLeak(cta)) {
+  if (hits.length || bleed || register || empty || canned || ungrounded || customerCopyHasLeak(headline) || customerCopyHasLeak(cta)) {
     return {
       headline: fallback.headline,
       body: fallback.body,
       cta: cta && !customerCopyHasLeak(cta) && !localeScriptBleed(cta, locale) ? cta : fallback.cta,
       ok: false,
       repaired: true,
-      hits: [...hits, ...(bleed ? ["locale-bleed"] : []), ...(register ? ["arabic-register"] : []), ...(empty ? ["empty-headline"] : [])],
+      hits: [
+        ...hits,
+        ...(bleed ? ["locale-bleed"] : []),
+        ...(register ? ["arabic-register"] : []),
+        ...(empty ? ["empty-headline"] : []),
+        ...(canned || ungrounded ? ["canned-slogan"] : []),
+      ],
     };
   }
 

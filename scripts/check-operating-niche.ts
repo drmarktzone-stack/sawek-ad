@@ -5,6 +5,7 @@ import { factsToIntake } from "../lib/engine/gemini-generate";
 import {
   bypassNicheGate,
   charterAllowsCampaign,
+  nicheOutsideReason,
   resolveOperatingNiche,
 } from "../lib/operating-niche";
 import { detectVertical } from "../lib/vertical";
@@ -23,6 +24,15 @@ if (resolveOperatingNiche(facts("מרפאת שיניים נווה", "dental clin
 }
 if (resolveOperatingNiche(facts("عيادة تجميل", "aesthetic clinic", "بوتوكس وفلر طبي")) !== "medical_clinic") {
   fail("aesthetic clinic should be medical_clinic");
+}
+if (resolveOperatingNiche(facts("د. جوفرين", "", "جراح تجميل متمرس في حيفا — جراحة التجميل")) !== "medical_clinic") {
+  fail("plastic surgeon with empty category must be medical_clinic");
+}
+if (detectVertical(facts("د. جوفرين", "", "جراح تجميل متمرس في حيفا")) !== "clinic") {
+  fail("plastic surgeon description must detectVertical clinic");
+}
+if (resolveOperatingNiche(facts('ד"ר גופרין', "", "כירורגיה פלסטית ואסתטיקה רפואית בחיפה")) !== "medical_clinic") {
+  fail("Hebrew aesthetic surgery with empty category must be medical_clinic");
 }
 if (resolveOperatingNiche(facts("מרכז למידה הדר", "tutoring", "שיעורי עזר לבגרות")) !== "education") {
   fail("tutoring center should be education");
@@ -94,6 +104,14 @@ const tutorFacts = factsToIntake({
   facts: { businessName: "מרכז למידה הדר", category: "tutoring", description: "שיעורי עזר" },
 });
 if (!charterAllowsCampaign(tutorFacts)) fail("tutoring generate facts must be allowed");
+
+const genericOutside = nicheOutsideReason(facts("Acme Holdings", "industrial holding", "group of companies"), "ar");
+if (/عيادة طبية|ولا مطعم|ولا تعليم|حرف بيت|ستوديو لياقة|التخصّصات الخمس|الخمس مجالات/.test(genericOutside)) {
+  fail(`generic out-of-niche AR must not list the five charter niches: ${genericOutside}`);
+}
+if (!genericOutside.includes("هالموقع برا نطاق شغلنا الحالي") || !genericOutside.includes("قطاعات محلية محددة")) {
+  fail(`generic out-of-niche AR must use the mandated copy: ${genericOutside}`);
+}
 
 if (failures.length) {
   console.error("FAIL\n" + failures.join("\n"));

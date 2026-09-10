@@ -292,17 +292,49 @@ export function foldIndicDigits(value: string): string {
   return String(value ?? "").replace(/[٠-٩۰-۹]/g, (ch) => INDIC_DIGITS[ch] ?? ch);
 }
 
-/** Display-form IL number when digits are on the page (05X-XXXXXXX / 0X-XXXXXXX). */
+/** Display-form IL number when digits are on the page (05X-XXXXXXX / 0X-XXXXXXX).
+ * Never hyphenate leftover Arabic/nav/fax prose into the stored value.
+ */
 export function formatIlPhone(raw: string): string {
   const src = foldIndicDigits(String(raw ?? "")).trim();
   if (!src) return "";
+  const first = firstIlPhoneMatch(src);
+  if (!first) return "";
+  return formatIlDigits(first);
+}
+
+function firstIlPhoneMatch(src: string): string {
+  const intlMobile = src.match(/(?:\+|00)?972[\s.-]?0?(?:50|52|53|54|55)[\s.-]?\d{3}[\s.-]?\d{4}/);
+  if (intlMobile) return intlMobile[0];
+  const mobile =
+    src.match(/0(?:50|52|53|54|55)[\s.-]?\d{3}[\s.-]?\d{4}/) ||
+    src.match(/0?5\d[\s.-]?\d{3}[\s.-]?\d{4}/);
+  if (mobile) return mobile[0];
+  const voip = src.match(/0(?:72|73|74|76|77|78)[\s.-]?\d{7}/);
+  if (voip) return voip[0];
+  const intlLand = src.match(/(?:\+|00)?972[\s.-]?0?[2-489][\s.-]?\d{3}[\s.-]?\d{4}/);
+  if (intlLand) return intlLand[0];
+  const land = src.match(/0[2-489][\s.-]?\d{3}[\s.-]?\d{4}/);
+  if (land) return land[0];
   const digits = src.replace(/[^\d]/g, "");
   let local = digits;
   if (local.startsWith("972")) local = `0${local.slice(3)}`;
+  if (/^05\d{8}$/.test(local) || /^0[2-489]\d{7}$/.test(local) || /^0(?:72|73|74|76|77|78)\d{7}$/.test(local)) {
+    return local;
+  }
+  return "";
+}
+
+function formatIlDigits(raw: string): string {
+  let local = foldIndicDigits(raw).replace(/[^\d]/g, "");
+  if (local.startsWith("972")) local = `0${local.slice(3)}`;
+  if (/^5\d{8}$/.test(local)) local = `0${local}`;
+  if (/^[2-489]\d{7}$/.test(local)) local = `0${local}`;
   if (/^05\d{8}$/.test(local)) return `${local.slice(0, 3)}-${local.slice(3)}`;
   if (/^0(?:50|52|53|54|55|72|73|74|76|77|78)\d{7}$/.test(local)) return `${local.slice(0, 3)}-${local.slice(3)}`;
+  if (/^0[2-489]\d{7}$/.test(local)) return `${local.slice(0, 2)}-${local.slice(2)}`;
   if (/^0\d{8}$/.test(local)) return `${local.slice(0, 2)}-${local.slice(2)}`;
-  return src.replace(/\s+/g, "-");
+  return "";
 }
 
 
@@ -426,8 +458,16 @@ export function sanitizeExtractedFields(
     else if (!isUsableLocation(out.location)) delete out.location;
     else out.location = attachEvidencedCity(out.location, hay || out.location);
   }
-  if (out.phone && isPlaceholderPhone(out.phone)) delete out.phone;
-  if (out.whatsapp && isPlaceholderPhone(out.whatsapp)) delete out.whatsapp;
+  if (out.phone) {
+    const cleaned = formatIlPhone(out.phone);
+    if (cleaned && !isPlaceholderPhone(cleaned)) out.phone = cleaned;
+    else delete out.phone;
+  }
+  if (out.whatsapp) {
+    const cleaned = formatIlPhone(out.whatsapp);
+    if (cleaned && !isPlaceholderPhone(cleaned)) out.whatsapp = cleaned;
+    else delete out.whatsapp;
+  }
   if (out.category && FOOD_SCHEMA_RE.test(out.category) && MEDICAL_SCHEMA_RE.test(hay)) {
     const med = hay.match(MEDICAL_SCHEMA_RE);
     if (med?.[1]) out.category = med[1];
@@ -1014,11 +1054,19 @@ function phoneDigitKey(raw: string): string {
   return d;
 }
 
-/** Unique on-page numbers for one bucket (phone or WhatsApp). Cap 2. */
+/** Unique on-page numbers for one bucket (phone or WhatsApp). Cap 2. Clean IL only. */
 function collectNumberBucket(text: string, labels: string[], alsoLoose: boolean): string {
   const hits: string[] = [];
   const push = (raw: string) => {
-    const f = formatIlPhone(raw) || String(raw || "").replace(/\s+/g, " ").trim();
+    if (isFaxOrNavPhoneJunk(raw)) {
+      const cleaned = formatIlPhone(raw);
+      if (cleaned) {
+        const key = phoneDigitKey(cleaned);
+        if (key.length >= 8 && !hits.some((h) => phoneDigitKey(h) === key)) hits.push(cleaned);
+      }
+      return;
+    }
+    const f = formatIlPhone(raw);
     if (!f) return;
     const key = phoneDigitKey(f);
     if (key.length < 8) return;
@@ -1031,6 +1079,14 @@ function collectNumberBucket(text: string, labels: string[], alsoLoose: boolean)
     if (extracted) push(extracted);
   }
   return hits.slice(0, 2).join(" · ");
+}
+
+function isFaxOrNavPhoneJunk(raw: string): boolean {
+  const s = String(raw || "");
+  if (/تصفح|قائمة|القائمة|ניווט|תפריט ראשי/i.test(s)) return true;
+  if (/(?:فاكس|פקס|\bfax\b)/i.test(s) && /هاتف|טלפון|phone|נייד|موبايل/i.test(s)) return true;
+  if (/[\u0590-\u05FF\u0600-\u06FF]/.test(s) && s.replace(/[^\d]/g, "").length >= 16) return true;
+  return false;
 }
 
 /** First usable number from a phone/whatsapp field (may be joined with ·). */

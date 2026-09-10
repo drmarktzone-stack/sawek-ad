@@ -9,12 +9,16 @@ function blob(intake: VerticalFacts): string {
   return `${intake.businessName ?? ""} ${intake.category ?? ""} ${intake.description ?? ""}`;
 }
 
+/** Plastic / aesthetic surgeon as the business — even when schema category is empty. */
+export const PLASTIC_AESTHETIC_RE =
+  /جراح تجميل|جراحة تجميل|جراحة التجميل|عمليات تجميل|plastic surg|plastic surgeon|כירורגיה פלסטית|ניתוח פלסטי|ניתוחים פלסטיים|אסתטיקה רפואית|רפואה אסתטית|כירורג פלסטי|מנתח פלסטי|aesthetic (?:clinic|medicine|surgeon|surgery)|تجميل طبي|عيادة تجميل|rhinoplast|تجميل الأنف|تكبير(?: وإعادة بناء)? الثدي|מתיחת פנים|הגדלת חזה|שתלי חזה|B-?Lite|بي لايت/i;
+
 /** Clinic as the actual physical business — not a digital product that cites a pediatrician as author. */
 const NAMED_CLINIC =
-  /عيادة|מרפאה|\bclinic\b|\bclinics\b|hospital|مستشفى|בית חולים|מרפאת|drsamerped\.ai\.studio/i;
+  /عيادة|מרפאה|\bclinic\b|\bclinics\b|hospital|مستشفى|בית חולים|מרפאת|drsamerped\.ai\.studio|جراح تجميل|כירורג פלסטי/i;
 
 const CLINIC_AS_BUSINESS =
-  /عيادة|מרפאה|\bclinic\b|\bclinics\b|hospital|مستشفى|בית חולים|מרפאת|طبيب أطفال|רופא ילדים|dental|\bdentist\b|שיניים|أسنان|וטרינר|بيطر|aesthetic|تجميل طبي|عيادة تجميل|דרמטו|جلدية|dermatolog|בוטוקס|بوتوكس/i;
+  /عيادة|מרפאה|\bclinic\b|\bclinics\b|hospital|مستشفى|בית חולים|מרפאת|طبيب أطفال|רופא ילדים|dental|\bdentist\b|שיניים|أسنان|וטרינר|بيطر|aesthetic|تجميل طبي|عيادة تجميل|דרמטו|جلدية|dermatolog|בוטוקס|بوتوكس|جراح تجميل|جراحة تجميل|جراحة التجميل|عمليات تجميل|plastic surg|כירורגיה פלסטית|ניתוח פלסטי|אסתטיקה רפואית|רפואה אסתטית|כירורג פלסטי|מנתח פלסטי/i;
 
 /** App / platform / smart-tools product — not a walk-in clinic. */
 const PRODUCT_AS_BUSINESS =
@@ -35,12 +39,16 @@ const RETAIL_AS_BUSINESS =
 const SCHOOL_AS_BUSINESS =
   /בית ספר|مدرسة|school|עירייה|بلدية|municipality|עמותה|جمعية|\bngo\b|תחנה לבריאות|محطة صحة|public health|גן ילדים|روضة|tutoring|שיעורי עזר|دروس خصوصية|מורה פרטי|معلم خصوصي|מרכז למידה|مركز تعليمي|הכנה לבגרות|توجيهي/i;
 
+export function isPlasticAestheticClinic(intake: VerticalFacts): boolean {
+  return PLASTIC_AESTHETIC_RE.test(blob(intake));
+}
+
 export function detectVertical(intake: VerticalFacts): Vertical {
   const text = blob(intake);
   const nameCat = `${intake.businessName ?? ""} ${intake.category ?? ""}`;
   const namedClinic = NAMED_CLINIC.test(nameCat) || /drsamerped\.ai\.studio/i.test(text);
   const pool = POOL_AS_BUSINESS.test(text);
-  const clinic = CLINIC_AS_BUSINESS.test(text);
+  const clinic = CLINIC_AS_BUSINESS.test(text) || PLASTIC_AESTHETIC_RE.test(text);
   const product = PRODUCT_AS_BUSINESS.test(text);
 
   // Hydrotherapy / pool may mention treatments + kupat holim. That is not a clinic.

@@ -4,7 +4,7 @@
  * there is no category/page signal.
  */
 import type { IngestFieldId } from "./document-ingest";
-import { detectVertical } from "./vertical";
+import { detectVertical, isPlasticAestheticClinic, PLASTIC_AESTHETIC_RE } from "./vertical";
 import { resolveOperatingNiche } from "./operating-niche";
 import { HOSPITAL_OR_DEPT_RE, extractPostalAddressFromText, cleanLocationValue, isUnknownSentinel, attachEvidencedCity, evidencedCityFromText } from "./scan-truth/patterns";
 
@@ -69,7 +69,25 @@ function departmentLines(corpus: string): string[] {
 const DENTAL_RE = /מרפאת שיניים|רופא שיניים|השתלות שיניים|אסתטיקה דנטלית|عيادة أسنان|\bdentist\b|\bdental\b|أسنان/;
 const CLINIC_TAGLINE_RE = /המרכז ל[^\n.]{4,80}|المركز(?:\s+ل)?[^\n.]{4,80}/;
 const SERVICE_HEADING_RE =
-  /שתל|תותב|כתר|אסתטיקה דנטלית|שחזור|השתל|implant|crown|veneer|zirconia|זירקוניה|مزرعة|تاج/;
+  /שתל|תותב|כתר|אסתטיקה דנטלית|שחזור|השתל|implant|crown|veneer|zirconia|זירקוניה|مزرعة|تاج|تجميل الأنف|rhinoplast|تكبير الثدي|تشكيل الجسم|تجميل الوجه|ניתוח אף|הגדלת חזה/;
+
+/** Published plastic / aesthetic phrases — only kept when the page actually contains them. */
+const PUBLISHED_PLASTIC_SERVICES = [
+  "جراحة تجميل الأنف",
+  "عملية تجميل الأنف",
+  "عمليات تجميل الوجه",
+  "عمليات تشكيل الجسم",
+  "تكبير الثدي",
+  "شد الثدي",
+  "تصغير الثدي",
+  "زرعات خفيفة الوزن",
+  "B-Lite",
+  "B-LITE",
+  "ניתוח אף",
+  "הגדלת חזה",
+  "הקטנת חזה",
+  "מתיחת פנים",
+];
 
 /** Published Halloun / dental phrases — only kept when the page actually contains them. */
 const PUBLISHED_DENTAL_SERVICES = [
@@ -92,7 +110,7 @@ function serviceHeadings(corpus: string): string[] {
   const text = String(corpus || "");
   const out: string[] = [];
   const flat = text.replace(/\s+/g, " ");
-  for (const phrase of PUBLISHED_DENTAL_SERVICES) {
+  for (const phrase of [...PUBLISHED_PLASTIC_SERVICES, ...PUBLISHED_DENTAL_SERVICES]) {
     if (flat.includes(phrase) && !out.includes(phrase)) out.push(phrase);
   }
   const chunks = text.split(/\n+|<br\s*\/?>|·|\u00b7/i);
@@ -137,7 +155,13 @@ export function prefillCampaignFields(fields: Fields, corpus = ""): Fields {
   }
 
   const hay = `${name} ${out.category || ""} ${out.description || ""} ${corpus}`;
-  const hospitalSystem = HOSPITAL_OR_DEPT_RE.test(hay) && !DENTAL_RE.test(hay) && !GROCERY_RE.test(hay);
+  const namedHospital = HOSPITAL_OR_DEPT_RE.test(`${name} ${out.category || ""}`);
+  const plastic = PLASTIC_AESTHETIC_RE.test(hay) || isPlasticAestheticClinic({
+    businessName: name,
+    category: out.category || "",
+    description: out.description || "",
+  });
+  const hospitalSystem = namedHospital && !DENTAL_RE.test(hay) && !plastic && !GROCERY_RE.test(hay);
   if (hospitalSystem) return out;
 
   const vertical = detectVertical({
@@ -153,13 +177,15 @@ export function prefillCampaignFields(fields: Fields, corpus = ""): Fields {
   const grocery = isGroceryBusiness(out, corpus) || vertical === "retail";
   const depts = departmentLines(corpus);
   const services = serviceHeadings(corpus);
-  const clinic = niche === "medical_clinic" || vertical === "clinic" || DENTAL_RE.test(hay);
+  const clinic = niche === "medical_clinic" || vertical === "clinic" || DENTAL_RE.test(hay) || plastic;
 
   if (grocery && !has(out, "category")) {
     out.category = /GroceryStore/i.test(hay) ? "GroceryStore" : "سوبر ماركت";
   }
   if (clinic && DENTAL_RE.test(hay) && (!has(out, "category") || /MedicalClinic|Physician|LocalBusiness/i.test(String(out.category || "")))) {
     out.category = "מרפאת שיניים";
+  } else if (clinic && plastic && (!has(out, "category") || /MedicalClinic|Physician|LocalBusiness/i.test(String(out.category || "")))) {
+    out.category = /[\u0600-\u06FF]/.test(hay) ? "جراح تجميل" : /[\u0590-\u05FF]/.test(hay) ? "כירורגיה פלסטית" : "Plastic surgery";
   } else if (clinic && !has(out, "category")) {
     out.category = "MedicalClinic";
   }

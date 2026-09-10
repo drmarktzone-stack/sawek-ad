@@ -12,10 +12,11 @@ import { RESIZE_FORMATS } from "../lib/resize-formats";
 import { assemblePack } from "../lib/engine/run";
 import { attachCompleteAd } from "../lib/engine/ad-engine";
 import { generateVariants } from "../lib/engine/copy";
-import { acceptScanBrandValue, applyIngestReview, rowsFromExtracted } from "../lib/document-ingest";
+import { acceptScanBrandValue, applyIngestReview, extractFieldsFromText, formatIlPhone, rowsFromExtracted } from "../lib/document-ingest";
 import { emptyIntake, wizardReady, validateIntake } from "../lib/engine/validate";
 import { diagnose } from "../lib/engine/diagnose";
 import { detectVertical, isPediatrics, showsHmoAudience } from "../lib/vertical";
+import { resolveOperatingNiche } from "../lib/operating-niche";
 import { AUDIENCE_CHIPS, audienceChipsFor, resolveChipLabel, toggleChipValue } from "../lib/chips";
 import { demoIntake, isPediatricDemo } from "../lib/demo";
 import { hydrateScanIntake } from "../lib/intake-locale";
@@ -24,6 +25,19 @@ import type { IngestedDocument, MediaAssetMeta } from "../lib/types";
 const failures: string[] = [];
 function fail(msg: string) {
   failures.push(msg);
+}
+
+const junkPhone = formatIlPhone("04-8550930-فاكس:-04-8550929-تصفح-سريع-الرئيسية");
+if (junkPhone !== "04-8550930") fail(`formatIlPhone must extract clean IL landline, got ${JSON.stringify(junkPhone)}`);
+if (formatIlPhone("هاتف: 04-8550930 فاكس: 04-8550929 تصفح سريع") !== "04-8550930") {
+  fail("formatIlPhone must stop at fax/nav Arabic");
+}
+const fromText = extractFieldsFromText("هاتف: 04-8550930 فاكس: 04-8550929 تصفح سريع الرئيسية\nالعنوان: شارع بن غوريون 4، حيفا", "govrin.txt");
+if (String(fromText.phone || fromText.whatsapp || "").includes("فاكس") || String(fromText.phone || fromText.whatsapp || "").includes("تصفح")) {
+  fail(`extractFieldsFromText kept phone junk ${JSON.stringify({ p: fromText.phone, w: fromText.whatsapp })}`);
+}
+if (!/^04-8550930$/.test(String(fromText.phone || fromText.whatsapp || "").split("·")[0].trim())) {
+  fail(`extractFieldsFromText phone ${JSON.stringify(fromText.phone || fromText.whatsapp)}`);
 }
 
 const fixturePath = join(__dirname, "fixtures/url-ingest-localbusiness.html");
@@ -1105,6 +1119,52 @@ else {
   }
   if (hallounOffer && !/ביום אחד|في يوم واحد|same-day/i.test(`${hallounOffer.timeToResult} ${hallounOffer.dreamOutcome} ${hallounOffer.headline}`)) {
     fail(`halloun offer missed evidenced same-day implant line ${hallounOffer.timeToResult}`);
+  }
+}
+
+const govrinHtml = readFileSync(join(__dirname, "fixtures/url-ingest-govrin.html"), "utf8");
+const govrin = parseFetchedHtml(govrinHtml, "https://www.govrin.co.il/ar", "https://www.govrin.co.il/ar");
+if (!govrin.ok) fail(`govrin parse failed: ${govrin.error}`);
+else {
+  const f = govrin.fields;
+  const facts = { businessName: f.businessName || "", category: f.category || "", description: f.description || "" };
+  if (detectVertical(facts) !== "clinic") fail(`govrin detectVertical=${detectVertical(facts)} cat=${JSON.stringify(f.category)} desc=${JSON.stringify(f.description)}`);
+  if (resolveOperatingNiche(facts) !== "medical_clinic") fail(`govrin niche=${resolveOperatingNiche(facts)}`);
+  if (!/جوفرين|جوبرين|Govrin/i.test(String(f.businessName || ""))) fail(`govrin name ${JSON.stringify(f.businessName)}`);
+  if (!/تجميل|פלסט|Plastic|MedicalClinic/i.test(`${f.category} ${f.description}`)) {
+    fail(`govrin missing plastic/clinic description ${JSON.stringify({ c: f.category, d: f.description })}`);
+  }
+  const contact = `${f.phone || ""} ${f.whatsapp || ""}`;
+  if (!/04-?8550930/.test(contact)) fail(`govrin phone missing ${JSON.stringify({ phone: f.phone, wa: f.whatsapp })}`);
+  if (/فاكس|تصفح|8550929/.test(contact)) fail(`govrin phone junk ${JSON.stringify({ phone: f.phone, wa: f.whatsapp })}`);
+  if (!/حيفا|חיפה|Haifa/i.test(String(f.location || ""))) fail(`govrin location ${JSON.stringify(f.location)}`);
+  const govrinDoc: IngestedDocument = {
+    id: "govrin",
+    name: "https://www.govrin.co.il/ar",
+    mime: "text/html",
+    size: 1,
+    kind: "url",
+    tags: ["identity"],
+    excerpt: "",
+    createdAt: new Date().toISOString(),
+  };
+  const govrinApplied = applyIngestReview(emptyIntake(), rowsFromExtracted(f, false), govrinDoc, []);
+  if (!wizardReady(govrinApplied)) {
+    fail(
+      `govrin should be wizardReady; missing ${["businessName", "description", "audience", "biggestProblem", "uniqueAdvantage", "mainGoal"].filter((k) => !String((govrinApplied as unknown as Record<string, string>)[k] || "").trim()).join(",")}`,
+    );
+  }
+  const arGovrin = hydrateScanIntake(govrinApplied, "ar");
+  if (resolveOperatingNiche(arGovrin) !== "medical_clinic") fail("hydrated govrin must stay medical_clinic");
+  const govrinAds = generateVariants(arGovrin).filter((v) => v.locale === "ar");
+  const govrinBlob = govrinAds.map((v) => `${v.headline}\n${v.primaryText}`).join("\n");
+  if (/لما الولد مريض|جيبوه عالعيادة|عيادة \/ أسنان \/ تجميل طبي|التخصّصات الخمس/.test(govrinBlob)) {
+    fail(`govrin ads dumped pediatric slogans or five-niche list: ${govrinBlob.slice(0, 400)}`);
+  }
+  const heads = govrinAds.map((v) => v.headline.trim()).filter(Boolean);
+  if (heads.length >= 2 && new Set(heads).size < 2) fail(`govrin AR headlines template-looped ${JSON.stringify(heads)}`);
+  if (!govrinAds.some((v) => /تجميل|جوفرين|جوبرين|أنف|ثدي|حيفا/i.test(`${v.headline} ${v.primaryText}`))) {
+    fail(`govrin AR ads not grounded in this clinic ${heads.join(" | ")}`);
   }
 }
 

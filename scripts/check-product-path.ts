@@ -166,6 +166,34 @@ const wizardSrc = readFileSync(join(root, "components/wizard-flow.tsx"), "utf8")
 if (!wizardSrc.includes("/tools/core-message")) fail("diagnosis approve must continue to core message");
 if (!wizardSrc.includes("diagnosisApproved")) fail("HITL must hide five-agent continue after diagnosis");
 if (!wizardSrc.includes("charterAllowsCampaign")) fail("wizard must niche-gate complete campaign");
+if (/disabled=\{!wizardReady\(intake\)/.test(wizardSrc)) {
+  fail("build CTA must not silently grey when fields are missing");
+}
+if (!wizardSrc.includes("wizard-missing-fields")) fail("missing fields must be an explicit scroll list");
+if (!wizardSrc.includes('t("cta.buildReady")')) fail("ready CTA must use cta.buildReady (يلا نكمّل)");
+if (!wizardSrc.includes('t("cta.build")')) fail("ابنِ لي حملة كاملة must stay wired as alias");
+if (!wizardSrc.includes('t("wizard.missingPillar")')) fail("missing CTA must interpolate wizard.missingPillar");
+if (!wizardSrc.includes("focusWizardField")) fail("missing pillar rows must scroll to the field");
+const nicheGateSrc = readFileSync(join(root, "components/niche-gate.tsx"), "utf8");
+if (nicheGateSrc.includes("CHARTER_NICHES")) fail("niche gate must not render five niches as this business’s specialties");
+if (nicheGateSrc.includes("nicheLabel")) fail("niche gate must not badge the scanned business with charter niche labels");
+if (nicheGateSrc.includes("nicheGate.scope") || nicheGateSrc.includes("nicheGate.allowed")) {
+  fail("niche gate must not list operator specialties on the card");
+}
+if (!nicheGateSrc.includes('t("nicheGate.title")') || !nicheGateSrc.includes('t("nicheGate.body")')) {
+  fail("niche gate must use the out-of-scope title and body copy");
+}
+if (/عيادة\s*\/\s*أسنان|التخصّصات الخمس|الخمس مجالات/.test(nicheGateSrc)) {
+  fail("niche gate source must not hardcode the five charter niches");
+}
+const i18nSrc = readFileSync(join(root, "lib/i18n.ts"), "utf8");
+if (!i18nSrc.includes("يلا نكمّل — الأركان جاهزة")) fail("AR ready CTA string missing");
+if (!i18nSrc.includes("ابنِ لي حملة كاملة")) fail("AR build alias missing");
+if (!i18nSrc.includes("لسه ناقص: {name} — كمّله من المسح أو عدّله إيد")) fail("AR missing-pillar string missing");
+if (!i18nSrc.includes("هالموقع برا نطاق شغلنا الحالي")) fail("AR out-of-niche title missing");
+if (!i18nSrc.includes("منخدم قطاعات محلية محددة — ابعت الرابط الصحيح أو تواصل معنا")) {
+  fail("AR out-of-niche body missing");
+}
 
 const generateSrc = readFileSync(join(root, "lib/engine/gemini-generate.ts"), "utf8");
 if (!generateSrc.includes("charterAllowsCampaign") || !generateSrc.includes("niche_gated")) {

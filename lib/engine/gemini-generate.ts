@@ -455,7 +455,7 @@ function modeHint(mode: GenerateMode): string {
     return "mode=angles. Search-grounded. Fill angles {pain,benefit,social_proof,story} each with he/ar/en {headline,copy,cta}. Recreate per language — do not translate literally. Social proof: only ratings/reviews/customer counts present in facts; otherwise [יש להשלים] / [يجب الاستكمال] / [TO COMPLETE]. Cite public source URLs in sources[] when grounding returns them. Label asOf today's date. Never invent views, likes, ROAS, spend, or CPM.";
   }
   if (mode === "variations") {
-    return "mode=variations. FLASH path. Produce 12–18 SHORT ad variations across channels meta, google, whatsapp, story. Each variation needs he/ar/en {headline,body,cta}. Headlines ≤ 40 chars. Bodies ≤ 90 chars for Meta/Google, ≤ 300 for WhatsApp. Recreate per language — do not literal-translate. No invented prices, ROAS, ratings.";
+    return "mode=variations. FLASH path. Produce 12–18 SHORT ad variations across channels meta, google, whatsapp, story. Each variation needs he/ar/en {headline,body,cta}. Headlines ≤ 40 chars and UNIQUE per row — no two may repeat the same slogan. Write from THIS business’s facts. Palestinian AR. No pediatric clinic slogans unless the facts are a pediatrics clinic. No invented prices, ROAS, ratings.";
   }
   if (mode === "strategy") {
     return "mode=strategy. PRO + Search grounding. Deep CMO strategy psychologically tuned to the audience in the facts. When public trends help, cite the source URL and today's date. Fill audience / strategy / psychology in HE+AR+EN. Use only facts. Never invent ROAS, CAC, lead counts, views, likes, spend, or competitors.";
@@ -469,7 +469,7 @@ function modeHint(mode: GenerateMode): string {
   if (mode === "scripts") {
     return "mode=scripts. PRO path. Script pack for reels, tiktok, whatsapp in HE+AR+EN. 15s structure 0-3 / 3-12 / 12-15 for video. Facts only.";
   }
-  return "mode=ads. Search-grounded assemble. Fill HE+AR+EN locale packs (6 headlines each), the channels pack, AND angles {pain,benefit,social_proof,story} each with he/ar/en {headline,copy,cta}. Recreate per language — do not translate literally. Social proof: only ratings/reviews/customer counts present in facts; otherwise incomplete markers. When public creative patterns help, cite source URLs in sources[] and asOf today's date. Never invent views, likes, ROAS, spend, or CPM.";
+  return "mode=ads. Search-grounded assemble. Fill HE+AR+EN locale packs (6 DISTINCT headlines each), the channels pack, AND angles {pain,benefit,social_proof,story} each with he/ar/en {headline,copy,cta}. Write FRESH lines from THIS business’s facts only — name, city, services, phone. Ban repeating stored slogans (لما الولد مريض / כשהילד חולה / generic walk-in clinic templates). Palestinian spoken Arabic when locale=ar (مش فصحى ثقيلة). Recreate per language — do not translate literally. Six headlines must not share a template skeleton. Social proof: only ratings/reviews/customer counts present in facts; otherwise incomplete markers. When public creative patterns help, cite source URLs in sources[] and asOf today's date. Never invent views, likes, ROAS, spend, or CPM.";
 }
 
 function factsBlockFromBody(body: GenerateBody): string {

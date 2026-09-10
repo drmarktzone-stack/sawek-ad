@@ -7,7 +7,7 @@
  */
 import type { Intake, Locale } from "./types";
 import { intakeIsClinicDemo } from "./clinic-leak";
-import { detectVertical, type VerticalFacts } from "./vertical";
+import { detectVertical, isPlasticAestheticClinic, type VerticalFacts } from "./vertical";
 
 export type CharterNiche =
   | "medical_clinic"
@@ -50,7 +50,7 @@ export function resolveOperatingNiche(facts: VerticalFacts): OperatingNiche {
   const v = detectVertical(facts);
   const text = hay(facts);
   if (DELIVERY_AGGREGATOR_RE.test(text) && v !== "restaurant") return "unsupported";
-  if (v === "clinic") return "medical_clinic";
+  if (v === "clinic" || isPlasticAestheticClinic(facts)) return "medical_clinic";
   if (v === "school" || TUTOR_RE.test(text)) return "education";
   if (v === "restaurant") {
     if (DELIVERY_AGGREGATOR_RE.test(`${facts.businessName ?? ""} ${facts.category ?? ""}`)) {
@@ -61,6 +61,34 @@ export function resolveOperatingNiche(facts: VerticalFacts): OperatingNiche {
   if (FITNESS_RE.test(text)) return "fitness_studio";
   if (HOME_TRADES_RE.test(text)) return "home_trades";
   return "unsupported";
+}
+
+/** Why this scan is outside the operator — never a fake “specialties of this business” list. */
+export function nicheOutsideReason(facts: VerticalFacts, locale: Locale): string {
+  const text = hay(facts);
+  const salon = /salon|מספרה|صالون|حلاق|barber|תספורת|צבע שיער/i.test(text);
+  const grocery = /سوبر\s*ماركت|مقاضي|بقالة|מכולת|סופרמרקט|\bgrocery\b|\bsupermarket\b/i.test(text);
+  const realty = /נדל["״']?ן|תיווך|عقارات|مكتب عقاري|realtor|real\s*estate/i.test(text);
+  const creator = /content creator|يوتيوب|טיקטוק|YouTube and TikTok/i.test(text);
+  if (locale === "ar") {
+    if (salon) return "هالنشاط صالون/حلاقة — مش عيادة طبية. التطبيق ما بيبني له حملة.";
+    if (grocery) return "هالنشاط سوبرماركت/تجزئة — برّات تخصص التطبيق.";
+    if (realty) return "هالنشاط مكتب عقاري — برّات تخصص التطبيق.";
+    if (creator) return "هالنشاط صناعة محتوى عامة — برّات تخصص التطبيق.";
+    return "هالموقع برا نطاق شغلنا الحالي. منخدم قطاعات محلية محددة — ابعت الرابط الصحيح أو تواصل معنا";
+  }
+  if (locale === "he") {
+    if (salon) return "זה מספרה/סלון — לא מרפאה. לא בונים קמפיין.";
+    if (grocery) return "זה סופר/קמעונאות — מחוץ להתמחות.";
+    if (realty) return "זה תיווך נדל״ן — מחוץ להתמחות.";
+    if (creator) return "זה יוצר תוכן כללי — מחוץ להתמחות.";
+    return "האתר הזה מחוץ לטווח העבודה הנוכחי. אנחנו משרתים מגזרים מקומיים מוגדרים — שלחו את הקישור הנכון או פנו אלינו.";
+  }
+  if (salon) return "This is a salon/barber — not a medical clinic. The app will not build a campaign.";
+  if (grocery) return "This is grocery/retail — outside the operator’s specialty.";
+  if (realty) return "This is a real-estate brokerage — outside the operator’s specialty.";
+  if (creator) return "This is generic creator work — outside the operator’s specialty.";
+  return "This site is outside our current working scope. We serve specific local sectors — send the right link or contact us.";
 }
 
 /** Clinic demo is the medical-niche example. Other demos must still match a charter niche. */
