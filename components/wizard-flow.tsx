@@ -1201,17 +1201,51 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
 
               {!charterAllowsCampaign(intake) && (intake.businessName.trim() || intake.website.trim()) ? (
                 <NicheGateCard intake={intake} />
-              ) : null}
-              <Button
-                type="button"
-                size="lg"
-                className="mt-6 w-full text-base font-black shadow-[0_12px_32px_rgba(15,39,68,0.12)]"
-                disabled={!wizardReady(intake) || running || !charterAllowsCampaign(intake)}
-                onClick={startBuild}
-              >
-                <WandSparkles className="size-5" />
-                {t("cta.build")}
-              </Button>
+              ) : (
+                <>
+                  {!wizardReady(intake) && (
+                    <div
+                      className="mt-4 rounded-xl border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-danger"
+                      dir={locale === "en" ? "ltr" : "rtl"}
+                      data-testid="wizard-missing-fields"
+                    >
+                      <p className="font-bold">{t("wizard.missingHeading")}</p>
+                      <ul className="mt-1 list-disc ps-5">
+                        {missingRequired.map((f) => (
+                          <li key={String(f.field)}>
+                            <button
+                              type="button"
+                              className="font-semibold underline decoration-danger/50 underline-offset-4"
+                              onClick={() => focusWizardField(f.field)}
+                            >
+                              {f.label[locale]}
+                              <span className="sr-only"> — {t("wizard.goToField")}</span>
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  <Button
+                    type="button"
+                    size="lg"
+                    className="mt-6 w-full text-base font-black shadow-[0_12px_32px_rgba(15,39,68,0.12)]"
+                    disabled={running}
+                    data-testid="cta-build-full"
+                    onClick={() => {
+                      if (!wizardReady(intake)) {
+                        const first = missingRequired[0];
+                        if (first) focusWizardField(first.field);
+                        return;
+                      }
+                      void startBuild();
+                    }}
+                  >
+                    <WandSparkles className="size-5" />
+                    {t("cta.build")}
+                  </Button>
+                </>
+              )}
               {offerBlocked ? (
                 <OfferGateBanner
                   onSkip={() => {
@@ -1221,28 +1255,6 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
                   }}
                 />
               ) : null}
-              {!wizardReady(intake) && (
-                <div
-                  className="mt-3 rounded-xl border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-danger"
-                  dir={locale === "en" ? "ltr" : "rtl"}
-                >
-                  <p className="font-bold">{t("wizard.missingHeading")}</p>
-                  <ul className="mt-1 list-disc ps-5">
-                    {missingRequired.map((f) => (
-                      <li key={String(f.field)}>
-                        <button
-                          type="button"
-                          className="font-semibold underline decoration-danger/50 underline-offset-4"
-                          onClick={() => focusWizardField(f.field)}
-                        >
-                          {f.label[locale]}
-                          <span className="sr-only"> — {t("wizard.goToField")}</span>
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
             </section>
         </>
       )}

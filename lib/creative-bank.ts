@@ -1,6 +1,6 @@
 import type { Intake, Locale } from "./types";
 import type { Vertical } from "./vertical";
-import { detectVertical, foodFamily, isBakery } from "./vertical";
+import { detectVertical, foodFamily, isBakery, isPediatrics, isPlasticAestheticClinic } from "./vertical";
 import { isNoOffer } from "./no-offer";
 
 export type CreativeChannel = "facebook" | "instagram" | "whatsapp" | "landing" | "story" | "reels" | "flyer";
@@ -107,24 +107,21 @@ const HOOKS: Record<Vertical, Record<Locale, string[]>> = {
   },
   clinic: {
     he: [
-      "{name} — כשהילד חולה, לא סלוגן רפואי.",
+      "{name} — מרפאה מהעובדות, לא סלוגן רפואי כללי.",
       "{problem}",
       "{advantage}",
-      "שעות: {hours} — לפי סדר הגעה, בלי תור מדומה.",
       "{place} — שם + עיר, בלי «הכי טוב בעיר».",
     ],
     ar: [
-      "{name} — لما الولد مريض، مش شعار طبي.",
+      "{name} — عيادة من الحقائق، مش شعار طبي عام.",
       "{problem}",
       "{advantage}",
-      "الساعات: {hours} — جت أولاً، بلا دور مختلق.",
       "{place} — اسم + بلدة، بلا «الأفضل بالمدينة».",
     ],
     en: [
-      "{name} — when the child is sick, not a medical slogan.",
+      "{name} — a clinic from the facts, not a generic medical slogan.",
       "{problem}",
       "{advantage}",
-      "Hours: {hours} — walk-in order, no invented queue.",
       "{place} — name + town, never “best in town”.",
     ],
   },
@@ -434,9 +431,56 @@ const BAKERY_ANGLES: Record<Locale, string[]> = {
   en: ["warm bread in the morning", "from your street", "the oven every morning", "bread from this shop"],
 };
 
+const PEDIATRIC_HOOKS: Record<Locale, string[]> = {
+  he: [
+    "{name} — כשהילד חולה, לא סלוגן רפואי.",
+    "{problem}",
+    "{advantage}",
+    "שעות: {hours} — לפי סדר הגעה, בלי תור מדומה.",
+    "{place} — שם + עיר, בלי «הכי טוב בעיר».",
+  ],
+  ar: [
+    "{name} — لما الولد مريض، مش شعار طبي.",
+    "{problem}",
+    "{advantage}",
+    "الساعات: {hours} — جت أولاً، بلا دور مختلق.",
+    "{place} — اسم + بلدة، بلا «الأفضل بالمدينة».",
+  ],
+  en: [
+    "{name} — when the child is sick, not a medical slogan.",
+    "{problem}",
+    "{advantage}",
+    "Hours: {hours} — walk-in order, no invented queue.",
+    "{place} — name + town, never “best in town”.",
+  ],
+};
+
+const PLASTIC_HOOKS: Record<Locale, string[]> = {
+  he: [
+    "{name} — כירורגיה פלסטית מהמרפאה, לא סלוגן «הכי יפה».",
+    "{advantage}",
+    "{place} — שם + עיר מפורסמים.",
+  ],
+  ar: [
+    "{name} — جراحة تجميل من العيادة، مش شعار «الأجمل».",
+    "{advantage}",
+    "{place} — اسم + مدينة من الموقع.",
+  ],
+  en: [
+    "{name} — plastic surgery from this clinic, not a “prettiest” slogan.",
+    "{advantage}",
+    "{place} — published name + city.",
+  ],
+};
 export function hooksFor(vertical: Vertical, locale: Locale, intake?: Intake): string[] {
   if (intake && isBakery(intake)) {
     return BAKERY_HOOKS[locale].map((t) => fill(t, intake, locale)).filter((s) => s.length > 0);
+  }
+  if (intake && isPediatrics(intake)) {
+    return PEDIATRIC_HOOKS[locale].map((t) => fill(t, intake, locale)).filter((s) => s.length > 0);
+  }
+  if (intake && isPlasticAestheticClinic(intake)) {
+    return PLASTIC_HOOKS[locale].map((t) => fill(t, intake, locale)).filter((s) => s.length > 0);
   }
   const cafe = vertical === "restaurant" && intake && foodFamily(intake) === "cafe";
   const fam = cafe ? "cafe" : (vertical === "generic" || vertical === "product" ? serviceFamily(intake) : null);

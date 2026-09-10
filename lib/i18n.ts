@@ -2129,7 +2129,7 @@ export const copy: Dict = {
   "path.captureList": { he: "בנו רשימה בבעלות", ar: "ابنوا قائمة تملكونها", en: "Build the owned list" },
   "path.openExport": { he: "ייצוא", ar: "تصدير", en: "Export" },
 
-  "nicheGate.title": { he: "SAWEK AD לחמש נישות בלבד", ar: "SAWEK AD لخمس تخصّصات بس", en: "SAWEK AD is for five niches only" },
+  "nicheGate.title": { he: "העסק הזה מחוץ להתמחות האפליקציה", ar: "هذا النشاط خارج تخصص التطبيق", en: "This business is outside the app’s specialty" },
   "nicheGate.body": {
     he: "המפעיל המומחה עובד רק על: מרפאות (רפואה/שיניים/אסתטיקה), מרכזי למידה, מסעדות ובתי קפה (רכישה בבעלות), שיפוצים ומקצועות הבית, וסטודיו כושר בוטיק. לא מספרות, לא תיווך נדל״ן, לא יוצרים כלליים.",
     ar: "المشغّل المتخصّص بشغل بس: عيادات (طب/أسنان/تجميل طبي)، مراكز تعليم، مطاعم ومقاهي (اكتساب نملكه)، ترميم وحرف البيت، وستوديو لياقة مستقل. مش صالونات، مش مكاتب عقارية، مش صنّاع محتوى عامّين.",
@@ -2137,7 +2137,17 @@ export const copy: Dict = {
   },
   "nicheGate.allowed": { he: "חמש הנישות", ar: "التخصّصات الخمس", en: "The five niches" },
   "nicheGate.scanOther": { he: "סרקו עסק אחר מהרשימה", ar: "امسحوا شغل ثاني من القائمة", en: "Scan a business on the list" },
-  "nicheGate.this": { he: "הסריקה הזו מחוץ לנישות", ar: "هالمسح برّات التخصّصات", en: "This scan is outside the niches" },
+  "nicheGate.this": { he: "מחוץ להתמחות", ar: "خارج التخصص", en: "Out of specialty" },
+  "nicheGate.scope": {
+    he: "האפליקציה לא ממציאה תחום. חמש הנישות הן כלל הפעלה — לא רשימת התמחויות של העסק שנסרק.",
+    ar: "التطبيق ما بخترع تخصّص. الخمس مجالات هي حدود التشغيل — مش لائحة تخصّصات للنشاط الممسوح.",
+    en: "The app does not invent a vertical. The five niches are the operator’s scope — not this business’s specialty list.",
+  },
+  "nicheGate.named": {
+    he: "נסרק: {name}. זה לא כרטיס התמחויות.",
+    ar: "الممسوح: {name}. هاد مش كرت تخصّصات.",
+    en: "Scanned: {name}. This is not a specialties card.",
+  },
 
   "list.title": { he: "רשימה שאפשר להגיע אליה", ar: "قائمة بنقدر نوصلها", en: "A list you can actually reach" },
   "list.lead": {

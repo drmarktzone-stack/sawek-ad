@@ -7,7 +7,7 @@ import { OFFER_CHIPS, resolveChipLabel } from "../chips";
 import { coachIntake, isUnknownProblem } from "./coach";
 import { applyVoiceLockToText, voiceFromIntake, voiceIsLocked } from "./voice";
 import { offerLineForCopy } from "./offer-builder";
-import { customerCopyHasLeak, gateCustomerAd } from "../copy-purity";
+import { customerCopyHasLeak, gateCustomerAd, isCannedClinicSlogan, localeScriptBleed, templateLoopHits } from "../copy-purity";
 
 const KINDS: VariantKind[] = [
   "strong_offer",
@@ -49,6 +49,48 @@ export function generateVariants(intake: Intake): AdVariant[] {
       );
       variant = { ...variant, headline: gated.headline, primaryText: gated.body, cta: gated.cta };
       out.push(variant);
+    }
+  }
+  return diversifyVariantHeadlines(out, fixed);
+}
+
+function factHeadlineForKind(intake: Intake, locale: Locale, kind: VariantKind, used: string[]): string {
+  const name = intake.businessName.trim();
+  const adv = intake.uniqueAdvantage.trim();
+  const loc = intake.location.trim();
+  const cat = intake.category.trim();
+  const candidates: string[] = [];
+  if (kind === "unique_advantage" && adv) candidates.push(clipAtWord(adv, 48));
+  if (kind === "very_short" && name) candidates.push(name);
+  if (kind === "narrative" && name && loc) {
+    candidates.push(clipAtWord(locale === "ar" ? `${name} — ${loc}` : `${name} · ${loc}`, 48));
+  }
+  if (kind === "direct_sales" && intake.whatsapp.trim()) {
+    const wa = intake.whatsapp.trim().split(/\s*[·|,;]\s*/)[0];
+    candidates.push(clipAtWord(locale === "ar" ? `واتساب ${wa}` : locale === "he" ? `וואטסאפ ${wa}` : `WhatsApp ${wa}`, 48));
+  }
+  if (name && cat) candidates.push(clipAtWord(`${name} — ${cat}`, 48));
+  if (name) candidates.push(name);
+  if (adv) candidates.push(clipAtWord(adv, 48));
+  return candidates.find((h) => h && !used.includes(h) && !isCannedClinicSlogan(h, intake)) || name || candidates[0] || "";
+}
+
+function diversifyVariantHeadlines(variants: AdVariant[], intake: Intake): AdVariant[] {
+  const locales: Locale[] = ["he", "ar", "en"];
+  const out = [...variants];
+  for (const locale of locales) {
+    const idxs = out.map((v, i) => (v.locale === locale ? i : -1)).filter((i) => i >= 0);
+    const used: string[] = [];
+    for (const i of idxs) {
+      let h = out[i].headline;
+      const loop = templateLoopHits([...used, h]);
+      if (!h.trim() || isCannedClinicSlogan(h, intake) || loop.includes(h) || localeScriptBleed(h, locale)) {
+        h = factHeadlineForKind(intake, locale, out[i].kind, used);
+        const gated = gateCustomerAd({ headline: h, body: out[i].primaryText, cta: out[i].cta }, intake, locale);
+        out[i] = { ...out[i], headline: gated.headline, primaryText: gated.body, cta: gated.cta };
+        h = out[i].headline;
+      }
+      used.push(h);
     }
   }
   return out;

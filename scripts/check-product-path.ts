@@ -166,6 +166,13 @@ const wizardSrc = readFileSync(join(root, "components/wizard-flow.tsx"), "utf8")
 if (!wizardSrc.includes("/tools/core-message")) fail("diagnosis approve must continue to core message");
 if (!wizardSrc.includes("diagnosisApproved")) fail("HITL must hide five-agent continue after diagnosis");
 if (!wizardSrc.includes("charterAllowsCampaign")) fail("wizard must niche-gate complete campaign");
+if (/disabled=\{!wizardReady\(intake\)/.test(wizardSrc)) {
+  fail("build CTA must not silently grey when fields are missing");
+}
+if (!wizardSrc.includes("wizard-missing-fields")) fail("missing fields must be an explicit scroll list");
+const nicheGateSrc = readFileSync(join(root, "components/niche-gate.tsx"), "utf8");
+if (nicheGateSrc.includes("CHARTER_NICHES.map")) fail("niche gate must not render five niches as this business’s specialties");
+if (!nicheGateSrc.includes("nicheOutsideReason")) fail("niche gate must explain why the activity is outside specialty");
 
 const generateSrc = readFileSync(join(root, "lib/engine/gemini-generate.ts"), "utf8");
 if (!generateSrc.includes("charterAllowsCampaign") || !generateSrc.includes("niche_gated")) {

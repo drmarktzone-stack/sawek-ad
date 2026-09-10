@@ -24,6 +24,15 @@ if (resolveOperatingNiche(facts("מרפאת שיניים נווה", "dental clin
 if (resolveOperatingNiche(facts("عيادة تجميل", "aesthetic clinic", "بوتوكس وفلر طبي")) !== "medical_clinic") {
   fail("aesthetic clinic should be medical_clinic");
 }
+if (resolveOperatingNiche(facts("د. جوفرين", "", "جراح تجميل متمرس في حيفا — جراحة التجميل")) !== "medical_clinic") {
+  fail("plastic surgeon with empty category must be medical_clinic");
+}
+if (detectVertical(facts("د. جوفرين", "", "جراح تجميل متمرس في حيفا")) !== "clinic") {
+  fail("plastic surgeon description must detectVertical clinic");
+}
+if (resolveOperatingNiche(facts('ד"ר גופרין', "", "כירורגיה פלסטית ואסתטיקה רפואית בחיפה")) !== "medical_clinic") {
+  fail("Hebrew aesthetic surgery with empty category must be medical_clinic");
+}
 if (resolveOperatingNiche(facts("מרכז למידה הדר", "tutoring", "שיעורי עזר לבגרות")) !== "education") {
   fail("tutoring center should be education");
 }
