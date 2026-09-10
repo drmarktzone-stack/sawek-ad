@@ -4,6 +4,7 @@ import type { Locale } from "./types";
 import {
   fetchGoogleJson,
   recordImagenOutcome,
+  VERTEX_GEMINI_IMAGE_MODELS,
   VERTEX_IMAGEN_MODELS,
   vertexAccessToken,
   vertexLocation,
@@ -143,12 +144,14 @@ function walkInlineParts(parts: unknown): { mime: string; imageBase64: string } 
       (typeof o.mimeType === "string" && o.mimeType) ||
       "image/png";
     const mime = mimeRaw === "image/jpg" ? "image/jpeg" : mimeRaw;
+    if (mime.startsWith("image/svg")) continue;
     return { mime, imageBase64: cleaned };
   }
   return null;
 }
 
-function extractImage(json: unknown): { mime: string; imageBase64: string } | null {
+/** Parse Vertex/AI Studio image JSON. Accepts predict bytes and generateContent inlineData. Never SVG. */
+export function extractImage(json: unknown): { mime: string; imageBase64: string } | null {
   if (!json || typeof json !== "object") return null;
   const root = json as Record<string, unknown>;
   const buckets: unknown[] = [];
@@ -177,6 +180,7 @@ function extractImage(json: unknown): { mime: string; imageBase64: string } | nu
       (typeof o.mimeType === "string" && o.mimeType) ||
       "image/png";
     const mime = mimeRaw === "image/jpg" ? "image/jpeg" : mimeRaw;
+    if (mime.startsWith("image/svg")) continue;
     return { mime, imageBase64: cleaned };
   }
 
@@ -208,6 +212,55 @@ function foldReason(prev: ImagenFailReason | null, next: AttemptReason): ImagenF
   if (next === "quota" || prev === "quota") return "quota";
   if (next === "vertex_denied" || prev === "vertex_denied") return "vertex_denied";
   return prev ?? "imagen_error";
+}
+
+const VERTEX_GEMINI_IMAGE_CONFIGS: Record<string, unknown>[] = [
+  { responseModalities: ["TEXT", "IMAGE"] },
+  { responseModalities: ["IMAGE", "TEXT"] },
+];
+
+async function vertexGenerateContent(
+  token: string,
+  project: string,
+  location: string,
+  model: string,
+  prompt: string,
+): Promise<Attempt> {
+  let last: AttemptReason = "imagen_error";
+  for (const generationConfig of VERTEX_GEMINI_IMAGE_CONFIGS) {
+    try {
+      const url = `https://${location}-aiplatform.googleapis.com/v1/projects/${encodeURIComponent(project)}/locations/${encodeURIComponent(location)}/publishers/google/models/${encodeURIComponent(model)}:generateContent`;
+      const { status, json } = await fetchGoogleJson(
+        url,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            contents: [{ role: "user", parts: [{ text: prompt }] }],
+            generationConfig,
+          }),
+        },
+        45000,
+      );
+      if (status >= 200 && status < 300) {
+        const img = extractImage(json);
+        if (img) return { ok: true, ...img, model };
+        last = "imagen_error";
+        continue;
+      }
+      const reason = classifyHttp(status, json, "vertex");
+      if (reason === "quota" || reason === "vertex_denied" || reason === "not_found") {
+        return { ok: false, reason };
+      }
+      last = reason;
+    } catch {
+      last = "imagen_error";
+    }
+  }
+  return { ok: false, reason: last };
 }
 
 async function vertexPredict(
@@ -427,6 +480,19 @@ async function runImagenAttempt(facts: ImagenFacts, prompt: string): Promise<Ima
   let folded: ImagenFailReason | null = null;
 
   if (token) {
+    for (const model of VERTEX_GEMINI_IMAGE_MODELS) {
+      try {
+        const hit = await vertexGenerateContent(token, project, location, model, prompt);
+        if (hit.ok) {
+          const stored = attachStore(hit);
+          recordImagenOutcome({ reason: "ok", model: stored.model || model });
+          return stored;
+        }
+        folded = foldReason(folded, hit.reason);
+      } catch {
+        folded = foldReason(folded, "imagen_error");
+      }
+    }
     for (const model of VERTEX_MODELS) {
       try {
         const hit = await vertexPredict(token, project, location, model, prompt, sampleCount);

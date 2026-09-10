@@ -25,6 +25,7 @@ type Stack = {
   mapping?: {
     requestedPro?: string;
     requestedFlash?: string;
+    requestedImagen?: string;
     livePro?: string;
     liveFlash?: string;
     liveImagen?: string;
@@ -132,7 +133,7 @@ export function GcpStatusPage() {
           <ul className="mt-3 space-y-1 font-mono text-[13px] text-navy">
             <li>{stack.mapping.requestedPro} → {stack.mapping.livePro}</li>
             <li>{stack.mapping.requestedFlash} → {stack.mapping.liveFlash}</li>
-            <li>Imagen 3 → {stack.mapping.liveImagen}</li>
+            <li>{stack.mapping.requestedImagen ?? "imagen-3.0-generate-001"} → {stack.mapping.liveImagen}</li>
             <li>Translation → {stack.mapping.translation}</li>
           </ul>
           <p className="mt-3 text-[12px] text-muted">

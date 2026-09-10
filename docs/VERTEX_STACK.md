@@ -6,10 +6,10 @@ Owner asked for **Gemini 1.5 Pro** and **Gemini 1.5 Flash**. Those publishers ar
 |---|---|---|
 | `gemini-1.5-pro` | `gemini-2.5-pro` (fallback `gemini-2.0-pro`) | CMO strategy, site-audit insights, long-form calendars, script packs, deep ad copy, vision/score |
 | `gemini-1.5-flash` | `gemini-2.5-flash` (fallback `gemini-2.0-flash`) | Burst variations, short Meta / WhatsApp / Google Ads, channel overlay |
-| Imagen 3 | `imagen-3.0-generate-001` (then fast / Imagen 4 alias) | HD banner / ad stills, stored and served at `/api/imagen/:id` |
+| Imagen 3 (publisher) | `gemini-2.5-flash-image` via Vertex `:generateContent` (`responseModalities: TEXT,IMAGE`). Classic `imagen-3.0-generate-001` predict is optional secondary and returns NOT_FOUND on this pack. | HD banner / ad stills, stored and served at `/api/imagen/:id` |
 | Cloud Translation | v3 `projects/{id}:translateText` (v2 fallback) | HE ↔ AR ↔ EN pack + variation localization — neural MT, not string replace |
 
-Code constants: `VERTEX_MODEL_MAPPING`, `VERTEX_GEMINI_PRO_MODELS`, `VERTEX_GEMINI_FLASH_MODELS`, `VERTEX_IMAGEN_MODELS` in `lib/vertex.ts`.
+Code constants: `VERTEX_MODEL_MAPPING`, `VERTEX_GEMINI_PRO_MODELS`, `VERTEX_GEMINI_FLASH_MODELS`, `VERTEX_GEMINI_IMAGE_MODELS`, `VERTEX_IMAGEN_MODELS` in `lib/vertex.ts`.
 
 ## Routing
 
@@ -18,7 +18,7 @@ Code constants: `VERTEX_MODEL_MAPPING`, `VERTEX_GEMINI_PRO_MODELS`, `VERTEX_GEMI
 - `POST /api/generate` uses that map.
 - `POST /api/generate/variations` is the dedicated Flash path.
 - `POST /api/translate` is Cloud Translation only.
-- `POST /api/imagen` calls Imagen 3; success requires real image bytes (no empty SVG as ok).
+- `POST /api/imagen` calls Vertex `gemini-2.5-flash-image` (`:generateContent`) first, then optional Imagen `:predict`, then AI Studio. Success requires real image bytes (no empty SVG as ok).
 - `overlayPackAgency` (Create Complete Ad) calls Pro desk, Flash pieces, Flash variations, Imagen, Cloud Translation, and research. Persists `completeAd.visualSrc`, `flashVariations`, and `completeAd.metadata.gcp`.
 - `GET /api/gemini-status` returns all four services + the 1.5 → 2.5 mapping.
 - UI: `/status`
@@ -45,7 +45,7 @@ import {
   completeGemini,          // Pro / Flash (+ optional Search Grounding)
   runFlashVariations,      // Flash burst
   runProDesk,              // Pro CMO overlay
-  runImagen, runImagenMany,// Imagen 3 stills / carousels
+  runImagen, runImagenMany,// Vertex Gemini image stills / carousels
   translateTexts,          // Cloud Translation HE↔AR↔EN
   runViralDeskJob,         // typed Mohtawak jobs
   loadBrandVoice, saveBrandVoice, FIRESTORE_BRAND_VOICE_COLLECTION,
@@ -58,7 +58,7 @@ import {
 | Hooks | `runViralDeskJob("hooks", body)` | Flash | Short openers |
 | Hook / retention predictor | `runViralDeskJob("predict", body)` | Pro | `{ kind: "gemini_pro_estimate", notLiveMetrics: true }` — **not** live views/CTR/ROAS |
 | Video rewrite | `runViralDeskJob("rewrite", { …, script })` | Pro | |
-| Imagen carousel | `runViralDeskJob("carousel", { …, slides: 5 })` | Imagen 3 | Real bytes; no empty SVG |
+| Imagen carousel | `runViralDeskJob("carousel", { …, slides: 5 })` | Vertex `gemini-2.5-flash-image` | Real bytes; no empty SVG |
 | 30-day calendar | `runViralDeskJob("calendar30", body)` | Pro + Search Grounding | Trend-aware planning; cite URLs; no fake ROAS |
 | Trends | `runViralDeskJob("trends", body)` | Pro + `completeGemini({ grounding: true })` | Search Grounding; cite URLs; no invented views |
 | Market research | `runMarketResearch(intake)` or `POST /api/research` | Pro + free public surfaces | Meta Ad Library (token optional), TikTok Creative Center URLs, Google Ads Transparency, Pinterest Trends, YouTube suggest, LinkedIn Ad Library |

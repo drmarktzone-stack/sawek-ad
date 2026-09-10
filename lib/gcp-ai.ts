@@ -6,7 +6,7 @@
  *
  * Tiers: Pro = deep / predictor / calendar / scripts / trends.
  *        Flash = hooks + burst variations.
- *        Imagen = stills + carousels (real bytes only).
+ *        Image = Vertex gemini-2.5-flash-image stills + carousels (real bytes only).
  *        Translation = HE ↔ AR ↔ EN neural MT.
  * Never invent ROAS or live platform metrics.
  */
@@ -14,6 +14,7 @@ export {
   VERTEX_MODEL_MAPPING,
   VERTEX_GEMINI_PRO_MODELS,
   VERTEX_GEMINI_FLASH_MODELS,
+  VERTEX_GEMINI_IMAGE_MODELS,
   VERTEX_IMAGEN_MODELS,
   modelsForTier,
   defaultModelForTier,

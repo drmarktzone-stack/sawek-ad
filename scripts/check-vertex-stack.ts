@@ -7,6 +7,7 @@ import { join } from "path";
 import {
   VERTEX_GEMINI_FLASH_MODELS,
   VERTEX_GEMINI_PRO_MODELS,
+  VERTEX_GEMINI_IMAGE_MODELS,
   VERTEX_IMAGEN_MODELS,
   VERTEX_MODEL_MAPPING,
   defaultModelForTier,
@@ -15,6 +16,7 @@ import {
 import { shouldGroundGenerateMode, tierForGenerateMode } from "../lib/engine/gemini-generate";
 import { VIRAL_DESK_JOBS } from "../lib/engine/viral-desk";
 import { FIRESTORE_BRAND_VOICE_COLLECTION } from "../lib/brand-voice";
+import { extractImage } from "../lib/imagen";
 
 const root = process.cwd();
 const failures: string[] = [];
@@ -26,12 +28,14 @@ if (VERTEX_MODEL_MAPPING.requestedPro !== "gemini-1.5-pro") fail("requested Pro 
 if (VERTEX_MODEL_MAPPING.requestedFlash !== "gemini-1.5-flash") fail("requested Flash mapping");
 if (VERTEX_MODEL_MAPPING.livePro !== "gemini-2.5-pro") fail(`live Pro ${VERTEX_MODEL_MAPPING.livePro}`);
 if (VERTEX_MODEL_MAPPING.liveFlash !== "gemini-2.5-flash") fail(`live Flash ${VERTEX_MODEL_MAPPING.liveFlash}`);
-if (VERTEX_MODEL_MAPPING.liveImagen !== "imagen-3.0-generate-001") fail("live Imagen");
+if (VERTEX_MODEL_MAPPING.requestedImagen !== "imagen-3.0-generate-001") fail("requested Imagen mapping");
+if (VERTEX_MODEL_MAPPING.liveImagen !== "gemini-2.5-flash-image") fail(`live image ${VERTEX_MODEL_MAPPING.liveImagen}`);
 if (VERTEX_MODEL_MAPPING.translation !== "cloud-translation-v3") fail("translation id");
 
 if (!VERTEX_GEMINI_PRO_MODELS.includes("gemini-2.5-pro")) fail("PRO list missing gemini-2.5-pro");
 if (!VERTEX_GEMINI_FLASH_MODELS.includes("gemini-2.5-flash")) fail("FLASH list missing gemini-2.5-flash");
-if (!VERTEX_IMAGEN_MODELS.includes("imagen-3.0-generate-001")) fail("Imagen 3 missing");
+if (!VERTEX_GEMINI_IMAGE_MODELS.includes("gemini-2.5-flash-image")) fail("Vertex Gemini image missing");
+if (!VERTEX_IMAGEN_MODELS.includes("imagen-3.0-generate-001")) fail("Imagen predict alias missing");
 
 if (defaultModelForTier("pro") !== "gemini-2.5-pro") fail("defaultModelForTier pro");
 if (defaultModelForTier("flash") !== "gemini-2.5-flash") fail("defaultModelForTier flash");
@@ -96,10 +100,45 @@ if (!generate.includes('tier: tierForGenerateMode(mode)')) fail("generate route 
 if (!generate.includes('tier: "pro"')) fail("vision/score missing pro tier");
 
 const imagen = readFileSync(join(root, "lib/imagen.ts"), "utf8");
-if (!imagen.includes("VERTEX_IMAGEN_MODELS")) fail("imagen.ts must use VERTEX_IMAGEN_MODELS");
+if (!imagen.includes("VERTEX_GEMINI_IMAGE_MODELS")) fail("imagen.ts must use VERTEX_GEMINI_IMAGE_MODELS");
+if (!imagen.includes("VERTEX_IMAGEN_MODELS")) fail("imagen.ts must keep VERTEX_IMAGEN_MODELS as secondary");
+if (!imagen.includes("vertexGenerateContent")) fail("imagen.ts must call Vertex generateContent for Gemini image");
+if (!imagen.includes(":generateContent")) fail("imagen.ts must POST Vertex :generateContent");
 if (!imagen.includes("recordImagenOutcome")) fail("imagen.ts must record outcomes");
 if (!imagen.includes("storeImagenImage")) fail("imagen.ts must store stills");
 if (/ok:\s*true[\s\S]{0,80}svg/i.test(imagen)) fail("imagen must not mark SVG junk as ok");
+
+const pngB64 =
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
+const fromGenerate = extractImage({
+  candidates: [{ content: { parts: [{ inlineData: { mimeType: "image/png", data: pngB64 } }] } }],
+});
+if (!fromGenerate || fromGenerate.mime !== "image/png" || fromGenerate.imageBase64 !== pngB64) {
+  fail("extractImage must read generateContent inlineData");
+}
+const fromSnake = extractImage({
+  candidates: [{ content: { parts: [{ inline_data: { mime_type: "image/jpeg", data: pngB64 } }] } }],
+});
+if (!fromSnake || fromSnake.mime !== "image/jpeg" || fromSnake.imageBase64 !== pngB64) {
+  fail("extractImage must read inline_data snake_case");
+}
+const fromPredict = extractImage({
+  predictions: [{ bytesBase64Encoded: pngB64, mimeType: "image/png" }],
+});
+if (!fromPredict || fromPredict.imageBase64 !== pngB64) fail("extractImage must still read Imagen predict bytes");
+if (extractImage({ candidates: [{ content: { parts: [{ inlineData: { mimeType: "image/svg+xml", data: pngB64 } }] } }] })) {
+  fail("extractImage must reject SVG payloads");
+}
+if (extractImage({ candidates: [{ content: { parts: [{ inlineData: { mimeType: "image/png", data: "abc" } }] } }] })) {
+  fail("extractImage must reject tiny payloads");
+}
+const attemptSrc = imagen.slice(imagen.indexOf("async function runImagenAttempt"));
+const genCall = attemptSrc.indexOf("vertexGenerateContent(");
+const predictCall = attemptSrc.indexOf("vertexPredict(");
+const studioCall = attemptSrc.indexOf("googleAiPredict(");
+if (genCall < 0 || predictCall < 0 || studioCall < 0 || !(genCall < predictCall && predictCall < studioCall)) {
+  fail("Vertex generateContent must run before Imagen predict and AI Studio");
+}
 
 const translate = readFileSync(join(root, "lib/translate.ts"), "utf8");
 if (!translate.includes("translation.googleapis.com/v3")) fail("Cloud Translation v3 URL missing");
@@ -122,10 +161,13 @@ if (!run.includes("attachResearchAndSync") && !run.includes("applyResearchToPack
 const vertexDoc = readFileSync(join(root, "docs/VERTEX_STACK.md"), "utf8");
 if (vertexDoc.includes("Use it only for trends")) fail("VERTEX_STACK still limits grounding to trends");
 if (!vertexDoc.includes("runMarketResearch")) fail("VERTEX_STACK missing research desk");
+if (!vertexDoc.includes("gemini-2.5-flash-image")) fail("VERTEX_STACK missing Gemini image model");
+if (!VERTEX_MODEL_MAPPING.reason.includes("gemini-2.5-flash-image")) fail("mapping reason must name gemini-2.5-flash-image");
 
 const env = readFileSync(join(root, ".env.example"), "utf8");
 if (!env.includes("GOOGLE_CLOUD_PROJECT=project-8fd8a005-ae6d-4139-ab4")) fail(".env.example project");
 if (!env.includes("gemini-2.5-pro")) fail(".env.example mapping");
+if (!env.includes("gemini-2.5-flash-image")) fail(".env.example image mapping");
 
 const i18n = readFileSync(join(root, "lib/i18n.ts"), "utf8");
 if (!i18n.includes("gcp.flashDown")) fail("Hebrew Flash-down copy");
@@ -196,4 +238,4 @@ if (failures.length) {
   console.error("FAIL vertex stack\n" + failures.join("\n"));
   process.exit(1);
 }
-console.log("PASS vertex stack: Pro/Flash/Imagen/Translation routing + 1.5→2.5 mapping + viral-desk callbook");
+console.log("PASS vertex stack: Pro/Flash/Gemini-image/Translation routing + 1.5→2.5 mapping + viral-desk callbook");

@@ -16,7 +16,7 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
     headers: {
       "Content-Type": hit.mime,
       "Cache-Control": "private, max-age=1800",
-      "X-Imagen-Model": hit.model || "imagen-3.0-generate-001",
+      "X-Imagen-Model": hit.model || "gemini-2.5-flash-image",
     },
   });
 }

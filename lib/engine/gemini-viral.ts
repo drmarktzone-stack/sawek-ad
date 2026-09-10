@@ -388,10 +388,10 @@ export async function runViralDesk(body: ViralBody): Promise<{
     const imagenNote = batch.images.length
       ? undefined
       : locale === "ar"
-        ? "Imagen 3 غير متاح الآن — الخطوط جاهزة بلا خلفيات مولَّدة."
+        ? "توليد الصورة على Vertex غير متاح الآن — الخطوط جاهزة بلا خلفيات مولَّدة."
         : locale === "he"
-          ? "Imagen 3 לא זמין כרגע — המתארים מוכנים בלי רקעים שנוצרו."
-          : "Imagen 3 is unavailable right now — slide outlines only, no generated backgrounds.";
+          ? "יצירת תמונה ב-Vertex לא זמינה כרגע — המתארים מוכנים בלי רקעים שנוצרו."
+          : "Vertex image is unavailable right now — slide outlines only, no generated backgrounds.";
     return {
       ok: true,
       mode,
