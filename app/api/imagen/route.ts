@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 /**
- * Optional Vertex Imagen 3 still(s). Never logs image bytes or tokens.
+ * Optional Vertex Gemini image still(s) (gemini-2.5-flash-image). Never logs image bytes or tokens.
  * Always JSON 200: { ok:true, mime, imageBase64, images } | { ok:false, reason, images }.
  * Accepts sampleCount or prompts[] for 8–12 parallel stills.
  */

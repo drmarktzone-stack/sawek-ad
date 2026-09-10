@@ -14,12 +14,13 @@ export type GeminiTier = "pro" | "flash";
 export const VERTEX_MODEL_MAPPING = {
   requestedPro: "gemini-1.5-pro",
   requestedFlash: "gemini-1.5-flash",
+  requestedImagen: "imagen-3.0-generate-001",
   livePro: "gemini-2.5-pro",
   liveFlash: "gemini-2.5-flash",
-  liveImagen: "imagen-3.0-generate-001",
+  liveImagen: "gemini-2.5-flash-image",
   translation: "cloud-translation-v3",
   reason:
-    "Gemini 1.5 Pro/Flash are retired on Vertex AI. SAWEK AD maps them to the current Pro/Flash publishers on the $300 GCP pack.",
+    "Gemini 1.5 Pro/Flash are retired on Vertex AI. SAWEK AD maps them to the current Pro/Flash publishers on the $300 GCP pack. Classic Imagen publisher models (imagen-3.0-generate-001 and aliases) return NOT_FOUND here — ad stills use gemini-2.5-flash-image via Vertex generateContent.",
 } as const;
 
 /** Deep jobs: CMO strategy, site audit, calendars, script packs, agency copy. */
@@ -35,7 +36,10 @@ export const VERTEX_GEMINI_FLASH_MODELS = [
 /** @deprecated Prefer VERTEX_GEMINI_FLASH_MODELS / modelsForTier("flash"). */
 export const VERTEX_GEMINI_MODELS = VERTEX_GEMINI_FLASH_MODELS;
 
-/** Vertex Imagen 3 first; current Imagen aliases after. Never a fake SVG. */
+/** Vertex Gemini native image via :generateContent. Primary stills path on this $300 pack. */
+export const VERTEX_GEMINI_IMAGE_MODELS = ["gemini-2.5-flash-image"] as const;
+
+/** Classic Imagen :predict publishers. Optional secondary — often NOT_FOUND on this project. Never a fake SVG. */
 export const VERTEX_IMAGEN_MODELS = [
   "imagen-3.0-generate-001",
   "imagen-3.0-fast-generate-001",
@@ -471,7 +475,7 @@ const SERVICE_ROLES: Record<GcpServiceId, string> = {
     "Primary marketing brain — audience analysis, CMO strategy, site audit, long-form calendars, script packs",
   gemini_flash:
     "Real-time burst — dozens of ad variations, headlines, short Meta/WhatsApp/Google Ads texts",
-  imagen: "HD banner / ad visuals concept-matched to the copy (Imagen 3 on Vertex)",
+  imagen: "HD banner / ad visuals concept-matched to the copy (gemini-2.5-flash-image on Vertex)",
   translation: "Cloud Translation API — culturally-aware HE ↔ AR ↔ EN pack and variation localization",
 };
 
@@ -513,7 +517,7 @@ export async function publicGcpStackStatus(): Promise<GcpStackStatus> {
       model: imagen.model || VERTEX_MODEL_MAPPING.liveImagen,
       role: SERVICE_ROLES.imagen,
       provider: token ? "vertex" : "none",
-      reason: !token ? "no_adc" : imagen.reason,
+      reason: !token ? "no_adc" : imagen.reason || "ok",
     },
     {
       id: "translation",

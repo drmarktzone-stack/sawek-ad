@@ -25,7 +25,7 @@ export const VIRAL_DESK_JOBS: Record<
   hooks: { tier: "flash", note: "Hook bank — short opening lines" },
   predict: { tier: "pro", note: "Estimated hook/retention 1–100 — not live platform metrics" },
   rewrite: { tier: "pro", note: "Rewrite a video script from facts + source text" },
-  carousel: { tier: "imagen", note: "Imagen 3 sequential stills — real bytes only" },
+  carousel: { tier: "imagen", note: "Vertex gemini-2.5-flash-image sequential stills — real bytes only" },
   calendar30: { tier: "pro", grounding: true, note: "30-day trend-aware calendar — no fake ROAS" },
   trends: { tier: "pro", grounding: true, note: "Search-grounded trend notes — no invented views" },
 };

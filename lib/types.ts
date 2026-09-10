@@ -740,7 +740,7 @@ export interface CarouselSlide {
   headline: string;
   body: string;
   visual: string;
-  /** Imagen 3 still when Vertex returns real bytes — never a fake SVG. */
+  /** Vertex Gemini image still when generateContent returns real bytes — never a fake SVG. */
   imageUrl?: string;
   imageSource?: "imagen";
 }
