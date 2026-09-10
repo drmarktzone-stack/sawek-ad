@@ -10,7 +10,8 @@ import { CampaignAdVisual } from "@/components/ad-mockup";
 import { Button } from "@/components/ui/button";
 import { LangLink } from "@/components/lang-link";
 import { useI18n } from "@/components/i18n-provider";
-import { loadDraft, getCampaign, INGEST_APPLIED_EVENT, saveDraft } from "@/lib/storage";
+import { loadDraft, INGEST_APPLIED_EVENT, saveDraft } from "@/lib/storage";
+import { loadCampaignTools } from "@/lib/campaign-tools";
 import { assemblePack, overlayPackAgency } from "@/lib/engine/run";
 import { validateIntake, wizardReady } from "@/lib/engine/validate";
 import { lockDefaultDialect } from "@/lib/engine/voice";
@@ -26,7 +27,7 @@ import { useIsClient } from "@/lib/use-is-client";
 import { useAuth } from "@/components/auth-provider";
 import { OsDisclosure, OsEmpty, OsLoading, OsPage, OsRow, OsSection, OsUnknown, OverlayStatus, ValueOrUnknown } from "@/components/command/primitives";
 import { CampaignJourney } from "@/components/campaign-journey";
-import { ContentJobsStrip } from "@/components/content-jobs";
+import { NextStepCard } from "@/components/next-step-card";
 import { OfferGateBanner } from "@/components/offer-gate-banner";
 import { offerGate } from "@/lib/engine/offer-builder";
 
@@ -41,10 +42,9 @@ export function TaskWorkspace() {
   const [gateOpen, setGateOpen] = useState(false);
 
   function hydrate() {
-    const d = loadDraft();
-    setIntake(d.intake);
-    const existing = d.packId ? getCampaign(d.packId) : null;
-    setPack(existing ?? null);
+    const { intake: truth, pack: live } = loadCampaignTools();
+    setIntake(truth);
+    setPack(live);
     setReady(true);
   }
 
@@ -114,15 +114,13 @@ export function TaskWorkspace() {
   const intakeReady = wizardReady(intake);
   const openHitl =
     intakeReady &&
-    Boolean(pack) &&
-    (loadDraft().phase === "agents" ||
-      pack?.diagnosis.approved === false ||
-      pack?.agentStatus.diagnostic === "needs_approval");
+    Boolean(pack?.diagnosis?.hypotheses?.length) &&
+    pack?.diagnosis.approved === false;
 
   return (
     <OsPage data-testid="task-workspace" dir={locale === "en" ? "ltr" : "rtl"}>
       <CampaignJourney compact />
-      <ContentJobsStrip compact />
+      <NextStepCard compact />
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <LangLink href="/dashboard" className="inline-flex items-center gap-2 text-sm font-bold text-muted hover:text-navy">
           <LayoutDashboard className="size-4" />

@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import type { CampaignPack, Locale } from "@/lib/types";
-import { latestPack } from "@/lib/active-pack";
 import { installDemoPack } from "@/lib/active-pack";
+import { loadCampaignTools } from "@/lib/campaign-tools";
 import { isPublishedDemoId } from "@/lib/demo-catalog";
 import { DepartmentRail } from "@/components/department-shell";
+import { NextStepCard } from "@/components/next-step-card";
 import { ViralDesk } from "@/components/viral-desk";
 import { DemoPicker } from "@/components/demo-picker";
 import { ConquerHeadline } from "@/components/stepper";
@@ -21,8 +22,8 @@ export default function ViralPage() {
   const [packLang, setPackLang] = useState<Locale>(locale);
 
   if (client && !booted) {
-    const latest = latestPack();
-    if (latest) setPack(latest);
+    const { pack: live } = loadCampaignTools();
+    if (live) setPack(live);
     setPackLang(locale);
     setBooted(true);
   }
@@ -40,6 +41,7 @@ export default function ViralPage() {
       <ConquerHeadline subtitle={t("nav.viral")} />
       <p className="mx-auto mb-6 max-w-2xl text-center text-sm text-muted">{t("dept.viralLead")}</p>
       <DepartmentRail />
+      <NextStepCard compact />
       <div className="mb-6 flex flex-col items-center gap-3">
         <p className="text-sm text-muted">{t("home.demos.secondary")}</p>
         <DemoPicker onSelect={(id) => setPack(installDemoPack(id, packLang))} size="default" />

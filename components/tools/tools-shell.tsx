@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { CampaignJourney } from "@/components/campaign-journey";
-import { ContentJobsStrip } from "@/components/content-jobs";
+import { NextStepCard } from "@/components/next-step-card";
 import { OsPage } from "@/components/command/primitives";
 import { useI18n } from "@/components/i18n-provider";
 import { DemoPicker } from "@/components/demo-picker";
@@ -24,7 +24,7 @@ export function ToolsShell({
   return (
     <OsPage data-testid={testId} dir={locale === "en" ? "ltr" : "rtl"}>
       <CampaignJourney />
-      <ContentJobsStrip compact />
+      <NextStepCard compact />
       <p className="os-kicker">{kicker}</p>
       <h1 className="os-title mt-2 text-3xl sm:text-4xl">{title}</h1>
       <p className="mt-3 max-w-2xl text-base text-muted">{lead}</p>

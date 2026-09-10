@@ -11,7 +11,7 @@ import {
   type IngestReviewRow,
 } from "@/lib/document-ingest";
 import { applyIntakeToDraft } from "@/lib/storage";
-import { emptyIntake, wizardReady } from "@/lib/engine/validate";
+import { emptyIntake } from "@/lib/engine/validate";
 import { lockDefaultDialect } from "@/lib/engine/voice";
 import { clearPendingDemo } from "@/lib/demo";
 import { clearEmptyCampaign } from "@/lib/empty-campaign";
@@ -280,11 +280,7 @@ export function UrlIngest() {
     setPosts([]);
     setBrandKit({ colors: [], source: "none" });
     if (pathname.startsWith("/task")) return;
-    if (!wizardReady(next)) {
-      router.push(withLang("/#studio", locale));
-      return;
-    }
-    router.push(withLang("/tools/core-message", locale));
+    router.push(withLang("/#studio", locale));
   }
 
   return (

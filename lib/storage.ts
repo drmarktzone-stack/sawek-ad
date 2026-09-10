@@ -1,4 +1,4 @@
-import type { CampaignPack, CoachReport, HsoStudioState, Intake, LabRun, Locale, SelfPlan, SelfProfile, StudioPiece } from "./types";
+import type { CampaignPack, CoachReport, HsoStudioState, Intake, LabRun, Locale, SelfPlan, SelfProfile, StudioPiece, ViralDeskState } from "./types";
 import { emptyIntake } from "./engine/validate";
 import { coachIntake } from "./engine/coach";
 import { copyLeaksClinic, intakeIsClinicDemo, isBlockedEmptySessionName } from "./clinic-leak";
@@ -69,6 +69,7 @@ export interface DraftState {
   packId?: string;
   coach?: CoachReport;
   hsoStudio?: HsoStudioState;
+  viral?: ViralDeskState;
 }
 
 export function loadDraft(): DraftState {
@@ -112,6 +113,7 @@ export function loadDraft(): DraftState {
       d.hsoStudio && typeof d.hsoStudio === "object" && Array.isArray(d.hsoStudio.variants)
         ? d.hsoStudio
         : undefined,
+    viral: d.viral && typeof d.viral === "object" ? d.viral : undefined,
   };
 }
 

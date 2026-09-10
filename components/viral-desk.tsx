@@ -18,6 +18,7 @@ import type {
   VoiceProfile,
 } from "@/lib/types";
 import { applyVoiceToIntake, voiceFromIntake, voiceIsSaved } from "@/lib/engine/voice";
+import { loadCampaignTools, persistLockedVoice, persistViral } from "@/lib/campaign-tools";
 import {
   buildBioPack,
   buildCarouselPack,
@@ -29,7 +30,6 @@ import {
   remixNeedTranscript,
 } from "@/lib/engine/viral-content";
 import { buildPostingCalendar, postingKindLabel } from "@/lib/engine/posting-calendar";
-import { loadDraft, saveDraft } from "@/lib/storage";
 import { useI18n } from "@/components/i18n-provider";
 import { Button } from "@/components/ui/button";
 import { Input, Label, Textarea } from "@/components/ui/input";
@@ -107,8 +107,8 @@ export function ViralDesk({
   const { t, locale } = useI18n();
   const search = useSearchParams();
   const lang = packLang ?? locale;
-  const draft = loadDraft();
-  const intake0 = pack?.intake ?? draft.intake;
+  const tools = loadCampaignTools();
+  const intake0 = pack?.intake ?? tools.intake;
   const [voice, setVoice] = useState<VoiceProfile>(() => voiceFromIntake(intake0));
   const [savedFlash, setSavedFlash] = useState(false);
   const [saveHint, setSaveHint] = useState("");
@@ -161,7 +161,7 @@ export function ViralDesk({
   }, [search]);
 
   const currentIntake = useMemo((): Intake => {
-    const base = pack?.intake ?? loadDraft().intake;
+    const base = pack?.intake ?? loadCampaignTools().intake;
     return applyVoiceToIntake(base, voice);
   }, [pack?.intake, voice]);
 
@@ -170,9 +170,8 @@ export function ViralDesk({
       setSaveHint(t("viral.voiceNeed"));
       return;
     }
-    const nextIntake = applyVoiceToIntake(pack?.intake ?? loadDraft().intake, voice);
-    const d = loadDraft();
-    saveDraft({ ...d, intake: { ...d.intake, ...nextIntake, voice } });
+    persistLockedVoice(voice);
+    const nextIntake = applyVoiceToIntake(pack?.intake ?? loadCampaignTools().intake, voice);
     if (pack && onPack) {
       onPack({ ...pack, intake: nextIntake, updatedAt: new Date().toISOString() });
     }
@@ -213,7 +212,6 @@ export function ViralDesk({
   }
 
   function commitViral(partial: Partial<ViralDeskState>) {
-    if (!pack || !onPack) return;
     const viral: ViralDeskState = {
       idea,
       scripts,
@@ -225,7 +223,9 @@ export function ViralDesk({
       analysis,
       ...partial,
     };
-    onPack({ ...pack, viral, updatedAt: new Date().toISOString() });
+    const snap = persistViral(viral);
+    if (snap.pack && onPack) onPack(snap.pack);
+    else if (pack && onPack) onPack({ ...pack, viral, updatedAt: new Date().toISOString() });
   }
 
   async function callViral(mode: Tab, extra: Record<string, unknown> = {}) {

@@ -10,10 +10,10 @@ import {
   Pencil,
   SlidersHorizontal,
   Sparkles,
-  Users,
   WandSparkles,
   Coins,
   Activity,
+  Link2,
 } from "lucide-react";
 
 export type NavKey =
@@ -50,20 +50,20 @@ export type NavItem = {
   icon: LucideIcon;
 };
 
+/** Primary = the one campaign journey. Everything else is More or hidden. */
 export const PRIMARY_NAV: NavItem[] = [
-  { href: "/dashboard", key: "nav.command", icon: LayoutDashboard },
-  { href: "/task/ad", key: "nav.create", icon: WandSparkles },
+  { href: "/", key: "nav.build", icon: Link2 },
   { href: "/tools/core-message", key: "nav.voice", icon: Fingerprint },
   { href: "/tools/offer", key: "nav.offerTool", icon: Compass },
+  { href: "/task/ad", key: "nav.create", icon: WandSparkles },
   { href: "/campaigns", key: "nav.campaigns", icon: Folder },
 ];
 
 export const MORE_NAV: NavItem[] = [
-  { href: "/studio", key: "nav.studio", icon: Pencil },
-  { href: "/tools/hso", key: "nav.hso", icon: Megaphone },
-  { href: "/", key: "nav.build", icon: WandSparkles },
   { href: "/viral", key: "nav.viral", icon: Sparkles },
-  { href: "/leads", key: "nav.leads", icon: Users },
+  { href: "/tools/hso", key: "nav.hso", icon: Megaphone },
+  { href: "/studio", key: "nav.studio", icon: Pencil },
+  { href: "/dashboard", key: "nav.command", icon: LayoutDashboard },
   { href: "/self", key: "nav.self", icon: SlidersHorizontal },
   { href: "/medical/optibrain", key: "nav.medical", icon: Brain },
   { href: "/pricing", key: "nav.pricing", icon: Coins },
@@ -72,7 +72,7 @@ export const MORE_NAV: NavItem[] = [
 ];
 
 export const DOCK_NAV: NavItem[] = [
-  { href: "/dashboard", key: "nav.command", icon: LayoutDashboard },
+  { href: "/", key: "nav.build", icon: Link2 },
   { href: "/task/ad", key: "nav.create", icon: WandSparkles },
   { href: "/tools/offer", key: "nav.offerTool", icon: Compass },
   { href: "/campaigns", key: "nav.campaigns", icon: Folder },
