@@ -468,11 +468,13 @@ export function whatsappScript(intake: Intake, locale: Locale): string {
     const h1 = isWalkIn(intake) && isPediatrics(intake) ? `${LOCKED_AR_H1}.` : "";
     const site = intake.website?.trim() ?? "";
     const hello =
-      niche === "fitness_studio"
-        ? `أهلا، هون ${n} — ستوديو تدريب.`
-        : niche === "home_trades"
-          ? `أهلا، هون ${n} — شغل بيت.`
-          : `أهلا، هون ${n}.`;
+      niche === "beauty_salon"
+        ? `أهلا، هون ${n} — صالون.`
+        : niche === "real_estate"
+          ? `أهلا، هون ${n} — مكتب عقاري.`
+          : niche === "local_retail"
+            ? `أهلا، هون ${n} — محل.`
+            : `أهلا، هون ${n}.`;
     return [
       h1,
       hello,
@@ -496,11 +498,13 @@ export function whatsappScript(intake: Intake, locale: Locale): string {
         : "מתי נוח לתור?";
     const site = intake.website?.trim() ?? "";
     const hello =
-      niche === "fitness_studio"
-        ? `שלום, כאן ${n} — סטודיו אימונים.`
-        : niche === "home_trades"
-          ? `שלום, כאן ${n} — עבודות בית.`
-          : `שלום, כאן ${n}.`;
+      niche === "beauty_salon"
+        ? `שלום, כאן ${n} — מספרה.`
+        : niche === "real_estate"
+          ? `שלום, כאן ${n} — תיווך.`
+          : niche === "local_retail"
+            ? `שלום, כאן ${n} — חנות.`
+            : `שלום, כאן ${n}.`;
     const open = wa ? `${hello} וואטסאפ ${wa}.` : site ? `${hello} ${site}` : hello;
     return [
       open,
@@ -522,11 +526,13 @@ export function whatsappScript(intake: Intake, locale: Locale): string {
       : "When works for a visit?";
   const site = intake.website?.trim() ?? "";
   const hello =
-    niche === "fitness_studio"
-      ? `Hi, this is ${n} — a training studio.`
-      : niche === "home_trades"
-        ? `Hi, this is ${n} — home trades.`
-        : `Hi, this is ${n}.`;
+    niche === "beauty_salon"
+      ? `Hi, this is ${n} — a salon.`
+      : niche === "real_estate"
+        ? `Hi, this is ${n} — a local broker.`
+        : niche === "local_retail"
+          ? `Hi, this is ${n} — a local shop.`
+          : `Hi, this is ${n}.`;
   const open = wa ? `${hello} WhatsApp ${wa}.` : site ? `${hello} ${site}` : hello;
   return [
     open,

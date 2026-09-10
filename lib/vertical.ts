@@ -30,7 +30,7 @@ const FOOD_AS_BUSINESS =
   /restaurant|מסעדה|مطعم|מטבח|ים-?תיכון|mediterranean|mezze|מזה|hummus|חומוס|حمص|shawarma|شاورما|שוארמה|grill|גריל|غريل|burger|بورجر|برغر|המבורגר|בורגר|همبرغر|dessert|קינוח|حلوي|كباب|kebab|falafel|פלאפל|pizza|פיצה|بيتزا|steak|סטייק|kitchen|مطبخ|cafe|קפה|مقهى|أفندنا|أفندن|افندن|afanden|grill king|مأكول|גלידה|ice cream|حلويات|bakery|מאפיי|מאפה|مخبز|معجنات/i;
 
 const RETAIL_AS_BUSINESS =
-  /אופנה|בוטיק|بوتيك|חנות|חנויות|מותגים|עיר המותגים|שופינג|לייף\s*סטייל|הנעלה|ביגוד|fashion|boutique|outlet|\bmall\b|apparel|clothing|retail|lifestyle store|\bshops?\b|brand city|shopping|\bsport\b|sneakers/i;
+  /אופנה|בוטיק|بوتيك|חנות|חנויות|מותגים|עיר המותגים|שופינג|לייף\s*סטייל|הנעלה|ביגוד|fashion|boutique|outlet|\bmall\b|apparel|clothing|retail|lifestyle store|\bshops?\b|brand city|shopping|\bsport\b|sneakers|מכשירי חשמל|أجهزة كهرب|كهربائيات|appliances|electronics store|כלי בית|أدوات منزلية|white goods|חנות אלקטרוניקה|محل أجهزة/i;
 
 const SCHOOL_AS_BUSINESS =
   /בית ספר|مدرسة|school|עירייה|بلدية|municipality|עמותה|جمعية|\bngo\b|תחנה לבריאות|محطة صحة|public health|גן ילדים|روضة|tutoring|שיעורי עזר|دروس خصوصية|מורה פרטי|معلم خصوصي|מרכז למידה|مركز تعليمي|הכנה לבגרות|توجيهي/i;

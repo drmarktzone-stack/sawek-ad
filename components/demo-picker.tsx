@@ -37,7 +37,7 @@ export function DemoPicker({ onSelect, className, tone = "light" }: Props) {
         {locale === "he" ? "בחרו הדגמה" : locale === "ar" ? "اختاروا عرضاً" : "Choose a demo"}
       </p>
       <ul className="divide-y divide-[var(--line)]">
-        {DEMO_CATALOG.filter((d) => d.kind !== "retail").map((d) => {
+        {DEMO_CATALOG.map((d) => {
           const ideas = ideaNamesById[d.id] ?? [];
           return (
             <li key={d.id}>

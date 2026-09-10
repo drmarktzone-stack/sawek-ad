@@ -101,10 +101,9 @@ export function prefillCampaignFields(fields: Fields, corpus = ""): Fields {
   }
 
   if (!has(out, "audience")) {
-    if (niche === "home_trades") out.audience = "homeowners";
-    else if (niche === "fitness_studio") out.audience = "young";
-    else if (niche === "education") out.audience = "parents";
-    else if (grocery || vertical === "generic" || vertical === "restaurant" || niche === "restaurant") {
+    if (niche === "beauty_salon") out.audience = "women";
+    else if (niche === "real_estate") out.audience = "homeowners";
+    else if (niche === "local_retail" || grocery || vertical === "generic" || vertical === "restaurant" || niche === "restaurant") {
       out.audience = "local_families";
     }
   }

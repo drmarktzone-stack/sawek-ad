@@ -8,29 +8,29 @@ import { detectVertical, type VerticalFacts } from "./vertical";
 
 export type CharterNiche =
   | "medical_clinic"
-  | "education"
   | "restaurant"
-  | "home_trades"
-  | "fitness_studio";
+  | "beauty_salon"
+  | "local_retail"
+  | "real_estate";
 
 export type OperatingNiche = CharterNiche | "unsupported";
 
 export const CHARTER_NICHES: readonly CharterNiche[] = [
   "medical_clinic",
-  "education",
   "restaurant",
-  "home_trades",
-  "fitness_studio",
+  "beauty_salon",
+  "local_retail",
+  "real_estate",
 ] as const;
 
-const FITNESS_RE =
-  /חדר כושר|\bgym\b|fitness studio|pilates|פילאטיס|yoga studio|יוגה|بوتيك رياضي|استوديو رياضي|نادي رياضي|crossfit|קרוספיט|אימון אישי|مدرب شخصي|personal trainer|boutique (fitness|studio)|studio (fitness|pilates|yoga)/i;
+const SALON_RE =
+  /מספרה|salon|barber|حلاق|صالون|מכון יופי|مصفف|صبّاغ شعر|שיער|nails|ציפורן|מניקור|pedicure|يوغا وجه|beauty salon|hair (salon|dresser)|ברבר|كوافير/i;
 
-const HOME_TRADES_RE =
-  /שיפוצ|ترميم|renovat|\bcontractor\b|קבלן|مقاول|אינסטל|سباك|\bplumb|\bחשמל|كهرب|electric|מיזוג|تكييف|\bhvac\b|צביעה|دهان|\bpaint|ריצוף|بلاط|גגות|\broof|גבס|جبس|אלומיניום|المنيوم|handyman|הנדימן|עבודות בית|home (trade|repair)|שפכטל|טיח/i;
+const REAL_ESTATE_RE =
+  /נדל["״']?ן|תיווך|מתווך|عقارات|\bعقار\b|مكتب عقاري|وكيل عقاري|realtor|real\s*estate|\bbroker\b|דירות למכירה|شقق للبيع|للبيع والإيجار|נכסים למכירה|property (broker|agent)|يسكن|השכרה ומכירה/i;
 
-const TUTOR_RE =
-  /tutoring|שיעורי עזר|دروس خصوصية|מורה פרטי|معلم خصوصي|מרכז למידה|مركز تعليمي|הכנה לבגרות|توجيهي|בגרויות|private tutor|معهد تعليمي/i;
+const APPLIANCE_RE =
+  /מכשירי חשמל|أجهزة كهرب|كهربائيات|appliances|electronics store|כלי בית|أدوات منزلية|white goods|חנות אלקטרוניקה|محل أجهزة/i;
 
 function hay(facts: VerticalFacts): string {
   return `${facts.businessName ?? ""} ${facts.category ?? ""} ${facts.description ?? ""}`;
@@ -44,10 +44,10 @@ export function resolveOperatingNiche(facts: VerticalFacts): OperatingNiche {
   const v = detectVertical(facts);
   const text = hay(facts);
   if (v === "clinic") return "medical_clinic";
-  if (v === "school" || TUTOR_RE.test(text)) return "education";
   if (v === "restaurant") return "restaurant";
-  if (FITNESS_RE.test(text)) return "fitness_studio";
-  if (HOME_TRADES_RE.test(text)) return "home_trades";
+  if (SALON_RE.test(text)) return "beauty_salon";
+  if (v === "retail" || APPLIANCE_RE.test(text)) return "local_retail";
+  if (REAL_ESTATE_RE.test(text)) return "real_estate";
   return "unsupported";
 }
 
@@ -64,11 +64,11 @@ export function charterAllowsCampaign(intake: Intake): boolean {
 
 export function nicheLabel(n: OperatingNiche, locale: Locale): string {
   const labels: Record<OperatingNiche, Record<Locale, string>> = {
-    medical_clinic: { he: "מרפאה / שיניים / אסתטיקה רפואית", ar: "عيادة / أسنان / تجميل طبي", en: "Medical / dental / aesthetic clinic" },
-    education: { he: "שיעורים פרטיים / חינוך מקומי", ar: "دروس خصوصية / تعليم محلي", en: "Tutoring / local education" },
-    restaurant: { he: "מסעדה / בית קפה", ar: "مطعم / مقهى", en: "Restaurant / café" },
-    home_trades: { he: "שיפוצים / קבלנים / מקצועות הבית", ar: "ترميم / مقاولون / حرف البيت", en: "Renovation / contractors / home trades" },
-    fitness_studio: { he: "סטודיו כושר בוטיק", ar: "ستوديو لياقة مستقل", en: "Boutique fitness studio" },
+    medical_clinic: { he: "מרפאה מקומית", ar: "عيادة محلية", en: "Local medical clinic" },
+    restaurant: { he: "מסעדה / בית קפה / מאפייה", ar: "مطعم / مقهى / مخبز", en: "Restaurant / café / bakery" },
+    beauty_salon: { he: "מספרה / ברבר / יופי", ar: "صالون / حلاق / تجميل", en: "Beauty salon / barber" },
+    local_retail: { he: "קמעונאות מקומית (מכולת / בוטיק / מכשירים)", ar: "تجزئة محلية (بقالة / بوتيك / أجهزة)", en: "Local retail (grocery / boutique / appliances)" },
+    real_estate: { he: "תיווך נדל״ן מקומי", ar: "مكتب عقاري محلي", en: "Local real estate broker" },
     unsupported: { he: "מחוץ לחמש הנישות", ar: "برّات الخمس تخصّصات", en: "Outside the five niches" },
   };
   return labels[n][locale];

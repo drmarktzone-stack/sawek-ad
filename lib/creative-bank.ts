@@ -330,13 +330,14 @@ const LAYOUTS: LayoutSpec[] = [
   { id: "sale-story", channel: "story", shape: "story", sale: true, name: L("סטורי מבצע", "ستوري عرض", "Sale story") },
 ];
 
-export type ServiceFamily = "salon" | "gym" | "cafe" | "workshop" | "pro" | "trades" | null;
+export type ServiceFamily = "salon" | "gym" | "cafe" | "workshop" | "pro" | "trades" | "realty" | null;
 
 /** Distinctive generic-service banks — never invent ratings or prices. */
 export function serviceFamily(intake?: Intake): ServiceFamily {
   if (!intake) return null;
   const blob = `${intake.businessName} ${intake.category} ${intake.description}`.toLowerCase();
-  if (/salon|ספר|מספרה|حلاق|صالون|barber|שיער|تجميل|יופי|nails|ציפורן/.test(blob)) return "salon";
+  if (/salon|ספר|מספרה|حلاق|صالون|barber|שיער|יופי|nails|ציפורן/.test(blob)) return "salon";
+  if (/נדל["״']?ן|תיווך|מתווך|عقارات|مكتب عقاري|وكيل عقاري|realtor|real\s*estate|\bbroker\b/.test(blob)) return "realty";
   if (/gym|כושר|نادي|fitness|חדר כושר|yoga|יוגה|pilates|פילאטיס/.test(blob)) return "gym";
   if (/שיפוצ|ترميم|renovat|contractor|קבלן|مقاول|אינסטל|سباك|plumb|חשמל|كهرب|electric|מיזוג|تكييف|hvac|צביעה|دهان|paint|handyman|הנדימן/.test(blob)) return "trades";
   if (/cafe|קפה|مقهى|coffee|espresso/.test(blob) && !isBakery(intake)) return "cafe";
@@ -376,6 +377,11 @@ const SERVICE_HOOKS: Record<Exclude<ServiceFamily, null>, Record<Locale, string[
     ar: ["{name} — شغل بالبيت، مش كتالوج أسعار مختلق.", "{advantage}", "واتساب لعرض سعر — بلا رقم ما انقال."],
     en: ["{name} — work in the home, not an invented price catalog.", "{advantage}", "WhatsApp for a quote — no number that was never said."],
   },
+  realty: {
+    he: ["{name} — נכס מהעמוד, לא הבטחת תשואה.", "{advantage}", "וואטסאפ לסיור — בלי מחיר מומצא."],
+    ar: ["{name} — عقار من الصفحة، مش وعد عائد.", "{advantage}", "واتساب لجولة — بلا سعر مختلق."],
+    en: ["{name} — a listing from the page, not a yield promise.", "{advantage}", "WhatsApp for a viewing — no invented price."],
+  },
 };
 
 const SERVICE_ANGLES: Record<Exclude<ServiceFamily, null>, Record<Locale, string[]>> = {
@@ -408,6 +414,11 @@ const SERVICE_ANGLES: Record<Exclude<ServiceFamily, null>, Record<Locale, string
     he: ["עבודה בבית", "תמונת עבודה אמיתית", "וואטסאפ להצעה בלי מחיר מומצא", "בעלי בתים באזור"],
     ar: ["شغل بالبيت", "صورة شغل حقيقية", "واتساب لعرض بلا سعر مختلق", "أصحاب بيوت بالمنطقة"],
     en: ["work in the home", "a real job photo", "WhatsApp for a quote, no invented price", "homeowners nearby"],
+  },
+  realty: {
+    he: ["נכס אחד מהעמוד", "כתובת שפורסמה", "וואטסאפ לסיור בלי תשואה", "מחפשי דירה באזור"],
+    ar: ["عقار واحد من الصفحة", "عنوان منشور", "واتساب لجولة بلا عائد", "دورين بيت بالمنطقة"],
+    en: ["one listing from the page", "the published address", "WhatsApp for a viewing, no yield", "people looking nearby"],
   },
 };
 
