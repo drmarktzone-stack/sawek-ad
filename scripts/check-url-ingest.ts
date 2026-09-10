@@ -887,6 +887,9 @@ else {
   if (!/راهط|لهافيم/.test(String(ak.fields.location || ""))) {
     fail(`alkaramah location missing delivery cities ${JSON.stringify(ak.fields.location)}`);
   }
+  if (/ديجيتال|digital\s*life|برمجة/.test(String(ak.fields.location || ""))) {
+    fail(`alkaramah location kept vendor chrome ${JSON.stringify(ak.fields.location)}`);
+  }
   if (/0123456789/.test(JSON.stringify(ak.fields))) fail("alkaramah invented placeholder phone");
   if (detectVertical(ak.fields as { businessName?: string; category?: string; description?: string }) === "clinic") {
     fail("alkaramah leaked clinic vertical");
