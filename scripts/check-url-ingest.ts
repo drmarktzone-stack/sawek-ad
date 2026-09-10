@@ -862,6 +862,11 @@ if (pastedTruth.website !== "https://alkaramah-market.com/") {
 if (pastedTruth.name) fail(`kicker leaked as business name ${JSON.stringify(pastedTruth.name)}`);
 if (!isBrandChromeText("نظام تسويق هادي")) fail("app kicker must count as chrome, not a business");
 if (isBrandChromeText("الكرامة")) fail("real supermarket name must not be treated as chrome");
+const gluedName = interpretCampaignPaste("https://alkaramah-market.com/نظامتسويقهادي");
+if (gluedName.website !== "https://alkaramah-market.com/") {
+  fail(`glued name paste website ${JSON.stringify(gluedName.website)}`);
+}
+if (gluedName.name) fail(`glued kicker leftover as name ${JSON.stringify(gluedName.name)}`);
 const dirtyInspect = inspectUrl(dirtyBrand);
 if (!dirtyInspect.ok || dirtyInspect.url.href.replace(/\/$/, "") !== "https://alkaramah-market.com") {
   fail(`inspectUrl must clean dirty paste (got ${dirtyInspect.ok ? dirtyInspect.url.href : dirtyInspect.error})`);

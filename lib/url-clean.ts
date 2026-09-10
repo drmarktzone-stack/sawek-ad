@@ -152,12 +152,11 @@ export function isBrandChromeText(raw: string): boolean {
   return BRAND_LEAK_RE.test(s) && stripped.replace(/https?:\/\/\S+/gi, "").trim().length < 3;
 }
 
-/** Dirty paste in any truth field: pull the URL, never keep the kicker as the business name. */
+/** Dirty paste: if a URL is present, that is the website — leftovers are chrome, never the business name. */
 export function interpretCampaignPaste(raw: string): { website: string; name: string } {
   const website = sanitizePastedUrl(raw);
-  let name = stripBrandLeak(raw);
-  if (website) name = name.split(website).join(" ").trim();
-  name = name.replace(/^https?:\/\/\S+/i, "").trim();
-  if (isBrandChromeText(name) || !name) name = "";
-  return { website, name };
+  if (website) return { website, name: "" };
+  let name = stripBrandLeak(raw).replace(/^https?:\/\/\S+/i, "").trim();
+  if (isBrandChromeText(name) || isBrandChromeText(raw) || looksLikeDirtyUrlPaste(raw)) name = "";
+  return { website: "", name };
 }
