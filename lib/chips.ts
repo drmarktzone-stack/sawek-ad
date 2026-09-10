@@ -1,5 +1,6 @@
 import type { Intake, Locale } from "./types";
 import { detectVertical, isProductLike, showsHmoAudience, unknownProblemLabel } from "./vertical";
+import { resolveOperatingNiche } from "./operating-niche";
 
 export interface ChipOption {
   id: string;
@@ -33,6 +34,7 @@ export const AUDIENCE_CHIPS: ChipOption[] = [
   { id: "young", label: { he: "צעירים 18–34", ar: "شباب 18–34", en: "Young adults 18–34" } },
   { id: "women", label: { he: "נשים 25–45", ar: "نساء 25–45", en: "Women 25–45" } },
   { id: "men", label: { he: "גברים 30–55", ar: "رجال 30–55", en: "Men 30–55" } },
+  { id: "homeowners", label: { he: "בעלי בתים", ar: "أصحاب بيوت", en: "Homeowners" } },
   { id: "custom", custom: true, label: { he: "כתוב בעצמך", ar: "اكتب بنفسك", en: "Write your own" } },
 ];
 
@@ -226,6 +228,16 @@ const PRODUCT_AUDIENCE_IDS = new Set(["parents", "local_families", "app_users", 
 export function audienceChipsFor(intake: Pick<Intake, "businessName" | "category" | "description">): ChipOption[] {
   if (isProductLike(intake)) {
     return AUDIENCE_CHIPS.filter((c) => PRODUCT_AUDIENCE_IDS.has(c.id));
+  }
+  const niche = resolveOperatingNiche(intake);
+  if (niche === "home_trades") {
+    return AUDIENCE_CHIPS.filter((c) => ["homeowners", "local_families", "owners", "custom"].includes(c.id));
+  }
+  if (niche === "fitness_studio") {
+    return AUDIENCE_CHIPS.filter((c) => ["young", "women", "men", "local_families", "custom"].includes(c.id));
+  }
+  if (niche === "education") {
+    return AUDIENCE_CHIPS.filter((c) => ["parents", "local_families", "custom"].includes(c.id));
   }
   if (showsHmoAudience(intake)) return AUDIENCE_CHIPS.filter((c) => c.id !== "app_users");
   return AUDIENCE_CHIPS.filter((c) => !HMO_AUDIENCE_IDS.has(c.id) && c.id !== "app_users");

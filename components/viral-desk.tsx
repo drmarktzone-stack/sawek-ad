@@ -31,6 +31,8 @@ import {
 } from "@/lib/engine/viral-content";
 import { buildPostingCalendar, postingKindLabel } from "@/lib/engine/posting-calendar";
 import { useI18n } from "@/components/i18n-provider";
+import { NicheGateCard } from "@/components/niche-gate";
+import { charterAllowsCampaign } from "@/lib/operating-niche";
 import { Button } from "@/components/ui/button";
 import { Input, Label, Textarea } from "@/components/ui/input";
 import { VoiceFields } from "@/components/voice-fields";
@@ -354,6 +356,10 @@ function ViralDeskBody({
     { id: "remix", key: "viral.tabRemix" },
     { id: "analyze", key: "viral.tabAnalyze" },
   ];
+
+  if ((intake0.businessName.trim() || intake0.website.trim()) && !charterAllowsCampaign(intake0)) {
+    return <NicheGateCard intake={intake0} />;
+  }
 
   return (
     <section id="viral" data-testid="viral-desk" className={embedded ? "mt-8" : ""}>

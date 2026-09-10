@@ -1,7 +1,7 @@
 "use client";
 
-import { SelfMarketing } from "@/components/self-marketing";
+import { JourneyRedirect } from "@/components/journey-redirect";
 
 export default function SelfPage() {
-  return <SelfMarketing />;
+  return <JourneyRedirect />;
 }

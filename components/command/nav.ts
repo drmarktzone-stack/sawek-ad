@@ -6,14 +6,13 @@ import {
   Folder,
   HelpCircle,
   LayoutDashboard,
+  Link2,
   Megaphone,
-  Pencil,
-  SlidersHorizontal,
   Sparkles,
   WandSparkles,
   Coins,
   Activity,
-  Link2,
+  Users,
 } from "lucide-react";
 
 export type NavKey =
@@ -42,7 +41,9 @@ export type NavKey =
   | "nav.more"
   | "nav.voice"
   | "nav.offerTool"
-  | "nav.hso";
+  | "nav.hso"
+  | "nav.list"
+  | "nav.trust";
 
 export type NavItem = {
   href: string;
@@ -50,21 +51,20 @@ export type NavItem = {
   icon: LucideIcon;
 };
 
-/** Primary = the one campaign journey. Everything else is More or hidden. */
+/** Primary = scan + 4 pillars. Everything else is More or hidden. */
 export const PRIMARY_NAV: NavItem[] = [
   { href: "/", key: "nav.build", icon: Link2 },
   { href: "/tools/core-message", key: "nav.voice", icon: Fingerprint },
   { href: "/tools/offer", key: "nav.offerTool", icon: Compass },
-  { href: "/task/ad", key: "nav.create", icon: WandSparkles },
-  { href: "/campaigns", key: "nav.campaigns", icon: Folder },
+  { href: "/task/ad", key: "nav.trust", icon: WandSparkles },
+  { href: "/tools/list", key: "nav.list", icon: Users },
 ];
 
 export const MORE_NAV: NavItem[] = [
   { href: "/viral", key: "nav.viral", icon: Sparkles },
   { href: "/tools/hso", key: "nav.hso", icon: Megaphone },
-  { href: "/studio", key: "nav.studio", icon: Pencil },
+  { href: "/campaigns", key: "nav.campaigns", icon: Folder },
   { href: "/dashboard", key: "nav.command", icon: LayoutDashboard },
-  { href: "/self", key: "nav.self", icon: SlidersHorizontal },
   { href: "/medical/optibrain", key: "nav.medical", icon: Brain },
   { href: "/pricing", key: "nav.pricing", icon: Coins },
   { href: "/about", key: "nav.about", icon: HelpCircle },
@@ -73,9 +73,9 @@ export const MORE_NAV: NavItem[] = [
 
 export const DOCK_NAV: NavItem[] = [
   { href: "/", key: "nav.build", icon: Link2 },
-  { href: "/task/ad", key: "nav.create", icon: WandSparkles },
   { href: "/tools/offer", key: "nav.offerTool", icon: Compass },
-  { href: "/campaigns", key: "nav.campaigns", icon: Folder },
+  { href: "/task/ad", key: "nav.trust", icon: WandSparkles },
+  { href: "/tools/list", key: "nav.list", icon: Users },
 ];
 
 export const ALL_NAV: NavItem[] = [...PRIMARY_NAV, ...MORE_NAV];

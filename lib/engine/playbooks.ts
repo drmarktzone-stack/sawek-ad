@@ -1,6 +1,7 @@
 import type { Intake, Locale } from "../types";
 import type { Vertical } from "../vertical";
 import { crowdFallback, detectVertical, placeNoun, unknownProblemLabel } from "../vertical";
+import { resolveOperatingNiche } from "../operating-niche";
 import { isNoOffer } from "../no-offer";
 import { isFreeService, problemChipsFor } from "../operating-model";
 import { ADVANTAGE_CHIPS, OFFER_CHIPS, audienceChipsFor, resolveChipLabel } from "../chips";
@@ -361,6 +362,66 @@ export function playbookFor(intake: Intake): VerticalPlaybook {
         L("חלון הרשמה", "نافذة تسجيل", "enrollment window"),
         L("אמון הורים", "ثقة أهل", "parent trust"),
         L(bankCtas("he")[0] || "הרשמה", bankCtas("ar")[0] || "تسجيل", bankCtas("en")[0] || "Enroll"),
+      ],
+    };
+  }
+
+  const niche = resolveOperatingNiche(intake);
+  if (niche === "fitness_studio") {
+    return {
+      vertical: v,
+      hookPain: L(
+        painHe || `${nHe} — רצפה ואימון אמיתי, לא גוף ב־30 יום.`,
+        painAr || `${nAr} — أرضية وتدريب حقيقي، مش جسم بـ 30 يوم.`,
+        painEn || `${nEn} — a real floor and training, not a 30-day body.`,
+      ),
+      proof: L(
+        advHe || `${nHe} ב${locHe}. שעות ואמת מהעמוד — בלי הבטחת תוצאה.`,
+        advAr || `${nAr} في ${locAr}. ساعات وحقيقة من الصفحة — بلا وعد نتيجة.`,
+        advEn || `${nEn} in ${locEn}. Hours and facts from the page — no outcome promise.`,
+      ),
+      channels: channelCore,
+      plan7: L(
+        "ימים 1–2: הוק על האימון עצמו (עובדות). ימים 3–4: שעות/מקום. ימים 5–7: וואטסאפ לרשימה בבעלות + מודעת פייסבוק. PLAN. בלי לפני/אחרי מזויף.",
+        "يوم 1–2: خطاف التمرين نفسه (حقائق). يوم 3–4: ساعات/مكان. يوم 5–7: واتساب للقائمة المملوكة + إعلان فيسبوك. خطة. بلا قبل/بعد مزيف.",
+        "Days 1–2: hook on the actual training (facts). Days 3–4: hours/place. Days 5–7: WhatsApp to the owned list + Facebook ad. PLAN. No fake before/after.",
+      ),
+      audienceProposed: L("מתאמנים בשכונה", "متدرّبين بالحي", "neighbors who train"),
+      problemProposed: problemFromDesc,
+      advantageProposed: advantageFromFacts,
+      angles: [
+        L(bankHooks("he")[0] || "רצפה ורזל", bankHooks("ar")[0] || "أرضية وحديد", bankHooks("en")[0] || "floor and iron"),
+        L(bankCtas("he")[0] || "בואו להתאמן", bankCtas("ar")[0] || "تعوا تتدرّبوا", bankCtas("en")[0] || "Come train"),
+        L(nHe, nAr, nEn),
+      ],
+    };
+  }
+  if (niche === "home_trades") {
+    return {
+      vertical: v,
+      hookPain: L(
+        painHe || `${nHe} — עבודה בבית, לא קטלוג מחירים מומצא.`,
+        painAr || `${nAr} — شغل بالبيت، مش كتالوج أسعار مختلق.`,
+        painEn || `${nEn} — work in the home, not an invented price catalog.`,
+      ),
+      proof: L(
+        advHe || `${nHe} ב${locHe}. מה שכתוב באתר — בלי אחריות שלא נאמרה.`,
+        advAr || `${nAr} في ${locAr}. اللي مكتوب بالموقع — بلا ضمان ما انقال.`,
+        advEn || `${nEn} in ${locEn}. What’s on the site — no unstated warranty.`,
+      ),
+      channels: channelCore,
+      plan7: L(
+        "ימים 1–2: תמונת עבודה אמיתית + הוק מהעובדות. ימים 3–4: וואטסאפ להצעת מחיר (בלי מספר מומצא). ימים 5–7: ליד לרשימה בבעלות. PLAN.",
+        "يوم 1–2: صورة شغل حقيقية + خطاف من الحقائق. يوم 3–4: واتساب لعرض سعر (بلا رقم مختلق). يوم 5–7: زبون للقائمة المملوكة. خطة.",
+        "Days 1–2: a real job photo + hook from facts. Days 3–4: WhatsApp for a quote (no invented number). Days 5–7: a lead on the owned list. PLAN.",
+      ),
+      audienceProposed: L("בעלי בתים באזור", "أصحاب بيوت بالمنطقة", "homeowners nearby"),
+      problemProposed: problemFromDesc,
+      advantageProposed: advantageFromFacts,
+      angles: [
+        L("עבודה בבית", "شغل بالبيت", "work in the home"),
+        L(bankCtas("he")[0] || "וואטסאפ להצעה", bankCtas("ar")[0] || "واتساب لعرض", bankCtas("en")[0] || "WhatsApp for a quote"),
+        L(nHe, nAr, nEn),
       ],
     };
   }

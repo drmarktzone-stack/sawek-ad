@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { ToolsShell } from "@/components/tools/tools-shell";
+import { CharterOnly } from "@/components/niche-gate";
 import { Button } from "@/components/ui/button";
 import { Input, Label, Textarea } from "@/components/ui/input";
 import { useI18n } from "@/components/i18n-provider";
@@ -33,20 +34,22 @@ export function CoreMessageTool() {
   const [beliefs, setBeliefs] = useState(["", "", ""]);
   const [neverSay, setNeverSay] = useState("");
   const [voice, setVoice] = useState<VoiceProfile | null>(null);
+  const [intake, setIntake] = useState<Intake | null>(null);
   const [copied, setCopied] = useState(false);
   const [need, setNeed] = useState(false);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
     if (!client) return;
-    const { intake } = loadCampaignTools();
-    const next = inputFrom(intake);
+    const { intake: live } = loadCampaignTools();
+    setIntake(live);
+    const next = inputFrom(live);
     setNiche(next.niche);
     setAudience(next.audience);
     setDialect(next.dialect || (locale === "ar" ? defaultDialectForLocale("ar") : next.dialect));
     setBeliefs(next.beliefs);
     setNeverSay(next.neverSay);
-    const existing = normalizeVoice(intake.voice);
+    const existing = normalizeVoice(live.voice);
     if (voiceIsLocked(existing)) setVoice(existing);
     setReady(true);
   }, [client]);
@@ -97,6 +100,7 @@ export function CoreMessageTool() {
 
   return (
     <ToolsShell kicker={t("nav.voice")} title={t("voice.title")} lead={t("voice.lead")} testId="tool-core-message">
+      <CharterOnly intake={intake}>
       <div className="grid gap-5 lg:grid-cols-2">
         <div className="space-y-4 rounded-[14px] border border-[var(--line)] bg-[var(--paper)] p-4">
           <div>
@@ -175,6 +179,7 @@ export function CoreMessageTool() {
           )}
         </div>
       </div>
+      </CharterOnly>
     </ToolsShell>
   );
 }

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { ingestUrl } from "@/lib/url-ingest";
 import { factsToIntake, geminiFailFromEnv, runViralDesk, type ViralBody } from "@/lib/gcp-ai";
+import { charterAllowsCampaign } from "@/lib/operating-niche";
 import { remixFromSource, remixNeedTranscript } from "@/lib/engine/viral-content";
 import { checkAiRateLimit, rateLimitHeaders, userIdFromRequest, vertexRateLimitedBody } from "@/lib/rate-limit";
 
@@ -39,6 +40,10 @@ export async function POST(req: Request) {
       return NextResponse.json(vertexRateLimitedBody(), { status: 200, headers: rateLimitHeaders(limit) });
     }
     const body = (await req.json()) as ViralBody;
+    const intake = factsToIntake(body);
+    if ((intake.businessName.trim() || intake.website.trim() || intake.description.trim()) && !charterAllowsCampaign(intake)) {
+      return NextResponse.json({ ok: false, reason: "niche_gated" }, { status: 200 });
+    }
     const mode = body.mode;
     const transcript = typeof body.transcript === "string" ? body.transcript.trim() : "";
     const caption = typeof body.caption === "string" ? body.caption.trim() : "";

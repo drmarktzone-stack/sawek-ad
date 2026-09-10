@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useI18n } from "@/components/i18n-provider";
 import { LangLink } from "@/components/lang-link";
 import { Button } from "@/components/ui/button";
+import { NicheGateCard } from "@/components/niche-gate";
 import { CAMPAIGN_STEPS, resolveCampaignPath } from "@/lib/campaign-path";
 import { loadCampaignTools } from "@/lib/campaign-tools";
 import { INGEST_APPLIED_EVENT } from "@/lib/storage";
@@ -34,6 +35,14 @@ export function NextStepCard({
 
   const path = useMemo(() => (client ? resolveCampaignPath(loadCampaignTools()) : null), [client, tick]);
   if (!path) return null;
+
+  if (path.gated) {
+    return (
+      <section className={cn("mb-5", compact && "mb-3")} data-testid="next-step" data-step="gated">
+        <NicheGateCard intake={path.intake} onScan={onScan} />
+      </section>
+    );
+  }
 
   const scanAction = path.current === "scan" && onScan;
 

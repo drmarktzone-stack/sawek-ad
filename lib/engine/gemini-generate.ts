@@ -36,6 +36,7 @@ import {
   whatsappScript,
 } from "./spoken";
 import { VISION_MAX_BYTES } from "./gemini-client-caps";
+import { charterAllowsCampaign } from "../operating-niche";
 import { isVoiceDialect, normalizeVoice, voiceFactLines } from "./voice";
 export { VISION_MAX_BYTES };
 
@@ -962,6 +963,10 @@ export async function runGeminiGenerate(body: GenerateBody): Promise<GenerateRes
   if (!bodyHasFacts(body)) {
     recordGeminiOutcome({ provider: "none", reason: "no_facts" });
     return { ok: false, reason: "no_facts", useTemplates: true };
+  }
+  const intake = factsToIntake(body);
+  if (!charterAllowsCampaign(intake)) {
+    return { ok: false, reason: "niche_gated" };
   }
   const spoken = () => spokenGenerateOk(body);
   try {

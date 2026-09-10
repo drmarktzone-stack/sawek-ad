@@ -5,6 +5,7 @@
  */
 import type { IngestFieldId } from "./document-ingest";
 import { detectVertical } from "./vertical";
+import { resolveOperatingNiche } from "./operating-niche";
 import { HOSPITAL_OR_DEPT_RE } from "./scan-truth/patterns";
 
 type Fields = Partial<Record<IngestFieldId, string>>;
@@ -82,6 +83,11 @@ export function prefillCampaignFields(fields: Fields, corpus = ""): Fields {
     category: out.category || "",
     description: out.description || "",
   });
+  const niche = resolveOperatingNiche({
+    businessName: name,
+    category: out.category || "",
+    description: out.description || "",
+  });
   const grocery = isGroceryBusiness(out, corpus) || vertical === "retail";
   const depts = departmentLines(corpus);
 
@@ -95,7 +101,10 @@ export function prefillCampaignFields(fields: Fields, corpus = ""): Fields {
   }
 
   if (!has(out, "audience")) {
-    if (grocery || vertical === "generic" || vertical === "restaurant") {
+    if (niche === "home_trades") out.audience = "homeowners";
+    else if (niche === "fitness_studio") out.audience = "young";
+    else if (niche === "education") out.audience = "parents";
+    else if (grocery || vertical === "generic" || vertical === "restaurant" || niche === "restaurant") {
       out.audience = "local_families";
     }
   }
