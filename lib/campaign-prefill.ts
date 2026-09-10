@@ -95,7 +95,7 @@ export function prefillCampaignFields(fields: Fields, corpus = ""): Fields {
   }
 
   if (!has(out, "audience")) {
-    if (grocery || vertical === "retail" || vertical === "generic" || vertical === "restaurant") {
+    if (grocery || vertical === "generic" || vertical === "restaurant") {
       out.audience = "local_families";
     }
   }
@@ -113,7 +113,7 @@ export function prefillCampaignFields(fields: Fields, corpus = ""): Fields {
   }
 
   if (!has(out, "mainGoal")) {
-    out.mainGoal = grocery || vertical === "retail" || vertical === "restaurant" ? "sales" : "leads";
+    out.mainGoal = grocery || vertical === "restaurant" ? "sales" : "leads";
   }
 
   if (!has(out, "brandTone") && /[\u0600-\u06FF]/.test(hay)) {

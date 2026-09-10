@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Check, Copy, Film, Loader2 } from "lucide-react";
 import type {
@@ -93,17 +93,27 @@ async function firstFrame(file: File): Promise<{ mime: string; data: string; dur
   });
 }
 
-export function ViralDesk({
-  pack,
-  packLang,
-  onPack,
-  embedded = false,
-}: {
+type ViralDeskProps = {
   pack?: CampaignPack | null;
   packLang?: Locale;
   onPack?: (p: CampaignPack) => void;
   embedded?: boolean;
-}) {
+};
+
+export function ViralDesk(props: ViralDeskProps) {
+  return (
+    <Suspense fallback={null}>
+      <ViralDeskBody {...props} />
+    </Suspense>
+  );
+}
+
+function ViralDeskBody({
+  pack,
+  packLang,
+  onPack,
+  embedded = false,
+}: ViralDeskProps) {
   const { t, locale } = useI18n();
   const search = useSearchParams();
   const lang = packLang ?? locale;
