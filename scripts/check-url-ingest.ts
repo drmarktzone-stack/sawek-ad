@@ -1097,10 +1097,10 @@ else {
   }
   const imgs = halloun.images || [];
   if (imgs.some((u: string) => /\.woff2?/i.test(u))) fail(`halloun kept font asset ${JSON.stringify(imgs)}`);
-  if (imgs.some((u: string) => /upscalemedia|group-\d+\.png/i.test(u))) {
+  if (imgs.some((u: string) => /upscalemedia|(?:^|\/)group[-_]?\d+/i.test(u))) {
     fail(`halloun kept decorative graphic ${JSON.stringify(imgs)}`);
   }
-  if (halloun.ogImage && /upscalemedia|group-\d+\.png|\.woff2?/i.test(halloun.ogImage)) {
+  if (halloun.ogImage && /upscalemedia|(?:^|\/)group[-_]?\d+|\.woff2?/i.test(halloun.ogImage)) {
     fail(`halloun kept junk og:image ${JSON.stringify(halloun.ogImage)}`);
   }
   if (hallounOffer && !/ביום אחד|في يوم واحد|same-day/i.test(`${hallounOffer.timeToResult} ${hallounOffer.dreamOutcome} ${hallounOffer.headline}`)) {
