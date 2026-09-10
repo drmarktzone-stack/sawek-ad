@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import { useI18n } from "@/components/i18n-provider";
 import { Button } from "@/components/ui/button";
-import { charterAllowsCampaign, nicheOutsideReason } from "@/lib/operating-niche";
+import { charterAllowsCampaign } from "@/lib/operating-niche";
 import type { Intake } from "@/lib/types";
 
 export function NicheGateCard({
@@ -14,24 +14,22 @@ export function NicheGateCard({
   onScan?: () => void;
 }) {
   const { t, locale } = useI18n();
-  const why = nicheOutsideReason(intake, locale);
+  const scannedName = intake.businessName.trim();
   return (
     <section
       className="mt-4 rounded-[22px] border-2 border-danger/40 bg-danger/10 p-4 sm:p-5"
       data-testid="niche-gate"
       dir={locale === "en" ? "ltr" : "rtl"}
     >
-      <p className="os-kicker">{t("nicheGate.this")}</p>
       <h2 className="os-title mt-1 text-2xl">{t("nicheGate.title")}</h2>
-      <p className="mt-2 text-sm font-bold text-navy">{why}</p>
-      {intake.businessName.trim() ? (
-        <p className="mt-2 text-sm text-muted">
-          {t("nicheGate.named").replace("{name}", intake.businessName.trim())}
+      <p className="mt-2 text-sm font-bold text-navy">{t("nicheGate.body")}</p>
+      {scannedName ? (
+        <p className="mt-2 text-sm text-muted" data-testid="niche-gate-scanned-name">
+          {t("nicheGate.named").replace("{name}", scannedName)}
         </p>
       ) : null}
-      <p className="mt-3 text-xs text-muted">{t("nicheGate.scope")}</p>
       {onScan ? (
-        <Button type="button" size="lg" variant="coral" className="mt-4 font-black" onClick={onScan}>
+        <Button type="button" size="lg" variant="outline" className="mt-4 font-black" onClick={onScan}>
           {t("nicheGate.scanOther")}
         </Button>
       ) : null}

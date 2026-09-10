@@ -5,6 +5,7 @@ import { factsToIntake } from "../lib/engine/gemini-generate";
 import {
   bypassNicheGate,
   charterAllowsCampaign,
+  nicheOutsideReason,
   resolveOperatingNiche,
 } from "../lib/operating-niche";
 import { detectVertical } from "../lib/vertical";
@@ -103,6 +104,14 @@ const tutorFacts = factsToIntake({
   facts: { businessName: "מרכז למידה הדר", category: "tutoring", description: "שיעורי עזר" },
 });
 if (!charterAllowsCampaign(tutorFacts)) fail("tutoring generate facts must be allowed");
+
+const genericOutside = nicheOutsideReason(facts("Acme Holdings", "industrial holding", "group of companies"), "ar");
+if (/عيادة طبية|ولا مطعم|ولا تعليم|حرف بيت|ستوديو لياقة|التخصّصات الخمس|الخمس مجالات/.test(genericOutside)) {
+  fail(`generic out-of-niche AR must not list the five charter niches: ${genericOutside}`);
+}
+if (!genericOutside.includes("هالموقع برا نطاق شغلنا الحالي") || !genericOutside.includes("قطاعات محلية محددة")) {
+  fail(`generic out-of-niche AR must use the mandated copy: ${genericOutside}`);
+}
 
 if (failures.length) {
   console.error("FAIL\n" + failures.join("\n"));

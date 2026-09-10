@@ -311,8 +311,13 @@ export const copy: Dict = {
   },
   "wizard.missingHeading": {
     he: "כדי לבנות קמפיין מלא, עוד חסר:",
-    ar: "لبناء حملة كاملة، لساته ناقص:",
+    ar: "لسه ناقص:",
     en: "To build a full campaign, still missing:",
+  },
+  "wizard.missingPillar": {
+    he: "עוד חסר: {name} — השלימו מהסריקה או ידנית",
+    ar: "لسه ناقص: {name} — كمّله من المسح أو عدّله إيد",
+    en: "Still missing: {name} — fill it from the scan or edit it yourself",
   },
   "wizard.needText": {
     he: "שדה חובה — מלאו אותו כאן לפני בניית הקמפיין.",
@@ -353,6 +358,7 @@ export const copy: Dict = {
   "design.layouts": { he: "פריסות ערוץ", ar: "تخطيطات القناة", en: "Channel layouts" },
   "design.swatch": { he: "פלטה", ar: "لوحة", en: "Palette" },
   "cta.build": { he: "בנה לי קמפיין מלא", ar: "ابنِ لي حملة كاملة", en: "Build me a full campaign" },
+  "cta.buildReady": { he: "יאללה ממשיכים — העמודים מוכנים", ar: "يلا نكمّل — الأركان جاهزة", en: "Let's go — the pillars are ready" },
   "cta.back": { he: "חזרה", ar: "رجوع", en: "Back" },
   "cta.next": { he: "המשך", ar: "متابعة", en: "Continue" },
   "cta.demo": { he: "הדגמה בלי להקליד", ar: "تجربة بدون كتابة", en: "Demo — no typing" },
@@ -2129,11 +2135,15 @@ export const copy: Dict = {
   "path.captureList": { he: "בנו רשימה בבעלות", ar: "ابنوا قائمة تملكونها", en: "Build the owned list" },
   "path.openExport": { he: "ייצוא", ar: "تصدير", en: "Export" },
 
-  "nicheGate.title": { he: "העסק הזה מחוץ להתמחות האפליקציה", ar: "هذا النشاط خارج تخصص التطبيق", en: "This business is outside the app’s specialty" },
+  "nicheGate.title": {
+    he: "האתר הזה מחוץ לטווח העבודה הנוכחי.",
+    ar: "هالموقع برا نطاق شغلنا الحالي.",
+    en: "This site is outside our current working scope.",
+  },
   "nicheGate.body": {
-    he: "המפעיל המומחה עובד רק על: מרפאות (רפואה/שיניים/אסתטיקה), מרכזי למידה, מסעדות ובתי קפה (רכישה בבעלות), שיפוצים ומקצועות הבית, וסטודיו כושר בוטיק. לא מספרות, לא תיווך נדל״ן, לא יוצרים כלליים.",
-    ar: "المشغّل المتخصّص بشغل بس: عيادات (طب/أسنان/تجميل طبي)، مراكز تعليم، مطاعم ومقاهي (اكتساب نملكه)، ترميم وحرف البيت، وستوديو لياقة مستقل. مش صالونات، مش مكاتب عقارية، مش صنّاع محتوى عامّين.",
-    en: "This specialist operator only runs: medical/dental/aesthetic clinics, tutoring and local education, restaurants and cafés (owned acquisition), renovation/home trades, and boutique fitness studios. Not salon ops, not real-estate brokerages, not generic creators.",
+    he: "אנחנו משרתים מגזרים מקומיים מוגדרים — שלחו את הקישור הנכון או פנו אלינו.",
+    ar: "منخدم قطاعات محلية محددة — ابعت الرابط الصحيح أو تواصل معنا",
+    en: "We serve specific local sectors — send the right link or contact us.",
   },
   "nicheGate.allowed": { he: "חמש הנישות", ar: "التخصّصات الخمس", en: "The five niches" },
   "nicheGate.scanOther": { he: "סרקו עסק אחר מהרשימה", ar: "امسحوا شغل ثاني من القائمة", en: "Scan a business on the list" },
@@ -2144,9 +2154,9 @@ export const copy: Dict = {
     en: "The app does not invent a vertical. The five niches are the operator’s scope — not this business’s specialty list.",
   },
   "nicheGate.named": {
-    he: "נסרק: {name}. זה לא כרטיס התמחויות.",
-    ar: "الممسوح: {name}. هاد مش كرت تخصّصات.",
-    en: "Scanned: {name}. This is not a specialties card.",
+    he: "נסרק: {name}",
+    ar: "الممسوح: {name}",
+    en: "Scanned: {name}",
   },
 
   "list.title": { he: "רשימה שאפשר להגיע אליה", ar: "قائمة بنقدر نوصلها", en: "A list you can actually reach" },

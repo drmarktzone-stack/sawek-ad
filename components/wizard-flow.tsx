@@ -1209,17 +1209,16 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
                       dir={locale === "en" ? "ltr" : "rtl"}
                       data-testid="wizard-missing-fields"
                     >
-                      <p className="font-bold">{t("wizard.missingHeading")}</p>
-                      <ul className="mt-1 list-disc ps-5">
+                      <p className="sr-only">{t("wizard.missingHeading")}</p>
+                      <ul className="list-disc ps-5">
                         {missingRequired.map((f) => (
                           <li key={String(f.field)}>
                             <button
                               type="button"
-                              className="font-semibold underline decoration-danger/50 underline-offset-4"
+                              className="text-start font-semibold underline decoration-danger/50 underline-offset-4"
                               onClick={() => focusWizardField(f.field)}
                             >
-                              {f.label[locale]}
-                              <span className="sr-only"> — {t("wizard.goToField")}</span>
+                              {t("wizard.missingPillar").replace("{name}", f.label[locale])}
                             </button>
                           </li>
                         ))}
@@ -1229,9 +1228,15 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
                   <Button
                     type="button"
                     size="lg"
-                    className="mt-6 w-full text-base font-black shadow-[0_12px_32px_rgba(15,39,68,0.12)]"
+                    variant={wizardReady(intake) ? "gold" : "outline"}
+                    className={cn(
+                      "mt-6 w-full text-base font-black shadow-[0_12px_32px_rgba(15,39,68,0.12)]",
+                      !wizardReady(intake) && "border-danger text-danger hover:border-danger hover:text-danger",
+                    )}
                     disabled={running}
+                    aria-disabled={!wizardReady(intake)}
                     data-testid="cta-build-full"
+                    data-cta-state={wizardReady(intake) ? "ready" : "missing"}
                     onClick={() => {
                       if (!wizardReady(intake)) {
                         const first = missingRequired[0];
@@ -1241,8 +1246,18 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
                       void startBuild();
                     }}
                   >
-                    <WandSparkles className="size-5" />
-                    {t("cta.build")}
+                    {wizardReady(intake) ? (
+                      <>
+                        <WandSparkles className="size-5" />
+                        {t("cta.buildReady")}
+                        <span className="sr-only">{t("cta.build")}</span>
+                      </>
+                    ) : (
+                      t("wizard.missingPillar").replace(
+                        "{name}",
+                        missingRequired[0]?.label[locale] ?? "",
+                      )
+                    )}
                   </Button>
                 </>
               )}

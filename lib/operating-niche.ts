@@ -75,20 +75,20 @@ export function nicheOutsideReason(facts: VerticalFacts, locale: Locale): string
     if (grocery) return "هالنشاط سوبرماركت/تجزئة — برّات تخصص التطبيق.";
     if (realty) return "هالنشاط مكتب عقاري — برّات تخصص التطبيق.";
     if (creator) return "هالنشاط صناعة محتوى عامة — برّات تخصص التطبيق.";
-    return "مسحنا اللي انكتب بالموقع وما طلع عيادة طبية، ولا مطعم، ولا تعليم، ولا حرف بيت، ولا ستوديو لياقة — فما منبني حملة.";
+    return "هالموقع برا نطاق شغلنا الحالي. منخدم قطاعات محلية محددة — ابعت الرابط الصحيح أو تواصل معنا";
   }
   if (locale === "he") {
     if (salon) return "זה מספרה/סלון — לא מרפאה. לא בונים קמפיין.";
     if (grocery) return "זה סופר/קמעונאות — מחוץ להתמחות.";
     if (realty) return "זה תיווך נדל״ן — מחוץ להתמחות.";
     if (creator) return "זה יוצר תוכן כללי — מחוץ להתמחות.";
-    return "הסריקה לא זיהתה מרפאה, מסעדה, חינוך, מקצועות בית או סטודיו כושר — לכן לא בונים קמפיין.";
+    return "האתר הזה מחוץ לטווח העבודה הנוכחי. אנחנו משרתים מגזרים מקומיים מוגדרים — שלחו את הקישור הנכון או פנו אלינו.";
   }
   if (salon) return "This is a salon/barber — not a medical clinic. The app will not build a campaign.";
   if (grocery) return "This is grocery/retail — outside the operator’s specialty.";
   if (realty) return "This is a real-estate brokerage — outside the operator’s specialty.";
   if (creator) return "This is generic creator work — outside the operator’s specialty.";
-  return "The scan did not identify a medical clinic, restaurant, tutoring center, home trade, or fitness studio — so we will not build a campaign.";
+  return "This site is outside our current working scope. We serve specific local sectors — send the right link or contact us.";
 }
 
 /** Clinic demo is the medical-niche example. Other demos must still match a charter niche. */
