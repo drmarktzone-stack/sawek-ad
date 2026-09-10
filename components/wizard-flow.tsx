@@ -770,7 +770,7 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
                   onChange={(e) => {
                     const parsed = interpretCampaignPaste(e.target.value);
                     patch({
-                      businessName: parsed.website ? parsed.name : e.target.value,
+                      businessName: parsed.name,
                       ...(parsed.website ? { website: parsed.website } : {}),
                     });
                   }}

@@ -7,7 +7,7 @@ import { businessKey } from "./engine/ad-engine/sources";
 import { detectVertical } from "./vertical";
 import { normalizeVoice } from "./engine/voice";
 import { normalizeOfferBlueprint } from "./engine/offer-builder";
-import { interpretCampaignPaste, isBrandChromeText, sanitizePastedUrl } from "./url-clean";
+import { interpretCampaignPaste, sanitizePastedUrl } from "./url-clean";
 
 const K = {
   locale: "omniad-locale",
@@ -147,11 +147,8 @@ export function saveDraft(draft: DraftState) {
 
 function scrubIntakeChrome(intake: Intake): Intake {
   const fromName = interpretCampaignPaste(intake.businessName);
-  const website = sanitizePastedUrl(intake.website) || fromName.website || intake.website;
-  let name = intake.businessName.trim();
-  if (fromName.website) name = fromName.name;
-  if (isBrandChromeText(name)) name = "";
-  return { ...intake, businessName: name, website };
+  const website = fromName.website || sanitizePastedUrl(intake.website) || intake.website;
+  return { ...intake, businessName: fromName.name, website };
 }
 
 export const INGEST_APPLIED_EVENT = "sawek-ingest-applied";

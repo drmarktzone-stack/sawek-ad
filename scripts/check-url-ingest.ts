@@ -867,6 +867,8 @@ if (gluedName.website !== "https://alkaramah-market.com/") {
   fail(`glued name paste website ${JSON.stringify(gluedName.website)}`);
 }
 if (gluedName.name) fail(`glued kicker leftover as name ${JSON.stringify(gluedName.name)}`);
+const kickerCrumb = interpretCampaignPaste("نظام تسويق هادي /om/");
+if (kickerCrumb.name) fail(`kicker leftover crumb as name ${JSON.stringify(kickerCrumb.name)}`);
 const dirtyInspect = inspectUrl(dirtyBrand);
 if (!dirtyInspect.ok || dirtyInspect.url.href.replace(/\/$/, "") !== "https://alkaramah-market.com") {
   fail(`inspectUrl must clean dirty paste (got ${dirtyInspect.ok ? dirtyInspect.url.href : dirtyInspect.error})`);

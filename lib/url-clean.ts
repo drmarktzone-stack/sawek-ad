@@ -149,7 +149,9 @@ export function isBrandChromeText(raw: string): boolean {
   const stripped = stripBrandLeak(s);
   if (!stripped) return true;
   BRAND_LEAK_RE.lastIndex = 0;
-  return BRAND_LEAK_RE.test(s) && stripped.replace(/https?:\/\/\S+/gi, "").trim().length < 3;
+  if (BRAND_LEAK_RE.test(s)) return true;
+  const leftover = stripped.replace(/https?:\/\/\S+/gi, "").replace(/[/.]/g, "").trim();
+  return leftover.length < 8 && /تسويق|שיווק|sawek|marketing\s*os/i.test(s);
 }
 
 /** Dirty paste: if a URL is present, that is the website — leftovers are chrome, never the business name. */
