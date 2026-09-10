@@ -1,9 +1,10 @@
 "use client";
 
-import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import type { AgentId, CampaignPack, Locale } from "@/lib/types";
-import { installDemoPack, latestPack } from "@/lib/active-pack";
+import { installDemoPack } from "@/lib/active-pack";
+import { loadCampaignTools } from "@/lib/campaign-tools";
+import { resolveCampaignPath } from "@/lib/campaign-path";
 import { EMPTY_CAMPAIGN_EVENT, wantsEmptyCampaign } from "@/lib/empty-campaign";
 import { DemoPicker } from "@/components/demo-picker";
 import { LOCALES } from "@/lib/i18n";
@@ -14,6 +15,7 @@ import { ConquerHeadline } from "@/components/stepper";
 import { cn } from "@/lib/utils";
 import { LangLink } from "@/components/lang-link";
 import { CampaignJourney } from "@/components/campaign-journey";
+import { NextStepCard } from "@/components/next-step-card";
 
 const AGENT_LABEL: Record<AgentId, Record<Locale, string>> = {
   intake: { he: "קליטה", ar: "الاستقبال", en: "Intake" },
@@ -23,51 +25,8 @@ const AGENT_LABEL: Record<AgentId, Record<Locale, string>> = {
   optimizer: { he: "אופטימיזר", ar: "المُحسِّن", en: "Optimizer" },
 };
 
-const DEPT_RAIL = [
-  { href: "/dashboard", key: "nav.command" as const },
-  { href: "/task/ad", key: "nav.create" as const },
-  { href: "/campaigns", key: "nav.campaigns" as const },
-  { href: "/studio", key: "nav.studio" as const },
-  { href: "/growth/market", key: "nav.intel" as const },
-  { href: "/growth/dna", key: "nav.dna" as const },
-  { href: "/growth/experiments", key: "nav.experiments" as const },
-  { href: "/leads", key: "nav.leads" as const },
-  { href: "/", key: "nav.build" as const },
-  { href: "/discovery", key: "nav.discovery" as const },
-  { href: "/strategy", key: "nav.strategy" as const },
-  { href: "/viral", key: "nav.viral" as const },
-  { href: "/media", key: "nav.media" as const },
-  { href: "/medical/optibrain", key: "nav.medical" as const },
-  { href: "/growth", key: "nav.growth" as const },
-  { href: "/lab", key: "nav.lab" as const },
-  { href: "/self", key: "nav.self" as const },
-  { href: "/tools/core-message", key: "nav.voice" as const },
-  { href: "/tools/offer", key: "nav.offerTool" as const },
-  { href: "/tools/hso", key: "nav.hso" as const },
-];
-
 export function DepartmentRail() {
-  const { t } = useI18n();
-  const pathname = usePathname();
-  return (
-    <nav className="os-tabs mb-6" aria-label={t("os.kicker")}>
-      {DEPT_RAIL.map((item) => {
-        const active =
-          item.href === "/"
-            ? pathname === "/"
-            : pathname === item.href || pathname.startsWith(`${item.href}/`);
-        return (
-          <LangLink
-            key={item.href}
-            href={item.href}
-            className={cn("os-tab", active && "is-active")}
-          >
-            {t(item.key)}
-          </LangLink>
-        );
-      })}
-    </nav>
-  );
+  return <CampaignJourney compact />;
 }
 
 export function ProducedBy({ agents }: { agents: AgentId[] }) {
@@ -126,8 +85,8 @@ export function DepartmentShell({
   const [packLang, setPackLang] = useState<Locale>(locale);
 
   if (client && !booted) {
-    const latest = latestPack();
-    if (latest) setPack(latest);
+    const { pack: live } = loadCampaignTools();
+    if (live) setPack(live);
     setPackLang(locale);
     setBooted(true);
   }
@@ -149,12 +108,14 @@ export function DepartmentShell({
     setPack(next);
   }
 
+  const path = resolveCampaignPath();
+
   return (
     <div className="os-page max-w-6xl">
       <CampaignJourney compact />
+      <NextStepCard compact />
       <ConquerHeadline subtitle={t(titleKey)} />
       <p className="mx-auto mb-4 max-w-2xl text-center text-sm text-muted">{t(leadKey)}</p>
-      <DepartmentRail />
 
       {!booted && <p className="os-state">{t("os.loading")}</p>}
 
@@ -164,7 +125,7 @@ export function DepartmentShell({
           <div className="mt-5 flex flex-col items-center gap-3">
             <DemoPicker onSelect={(id) => loadDemo(id)} size="default" />
             <Button asChild variant="dark">
-              <LangLink href="/">{t("nav.build")}</LangLink>
+              <LangLink href={path.href}>{t(path.cta)}</LangLink>
             </Button>
           </div>
         </div>

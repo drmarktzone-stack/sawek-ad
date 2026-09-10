@@ -1,12 +1,7 @@
 "use client";
 
-import { LeadsDeptView } from "@/components/dept-leads";
-import { DepartmentShell } from "@/components/department-shell";
+import { JourneyRedirect } from "@/components/journey-redirect";
 
 export default function LeadsPage() {
-  return (
-    <DepartmentShell titleKey="nav.leads" leadKey="dept.leadsLead">
-      {({ pack, packLang }) => <LeadsDeptView pack={pack} packLang={packLang} />}
-    </DepartmentShell>
-  );
+  return <JourneyRedirect />;
 }

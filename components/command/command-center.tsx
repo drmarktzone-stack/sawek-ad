@@ -4,6 +4,7 @@ import { LangLink } from "@/components/lang-link";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/components/i18n-provider";
 import { OsRow, OsSection, OsUnknown, ValueOrUnknown } from "@/components/command/primitives";
+import { CAMPAIGN_STEPS, resolveCampaignPath } from "@/lib/campaign-path";
 import type { CommandSignals } from "@/components/command/signals";
 
 function lineOrUnknown(value?: string | null) {
@@ -13,6 +14,7 @@ function lineOrUnknown(value?: string | null) {
 
 export function ContextBar({ signals }: { signals: CommandSignals }) {
   const { t } = useI18n();
+  const path = resolveCampaignPath({ intake: signals.intake, pack: signals.pack });
   return (
     <div className="flex flex-col gap-3 border-b border-[var(--line)] pb-4 sm:flex-row sm:items-end sm:justify-between">
       <div className="min-w-0">
@@ -26,7 +28,7 @@ export function ContextBar({ signals }: { signals: CommandSignals }) {
         </p>
       </div>
       <Button asChild size="lg" variant="coral" className="btn-mobile-full">
-        <LangLink href="/task/ad">{t("complete.kicker")}</LangLink>
+        <LangLink href={path.href}>{t(path.cta)}</LangLink>
       </Button>
     </div>
   );
@@ -77,57 +79,34 @@ export function TodayBoard({ signals }: { signals: CommandSignals }) {
 
 export function ModuleSummaries({ signals }: { signals: CommandSignals }) {
   const { t } = useI18n();
-  const ws = signals.workspace;
-  const modules = [
-    {
-      href: "/growth/market",
-      title: t("nav.intel"),
-      body: ws?.market?.patterns[0]
-        ? `${ws.market.patterns[0].name}`
-        : t("os.unknown"),
-    },
-    {
-      href: "/growth/performance",
-      title: t("nav.analytics"),
-      body: ws?.performance.observed[0]
-        ? `${ws.performance.observed[0].label}: ${ws.performance.observed[0].value}`
-        : t("os.unknown"),
-    },
-    {
-      href: "/growth/experiments",
-      title: t("nav.experiments"),
-      body: ws?.experiments[0] ? `${ws.experiments[0].name} · ${ws.experiments[0].status}` : t("os.unknown"),
-    },
-    {
-      href: "/growth",
-      title: t("os.learnings"),
-      body: ws?.learnings[0]?.summary || t("os.unknown"),
-    },
-    {
-      href: "/campaigns",
-      title: t("nav.campaigns"),
-      body: signals.campaigns.length ? String(signals.campaigns.length) : t("os.unknown"),
-    },
-    {
-      href: "/growth/dna",
-      title: t("nav.dna"),
-      body: ws?.dna.traits[0]?.topic || t("os.unknown"),
-    },
-  ] as const;
-
+  const path = resolveCampaignPath({ intake: signals.intake, pack: signals.pack });
   return (
-    <OsSection kicker={t("os.modules")} title={t("os.modulesTitle")}>
+    <OsSection kicker={t("journey.kicker")} title={t("path.here")}>
       <ul className="divide-y divide-[var(--line)]">
-        {modules.map((m) => (
-          <li key={m.href}>
-            <LangLink href={m.href} className="os-row tap-row hover:text-teal">
-              <span className="os-meta">{m.title}</span>
-              <span className="min-w-0 truncate text-sm font-semibold text-navy">{m.body}</span>
+        {CAMPAIGN_STEPS.map((step) => (
+          <li key={step.id}>
+            <LangLink href={step.href} className="os-row tap-row hover:text-teal">
+              <span className="os-meta">{t(step.key)}</span>
+              <span className="min-w-0 truncate text-sm font-semibold text-navy">
+                {path.current === step.id ? t(step.cta) : path.done[step.id] ? t("journey.done") : t("os.unknown")}
+              </span>
             </LangLink>
           </li>
         ))}
       </ul>
     </OsSection>
+  );
+}
+
+function accentLastSentence(text: string) {
+  const m = text.match(/^(.*?)([.؟!?]+\s*)([^.؟!]+[.؟!]?)\s*$/u);
+  if (!m?.[3]) return text;
+  return (
+    <>
+      {m[1]}
+      {m[2]}
+      <span className="text-lime">{m[3]}</span>
+    </>
   );
 }
 
@@ -141,36 +120,55 @@ export function CommandHero({
   onEmpty: () => void;
 }) {
   const { t } = useI18n();
+  const path = resolveCampaignPath({ intake: signals.intake, pack: signals.pack });
+  const continuePath = path.current !== "scan";
   return (
-    <section className="agency-hero-glow relative isolate overflow-hidden">
-      <div aria-hidden className="agency-grain absolute inset-0 opacity-10" />
+    <section className="mw-hero relative isolate overflow-hidden">
+      <div aria-hidden className="agency-grain absolute inset-0 opacity-[0.08]" />
       <div className="relative mx-auto max-w-6xl px-4 pb-12 pt-8 sm:pb-14 sm:pt-12">
-        <p className="agency-kicker mb-3 text-center">{t("os.kicker")}</p>
-        <h1 className="agency-display-cream mx-auto max-w-4xl text-center text-[2.1rem] leading-[1.12] sm:text-5xl lg:text-[3.6rem]">
-          {t("os.headline")}
+        <p className="hub-badge mx-auto mb-5">
+          <span className="hub-badge-dot" aria-hidden />
+          {t("os.kicker")}
+        </p>
+        <h1 className="agency-display-cream mx-auto max-w-4xl text-center text-[2.2rem] leading-[1.12] sm:text-5xl lg:text-[3.6rem]">
+          {accentLastSentence(t("os.headline"))}
         </h1>
-        <p className="mx-auto mt-4 max-w-2xl text-center text-base font-semibold text-muted sm:text-lg">
+        <p className="mx-auto mt-4 max-w-2xl text-center text-base font-medium text-white/70 sm:text-lg">
           {t("os.pitch")}
         </p>
         <div className="mt-8 flex flex-col items-center gap-3">
           <div className="mobile-stack w-full justify-center">
-            <Button type="button" size="lg" variant="coral" className="btn-mobile-full text-base font-black" onClick={onScan}>
-              {t("home.cta.primary")}
-            </Button>
-            <Button asChild size="lg" variant="gold" className="btn-mobile-full text-base font-black">
-              <LangLink href="/task/ad">{t("complete.kicker")}</LangLink>
-            </Button>
-            <Button type="button" size="lg" variant="outline" className="btn-mobile-full" onClick={onEmpty}>
+            {continuePath ? (
+              <Button asChild size="lg" variant="coral" className="btn-mobile-full text-base font-black">
+                <LangLink href={path.href}>{t(path.cta)}</LangLink>
+              </Button>
+            ) : (
+              <Button type="button" size="lg" variant="coral" className="btn-mobile-full text-base font-black" onClick={onScan}>
+                {t("home.cta.primary")}
+              </Button>
+            )}
+            {continuePath ? (
+              <Button type="button" size="lg" variant="outline" className="btn-mobile-full border-white/30 bg-transparent text-white hover:border-lime hover:bg-white/5" onClick={onScan}>
+                {t("path.scanNow")}
+              </Button>
+            ) : (
+              <Button asChild size="lg" variant="default" className="btn-mobile-full text-base font-black">
+                <LangLink href="/#studio">{t("path.fillTruth")}</LangLink>
+              </Button>
+            )}
+            <Button type="button" size="lg" variant="outline" className="btn-mobile-full border-white/30 bg-transparent text-white hover:border-lime hover:bg-white/5" onClick={onEmpty}>
               {t("cta.new")}
             </Button>
           </div>
           {signals.hasBusiness ? (
-            <p className="text-sm text-muted">
+            <p className="text-sm text-white/60">
               {t("os.context")}: {signals.businessName}
               {signals.completeness != null ? ` · ${signals.completeness}/100` : ""}
+              {" · "}
+              {t("path.here")}: {t(path.key)}
             </p>
           ) : (
-            <p className="text-sm text-muted">{t("os.noBusiness")}</p>
+            <p className="text-sm text-white/60">{t("os.noBusiness")}</p>
           )}
         </div>
       </div>

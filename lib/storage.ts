@@ -1,4 +1,4 @@
-import type { CampaignPack, CoachReport, HsoStudioState, Intake, LabRun, Locale, SelfPlan, SelfProfile, StudioPiece } from "./types";
+import type { CampaignPack, CoachReport, HsoStudioState, Intake, LabRun, Locale, SelfPlan, SelfProfile, StudioPiece, ViralDeskState } from "./types";
 import { emptyIntake } from "./engine/validate";
 import { coachIntake } from "./engine/coach";
 import { copyLeaksClinic, intakeIsClinicDemo, isBlockedEmptySessionName } from "./clinic-leak";
@@ -7,6 +7,7 @@ import { businessKey } from "./engine/ad-engine/sources";
 import { detectVertical } from "./vertical";
 import { normalizeVoice } from "./engine/voice";
 import { normalizeOfferBlueprint } from "./engine/offer-builder";
+import { interpretCampaignPaste, sanitizePastedUrl } from "./url-clean";
 
 const K = {
   locale: "omniad-locale",
@@ -69,6 +70,7 @@ export interface DraftState {
   packId?: string;
   coach?: CoachReport;
   hsoStudio?: HsoStudioState;
+  viral?: ViralDeskState;
 }
 
 export function loadDraft(): DraftState {
@@ -112,6 +114,7 @@ export function loadDraft(): DraftState {
       d.hsoStudio && typeof d.hsoStudio === "object" && Array.isArray(d.hsoStudio.variants)
         ? d.hsoStudio
         : undefined,
+    viral: d.viral && typeof d.viral === "object" ? d.viral : undefined,
   };
 }
 
@@ -129,15 +132,23 @@ function emptySessionActive(): boolean {
 }
 
 export function saveDraft(draft: DraftState) {
+  const intake = scrubIntakeChrome(draft.intake ?? emptyIntake());
+  const next = { ...draft, intake };
   if (emptySessionActive()) {
-    const name = String(draft.intake?.businessName ?? "").trim();
-    const clinic = intakeIsClinicDemo(draft.intake ?? {}) || isBlockedEmptySessionName(name);
+    const name = String(intake.businessName ?? "").trim();
+    const clinic = intakeIsClinicDemo(intake) || isBlockedEmptySessionName(name);
     if (!name || clinic) {
       write(K.draft, { intake: emptyIntake(), step: 1, phase: "wizard" });
       return;
     }
   }
-  write(K.draft, draft);
+  write(K.draft, next);
+}
+
+function scrubIntakeChrome(intake: Intake): Intake {
+  const fromName = interpretCampaignPaste(intake.businessName);
+  const website = fromName.website || sanitizePastedUrl(intake.website) || intake.website;
+  return { ...intake, businessName: fromName.name, website };
 }
 
 export const INGEST_APPLIED_EVENT = "sawek-ingest-applied";
@@ -147,12 +158,13 @@ export const INGEST_APPLIED_EVENT = "sawek-ingest-applied";
  */
 export function applyIntakeToDraft(intake: Intake, opts?: { resetWizard?: boolean }): DraftState {
   const d = loadDraft();
-  const coach = coachIntake(intake);
+  const clean = scrubIntakeChrome(intake);
+  const coach = coachIntake(clean);
   const next: DraftState = opts?.resetWizard
-    ? { intake, step: 2, phase: "wizard", coach }
-    : { ...d, intake, coach };
+    ? { intake: clean, step: 2, phase: "wizard", coach }
+    : { ...d, intake: clean, coach };
   saveDraft(next);
-  if (opts?.resetWizard) isolateStudioToIntake(intake);
+  if (opts?.resetWizard) isolateStudioToIntake(clean);
   if (typeof window !== "undefined") {
     window.dispatchEvent(new Event(INGEST_APPLIED_EVENT));
   }

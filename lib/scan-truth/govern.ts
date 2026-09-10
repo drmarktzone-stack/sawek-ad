@@ -188,10 +188,42 @@ export function qualifyField(
   else if (field === "biggestProblem") q = qualifyProblem(value, unit);
   else if (field === "location") q = qualifyLocation(value, unit);
   else if (field === "uniqueAdvantage" || field === "brandTone" || field === "brandPositioning") {
-    if (unit && REJECT_CLASSES.has(unit.contentClass)) q = classToRejection(unit.contentClass) || "UNRELATED";
-    else if (isEcommerceChromeText(value)) q = "PAGE_CHROME";
-    else if (unit?.contentClass === "BUSINESS_FACTS") q = "VERIFIED_BUSINESS_FACT";
-    else q = "UNKNOWN";
+    if (isEcommerceChromeText(value)) q = "PAGE_CHROME";
+    else if (
+      unit &&
+      REJECT_CLASSES.has(unit.contentClass) &&
+      unit.sourceType !== "og" &&
+      unit.sourceType !== "heading" &&
+      unit.sourceType !== "meta"
+    ) {
+      q = classToRejection(unit.contentClass) || "UNRELATED";
+    } else if (
+      unit?.contentClass === "BUSINESS_FACTS" ||
+      unit?.sourceType === "og" ||
+      unit?.sourceType === "heading" ||
+      unit?.sourceType === "jsonld" ||
+      unit?.sourceType === "meta" ||
+      !unit
+    ) {
+      q = unit?.sourceType === "jsonld" ? "SOURCE_VERIFIED_FACT" : "VERIFIED_BUSINESS_FACT";
+    } else q = "UNKNOWN";
+  } else if (field === "businessName" || field === "category" || field === "description") {
+    const identityHit =
+      (identity.name && tokenOverlap(value, identity.name) >= 1) ||
+      unit?.sourceType === "jsonld" ||
+      unit?.sourceType === "og" ||
+      unit?.sourceType === "meta" ||
+      unit?.sourceType === "heading" ||
+      !unit;
+    if (unit && unit.contentClass === "THIRD_PARTY" && !identityHit) {
+      q = "UNRELATED";
+    } else if (identityHit || unit?.contentClass === "BUSINESS_FACTS") {
+      q = unit?.sourceType === "jsonld" ? "SOURCE_VERIFIED_FACT" : "VERIFIED_BUSINESS_FACT";
+    } else if (unit && REJECT_CLASSES.has(unit.contentClass)) {
+      q = classToRejection(unit.contentClass) || "UNRELATED";
+    } else {
+      q = "VERIFIED_BUSINESS_FACT";
+    }
   } else {
     if (unit && unit.contentClass === "THIRD_PARTY" && (field === "businessName" || field === "category")) {
       q = "UNRELATED";

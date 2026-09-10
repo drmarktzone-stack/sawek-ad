@@ -12,9 +12,12 @@ import { FunctionRail } from "@/components/function-rail";
 import { LangLink } from "@/components/lang-link";
 import { PRICE_MONTHLY_ILS, PRICE_YEARLY_ILS } from "@/lib/plan";
 import { useCommandSignals } from "@/components/command/signals";
-import { CampaignTable, CommandHero, ModuleSummaries, TodayBoard } from "@/components/command/command-center";
+import { CampaignTable, CommandHero } from "@/components/command/command-center";
 import { OsDisclosure } from "@/components/command/primitives";
 import { CampaignJourney } from "@/components/campaign-journey";
+import { ContentJobsStrip } from "@/components/content-jobs";
+import { NextStepCard } from "@/components/next-step-card";
+import { wizardReady } from "@/lib/engine/validate";
 
 export function HomeStudio() {
   const { t } = useI18n();
@@ -58,6 +61,8 @@ export function HomeStudio() {
 
       <div className="relative mx-auto max-w-6xl px-4 py-6">
         <CampaignJourney />
+        <NextStepCard onScan={focusScan} />
+        {wizardReady(signals.intake) ? <ContentJobsStrip /> : null}
         <p className="mx-auto mb-4 max-w-xl text-center text-sm text-muted">{t("home.truth")}</p>
       </div>
 
@@ -83,10 +88,8 @@ export function HomeStudio() {
         <PwaInstallHint />
       </div>
 
-      {signals.ready ? (
+      {signals.ready && signals.campaigns.length ? (
         <div className="mx-auto max-w-6xl px-4">
-          <TodayBoard signals={signals} />
-          <ModuleSummaries signals={signals} />
           <CampaignTable signals={signals} />
         </div>
       ) : null}

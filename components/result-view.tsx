@@ -229,10 +229,10 @@ export function ResultView({
               <PlanGate feature="landing" className="mt-0" />
             )}
             <LangLink
-              href="/growth"
+              href="/task/ad"
               className="inline-flex items-center gap-2 rounded-[12px] bg-[#F5C518] px-4 py-2 text-sm font-black text-black"
             >
-              {tr("nav.growth")}
+              {tr("path.makeAd")}
             </LangLink>
             </div>
           </div>
@@ -455,11 +455,11 @@ export function ResultView({
 
       <div className="mb-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {[
-          { href: "/discovery", key: "nav.discovery" as const, body: pack.agency?.discovery.icp[locale] },
-          { href: "/strategy", key: "nav.strategy" as const, body: pack.agency?.strategy.positioning[locale] },
-          { href: "/studio", key: "nav.studio" as const, body: cmoIdeas.selected[0] ? `${cmoIdeas.selected[0].name[locale] || cmoIdeas.selected[0].name.he} — ${cmoIdeas.selected[0].whyItWins[locale] || cmoIdeas.selected[0].whyItWins.he}` : pack.agency?.creative.hooks[0]?.hook[locale] },
-          { href: "/media", key: "nav.media" as const, body: pack.agency?.mediaExtra.planOnly[locale] },
-          { href: "/leads", key: "nav.leads" as const, body: pack.agency?.leads.magnet[locale] },
+          { href: "/#studio", key: "journey.truth" as const, body: pack.intake.description || pack.intake.category },
+          { href: "/task/ad", key: "journey.diagnosis" as const, body: pack.diagnosis.summary[locale] },
+          { href: "/tools/core-message", key: "nav.voice" as const, body: pack.intake.voice?.coreMessage || pack.agency?.strategy.positioning[locale] },
+          { href: "/tools/offer", key: "nav.offerTool" as const, body: pack.intake.offer || pack.offerBlueprint?.headline || tr("path.saveOffer") },
+          { href: "/viral", key: "nav.viral" as const, body: pack.viral?.idea || pack.brief?.viralIdea[locale] || pack.agency?.creative.hooks[0]?.hook[locale] },
           { href: "/campaigns", key: "nav.campaigns" as const, body: tr("dept.opsLead") },
         ].map((card) => (
           <LangLink

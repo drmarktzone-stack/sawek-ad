@@ -3,21 +3,17 @@ import {
   Brain,
   Compass,
   Fingerprint,
-  FlaskConical,
   Folder,
   HelpCircle,
   LayoutDashboard,
   Megaphone,
   Pencil,
-  Radar,
-  Search,
   SlidersHorizontal,
   Sparkles,
-  Users,
   WandSparkles,
   Coins,
   Activity,
-  Share2,
+  Link2,
 } from "lucide-react";
 
 export type NavKey =
@@ -54,42 +50,32 @@ export type NavItem = {
   icon: LucideIcon;
 };
 
+/** Primary = the one campaign journey. Everything else is More or hidden. */
 export const PRIMARY_NAV: NavItem[] = [
-  { href: "/dashboard", key: "nav.command", icon: LayoutDashboard },
-  { href: "/task/ad", key: "nav.create", icon: WandSparkles },
+  { href: "/", key: "nav.build", icon: Link2 },
+  { href: "/tools/core-message", key: "nav.voice", icon: Fingerprint },
   { href: "/tools/offer", key: "nav.offerTool", icon: Compass },
-  { href: "/studio", key: "nav.studio", icon: Pencil },
+  { href: "/task/ad", key: "nav.create", icon: WandSparkles },
   { href: "/campaigns", key: "nav.campaigns", icon: Folder },
 ];
 
 export const MORE_NAV: NavItem[] = [
-  { href: "/tools/core-message", key: "nav.voice", icon: Fingerprint },
-  { href: "/tools/hso", key: "nav.hso", icon: Megaphone },
-  { href: "/", key: "nav.build", icon: WandSparkles },
-  { href: "/growth/market", key: "nav.intel", icon: Radar },
-  { href: "/growth/dna", key: "nav.dna", icon: Fingerprint },
-  { href: "/growth/experiments", key: "nav.experiments", icon: FlaskConical },
-  { href: "/leads", key: "nav.leads", icon: Users },
-  { href: "/discovery", key: "nav.discovery", icon: Search },
-  { href: "/strategy", key: "nav.strategy", icon: Compass },
   { href: "/viral", key: "nav.viral", icon: Sparkles },
-  { href: "/media", key: "nav.media", icon: Megaphone },
-  { href: "/growth", key: "nav.growth", icon: Brain },
-  { href: "/growth/performance", key: "nav.analytics", icon: Activity },
-  { href: "/lab", key: "nav.lab", icon: FlaskConical },
-  { href: "/medical/optibrain", key: "nav.medical", icon: Brain },
+  { href: "/tools/hso", key: "nav.hso", icon: Megaphone },
+  { href: "/studio", key: "nav.studio", icon: Pencil },
+  { href: "/dashboard", key: "nav.command", icon: LayoutDashboard },
   { href: "/self", key: "nav.self", icon: SlidersHorizontal },
-  { href: "/settings/social", key: "nav.social", icon: Share2 },
+  { href: "/medical/optibrain", key: "nav.medical", icon: Brain },
   { href: "/pricing", key: "nav.pricing", icon: Coins },
   { href: "/about", key: "nav.about", icon: HelpCircle },
   { href: "/status", key: "nav.status", icon: Activity },
 ];
 
 export const DOCK_NAV: NavItem[] = [
-  { href: "/dashboard", key: "nav.command", icon: LayoutDashboard },
+  { href: "/", key: "nav.build", icon: Link2 },
   { href: "/task/ad", key: "nav.create", icon: WandSparkles },
   { href: "/tools/offer", key: "nav.offerTool", icon: Compass },
-  { href: "/studio", key: "nav.studio", icon: Pencil },
+  { href: "/campaigns", key: "nav.campaigns", icon: Folder },
 ];
 
 export const ALL_NAV: NavItem[] = [...PRIMARY_NAV, ...MORE_NAV];

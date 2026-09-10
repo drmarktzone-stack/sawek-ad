@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import type { CampaignPack, Intake } from "@/lib/types";
 import type { GrowthWorkspace } from "@/lib/scientist/types";
 import { loadDraft, loadCampaigns } from "@/lib/storage";
-import { latestPack } from "@/lib/active-pack";
+import { loadCampaignTools } from "@/lib/campaign-tools";
 import { getPrimaryWorkspace, loadScientistWorkspaces } from "@/lib/scientist/store";
 import { emptyIntake } from "@/lib/engine/validate";
 import { useIsClient } from "@/lib/use-is-client";
@@ -24,11 +24,11 @@ export type CommandSignals = {
 
 export function readSignals(): Omit<CommandSignals, "ready"> {
   const draft = loadDraft();
-  const pack = latestPack();
+  const { pack, intake: truth } = loadCampaignTools();
   const campaigns = loadCampaigns().filter((p) => !p.demoMeta);
   const workspace = getPrimaryWorkspace() ?? loadScientistWorkspaces()[0] ?? null;
-  const intake = draft.intake ?? emptyIntake();
-  const businessName = intake.businessName?.trim() || pack?.name || workspace?.business.name || "";
+  const intake = truth ?? draft.intake ?? emptyIntake();
+  const businessName = intake.businessName?.trim() || pack?.name || "";
   return {
     intake,
     pack,

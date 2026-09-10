@@ -36,7 +36,15 @@ Required IAM on the Cloud Run SA (same $300 pack):
 
 Hebrew / Arabic / English copy in `lib/i18n.ts` (`gcp.note.*`, `gcp.flashDown`, `gcp.proDown`, `audit.imagenDown`) tells the user when a Google API is down. Templates stay intake-driven. No fake ROAS.
 
-## Viral-desk callbook (Mohtawak-style — next PR)
+## Design reference
+
+Product DNA: **Mohtawak** (محتواك) at [dawrati.ai](https://dawrati.ai/) — Arabic-first content jobs (7 viral scripts, hooks, retention/success *planning* predictor, rewrite, carousel, 30-day calendar, trends, brand voice). One tap per job, wired from the campaign path into `/viral?job=…`.
+
+**Not** Mohtwa / [mohtwa.ai](https://mohtwa.ai/). Do not restyle SAWEK to that pale-blue / cobalt store-badge landing.
+
+Chrome (from Mohtawak product screenshots): lime-green accents on a dark charcoal hero, soft off-white boards, rounded white tool cards with dark borders, pill CTAs. Adapt the language — do not clone logos or copy.
+
+## Viral-desk callbook (Mohtawak-style)
 
 Import **only** from `@/lib/gcp-ai`. Do not reach into `lib/vertex.ts` internals.
 

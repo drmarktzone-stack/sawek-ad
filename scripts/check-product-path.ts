@@ -13,6 +13,10 @@ import { honestProofCopy, sanitizeAngles } from "../lib/engine/angles";
 import { rsaLines } from "../lib/engine/spoken";
 import { bankForIntake, serviceFamily } from "../lib/creative-bank";
 import { PUBLISHED_DEMO_IDS } from "../lib/demo-catalog";
+import { PRIMARY_NAV, MORE_NAV } from "../components/command/nav";
+import { CAMPAIGN_STEPS, DEAD_JOURNEY_HREFS, resolveCampaignPath } from "../lib/campaign-path";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import type { CampaignPack, Intake } from "../lib/types";
 
 const failures: string[] = [];
@@ -125,6 +129,57 @@ if (!cmo.selected.some((i) => /cup|quiet|stool|brew|empty_table|no_best|wa_table
 
 if (!thinPack.siteAudit?.weaknesses.some((w) => w.id === "no-photos")) {
   fail("thin scan site audit missing no-photos (photo offer trigger)");
+}
+
+const navHrefs = [...PRIMARY_NAV, ...MORE_NAV].map((n) => n.href);
+if (!PRIMARY_NAV.some((n) => n.href === "/")) fail("primary nav missing scan/home");
+if (!PRIMARY_NAV.some((n) => n.href === "/task/ad")) fail("primary nav missing Complete Ad");
+if (!PRIMARY_NAV.some((n) => n.href === "/tools/offer")) fail("primary nav missing offer");
+if (!PRIMARY_NAV.some((n) => n.href === "/tools/core-message")) fail("primary nav missing core message");
+if (!PRIMARY_NAV.some((n) => n.href === "/campaigns")) fail("primary nav missing campaigns");
+for (const dead of [...DEAD_JOURNEY_HREFS, "/growth/market", "/growth/dna", "/growth/experiments"]) {
+  if (navHrefs.includes(dead)) fail(`dead tool still in nav: ${dead}`);
+}
+
+const emptyPath = resolveCampaignPath({ intake: emptyIntake(), pack: null });
+if (emptyPath.current !== "scan") fail(`empty campaign current=${emptyPath.current}, expected scan`);
+if (CAMPAIGN_STEPS.map((s) => s.id).join(">") !== "scan>truth>diagnosis>message>offer>create>variants>export") {
+  fail(`campaign steps drifted: ${CAMPAIGN_STEPS.map((s) => s.id).join(">")}`);
+}
+
+const root = process.cwd();
+const css = readFileSync(join(root, "app/globals.css"), "utf8");
+if (/Hub Clear|pale sky \/ cobalt|#2563eb|#2563EB/.test(css)) fail("mohtwa.ai chrome leaked into tokens");
+if (!/Mohtawak operator/.test(css)) fail("Mohtawak lime/dark tokens missing");
+if (!/mw-hero/.test(css)) fail("dark Mohtawak hero class missing");
+const jobsUi = readFileSync(join(root, "components/content-jobs.tsx"), "utf8");
+for (const job of ["scripts", "hooks", "analyze", "remix", "carousel", "calendar", "trends", "voice"]) {
+  if (!jobsUi.includes(`job: "${job}"`)) fail(`content jobs missing ${job}`);
+}
+
+const wizardSrc = readFileSync(join(root, "components/wizard-flow.tsx"), "utf8");
+if (!wizardSrc.includes("/tools/core-message")) fail("diagnosis approve must continue to core message");
+if (!wizardSrc.includes("diagnosisApproved")) fail("HITL must hide five-agent continue after diagnosis");
+
+const taskSrc = readFileSync(join(root, "components/task-workspace.tsx"), "utf8");
+if (!taskSrc.includes("approved === false")) fail("task workspace must not open empty HITL");
+if (!taskSrc.includes("loadCampaignTools")) fail("task workspace must hydrate shared Business Truth");
+
+const viralPage = readFileSync(join(root, "app/viral/page.tsx"), "utf8");
+if (!viralPage.includes("loadCampaignTools")) fail("viral page must boot shared Business Truth");
+if (viralPage.includes("latestPack()")) fail("viral page must not boot latestPack (clinic bleed)");
+
+const dept = readFileSync(join(root, "components/department-shell.tsx"), "utf8");
+if (!dept.includes("loadCampaignTools")) fail("department shell must boot shared Business Truth");
+if (dept.includes("latestPack()")) fail("department shell must not boot latestPack (clinic bleed)");
+
+const toolsSrc = readFileSync(join(root, "lib/campaign-tools.ts"), "utf8");
+if (!toolsSrc.includes("intakeIsClinicDemo")) fail("shared store must drop clinic pack vs non-clinic draft");
+if (!toolsSrc.includes("persistViral")) fail("viral tools must write the shared store");
+
+for (const file of ["app/lab/page.tsx", "app/discovery/page.tsx", "app/strategy/page.tsx", "app/media/page.tsx", "app/leads/page.tsx", "app/growth/layout.tsx"]) {
+  const src = readFileSync(join(root, file), "utf8");
+  if (!src.includes("JourneyRedirect")) fail(`${file} must bounce onto the campaign path`);
 }
 
 if (failures.length) {

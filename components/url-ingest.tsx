@@ -11,7 +11,7 @@ import {
   type IngestReviewRow,
 } from "@/lib/document-ingest";
 import { applyIntakeToDraft } from "@/lib/storage";
-import { emptyIntake, wizardReady } from "@/lib/engine/validate";
+import { emptyIntake } from "@/lib/engine/validate";
 import { lockDefaultDialect } from "@/lib/engine/voice";
 import { clearPendingDemo } from "@/lib/demo";
 import { clearEmptyCampaign } from "@/lib/empty-campaign";
@@ -21,7 +21,7 @@ import { IngestReviewDialog } from "@/components/document-ingest";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { assetsFromPublicUrls } from "@/lib/media-assets";
-import { stripTrackingParams } from "@/lib/url-clean";
+import { sanitizePastedUrl, stripTrackingParams } from "@/lib/url-clean";
 import { withLang } from "@/lib/locale-url";
 
 /** Ecommerce homepage + Gemini enrich regularly exceeds 15–30s; do not abort early. */
@@ -101,7 +101,7 @@ export function UrlIngest() {
       setError(t("url.error.invalid"));
       return;
     }
-    const url = stripTrackingParams(rawUrl) || rawUrl;
+    const url = sanitizePastedUrl(rawUrl) || stripTrackingParams(rawUrl) || rawUrl;
     if (url !== rawUrl) setValue(url);
     setBusy(true);
 
@@ -280,44 +280,59 @@ export function UrlIngest() {
     setPosts([]);
     setBrandKit({ colors: [], source: "none" });
     if (pathname.startsWith("/task")) return;
-    if (!wizardReady(next)) {
-      router.push(withLang("/#studio", locale));
-      return;
-    }
-    router.push(withLang("/tools/core-message", locale));
+    router.push(withLang("/#studio", locale));
   }
 
   return (
     <div
       className={cn(
-        "border-b border-[var(--line)] bg-[#f3f8f1]",
+        "border-b border-[var(--line)] bg-[var(--ivory)]",
         home ? "px-3 py-3" : "px-3 py-2 sm:py-1.5",
       )}
     >
       <form
         onSubmit={(e) => void scan(e)}
         className={cn(
-          "mx-auto flex w-full max-w-[92rem] min-w-0 flex-col",
+          "scan-url-card mx-auto flex w-full max-w-[92rem] min-w-0 flex-col",
           home ? "gap-2" : "gap-1.5",
         )}
+        data-testid="scan-url-form"
       >
         <label htmlFor="scan-url" className="text-start text-sm font-black text-navy">
           {t("url.label")}
         </label>
-        <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center">
+        <div className="flex min-w-0 flex-col gap-2 rounded-[22px] border-2 border-[var(--ink)] bg-white p-1.5 sm:flex-row sm:items-center sm:ps-3">
           <div className="flex min-w-0 flex-1 items-center gap-2">
             <Globe className={cn("shrink-0 text-teal", home ? "size-5" : "size-4")} aria-hidden />
             <input
               id="scan-url"
               dir="ltr"
               className={cn(
-                "w-full min-w-0 rounded-[12px] border border-[var(--line)] bg-white px-4 text-[16px] text-ink placeholder:text-muted-soft outline-none focus:border-teal focus:shadow-[0_0_0_4px_rgba(200,224,74,0.35)]",
+                "w-full min-w-0 rounded-[16px] border-0 bg-transparent px-2 text-[16px] text-ink placeholder:text-muted-soft outline-none focus:shadow-none",
                 home ? "h-12" : "h-11 sm:h-10 sm:text-sm",
               )}
               value={value}
-              onChange={(e) => setValue(e.target.value)}
+              onChange={(e) => {
+                const next = e.target.value;
+                const clean = sanitizePastedUrl(next);
+                setValue(clean || next);
+              }}
+              onPaste={(e) => {
+                const text = e.clipboardData.getData("text");
+                const clean = sanitizePastedUrl(text);
+                if (clean && clean !== text.trim()) {
+                  e.preventDefault();
+                  setValue(clean);
+                }
+              }}
+              onBlur={() => {
+                const clean = sanitizePastedUrl(value);
+                if (clean && clean !== value.trim()) setValue(clean);
+              }}
               placeholder={t("url.placeholder")}
-              autoComplete="url"
+              autoComplete="off"
+              autoCorrect="off"
+              spellCheck={false}
               inputMode="url"
               enterKeyHint="go"
               name="business-url"

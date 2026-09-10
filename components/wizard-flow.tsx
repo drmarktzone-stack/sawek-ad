@@ -19,9 +19,10 @@ import {
   type WizardRequiredField,
 } from "@/lib/engine/validate";
 import { assemblePack, idleStatus, overlayPackAgency, runIntakeAndDiagnosis, runMedia, runOptimizerStage, runStrategic } from "@/lib/engine/run";
-import { loadDraft, saveDraft, getCampaign, INGEST_APPLIED_EVENT } from "@/lib/storage";
+import { loadDraft, saveDraft, INGEST_APPLIED_EVENT } from "@/lib/storage";
+import { loadCampaignTools } from "@/lib/campaign-tools";
+import { NextStepCard } from "@/components/next-step-card";
 import { nextHitlGate } from "@/lib/engine/hitl";
-import { offerGate } from "@/lib/engine/offer-builder";
 import { OfferGateBanner } from "@/components/offer-gate-banner";
 import { syncCampaign } from "@/lib/supabase";
 import { uid } from "@/lib/utils";
@@ -29,6 +30,7 @@ import { MAX_COMPETITORS } from "@/lib/factory-formats";
 import { AREA_LABEL } from "@/lib/i18n";
 import { markEmptyCampaign, wantsEmptyCampaign, clearEmptyCampaign, explicitDemoInUrl, demoParamFromUrl, applyEmptyCampaignHydrate, EMPTY_CAMPAIGN_EVENT, releaseEmptyIfTypedName } from "@/lib/empty-campaign";
 import { stripDemoParamsPreserveLang, withLang } from "@/lib/locale-url";
+import { interpretCampaignPaste, sanitizePastedUrl } from "@/lib/url-clean";
 import {
   ADVANTAGE_CHIPS,
   CHANNEL_CHIPS,
@@ -260,20 +262,19 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
         offer: intake.offerCustom,
       });
       const resume = d.phase === "agents" || d.phase === "interview" ? d.phase : "wizard";
-      if (resume === "agents") {
-        const existing = d.packId ? getCampaign(d.packId) : undefined;
-        if (existing) {
-          setPack(existing);
-          setAgentStatus(existing.agentStatus);
-          setHitlError("");
-        } else {
-          setPack(null);
-          setAgentStatus(idleStatus());
-          setHitlError(t("agents.packMissing"));
-        }
+      const existing = loadCampaignTools().pack;
+      const needHitl = Boolean(existing?.diagnosis?.hypotheses?.length && existing.diagnosis.approved === false);
+      if (existing) {
+        setPack(existing);
+        setAgentStatus(existing.agentStatus);
+        setHitlError("");
+      }
+      if (resume === "agents" && needHitl) {
         setPhase("agents");
+      } else if (resume === "interview") {
+        setPhase("interview");
       } else {
-        setPhase(resume);
+        setPhase("wizard");
       }
     }
     setHydrated(true);
@@ -315,22 +316,28 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
         offer: d.intake.offerCustom,
       });
       const resume = d.phase === "interview" || d.phase === "agents" ? d.phase : "wizard";
+      const tools = loadCampaignTools();
+      const existing = tools.pack;
+      const needHitl = Boolean(existing?.diagnosis?.hypotheses?.length && existing.diagnosis.approved === false);
       if (resume === "wizard") {
         setPhase("wizard");
-        setPack(null);
-        setAgentStatus(idleStatus());
-      } else if (resume === "agents") {
-        const existing = d.packId ? getCampaign(d.packId) : undefined;
-        if (existing) {
-          setPack(existing);
-          setAgentStatus(existing.agentStatus);
+        if (tools.pack) {
+          setPack(tools.pack);
+          setAgentStatus(tools.pack.agentStatus);
           setHitlError("");
         } else {
           setPack(null);
           setAgentStatus(idleStatus());
-          setHitlError(t("agents.packMissing"));
         }
+      } else if (resume === "agents" && needHitl && existing) {
+        setPack(existing);
+        setAgentStatus(existing.agentStatus);
+        setHitlError("");
         setPhase("agents");
+      } else if (resume === "agents") {
+        setPack(existing);
+        setAgentStatus(existing?.agentStatus ?? idleStatus());
+        setPhase("wizard");
       } else {
         setPhase(resume);
       }
@@ -496,16 +503,7 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
 
   async function startBuild() {
     if (!wizardReady(intake)) return;
-    const gate = offerGate(intake, pack);
-    if (!gate.ok) {
-      setOfferBlocked(true);
-      return;
-    }
     setOfferBlocked(false);
-    if (cmoFieldsMissing(intake)) {
-      setPhase("interview");
-      return;
-    }
     await runAgents();
   }
 
@@ -552,14 +550,18 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
     setHitlError("");
     let current = pack;
     if (!current) {
-      const d = loadDraft();
-      current = d.packId ? getCampaign(d.packId) ?? null : null;
+      current = loadCampaignTools().pack;
       if (current) {
         setPack(current);
         setAgentStatus(current.agentStatus);
       }
     }
     if (!current) {
+      if (wizardReady(intake)) {
+        advancing.current = false;
+        await runAgents();
+        return;
+      }
       setHitlError(t("agents.packMissing"));
       setRunning(false);
       return;
@@ -595,6 +597,10 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
         void syncCampaign(next);
         setPack(next);
         setAgentStatus(next.agentStatus);
+        setPhase("wizard");
+        saveDraft({ intake, step: 4, phase: "wizard", packId: next.id });
+        router.push(withLang("/tools/core-message", locale));
+        return;
       } else if (gate === "strategic") {
         const built = await runMedia(intake, onStatus);
         const next = await overlayPackAgency(assemblePack(intake, {
@@ -750,7 +756,33 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
                 <Input
                   value={intake.businessName}
                   placeholder={t("biz.namePh")}
-                  onChange={(e) => patch({ businessName: e.target.value })}
+                  onPaste={(e) => {
+                    const text = e.clipboardData.getData("text");
+                    const parsed = interpretCampaignPaste(text);
+                    if (parsed.website || parsed.name !== text.trim()) {
+                      e.preventDefault();
+                      patch({
+                        businessName: parsed.name,
+                        ...(parsed.website ? { website: parsed.website } : {}),
+                      });
+                    }
+                  }}
+                  onChange={(e) => {
+                    const parsed = interpretCampaignPaste(e.target.value);
+                    patch({
+                      businessName: parsed.name,
+                      ...(parsed.website ? { website: parsed.website } : {}),
+                    });
+                  }}
+                  onBlur={() => {
+                    const parsed = interpretCampaignPaste(intake.businessName);
+                    if (parsed.name !== intake.businessName || parsed.website) {
+                      patch({
+                        businessName: parsed.name,
+                        ...(parsed.website ? { website: parsed.website } : {}),
+                      });
+                    }
+                  }}
                 />
               </Field>
               <Field
@@ -945,7 +977,11 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
                 <Input
                   value={intake.website}
                   placeholder="https://"
-                  onChange={(e) => patch({ website: e.target.value })}
+                  dir="ltr"
+                  onChange={(e) => {
+                    const clean = sanitizePastedUrl(e.target.value);
+                    patch({ website: clean || e.target.value });
+                  }}
                 />
               </Field>
               <Field label={t("biz.whatsapp")} filled={Boolean((intake.whatsapp ?? "").trim())}>
@@ -1342,25 +1378,33 @@ function AgentsPanel({
 }) {
   const { t, locale } = useI18n();
   const gate = nextHitlGate(agentStatus, pack);
+  const diagnosisReady = Boolean(pack?.diagnosis?.hypotheses?.length);
+  const diagnosisApproved = Boolean(pack?.diagnosis?.approved);
   const approveLabel =
     running ? t("agents.advancing") : gate === "diagnostic" ? t("cta.approve") : t("cta.continueStage");
   return (
     <section className="hitl-agents">
-      <h2 className="agency-display mb-2 text-center text-3xl">{t("agents.title")}</h2>
-      <p className="mb-6 text-center text-sm text-muted">{t("agents.hitl")}</p>
-      <ul className="mb-8 space-y-2">
-        {AGENT_KEYS.map((a, i) => (
-          <li
-            key={a.id}
-            className="agency-board flex items-center justify-between px-4 py-3"
-          >
-            <span className="text-sm font-semibold">
-              {i + 1}. {t(a.key)}
-            </span>
-            <StatusPill status={agentStatus[a.id]} />
-          </li>
-        ))}
-      </ul>
+      {diagnosisApproved ? (
+        <NextStepCard compact />
+      ) : (
+        <>
+          <h2 className="agency-display mb-2 text-center text-3xl">{t("agents.title")}</h2>
+          <p className="mb-6 text-center text-sm text-muted">{t("agents.hitl")}</p>
+          <ul className="mb-8 space-y-2">
+            {AGENT_KEYS.map((a, i) => (
+              <li
+                key={a.id}
+                className="agency-board flex items-center justify-between px-4 py-3"
+              >
+                <span className="text-sm font-semibold">
+                  {i + 1}. {t(a.key)}
+                </span>
+                <StatusPill status={agentStatus[a.id]} />
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
 
       {pack && (
         <div className="agency-board p-5 sm:p-7">
@@ -1425,19 +1469,27 @@ function AgentsPanel({
             {hitlError}
           </p>
         ) : null}
-        <Button
-          type="button"
-          size="lg"
-          className="w-full"
-          disabled={running}
-          onClick={onApprove}
-          data-testid="hitl-approve"
-        >
-          {approveLabel}
-        </Button>
-        <button type="button" className="mt-3 w-full text-sm text-muted" onClick={onBack} data-testid="hitl-reject">
-          {t("cta.reject")}
-        </button>
+        {diagnosisReady && !diagnosisApproved ? (
+          <Button
+            type="button"
+            size="lg"
+            className="w-full"
+            disabled={running}
+            onClick={onApprove}
+            data-testid="hitl-approve"
+          >
+            {approveLabel}
+          </Button>
+        ) : diagnosisApproved ? null : (
+          <p className="mb-3 text-center text-sm font-semibold text-navy" data-testid="hitl-need-intake">
+            {t("agents.needIntake")}
+          </p>
+        )}
+        {diagnosisApproved ? null : (
+          <button type="button" className="mt-3 w-full text-sm text-muted" onClick={onBack} data-testid="hitl-reject">
+            {t("cta.reject")}
+          </button>
+        )}
         <div className="mt-6 border-t border-navy/10 pt-5">
           <Button type="button" size="lg" className="w-full" onClick={onNewCampaign} data-testid="hitl-new">
             {t("cta.newOther")}
