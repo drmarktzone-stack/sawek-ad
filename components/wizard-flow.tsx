@@ -1234,7 +1234,6 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
                       !wizardReady(intake) && "border-danger text-danger hover:border-danger hover:text-danger",
                     )}
                     disabled={running}
-                    aria-disabled={!wizardReady(intake)}
                     data-testid="cta-build-full"
                     data-cta-state={wizardReady(intake) ? "ready" : "missing"}
                     onClick={() => {
