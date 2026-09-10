@@ -2,7 +2,7 @@ import { readFileSync } from "fs";
 import { join } from "path";
 import { emptyIntake } from "../lib/engine/validate";
 import { demoIntake } from "../lib/demo";
-import { loadDraft, saveDraft, loadCampaigns, saveCampaigns } from "../lib/storage";
+import { loadDraft, saveDraft, loadCampaigns, saveCampaigns, applyIntakeToDraft } from "../lib/storage";
 import {
   markEmptyCampaign,
   wantsEmptyCampaign,
@@ -169,6 +169,23 @@ if (!src.active.includes("wantsEmptyCampaign")) fail("latestPack must stay empty
 const leak = readFileSync(join(process.cwd(), "lib/clinic-leak.ts"), "utf8");
 if (!leak.includes("Olive Kitchen") || !leak.includes("Sand Boutique")) fail("empty-session blocklist must include olive/sand demos");
 if (src.lp.includes("startPediatricDemoFlow")) fail("unknown landing must not promote the clinic demo");
+
+saveDraft({
+  intake: clinic,
+  step: 4,
+  phase: "agents",
+  packId: "demo-olive-kitchen",
+  hsoStudio: { platform: "meta", locale: "ar", variants: [{ id: "x" }] } as never,
+  viral: { idea: "مطبخ الزيتون" },
+});
+const hallounDraft = applyIntakeToDraft(
+  { ...emptyIntake(), businessName: 'ד"ר אליאס הלון', website: "https://dr-halloun.com/lp/", category: "מרפאת שיניים" },
+  { resetWizard: true },
+);
+if (hallounDraft.packId) fail(`scan apply must drop prior packId (got ${hallounDraft.packId})`);
+if (hallounDraft.hsoStudio) fail("scan apply must drop prior hsoStudio");
+if (hallounDraft.viral) fail("scan apply must drop prior viral leftovers");
+if (/زيتون|Olive|סאמר/.test(hallounDraft.intake.businessName)) fail("scan apply leaked demo name");
 
 if (bodyHasFacts({})) fail("empty body should not look like facts");
 if (bodyHasFacts({ description: "", audience: "" })) fail("blank description is not facts");

@@ -16,7 +16,6 @@ import {
   type OfferBuilderInput,
 } from "@/lib/engine/offer-builder";
 import type { Intake, OfferBlueprint } from "@/lib/types";
-import { playbookFor } from "@/lib/engine/playbooks";
 import { useIsClient } from "@/lib/use-is-client";
 
 const emptyInput = (): OfferBuilderInput => ({
@@ -45,11 +44,10 @@ export function OfferBuilderTool() {
     setIntake(live);
     const existing = normalizeOfferBlueprint(live.offerBlueprint ?? pack?.offerBlueprint, locale);
     if (offerBlueprintIsSaved(existing) || existing.skipped) setOffer(existing);
-    const pb = playbookFor(live);
     const named = Boolean(live.businessName.trim());
     setInput({
-      dreamOutcome: existing.dreamOutcome || (named ? pb.hookPain[locale] : ""),
-      proof: existing.proof || (named ? pb.proof[locale] : ""),
+      dreamOutcome: existing.dreamOutcome || (named ? live.uniqueAdvantage || live.description || "" : ""),
+      proof: existing.proof || (named ? live.location || live.category || "" : ""),
       timeToResult: existing.timeToResult,
       customerEffort: existing.customerEffort,
       price: existing.price,
@@ -144,29 +142,37 @@ export function OfferBuilderTool() {
         </div>
 
         <div className="space-y-3 rounded-[14px] border border-[var(--line)] bg-[var(--paper)] p-4" data-testid="ob-output">
-          {offer && offerBlueprintIsSaved(offer) ? (
+          {offer && (offerBlueprintIsSaved(offer) || offer.headline.trim()) ? (
             <>
               <p className="os-kicker">{t("offer.headline")}</p>
-              <p className="os-title text-2xl" data-testid="ob-headline">{offer.headline}</p>
-              <p className="os-kicker mt-4">{t("offer.stack")}</p>
-              <ul className="list-disc ps-5 text-sm text-navy" data-testid="ob-stack">
-                {offer.valueStack.map((row) => (
-                  <li key={row}>{row}</li>
-                ))}
-              </ul>
+              <p className="os-title text-2xl text-navy" data-testid="ob-headline">{offer.headline}</p>
+              {offer.valueStack.length ? (
+                <>
+                  <p className="os-kicker mt-4">{t("offer.stack")}</p>
+                  <ul className="list-disc ps-5 text-sm text-navy" data-testid="ob-stack">
+                    {offer.valueStack.map((row) => (
+                      <li key={row}>{row}</li>
+                    ))}
+                  </ul>
+                </>
+              ) : null}
               <p className="os-kicker mt-4">{t("offer.guarantee")}</p>
               <p className="text-sm" data-testid="ob-guarantee">
                 {offer.guaranteeReal && offer.guarantee ? offer.guarantee : t("offer.noGuarantee")}
               </p>
-              <p className="os-kicker mt-4">{t("offer.hooks")}</p>
-              <ol className="list-decimal ps-5 text-sm font-semibold text-navy" data-testid="ob-hooks">
-                {offer.hooks.map((h) => (
-                  <li key={h}>{h}</li>
-                ))}
-              </ol>
-              <p className="text-sm font-bold text-teal">{t("tools.saved")}</p>
+              {offer.hooks.length ? (
+                <>
+                  <p className="os-kicker mt-4">{t("offer.hooks")}</p>
+                  <ol className="list-decimal ps-5 text-sm font-semibold text-navy" data-testid="ob-hooks">
+                    {offer.hooks.map((h) => (
+                      <li key={h}>{h}</li>
+                    ))}
+                  </ol>
+                </>
+              ) : null}
+              {offerBlueprintIsSaved(offer) ? <p className="text-sm font-bold text-teal">{t("tools.saved")}</p> : null}
               <div className="flex flex-wrap gap-2">
-                <Button type="button" variant="outline" onClick={() => void copyOut()}>
+                <Button type="button" variant="outline" className="border-2 border-[var(--ink)] bg-white font-black text-navy" data-testid="ob-copy" onClick={() => void copyOut()}>
                   {copied ? t("tools.copied") : t("tools.copy")}
                 </Button>
                 <Button asChild>

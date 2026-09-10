@@ -1,19 +1,32 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useI18n } from "@/components/i18n-provider";
 import { LangLink } from "@/components/lang-link";
 import { useIsClient } from "@/lib/use-is-client";
 import { loadCampaignTools } from "@/lib/campaign-tools";
 import { CAMPAIGN_STEPS, resolveCampaignPath } from "@/lib/campaign-path";
+import { INGEST_APPLIED_EVENT } from "@/lib/storage";
+import { EMPTY_CAMPAIGN_EVENT } from "@/lib/empty-campaign";
 import { cn } from "@/lib/utils";
 
 export function CampaignJourney({ compact = false }: { compact?: boolean }) {
   const { t, locale } = useI18n();
   const pathname = usePathname();
   const client = useIsClient();
-  const snap = useMemo(() => (client ? loadCampaignTools() : null), [client, pathname]);
+  const [tick, setTick] = useState(0);
+  useEffect(() => {
+    if (!client) return;
+    const bump = () => setTick((n) => n + 1);
+    window.addEventListener(INGEST_APPLIED_EVENT, bump);
+    window.addEventListener(EMPTY_CAMPAIGN_EVENT, bump);
+    return () => {
+      window.removeEventListener(INGEST_APPLIED_EVENT, bump);
+      window.removeEventListener(EMPTY_CAMPAIGN_EVENT, bump);
+    };
+  }, [client]);
+  const snap = useMemo(() => (client ? loadCampaignTools() : null), [client, pathname, tick]);
   const path = useMemo(() => (snap ? resolveCampaignPath(snap) : null), [snap]);
   const locked = Boolean(path?.done.client);
 

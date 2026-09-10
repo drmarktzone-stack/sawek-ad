@@ -150,6 +150,7 @@ export interface Intake {
   description: string;
   location: string;
   website: string;
+  phone?: string;
   whatsapp: string;
   clinicHours: string;
   kupaFileBy: string;

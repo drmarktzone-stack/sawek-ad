@@ -10,12 +10,15 @@ import { buildSiteAudit } from "../lib/engine/site-audit";
 import { buildPostingCalendar } from "../lib/engine/posting-calendar";
 import { RESIZE_FORMATS } from "../lib/resize-formats";
 import { assemblePack } from "../lib/engine/run";
+import { attachCompleteAd } from "../lib/engine/ad-engine";
+import { generateVariants } from "../lib/engine/copy";
 import { acceptScanBrandValue, applyIngestReview, rowsFromExtracted } from "../lib/document-ingest";
 import { emptyIntake, wizardReady, validateIntake } from "../lib/engine/validate";
 import { diagnose } from "../lib/engine/diagnose";
 import { detectVertical, isPediatrics, showsHmoAudience } from "../lib/vertical";
 import { AUDIENCE_CHIPS, audienceChipsFor, resolveChipLabel, toggleChipValue } from "../lib/chips";
 import { demoIntake, isPediatricDemo } from "../lib/demo";
+import { hydrateScanIntake } from "../lib/intake-locale";
 import type { IngestedDocument, MediaAssetMeta } from "../lib/types";
 
 const failures: string[] = [];
@@ -993,6 +996,124 @@ else {
   }
   if (!/مجرد مخبز|طعم البيت/.test(String(taglineParsed.fields.description || ""))) {
     fail(`title tagline must become description, got ${JSON.stringify(taglineParsed.fields.description)}`);
+  }
+}
+
+const hallounHtml = readFileSync(join(__dirname, "fixtures/url-ingest-halloun.html"), "utf8");
+const hallounDirty = "https://dr-halloun.com/lp/?gad_source=1&gad_campaignid=23340775362";
+const halloun = parseFetchedHtml(hallounHtml, "https://dr-halloun.com/lp/", hallounDirty);
+if (!halloun.ok) fail(`halloun parse failed: ${halloun.error}`);
+else {
+  const f = halloun.fields;
+  if (sanitizePastedUrl(hallounDirty) !== "https://dr-halloun.com/lp/") {
+    fail(`gad_source must strip (got ${JSON.stringify(sanitizePastedUrl(hallounDirty))})`);
+  }
+  if (!/הלון|Halloun|حلون/.test(String(f.businessName || ""))) {
+    fail(`halloun name ${JSON.stringify(f.businessName)}`);
+  }
+  if (/תיאור:/.test(String(f.location || ""))) fail(`halloun location kept description blob ${JSON.stringify(f.location)}`);
+  if (!/שדרות הנשיא\s*21/.test(String(f.location || "")) || !/חיפה/.test(String(f.location || ""))) {
+    fail(`halloun location missing Haifa street ${JSON.stringify(f.location)}`);
+  }
+  if (!/שיניים|Dentist|أسنان/.test(String(f.category || ""))) {
+    fail(`halloun category empty ${JSON.stringify(f.category)}`);
+  }
+  if (!/המרכז לאסתטיקה|שתל|אסתטיקה/.test(String(f.uniqueAdvantage || f.brandPositioning || ""))) {
+    fail(`halloun USP empty ${JSON.stringify(f.uniqueAdvantage)}`);
+  }
+  if (!/שתל|כתר|אסתטיקה/.test(String(f.landingLines || f.description || ""))) {
+    fail(`halloun services empty ${JSON.stringify(f.landingLines)}`);
+  }
+  if (!String(f.audience || "").trim()) fail("halloun audience empty");
+  if (String(f.mainGoal || "") !== "leads") fail(`halloun goal ${JSON.stringify(f.mainGoal)}`);
+  if (String(f.biggestProblem || "") !== "unknown") fail(`halloun problem should be unknown chip, got ${JSON.stringify(f.biggestProblem)}`);
+  if (/Olive|زيتون|סאמר|أبو مخ/.test(JSON.stringify(f))) fail("halloun fields leaked demo");
+  if (!/054-?5358348/.test(String(f.whatsapp || ""))) fail(`halloun whatsapp ${JSON.stringify(f.whatsapp)}`);
+  if (/077/.test(String(f.phone || f.whatsapp || ""))) fail("halloun kept Elementor 077 stub");
+  const hallounDoc: IngestedDocument = {
+    id: "halloun",
+    name: "https://dr-halloun.com/lp/",
+    mime: "text/html",
+    size: 1,
+    kind: "url",
+    tags: ["identity"],
+    excerpt: "",
+    createdAt: new Date().toISOString(),
+  };
+  const hallounApplied = applyIngestReview(emptyIntake(), rowsFromExtracted(f, false), hallounDoc, []);
+  if (/תיאור:/.test(hallounApplied.location)) fail("applied halloun location still a description");
+  if (!wizardReady(hallounApplied)) {
+    fail(
+      `halloun should be wizardReady; missing ${["businessName", "description", "audience", "biggestProblem", "uniqueAdvantage", "mainGoal"].filter((k) => !String((hallounApplied as unknown as Record<string, string>)[k] || "").trim()).join(",")}`,
+    );
+  }
+  const ar = hydrateScanIntake(hallounApplied, "ar");
+  if (/[\u0590-\u05FF]/.test(`${ar.category} ${ar.location} ${ar.description} ${ar.landingLines} ${ar.uniqueAdvantage}`)) {
+    fail(`AR UI still showing Hebrew facts: cat=${ar.category} loc=${ar.location} desc=${ar.description} lines=${ar.landingLines}`);
+  }
+  if (ar.voice?.dialect !== "ar-palestinian") fail(`AR dialect ${ar.voice?.dialect}`);
+  if (!/حيفا|شارع الرئيس/.test(ar.location)) fail(`AR location ${ar.location}`);
+  if (!/أسنان/.test(ar.category + ar.description + ar.uniqueAdvantage)) fail("AR missing dental specialty");
+  if (/[\u0590-\u05FF]/.test(`${ar.voice?.coreMessage || ""} ${ar.voice?.niche || ""}`)) {
+    fail(`AR voice still Hebrew: ${ar.voice?.coreMessage} / ${ar.voice?.niche}`);
+  }
+  const hallounReport = validateIntake(ar);
+  if (hallounReport.completeness >= 100) fail("halloun must not fake a 100 data-quality score");
+  if (hallounReport.missing.some((m) => ["businessModel", "monthlyBudget", "targetCac", "avgOrderValue", "marginPercent"].includes(String(m.field)))) {
+    fail("empty financials must not be required blockers");
+  }
+  const hallounAd = attachCompleteAd(
+    assemblePack(ar, {
+      report: hallounReport,
+      diagnosis: diagnose(ar, hallounReport),
+      variants: generateVariants(ar),
+      agentStatus: { intake: "complete", diagnostic: "complete", strategic: "complete", media: "complete", optimizer: "complete" },
+    }),
+  ).completeAd?.locales.ar;
+  if (!hallounAd?.headline?.trim() || /^(intro|—|intro\s*—)/i.test(hallounAd.headline)) {
+    fail(`halloun complete-ad placeholder ${JSON.stringify(hallounAd?.headline)}`);
+  }
+  if (/زيتون|Olive|סאמר|أبو مخ/.test(JSON.stringify(hallounAd))) fail("halloun complete-ad leaked demo");
+  const imgs = halloun.images || [];
+  if (imgs.some((u: string) => /\.woff2?/i.test(u))) fail(`halloun kept font asset ${JSON.stringify(imgs)}`);
+}
+
+const ogBlobOnly = parseFetchedHtml(
+  `<!doctype html><html lang="he"><head><title>ד"ר אליאס הלון</title><meta property="og:description" content="תיאור: מרפאת שיניים בחיפה בשדרות הנשיא 21, השתלות שיניים ואסתטיקה דנטלית בשירות איכותי ומקצועי."/></head><body><p>שדרות הנשיא 21, חיפה</p><p>מרפאת שיניים</p></body></html>`,
+  "https://dr-halloun.com/lp/",
+  "https://dr-halloun.com/lp/",
+);
+if (!ogBlobOnly.ok) fail(`og-blob halloun parse ${ogBlobOnly.error}`);
+else if (
+  /תיאור:/.test(String(ogBlobOnly.fields.location || "")) ||
+  !/שדרות הנשיא\s*21/.test(String(ogBlobOnly.fields.location || "")) ||
+  !/חיפה/.test(String(ogBlobOnly.fields.location || ""))
+) {
+  fail(`og-blob location ${JSON.stringify(ogBlobOnly.fields.location)}`);
+}
+
+const hallounLiveShape = parseFetchedHtml(
+  `<!doctype html><html lang="he"><head><title>דף נחיתה - ד"ר אליאס הלון</title>
+  <meta property="og:site_name" content="ד&quot;ר אליאס הלון"/>
+  <meta property="og:description" content="מרפאת שיניים בחיפה בשדרות הנשיא 21, השתלות שיניים ואסתטיקה דנטלית בשירות איכותי ומקצועי. השאירו פרטים אצל ד&quot;ר אליאס הלון או התקשרו."/>
+  <script type="application/ld+json">{"@type":"WebPage","description":"מרפאת שיניים בחיפה בשדרות הנשיא 21, השתלות שיניים ואסתטיקה דנטלית בשירות איכותי ומקצועי."}</script>
+  </head><body>
+  <span class="elementor-button-text">שדרות הנשיא 21, חיפה</span>
+  <h2>שתלים מזרקוניה</h2><h2>כתרים על גבי שתלים</h2>
+  <p>המרכז לאסתטיקה והשתלות שיניים</p>
+  </body></html>`,
+  "https://dr-halloun.com/lp/",
+  "https://dr-halloun.com/lp/?gad_source=1&gad_campaignid=23340775362",
+);
+if (!hallounLiveShape.ok) fail(`halloun live-shape parse ${hallounLiveShape.error}`);
+else {
+  const loc = String(hallounLiveShape.fields.location || "");
+  if (!/שדרות הנשיא\s*21/.test(loc) || !/חיפה/.test(loc) || /תיאור:|השתלות שיניים ואסתטיקה/.test(loc)) {
+    fail(`halloun live-shape location ${JSON.stringify(loc)}`);
+  }
+  if (!String(hallounLiveShape.fields.audience || "").trim()) fail("halloun live-shape audience empty");
+  if (!/חיפה/.test(String(hallounLiveShape.fields.audience || ""))) {
+    fail(`halloun live-shape audience missing city ${JSON.stringify(hallounLiveShape.fields.audience)}`);
   }
 }
 

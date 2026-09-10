@@ -3,10 +3,12 @@
 import { useEffect, useState } from "react";
 import type { CampaignPack, Intake } from "@/lib/types";
 import type { GrowthWorkspace } from "@/lib/scientist/types";
-import { loadDraft, loadCampaigns } from "@/lib/storage";
+import { loadDraft, loadCampaigns, INGEST_APPLIED_EVENT } from "@/lib/storage";
+import { EMPTY_CAMPAIGN_EVENT } from "@/lib/empty-campaign";
+import { emptyIntake, validateIntake } from "@/lib/engine/validate";
+import { getWorkspaceByBusiness } from "@/lib/scientist/store";
+import { businessIdFromName } from "@/lib/scientist/engines";
 import { loadCampaignTools } from "@/lib/campaign-tools";
-import { getPrimaryWorkspace, loadScientistWorkspaces } from "@/lib/scientist/store";
-import { emptyIntake } from "@/lib/engine/validate";
 import { useIsClient } from "@/lib/use-is-client";
 import { useAuth } from "@/components/auth-provider";
 
@@ -26,9 +28,11 @@ export function readSignals(): Omit<CommandSignals, "ready"> {
   const draft = loadDraft();
   const { pack, intake: truth } = loadCampaignTools();
   const campaigns = loadCampaigns().filter((p) => !p.demoMeta);
-  const workspace = getPrimaryWorkspace() ?? loadScientistWorkspaces()[0] ?? null;
   const intake = truth ?? draft.intake ?? emptyIntake();
   const businessName = intake.businessName?.trim() || pack?.name || "";
+  const workspace = businessName
+    ? getWorkspaceByBusiness(businessIdFromName(businessName)) ?? null
+    : null;
   return {
     intake,
     pack,
@@ -37,7 +41,7 @@ export function readSignals(): Omit<CommandSignals, "ready"> {
     hasBusiness: Boolean(businessName),
     businessName,
     campaignName: pack?.name || "",
-    completeness: pack?.intakeReport.completeness ?? null,
+    completeness: validateIntake(intake).completeness,
   };
 }
 
@@ -58,7 +62,14 @@ export function useCommandSignals(): CommandSignals {
 
   useEffect(() => {
     if (!client || !authReady) return;
-    setState({ ready: true, ...readSignals() });
+    const refresh = () => setState({ ready: true, ...readSignals() });
+    refresh();
+    window.addEventListener(INGEST_APPLIED_EVENT, refresh);
+    window.addEventListener(EMPTY_CAMPAIGN_EVENT, refresh);
+    return () => {
+      window.removeEventListener(INGEST_APPLIED_EVENT, refresh);
+      window.removeEventListener(EMPTY_CAMPAIGN_EVENT, refresh);
+    };
   }, [client, authReady]);
 
   return state;

@@ -153,6 +153,9 @@ export function pickLogo(metas: MediaAssetMeta[] | undefined): MediaAssetMeta | 
   );
 }
 
+const FONT_OR_JUNK_SRC =
+  /\.woff2?(?:\?|$)|\.ttf(?:\?|$)|\.eot(?:\?|$)|\.otf(?:\?|$)|fonts?\/|pixel|1x1|spacer|blank\.gif/i;
+
 function mimeFromUrl(url: string): string {
   const q = url.split("?")[0]?.toLowerCase() ?? "";
   if (q.endsWith(".png")) return "image/png";
@@ -175,6 +178,7 @@ export function assetsFromPublicUrls(urls: string[], title?: string, cap = 16): 
   const seen: string[] = [];
   for (const src of urls) {
     if (!src || !/^https?:\/\//i.test(src) || seen.includes(src)) continue;
+    if (FONT_OR_JUNK_SRC.test(src)) continue;
     seen.push(src);
     extra.push({
       id: uid("asset"),

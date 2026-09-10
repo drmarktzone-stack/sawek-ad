@@ -18,6 +18,10 @@ export {
   isUnknownSentinel,
   isUsableLocationValue,
   looksLikePostalAddress,
+  extractPostalAddressFromText,
+  cleanLocationValue,
+  evidencedCityFromText,
+  attachEvidencedCity,
 } from "./patterns";
 export { extractContentUnits, classifyUnits, buildBusinessIdentity, businessCorpus } from "./page";
 export { governFields, qualifyField, mergeByStrength } from "./govern";

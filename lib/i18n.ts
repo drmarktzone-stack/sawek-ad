@@ -247,6 +247,7 @@ export const copy: Dict = {
   "biz.location": { he: "מיקום", ar: "الموقع", en: "Location" },
   "biz.website": { he: "אתר (אופציונלי)", ar: "موقع (اختياري)", en: "Website (optional)" },
   "biz.whatsapp": { he: "וואטסאפ", ar: "واتساب", en: "WhatsApp" },
+  "biz.phone": { he: "טלפון", ar: "تلفون", en: "Phone" },
   "biz.whatsappPh": { he: "05X-XXXXXXX", ar: "05X-XXXXXXX", en: "05X-XXXXXXX" },
   "biz.hours": { he: "שעות פעילות / אופן הגעה", ar: "ساعات العمل / كيف تجوا", en: "Business hours / how to arrive" },
   "biz.hoursPh": {
@@ -2147,6 +2148,7 @@ export const copy: Dict = {
   "list.note": { he: "הערה (רשות)", ar: "ملاحظة (اختياري)", en: "Note (optional)" },
   "list.saveLead": { he: "שמרו ליד", ar: "احفظوا الزبون", en: "Save lead" },
   "list.empty": { he: "עדיין אין לידים שמורים — סמנו וואטסאפ או הוסיפו איש קשר אמיתי.", ar: "لساته ما في زبائن محفوظين — علّموا واتساب أو ضيفوا شخص حقيقي.", en: "No saved leads yet — mark WhatsApp ready or add a real contact." },
+  "list.needLead": { he: "צריך שם או טלפון אמיתי. שדה ריק לא נשמר.", ar: "لازم اسم أو تلفون حقيقي. الحقل الفاضي ما بينحفظ.", en: "Need a real name or phone. Empty save is rejected." },
   "list.count": { he: "לידים שמורים", ar: "زبائن محفوظين", en: "Saved leads" },
   "list.needBusiness": { he: "סרקו עסק מהחמש נישות קודם.", ar: "امسحوا شغل من الخمس تخصّصات أولاً.", en: "Scan a charter-niche business first." },
 

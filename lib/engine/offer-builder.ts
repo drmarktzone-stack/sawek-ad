@@ -216,10 +216,7 @@ export function applyOfferToIntake(intake: Intake, offer: OfferBlueprint): Intak
     offerBlueprint: offer,
     offerSkipConfirmed: offer.skipped === true,
   };
-  if (offer.saved && offer.headline.trim() && !offer.skipped) {
-    next.offer = offer.headline.trim();
-    next.offerCustom = true;
-  }
+  // Hormozi blueprint is not a promo chip — never copy the headline into intake.offer.
   return next;
 }
 
