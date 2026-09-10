@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from "fs";
 import { join } from "path";
-import { inspectUrl, parseFetchedHtml, ingestUrl, collectSameOriginNavUrls, mergeExtractedFields, extractScriptBundleText } from "../lib/url-ingest";
+import { inspectUrl, parseFetchedHtml, ingestUrl, collectSameOriginNavUrls, mergeExtractedFields, extractScriptBundleText, sanitizePastedUrl } from "../lib/url-ingest";
 import { detectSocialKind, facebookMbasicUrl, facebookPagePluginUrl, isSocialErrorTitle, isSocialLoginWall, parseOembedJson, parseSocialPage, socialHasPublicContent } from "../lib/social-page";
 import { SOCIAL_LOGIN_WALL_COPY, socialLoginWallError } from "../lib/url-ingest";
 import { buildPastCampaignAuditFromPosts } from "../lib/engine/past-campaign-audit";
@@ -10,7 +10,8 @@ import { buildPostingCalendar } from "../lib/engine/posting-calendar";
 import { RESIZE_FORMATS } from "../lib/resize-formats";
 import { assemblePack } from "../lib/engine/run";
 import { acceptScanBrandValue, applyIngestReview, rowsFromExtracted } from "../lib/document-ingest";
-import { emptyIntake, wizardReady } from "../lib/engine/validate";
+import { emptyIntake, wizardReady, validateIntake } from "../lib/engine/validate";
+import { diagnose } from "../lib/engine/diagnose";
 import { detectVertical, isPediatrics, showsHmoAudience } from "../lib/vertical";
 import { AUDIENCE_CHIPS, audienceChipsFor, resolveChipLabel, toggleChipValue } from "../lib/chips";
 import { demoIntake, isPediatricDemo } from "../lib/demo";
@@ -840,6 +841,80 @@ if (!/גריל מקומי/.test(igSocial.description)) fail(`instagram bio ${JSO
 if (/12K Followers/.test(igSocial.description)) fail("instagram kept follower chrome as bio");
 if (/ROAS|25-34/.test(JSON.stringify(igSocial))) fail("instagram invented metrics");
 if (igSocial.posts.length && !igSocial.posts.every((p) => p.text.trim())) fail("instagram empty invented post");
+
+const dirtyBrand = "https://alkaramah-market.com/ نظام تسويق هادي";
+const dirtyGlued = "https://alkaramah-market.com/ظام تسويق هادي";
+const cleanAk = "https://alkaramah-market.com/";
+if (sanitizePastedUrl(dirtyBrand) !== "https://alkaramah-market.com/") {
+  fail(`sanitize dirty brand paste → ${JSON.stringify(sanitizePastedUrl(dirtyBrand))}`);
+}
+if (sanitizePastedUrl(dirtyGlued) !== "https://alkaramah-market.com/") {
+  fail(`sanitize glued brand paste → ${JSON.stringify(sanitizePastedUrl(dirtyGlued))}`);
+}
+if (sanitizePastedUrl("نظام تسويق هادي https://alkaramah-market.com/") !== "https://alkaramah-market.com/") {
+  fail("sanitize leading brand text");
+}
+const dirtyInspect = inspectUrl(dirtyBrand);
+if (!dirtyInspect.ok || dirtyInspect.url.href.replace(/\/$/, "") !== "https://alkaramah-market.com") {
+  fail(`inspectUrl must clean dirty paste (got ${dirtyInspect.ok ? dirtyInspect.url.href : dirtyInspect.error})`);
+}
+
+const akHtml = readFileSync(join(__dirname, "fixtures/url-ingest-alkaramah.html"), "utf8");
+const ak = parseFetchedHtml(akHtml, cleanAk, dirtyBrand);
+if (!ak.ok) fail(`alkaramah fixture parse failed: ${ak.error}`);
+else {
+  if (ak.url !== cleanAk && ak.url !== "https://alkaramah-market.com") {
+    fail(`alkaramah stored dirty url ${JSON.stringify(ak.url)}`);
+  }
+  if (ak.fields.website && /تسويق|هادي|\s/.test(ak.fields.website)) {
+    fail(`alkaramah website still dirty ${JSON.stringify(ak.fields.website)}`);
+  }
+  if (!/الكرامة/.test(String(ak.fields.businessName || ""))) {
+    fail(`alkaramah name missing ${JSON.stringify(ak.fields.businessName)}`);
+  }
+  if (/404|not found/i.test(String(ak.fields.businessName || ak.title || ""))) {
+    fail("alkaramah treated 404 as the business");
+  }
+  if (!String(ak.fields.description || "").trim()) fail("alkaramah description empty");
+  if (!/grocery|سوبر|Retail|ماركت/i.test(String(ak.fields.category || ak.fields.businessName || ""))) {
+    fail(`alkaramah category weak ${JSON.stringify(ak.fields.category)}`);
+  }
+  if (String(ak.fields.audience || "") !== "local_families") {
+    fail(`alkaramah audience ${JSON.stringify(ak.fields.audience)}`);
+  }
+  if (!String(ak.fields.uniqueAdvantage || "").trim()) fail("alkaramah USP empty");
+  if (String(ak.fields.mainGoal || "") !== "sales") fail(`alkaramah goal ${JSON.stringify(ak.fields.mainGoal)}`);
+  if (!/راهط|لهافيم/.test(String(ak.fields.location || ""))) {
+    fail(`alkaramah location missing delivery cities ${JSON.stringify(ak.fields.location)}`);
+  }
+  if (/0123456789/.test(JSON.stringify(ak.fields))) fail("alkaramah invented placeholder phone");
+  if (detectVertical(ak.fields as { businessName?: string; category?: string; description?: string }) === "clinic") {
+    fail("alkaramah leaked clinic vertical");
+  }
+  const akDoc: IngestedDocument = {
+    id: "doc-ak",
+    name: cleanAk,
+    mime: "text/html",
+    size: 1,
+    kind: "url",
+    tags: ["identity"],
+    excerpt: "",
+    createdAt: new Date().toISOString(),
+  };
+  const akApplied = applyIngestReview(emptyIntake(), rowsFromExtracted(ak.fields, false), akDoc, []);
+  if (!wizardReady(akApplied)) {
+    fail(
+      `alkaramah should be wizardReady; missing ${["businessName", "description", "audience", "biggestProblem", "uniqueAdvantage", "mainGoal"].filter((k) => !String((akApplied as unknown as Record<string, string>)[k] || "").trim()).join(",")}`,
+    );
+  }
+  const akReport = validateIntake(akApplied);
+  const akDiag = diagnose(akApplied, akReport);
+  if (!akDiag.hypotheses.length) fail("alkaramah diagnosis produced no hypotheses");
+}
+
+const notFoundHtml = `<!DOCTYPE html><html><head><title>404 Not Found</title></head><body>Not Found</body></html>`;
+const nf = parseFetchedHtml(notFoundHtml, "https://alkaramah-market.com/%20foo", dirtyBrand);
+if (nf.ok) fail("404 HTML must not parse as a business");
 
 const liveUrl = "https://grillking.multiscreensite.com/";
 if (process.env.URL_INGEST_LIVE === "1") {

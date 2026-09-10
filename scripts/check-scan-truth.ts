@@ -155,7 +155,12 @@ const pipe = runScanTruthPipeline({
 });
 if (pipe.fields.offer) fail(`pipeline levain offer ${JSON.stringify(pipe.fields.offer)}`);
 if (/\btote\b/i.test(String(pipe.fields.biggestProblem || ""))) fail("pipeline tote problem");
-if (!pipe.rejected.length) fail("pipeline should reject chrome candidates");
+{
+  const blob = JSON.stringify(pipe.fields).toLowerCase();
+  if (/free shipping|unlock free|tote|have an account/.test(blob)) {
+    fail(`pipeline Truth still has chrome: ${blob.slice(0, 240)}`);
+  }
+}
 
 if (levain.ok && local.ok) {
   const fromLocal = applyIngestReview(

@@ -21,7 +21,6 @@ import {
 import { assemblePack, idleStatus, overlayPackAgency, runIntakeAndDiagnosis, runMedia, runOptimizerStage, runStrategic } from "@/lib/engine/run";
 import { loadDraft, saveDraft, getCampaign, INGEST_APPLIED_EVENT } from "@/lib/storage";
 import { nextHitlGate } from "@/lib/engine/hitl";
-import { offerGate } from "@/lib/engine/offer-builder";
 import { OfferGateBanner } from "@/components/offer-gate-banner";
 import { syncCampaign } from "@/lib/supabase";
 import { uid } from "@/lib/utils";
@@ -496,16 +495,7 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
 
   async function startBuild() {
     if (!wizardReady(intake)) return;
-    const gate = offerGate(intake, pack);
-    if (!gate.ok) {
-      setOfferBlocked(true);
-      return;
-    }
     setOfferBlocked(false);
-    if (cmoFieldsMissing(intake)) {
-      setPhase("interview");
-      return;
-    }
     await runAgents();
   }
 
@@ -560,6 +550,11 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
       }
     }
     if (!current) {
+      if (wizardReady(intake)) {
+        advancing.current = false;
+        await runAgents();
+        return;
+      }
       setHitlError(t("agents.packMissing"));
       setRunning(false);
       return;
@@ -1342,6 +1337,7 @@ function AgentsPanel({
 }) {
   const { t, locale } = useI18n();
   const gate = nextHitlGate(agentStatus, pack);
+  const diagnosisReady = Boolean(pack?.diagnosis?.hypotheses?.length);
   const approveLabel =
     running ? t("agents.advancing") : gate === "diagnostic" ? t("cta.approve") : t("cta.continueStage");
   return (
@@ -1425,16 +1421,22 @@ function AgentsPanel({
             {hitlError}
           </p>
         ) : null}
-        <Button
-          type="button"
-          size="lg"
-          className="w-full"
-          disabled={running}
-          onClick={onApprove}
-          data-testid="hitl-approve"
-        >
-          {approveLabel}
-        </Button>
+        {diagnosisReady ? (
+          <Button
+            type="button"
+            size="lg"
+            className="w-full"
+            disabled={running}
+            onClick={onApprove}
+            data-testid="hitl-approve"
+          >
+            {approveLabel}
+          </Button>
+        ) : (
+          <p className="mb-3 text-center text-sm font-semibold text-navy" data-testid="hitl-need-intake">
+            {t("agents.needIntake")}
+          </p>
+        )}
         <button type="button" className="mt-3 w-full text-sm text-muted" onClick={onBack} data-testid="hitl-reject">
           {t("cta.reject")}
         </button>

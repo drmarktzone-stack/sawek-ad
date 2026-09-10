@@ -13,6 +13,7 @@ import { honestProofCopy, sanitizeAngles } from "../lib/engine/angles";
 import { rsaLines } from "../lib/engine/spoken";
 import { bankForIntake, serviceFamily } from "../lib/creative-bank";
 import { PUBLISHED_DEMO_IDS } from "../lib/demo-catalog";
+import { PRIMARY_NAV, MORE_NAV } from "../components/command/nav";
 import type { CampaignPack, Intake } from "../lib/types";
 
 const failures: string[] = [];
@@ -125,6 +126,14 @@ if (!cmo.selected.some((i) => /cup|quiet|stool|brew|empty_table|no_best|wa_table
 
 if (!thinPack.siteAudit?.weaknesses.some((w) => w.id === "no-photos")) {
   fail("thin scan site audit missing no-photos (photo offer trigger)");
+}
+
+const navHrefs = [...PRIMARY_NAV, ...MORE_NAV].map((n) => n.href);
+if (!PRIMARY_NAV.some((n) => n.href === "/task/ad")) fail("primary nav missing Complete Ad");
+if (!PRIMARY_NAV.some((n) => n.href === "/tools/offer")) fail("primary nav missing offer");
+if (!PRIMARY_NAV.some((n) => n.href === "/tools/core-message")) fail("primary nav missing core message");
+for (const dead of ["/growth/market", "/growth/dna", "/growth/experiments", "/lab", "/discovery", "/strategy", "/media"]) {
+  if (navHrefs.includes(dead)) fail(`dead tool still in nav: ${dead}`);
 }
 
 if (failures.length) {

@@ -127,7 +127,7 @@ export function Header() {
           <span className="truncate font-[family-name:var(--font-display-he)] text-lg font-bold tracking-tight text-ink sm:text-xl">
             {t("brand.name")}
           </span>
-          <span className="truncate text-[11px] font-semibold text-teal sm:text-xs">{t("os.kicker")}</span>
+          <span className="brand-kicker truncate text-[11px] font-semibold text-teal sm:text-xs">{t("os.kicker")}</span>
         </LangLink>
 
         <nav className="ms-2 hidden min-w-0 flex-1 items-center gap-0.5 overflow-x-auto xl:flex" aria-label={t("os.kicker")}>

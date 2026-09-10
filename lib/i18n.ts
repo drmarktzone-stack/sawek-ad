@@ -479,8 +479,13 @@ export const copy: Dict = {
   },
   "agents.packMissing": {
     he: "האבחון לא נטען. סרקו שוב או המשיכו מהשלב הקודם.",
-    ar: "التشخيص ما انتحميل. امسحوا مرة ثانية أو ارجعوا للمرحلة السابقة.",
+    ar: "التشخيص ما انحمّل. امسحوا مرة ثانية أو ارجعوا للمرحلة السابقة.",
     en: "Diagnosis did not load. Scan again or go back a step.",
+  },
+  "agents.needIntake": {
+    he: "מלאו את השדות האדומים או סרקו אתר — ואז האבחון ייטען.",
+    ar: "عبّوا الحقول الحمرا أو امسحوا موقع — وبعدها التشخيص بنفتح.",
+    en: "Fill the red fields or scan a site — then diagnosis loads.",
   },
   "agents.hitlError": {
     he: "ההמשך נכשל. נסו שוב.",

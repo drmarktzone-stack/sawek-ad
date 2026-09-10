@@ -21,7 +21,7 @@ import { IngestReviewDialog } from "@/components/document-ingest";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { assetsFromPublicUrls } from "@/lib/media-assets";
-import { stripTrackingParams } from "@/lib/url-clean";
+import { sanitizePastedUrl, stripTrackingParams } from "@/lib/url-clean";
 import { withLang } from "@/lib/locale-url";
 
 /** Ecommerce homepage + Gemini enrich regularly exceeds 15–30s; do not abort early. */
@@ -101,7 +101,7 @@ export function UrlIngest() {
       setError(t("url.error.invalid"));
       return;
     }
-    const url = stripTrackingParams(rawUrl) || rawUrl;
+    const url = sanitizePastedUrl(rawUrl) || stripTrackingParams(rawUrl) || rawUrl;
     if (url !== rawUrl) setValue(url);
     setBusy(true);
 
@@ -297,9 +297,10 @@ export function UrlIngest() {
       <form
         onSubmit={(e) => void scan(e)}
         className={cn(
-          "mx-auto flex w-full max-w-[92rem] min-w-0 flex-col",
+          "scan-url-card mx-auto flex w-full max-w-[92rem] min-w-0 flex-col",
           home ? "gap-2" : "gap-1.5",
         )}
+        data-testid="scan-url-form"
       >
         <label htmlFor="scan-url" className="text-start text-sm font-black text-navy">
           {t("url.label")}
@@ -315,9 +316,26 @@ export function UrlIngest() {
                 home ? "h-12" : "h-11 sm:h-10 sm:text-sm",
               )}
               value={value}
-              onChange={(e) => setValue(e.target.value)}
+              onChange={(e) => {
+                const next = e.target.value;
+                setValue(next);
+              }}
+              onPaste={(e) => {
+                const text = e.clipboardData.getData("text");
+                const clean = sanitizePastedUrl(text);
+                if (clean && clean !== text.trim()) {
+                  e.preventDefault();
+                  setValue(clean);
+                }
+              }}
+              onBlur={() => {
+                const clean = sanitizePastedUrl(value);
+                if (clean && clean !== value.trim()) setValue(clean);
+              }}
               placeholder={t("url.placeholder")}
-              autoComplete="url"
+              autoComplete="off"
+              autoCorrect="off"
+              spellCheck={false}
               inputMode="url"
               enterKeyHint="go"
               name="business-url"

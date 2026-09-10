@@ -36,8 +36,9 @@ import {
   type SocialPost,
 } from "./social-page";
 import type { PastCampaignAudit } from "./types";
-import { stripTrackingParams } from "./url-clean";
-export { stripTrackingParams } from "./url-clean";
+import { sanitizePastedUrl, stripTrackingParams } from "./url-clean";
+import { isErrorPageTitle, isPlaceholderPhone, prefillCampaignFields } from "./campaign-prefill";
+export { stripTrackingParams, sanitizePastedUrl } from "./url-clean";
 
 /** Extra-page per-request timeout. Homepage uses URL_HOMEPAGE_TIMEOUT_MS. */
 export const URL_FETCH_TIMEOUT_MS = 8_000;
@@ -334,7 +335,8 @@ export function inspectUrl(
   raw: string,
   extraBlockedHosts: string[] = [],
 ): { ok: true; url: URL } | UrlIngestErr {
-  const trimmed = String(raw ?? "").trim();
+  const cleaned = sanitizePastedUrl(raw);
+  const trimmed = cleaned || String(raw ?? "").trim();
   if (!trimmed) return { ok: false, error: "invalid_url" };
   let parsed: URL;
   try {
@@ -763,6 +765,7 @@ function navScore(href: string, label: string): number {
   const blob = `${href} ${label}`;
   if (/about|אודות|من نحن|حولنا|\bحول\b|about-us|who-we-are|our-story|מי אנחנו/i.test(blob)) return 100;
   if (/services|שירותים|خدمات|service/i.test(blob)) return 95;
+  if (/city\.list|توصيل|delivery.?zone|مناطق التوصيل|אזורי משלוח/i.test(blob)) return 92;
   if (/contact|צור קשר|צור\b|اتصل|contact-us/i.test(blob)) return 90;
   if (/תפריט|\bmenu\b|قائمة/i.test(blob)) return 85;
   if (/shop|חנות|متجر|store|catalog|קטלוג|product/i.test(blob)) return 82;
@@ -1211,6 +1214,34 @@ function isCssResponse(contentType: string | null, sniff: string): boolean {
 const PAGE_ADDRESS_HINT =
   /(?:מחלף|רחוב\s+\S|שדרות\s+\S|כביש\s*\d|الشارع|شارع\s+|مجمع|الطابق|קומה|בצד|بجانب|\d+(?:st|nd|rd|th)\s+(?:street|st\.?|avenue|ave\.?)\b|\d+\s+[\w.'-]+\s+(?:street|st\.?|avenue|ave\.?|road|rd\.?|blvd)\b)/i;
 
+const DELIVERY_ZONE_HEADING =
+  /التوصيل متاح إلى المناطق التالية|המשלוח זמין לאזורים|delivery (?:is )?available to/i;
+
+const DEPT_OR_NAV_LINE =
+  /مشروبات|بيض|شيبس|كعك|بقوليات|مخللات|مكسرات|قهوه|مثلجات|تنظيف|مستلزمات|خبز|بهارات|آراء|سياسة|تثبيت|طلباتي|السلة|المفضلة|مناطق التوصيل|سوبر/;
+
+function deliveryZonesFromText(html: string, visible: string): string {
+  const hay = `${html}\n${visible}`;
+  if (!DELIVERY_ZONE_HEADING.test(hay)) return "";
+  const start = visible.search(DELIVERY_ZONE_HEADING);
+  const slice = start >= 0 ? visible.slice(start) : visible;
+  const cities: string[] = [];
+  for (const line of slice.split(/\n/)) {
+    const s = line
+      .replace(/₪/g, " ")
+      .replace(/\d+/g, " ")
+      .replace(/المنطقة|رسوم التوصيل|التوصيل متاح إلى المناطق التالية/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (!s || s.length < 2 || s.length > 40) continue;
+    if (!/[\u0600-\u06FF\u0590-\u05FF]/.test(s)) continue;
+    if (DEPT_OR_NAV_LINE.test(s)) continue;
+    if (!cities.includes(s)) cities.push(s);
+    if (cities.length >= 6) break;
+  }
+  return cities.length ? clip(cities.join("، "), 160) : "";
+}
+
 export function parseFetchedHtml(
   html: string,
   finalUrl: string,
@@ -1220,6 +1251,9 @@ export function parseFetchedHtml(
   const raw = String(html ?? "");
   if (!raw.trim() && !String(extraText || "").trim()) return { ok: false, error: "empty" };
   const title = tagText(raw, "title");
+  if (isErrorPageTitle(title)) {
+    return { ok: false, error: "empty" };
+  }
   const ogSiteName = metaContent(raw, "og:site_name");
   const ogTitle = metaContent(raw, "og:title") || metaContent(raw, "twitter:title");
   const ogDescription =
@@ -1311,7 +1345,7 @@ export function parseFetchedHtml(
   const blob = [...labeled, h1 && `H1: ${h1}`, ...h2s.map((t) => `H2: ${t}`), visible, extraCorpus].filter(Boolean).join("\n");
   if (!blob.trim() && !title && !ogTitle && !nodes.length) return { ok: false, error: "empty" };
 
-  const siteUrl = submittedUrl || finalUrl;
+  const siteUrl = sanitizePastedUrl(submittedUrl || finalUrl) || submittedUrl || finalUrl;
   const seed: UrlIngestFields = {};
   if (/^https?:\/\//i.test(siteUrl)) seed.website = stripTrackingParams(siteUrl.split("#")[0]) || siteUrl.split("#")[0];
   const fromLd = jsonLdName(jsonLdPool);
@@ -1323,8 +1357,14 @@ export function parseFetchedHtml(
   if (rankedCat && !isJunkUiText(rankedCat) && !isCatalogHeading(rankedCat)) seed.category = rankedCat;
   const fromLdAddr = jsonLdPostalAddress(jsonLdPool);
   if (fromLdAddr) seed.location = fromLdAddr;
-  const seedPhone = tels.map((t) => formatIlPhone(t) || t).find((t) => t.replace(/\D/g, "").length >= 8) || "";
-  const seedWa = was.map((w) => formatIlPhone(w) || w).find((t) => String(t).replace(/\D/g, "").length >= 8) || "";
+  const seedPhone =
+    tels
+      .map((t) => formatIlPhone(t) || t)
+      .find((t) => t.replace(/\D/g, "").length >= 8 && !isPlaceholderPhone(t)) || "";
+  const seedWa =
+    was
+      .map((w) => formatIlPhone(w) || w)
+      .find((t) => String(t).replace(/\D/g, "").length >= 8 && !isPlaceholderPhone(t)) || "";
   if (seedPhone) seed.phone = seedPhone;
   if (seedWa) seed.whatsapp = seedWa;
   else if (seedPhone) seed.whatsapp = seedPhone;
@@ -1394,6 +1434,10 @@ export function parseFetchedHtml(
   }
   if (fromLdAddr) fields.location = fromLdAddr;
   else if (fields.location && !isUsableLocation(fields.location)) delete fields.location;
+  if (!String(fields.location || "").trim()) {
+    const zones = deliveryZonesFromText(raw, visible);
+    if (zones && isUsableLocation(zones)) fields.location = zones;
+  }
   fields = sanitizeExtractedFields(fields, pipeline.businessCorpus);
   if (fromLdAddr && !fields.location) fields.location = fromLdAddr;
   syncPhoneWhatsappFields(fields);
@@ -1424,6 +1468,11 @@ export function parseFetchedHtml(
   if (slogan && !fields.brandPositioning && !isEcommerceChromeText(slogan) && !isUiChromeText(slogan)) {
     fields.brandPositioning = clip(slogan, 160);
   }
+  if (fields.phone && isPlaceholderPhone(fields.phone)) delete fields.phone;
+  if (fields.whatsapp && isPlaceholderPhone(fields.whatsapp)) delete fields.whatsapp;
+  syncPhoneWhatsappFields(fields);
+  fields = prefillCampaignFields(fields, [pipeline.businessCorpus, visible, extraCorpus].filter(Boolean).join("\n"));
+  if (isErrorPageTitle(String(fields.businessName || ""))) delete fields.businessName;
 
   const file = filenameFromUrl(finalUrl);
 
@@ -1753,6 +1802,16 @@ function mergeUrlIngestResults(home: UrlIngestOk, extras: UrlIngestOk[]): UrlIng
   fields = sanitizeExtractedFields(fields, factsHay);
   if (home.fields.website) fields.website = home.fields.website;
   if (home.fields.businessName) fields.businessName = home.fields.businessName;
+  if (!String(fields.location || "").trim()) {
+    for (const ex of extras) {
+      const loc = String(ex.fields.location || "").trim();
+      if (loc) {
+        fields.location = loc;
+        break;
+      }
+    }
+  }
+  fields = prefillCampaignFields(fields, [home.text, ...extras.map((e) => e.text)].filter(Boolean).join("\n"));
   const ogImage = home.ogImage || extras.find((e) => e.ogImage)?.ogImage;
   const images: string[] = [...(home.images ?? [])];
   for (const e of extras) {
@@ -1780,6 +1839,7 @@ function mergeUrlIngestResults(home: UrlIngestOk, extras: UrlIngestOk[]): UrlIng
       .filter(Boolean)
       .join("\n"),
   );
+  fields = prefillCampaignFields(fields, text);
   const colors: string[] = [...(home.colors ?? [])];
   for (const e of extras) {
     for (const c of e.colors ?? []) {
@@ -2085,7 +2145,7 @@ async function ingestSocialUrl(
 }
 
 export async function ingestUrl(raw: string, extraBlockedHosts: string[] = []): Promise<UrlIngestResult> {
-  const submittedRaw = String(raw ?? "").trim().split("#")[0];
+  const submittedRaw = sanitizePastedUrl(raw) || String(raw ?? "").trim().split("#")[0];
   const submitted = stripTrackingParams(submittedRaw) || submittedRaw;
   const inspected = inspectUrl(submitted, extraBlockedHosts);
   if (!inspected.ok) return inspected;

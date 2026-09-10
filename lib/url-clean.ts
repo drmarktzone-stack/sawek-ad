@@ -22,6 +22,14 @@ const TRACKING_QUERY_KEYS = new Set([
   "dclid",
 ]);
 
+/** App chrome / wordmark that leaks into mobile paste (RTL selection). */
+const BRAND_LEAK_RE =
+  /نظام\s*تسويق\s*هادي|ظام\s*تسويق\s*هادي|مערכת\s*שיווק\s*שקטה|calm\s*marketing\s*os|sawek\s*ad|ساويك|סאווק|رابط\s*الموقع(?:\s*للمسح)?|امسح\s*الموقع|כתובת\s*האתר(?:\s*לסריקה)?/gi;
+
+const HTTP_URL_RE = /https?:\/\/[^\s<>"'،,;]+/i;
+const DOMAIN_RE =
+  /\b(?:www\.)?[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+\b(?:\/[^\s]*)?/i;
+
 /** Drop utm_* / click ids before fetch and before storing website. */
 export function stripTrackingParams(raw: string): string {
   const trimmed = String(raw ?? "").trim().split("#")[0];
@@ -38,10 +46,97 @@ export function stripTrackingParams(raw: string): string {
     }
     if (!changed) return trimmed;
     const qs = u.searchParams.toString();
-    // Rebuild without forcing URL.href path normalization when possible.
     const path = u.pathname || "/";
     return `${u.protocol}//${u.host}${path}${qs ? `?${qs}` : ""}`;
   } catch {
     return trimmed;
   }
+}
+
+function stripBrandLeak(raw: string): string {
+  return String(raw ?? "")
+    .replace(/[\u200e\u200f\u202a-\u202e]/g, "")
+    .replace(BRAND_LEAK_RE, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function firstUrlCandidate(raw: string): string {
+  const cleaned = stripBrandLeak(raw);
+  if (!cleaned) return "";
+  if (/^[a-z][a-z0-9+.-]*:\/\//i.test(cleaned) && !/^https?:\/\//i.test(cleaned)) {
+    return "";
+  }
+  const http = cleaned.match(HTTP_URL_RE);
+  if (http?.[0]) return http[0].replace(/[)\]}>.,;:]+$/, "");
+  if (/^https?:\/\/\S+$/i.test(cleaned) && !/[\u0600-\u06FF\u0590-\u05FF\s]/.test(cleaned)) {
+    return cleaned.split("#")[0] ?? cleaned;
+  }
+  const domain = cleaned.match(DOMAIN_RE);
+  if (domain?.[0] && !/^https?:\/\//i.test(domain[0])) {
+    return `https://${domain[0].replace(/[)\]}>.,;:]+$/, "")}`;
+  }
+  return "";
+}
+
+function scrubContaminatedPath(pathname: string): string {
+  let path = pathname || "/";
+  try {
+    path = decodeURIComponent(path);
+  } catch {
+    /* keep encoded */
+  }
+  const spaceCut = path.search(/[\s\u00a0]/);
+  if (spaceCut >= 0) path = path.slice(0, spaceCut);
+  // Branding glued onto a homepage path (no space): /نظام تسويق or /ظام تسويق
+  if (/تسويق|שיווק|sawek|marketing\s*os/i.test(path)) {
+    const brandAt = path.search(/[\u0600-\u06FF\u0590-\u05FF]|sawek|marketing/i);
+    if (brandAt > 0) path = path.slice(0, brandAt);
+    else path = "/";
+  }
+  const core = path.replace(/^\//, "").replace(/\/+$/, "");
+  // RTL chrome fragment with no ASCII slug — not a real product path.
+  if (core && !/[a-z0-9]/i.test(core) && /[\u0600-\u06FF\u0590-\u05FF]/.test(core)) {
+    path = "/";
+  }
+  path = path.replace(/\/+$/, "") || "/";
+  if (!path.startsWith("/")) path = `/${path}`;
+  return path;
+}
+
+/**
+ * Extract a fetchable http(s) URL from a dirty paste.
+ * Strips trailing/leading app chrome (نظام تسويق هادي) and tracking params.
+ */
+export function sanitizePastedUrl(raw: string): string {
+  const brandless = stripBrandLeak(raw);
+  const single = brandless.trim();
+  if (
+    /^https?:\/\/[^\s<>"'،,;]+$/i.test(single) &&
+    !/[\u0600-\u06FF\u0590-\u05FF]/.test(single) &&
+    !/%20|%d[89a-f]/i.test(single)
+  ) {
+    return stripTrackingParams(single.split("#")[0] || single) || single.split("#")[0] || "";
+  }
+  const candidate = firstUrlCandidate(raw);
+  if (!candidate) return "";
+  try {
+    const u = new URL(candidate);
+    if (u.protocol !== "http:" && u.protocol !== "https:") return "";
+    if (!u.hostname) return "";
+    u.hash = "";
+    u.pathname = scrubContaminatedPath(u.pathname);
+    const rebuilt = `${u.protocol}//${u.host}${u.pathname}${u.search}`;
+    return stripTrackingParams(rebuilt) || rebuilt;
+  } catch {
+    return "";
+  }
+}
+
+export function looksLikeDirtyUrlPaste(raw: string): boolean {
+  const s = String(raw ?? "");
+  if (!s.trim()) return false;
+  if (BRAND_LEAK_RE.test(s)) return true;
+  if (/\s/.test(s.trim()) && /https?:\/\//i.test(s)) return true;
+  return /https?:\/\/\S*[\u0600-\u06FF\u0590-\u05FF]/.test(s);
 }

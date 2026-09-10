@@ -23,6 +23,9 @@ const PRODUCT_AS_BUSINESS =
 const POOL_AS_BUSINESS =
   /hydrotherap|הידרותרפ|علاج مائي|בריכה טיפול|בריכה|مسبح|\bpools?\b|רנאן|رنان|\brinan\b/i;
 
+const GROCERY_AS_BUSINESS =
+  /سوبر\s*ماركت|سوبرماركت|مقاضي|بقالة|מכולת|סופרמרקט|\bgrocery\b|\bsupermarket\b|grocerystore/i;
+
 const FOOD_AS_BUSINESS =
   /restaurant|מסעדה|مطعم|מטבח|ים-?תיכון|mediterranean|mezze|מזה|hummus|חומוס|حمص|shawarma|شاورما|שוארמה|grill|גריל|غريل|burger|بورجر|برغر|המבורגר|בורגר|همبرغر|dessert|קינוח|حلوي|كباب|kebab|falafel|פלאפל|pizza|פיצה|بيتزا|steak|סטייק|kitchen|مطبخ|cafe|קפה|مقهى|أفندنا|أفندن|افندن|afanden|grill king|مأكول|גלידה|ice cream|حلويات|bakery|מאפיי|מאפה|مخبز|معجنات/i;
 
@@ -46,6 +49,7 @@ export function detectVertical(intake: VerticalFacts): Vertical {
   // or the page cites a pediatrician as content author.
   if (product && !namedClinic) return "product";
   if (clinic) return "clinic";
+  if (GROCERY_AS_BUSINESS.test(text)) return "retail";
   if (FOOD_AS_BUSINESS.test(text)) return "restaurant";
   if (RETAIL_AS_BUSINESS.test(text)) return "retail";
   if (SCHOOL_AS_BUSINESS.test(text)) return "school";

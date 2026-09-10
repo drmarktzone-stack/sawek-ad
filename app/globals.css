@@ -377,6 +377,20 @@ body {
   transform: translateZ(0);
 }
 
+.scan-url-card {
+  isolation: isolate;
+  user-select: text;
+}
+
+.scan-url-card input {
+  user-select: text;
+}
+
+.brand-kicker {
+  user-select: none;
+  pointer-events: none;
+}
+
 @media (max-width: 639px) {
   .scan-sticky form {
     flex-direction: column;

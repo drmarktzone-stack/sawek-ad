@@ -16,6 +16,8 @@ import { isPediatricDemo } from "./demo";
 import { AUDIENCE_CHIPS, ADVANTAGE_CHIPS, GOAL_CHIPS, PROBLEM_CHIPS, type ChipOption } from "./chips";
 import { emptyIntake } from "./engine/validate";
 import { detectVertical } from "./vertical";
+import { isNoOffer } from "./no-offer";
+import { isPlaceholderPhone } from "./campaign-prefill";
 import { uid } from "./utils";
 import {
   isEcommerceChromeText,
@@ -245,7 +247,7 @@ function firstMatch(text: string, re: RegExp): string {
 const PROMO_WORD = /מבצע(?:\s+חדש)?|חיסול|הנחה|خصم|تصفية|كوبون|קופון|\bdiscount\b|\bhot\s*sale\b|\bsale\b|مجانا[ً]?|مجاني/i;
 const CATALOG_H1 = /חדשים על המדפים|hot sale|קטלוג|catalog|new in|on the shelves/i;
 const JUNK_UI_RE =
-  /איפוס סיסמה|שחזור סיסמה|התחבר(?:ות)?|\bהרשם\b|הרשמה|skip to|\bcookie\b|forgot password|\blogin\b|\blog[- ]?in\b|\bcart\b|lost.?password|woocommerce-LostPassword|have an account|create (?:an )?account|already have an account|don['’]t have an account|sign[- ]?in|sign[- ]?up|my account|reset password|remember me|newsletter/i;
+  /איפוס סיסמה|שחזור סיסמה|התחבר(?:ות)?|\bהרשם\b|הרשמה|skip to|\bcookie\b|forgot password|\blogin\b|\blog[- ]?in\b|\bcart\b|lost.?password|woocommerce-LostPassword|have an account|create (?:an )?account|already have an account|don['’]t have an account|sign[- ]?in|sign[- ]?up|my account|reset password|remember me|newsletter|^404(?:\s+not\s+found)?$|^not found$|page not found/i;
 const SCHEMA_CATEGORY_LABEL =
   /(?:^|\n)\s*(?:תחום|קטגוריה|المجال|category)\s*[:：]\s*(MedicalClinic|MedicalOrganization|Physician|Hospital|Dentist|Bakery|CafeOrCoffeeShop|FoodEstablishment|FastFoodRestaurant|Restaurant|ClothingStore|GroceryStore|Store)\b/i;
 const MEDICAL_SCHEMA_RE = /\b(Hospital|MedicalClinic|MedicalOrganization|Physician|Dentist)\b/i;
@@ -308,6 +310,7 @@ export function isChromePromoText(value: string): boolean {
 export function isJunkUiText(value: string): boolean {
   const v = value.replace(/\s+/g, " ").trim();
   if (!v) return true;
+  if (/^(?:404|403|500|503)(?:\s+not\s+found)?$|^not\s+found$|^page\s+not\s+found$/i.test(v)) return true;
   if (isChromePromoText(v) || isUiChromeText(v)) return true;
   const core = v.replace(/[?؟!.]+$/g, "").trim();
   if (core.length <= 80 && JUNK_UI_RE.test(core)) return true;
@@ -413,6 +416,8 @@ export function sanitizeExtractedFields(
     else delete out.audience;
   }
   if (out.location && !isUsableLocation(out.location)) delete out.location;
+  if (out.phone && isPlaceholderPhone(out.phone)) delete out.phone;
+  if (out.whatsapp && isPlaceholderPhone(out.whatsapp)) delete out.whatsapp;
   if (out.category && FOOD_SCHEMA_RE.test(out.category) && MEDICAL_SCHEMA_RE.test(hay)) {
     const med = hay.match(MEDICAL_SCHEMA_RE);
     if (med?.[1]) out.category = med[1];
@@ -791,7 +796,9 @@ export function fillEmptyFromPageProse(
 
   if (!String(out.audience || "").trim()) {
     const ids: string[] = [];
-    if (/לכל המשפחה|משפחות מקומיות|local families/i.test(hay)) ids.push("local_families");
+    if (/לכל המשפחה|משפחות מקומיות|local families|سوبر\s*ماركت|سوبرماركت|סופרמרקט|\bsupermarket\b|\bgrocery\b/i.test(hay)) {
+      ids.push("local_families");
+    }
     const pediatric = pediatricAudienceContext(hay);
     const he = hay.match(/להורים|\bהורים\b/)?.[0];
     if (pediatric || /every parent|7000\s*\+?\s*parents/i.test(hay) || (he && pediatric)) ids.push("parents");
@@ -804,7 +811,8 @@ export function fillEmptyFromPageProse(
   }
 
   if (!String(out.category || "").trim()) {
-    if (/אופנה/.test(hay)) out.category = "אופנה";
+    if (/سوبر\s*ماركت|سوبرماركت|סופרמרקט|\bsupermarket\b|\bgrocery\b/i.test(hay)) out.category = "GroceryStore";
+    else if (/אופנה/.test(hay)) out.category = "אופנה";
     else if (/fashion retail/i.test(hay)) out.category = "fashion retail";
     else {
       const catHit =
@@ -1269,6 +1277,7 @@ function rowFor(
 
 const ALWAYS_SHOW: IngestFieldId[] = [
   "businessName",
+  "category",
   "location",
   "phone",
   "whatsapp",
@@ -1584,6 +1593,10 @@ export function applyIngestReview(
     const v = detectVertical(next);
     if (v === "product") next.type = "product";
     else next.type = "business";
+    if (isNoOffer(next.offer) || !String(next.offer || "").trim()) {
+      next.offer = "no_offer";
+      next.offerSkipConfirmed = true;
+    }
   }
   return next;
 }

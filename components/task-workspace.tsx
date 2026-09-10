@@ -112,11 +112,11 @@ export function TaskWorkspace() {
   const complete = pack?.completeAd;
   const intakeReady = wizardReady(intake);
   const openHitl =
-    !intakeReady ||
-    (Boolean(pack) &&
-      (loadDraft().phase === "agents" ||
-        pack?.diagnosis.approved === false ||
-        pack?.agentStatus.diagnostic === "needs_approval"));
+    intakeReady &&
+    Boolean(pack) &&
+    (loadDraft().phase === "agents" ||
+      pack?.diagnosis.approved === false ||
+      pack?.agentStatus.diagnostic === "needs_approval");
 
   return (
     <OsPage data-testid="task-workspace" dir={locale === "en" ? "ltr" : "rtl"}>
@@ -210,16 +210,10 @@ export function TaskWorkspace() {
                 <LangLink href="/tools/offer">{t("nav.offerTool")}</LangLink>
               </Button>
               <Button asChild size="sm" variant="outline">
-                <LangLink href="/growth/market">{t("os.findOpp")}</LangLink>
+                <LangLink href="/tools/core-message">{t("nav.voice")}</LangLink>
               </Button>
               <Button asChild size="sm" variant="outline">
                 <LangLink href="/">{t("os.buildCampaign")}</LangLink>
-              </Button>
-              <Button asChild size="sm" variant="outline">
-                <LangLink href="/growth/market">{t("os.analyzeMarket")}</LangLink>
-              </Button>
-              <Button asChild size="sm" variant="outline">
-                <LangLink href="/growth/experiments">{t("os.runExperiment")}</LangLink>
               </Button>
             </div>
           </section>
@@ -277,9 +271,6 @@ export function TaskWorkspace() {
               ) : null}
               <Button asChild size="sm" variant="outline">
                 <LangLink href="/studio">{t("nav.studio")}</LangLink>
-              </Button>
-              <Button asChild size="sm" variant="outline">
-                <LangLink href="/growth">{t("nav.growth")}</LangLink>
               </Button>
             </div>
           </OsSection>

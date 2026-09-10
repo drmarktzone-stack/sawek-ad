@@ -65,7 +65,12 @@ export async function runStrategic(
   onStatus("strategic", "running");
   await sleep(500);
   const generated = generateVariants(intake);
-  const enriched = await enrichVariantsWithGemini(intake, generated);
+  let enriched: { variants: typeof generated; angles?: CampaignAngles };
+  try {
+    enriched = await enrichVariantsWithGemini(intake, generated);
+  } catch {
+    enriched = { variants: generated };
+  }
   const strategy = generateStrategy(intake, approved);
   onStatus("strategic", "needs_approval");
   return { variants: enriched.variants, strategy, angles: enriched.angles };
