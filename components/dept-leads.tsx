@@ -66,7 +66,7 @@ export function LeadsDeptView({ pack, packLang }: { pack: CampaignPack; packLang
       <div className="rounded-2xl border border-navy/10 bg-white p-5">
         <p className="text-sm text-muted">{t("dept.selfStay")}</p>
         <Button asChild className="mt-3" size="sm">
-          <Link href="/self">{t("nav.self")}</Link>
+          <Link href="/tools/list">{t("nav.list")}</Link>
         </Button>
       </div>
     </div>

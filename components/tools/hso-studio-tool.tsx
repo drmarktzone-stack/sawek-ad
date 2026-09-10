@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { ToolsShell } from "@/components/tools/tools-shell";
+import { CharterOnly } from "@/components/niche-gate";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/components/i18n-provider";
 import { LangLink } from "@/components/lang-link";
 import { loadCampaignTools, persistHsoStudio } from "@/lib/campaign-tools";
 import { canGenerateHso, generateHsoStudio } from "@/lib/engine/hso-studio";
 import { offerBlueprintIsSaved } from "@/lib/engine/offer-builder";
-import type { HsoPlatform, HsoStudioState } from "@/lib/types";
+import type { HsoPlatform, HsoStudioState, Intake } from "@/lib/types";
 import { useIsClient } from "@/lib/use-is-client";
 import { cn } from "@/lib/utils";
 
@@ -23,12 +24,14 @@ export function HsoStudioTool() {
   const [copied, setCopied] = useState("");
   const [ready, setReady] = useState(false);
   const [hasOffer, setHasOffer] = useState(false);
+  const [intake, setIntake] = useState<Intake | null>(null);
 
   useEffect(() => {
     if (!client) return;
-    const { intake, pack } = loadCampaignTools();
-    const offer = pack?.offerBlueprint ?? intake.offerBlueprint;
-    setHasOffer(offerBlueprintIsSaved(offer) || Boolean(intake.offerSkipConfirmed || offer?.skipped));
+    const { intake: live, pack } = loadCampaignTools();
+    setIntake(live);
+    const offer = pack?.offerBlueprint ?? live.offerBlueprint;
+    setHasOffer(offerBlueprintIsSaved(offer) || Boolean(live.offerSkipConfirmed || offer?.skipped));
     if (pack?.hsoStudio?.variants.length) setState(pack.hsoStudio);
     setReady(true);
   }, [client]);
@@ -59,6 +62,7 @@ export function HsoStudioTool() {
 
   return (
     <ToolsShell kicker={t("nav.hso")} title={t("hso.title")} lead={t("hso.lead")} testId="tool-hso">
+      <CharterOnly intake={intake}>
       <div className="rounded-[14px] border border-[var(--line)] bg-[var(--paper)] p-4">
         <p className="os-kicker">{t("hso.platform")}</p>
         <div className="mt-2 flex flex-wrap gap-2">
@@ -115,11 +119,12 @@ export function HsoStudioTool() {
               <LangLink href="/task/ad">{t("tools.nextAd")}</LangLink>
             </Button>
             <Button asChild variant="outline">
-              <LangLink href="/studio">{t("tools.nextContent")}</LangLink>
+              <LangLink href="/viral">{t("tools.nextContent")}</LangLink>
             </Button>
           </div>
         </div>
       ) : null}
+      </CharterOnly>
     </ToolsShell>
   );
 }

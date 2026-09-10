@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { ToolsShell } from "@/components/tools/tools-shell";
+import { CharterOnly } from "@/components/niche-gate";
 import { Button } from "@/components/ui/button";
 import { Input, Label, Textarea } from "@/components/ui/input";
 import { useI18n } from "@/components/i18n-provider";
@@ -14,7 +15,8 @@ import {
   offerBlueprintIsSaved,
   type OfferBuilderInput,
 } from "@/lib/engine/offer-builder";
-import type { OfferBlueprint } from "@/lib/types";
+import type { Intake, OfferBlueprint } from "@/lib/types";
+import { playbookFor } from "@/lib/engine/playbooks";
 import { useIsClient } from "@/lib/use-is-client";
 
 const emptyInput = (): OfferBuilderInput => ({
@@ -32,18 +34,22 @@ export function OfferBuilderTool() {
   const client = useIsClient();
   const [input, setInput] = useState<OfferBuilderInput>(emptyInput);
   const [offer, setOffer] = useState<OfferBlueprint | null>(null);
+  const [intake, setIntake] = useState<Intake | null>(null);
   const [need, setNeed] = useState(false);
   const [copied, setCopied] = useState(false);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
     if (!client) return;
-    const { intake, pack } = loadCampaignTools();
-    const existing = normalizeOfferBlueprint(intake.offerBlueprint ?? pack?.offerBlueprint, locale);
+    const { intake: live, pack } = loadCampaignTools();
+    setIntake(live);
+    const existing = normalizeOfferBlueprint(live.offerBlueprint ?? pack?.offerBlueprint, locale);
     if (offerBlueprintIsSaved(existing) || existing.skipped) setOffer(existing);
+    const pb = playbookFor(live);
+    const named = Boolean(live.businessName.trim());
     setInput({
-      dreamOutcome: existing.dreamOutcome,
-      proof: existing.proof,
+      dreamOutcome: existing.dreamOutcome || (named ? pb.hookPain[locale] : ""),
+      proof: existing.proof || (named ? pb.proof[locale] : ""),
       timeToResult: existing.timeToResult,
       customerEffort: existing.customerEffort,
       price: existing.price,
@@ -90,6 +96,7 @@ export function OfferBuilderTool() {
 
   return (
     <ToolsShell kicker={t("nav.offerTool")} title={t("offer.title")} lead={t("offer.lead")} testId="tool-offer">
+      <CharterOnly intake={intake}>
       <div className="grid gap-5 lg:grid-cols-2">
         <div className="space-y-4 rounded-[14px] border border-[var(--line)] bg-[var(--paper)] p-4">
           <div>
@@ -180,6 +187,7 @@ export function OfferBuilderTool() {
           )}
         </div>
       </div>
+      </CharterOnly>
     </ToolsShell>
   );
 }

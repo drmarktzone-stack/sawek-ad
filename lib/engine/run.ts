@@ -17,6 +17,7 @@ import { buildResearchSkeleton, runMarketResearch } from "./ad-research";
 import { attachResearchAndSync, orchestrateAssemble } from "./campaign-orchestrator";
 import { gateCustomerAd, localeScriptBleed } from "../copy-purity";
 import { lockDefaultDialect } from "./voice";
+import { charterAllowsCampaign } from "../operating-niche";
 
 export const AGENT_ORDER: AgentId[] = [
   "intake",
@@ -411,6 +412,7 @@ function gateCompleteAdLocales(pack: CampaignPack): CampaignPack {
 
 /** Overlay Gemini channel copy onto agency creative pieces (he+ar+en). No-op if Gemini unavailable. */
 export async function overlayPackAgency(pack: CampaignPack, opts?: { locale?: Locale }): Promise<CampaignPack> {
+  if (!charterAllowsCampaign(pack.intake)) return pack;
   const locale = opts?.locale ?? "he";
   const intake = lockDefaultDialect(pack.intake, locale);
   let next: CampaignPack = intake === pack.intake ? pack : { ...pack, intake };

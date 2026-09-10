@@ -1,6 +1,6 @@
 "use client";
 
-import { Compass, Fingerprint, FolderKanban, Link2, Megaphone, WandSparkles } from "lucide-react";
+import { Compass, Fingerprint, Link2, Users, WandSparkles } from "lucide-react";
 import { useI18n } from "@/components/i18n-provider";
 import { LangLink } from "@/components/lang-link";
 import { CAMPAIGN_STEPS } from "@/lib/campaign-path";
@@ -8,13 +8,10 @@ import { cn } from "@/lib/utils";
 
 const STEP_ICON = {
   scan: Link2,
-  truth: Link2,
-  diagnosis: WandSparkles,
-  message: Fingerprint,
+  client: Fingerprint,
   offer: Compass,
-  create: WandSparkles,
-  variants: Megaphone,
-  export: FolderKanban,
+  trust: WandSparkles,
+  list: Users,
 } as const;
 
 /** Named product functions = the one campaign journey. */

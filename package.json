@@ -14,6 +14,7 @@
     "check:demo-cmo": "npx --yes tsx scripts/check-demo-cmo.ts",
     "check:cmo-product": "npx --yes tsx scripts/check-cmo-product.ts",
     "check:product-path": "npx --yes tsx scripts/check-product-path.ts",
+    "check:operating-niche": "npx --yes tsx scripts/check-operating-niche.ts",
     "check:vertex-stack": "npx --yes tsx scripts/check-vertex-stack.ts",
     "check:viral-desk": "npx --yes tsx scripts/check-viral-desk.ts",
     "check:ad-research": "npx --yes tsx scripts/check-ad-research.ts",

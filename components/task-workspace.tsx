@@ -12,6 +12,7 @@ import { LangLink } from "@/components/lang-link";
 import { useI18n } from "@/components/i18n-provider";
 import { loadDraft, INGEST_APPLIED_EVENT, saveDraft } from "@/lib/storage";
 import { loadCampaignTools } from "@/lib/campaign-tools";
+import { charterAllowsCampaign } from "@/lib/operating-niche";
 import { assemblePack, overlayPackAgency } from "@/lib/engine/run";
 import { validateIntake, wizardReady } from "@/lib/engine/validate";
 import { lockDefaultDialect } from "@/lib/engine/voice";
@@ -29,6 +30,7 @@ import { OsDisclosure, OsEmpty, OsLoading, OsPage, OsRow, OsSection, OsUnknown, 
 import { CampaignJourney } from "@/components/campaign-journey";
 import { NextStepCard } from "@/components/next-step-card";
 import { OfferGateBanner } from "@/components/offer-gate-banner";
+import { NicheGateCard } from "@/components/niche-gate";
 import { offerGate } from "@/lib/engine/offer-builder";
 
 export function TaskWorkspace() {
@@ -65,6 +67,7 @@ export function TaskWorkspace() {
     if (ctx.empty) return;
     const draft = loadDraft();
     const liveIntake = lockDefaultDialect(draft.intake, locale);
+    if (!charterAllowsCampaign(liveIntake)) return;
     const gate = offerGate(liveIntake, pack);
     if (!gate.ok) {
       setIntake(liveIntake);
@@ -181,6 +184,9 @@ export function TaskWorkspace() {
             <p className="os-kicker">{t("task.detected")}</p>
             <h2 className="agency-display-cream mt-2 text-3xl">{t("complete.kicker")}</h2>
             <p className="mt-2 text-sm text-muted">{t("task.createAdLead")}</p>
+            {(intake.businessName.trim() || intake.website.trim()) && !charterAllowsCampaign(intake) ? (
+              <NicheGateCard intake={intake} />
+            ) : (
             <Button
               type="button"
               size="lg"
@@ -193,6 +199,7 @@ export function TaskWorkspace() {
               <WandSparkles className="size-5" />
               {building ? t("task.building") : t("complete.kicker")}
             </Button>
+            )}
             {gateOpen ? (
               <OfferGateBanner
                 onSkip={() => {
@@ -270,7 +277,10 @@ export function TaskWorkspace() {
                 </Button>
               ) : null}
               <Button asChild size="sm" variant="outline">
-                <LangLink href="/studio">{t("nav.studio")}</LangLink>
+                <LangLink href="/viral">{t("nav.viral")}</LangLink>
+              </Button>
+              <Button asChild size="sm" variant="outline">
+                <LangLink href="/tools/list">{t("nav.list")}</LangLink>
               </Button>
             </div>
           </OsSection>

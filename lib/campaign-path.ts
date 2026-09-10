@@ -2,18 +2,16 @@ import type { CampaignPack, Intake } from "./types";
 import { loadCampaignTools, type CampaignToolSnapshot } from "./campaign-tools";
 import { wizardReady } from "./engine/validate";
 import { offerBlueprintIsSaved } from "./engine/offer-builder";
-import { voiceIsLocked } from "./engine/voice";
+import { charterAllowsCampaign } from "./operating-niche";
+import { ownedListIsReady, loadOwnedList } from "./owned-list";
 
-/** Canonical campaign path — the only journey Home / Command / nav should push. */
+/** Canonical campaign path — scan, then the 4 Mohtawak pillars. */
 export const CAMPAIGN_STEPS = [
   { id: "scan", href: "/", key: "journey.scan" as const, cta: "path.scanNow" as const },
-  { id: "truth", href: "/#studio", key: "journey.truth" as const, cta: "path.fillTruth" as const },
-  { id: "diagnosis", href: "/task/ad", key: "journey.diagnosis" as const, cta: "path.approveDiagnosis" as const },
-  { id: "message", href: "/tools/core-message", key: "journey.message" as const, cta: "path.lockVoice" as const },
+  { id: "client", href: "/#studio", key: "journey.client" as const, cta: "path.lockClient" as const },
   { id: "offer", href: "/tools/offer", key: "journey.offer" as const, cta: "path.saveOffer" as const },
-  { id: "create", href: "/task/ad", key: "journey.create" as const, cta: "path.makeAd" as const },
-  { id: "variants", href: "/tools/hso", key: "journey.variants" as const, cta: "path.makeVariants" as const },
-  { id: "export", href: "/campaigns", key: "journey.export" as const, cta: "path.openExport" as const },
+  { id: "trust", href: "/task/ad", key: "journey.trust" as const, cta: "path.makeAd" as const },
+  { id: "list", href: "/tools/list", key: "journey.list" as const, cta: "path.captureList" as const },
 ] as const;
 
 export type PathStepId = (typeof CAMPAIGN_STEPS)[number]["id"];
@@ -29,6 +27,7 @@ export type CampaignPathState = {
   index: number;
   intake: Intake;
   pack: CampaignPack | null;
+  gated: boolean;
 };
 
 /** Orphan desks that strand users — hide from nav and bounce to the live path. */
@@ -39,38 +38,52 @@ export const DEAD_JOURNEY_HREFS = [
   "/strategy",
   "/media",
   "/leads",
+  "/self",
+  "/studio",
 ] as const;
 
 function stepDone(intake: Intake, pack: CampaignPack | null): PathDone {
   const hasScan = Boolean(intake.website?.trim() || intake.businessName.trim());
-  const hasTruth = wizardReady(intake);
-  const diagApproved = Boolean(pack?.diagnosis?.approved && pack.diagnosis.hypotheses?.length);
-  const locked = voiceIsLocked(intake.voice);
+  const hasClient = wizardReady(intake) && Boolean(intake.audience.trim());
   const offerOk =
     offerBlueprintIsSaved(intake.offerBlueprint ?? pack?.offerBlueprint) ||
     Boolean(intake.offerSkipConfirmed || intake.offerBlueprint?.skipped);
-  const hasCreate = Boolean(pack?.completeAd);
-  const hasVariants = Boolean(
-    pack?.hsoStudio?.variants.length ||
-      pack?.flashVariations?.variations.length ||
-      pack?.viral?.scripts?.scripts.length,
+  const hasTrust = Boolean(
+    pack?.completeAd ||
+      pack?.viral?.scripts?.scripts.length ||
+      pack?.hsoStudio?.variants.length,
   );
+  const hasList = ownedListIsReady(loadOwnedList(intake.businessName));
   return {
     scan: hasScan,
-    truth: hasTruth,
-    diagnosis: diagApproved,
-    message: locked,
+    client: hasClient,
     offer: offerOk,
-    create: hasCreate,
-    variants: hasVariants,
-    export: Boolean(pack?.saved && hasCreate),
+    trust: hasTrust,
+    list: hasList,
   };
 }
 
 export function resolveCampaignPath(snap?: CampaignToolSnapshot): CampaignPathState {
   const { intake, pack } = snap ?? loadCampaignTools();
+  const gated = Boolean(
+    (intake.businessName.trim() || intake.website.trim()) && !charterAllowsCampaign(intake),
+  );
   const done = stepDone(intake, pack);
   const order = CAMPAIGN_STEPS;
+  if (gated) {
+    const scan = order[0];
+    return {
+      current: "scan",
+      href: scan.href,
+      cta: scan.cta,
+      key: scan.key,
+      done,
+      index: 0,
+      intake,
+      pack,
+      gated: true,
+    };
+  }
   const current = order.find((s) => !done[s.id]) ?? order[order.length - 1];
   return {
     current: current.id,
@@ -81,6 +94,7 @@ export function resolveCampaignPath(snap?: CampaignToolSnapshot): CampaignPathSt
     index: order.findIndex((s) => s.id === current.id),
     intake,
     pack,
+    gated: false,
   };
 }
 

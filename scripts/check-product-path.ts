@@ -133,17 +133,18 @@ if (!thinPack.siteAudit?.weaknesses.some((w) => w.id === "no-photos")) {
 
 const navHrefs = [...PRIMARY_NAV, ...MORE_NAV].map((n) => n.href);
 if (!PRIMARY_NAV.some((n) => n.href === "/")) fail("primary nav missing scan/home");
-if (!PRIMARY_NAV.some((n) => n.href === "/task/ad")) fail("primary nav missing Complete Ad");
+if (!PRIMARY_NAV.some((n) => n.href === "/task/ad")) fail("primary nav missing trust/complete ad");
 if (!PRIMARY_NAV.some((n) => n.href === "/tools/offer")) fail("primary nav missing offer");
-if (!PRIMARY_NAV.some((n) => n.href === "/tools/core-message")) fail("primary nav missing core message");
-if (!PRIMARY_NAV.some((n) => n.href === "/campaigns")) fail("primary nav missing campaigns");
+if (!PRIMARY_NAV.some((n) => n.href === "/tools/core-message")) fail("primary nav missing ideal client");
+if (!PRIMARY_NAV.some((n) => n.href === "/tools/list")) fail("primary nav missing owned list");
+if (!navHrefs.includes("/campaigns")) fail("campaigns missing from nav");
 for (const dead of [...DEAD_JOURNEY_HREFS, "/growth/market", "/growth/dna", "/growth/experiments"]) {
   if (navHrefs.includes(dead)) fail(`dead tool still in nav: ${dead}`);
 }
 
 const emptyPath = resolveCampaignPath({ intake: emptyIntake(), pack: null });
 if (emptyPath.current !== "scan") fail(`empty campaign current=${emptyPath.current}, expected scan`);
-if (CAMPAIGN_STEPS.map((s) => s.id).join(">") !== "scan>truth>diagnosis>message>offer>create>variants>export") {
+if (CAMPAIGN_STEPS.map((s) => s.id).join(">") !== "scan>client>offer>trust>list") {
   fail(`campaign steps drifted: ${CAMPAIGN_STEPS.map((s) => s.id).join(">")}`);
 }
 
@@ -160,10 +161,22 @@ for (const job of ["scripts", "hooks", "analyze", "remix", "carousel", "calendar
 const wizardSrc = readFileSync(join(root, "components/wizard-flow.tsx"), "utf8");
 if (!wizardSrc.includes("/tools/core-message")) fail("diagnosis approve must continue to core message");
 if (!wizardSrc.includes("diagnosisApproved")) fail("HITL must hide five-agent continue after diagnosis");
+if (!wizardSrc.includes("charterAllowsCampaign")) fail("wizard must niche-gate complete campaign");
+
+const generateSrc = readFileSync(join(root, "lib/engine/gemini-generate.ts"), "utf8");
+if (!generateSrc.includes("charterAllowsCampaign") || !generateSrc.includes("niche_gated")) {
+  fail("generate API must niche-gate unsupported businesses");
+}
 
 const taskSrc = readFileSync(join(root, "components/task-workspace.tsx"), "utf8");
 if (!taskSrc.includes("approved === false")) fail("task workspace must not open empty HITL");
 if (!taskSrc.includes("loadCampaignTools")) fail("task workspace must hydrate shared Business Truth");
+if (taskSrc.includes('href="/studio"') || taskSrc.includes("href=\"/self\"")) {
+  fail("task workspace still links to dead /studio or /self");
+}
+
+const hsoSrc = readFileSync(join(root, "components/tools/hso-studio-tool.tsx"), "utf8");
+if (hsoSrc.includes('href="/studio"')) fail("hso studio still links to dead /studio");
 
 const viralPage = readFileSync(join(root, "app/viral/page.tsx"), "utf8");
 if (!viralPage.includes("loadCampaignTools")) fail("viral page must boot shared Business Truth");
@@ -177,7 +190,16 @@ const toolsSrc = readFileSync(join(root, "lib/campaign-tools.ts"), "utf8");
 if (!toolsSrc.includes("intakeIsClinicDemo")) fail("shared store must drop clinic pack vs non-clinic draft");
 if (!toolsSrc.includes("persistViral")) fail("viral tools must write the shared store");
 
-for (const file of ["app/lab/page.tsx", "app/discovery/page.tsx", "app/strategy/page.tsx", "app/media/page.tsx", "app/leads/page.tsx", "app/growth/layout.tsx"]) {
+for (const file of [
+  "app/lab/page.tsx",
+  "app/discovery/page.tsx",
+  "app/strategy/page.tsx",
+  "app/media/page.tsx",
+  "app/leads/page.tsx",
+  "app/growth/layout.tsx",
+  "app/self/page.tsx",
+  "app/studio/page.tsx",
+]) {
   const src = readFileSync(join(root, file), "utf8");
   if (!src.includes("JourneyRedirect")) fail(`${file} must bounce onto the campaign path`);
 }

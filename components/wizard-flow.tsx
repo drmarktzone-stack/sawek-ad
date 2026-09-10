@@ -21,7 +21,9 @@ import {
 import { assemblePack, idleStatus, overlayPackAgency, runIntakeAndDiagnosis, runMedia, runOptimizerStage, runStrategic } from "@/lib/engine/run";
 import { loadDraft, saveDraft, INGEST_APPLIED_EVENT } from "@/lib/storage";
 import { loadCampaignTools } from "@/lib/campaign-tools";
+import { charterAllowsCampaign } from "@/lib/operating-niche";
 import { NextStepCard } from "@/components/next-step-card";
+import { NicheGateCard } from "@/components/niche-gate";
 import { nextHitlGate } from "@/lib/engine/hitl";
 import { OfferGateBanner } from "@/components/offer-gate-banner";
 import { syncCampaign } from "@/lib/supabase";
@@ -503,6 +505,7 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
 
   async function startBuild() {
     if (!wizardReady(intake)) return;
+    if (!charterAllowsCampaign(intake)) return;
     setOfferBlocked(false);
     await runAgents();
   }
@@ -1172,11 +1175,14 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
                 </div>
               </div>
 
+              {!charterAllowsCampaign(intake) && (intake.businessName.trim() || intake.website.trim()) ? (
+                <NicheGateCard intake={intake} />
+              ) : null}
               <Button
                 type="button"
                 size="lg"
                 className="mt-6 w-full text-base font-black shadow-[0_12px_32px_rgba(15,39,68,0.12)]"
-                disabled={!wizardReady(intake) || running}
+                disabled={!wizardReady(intake) || running || !charterAllowsCampaign(intake)}
                 onClick={startBuild}
               >
                 <WandSparkles className="size-5" />

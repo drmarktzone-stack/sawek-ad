@@ -12,6 +12,7 @@ import {
 } from "../chips";
 import { canonicalDoctorName } from "../demo";
 import { coverageFactLine, isClalitCoverageFact, isFreeService, isSchoolLike, problemChipsFor } from "../operating-model";
+import { resolveOperatingNiche } from "../operating-niche";
 import {
   crowdFallback,
   detectVertical,
@@ -459,15 +460,22 @@ export function whatsappScript(intake: Intake, locale: Locale): string {
   const hours = hoursLine(intake, locale);
   const kupa = kupaLine(intake, locale);
   const place = placeBit(intake, locale);
+  const niche = resolveOperatingNiche(intake);
   if (locale === "ar") {
     const walk = isWalkIn(intake)
       ? "جت أولاً بدون مواعيد — مش منحجز دور من الواتساب."
       : "";
     const h1 = isWalkIn(intake) && isPediatrics(intake) ? `${LOCKED_AR_H1}.` : "";
     const site = intake.website?.trim() ?? "";
+    const hello =
+      niche === "fitness_studio"
+        ? `أهلا، هون ${n} — ستوديو تدريب.`
+        : niche === "home_trades"
+          ? `أهلا، هون ${n} — شغل بيت.`
+          : `أهلا، هون ${n}.`;
     return [
       h1,
-      `أهلا، هون ${n}.`,
+      hello,
       place ? place + "." : "",
       wa ? `واتساب ${wa}.` : site ? site : "",
       walk,
@@ -487,11 +495,13 @@ export function whatsappScript(intake: Intake, locale: Locale): string {
         ? ""
         : "מתי נוח לתור?";
     const site = intake.website?.trim() ?? "";
-    const open = wa
-      ? `שלום, כאן ${n}. וואטסאפ ${wa}.`
-      : site
-        ? `שלום, כאן ${n}. ${site}`
-        : `שלום, כאן ${n}.`;
+    const hello =
+      niche === "fitness_studio"
+        ? `שלום, כאן ${n} — סטודיו אימונים.`
+        : niche === "home_trades"
+          ? `שלום, כאן ${n} — עבודות בית.`
+          : `שלום, כאן ${n}.`;
+    const open = wa ? `${hello} וואטסאפ ${wa}.` : site ? `${hello} ${site}` : hello;
     return [
       open,
       place,
@@ -511,11 +521,13 @@ export function whatsappScript(intake: Intake, locale: Locale): string {
       ? ""
       : "When works for a visit?";
   const site = intake.website?.trim() ?? "";
-  const open = wa
-    ? `Hi, this is ${n}. WhatsApp ${wa}.`
-    : site
-      ? `Hi, this is ${n}. ${site}`
-      : `Hi, this is ${n}.`;
+  const hello =
+    niche === "fitness_studio"
+      ? `Hi, this is ${n} — a training studio.`
+      : niche === "home_trades"
+        ? `Hi, this is ${n} — home trades.`
+        : `Hi, this is ${n}.`;
+  const open = wa ? `${hello} WhatsApp ${wa}.` : site ? `${hello} ${site}` : hello;
   return [
     open,
     place,

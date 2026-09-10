@@ -15,7 +15,7 @@ export function CampaignJourney({ compact = false }: { compact?: boolean }) {
   const client = useIsClient();
   const snap = useMemo(() => (client ? loadCampaignTools() : null), [client, pathname]);
   const path = useMemo(() => (snap ? resolveCampaignPath(snap) : null), [snap]);
-  const locked = Boolean(path?.done.message);
+  const locked = Boolean(path?.done.client);
 
   return (
     <nav
