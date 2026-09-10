@@ -14,6 +14,8 @@ import { rsaLines } from "../lib/engine/spoken";
 import { bankForIntake, serviceFamily } from "../lib/creative-bank";
 import { PUBLISHED_DEMO_IDS } from "../lib/demo-catalog";
 import { PRIMARY_NAV, MORE_NAV } from "../components/command/nav";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import type { CampaignPack, Intake } from "../lib/types";
 
 const failures: string[] = [];
@@ -134,6 +136,15 @@ if (!PRIMARY_NAV.some((n) => n.href === "/tools/offer")) fail("primary nav missi
 if (!PRIMARY_NAV.some((n) => n.href === "/tools/core-message")) fail("primary nav missing core message");
 for (const dead of ["/growth/market", "/growth/dna", "/growth/experiments", "/lab", "/discovery", "/strategy", "/media"]) {
   if (navHrefs.includes(dead)) fail(`dead tool still in nav: ${dead}`);
+}
+
+const root = process.cwd();
+const css = readFileSync(join(root, "app/globals.css"), "utf8");
+if (/Hub Clear|pale sky \/ cobalt/.test(css)) fail("mohtwa.ai chrome leaked into tokens");
+if (!/Verde Clear/.test(css)) fail("Verde Clear tokens missing after Mohtawak correction");
+const jobsUi = readFileSync(join(root, "components/content-jobs.tsx"), "utf8");
+for (const job of ["scripts", "hooks", "analyze", "remix", "carousel", "calendar", "trends", "voice"]) {
+  if (!jobsUi.includes(`job: "${job}"`)) fail(`content jobs missing ${job}`);
 }
 
 if (failures.length) {

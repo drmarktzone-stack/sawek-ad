@@ -26,6 +26,7 @@ import { useIsClient } from "@/lib/use-is-client";
 import { useAuth } from "@/components/auth-provider";
 import { OsDisclosure, OsEmpty, OsLoading, OsPage, OsRow, OsSection, OsUnknown, OverlayStatus, ValueOrUnknown } from "@/components/command/primitives";
 import { CampaignJourney } from "@/components/campaign-journey";
+import { ContentJobsStrip } from "@/components/content-jobs";
 import { OfferGateBanner } from "@/components/offer-gate-banner";
 import { offerGate } from "@/lib/engine/offer-builder";
 
@@ -121,6 +122,7 @@ export function TaskWorkspace() {
   return (
     <OsPage data-testid="task-workspace" dir={locale === "en" ? "ltr" : "rtl"}>
       <CampaignJourney compact />
+      <ContentJobsStrip compact />
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <LangLink href="/dashboard" className="inline-flex items-center gap-2 text-sm font-bold text-muted hover:text-navy">
           <LayoutDashboard className="size-4" />

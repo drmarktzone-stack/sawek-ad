@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Check, Copy, Film, Loader2 } from "lucide-react";
 import type {
   BioPack,
@@ -36,6 +37,8 @@ import { VoiceFields } from "@/components/voice-fields";
 import { cn } from "@/lib/utils";
 
 type Tab = "scripts" | "hooks" | "carousel" | "bio" | "trends" | "remix" | "analyze";
+
+const VIRAL_TABS: Tab[] = ["scripts", "hooks", "carousel", "bio", "trends", "remix", "analyze"];
 
 function factsPayload(intake: Intake) {
   return {
@@ -102,6 +105,7 @@ export function ViralDesk({
   embedded?: boolean;
 }) {
   const { t, locale } = useI18n();
+  const search = useSearchParams();
   const lang = packLang ?? locale;
   const draft = loadDraft();
   const intake0 = pack?.intake ?? draft.intake;
@@ -131,6 +135,30 @@ export function ViralDesk({
   const [videoName, setVideoName] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
   const videoFile = useRef<File | null>(null);
+
+  useEffect(() => {
+    const job = search.get("job");
+    if (!job) return;
+    if (job === "calendar") {
+      setCalendarOn(true);
+      requestAnimationFrame(() => {
+        document.getElementById("viral-calendar")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+      return;
+    }
+    if (job === "voice") {
+      requestAnimationFrame(() => {
+        document.getElementById("viral-voice")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+      return;
+    }
+    if (VIRAL_TABS.includes(job as Tab)) {
+      setTab(job as Tab);
+      requestAnimationFrame(() => {
+        document.getElementById("viral-output")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
+  }, [search]);
 
   const currentIntake = useMemo((): Intake => {
     const base = pack?.intake ?? loadDraft().intake;
@@ -346,7 +374,7 @@ export function ViralDesk({
         ))}
       </ol>
 
-      <div className="mt-6 rounded-[20px] border border-[rgba(8,17,31,0.08)] bg-white p-5 shadow-[var(--shadow-card)] sm:p-7">
+      <div id="viral-voice" className="mt-6 rounded-[20px] border border-[rgba(8,17,31,0.08)] bg-white p-5 shadow-[var(--shadow-card)] sm:p-7">
         <p className="agency-kicker">{t("viral.step")} 01</p>
         <h3 className="mt-2 text-xl font-black text-navy">{t("viral.step1")}</h3>
         <div className="mt-4">
@@ -405,7 +433,7 @@ export function ViralDesk({
         </div>
       </div>
 
-      <div className="mt-4 rounded-[20px] border border-[rgba(8,17,31,0.08)] bg-white p-5 shadow-[var(--shadow-card)] sm:p-7">
+      <div id="viral-output" className="mt-4 rounded-[20px] border border-[rgba(8,17,31,0.08)] bg-white p-5 shadow-[var(--shadow-card)] sm:p-7">
         <p className="agency-kicker">{t("viral.step")} 03</p>
         <h3 className="mt-2 text-xl font-black text-navy">{t("viral.step3")}</h3>
         <div className="mt-4 flex flex-wrap gap-1">
@@ -658,7 +686,7 @@ export function ViralDesk({
       </div>
 
       {calendarOn && days.length >= 30 ? (
-        <section data-testid="viral-calendar-30" className="mt-6">
+        <section id="viral-calendar" data-testid="viral-calendar-30" className="mt-6">
           <h3 className="text-lg font-black text-navy">{t("viral.calendar")}</h3>
           <ol className="mobile-card-grid cols-2 mt-3 sm:grid-cols-3 lg:grid-cols-5">
             {days.slice(0, 30).map((d) => (

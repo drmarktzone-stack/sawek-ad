@@ -16,6 +16,7 @@ import { useAuth } from "@/components/auth-provider";
 import { fetchRemoteWorkspaces, mergeRemoteWorkspaces } from "@/lib/scientist/store";
 import { useCommandSignals } from "@/components/command/signals";
 import { CampaignTable, ContextBar, ModuleSummaries, TodayBoard } from "@/components/command/command-center";
+import { ContentJobsStrip } from "@/components/content-jobs";
 import { OsLoading, OsPage, OsSection, OsTabs } from "@/components/command/primitives";
 
 type Filter = "all" | LabFeatureType;
@@ -139,6 +140,7 @@ export function DashboardPage() {
       <p className="os-kicker">{t("os.kicker")}</p>
       <h1 className="os-title mt-1 text-3xl sm:text-4xl">{t("nav.command")}</h1>
       <p className="mt-2 mb-6 max-w-2xl text-sm text-muted">{t("os.todayTitle")}</p>
+      <ContentJobsStrip compact />
 
       {signals.ready ? (
         <>
