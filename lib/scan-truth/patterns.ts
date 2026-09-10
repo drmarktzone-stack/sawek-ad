@@ -69,6 +69,67 @@ const AR_STREET_RE = /شارع\s+\S+(?:\s+\S+){0,4}(?:\s+\d{1,4})?/;
 const EN_STREET_RE =
   /\d{1,5}\s+[\w.'-]+(?:\s+[\w.'-]+)?\s+(?:street|st\.?|avenue|ave\.?|road|rd\.?|blvd|boulevard)\b/i;
 
+/**
+ * Cities we may attach when the page already names them.
+ * Never includes שדרות (boulevard vs the town) — that would contaminate street lines.
+ */
+const IL_CITY_ALTS = [
+  "חיפה",
+  "תל אביב",
+  "תל-אביב",
+  "ירושלים",
+  "נתניה",
+  "באר שבע",
+  "הרצליה",
+  "רמת גן",
+  "פתח תקווה",
+  "ראשון לציון",
+  "אשדוד",
+  "אשקלון",
+  "נהריה",
+  "עכו",
+  "טבריה",
+  "אילת",
+  "כפר סבא",
+  "רעננה",
+  "חדרה",
+  "נצרת",
+  "באקה אל-גרביה",
+  "באקה אל גרבייה",
+  "באקה",
+  "حيفا",
+  "القدس",
+  "تل أبيب",
+  "باقة الغربية",
+  "باقة",
+  "الناصرة",
+  "عكا",
+  "Haifa",
+  "Jerusalem",
+  "Tel Aviv",
+  "Nazareth",
+];
+
+const IL_CITY_FIND_RE = new RegExp(`(?:^|[,،\\s]|ב|في\\s+)(${IL_CITY_ALTS.join("|")})(?:$|[,،\\s.])`);
+
+/** City named on the page (locative / comma / standalone). Never invents. */
+export function evidencedCityFromText(text: string): string {
+  const hay = String(text || "").replace(/\s+/g, " ").trim();
+  if (!hay) return "";
+  const m = hay.match(IL_CITY_FIND_RE);
+  return m?.[1] || "";
+}
+
+/** If a street fragment has no city, append one only when the same page names it. */
+export function attachEvidencedCity(street: string, corpus: string): string {
+  const s = String(street || "").replace(/\s+/g, " ").trim();
+  if (!s) return "";
+  if (evidencedCityFromText(s)) return s;
+  const city = evidencedCityFromText(corpus);
+  if (city && !s.includes(city)) return `${s}, ${city}`;
+  return s;
+}
+
 function stripLocationFieldLabel(value: string): string {
   return value.replace(/\s+/g, " ").trim().replace(LOCATION_FIELD_LABEL_RE, "").trim();
 }
@@ -76,17 +137,20 @@ function stripLocationFieldLabel(value: string): string {
 function cityNearStreet(hay: string, street: string): string {
   const around = hay.replace(/\s+/g, " ");
   const idx = around.indexOf(street);
-  const window = idx >= 0 ? around.slice(Math.max(0, idx - 40), idx + street.length + 40) : around;
-  const heCity =
-    window.match(/,\s*([א-ת]{3,15})\s*$/) ||
-    window.match(/,\s*([א-ת]{3,15})\s*[,.]/) ||
-    window.match(/\bב([א-ת]{3,15})\s+(?:ב)?(?:שדרות|רחוב)/);
-  if (heCity?.[1]) return heCity[1];
-  const arCity = window.match(/،\s*([\u0600-\u06FF]{3,20})/);
-  if (arCity?.[1]) return arCity[1];
-  const enCity = window.match(/,\s*([A-Z][a-zA-Z]{2,20})(?:\s*,|\s+[A-Z]{2}\b|$)/);
-  if (enCity?.[1] && !/street|avenue|road|blvd/i.test(enCity[1])) return enCity[1];
-  return "";
+  const window = idx >= 0 ? around.slice(Math.max(0, idx - 48), idx + street.length + 56) : around;
+  return evidencedCityFromText(window);
+}
+
+function streetMatches(line: string): string[] {
+  const found: string[] = [];
+  const push = (m: string) => {
+    const v = m.replace(/\s+/g, " ").trim();
+    if (v && !found.includes(v)) found.push(v);
+  };
+  for (const m of line.matchAll(new RegExp(HE_STREET_RE.source, "g"))) push(m[0]);
+  for (const m of line.matchAll(new RegExp(AR_STREET_RE.source, "g"))) push(m[0]);
+  for (const m of line.matchAll(new RegExp(EN_STREET_RE.source, "gi"))) push(m[0]);
+  return found;
 }
 
 function composeStreetCity(street: string, city: string): string {
@@ -130,22 +194,23 @@ export function extractPostalAddressFromText(text: string): string {
   for (const line of lines) {
     if (!line || line.length < 6) continue;
     if (/אימייל|email|סיסמה|password|podium|street level/i.test(line)) continue;
-    if (HE_STREET_RE.test(line) && line.length <= 80 && !locationHasMarketingPayload(line)) {
-      push(line);
+    if ((HE_STREET_RE.test(line) || AR_STREET_RE.test(line) || EN_STREET_RE.test(line)) && line.length <= 80 && !locationHasMarketingPayload(line)) {
+      push(attachEvidencedCity(line, raw));
     }
-    const he = line.match(HE_STREET_RE);
-    if (he) push(composeStreetCity(he[0], cityNearStreet(line, he[0])));
-    const ar = line.match(AR_STREET_RE);
-    if (ar) push(composeStreetCity(ar[0], cityNearStreet(line, ar[0])));
-    const en = line.match(EN_STREET_RE);
-    if (en) push(composeStreetCity(en[0], cityNearStreet(line, en[0])));
+    for (const street of streetMatches(line)) {
+      push(attachEvidencedCity(composeStreetCity(street, cityNearStreet(line, street)), raw));
+    }
   }
   hits.sort((a, b) => {
     const score = (s: string) =>
-      (looksLikePostalAddress(s) ? 80 : 0) + (/,/.test(s) ? 15 : 0) + (/\d/.test(s) ? 20 : 0) - s.length / 8;
+      (looksLikePostalAddress(s) ? 80 : 0) +
+      (evidencedCityFromText(s) ? 40 : 0) +
+      (/,|،/.test(s) ? 10 : 0) +
+      (/\d/.test(s) ? 20 : 0) -
+      s.length / 8;
     return score(b) - score(a);
   });
-  return hits[0] || "";
+  return attachEvidencedCity(hits[0] || "", raw);
 }
 
 /** Strip description labels and marketing sentences; keep only a postal fragment when present. */

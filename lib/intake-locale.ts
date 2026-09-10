@@ -25,6 +25,9 @@ const PAIRS: [string, string, string][] = [
   ["שתלים מזרקוניה", "زرعات زركونيا", "Zirconia implants"],
   ["תותבות על גבי שתלים", "أطقم على زرعات", "Implant-supported dentures"],
   ["כתרים על גבי שתלים", "تيجان على زرعات", "Implant crowns"],
+  ["כתרים מזרקוניה", "تيجان زركونيا", "Zirconia crowns"],
+  ["ציפוי חרסינה", "قشور بورسلان", "Porcelain veneers"],
+  ["כתרים", "تيجان", "crowns"],
   ["שחזורים אסתטיים", "ترميمات تجميلية", "Aesthetic restorations"],
   ["בשירות איכותי ומקצועי", "بخدمة مهنية عالية", "professional quality care"],
   ["בחיפה ב", "في حيفا في ", "in Haifa on "],
@@ -94,10 +97,10 @@ export function hydrateScanIntake(intake: Intake, locale: Locale): Intake {
     ...emptyVoice(),
     ...voice,
     dialect: voice.dialect || (locale === "ar" ? "ar-palestinian" : voice.dialect),
-    niche: voice.niche || next.category,
-    audience: voice.audience || next.audience,
-    coreMessage: voice.coreMessage || next.uniqueAdvantage || next.description,
-    personalVoice: voice.personalVoice || next.brandTone,
+    niche: rewriteField(voice.niche || next.category, locale) || next.category,
+    audience: rewriteField(voice.audience || next.audience, locale) || next.audience,
+    coreMessage: rewriteField(voice.coreMessage || next.uniqueAdvantage || next.description, locale) || next.uniqueAdvantage || next.description,
+    personalVoice: rewriteField(voice.personalVoice || next.brandTone, locale) || next.brandTone,
   };
   return next;
 }

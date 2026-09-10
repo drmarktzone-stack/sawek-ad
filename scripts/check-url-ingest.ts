@@ -10,6 +10,8 @@ import { buildSiteAudit } from "../lib/engine/site-audit";
 import { buildPostingCalendar } from "../lib/engine/posting-calendar";
 import { RESIZE_FORMATS } from "../lib/resize-formats";
 import { assemblePack } from "../lib/engine/run";
+import { attachCompleteAd } from "../lib/engine/ad-engine";
+import { generateVariants } from "../lib/engine/copy";
 import { acceptScanBrandValue, applyIngestReview, rowsFromExtracted } from "../lib/document-ingest";
 import { emptyIntake, wizardReady, validateIntake } from "../lib/engine/validate";
 import { diagnose } from "../lib/engine/diagnose";
@@ -1046,12 +1048,32 @@ else {
     );
   }
   const ar = hydrateScanIntake(hallounApplied, "ar");
-  if (/[\u0590-\u05FF]/.test(`${ar.category} ${ar.location} ${ar.description}`)) {
-    fail(`AR UI still showing Hebrew facts: cat=${ar.category} loc=${ar.location} desc=${ar.description}`);
+  if (/[\u0590-\u05FF]/.test(`${ar.category} ${ar.location} ${ar.description} ${ar.landingLines} ${ar.uniqueAdvantage}`)) {
+    fail(`AR UI still showing Hebrew facts: cat=${ar.category} loc=${ar.location} desc=${ar.description} lines=${ar.landingLines}`);
   }
   if (ar.voice?.dialect !== "ar-palestinian") fail(`AR dialect ${ar.voice?.dialect}`);
   if (!/حيفا|شارع الرئيس/.test(ar.location)) fail(`AR location ${ar.location}`);
   if (!/أسنان/.test(ar.category + ar.description + ar.uniqueAdvantage)) fail("AR missing dental specialty");
+  if (/[\u0590-\u05FF]/.test(`${ar.voice?.coreMessage || ""} ${ar.voice?.niche || ""}`)) {
+    fail(`AR voice still Hebrew: ${ar.voice?.coreMessage} / ${ar.voice?.niche}`);
+  }
+  const hallounReport = validateIntake(ar);
+  if (hallounReport.completeness >= 100) fail("halloun must not fake a 100 data-quality score");
+  if (hallounReport.missing.some((m) => ["businessModel", "monthlyBudget", "targetCac", "avgOrderValue", "marginPercent"].includes(String(m.field)))) {
+    fail("empty financials must not be required blockers");
+  }
+  const hallounAd = attachCompleteAd(
+    assemblePack(ar, {
+      report: hallounReport,
+      diagnosis: diagnose(ar, hallounReport),
+      variants: generateVariants(ar),
+      agentStatus: { intake: "complete", diagnostic: "complete", strategic: "complete", media: "complete", optimizer: "complete" },
+    }),
+  ).completeAd?.locales.ar;
+  if (!hallounAd?.headline?.trim() || /^(intro|—|intro\s*—)/i.test(hallounAd.headline)) {
+    fail(`halloun complete-ad placeholder ${JSON.stringify(hallounAd?.headline)}`);
+  }
+  if (/زيتون|Olive|סאמר|أبو مخ/.test(JSON.stringify(hallounAd))) fail("halloun complete-ad leaked demo");
   const imgs = halloun.images || [];
   if (imgs.some((u: string) => /\.woff2?/i.test(u))) fail(`halloun kept font asset ${JSON.stringify(imgs)}`);
 }
@@ -1062,8 +1084,37 @@ const ogBlobOnly = parseFetchedHtml(
   "https://dr-halloun.com/lp/",
 );
 if (!ogBlobOnly.ok) fail(`og-blob halloun parse ${ogBlobOnly.error}`);
-else if (/תיאור:/.test(String(ogBlobOnly.fields.location || "")) || !/שדרות הנשיא\s*21/.test(String(ogBlobOnly.fields.location || ""))) {
+else if (
+  /תיאור:/.test(String(ogBlobOnly.fields.location || "")) ||
+  !/שדרות הנשיא\s*21/.test(String(ogBlobOnly.fields.location || "")) ||
+  !/חיפה/.test(String(ogBlobOnly.fields.location || ""))
+) {
   fail(`og-blob location ${JSON.stringify(ogBlobOnly.fields.location)}`);
+}
+
+const hallounLiveShape = parseFetchedHtml(
+  `<!doctype html><html lang="he"><head><title>דף נחיתה - ד"ר אליאס הלון</title>
+  <meta property="og:site_name" content="ד&quot;ר אליאס הלון"/>
+  <meta property="og:description" content="מרפאת שיניים בחיפה בשדרות הנשיא 21, השתלות שיניים ואסתטיקה דנטלית בשירות איכותי ומקצועי. השאירו פרטים אצל ד&quot;ר אליאס הלון או התקשרו."/>
+  <script type="application/ld+json">{"@type":"WebPage","description":"מרפאת שיניים בחיפה בשדרות הנשיא 21, השתלות שיניים ואסתטיקה דנטלית בשירות איכותי ומקצועי."}</script>
+  </head><body>
+  <span class="elementor-button-text">שדרות הנשיא 21, חיפה</span>
+  <h2>שתלים מזרקוניה</h2><h2>כתרים על גבי שתלים</h2>
+  <p>המרכז לאסתטיקה והשתלות שיניים</p>
+  </body></html>`,
+  "https://dr-halloun.com/lp/",
+  "https://dr-halloun.com/lp/?gad_source=1&gad_campaignid=23340775362",
+);
+if (!hallounLiveShape.ok) fail(`halloun live-shape parse ${hallounLiveShape.error}`);
+else {
+  const loc = String(hallounLiveShape.fields.location || "");
+  if (!/שדרות הנשיא\s*21/.test(loc) || !/חיפה/.test(loc) || /תיאור:|השתלות שיניים ואסתטיקה/.test(loc)) {
+    fail(`halloun live-shape location ${JSON.stringify(loc)}`);
+  }
+  if (!String(hallounLiveShape.fields.audience || "").trim()) fail("halloun live-shape audience empty");
+  if (!/חיפה/.test(String(hallounLiveShape.fields.audience || ""))) {
+    fail(`halloun live-shape audience missing city ${JSON.stringify(hallounLiveShape.fields.audience)}`);
+  }
 }
 
   if (failures.length) {

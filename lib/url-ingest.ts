@@ -15,7 +15,7 @@ import {
 } from "./document-ingest";
 import { extractCssColors, extractLogoUrl } from "./brand-kit";
 import { runScanTruthPipeline, extraPageMayFillTruth, EXTRA_CONTACT_FIELDS } from "./scan-truth/pipeline";
-import { isEcommerceChromeText, isPainStatement, isUiChromeText, splitSentences, tokenOverlap, extractPostalAddressFromText, cleanLocationValue } from "./scan-truth/patterns";
+import { isEcommerceChromeText, isPainStatement, isUiChromeText, splitSentences, tokenOverlap, extractPostalAddressFromText, cleanLocationValue, attachEvidencedCity } from "./scan-truth/patterns";
 import type { FactEvidence } from "./scan-truth/types";
 import {
   detectSocialKind,
@@ -1445,22 +1445,26 @@ export function parseFetchedHtml(
     const cur = String(fields.category || "").trim();
     if (!cur || categoryRank(rankedCat) > categoryRank(cur)) fields.category = rankedCat;
   }
-  if (fromLdAddr) fields.location = fromLdAddr;
+  const locationCorpus = [addr || "", visible, pipeline.businessCorpus, extraCorpus, ogDescription || ""].filter(Boolean).join("\n");
+  if (fromLdAddr) fields.location = attachEvidencedCity(fromLdAddr, locationCorpus);
   else if (fields.location) {
     const cleaned = cleanLocationValue(fields.location) || extractPostalAddressFromText(fields.location);
-    if (cleaned && isUsableLocation(cleaned)) fields.location = cleaned;
+    if (cleaned && isUsableLocation(cleaned)) fields.location = attachEvidencedCity(cleaned, locationCorpus);
     else if (!isUsableLocation(fields.location)) delete fields.location;
   }
   if (!String(fields.location || "").trim() || !isUsableLocation(String(fields.location))) {
-    const fromVisible = extractPostalAddressFromText([addr || "", visible, pipeline.businessCorpus, extraCorpus].filter(Boolean).join("\n"));
+    const fromVisible = extractPostalAddressFromText(locationCorpus);
     if (fromVisible && isUsableLocation(fromVisible)) fields.location = fromVisible;
     else {
       const zones = deliveryZonesFromText(raw, visible);
       if (zones && isUsableLocation(zones)) fields.location = zones;
     }
+  } else {
+    fields.location = attachEvidencedCity(String(fields.location), locationCorpus);
   }
   fields = sanitizeExtractedFields(fields, pipeline.businessCorpus);
-  if (fromLdAddr && !fields.location) fields.location = fromLdAddr;
+  if (fromLdAddr && !fields.location) fields.location = attachEvidencedCity(fromLdAddr, locationCorpus);
+  if (fields.location) fields.location = attachEvidencedCity(String(fields.location), locationCorpus);
   syncPhoneWhatsappFields(fields);
   const tagline = jsonLdTagline(jsonLdPool, sites);
   if (!String(fields.description || "").trim()) {

@@ -30,6 +30,7 @@ import {
   isUsableLocationValue,
   extractPostalAddressFromText,
   cleanLocationValue,
+  attachEvidencedCity,
 } from "./scan-truth/patterns";
 
 export const DOC_MAX_BYTES = IMAGE_MAX_BYTES;
@@ -419,9 +420,10 @@ export function sanitizeExtractedFields(
     else delete out.audience;
   }
   if (out.location) {
-    const cleaned = cleanLocationValue(out.location) || extractPostalAddressFromText(out.location);
-    if (cleaned && isUsableLocation(cleaned)) out.location = cleaned;
+    const cleaned = cleanLocationValue(out.location) || extractPostalAddressFromText(`${out.location}\n${hay}`);
+    if (cleaned && isUsableLocation(cleaned)) out.location = attachEvidencedCity(cleaned, hay || out.location);
     else if (!isUsableLocation(out.location)) delete out.location;
+    else out.location = attachEvidencedCity(out.location, hay || out.location);
   }
   if (out.phone && isPlaceholderPhone(out.phone)) delete out.phone;
   if (out.whatsapp && isPlaceholderPhone(out.whatsapp)) delete out.whatsapp;

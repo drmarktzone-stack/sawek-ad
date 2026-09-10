@@ -6,7 +6,7 @@
 import type { IngestFieldId } from "./document-ingest";
 import { detectVertical } from "./vertical";
 import { resolveOperatingNiche } from "./operating-niche";
-import { HOSPITAL_OR_DEPT_RE, extractPostalAddressFromText, cleanLocationValue, isUnknownSentinel } from "./scan-truth/patterns";
+import { HOSPITAL_OR_DEPT_RE, extractPostalAddressFromText, cleanLocationValue, isUnknownSentinel, attachEvidencedCity, evidencedCityFromText } from "./scan-truth/patterns";
 
 type Fields = Partial<Record<IngestFieldId, string>>;
 
@@ -84,10 +84,13 @@ function serviceHeadings(corpus: string): string[] {
   return out;
 }
 
-function cityFromLocation(location: string): string {
+function cityFromLocation(location: string, corpus = ""): string {
   const loc = String(location || "").trim();
-  const comma = loc.match(/,\s*([א-ת\u0600-\u06FFA-Za-z]{3,20})\s*$/);
-  return comma?.[1] || "";
+  const fromLoc = evidencedCityFromText(loc);
+  if (fromLoc) return fromLoc;
+  const comma = loc.match(/[,،]\s*([א-ת\u0600-\u06FFA-Za-z][א-ת\u0600-\u06FFA-Za-z\s-]{1,24})\s*$/);
+  if (comma?.[1] && evidencedCityFromText(comma[1])) return comma[1].trim();
+  return evidencedCityFromText(corpus);
 }
 
 /**
@@ -101,11 +104,13 @@ export function prefillCampaignFields(fields: Fields, corpus = ""): Fields {
 
   if (out.location) {
     const cleaned = cleanLocationValue(out.location) || extractPostalAddressFromText(`${out.location}\n${corpus}`);
-    if (cleaned) out.location = cleaned;
+    if (cleaned) out.location = attachEvidencedCity(cleaned, `${out.location}\n${corpus}`);
   }
   if (!has(out, "location")) {
     const fromCorpus = extractPostalAddressFromText(corpus);
-    if (fromCorpus) out.location = fromCorpus;
+    if (fromCorpus) out.location = attachEvidencedCity(fromCorpus, corpus);
+  } else if (has(out, "location")) {
+    out.location = attachEvidencedCity(String(out.location), `${out.location}\n${corpus}`);
   }
 
   const hay = `${name} ${out.category || ""} ${out.description || ""} ${corpus}`;
@@ -147,7 +152,7 @@ export function prefillCampaignFields(fields: Fields, corpus = ""): Fields {
     else if (niche === "fitness_studio") out.audience = "young";
     else if (niche === "education") out.audience = "parents";
     else if (clinic) {
-      const city = cityFromLocation(out.location || "");
+      const city = cityFromLocation(out.location || "", hay);
       const he = /[\u0590-\u05FF]/.test(hay);
       const ar = /[\u0600-\u06FF]/.test(hay);
       if (city && he && ar) out.audience = `מטופלים ב${city} · עברית וערבית`;

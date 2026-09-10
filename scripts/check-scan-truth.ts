@@ -19,6 +19,7 @@ import {
   isEcommerceChromeText,
   isPainStatement,
   isMerchUpsellText,
+  extractPostalAddressFromText,
 } from "../lib/scan-truth";
 import type { IngestedDocument } from "../lib/types";
 
@@ -196,6 +197,15 @@ if (levain.ok) {
   }
   const truth = buildBusinessTruth(applied);
   if (/free shipping/i.test(truth.offer) || /tote/i.test(truth.problem)) fail("BusinessTruth still has chrome");
+}
+
+{
+  const ogOnly =
+    "מרפאת שיניים בחיפה בשדרות הנשיא 21, השתלות שיניים ואסתטיקה דנטלית בשירות איכותי ומקצועי. השאירו פרטים אצל ד\"ר אליאס הלון או התקשרו.";
+  const extracted = extractPostalAddressFromText(ogOnly);
+  if (!/שדרות הנשיא\s*21/.test(extracted) || !/חיפה/.test(extracted) || /השתלות שיניים ואסתטיקה/.test(extracted)) {
+    fail(`OG street must keep Haifa and drop marketing (got ${JSON.stringify(extracted)})`);
+  }
 }
 
 if (failures.length) {
