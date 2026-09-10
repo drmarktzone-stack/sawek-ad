@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { ExternalLink } from "lucide-react";
 import type { CampaignPack, Locale, MarketResearch, ResearchSourceCard } from "@/lib/types";
 import { applyResearchToPack } from "@/lib/engine/research-overlay";
-import { buildResearchSkeleton } from "@/lib/engine/research-public";
+import { buildResearchSkeleton, visibleResearchSources } from "@/lib/engine/research-public";
 import { useI18n } from "@/components/i18n-provider";
 
 function factsFromIntake(pack: CampaignPack) {
@@ -173,7 +173,7 @@ export function ResearchDesk({
   }, [pack.id, pack.research?.fetched, retryNonce]);
 
   const notes = research?.notes ?? pack.cmoIdeas?.groundedNotes ?? [];
-  const sources = [...(research?.sources ?? [])].sort((a, b) => {
+  const sources = visibleResearchSources([...(research?.sources ?? [])]).sort((a, b) => {
     const rank = (id: string) => (id === "google_suggest" ? 0 : id === "youtube_suggest" ? 1 : 2);
     return rank(a.id) - rank(b.id);
   });
@@ -206,6 +206,9 @@ export function ResearchDesk({
         </p>
       ) : null}
       <p className="mt-2 text-xs font-semibold text-[#C9B896]">
+        {t("research.freeOnly")}
+      </p>
+      <p className="mt-1 text-xs font-semibold text-[#C9B896]">
         {research?.disclaimer?.[locale] || t("research.disclaimer")}
       </p>
       {onPack ? (

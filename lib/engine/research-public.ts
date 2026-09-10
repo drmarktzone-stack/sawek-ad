@@ -97,6 +97,18 @@ export function emptyResearchCard(
   };
 }
 
+/** Sources we can fetch without tokens. Token-walled libraries stay out of the desk. */
+export const FREE_RESEARCH_SOURCE_IDS: ResearchSourceId[] = ["google_suggest", "youtube_suggest"];
+
+export function visibleResearchSources<T extends { id: ResearchSourceId; examples?: unknown[]; notes?: unknown[]; status?: string }>(
+  sources: T[],
+): T[] {
+  return sources.filter((s) => {
+    if ((s.examples?.length ?? 0) > 0 || (s.notes?.length ?? 0) > 0) return true;
+    return FREE_RESEARCH_SOURCE_IDS.includes(s.id);
+  });
+}
+
 export function buildResearchSkeleton(intake: Intake): MarketResearch {
   const query = researchQuery(intake);
   const geo = researchGeo(intake);

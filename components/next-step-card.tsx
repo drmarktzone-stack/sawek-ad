@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { usePathname } from "next/navigation";
 import { useI18n } from "@/components/i18n-provider";
 import { LangLink } from "@/components/lang-link";
 import { Button } from "@/components/ui/button";
 import { NicheGateCard } from "@/components/niche-gate";
-import { CAMPAIGN_STEPS, resolveCampaignPath } from "@/lib/campaign-path";
+import { CAMPAIGN_STEPS, resolveCampaignPath, stepFromPathname } from "@/lib/campaign-path";
 import { loadCampaignTools } from "@/lib/campaign-tools";
 import { INGEST_APPLIED_EVENT } from "@/lib/storage";
 import { EMPTY_CAMPAIGN_EVENT } from "@/lib/empty-campaign";
@@ -20,6 +21,7 @@ export function NextStepCard({
   compact?: boolean;
 }) {
   const { t } = useI18n();
+  const pathname = usePathname();
   const client = useIsClient();
   const [tick, setTick] = useState(0);
 
@@ -34,6 +36,7 @@ export function NextStepCard({
   }, []);
 
   const path = useMemo(() => (client ? resolveCampaignPath(loadCampaignTools()) : null), [client, tick]);
+  const here = stepFromPathname(pathname || "");
   if (!path) return null;
 
   if (path.gated) {
@@ -44,7 +47,9 @@ export function NextStepCard({
     );
   }
 
-  const scanAction = path.current === "scan" && onScan;
+  const shown = here ? CAMPAIGN_STEPS.find((s) => s.id === here) ?? CAMPAIGN_STEPS[path.index] : CAMPAIGN_STEPS[path.index];
+  const shownIndex = CAMPAIGN_STEPS.findIndex((s) => s.id === shown.id);
+  const scanAction = shown.id === "scan" && path.current === "scan" && onScan;
 
   return (
     <section
@@ -53,11 +58,11 @@ export function NextStepCard({
         compact && "mb-3 p-3",
       )}
       data-testid="next-step"
-      data-step={path.current}
+      data-step={shown.id}
     >
       <p className="os-kicker">{t("path.here")}</p>
       <h2 className="os-title mt-1 text-2xl">
-        {path.index + 1}/{CAMPAIGN_STEPS.length} · {t(path.key)}
+        {shownIndex + 1}/{CAMPAIGN_STEPS.length} · {t(shown.key)}
       </h2>
       <p className="mt-2 text-sm text-muted">{t("path.lead")}</p>
       <div className="mt-4">

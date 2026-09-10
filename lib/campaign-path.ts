@@ -101,3 +101,14 @@ export function resolveCampaignPath(snap?: CampaignToolSnapshot): CampaignPathSt
 export function campaignStepById(id: PathStepId) {
   return CAMPAIGN_STEPS.find((s) => s.id === id) ?? CAMPAIGN_STEPS[0];
 }
+
+/** Stage chrome must match the tool URL, not the next incomplete step. */
+export function stepFromPathname(pathname: string): PathStepId | null {
+  const p = String(pathname || "").replace(/\/+$/, "") || "/";
+  if (p === "/" || p.endsWith("/#studio")) return "scan";
+  if (p.includes("/tools/core-message")) return "client";
+  if (p.includes("/tools/offer") || p.includes("/tools/hso")) return "offer";
+  if (p.includes("/task/ad")) return "trust";
+  if (p.includes("/tools/list")) return "list";
+  return null;
+}

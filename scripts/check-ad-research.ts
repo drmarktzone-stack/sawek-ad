@@ -17,6 +17,7 @@ import {
   researchLooksHonest,
   researchQuery,
   tiktokCreativeCenterUrls,
+  visibleResearchSources,
 } from "../lib/engine/ad-research";
 import { shouldGroundGenerateMode } from "../lib/engine/gemini-generate";
 import { VIRAL_DESK_JOBS } from "../lib/engine/viral-desk";
@@ -54,6 +55,13 @@ if (!/region=US/.test(cc.ads + cc.keywords + cc.hashtags)) fail("tiktok region")
 
 const skeleton = buildResearchSkeleton(olive);
 if (skeleton.sources.length !== 7) fail(`skeleton sources ${skeleton.sources.length}`);
+const visible = visibleResearchSources(skeleton.sources);
+if (visible.some((s) => s.id === "meta_ad_library" || s.id === "tiktok_creative_center" || s.id === "linkedin_ad_library")) {
+  fail("empty token-walled sources must stay hidden");
+}
+if (!visible.some((s) => s.id === "google_suggest") || !visible.some((s) => s.id === "youtube_suggest")) {
+  fail("free suggest sources must stay visible");
+}
 if (skeleton.fetched) fail("skeleton should not be fetched");
 if (!researchLooksHonest(skeleton)) fail("skeleton leaked fake metrics");
 if (FAKE.test(JSON.stringify(skeleton))) fail("skeleton FAKE");

@@ -6,6 +6,7 @@
 import type { Intake, Locale } from "./types";
 import { lockDefaultDialect, normalizeVoice, emptyVoice } from "./engine/voice";
 import { detectVertical } from "./vertical";
+import { attachScanOffer } from "./engine/offer-from-scan";
 
 const PAIRS: [string, string, string][] = [
   // he, ar, en
@@ -102,5 +103,8 @@ export function hydrateScanIntake(intake: Intake, locale: Locale): Intake {
     coreMessage: rewriteField(voice.coreMessage || next.uniqueAdvantage || next.description, locale) || next.uniqueAdvantage || next.description,
     personalVoice: rewriteField(voice.personalVoice || next.brandTone, locale) || next.brandTone,
   };
+  if (!next.offerSkipConfirmed) {
+    next = attachScanOffer(next, locale);
+  }
   return next;
 }

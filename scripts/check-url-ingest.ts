@@ -1074,6 +1074,24 @@ else {
     fail(`halloun complete-ad placeholder ${JSON.stringify(hallounAd?.headline)}`);
   }
   if (/زيتون|Olive|סאמר|أبو مخ/.test(JSON.stringify(hallounAd))) fail("halloun complete-ad leaked demo");
+  if (hallounApplied.offerSkipConfirmed) fail("halloun must not auto-skip the offer");
+  const hallounOffer = hallounApplied.offerBlueprint;
+  if (!hallounOffer?.saved) fail("halloun scan must save a package offer");
+  if (!hallounOffer?.headline?.trim()) fail("halloun offer headline empty");
+  if (hallounOffer && hallounOffer.price.trim()) fail(`halloun invented price ${hallounOffer.price}`);
+  if (hallounOffer && /₪|\d+\s*%/.test(`${hallounOffer.headline} ${hallounOffer.dreamOutcome} ${hallounOffer.price}`)) {
+    fail(`halloun offer invented a number ${JSON.stringify(hallounOffer)}`);
+  }
+  if (hallounOffer && !/השתל|אסתטיק|שתל|باقة|زراعة|تجميل/.test(`${hallounOffer.headline} ${hallounOffer.dreamOutcome}`)) {
+    fail(`halloun offer not grounded in implants/aesthetics ${hallounOffer.headline}`);
+  }
+  if (hallounOffer && !/واتساب|וואטסאפ|WhatsApp/i.test(`${hallounOffer.customerEffort} ${hallounOffer.objections} ${hallounOffer.hooks.join(" ")}`)) {
+    fail("halloun offer missing WhatsApp CTA");
+  }
+  const arOffer = ar.offerBlueprint;
+  if (!arOffer?.saved || /[\u0590-\u05FF]/.test(`${arOffer.headline} ${arOffer.dreamOutcome}`)) {
+    fail(`AR halloun offer still Hebrew ${arOffer?.headline}`);
+  }
   const imgs = halloun.images || [];
   if (imgs.some((u: string) => /\.woff2?/i.test(u))) fail(`halloun kept font asset ${JSON.stringify(imgs)}`);
 }

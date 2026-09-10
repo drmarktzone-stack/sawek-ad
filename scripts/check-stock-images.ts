@@ -12,7 +12,7 @@ import {
 import { isOfferedAsset, stockToAsset } from "../lib/media-assets";
 import { graphicPostersForIntake, posterToAsset } from "../lib/graphic-posters";
 import { demoIntake } from "../lib/demo";
-import { IMAGEN_PICKER_COUNT, imagenScenesFor } from "../lib/imagen-scenes";
+import { IMAGEN_PICKER_COUNT, imagenScenesFor, isDentalTopic } from "../lib/imagen-scenes";
 
 const failures: string[] = [];
 function fail(m: string) {
@@ -145,6 +145,33 @@ const stockAsset = stockToAsset({
 });
 if (!isOfferedAsset(stockAsset)) fail("stock asset not offered");
 if (!stockAsset.note.startsWith("offer:stock:")) fail(`stock note ${stockAsset.note}`);
+
+if (!isDentalTopic({ category: "מרפאת שיניים", description: "השתלות שיניים ואסתטיקה דנטלית", q: "חיפה" })) {
+  fail("Halloun facts must detect dental topic");
+}
+const dentalScenes = imagenScenesFor({
+  category: "מרפאת שיניים",
+  description: "השתלות שיניים · אסתטיקה דנטלית · שתלים מזרקוניה",
+  location: "שדרות הנשיא 21, חיפה",
+  locale: "he",
+  vertical: "clinic",
+});
+if (dentalScenes.length < 6) fail(`dental scenes ${dentalScenes.length}`);
+const dentalBlob = dentalScenes.map((s) => s.prompt).join("\n");
+if (!/implant|aesthetic|dental/i.test(dentalBlob)) fail("dental Imagen prompts missing implant/aesthetic grounding");
+if (/play nook|soft toys|children's play|pediatric waiting/i.test(dentalBlob)) {
+  fail("dental Imagen used pediatric toy scenes");
+}
+if (/formula|math poster|blue geometric/i.test(dentalBlob) && !/No math/.test(dentalBlob)) {
+  fail("dental Imagen asked for formula/geometric junk");
+}
+const dentalQs = topicQueriesFor({
+  category: "מרפאת שיניים",
+  description: "השתלות שיניים ואסתטיקה",
+  location: "חיפה",
+  vertical: "clinic",
+});
+if (!dentalQs.some((q) => /dental clinic/i.test(q))) fail(`dental stock queries ${dentalQs.join(" | ")}`);
 
 const posters = graphicPostersForIntake(demoIntake("he"));
 if (posters.length < 4) fail(`posters ${posters.length}`);

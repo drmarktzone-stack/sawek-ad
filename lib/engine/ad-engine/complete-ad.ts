@@ -15,6 +15,7 @@ import { runValidationGate } from "./validate";
 import { decideComposition, treatmentLabel } from "../image-composition";
 import { pickHero } from "../../media-assets";
 import { customerCopyHasLeak } from "../../copy-purity";
+import { isJunkCreativeSrc } from "../../creative-junk";
 
 const MAX_ATTEMPTS = 4;
 
@@ -120,7 +121,8 @@ export function buildCompleteAd(pack: CampaignPack, opts?: { rotate?: boolean })
   }
 
   const heroAsset = pickHero(intake.mediaAssets);
-  const imageComposition = decideComposition({ asset: heroAsset });
+  const heroOk = heroAsset?.publicSrc && !isJunkCreativeSrc(`${heroAsset.publicSrc} ${heroAsset.name} ${heroAsset.note || ""}`);
+  const imageComposition = decideComposition({ asset: heroOk ? heroAsset : undefined });
   const treat = treatmentLabel(imageComposition.mode);
   const localesWithTreatment = {
     he: { ...finalLocales.he, imageTreatment: treat.he },
@@ -137,7 +139,7 @@ export function buildCompleteAd(pack: CampaignPack, opts?: { rotate?: boolean })
     noveltyReason: diversity.noveltyReason,
     directionsExhausted: diversity.exhausted,
     imageComposition,
-    ...(heroAsset?.publicSrc
+    ...(heroOk && heroAsset?.publicSrc
       ? { visualSrc: heroAsset.publicSrc, visualPublicUrl: heroAsset.publicSrc, visualSource: "asset" as const }
       : { visualSource: "composition" as const }),
     compliance: {

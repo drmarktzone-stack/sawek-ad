@@ -18,6 +18,11 @@ import { attachResearchAndSync, orchestrateAssemble } from "./campaign-orchestra
 import { gateCustomerAd, localeScriptBleed } from "../copy-purity";
 import { lockDefaultDialect } from "./voice";
 import { charterAllowsCampaign } from "../operating-niche";
+import { detectVertical } from "../vertical";
+import { buildImagenPrompt } from "../imagen";
+import { imagenScenesFor } from "../imagen-scenes";
+import { isNoOffer } from "../no-offer";
+import { offerLineForCopy } from "./offer-builder";
 
 export const AGENT_ORDER: AgentId[] = [
   "intake",
@@ -260,6 +265,34 @@ async function fetchResearch(intake: Intake, brief?: CampaignBrief): Promise<Ret
 
 async function fetchImagenVisual(pack: CampaignPack, locale: Locale): Promise<{ src: string; publicUrl?: string } | null> {
   const loc = pack.completeAd?.locales[locale] || pack.completeAd?.locales.ar || pack.completeAd?.locales.en || pack.completeAd?.locales.he;
+  const intake = pack.intake;
+  const offerMood =
+    pack.offerBlueprint?.headline ||
+    offerLineForCopy(intake, locale) ||
+    (isNoOffer(intake.offer) ? "" : intake.offer);
+  const description = [intake.description, intake.uniqueAdvantage, intake.landingLines].filter(Boolean).join(" · ");
+  const scenes = imagenScenesFor({
+    vertical: pack.brief?.vertical || detectVertical(intake),
+    category: intake.category,
+    location: intake.location,
+    locale,
+    description,
+    offer: offerMood,
+    q: `${intake.category} ${description}`,
+  });
+  // Never send candidate labels like "Fact board" / "Black-yellow type" — those yield math posters.
+  const scene =
+    scenes[0]?.prompt ||
+    buildImagenPrompt({
+      businessName: intake.businessName,
+      category: intake.category,
+      description,
+      location: intake.location,
+      offer: offerMood,
+      headline: loc?.headline,
+      locale,
+      vertical: pack.brief?.vertical || detectVertical(intake),
+    });
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), 45_000);
   try {
@@ -267,14 +300,14 @@ async function fetchImagenVisual(pack: CampaignPack, locale: Locale): Promise<{ 
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        businessName: pack.intake.businessName,
-        category: pack.intake.category,
-        description: pack.intake.description,
-        location: pack.intake.location,
-        offer: pack.intake.offer,
+        businessName: intake.businessName,
+        category: intake.category,
+        description,
+        location: intake.location,
+        offer: offerMood,
         headline: loc?.headline,
-        scene: loc?.imagePrompt || loc?.visual || pack.brief?.coreMessage[locale] || pack.brief?.coreMessage.en,
-        vertical: pack.brief?.vertical,
+        scene,
+        vertical: pack.brief?.vertical || detectVertical(intake),
         locale,
       }),
       signal: ctrl.signal,

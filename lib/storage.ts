@@ -8,6 +8,7 @@ import { detectVertical } from "./vertical";
 import { normalizeVoice } from "./engine/voice";
 import { normalizeOfferBlueprint } from "./engine/offer-builder";
 import { interpretCampaignPaste, sanitizePastedUrl } from "./url-clean";
+import { isPublishedDemoId } from "./demo-catalog";
 
 const K = {
   locale: "omniad-locale",
@@ -38,7 +39,50 @@ function read<T>(key: string, fallback: T): T {
 
 function write(key: string, value: unknown) {
   if (!canUse()) return;
-  localStorage.setItem(key, JSON.stringify(value));
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    if (key === K.campaigns && Array.isArray(value)) {
+      try {
+        localStorage.setItem(key, JSON.stringify((value as CampaignPack[]).map(slimCampaignForStorage)));
+      } catch {
+        /* quota still exceeded — keep last good list */
+      }
+    }
+  }
+}
+
+function isEmbeddedDataUrl(src: string | undefined | null): boolean {
+  return Boolean(src && /^data:image\//i.test(src) && src.length > 400);
+}
+
+/** Drop huge data-URL stills so localStorage can keep the campaign. */
+export function slimCampaignForStorage(pack: CampaignPack): CampaignPack {
+  if (!pack || typeof pack !== "object") return pack;
+  const complete = pack.completeAd
+    ? {
+        ...pack.completeAd,
+        visualSrc: isEmbeddedDataUrl(pack.completeAd.visualSrc)
+          ? pack.completeAd.visualPublicUrl && !isEmbeddedDataUrl(pack.completeAd.visualPublicUrl)
+            ? pack.completeAd.visualPublicUrl
+            : undefined
+          : pack.completeAd.visualSrc,
+        visualPublicUrl: isEmbeddedDataUrl(pack.completeAd.visualPublicUrl)
+          ? pack.completeAd.visualSrc && !isEmbeddedDataUrl(pack.completeAd.visualSrc)
+            ? pack.completeAd.visualSrc
+            : undefined
+          : pack.completeAd.visualPublicUrl,
+      }
+    : pack.completeAd;
+  const assets = pack.intake?.mediaAssets;
+  const mediaAssets = Array.isArray(assets)
+    ? assets.map((a) => (isEmbeddedDataUrl(a.publicSrc) ? { ...a, publicSrc: undefined } : a))
+    : assets;
+  return {
+    ...pack,
+    completeAd: complete,
+    intake: pack.intake ? { ...pack.intake, mediaAssets: mediaAssets ?? pack.intake.mediaAssets } : pack.intake,
+  };
 }
 
 export function loadLocale(): Locale {
@@ -185,12 +229,33 @@ export function saveCampaigns(list: CampaignPack[]) {
 }
 
 export function upsertCampaign(pack: CampaignPack): CampaignPack[] {
+  const slim = slimCampaignForStorage(pack);
   const list = loadCampaigns();
-  const idx = list.findIndex((c) => c.id === pack.id);
-  const next = { ...pack, saved: true, updatedAt: new Date().toISOString() };
-  if (idx >= 0) list[idx] = next;
-  else if (!canSaveAnotherCampaign(clientPlan(), list.length, false)) return list;
-  else list.unshift(next);
+  const idx = list.findIndex((c) => c.id === slim.id);
+  const next = { ...slim, saved: true, updatedAt: new Date().toISOString() };
+  if (idx >= 0) {
+    list[idx] = next;
+  } else {
+    const biz = businessKey(slim.intake?.businessName || slim.name || "");
+    const sameBiz =
+      biz && biz !== "unnamed-business"
+        ? list.findIndex((c) => !c.demoMeta && businessKey(c.intake?.businessName || c.name || "") === biz)
+        : -1;
+    if (sameBiz >= 0) {
+      list[sameBiz] = next;
+    } else {
+      const userCount = list.filter((c) => !c.demoMeta && !isPublishedDemoId(c.id)).length;
+      if (!canSaveAnotherCampaign(clientPlan(), userCount, false)) {
+        const drop = list.findIndex((c) => !c.demoMeta && !isPublishedDemoId(c.id));
+        if (drop >= 0) list.splice(drop, 1);
+        else {
+          const demo = list.findIndex((c) => Boolean(c.demoMeta) || isPublishedDemoId(c.id));
+          if (demo >= 0) list.splice(demo, 1);
+        }
+      }
+      list.unshift(next);
+    }
+  }
   saveCampaigns(list);
   return list;
 }
