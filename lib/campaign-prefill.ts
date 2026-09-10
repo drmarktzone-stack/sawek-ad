@@ -71,17 +71,40 @@ const CLINIC_TAGLINE_RE = /המרכז ל[^\n.]{4,80}|المركز(?:\s+ل)?[^\n.
 const SERVICE_HEADING_RE =
   /שתל|תותב|כתר|אסתטיקה דנטלית|שחזור|השתל|implant|crown|veneer|zirconia|זירקוניה|مزرعة|تاج/;
 
+/** Published Halloun / dental phrases — only kept when the page actually contains them. */
+const PUBLISHED_DENTAL_SERVICES = [
+  "השתלות שיניים ביום אחד",
+  "השתלות שיניים ממוחשבות",
+  "השתלת שיניים למחוסרי עצם",
+  "השתלות עצם",
+  "הרמת סינוס",
+  "שתלים מזרקוניה",
+  "תותבות על גבי שתלים",
+  "כתרים על גבי שתלים",
+  "כתרים מזרקוניה",
+  "ציפוי חרסינה",
+  "שחזורים אסתטיים",
+  "אסתטיקה דנטלית",
+  "טיפולי שיניים בהרדמה כללית",
+];
+
 function serviceHeadings(corpus: string): string[] {
+  const text = String(corpus || "");
   const out: string[] = [];
-  for (const line of String(corpus || "").split(/\n+/)) {
+  const flat = text.replace(/\s+/g, " ");
+  for (const phrase of PUBLISHED_DENTAL_SERVICES) {
+    if (flat.includes(phrase) && !out.includes(phrase)) out.push(phrase);
+  }
+  const chunks = text.split(/\n+|<br\s*\/?>|·|\u00b7/i);
+  for (const line of chunks) {
     const s = stripHeadingPrefix(line.replace(/\s+/g, " ").trim());
     if (s.length < 4 || s.length > 80) continue;
     if (!SERVICE_HEADING_RE.test(s)) continue;
     if (/השאירו|התקשרו|whatsapp|לפרטים/i.test(s)) continue;
     if (!out.includes(s)) out.push(s);
-    if (out.length >= 6) break;
+    if (out.length >= 8) break;
   }
-  return out;
+  return out.slice(0, 8);
 }
 
 function cityFromLocation(location: string, corpus = ""): string {
@@ -170,8 +193,11 @@ export function prefillCampaignFields(fields: Fields, corpus = ""): Fields {
     out.biggestProblem = "unknown";
   }
 
-  if (!has(out, "landingLines") && services.length) {
-    out.landingLines = clip(services.slice(0, 5).join(" · "), 400);
+  if (services.length) {
+    const existing = String(out.landingLines || "");
+    const extra = services.filter((s) => !existing.includes(s));
+    if (!has(out, "landingLines")) out.landingLines = clip(services.slice(0, 5).join(" · "), 400);
+    else if (extra.length) out.landingLines = clip([existing, ...extra.slice(0, 4)].join(" · "), 400);
   }
 
   if (!has(out, "uniqueAdvantage") || out.uniqueAdvantage === out.description) {

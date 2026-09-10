@@ -2,7 +2,7 @@ import { readFileSync } from "fs";
 import { join } from "path";
 import { emptyIntake } from "../lib/engine/validate";
 import { demoIntake } from "../lib/demo";
-import { loadDraft, saveDraft, loadCampaigns, saveCampaigns, applyIntakeToDraft } from "../lib/storage";
+import { loadDraft, saveDraft, loadCampaigns, saveCampaigns, applyIntakeToDraft, upsertCampaign, slimCampaignForStorage } from "../lib/storage";
 import {
   markEmptyCampaign,
   wantsEmptyCampaign,
@@ -191,6 +191,32 @@ if (bodyHasFacts({})) fail("empty body should not look like facts");
 if (bodyHasFacts({ description: "", audience: "" })) fail("blank description is not facts");
 if (!bodyHasFacts({ description: "מכולת שכונתית בחיפה", audience: "neighbors" })) {
   fail("typed facts should pass bodyHasFacts");
+}
+
+const fat: CampaignPack = {
+  ...(savedPack as CampaignPack),
+  id: "halloun-live",
+  name: 'ד"ר אליאס הלון',
+  intake: {
+    ...emptyIntake(),
+    businessName: 'ד"ר אליאס הלון',
+    category: "מרפאת שיניים",
+    website: "https://dr-halloun.com/lp/",
+  },
+  completeAd: {
+    visualSrc: `data:image/png;base64,${"A".repeat(80_000)}`,
+    visualPublicUrl: `data:image/png;base64,${"B".repeat(80_000)}`,
+    visualSource: "imagen",
+  } as CampaignPack["completeAd"],
+};
+const slim = slimCampaignForStorage(fat);
+if (slim.completeAd?.visualSrc?.startsWith("data:image")) fail("slim must drop embedded visualSrc");
+if (slim.completeAd?.visualPublicUrl?.startsWith("data:image")) fail("slim must drop embedded visualPublicUrl");
+saveCampaigns([{ id: "old-user", name: "Cafe leftover", intake: { ...emptyIntake(), businessName: "Cafe leftover" } } as CampaignPack]);
+const afterUpsert = upsertCampaign(fat);
+if (!afterUpsert.some((c) => c.id === "halloun-live")) fail("Halloun campaign must persist even when the free slot is full");
+if (afterUpsert.find((c) => c.id === "halloun-live")?.completeAd?.visualSrc?.startsWith("data:image")) {
+  fail("persisted Halloun pack still embeds a data URL");
 }
 
 if (failures.length) {

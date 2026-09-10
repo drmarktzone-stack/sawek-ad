@@ -14,7 +14,7 @@ import { rsaLines } from "../lib/engine/spoken";
 import { bankForIntake, serviceFamily } from "../lib/creative-bank";
 import { PUBLISHED_DEMO_IDS } from "../lib/demo-catalog";
 import { PRIMARY_NAV, MORE_NAV } from "../components/command/nav";
-import { CAMPAIGN_STEPS, DEAD_JOURNEY_HREFS, resolveCampaignPath } from "../lib/campaign-path";
+import { CAMPAIGN_STEPS, DEAD_JOURNEY_HREFS, resolveCampaignPath, stepFromPathname } from "../lib/campaign-path";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import type { CampaignPack, Intake } from "../lib/types";
@@ -147,6 +147,10 @@ if (emptyPath.current !== "scan") fail(`empty campaign current=${emptyPath.curre
 if (CAMPAIGN_STEPS.find((s) => s.id === "client")?.href !== "/tools/core-message") {
   fail("ideal client step must open /tools/core-message, not /#studio");
 }
+if (stepFromPathname("/tools/core-message") !== "client") fail("core-message URL must be ideal-client stage");
+if (stepFromPathname("/ar/tools/offer") !== "offer") fail("offer URL must be offer stage");
+if (stepFromPathname("/task/ad") !== "trust") fail("task/ad URL must be trust stage");
+if (stepFromPathname("/") !== "scan") fail("home URL must be scan stage");
 
 const root = process.cwd();
 const css = readFileSync(join(root, "app/globals.css"), "utf8");

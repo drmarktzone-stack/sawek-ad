@@ -66,35 +66,42 @@ export function buildImagenPrompt(facts: ImagenFacts): string {
   const name = asText(facts.businessName, 80) || "a local business";
   const category = asText(facts.category, 80) || "local service";
   const headline = asText(facts.headline, 140);
+  const description = asText(facts.description, 180);
+  const location = asText(facts.location, 80);
+  const offer = asText(facts.offer, 80);
   const locale = localeOf(facts.locale);
   const region =
     locale === "he" ? "Israel, natural Mediterranean light"
     : locale === "ar" ? "Levant / Arabic-speaking street, warm daylight"
     : "clean contemporary setting, natural light";
-  const scene = asText(facts.scene, 500);
+  const scene = asText(facts.scene, 700);
+  const dental = /שיניים|أسنان|dental|dentist|implant|השתל|אסתטיקה|zirconia|שתל|زراعة/.test(
+    `${category} ${description} ${offer} ${scene}`,
+  );
+  const ground = [
+    `Business: ${name}. Category: ${category}.`,
+    location ? `Location (mood only, do not typeset): ${location}.` : "",
+    description ? `On-topic scan facts (do not typeset): ${description}.` : "",
+    offer && !/^(no_offer|unknown)$/i.test(offer) ? `Package mood only, never paint numbers: ${offer}.` : "",
+    dental
+      ? "Subject must be a dental clinic: implants, aesthetics, empty consult room, Mediterranean facade, or porcelain still-life. No pediatric toys. No math, formula, or blue geometric posters."
+      : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
   const mood = headline ? `Campaign mood (do not typeset or paint this text): ${headline}.` : "";
-  if (scene) {
-    return [
-      "Tasteful cinematic marketing photography still for an advertisement.",
-      scene,
-      `Category: ${category}. Setting: ${region}.`,
-      "Style: cinematic product-or-place mood, shallow depth, realistic materials, no collage.",
-      "No text, letters, numbers, logos, watermarks, UI chrome, or captions in the image.",
-      "Do NOT invent prices, discounts, coupons, medical claims, before/after comparisons, star ratings, or fake reviews.",
-      "Do NOT depict a photoreal identifiable doctor, patient, or any recognizable person. Empty place, product, facade, or abstract wellness atmosphere only.",
-      "No clinical procedure, no body close-up, no injection, no surgery.",
-    ].join(" ");
-  }
-  return [
-    "Tasteful marketing photography still for an advertisement.",
-    `Business: ${name}. Category: ${category}. Setting: ${region}.`,
-    mood,
+  const guard = [
     "Style: cinematic product-or-place mood, shallow depth, realistic materials, no collage.",
     "No text, letters, numbers, logos, watermarks, UI chrome, or captions in the image.",
     "Do NOT invent prices, discounts, coupons, medical claims, before/after comparisons, star ratings, or fake reviews.",
     "Do NOT depict a photoreal identifiable doctor, patient, or any recognizable person. Empty place, product, facade, or abstract wellness atmosphere only.",
     "No clinical procedure, no body close-up, no injection, no surgery.",
+    "No math formulas, chalkboard equations, or generic blue geometric graphics.",
   ].join(" ");
+  if (scene) {
+    return ["Tasteful cinematic marketing photography still for an advertisement.", scene, ground, `Setting: ${region}.`, guard].join(" ");
+  }
+  return ["Tasteful marketing photography still for an advertisement.", ground, mood, `Setting: ${region}.`, guard].join(" ");
 }
 
 function jsonBlob(json: unknown): string {
@@ -555,15 +562,15 @@ async function runImagenAttempt(facts: ImagenFacts, prompt: string): Promise<Ima
 }
 
 function attachStore(hit: ImagenOk): ImagenOk {
-  try {
-    // Keep an in-process GET /api/imagen/:id for this instance, but persist a
-    // data URL so packs/pickers survive Cloud Run restarts (memory store does not).
-    storeImagenImage(hit.imageBase64, hit.mime, hit.model);
-  } catch {
-    /* in-memory store is optional */
-  }
   const mime = hit.mime.startsWith("image/") ? hit.mime : "image/png";
-  return { ...hit, publicUrl: `data:${mime};base64,${hit.imageBase64}` };
+  try {
+    // Prefer a short /api/imagen/:id so campaign JSON fits in localStorage.
+    // Data URLs blow the quota and the generated campaign never persists.
+    const stored = storeImagenImage(hit.imageBase64, hit.mime, hit.model);
+    return { ...hit, mime, publicUrl: stored.publicUrl };
+  } catch {
+    return { ...hit, mime, publicUrl: `data:${mime};base64,${hit.imageBase64}` };
+  }
 }
 
 function promptList(facts: ImagenFacts): string[] {

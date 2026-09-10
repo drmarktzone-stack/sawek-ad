@@ -1,5 +1,6 @@
 import type { Vertical } from "./vertical";
 import { detectVertical, foodFamily, type FoodFamily } from "./vertical";
+import { isDentalTopic } from "./imagen-scenes";
 import { runtimeEnv } from "./runtime-env";
 
 export type StockSource = "openverse" | "wikimedia" | "google" | "vertex" | "curated";
@@ -65,6 +66,7 @@ const TOPIC_QUERIES: Record<Vertical, string[]> = {
     "children's doctor office interior",
     "family clinic",
     "warm medical clinic",
+    "dental clinic interior",
     "kids healthcare waiting room",
     "Mediterranean clinic facade",
     "clinic reception desk",
@@ -312,8 +314,17 @@ export function topicQueriesFor(input: StockSearchInput): string[] {
   const long = vertical === "restaurant" ? RESTAURANT_QUERIES[fam] : TOPIC_QUERIES[vertical];
   const facts = `${input.q ?? ""} ${input.category ?? ""} ${input.description ?? ""} ${input.offer ?? ""}`;
   const extras = (input.extraQueries ?? []).map((q) => q.trim()).filter(Boolean);
+  const dentalQs = isDentalTopic({
+    category: input.category,
+    description: input.description,
+    offer: input.offer,
+    q: input.q,
+  })
+    ? ["dental clinic", "dental clinic interior", "dental reception", "implant clinic interior"]
+    : [];
   const out: string[] = [
     ...extras,
+    ...dentalQs,
     ...short,
     ...lexiconQueriesFrom(facts),
     ...long,

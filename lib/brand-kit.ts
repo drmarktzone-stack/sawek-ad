@@ -1,6 +1,7 @@
 import type { ClientBrandKit, Intake, Locale, MediaAssetMeta } from "./types";
 import { stylesForVertical, CLINIC_POSTER_PALETTE, VERDE_CLEAR_PALETTE, isNeonPosterHex } from "./design-styles";
 import { detectVertical } from "./vertical";
+import { isJunkCreativeSrc } from "./creative-junk";
 
 export function emptyBrandKit(): ClientBrandKit {
   return { colors: [], source: "none" };
@@ -233,17 +234,22 @@ export function brandNote(kit: ClientBrandKit | undefined, locale: Locale): stri
 }
 
 export function pickHeroAsset(metas: MediaAssetMeta[] | undefined): MediaAssetMeta | undefined {
-  const list = (metas ?? []).filter((m) => m.kind === "image");
+  const list = (metas ?? []).filter((m) => {
+    if (m.kind !== "image") return false;
+    const blob = `${m.publicSrc || ""} ${m.name} ${m.label} ${m.note}`;
+    if (isJunkCreativeSrc(blob)) return false;
+    if (m.label === "logo") return false;
+    return true;
+  });
   if (!list.length) return undefined;
   const scored = list.map((m) => {
     const blob = `${m.publicSrc || ""} ${m.name} ${m.label} ${m.note}`;
     let s = 5;
-    if (m.label === "logo") s = 1;
-    if (/hero|og|cover|banner|gallery|product|exterior/i.test(blob)) s += 8;
+    if (/hero|og|cover|banner|gallery|product|exterior|clinic|חזית|dental|implant/i.test(blob)) s += 8;
     if (m.publicSrc) s += 2;
-    if (/logo|favicon|icon/i.test(blob)) s -= 4;
+    if (/logo|favicon|icon/i.test(blob)) s -= 8;
     return { m, s };
   });
   scored.sort((a, b) => b.s - a.s);
-  return scored[0]?.m;
+  return scored[0]?.s && scored[0].s > 0 ? scored[0].m : undefined;
 }

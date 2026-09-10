@@ -20,6 +20,30 @@ function regionFor(locale: Locale): string {
   return "clean contemporary setting, natural light";
 }
 
+export function isDentalTopic(input: { category?: unknown; description?: unknown; offer?: unknown; q?: unknown }): boolean {
+  const hay = `${input.category ?? ""} ${input.description ?? ""} ${input.offer ?? ""} ${input.q ?? ""}`;
+  return /שיניים|أسنان|dental|dentist|implant|השתל|אסתטיקה דנטל|zirconia|זירקוניה|שתל|تجميل الأسنان|زراعة/.test(hay);
+}
+
+/** Empty dental clinic stills — implants / aesthetics atmosphere. No pediatric toys, no math posters. */
+function dentalClinicScenes(region: string): ImagenScene[] {
+  const dental =
+    "This advertisement is for a dental clinic offering implants and dental aesthetics. Empty place or still-life only. No math, no formula posters, no blue geometric abstracts, no pediatric toys, no teeth close-ups, no procedures.";
+  const rows: [string, string, string][] = [
+    ["consult", "Consult room", `Cinematic still of an empty private dental consult room. Cream plaster, oak chair, ceramic tray unused, Mediterranean window light. No people. ${region}. ${GUARD} ${dental}`],
+    ["facade-dental", "Clinic facade", `Empty Mediterranean dental-clinic facade, cream stone and plaster, olive tree, quiet street, afternoon sun, no signage text. ${region}. ${GUARD} ${dental}`],
+    ["reception-dental", "Warm reception", `Warm wood reception of a dental clinic, linen lamp, empty chairs, cream wall, no computer text, no logos. ${region}. ${GUARD} ${dental}`],
+    ["porcelain", "Porcelain still", `Still life: white porcelain and ceramic on linen, soft daylight, dental-aesthetics atmosphere, no teeth, no instruments in use. ${region}. ${GUARD} ${dental}`],
+    ["corridor-dental", "Sunlit corridor", `Empty clinic corridor, cream plaster, pale stone tiles, a window flooding warm light, no people, no posters with text or formulas. ${region}. ${GUARD} ${dental}`],
+    ["waiting-adult", "Quiet waiting", `Empty adult waiting room, wood chairs, plant, cream wall, Mediterranean light, no toys, no magazines with readable covers. ${region}. ${GUARD} ${dental}`],
+    ["entry-dental", "Olive entry", `Clinic entry with potted olive, Mediterranean tile, open door spilling warm interior light, no text on the door. ${region}. ${GUARD} ${dental}`],
+    ["wellness-dental", "Wellness light", `Abstract wellness atmosphere: cream and soft sand bokeh, linen texture, sun haze, shallow depth. Not blue geometric, not a formula board. ${region}. ${GUARD} ${dental}`],
+    ["ceramic-desk", "Ceramic desk", `Sunlit wood consult desk, ceramic cup, closed folder without writing, cream bokeh. Dental clinic mood, no people. ${region}. ${GUARD} ${dental}`],
+    ["courtyard-dental", "Olive courtyard", `Quiet olive courtyard beside a small clinic wing, gravel, terracotta, empty bench, dappled shade. ${region}. ${GUARD} ${dental}`],
+  ];
+  return rows.map(([id, title, prompt]) => ({ id, title, prompt }));
+}
+
 function clinicScenes(region: string): ImagenScene[] {
   const rows: [string, string, string][] = [
     ["waiting-sun", "Sunlit waiting room", `Cinematic still of a sunlit pediatric waiting room empty of people. Cream plaster walls, wood chairs, large window with Mediterranean light shaft, oak floor, a few soft toys on a low shelf. ${region}. ${GUARD}`],
@@ -189,8 +213,15 @@ export function imagenScenesFor(input: {
     uniqueAdvantage: description,
     offer,
   });
+  const dental = isDentalTopic({
+    category,
+    description,
+    offer,
+    q: input.q,
+  });
   const all =
-    v === "clinic" ? clinicScenes(region)
+    v === "clinic" && dental ? dentalClinicScenes(region)
+    : v === "clinic" ? clinicScenes(region)
     : v === "restaurant" ? restaurantScenes(region, cuisine)
     : v === "pool" ? poolScenes(region)
     : v === "retail" ? retailScenes(region)

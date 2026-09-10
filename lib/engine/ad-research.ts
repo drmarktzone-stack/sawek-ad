@@ -41,6 +41,8 @@ export {
   researchGeo,
   researchQuery,
   tiktokCreativeCenterUrls,
+  visibleResearchSources,
+  FREE_RESEARCH_SOURCE_IDS,
 } from "./research-public";
 
 export type MarketResearchControls = {

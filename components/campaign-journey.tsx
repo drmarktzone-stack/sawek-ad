@@ -6,7 +6,7 @@ import { useI18n } from "@/components/i18n-provider";
 import { LangLink } from "@/components/lang-link";
 import { useIsClient } from "@/lib/use-is-client";
 import { loadCampaignTools } from "@/lib/campaign-tools";
-import { CAMPAIGN_STEPS, resolveCampaignPath } from "@/lib/campaign-path";
+import { CAMPAIGN_STEPS, resolveCampaignPath, stepFromPathname } from "@/lib/campaign-path";
 import { INGEST_APPLIED_EVENT } from "@/lib/storage";
 import { EMPTY_CAMPAIGN_EVENT } from "@/lib/empty-campaign";
 import { cn } from "@/lib/utils";
@@ -28,6 +28,7 @@ export function CampaignJourney({ compact = false }: { compact?: boolean }) {
   }, [client]);
   const snap = useMemo(() => (client ? loadCampaignTools() : null), [client, pathname, tick]);
   const path = useMemo(() => (snap ? resolveCampaignPath(snap) : null), [snap]);
+  const here = stepFromPathname(pathname || "");
   const locked = Boolean(path?.done.client);
 
   return (
@@ -53,7 +54,7 @@ export function CampaignJourney({ compact = false }: { compact?: boolean }) {
       <ol className="flex min-w-0 items-center gap-1 overflow-x-auto pb-0.5">
         {CAMPAIGN_STEPS.map((step, i) => {
           const done = Boolean(path?.done[step.id]);
-          const current = path?.current === step.id;
+          const current = here ? here === step.id : path?.current === step.id;
           return (
             <li key={step.id} className="flex shrink-0 items-center gap-1">
               {i > 0 ? <span className="px-0.5 text-muted" aria-hidden>→</span> : null}

@@ -6,6 +6,7 @@
 import type { Intake, Locale } from "./types";
 import { lockDefaultDialect, normalizeVoice, emptyVoice } from "./engine/voice";
 import { detectVertical } from "./vertical";
+import { attachScanOffer } from "./engine/offer-from-scan";
 
 const PAIRS: [string, string, string][] = [
   // he, ar, en
@@ -16,7 +17,15 @@ const PAIRS: [string, string, string][] = [
   ["Dentist", "عيادة أسنان", "Dentist"],
   ["MedicalClinic", "عيادة طبية", "Medical clinic"],
   ["רופא שיניים", "طبيب أسنان", "Dentist"],
+  ["השתלות שיניים ממוחשבות", "زراعة الأسنان المحوسبة", "Computer-guided implants"],
+  ["השתלות שיניים ביום אחד", "زراعة الأسنان في يوم واحد", "Same-day dental implants"],
+  ["השתלת שיניים למחוסרי עצם", "زراعة أسنان لمن يعانون نقص العظم", "Implants for bone-deficient patients"],
+  ["טיפולי שיניים בהרדמה כללית", "علاجات أسنان تحت تخدير عام", "Dental treatment under general anesthesia"],
   ["השתלות שיניים", "زراعة الأسنان", "Dental implants"],
+  ["השתלות עצם", "ترقيع عظمي", "Bone grafts"],
+  ["הרמת סינוס", "رفع الجيب الأنفي", "Sinus lift"],
+  ["ביום אחד", "في يوم واحد", "same day"],
+  ["ממוחשבות", "محوسبة", "computer-guided"],
   ["אסתטיקה דנטלית", "تجميل الأسنان", "Dental aesthetics"],
   ["המרכז לאסתטיקה והשתלות שיניים", "المركز لتجميل وزراعة الأسنان", "Center for dental aesthetics and implants"],
   ["שדרות הנשיא", "شارع الرئيس", "Sderot HaNasi"],
@@ -102,5 +111,8 @@ export function hydrateScanIntake(intake: Intake, locale: Locale): Intake {
     coreMessage: rewriteField(voice.coreMessage || next.uniqueAdvantage || next.description, locale) || next.uniqueAdvantage || next.description,
     personalVoice: rewriteField(voice.personalVoice || next.brandTone, locale) || next.brandTone,
   };
+  if (!next.offerSkipConfirmed) {
+    next = attachScanOffer(next, locale);
+  }
   return next;
 }

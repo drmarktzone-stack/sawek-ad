@@ -18,6 +18,7 @@ import { emptyIntake } from "./engine/validate";
 import { emptyVoice, normalizeVoice } from "./engine/voice";
 import { detectVertical } from "./vertical";
 import { isNoOffer } from "./no-offer";
+import { attachScanOffer } from "./engine/offer-from-scan";
 import { isPlaceholderPhone } from "./campaign-prefill";
 import { uid } from "./utils";
 import {
@@ -1659,7 +1660,7 @@ export function applyIngestReview(
     else next.type = "business";
     if (isNoOffer(next.offer) || !String(next.offer || "").trim()) {
       next.offer = "no_offer";
-      next.offerSkipConfirmed = true;
+      next.offerCustom = false;
     }
     const voice = normalizeVoice(next.voice);
     next.voice = {
@@ -1681,8 +1682,11 @@ export function applyIngestReview(
     ) {
       next.offer = "no_offer";
       next.offerCustom = false;
-      next.offerSkipConfirmed = true;
     }
+    const scanLocale = /[\u0600-\u06FF]/.test(`${next.category} ${next.description}`) && !/[\u0590-\u05FF]/.test(next.businessName)
+      ? "ar"
+      : "he";
+    next = attachScanOffer(next, scanLocale);
   }
   return next;
 }

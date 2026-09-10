@@ -426,6 +426,11 @@ export const copy: Dict = {
     ar: "بس اللي عام. إذا المصدر محجوب أو محدود — منقول.",
     en: "Public surfaces only. Blocked or rate-limited sources are labeled honestly.",
   },
+  "research.freeOnly": {
+    he: "Google ו-YouTube suggest חינמיים. Meta / TikTok / LinkedIn בלי טוקן מוסתרים — לא ממציאים מודעות.",
+    ar: "اقتراحات Google وYouTube مجانية. Meta / TikTok / LinkedIn بلا توكن مخفيين — مش منختلق إعلانات.",
+    en: "Google and YouTube suggest stay free. Token-walled Meta / TikTok / LinkedIn are hidden — we will not invent ads.",
+  },
   "research.query": { he: "מונח", ar: "المصطلح", en: "Query" },
   "research.geo": { he: "אזור", ar: "المنطقة", en: "Region" },
   "research.asOf": { he: "נכון ל־", ar: "حتى تاريخ", en: "As of" },

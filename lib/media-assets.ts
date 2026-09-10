@@ -1,6 +1,9 @@
 import type { Locale, MediaAssetLabel, MediaAssetMeta } from "./types";
 import { uid } from "./utils";
 import { pickHeroAsset } from "./brand-kit";
+import { isJunkCreativeSrc } from "./creative-junk";
+
+export { isJunkCreativeSrc } from "./creative-junk";
 
 export const IMAGE_MAX_BYTES = 8 * 1024 * 1024;
 export const VIDEO_MAX_BYTES = 40 * 1024 * 1024;
@@ -153,8 +156,6 @@ export function pickLogo(metas: MediaAssetMeta[] | undefined): MediaAssetMeta | 
   );
 }
 
-const FONT_OR_JUNK_SRC =
-  /\.woff2?(?:\?|$)|\.ttf(?:\?|$)|\.eot(?:\?|$)|\.otf(?:\?|$)|fonts?\/|pixel|1x1|spacer|blank\.gif/i;
 
 function mimeFromUrl(url: string): string {
   const q = url.split("?")[0]?.toLowerCase() ?? "";
@@ -178,7 +179,7 @@ export function assetsFromPublicUrls(urls: string[], title?: string, cap = 16): 
   const seen: string[] = [];
   for (const src of urls) {
     if (!src || !/^https?:\/\//i.test(src) || seen.includes(src)) continue;
-    if (FONT_OR_JUNK_SRC.test(src)) continue;
+    if (isJunkCreativeSrc(src)) continue;
     seen.push(src);
     extra.push({
       id: uid("asset"),

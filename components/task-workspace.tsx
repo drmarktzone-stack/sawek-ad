@@ -10,7 +10,7 @@ import { CampaignAdVisual } from "@/components/ad-mockup";
 import { Button } from "@/components/ui/button";
 import { LangLink } from "@/components/lang-link";
 import { useI18n } from "@/components/i18n-provider";
-import { loadDraft, INGEST_APPLIED_EVENT, saveDraft } from "@/lib/storage";
+import { loadDraft, INGEST_APPLIED_EVENT, saveDraft, upsertCampaign } from "@/lib/storage";
 import { loadCampaignTools } from "@/lib/campaign-tools";
 import { charterAllowsCampaign } from "@/lib/operating-niche";
 import { assemblePack, overlayPackAgency } from "@/lib/engine/run";
@@ -94,12 +94,15 @@ export function TaskWorkspace() {
         },
         ...(pack?.id ? { id: pack.id } : {}),
       });
-      const next = await overlayPackAgency({
+      const staged = {
         ...assembled,
         offerBlueprint: locked.offerBlueprint ?? pack?.offerBlueprint,
         hsoStudio: pack?.hsoStudio ?? draft.hsoStudio,
-      }, { locale });
-      void syncCampaign(next);
+      };
+      upsertCampaign(staged);
+      saveDraft({ intake: locked, step: 4, phase: "agents", packId: staged.id, hsoStudio: staged.hsoStudio });
+      const next = await overlayPackAgency(staged, { locale });
+      await syncCampaign(next);
       saveDraft({ intake: locked, step: 4, phase: "agents", packId: next.id, hsoStudio: next.hsoStudio });
       setIntake(locked);
       setPack(next);
