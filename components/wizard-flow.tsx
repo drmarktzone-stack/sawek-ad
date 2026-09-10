@@ -30,6 +30,7 @@ import { MAX_COMPETITORS } from "@/lib/factory-formats";
 import { AREA_LABEL } from "@/lib/i18n";
 import { markEmptyCampaign, wantsEmptyCampaign, clearEmptyCampaign, explicitDemoInUrl, demoParamFromUrl, applyEmptyCampaignHydrate, EMPTY_CAMPAIGN_EVENT, releaseEmptyIfTypedName } from "@/lib/empty-campaign";
 import { stripDemoParamsPreserveLang, withLang } from "@/lib/locale-url";
+import { interpretCampaignPaste, sanitizePastedUrl } from "@/lib/url-clean";
 import {
   ADVANTAGE_CHIPS,
   CHANNEL_CHIPS,
@@ -755,7 +756,24 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
                 <Input
                   value={intake.businessName}
                   placeholder={t("biz.namePh")}
-                  onChange={(e) => patch({ businessName: e.target.value })}
+                  onPaste={(e) => {
+                    const text = e.clipboardData.getData("text");
+                    const parsed = interpretCampaignPaste(text);
+                    if (parsed.website || parsed.name !== text.trim()) {
+                      e.preventDefault();
+                      patch({
+                        businessName: parsed.name,
+                        ...(parsed.website ? { website: parsed.website } : {}),
+                      });
+                    }
+                  }}
+                  onChange={(e) => {
+                    const parsed = interpretCampaignPaste(e.target.value);
+                    patch({
+                      businessName: parsed.website ? parsed.name : e.target.value,
+                      ...(parsed.website ? { website: parsed.website } : {}),
+                    });
+                  }}
                 />
               </Field>
               <Field
@@ -950,7 +968,11 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
                 <Input
                   value={intake.website}
                   placeholder="https://"
-                  onChange={(e) => patch({ website: e.target.value })}
+                  dir="ltr"
+                  onChange={(e) => {
+                    const clean = sanitizePastedUrl(e.target.value);
+                    patch({ website: clean || e.target.value });
+                  }}
                 />
               </Field>
               <Field label={t("biz.whatsapp")} filled={Boolean((intake.whatsapp ?? "").trim())}>

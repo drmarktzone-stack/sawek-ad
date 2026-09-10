@@ -136,7 +136,28 @@ export function sanitizePastedUrl(raw: string): string {
 export function looksLikeDirtyUrlPaste(raw: string): boolean {
   const s = String(raw ?? "");
   if (!s.trim()) return false;
+  BRAND_LEAK_RE.lastIndex = 0;
   if (BRAND_LEAK_RE.test(s)) return true;
   if (/\s/.test(s.trim()) && /https?:\/\//i.test(s)) return true;
   return /https?:\/\/\S*[\u0600-\u06FF\u0590-\u05FF]/.test(s);
+}
+
+/** True when the string is only app chrome (نظام تسويق هادي), not a business name. */
+export function isBrandChromeText(raw: string): boolean {
+  const s = String(raw ?? "").trim();
+  if (!s) return false;
+  const stripped = stripBrandLeak(s);
+  if (!stripped) return true;
+  BRAND_LEAK_RE.lastIndex = 0;
+  return BRAND_LEAK_RE.test(s) && stripped.replace(/https?:\/\/\S+/gi, "").trim().length < 3;
+}
+
+/** Dirty paste in any truth field: pull the URL, never keep the kicker as the business name. */
+export function interpretCampaignPaste(raw: string): { website: string; name: string } {
+  const website = sanitizePastedUrl(raw);
+  let name = stripBrandLeak(raw);
+  if (website) name = name.split(website).join(" ").trim();
+  name = name.replace(/^https?:\/\/\S+/i, "").trim();
+  if (isBrandChromeText(name) || !name) name = "";
+  return { website, name };
 }

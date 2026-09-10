@@ -314,7 +314,8 @@ export function UrlIngest() {
               value={value}
               onChange={(e) => {
                 const next = e.target.value;
-                setValue(next);
+                const clean = sanitizePastedUrl(next);
+                setValue(clean || next);
               }}
               onPaste={(e) => {
                 const text = e.clipboardData.getData("text");
