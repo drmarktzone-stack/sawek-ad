@@ -37,6 +37,20 @@ function read<T>(key: string, fallback: T): T {
   }
 }
 
+/** Keep diagnosis + agentStatus even when quota cannot hold agency/research stills. */
+export function diagnosisDraftPack(pack: CampaignPack): CampaignPack {
+  const slim = slimCampaignForStorage(pack);
+  return {
+    ...slim,
+    variants: (slim.variants ?? []).slice(0, 8),
+    agency: undefined,
+    research: undefined,
+    completeAd: undefined,
+    lab: undefined,
+    pastCampaignAudit: undefined,
+  };
+}
+
 function write(key: string, value: unknown) {
   if (!canUse()) return;
   try {
@@ -47,6 +61,14 @@ function write(key: string, value: unknown) {
         localStorage.setItem(key, JSON.stringify((value as CampaignPack[]).map(slimCampaignForStorage)));
       } catch {
         /* quota still exceeded — keep last good list */
+      }
+    }
+    if (key === K.draft && value && typeof value === "object") {
+      try {
+        const d = value as DraftState;
+        localStorage.setItem(key, JSON.stringify({ ...d, pack: d.pack ? diagnosisDraftPack(d.pack) : undefined }));
+      } catch {
+        /* quota still exceeded — keep last good draft */
       }
     }
   }
@@ -135,11 +157,21 @@ export interface DraftState {
   step: 1 | 2 | 3 | 4;
   phase?: WizardPhase;
   packId?: string;
+  /** Full in-flight pack so remount never drops diagnosis after a scan. */
+  pack?: CampaignPack;
   agentStatus?: Record<AgentId, AgentStatus>;
   pauseForReview?: boolean;
   coach?: CoachReport;
   hsoStudio?: HsoStudioState;
   viral?: ViralDeskState;
+}
+
+function parseDraftPack(raw: unknown): CampaignPack | undefined {
+  if (!raw || typeof raw !== "object") return undefined;
+  const p = raw as CampaignPack;
+  if (typeof p.id !== "string" || !p.id.trim()) return undefined;
+  if (!p.diagnosis || typeof p.diagnosis !== "object") return undefined;
+  return p;
 }
 
 export function loadDraft(): DraftState {
@@ -179,8 +211,9 @@ export function loadDraft(): DraftState {
     },
     phase,
     packId: typeof d.packId === "string" ? d.packId : undefined,
+    pack: parseDraftPack(d.pack),
     agentStatus: parseAgentStatus(d.agentStatus),
-    pauseForReview: d.pauseForReview === true,
+    pauseForReview: false,
     coach: d.coach && typeof d.coach === "object" ? d.coach : undefined,
     hsoStudio:
       d.hsoStudio && typeof d.hsoStudio === "object" && Array.isArray(d.hsoStudio.variants)
@@ -205,7 +238,15 @@ function emptySessionActive(): boolean {
 
 export function saveDraft(draft: DraftState) {
   const intake = scrubIntakeChrome(draft.intake ?? emptyIntake());
-  const next = { ...draft, intake };
+  const pack = draft.pack ? slimCampaignForStorage(draft.pack) : undefined;
+  const next: DraftState = {
+    ...draft,
+    intake,
+    pack,
+    packId: pack?.id ?? draft.packId,
+    agentStatus: pack?.agentStatus ?? draft.agentStatus,
+    pauseForReview: false,
+  };
   if (emptySessionActive()) {
     const name = String(intake.businessName ?? "").trim();
     const clinic = intakeIsClinicDemo(intake) || isBlockedEmptySessionName(name);
@@ -233,7 +274,7 @@ export function applyIntakeToDraft(intake: Intake, opts?: { resetWizard?: boolea
   const clean = scrubIntakeChrome(intake);
   const coach = coachIntake(clean);
   const next: DraftState = opts?.resetWizard
-    ? { intake: clean, step: 2, phase: "wizard", coach, packId: undefined, hsoStudio: undefined, viral: undefined }
+    ? { intake: clean, step: 2, phase: "wizard", coach, packId: undefined, pack: undefined, hsoStudio: undefined, viral: undefined }
     : { ...d, intake: clean, coach };
   saveDraft(next);
   if (opts?.resetWizard) isolateStudioToIntake(clean);

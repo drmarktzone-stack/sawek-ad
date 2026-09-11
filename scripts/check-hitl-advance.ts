@@ -14,11 +14,17 @@ import { generateOptimizer } from "../lib/engine/optimizer";
 import {
   hitlCtaDisabled,
   hitlCtaKey,
+  hitlPauseEnabled,
   nextHitlGate,
+  packHasDiagnosis,
+  reconcileAgentStatus,
   shouldResumeAgents,
   simulateAutoHitlGates,
 } from "../lib/engine/hitl";
+import { autoAdvanceHitlToEnd, ensureDiagnosisFromIntake } from "../lib/engine/hitl-advance";
 import { fillIntakeFromScanTruth } from "../lib/campaign-prefill";
+import { loadDraft, saveDraft } from "../lib/storage";
+import { packBelongsToDraft } from "../lib/campaign-tools";
 import { t } from "../lib/i18n";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -149,7 +155,32 @@ if (nextHitlGate(finished.agentStatus, finished) !== "complete") {
 }
 
 if (nextHitlGate(idleStatus(), null) !== "diagnostic") {
-  fail("missing pack still reports a gate so UI can show pack-missing error instead of no-op");
+  fail("missing pack still reports diagnostic so auto-rebuild can run instead of a no-op");
+}
+
+const raceHollow = packOf(intake, {
+  agentStatus: {
+    intake: "complete",
+    diagnostic: "approved",
+    strategic: "running",
+    media: "blocked",
+    optimizer: "blocked",
+  },
+});
+raceHollow.diagnosis = { summary: { he: "", ar: "", en: "" }, hypotheses: [], approved: false };
+if (packHasDiagnosis(raceHollow)) fail("empty hypotheses must not count as a diagnosis");
+if (nextHitlGate(raceHollow.agentStatus, raceHollow) !== "diagnostic") {
+  fail("running strategic + missing diagnosis must gate diagnostic rebuild, not stay parked");
+}
+const raced = reconcileAgentStatus(raceHollow.agentStatus, raceHollow);
+if (raced.strategic === "running") fail("reconcile must not keep strategic يعمل when diagnosis is missing");
+if (raced.diagnostic !== "needs_approval") fail("reconcile missing diagnosis must show diagnostic, not approved+running");
+
+if (hitlPauseEnabled({ search: "", storage: { getItem: () => null } })) {
+  fail("pause-for-review must default OFF");
+}
+if (!hitlPauseEnabled({ search: "?hitl=review", storage: { getItem: () => null } })) {
+  fail("advanced ?hitl=review may enable pause");
 }
 
 const seen: string[] = [];
@@ -221,7 +252,6 @@ if (t("ar", "cta.approveAndFinish") !== "اعتمد وكمل للآخر") {
 if (t("ar", "cta.finishToEnd") !== "يلا نكمّل للآخر") {
   fail(`finishToEnd ar drifted: ${t("ar", "cta.finishToEnd")}`);
 }
-if (t("he", "agents.packMissing").length < 8) fail("agents.packMissing missing");
 if (t("he", "agents.hitlError").length < 8) fail("agents.hitlError missing");
 if (t("he", "agents.advancing").length < 4) fail("agents.advancing missing");
 if (t("ar", "agents.pauseReview").length < 4) fail("agents.pauseReview ar missing");
@@ -245,8 +275,27 @@ if (/if\s*\(\s*!pack\s*\)\s*return\s*;/.test(wizardSrc)) fail("advanceHitl must 
 if (!wizardSrc.includes("hitl-actions")) fail("HITL CTAs must use hitl-actions so the mobile dock cannot steal taps");
 if (!wizardSrc.includes('data-testid="hitl-approve"')) fail("hitl-approve testid missing");
 if (!wizardSrc.includes("runFullPipeline")) fail("default startBuild must auto-run the full pipeline");
+if (!wizardSrc.includes("pauseForReview")) fail("HITL pause-for-review must remain in source for advanced/dev");
 if (!wizardSrc.includes("restoreLivePack")) fail("remount must restore pack from draft/campaign store");
-if (!wizardSrc.includes("pauseForReview")) fail("HITL pause-for-review must be an optional toggle");
+if (/setHitlError\s*\(\s*t\(\s*"agents\.packMissing"/.test(wizardSrc)) {
+  fail("DEAD-END: advanceHitl/beginAgents must never setHitlError(packMissing)");
+}
+if (wizardSrc.includes('t("agents.packMissing")')) {
+  fail("packMissing i18n must not be customer-facing in wizard-flow (logs only)");
+}
+if (!wizardSrc.includes("rebuildFromIntakeAndFinish")) {
+  fail("null livePack must rebuild via buildDiagnosisPack + autoAdvanceHitlToEnd");
+}
+if (!wizardSrc.includes("buildDiagnosisPack")) fail("missing pack must rebuild diagnosis from intake");
+if (!wizardSrc.includes("autoAdvanceHitlToEnd")) fail("rebuild must auto-advance HITL to a finished campaign");
+if (wizardSrc.includes('data-testid="hitl-pause-review-agents"')) {
+  fail("AgentsPanel must not show pause-for-review on the customer AR/HE path");
+}
+if (!wizardSrc.includes("packHasDiagnosis")) fail("wizard must detect hollow diagnosis packs");
+if (!wizardSrc.includes("hitlPauseEnabled")) fail("pause-for-review must be hidden unless advanced");
+if (!wizardSrc.includes("reconcileAgentStatus")) fail("wizard must reconcile agentStatus with pack.diagnosis");
+if (!wizardSrc.includes("slimCampaignForStorage")) fail("live persist must write the pack snapshot");
+if (!wizardSrc.includes("upsertCampaign")) fail("live persist must upsert the pack locally before remount");
 if (!wizardSrc.includes("hitlCtaDisabled")) fail("HITL CTA disabled state must use hitlCtaDisabled (never running-only grey)");
 if (!wizardSrc.includes("agentStatus")) fail("draft persist must keep agentStatus");
 if (!wizardSrc.includes("fillIntakeFromScanTruth") && !wizardSrc.includes("fillMissingFromScan")) {
@@ -284,10 +333,126 @@ const advanceSrc = readFileSync(join(__dirname, "../lib/engine/hitl-advance.ts")
 if (advanceSrc.includes("/tools/core-message") || advanceSrc.includes("/task/ad")) {
   fail("hitl-advance must not redirect to other tools");
 }
-
-if (failures.length) {
-  console.error("check-hitl-advance FAIL");
-  for (const f of failures) console.error(" -", f);
-  process.exit(1);
+if (!advanceSrc.includes("ensureDiagnosisFromIntake")) {
+  fail("hitl-advance must rebuild diagnosis from intake when the draft pack is hollow");
 }
-console.log("check-hitl-advance PASS");
+
+function mockStorage() {
+  const mem = new Map<string, string>();
+  const storage: Storage = {
+    getItem: (k: string) => (mem.has(k) ? mem.get(k)! : null),
+    setItem: (k: string, v: string) => {
+      mem.set(k, String(v));
+    },
+    removeItem: (k: string) => {
+      mem.delete(k);
+    },
+    clear: () => mem.clear(),
+    key: (i: number) => [...mem.keys()][i] ?? null,
+    get length() {
+      return mem.size;
+    },
+  } as Storage;
+  const g = globalThis as unknown as {
+    window: { localStorage: Storage; location: { search: string } };
+    localStorage: Storage;
+  };
+  g.localStorage = storage;
+  g.window = { localStorage: storage, location: { search: "" } };
+}
+
+function ramLike(): Intake {
+  return {
+    ...emptyIntake(),
+    businessName: "RAM Dental",
+    category: "Dental clinic",
+    description: "Family dental clinic — implants, hygiene, published hours.",
+    location: "Ramallah",
+    website: "https://www.ram.dental/",
+    audience: "families",
+    biggestProblem: "unknown",
+    uniqueAdvantage: "local dental clinic",
+    mainGoal: "leads",
+    phone: "02-2961999",
+    whatsapp: "0599000000",
+    offer: "אין מבצע",
+  };
+}
+
+mockStorage();
+saveDraft({
+  intake: ramLike(),
+  step: 4,
+  phase: "agents",
+  pack: afterScanDiagnosis,
+  packId: afterScanDiagnosis.id,
+  agentStatus: afterScanDiagnosis.agentStatus,
+  pauseForReview: true,
+});
+const reloaded = loadDraft();
+if (!packHasDiagnosis(reloaded.pack)) fail("draft remount must keep diagnosis (ram.dental / halloun / govrin scans)");
+if (reloaded.pauseForReview) fail("pauseForReview must persist OFF even if a stale draft stored true");
+if (reloaded.pack && reloaded.pack.diagnosis.hypotheses.length < 1) {
+  fail("persisted draft pack lost diagnosis hypotheses");
+}
+
+const ramDraft = {
+  intake: { ...ramLike(), businessName: "رام دنتال" },
+  packId: afterScanDiagnosis.id,
+};
+const ramPack = {
+  ...afterScanDiagnosis,
+  id: afterScanDiagnosis.id,
+  intake: ramLike(),
+};
+if (!packBelongsToDraft(ramPack, ramDraft)) {
+  fail("locale-renamed ram.dental intake must still match the in-flight pack by packId/website");
+}
+
+async function checkAutoRebuild() {
+  const origFetch = globalThis.fetch;
+  globalThis.fetch = (async () => {
+    throw new Error("offline");
+  }) as typeof fetch;
+  try {
+    const ram = ramLike();
+    const hollow = packOf(ram, {
+      agentStatus: {
+        intake: "complete",
+        diagnostic: "approved",
+        strategic: "running",
+        media: "blocked",
+        optimizer: "blocked",
+      },
+    });
+    hollow.diagnosis = { summary: { he: "", ar: "", en: "" }, hypotheses: [], approved: false };
+    const rebuilt = await ensureDiagnosisFromIntake(ram, hollow, () => undefined);
+    if (!packHasDiagnosis(rebuilt)) fail("ensureDiagnosisFromIntake must rebuild hypotheses from current intake");
+    const done = await autoAdvanceHitlToEnd(ram, hollow, () => undefined, "ar");
+    if (!packHasDiagnosis(done)) fail("auto-rebuild from missing diagnosis must produce a diagnosis");
+    if (nextHitlGate(done.agentStatus, done) !== "complete") {
+      fail("missing-diagnosis draft must auto-finish the pipeline to a campaign pack");
+    }
+    if (!done.variants?.length) fail("finished rebuild must include creatives");
+    if (!/dental|أسنان|שינ|RAM|رام/i.test(done.intake.businessName + done.intake.category + done.intake.website)) {
+      fail("rebuild must keep ram.dental niche facts");
+    }
+  } finally {
+    globalThis.fetch = origFetch;
+  }
+}
+
+checkAutoRebuild()
+  .then(() => {
+    if (failures.length) {
+      console.error("check-hitl-advance FAIL");
+      for (const f of failures) console.error(" -", f);
+      process.exit(1);
+    }
+    console.log("check-hitl-advance PASS");
+  })
+  .catch((err: unknown) => {
+    console.error("check-hitl-advance FAIL");
+    console.error(" -", err instanceof Error ? err.stack || err.message : err);
+    process.exit(1);
+  });

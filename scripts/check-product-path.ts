@@ -166,7 +166,8 @@ const wizardSrc = readFileSync(join(root, "components/wizard-flow.tsx"), "utf8")
 if (wizardSrc.includes('withLang("/tools/core-message"') || wizardSrc.includes('withLang("/task/ad"')) {
   fail("diagnosis auto path must not kick to core-message or /task/ad");
 }
-if (!wizardSrc.includes("pauseForReview")) fail("HITL pause-for-review toggle missing");
+if (!wizardSrc.includes("pauseForReview")) fail("HITL pause-for-review toggle exists for advanced/dev");
+if (!wizardSrc.includes("hitlPauseEnabled")) fail("customer UI must hide pause-for-review unless hitlPauseEnabled");
 if (!wizardSrc.includes("runFullPipeline") && !wizardSrc.includes("autoAdvanceHitlToEnd")) {
   fail("startBuild must auto-run remaining HITL gates");
 }

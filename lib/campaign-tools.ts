@@ -3,9 +3,11 @@ import { latestPack } from "./active-pack";
 import { applyVoiceToIntake, normalizeVoice } from "./engine/voice";
 import { applyOfferToIntake, normalizeOfferBlueprint, skipOfferBlueprint } from "./engine/offer-builder";
 import { wantsEmptyCampaign } from "./empty-campaign";
-import { getCampaign, loadDraft, saveDraft, upsertCampaign } from "./storage";
+import { getCampaign, loadDraft, saveDraft, upsertCampaign, type DraftState } from "./storage";
 import { businessKey } from "./engine/ad-engine/sources";
 import { intakeIsClinicDemo } from "./clinic-leak";
+import { packHasDiagnosis } from "./engine/hitl";
+import { sanitizePastedUrl } from "./url-clean";
 
 export type CampaignToolSnapshot = {
   intake: Intake;
@@ -16,7 +18,28 @@ export type CampaignToolSnapshot = {
 function sameBusiness(a: string, b: string): boolean {
   const ka = businessKey(a);
   const kb = businessKey(b);
-  return Boolean(ka && kb && ka === kb);
+  return Boolean(ka && kb && ka === kb && ka !== "unnamed-business");
+}
+
+function sameWebsite(a?: string, b?: string): boolean {
+  const na = sanitizePastedUrl(String(a || "")).replace(/\/+$/, "").toLowerCase();
+  const nb = sanitizePastedUrl(String(b || "")).replace(/\/+$/, "").toLowerCase();
+  return Boolean(na && nb && (na === nb || na.endsWith(nb) || nb.endsWith(na)));
+}
+
+/** Keep the in-flight pack across locale name rewrites (RAM Dental vs Arabic). */
+export function packBelongsToDraft(pack: CampaignPack, draft: Pick<DraftState, "intake" | "packId">): boolean {
+  if (intakeIsClinicDemo(pack.intake) && !intakeIsClinicDemo(draft.intake)) return false;
+  if (draft.packId && pack.id === draft.packId) return true;
+  if (sameBusiness(pack.intake.businessName, draft.intake.businessName)) return true;
+  if (sameWebsite(pack.intake.website, draft.intake.website)) return true;
+  return false;
+}
+
+function preferPacked(a: CampaignPack | null, b: CampaignPack | null): CampaignPack | null {
+  if (a && packHasDiagnosis(a)) return a;
+  if (b && packHasDiagnosis(b)) return b;
+  return a || b;
 }
 
 function attachViral(pack: CampaignPack | null, viral?: ViralDeskState): CampaignPack | null {
@@ -27,13 +50,14 @@ function attachViral(pack: CampaignPack | null, viral?: ViralDeskState): Campaig
 }
 
 /**
- * Restore an in-flight campaign after remount. Never invent a new pack or
- * restart from stage 1 — use draft.packId / the isolated campaign store.
+ * Restore an in-flight campaign after remount. Draft.pack is the diagnosis
+ * snapshot when the campaigns list quota dropped the row.
  */
 export function restoreLivePack(): CampaignPack | null {
   const tools = loadCampaignTools();
   if (tools.pack) return tools.pack;
   const draft = loadDraft();
+  if (draft.pack && packBelongsToDraft(draft.pack, draft)) return draft.pack;
   if (!draft.packId) return null;
   const byId = getCampaign(draft.packId);
   if (!byId) return null;
@@ -48,18 +72,17 @@ export function loadCampaignTools(): CampaignToolSnapshot {
 
   const byId = draft.packId ? getCampaign(draft.packId) ?? null : null;
   const latest = latestPack();
-  let pack = byId || latest;
+  const draftPack = draft.pack ?? null;
+  const named = Boolean(draft.intake.businessName.trim());
 
-  const draftName = draft.intake.businessName.trim();
-  if (pack && !draftName) {
-    pack = null;
-  }
-  if (pack && draftName && !sameBusiness(pack.intake.businessName, draftName)) {
-    pack = null;
-  }
-  if (pack && intakeIsClinicDemo(pack.intake) && !intakeIsClinicDemo(draft.intake)) {
-    pack = null;
-  }
+  const pick = (p: CampaignPack | null): CampaignPack | null => {
+    if (!p) return null;
+    if (!named) return null;
+    if (!packBelongsToDraft(p, draft)) return null;
+    return p;
+  };
+
+  let pack = preferPacked(pick(byId), preferPacked(pick(draftPack), pick(latest)));
 
   const viral = pack?.viral ?? draft.viral;
   pack = attachViral(pack, viral);
@@ -86,6 +109,7 @@ function writeSnapshot(intake: Intake, pack: CampaignPack | null, extra?: Partia
     ...draft,
     intake,
     packId: pack?.id ?? draft.packId,
+    pack: pack ?? undefined,
     hsoStudio: extra?.hsoStudio ?? draft.hsoStudio,
     viral,
   });

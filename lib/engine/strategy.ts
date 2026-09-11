@@ -169,7 +169,7 @@ export function generateStrategy(intake: Intake, diagnosis: Diagnosis): Strategy
     { id: "app_marketing", items: appItems },
     {
       id: "marketing_diagnosis",
-      items: diagnosis.hypotheses.map((h) =>
+      items: (diagnosis?.hypotheses ?? []).map((h) =>
         item(
           L(h.area, h.area, h.area),
           L(`${h.finding.he}\n${h.recommendation.he}`, `${h.finding.ar}\n${h.recommendation.ar}`, `${h.finding.en}\n${h.recommendation.en}`),

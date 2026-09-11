@@ -183,6 +183,7 @@ const hallounDraft = applyIntakeToDraft(
   { resetWizard: true },
 );
 if (hallounDraft.packId) fail(`scan apply must drop prior packId (got ${hallounDraft.packId})`);
+if (hallounDraft.pack) fail("scan apply must drop prior draft pack so diagnosis cannot leak");
 if (hallounDraft.hsoStudio) fail("scan apply must drop prior hsoStudio");
 if (hallounDraft.viral) fail("scan apply must drop prior viral leftovers");
 if (/زيتون|Olive|סאמר/.test(hallounDraft.intake.businessName)) fail("scan apply leaked demo name");
