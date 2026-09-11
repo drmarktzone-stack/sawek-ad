@@ -163,8 +163,14 @@ for (const job of ["scripts", "hooks", "analyze", "remix", "carousel", "calendar
 }
 
 const wizardSrc = readFileSync(join(root, "components/wizard-flow.tsx"), "utf8");
-if (!wizardSrc.includes("/tools/core-message")) fail("diagnosis approve must continue to core message");
-if (!wizardSrc.includes("diagnosisApproved")) fail("HITL must hide five-agent continue after diagnosis");
+if (wizardSrc.includes('withLang("/tools/core-message"') || wizardSrc.includes('withLang("/task/ad"')) {
+  fail("diagnosis auto path must not kick to core-message or /task/ad");
+}
+if (!wizardSrc.includes("pauseForReview")) fail("HITL pause-for-review toggle missing");
+if (!wizardSrc.includes("runFullPipeline") && !wizardSrc.includes("autoAdvanceHitlToEnd")) {
+  fail("startBuild must auto-run remaining HITL gates");
+}
+if (wizardSrc.includes("diagnosisApproved ? null")) fail("HITL continue must stay visible after diagnosis");
 if (!wizardSrc.includes("charterAllowsCampaign")) fail("wizard must niche-gate complete campaign");
 if (/disabled=\{!wizardReady\(intake\)/.test(wizardSrc)) {
   fail("build CTA must not silently grey when fields are missing");

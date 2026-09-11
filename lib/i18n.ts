@@ -382,6 +382,8 @@ export const copy: Dict = {
   "cta.copy": { he: "העתק", ar: "نسخ", en: "Copy" },
   "cta.copied": { he: "הועתק", ar: "تم النسخ", en: "Copied" },
   "cta.approve": { he: "אשר אבחון והמשך לבנייה", ar: "اعتماد التشخيص والمتابعة", en: "Approve diagnosis and build" },
+  "cta.approveContinue": { he: "אשר והמשך", ar: "اعتمد وكمل", en: "Approve and continue" },
+  "cta.finishToEnd": { he: "יאללה עד הסוף", ar: "يلا نكمّل للآخر", en: "Let's finish it through" },
   "cta.reject": { he: "חזור לערוך נתונים", ar: "العودة لتعديل البيانات", en: "Go back and edit data" },
   "empty.dash": { he: "— לא סופק —", ar: "— غير متوفر —", en: "— not provided —" },
   "interview.title": { he: "ראיון CMO — לפני שמייצרים", ar: "مقابلة CMO — قبل التوليد", en: "CMO interview — before generating" },
@@ -485,14 +487,30 @@ export const copy: Dict = {
   "agents.media": { he: "מדיה באיר — תוכניות בלבד", ar: "مخطط الميديا — خطط فقط", en: "Media buyer strategist" },
   "agents.optimizer": { he: "אופטימיזציית ביצועים", ar: "تحسين الأداء", en: "Performance optimizer" },
   "agents.hitl": {
-    he: "אישור אנושי בין שלבי הסוכנים. אבחון חובה לפני בנייה.",
-    ar: "اعتماد بشري بين مراحل الوكلاء. التشخيص إلزامي قبل البناء.",
-    en: "Human approval between agent stages. Diagnosis is required before build.",
+    he: "ברירת מחדל: הסוכנים רצים עד הקמפיין המוכן. עצירה לסקירה רק אם ביקשתם.",
+    ar: "تلقائي: الوكلاء بكمّلوا للحملة الجاهزة. وقفة المراجعة بس إذا طلبتوها.",
+    en: "Default: agents run through to the finished campaign. Pause for review only if you ask.",
   },
+  "agents.pauseReview": {
+    he: "עצור לסקירה בין שלבים",
+    ar: "وقّف للمراجعة بين المراحل",
+    en: "Pause for review between stages",
+  },
+  "agents.pauseReviewHint": {
+    he: "כבוי כברירת מחדל — בונים עד המודעות המוכנות, בלי לקפוץ למסך אחר.",
+    ar: "مطفّي تلقائي — منبني للإعلانات الجاهزة، بلا قفزة على شاشة ثانية.",
+    en: "Off by default — we build through to finished ads, without jumping to another screen.",
+  },
+  "agents.fillFromScan": {
+    he: "השלם חסרים מהסריקה",
+    ar: "كمّل الناقص من المسح",
+    en: "Fill missing from scan",
+  },
+  "agents.retry": { he: "נסו שוב", ar: "حاولوا مرة ثانية", en: "Try again" },
   "agents.packMissing": {
-    he: "האבחון לא נטען. סרקו שוב או המשיכו מהשלב הקודם.",
-    ar: "التشخيص ما انحمّل. امسحوا مرة ثانية أو ارجعوا للمرحلة السابقة.",
-    en: "Diagnosis did not load. Scan again or go back a step.",
+    he: "האבחון לא נטען מהטיוטה. לא מוחקים כלום — נסו שוב או השלימו מהסריקה.",
+    ar: "التشخيص ما انحمّل من المسودة. مش رح نمسّح إشي — حاولوا مرة ثانية أو كمّلوا من المسح.",
+    en: "Diagnosis did not load from the draft. Nothing was cleared — retry or fill from scan.",
   },
   "agents.needIntake": {
     he: "מלאו את השדות האדומים או סרקו אתר — ואז האבחון ייטען.",
@@ -500,9 +518,9 @@ export const copy: Dict = {
     en: "Fill the red fields or scan a site — then diagnosis loads.",
   },
   "agents.hitlError": {
-    he: "ההמשך נכשל. נסו שוב.",
-    ar: "المتابعة فشلت. حاولوا مرة ثانية.",
-    en: "Could not continue. Try again.",
+    he: "ההמשך נכשל. נשארו על המסך הזה — נסו שוב או השלימו חסרים מהסריקה.",
+    ar: "المتابعة فشلت. ضلّينا على هالشاشة — حاولوا مرة ثانية أو كمّلوا الناقص من المسح.",
+    en: "Could not continue. Staying on this screen — retry or fill missing from scan.",
   },
   "agents.advancing": {
     he: "ממשיכים לשלב הבא…",

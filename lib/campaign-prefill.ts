@@ -3,6 +3,7 @@
  * Does not invent ROAS, prices, or clinic leftovers. Empty stays empty when
  * there is no category/page signal.
  */
+import type { Intake } from "./types";
 import type { IngestFieldId } from "./document-ingest";
 import { detectVertical, isPlasticAestheticClinic, PLASTIC_AESTHETIC_RE } from "./vertical";
 import { resolveOperatingNiche } from "./operating-niche";
@@ -259,4 +260,55 @@ export function prefillCampaignFields(fields: Fields, corpus = ""): Fields {
   }
 
   return out;
+}
+
+/**
+ * Fill empty wizard fields from scan-truth already on the intake (page copy,
+ * landing lines, ingested excerpts). Never invents ROAS, prices, or CAC.
+ */
+export function fillIntakeFromScanTruth(intake: Intake): Intake {
+  const corpus = [
+    intake.description,
+    intake.landingLines,
+    intake.brandPositioning,
+    intake.category,
+    ...(intake.ingestedDocs ?? []).map((d) => [d.excerpt, d.name].filter(Boolean).join("\n")),
+  ]
+    .filter(Boolean)
+    .join("\n");
+  const fields = prefillCampaignFields(
+    {
+      businessName: intake.businessName,
+      location: intake.location,
+      phone: intake.phone,
+      whatsapp: intake.whatsapp,
+      clinicHours: intake.clinicHours,
+      website: intake.website,
+      category: intake.category,
+      description: intake.description,
+      audience: intake.audience,
+      biggestProblem: intake.biggestProblem,
+      uniqueAdvantage: intake.uniqueAdvantage,
+      mainGoal: intake.mainGoal,
+      landingLines: intake.landingLines,
+      brandPositioning: intake.brandPositioning,
+      brandTone: intake.brandTone,
+    },
+    corpus,
+  );
+  return {
+    ...intake,
+    location: fields.location || intake.location,
+    category: fields.category || intake.category,
+    description: fields.description || intake.description,
+    audience: fields.audience || intake.audience,
+    biggestProblem: fields.biggestProblem || intake.biggestProblem,
+    uniqueAdvantage: fields.uniqueAdvantage || intake.uniqueAdvantage,
+    mainGoal: fields.mainGoal || intake.mainGoal,
+    landingLines: fields.landingLines || intake.landingLines,
+    brandPositioning: fields.brandPositioning || intake.brandPositioning,
+    brandTone: fields.brandTone || intake.brandTone,
+    phone: fields.phone || intake.phone,
+    whatsapp: fields.whatsapp || intake.whatsapp,
+  };
 }

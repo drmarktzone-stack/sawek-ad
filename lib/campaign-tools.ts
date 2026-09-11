@@ -26,6 +26,21 @@ function attachViral(pack: CampaignPack | null, viral?: ViralDeskState): Campaig
   return { ...pack, viral: next };
 }
 
+/**
+ * Restore an in-flight campaign after remount. Never invent a new pack or
+ * restart from stage 1 — use draft.packId / the isolated campaign store.
+ */
+export function restoreLivePack(): CampaignPack | null {
+  const tools = loadCampaignTools();
+  if (tools.pack) return tools.pack;
+  const draft = loadDraft();
+  if (!draft.packId) return null;
+  const byId = getCampaign(draft.packId);
+  if (!byId) return null;
+  if (intakeIsClinicDemo(byId.intake) && !intakeIsClinicDemo(draft.intake)) return null;
+  return byId;
+}
+
 /** One Business Truth: draft intake + the pack for THIS business only. */
 export function loadCampaignTools(): CampaignToolSnapshot {
   const draft = loadDraft();
