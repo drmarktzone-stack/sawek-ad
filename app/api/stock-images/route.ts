@@ -31,12 +31,14 @@ export async function GET(req: Request) {
       location: read(req, "location"),
       description: read(req, "description"),
       offer: read(req, "offer"),
+      services: read(req, "services"),
       extraQueries: read(req, "extra")
         .split("|")
         .map((s) => s.trim())
         .filter(Boolean),
       limit: Number(read(req, "limit") || 48) || 48,
       page: Number(read(req, "page") || 1) || 1,
+      locale: read(req, "locale"),
     };
     const requested = IMAGEN_PICKER_COUNT;
 
@@ -158,6 +160,8 @@ export async function GET(req: Request) {
         location: read(req, "location"),
         description: read(req, "description"),
         offer: read(req, "offer"),
+        services: read(req, "services"),
+        locale: read(req, "locale"),
         limit: Number(read(req, "limit") || 48) || 48,
         page: 1,
       };

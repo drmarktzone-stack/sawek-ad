@@ -255,7 +255,10 @@ export function audienceWhoLine(intake: Intake, locale: Locale): string {
 function arWalkInH1(intake: Intake): string {
   const n = shortName(intake, "ar");
   const walk = isWalkIn(intake);
-  if (walk && isPediatrics(intake)) return LOCKED_AR_H1;
+  if (walk && isPediatrics(intake)) {
+    const place = placeBit(intake, "ar");
+    return place ? `${n} — جت أولاً بدون مواعيد` : `${n} — جت أولاً`;
+  }
   if (walk) return `${n} — جت أولاً`;
   return n;
 }
@@ -435,7 +438,7 @@ export function landingH1(intake: Intake, locale: Locale): string {
   const place = placeBit(intake, locale);
   if (locale === "ar") {
     const h = walk ? arWalkInH1(intake) : place ? `${n} — ${place}` : n;
-    return forbiddenHeadline(h) ? (walk && isPediatrics(intake) ? LOCKED_AR_H1 : walk ? `${n} — جت أولاً` : n) : h;
+    return forbiddenHeadline(h) ? (walk ? `${n} — جت أولاً` : n) : h;
   }
   if (locale === "he") {
     return walk ? `${n} — לפי סדר הגעה` : n;
@@ -684,7 +687,7 @@ export function spokenHeadline(kind: VariantKind, intake: Intake, locale: Locale
     forbiddenHeadline(h) ||
     (intake.audience.length > 24 && h.includes(intake.audience))
   ) {
-    h = productH1 || (locale === "ar" ? (walk && isPediatrics(intake) ? LOCKED_AR_H1 : walk ? `${n} — جت أولاً` : n) : n);
+    h = productH1 || (locale === "ar" ? (walk ? `${n} — جت أولاً` : n) : n);
   }
   return clipAtWord(h, 48);
 }

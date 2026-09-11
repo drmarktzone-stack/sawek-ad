@@ -38,6 +38,7 @@ import { attachCompleteAd } from "./ad-engine/complete-ad";
 import { excludeFromHistory } from "./ad-engine/fingerprint";
 import { loadCreativeHistory } from "./ad-engine/memory";
 import { businessKey } from "./ad-engine/sources";
+import { applyCopyLinesToPack, attachLocalCopyLines, diversifyLocaleBatch } from "./copy-lines";
 export { contradictsVertical, verticalLeakRe } from "./campaign-brief";
 
 const KIND_ANGLE: VariantKind[] = [
@@ -96,7 +97,7 @@ export function alignVariantsToBrief(
 ): AdVariant[] {
   if (!variants.length) return variants;
   const vertical = brief.vertical;
-  return variants.map((v) => {
+  const aligned = variants.map((v) => {
     const idea = ideaByKind(ideas, v.kind) ?? ideas[0];
     const rawHook = idea?.hook[v.locale] || brief.coreMessage[v.locale] || "";
     const hook = rawHook && !customerCopyHasLeak(rawHook) ? rawHook : spokenHeadline(v.kind, intake, v.locale);
@@ -118,6 +119,11 @@ export function alignVariantsToBrief(
     const gated = gateCustomerAd({ headline, body, cta: v.cta }, intake, v.locale);
     return { ...v, headline: gated.headline, primaryText: gated.body, cta: gated.cta };
   });
+  let diversified = aligned;
+  for (const locale of ["he", "ar", "en"] as Locale[]) {
+    diversified = diversifyLocaleBatch(diversified, intake, locale);
+  }
+  return diversified;
 }
 
 export function cmoPackFromBrief(intake: Intake, brief: CampaignBrief, existing?: CmoIdeasPack): CmoIdeasPack {
@@ -189,7 +195,9 @@ export function syncPackEngines(pack: CampaignPack): CampaignPack {
     updatedAt: new Date().toISOString(),
   };
   const withAgency = { ...next, agency: buildAgency(next) };
-  return attachCompleteAd(withAgency, { rotate: false });
+  const withAd = attachCompleteAd(withAgency, { rotate: false });
+  if (pack.copyLines?.options.length) return applyCopyLinesToPack(withAd, pack.copyLines);
+  return attachLocalCopyLines(withAd);
 }
 
 /** Fold research notes into the same brief / CMO pack — never a second set of angles. */
@@ -248,7 +256,8 @@ export function orchestrateAssemble(intake: Intake, partial: AssemblePartial): C
     ...(intake.offerBlueprint ? { offerBlueprint: intake.offerBlueprint } : {}),
   };
   const assembled = { ...base, agency: buildAgency(base) };
-  return attachCompleteAd(assembled, { rotate: true });
+  const withAd = attachCompleteAd(assembled, { rotate: true });
+  return attachLocalCopyLines(withAd);
 }
 
 export function briefVerticalOf(pack: CampaignPack): CampaignVertical {

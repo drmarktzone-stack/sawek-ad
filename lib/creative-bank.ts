@@ -243,9 +243,9 @@ const ANGLES: Record<Vertical, Record<Locale, string[]>> = {
     en: ["water as fact", "empty deck", "family window from real hours", "no cure claim"],
   },
   clinic: {
-    he: ["שקט באותו יום", "שעות כגיבור", "וואטסאפ רך (לא חירום)", "כיסא ריק — בלי פני ילדים", "בלי תיאטרון כוכבים"],
-    ar: ["هدوء بنفس اليوم", "الساعات هي البطل", "واتساب لطيف (مش طوارئ)", "كرسي فاضي — بلا وجوه أطفال", "بلا مسرح نجوم"],
-    en: ["same-day calm", "hours as hero", "soft WhatsApp (not ER)", "empty chair — no children’s faces", "no star theatre"],
+    he: ["שקט באותו יום", "שעות אמת בכותרת", "וואטסאפ רך (לא חירום)", "חדר שקט — בלי פני ילדים", "בלי תיאטרון כוכבים"],
+    ar: ["هدوء بنفس اليوم", "الدوام هو العنوان", "واتساب لطيف (مش طوارئ)", "غرفة هادية — بلا وجوه أطفال", "بلا مسرح نجوم"],
+    en: ["same-day calm", "hours in the headline", "soft WhatsApp (not ER)", "quiet room — no children’s faces", "no star theatre"],
   },
   product: {
     he: ["כאב שחולץ מהדף", "מנגנון יתרון, לא סלוגן", "בלי מחיר שלא פורסם", "בלי ROAS"],
@@ -293,9 +293,9 @@ const CTAS: Record<Vertical, Record<Locale, string[]>> = {
     en: ["Visit the pool", "Ask hours on WhatsApp"],
   },
   clinic: {
-    he: ["הגיעו למרפאה", "וואטסאפ (לא לחירום)"],
-    ar: ["تعوا عالعيادة", "واتساب (مش للطوارئ)"],
-    en: ["Come to the clinic", "WhatsApp (not ER)"],
+    he: ["הגיעו למרפאה", "וואטסאפ (לא לחירום)", "לאתר", "שאלו על השעות"],
+    ar: ["تعوا عالعيادة", "واتساب (مش للطوارئ)", "للموقع", "اسألوا عن الدوام"],
+    en: ["Come to the clinic", "WhatsApp (not ER)", "Visit the site", "Ask about hours"],
   },
   product: {
     he: ["הצטרפו", "לאתר"],
@@ -388,9 +388,9 @@ const SERVICE_ANGLES: Record<Exclude<ServiceFamily, null>, Record<Locale, string
     en: ["one chair vs a catalog", "scissors/cloth close-up", "street as place identity", "hold via WhatsApp — no rating"],
   },
   gym: {
-    he: ["רצפה כעובדה", "שעות כגיבור", "בלי הבטחת גוף", "וואטסאפ לשעות — לא לנס"],
-    ar: ["الأرضية كحقيقة", "الساعات هي البطل", "بلا وعد جسم", "واتساب للساعات — مش لمعجزة"],
-    en: ["floor as fact", "hours as hero", "no body promise", "WhatsApp for hours — not a miracle"],
+    he: ["רצפה כעובדה", "שעות אמת בכותרת", "בלי הבטחת גוף", "וואטסאפ לשעות — לא לנס"],
+    ar: ["الأرضية كحقيقة", "الدوام هو العنوان", "بلا وعد جسم", "واتساب للساعات — مش لمعجزة"],
+    en: ["floor as fact", "hours in the headline", "no body promise", "WhatsApp for hours — not a miracle"],
   },
   cafe: {
     he: ["כוס שקטה בבוקר", "שולחן שקט", "הכתובת מהמקום", "טעם מהמקום"],
@@ -433,21 +433,21 @@ const BAKERY_ANGLES: Record<Locale, string[]> = {
 
 const PEDIATRIC_HOOKS: Record<Locale, string[]> = {
   he: [
-    "{name} — כשהילד חולה, לא סלוגן רפואי.",
+    "{name} — כשהילד חולה, לאן הולכים היום.",
     "{problem}",
     "{advantage}",
-    "שעות: {hours} — לפי סדר הגעה, בלי תור מדומה.",
-    "{place} — שם + עיר, בלי «הכי טוב בעיר».",
+    "שעות: {hours} — לפי סדר הגעה, בלי תור מראש.",
+    "{place} — שם + עיר מהעובדות.",
   ],
   ar: [
-    "{name} — لما الولد مريض، مش شعار طبي.",
+    "{name} — لما الولد بيمرض، وين بتروحوا اليوم.",
     "{problem}",
     "{advantage}",
-    "الساعات: {hours} — جت أولاً، بلا دور مختلق.",
-    "{place} — اسم + بلدة، بلا «الأفضل بالمدينة».",
+    "الساعات: {hours} — جت أولاً بدون مواعيد.",
+    "{place} — اسم + بلدة، من الحقائق.",
   ],
   en: [
-    "{name} — when the child is sick, not a medical slogan.",
+    "{name} — when a child is sick, know where to go today.",
     "{problem}",
     "{advantage}",
     "Hours: {hours} — walk-in order, no invented queue.",

@@ -24,10 +24,15 @@ import {
   factSpamHits,
   isCannedClinicSlogan,
   templateLoopHits,
+  ctaMonoculture,
+  hasBannedNonsense,
+  BANNED_NONSENSE,
 } from "../lib/copy-purity";
 import { composeCoreMessage } from "../lib/engine/core-message";
 import { VOICE_DIALECTS, defaultDialectForLocale, effectiveDialect, lockDefaultDialect } from "../lib/engine/voice";
 import { pickIdeas } from "../lib/engine/cmo-ideas";
+import { buildLocalCopyLinePool, COPY_LINE_MIN, copyBatchQuality, ctaOptionsFor } from "../lib/engine/copy-lines";
+import { buildPostingCalendar } from "../lib/engine/posting-calendar";
 import type { CampaignPack, Intake, Locale } from "../lib/types";
 
 const failures: string[] = [];
@@ -307,6 +312,76 @@ if (/لما الولد مريض|جيبوه عالعيادة|التخصّصات �
 }
 if (!/تجميل|جوفرين|أنف|حيفا|B-Lite/i.test(govrinBlob)) {
   fail(`govrin ads missing this clinic’s facts: ${govrinHeads.join(" | ")}`);
+}
+
+// --- Dr Samer-like pediatric clinic: grounded, no CTA loop, no “watches are the hero” ---
+function samerClinic(): Intake {
+  return {
+    ...emptyIntake(),
+    operatingModel: "free_service",
+    businessName: "د. سامر محمد أبو مخ",
+    category: "طبيب أطفال",
+    description: "عيادة أطفال في باقة الغربية — جت أولاً بدون مواعيد",
+    location: "باقة الغربية، مجمع النور، طابق 1",
+    website: "https://drsamerped.ai.studio",
+    whatsapp: "052-8885800",
+    clinicHours: "الأحد 08:00-13:00",
+    audience: "أهل باقة",
+    biggestProblem: "بدهم يعرفوا وين يروحوا اليوم",
+    uniqueAdvantage: "جت أولاً بدون مواعيد",
+    mainGoal: "walk_in",
+    offer: "no_offer",
+  };
+}
+const samer = samerClinic();
+const samerRaw = generateVariants(samer).filter((v) => v.locale === "ar");
+if (ctaMonoculture(samerRaw.map((v) => v.cta))) {
+  fail(`generateVariants CTA monoculture before assemble: ${JSON.stringify(samerRaw.map((v) => v.cta))}`);
+}
+const samerPack = packOf(samer, "samer-ar");
+const samerAr = samerPack.variants.filter((v) => v.locale === "ar");
+const samerCtas = samerAr.map((v) => v.cta);
+const samerHeads = samerAr.map((v) => v.headline);
+if (ctaMonoculture(samerCtas)) {
+  fail(`Dr Samer CTA monoculture: ${JSON.stringify(samerCtas)}`);
+}
+if (new Set(samerHeads.map((h) => h.replace(/\s+/g, " ").trim())).size < 2) {
+  fail(`Dr Samer headline loop: ${JSON.stringify(samerHeads)}`);
+}
+const samerBlob = samerAr.map((v) => `${v.headline}\n${v.primaryText}\n${v.cta}`).join("\n");
+if (hasBannedNonsense(samerBlob) || /الساعات هي البطل/.test(samerBlob)) {
+  fail(`Dr Samer ads leaked hours-as-hero / banned nonsense: ${samerBlob.slice(0, 280)}`);
+}
+if (/ROAS|₪\d|كلاليت/.test(samerBlob) && !/كلاليت/.test(`${samer.uniqueAdvantage} ${samer.description}`)) {
+  fail(`Dr Samer invented Clalit/ROAS/price: ${samerBlob.slice(0, 200)}`);
+}
+const samerCal = buildPostingCalendar(samerPack, "ar", 7);
+const calCtas = samerCal.map((d) => d.cta);
+const calHeads = samerCal.map((d) => d.headline);
+if (ctaMonoculture(calCtas)) fail(`Dr Samer calendar CTA loop: ${JSON.stringify(calCtas)}`);
+if (calHeads.length >= 2 && new Set(calHeads).size < 2) fail(`Dr Samer calendar headline loop: ${JSON.stringify(calHeads)}`);
+if (samerCal.some((d) => hasBannedNonsense(`${d.headline}\n${d.ideaName || ""}\n${d.cta}`))) {
+  fail(`Dr Samer calendar leaked strategy label: ${samerCal.map((d) => d.ideaName).join(" | ")}`);
+}
+for (let i = 1; i < samerCal.length; i++) {
+  if (samerCal[i]!.headline === samerCal[i - 1]!.headline && samerCal[i]!.cta === samerCal[i - 1]!.cta) {
+    fail(`Dr Samer day ${i + 1} same hook and CTA as previous`);
+  }
+}
+const samerPool = buildLocalCopyLinePool(samer, "ar");
+if (samerPool.options.length < COPY_LINE_MIN) fail(`Dr Samer copy pool ${samerPool.options.length} < ${COPY_LINE_MIN}`);
+const poolQ = copyBatchQuality(samerPool.options, samer);
+if (!poolQ.ok) fail(`Dr Samer copy pool quality: ${poolQ.reasons.join(",")}`);
+if (samerPool.options.filter((o) => o.kind === "cta").length < 3) fail("Dr Samer pool needs ≥3 CTAs");
+const poolCtas = ctaOptionsFor(samer, "ar");
+if (poolCtas.length < 3) fail(`ctaOptionsFor pediatric too thin: ${poolCtas.join(" | ")}`);
+if (poolCtas.every((c) => c === "جيبوه عالعيادة")) fail("pediatric CTAs still a single canned line");
+
+for (const phrase of BANNED_NONSENSE) {
+  const plantedHero = gateCustomerAd({ headline: phrase, body: "د. سامر بباقة", cta: "واتساب" }, samer, "ar");
+  if (plantedHero.headline.includes(phrase) || plantedHero.body.includes(phrase)) {
+    fail(`gate kept banned nonsense on Samer: ${phrase}`);
+  }
 }
 
 // --- Blocklist completeness vs user screenshots ---

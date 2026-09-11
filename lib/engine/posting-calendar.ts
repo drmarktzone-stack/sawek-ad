@@ -4,6 +4,7 @@ import { pickIdeas } from "./cmo-ideas";
 import { buildCarouselPack, buildViralScripts } from "./viral-content";
 import { researchNotesForCalendar } from "./research-overlay";
 import { localeViralIdea } from "./campaign-brief";
+import { isStrategyLabelLine, hasBannedNonsense, dayPlatformSameHook } from "../copy-purity";
 
 export type PostingChannel = "facebook" | "instagram" | "tiktok" | "whatsapp" | "landing";
 export type PostingKind = "post" | "script" | "carousel" | "campaign" | "ad";
@@ -66,6 +67,29 @@ export function buildPostingCalendar(pack: CampaignPack, locale: Locale, days = 
     body: (v?.primaryText || fields.shortBody).trim(),
     cta: (v?.cta || fields.cta).trim(),
   });
+  const linePool = pack.copyLines?.options?.filter((o) => o.locale === locale) ?? [];
+  const selectedLines = linePool.filter((o) => (pack.copyLines?.selectedIds ?? []).includes(o.id));
+  const usable = selectedLines.length >= 4 ? selectedLines : linePool;
+  const extraHeadlines = [
+    ...usable.filter((o) => o.kind === "headline" || o.kind === "hook").map((o) => o.text),
+    ...ads.map((v) => v.headline).filter(Boolean),
+  ].filter((h, i, arr) => arr.findIndex((x) => x === h) === i);
+  const extraCtas = [
+    ...usable.filter((o) => o.kind === "cta").map((o) => o.text),
+    ...ads.map((v) => v.cta).filter(Boolean),
+  ].filter((h, i, arr) => arr.findIndex((x) => x === h) === i);
+  const extraBodies = [
+    ...usable.filter((o) => o.kind === "primaryText").map((o) => o.text),
+    ...ads.map((v) => v.primaryText).filter(Boolean),
+  ].filter((h, i, arr) => arr.findIndex((x) => x === h) === i);
+  const rotatePiece = (base: ReturnType<typeof piece>, day: number) => {
+    const headline = extraHeadlines.length
+      ? extraHeadlines[(day - 1) % extraHeadlines.length]!
+      : base.headline;
+    const cta = extraCtas.length ? extraCtas[(day - 1) % extraCtas.length]! : base.cta;
+    const body = extraBodies.length ? extraBodies[(day - 1) % extraBodies.length]! : base.body;
+    return { headline, body, cta };
+  };
   const ideas = pack.cmoIdeas?.selected ?? pickIdeas(pack.intake, locale);
   const ideaAt = (i: number) => ideas[i % Math.max(1, ideas.length)];
   const viralIdea = pack.viral?.idea || (pack.brief ? localeViralIdea(pack.brief, locale) : "");
@@ -140,20 +164,26 @@ export function buildPostingCalendar(pack: CampaignPack, locale: Locale, days = 
   const trendNotes = researchNotesForCalendar(pack);
   const trendDays = new Set([4, 6, 8, 15, 22, 29]);
 
-  return plan.slice(0, target).map((row) => {
+  const rows = plan.slice(0, target).map((row) => {
     const idea = ideaAt(row.ideaIndex);
     const note = trendDays.has(row.day) ? trendNotes[(row.day - 1) % Math.max(1, trendNotes.length)] : undefined;
     const hint = note ? note.title[locale] || note.title.he || note.title.en : undefined;
+    const src = rotatePiece(row.src, row.day);
+    const rawName = idea?.name[locale] || idea?.name.he || "";
+    const ideaName =
+      rawName && !isStrategyLabelLine(rawName) && !hasBannedNonsense(rawName)
+        ? rawName
+        : idea?.hook[locale] || idea?.hook.he || extraHeadlines[(row.day - 1) % Math.max(1, extraHeadlines.length)] || "";
     return {
       day: row.day,
       channel: row.channel,
       formatId: row.formatId,
       formatLabel: row.formatLabel,
       channelLabel: CH[row.channel],
-      headline: row.src.headline,
-      body: row.src.body,
-      cta: row.src.cta,
-      ideaName: idea?.name[locale] || idea?.name.he,
+      headline: src.headline,
+      body: src.body,
+      cta: src.cta,
+      ideaName,
       whyItWins: idea?.whyItWins[locale] || idea?.whyItWins.he,
       planningScore: idea?.planningScore,
       kind: row.kind,
@@ -166,6 +196,17 @@ export function buildPostingCalendar(pack: CampaignPack, locale: Locale, days = 
         : {}),
     };
   });
+  for (let i = 1; i < rows.length; i++) {
+    const prev = rows[i - 1]!;
+    const cur = rows[i]!;
+    if (dayPlatformSameHook({ headline: prev.headline, angle: prev.ideaName }, { headline: cur.headline, angle: cur.ideaName })) {
+      const alt = extraHeadlines.find((h) => h && h !== cur.headline && h !== prev.headline);
+      if (alt) cur.headline = alt;
+      const altCta = extraCtas.find((c) => c && c !== cur.cta);
+      if (altCta) cur.cta = altCta;
+    }
+  }
+  return rows;
 }
 
 export function buildPostingWeek(pack: CampaignPack, locale: Locale): PostingDay[] {

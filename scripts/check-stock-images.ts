@@ -8,6 +8,8 @@ import {
   sanitizeStockHint,
   topicQueriesFor,
   wikiSearchQuery,
+  applyStockCaptions,
+  stockCaptionFor,
 } from "../lib/stock-images";
 import { isOfferedAsset, stockToAsset } from "../lib/media-assets";
 import { graphicPostersForIntake, posterToAsset } from "../lib/graphic-posters";
@@ -39,6 +41,25 @@ for (const need of [
 if (clinicQs.some((q) => /clalit|كلاليت|כללית|samer|سامر|סאמר/i.test(q))) {
   fail(`clinic queries leaked brand/person: ${clinicQs.join(" | ")}`);
 }
+const usedCaptions = new Set<string>();
+const cap1 = stockCaptionFor({ title: "Waiting room", query: "waiting room", id: "a" }, clinic, "clinic", usedCaptions);
+const cap2 = stockCaptionFor({ title: "Clinic interior", query: "clinic interior", id: "b" }, clinic, "clinic", usedCaptions);
+if (cap1 === cap2) fail(`stock captions not unique: ${cap1}`);
+if (/^ستوك حسب الموضوع$|^סטוק לפי נושא$|^stock by topic$/i.test(cap1) || /^ستوك حسب الموضوع$/.test(cap2)) {
+  fail(`generic stock tab used as the only caption: ${cap1} / ${cap2}`);
+}
+const captioned = applyStockCaptions(
+  [
+    { id: "1", thumb: "https://x.test/1.jpg", full: "https://x.test/1.jpg", title: "Waiting room", attribution: "w", source: "wikimedia", query: "waiting room" },
+    { id: "2", thumb: "https://x.test/2.jpg", full: "https://x.test/2.jpg", title: "DSC_0999", attribution: "w", source: "openverse", query: "clinic interior" },
+    { id: "3", thumb: "https://x.test/3.jpg", full: "https://x.test/3.jpg", title: "Reception desk", attribution: "w", source: "google", query: "clinic reception" },
+  ],
+  clinic,
+  "clinic",
+);
+const caps = captioned.map((i) => i.caption || "");
+if (new Set(caps).size !== caps.length) fail(`applyStockCaptions duplicates: ${caps.join(" | ")}`);
+if (caps.some((c) => !c.trim() || /^ستوك حسب الموضوع$/.test(c))) fail(`blank/generic caption: ${caps.join(" | ")}`);
 if (!clinicQs.some((q) => /^waiting room$/i.test(q))) {
   fail(`clinic missing short photographic query "waiting room": ${clinicQs.join(" | ")}`);
 }
@@ -114,6 +135,15 @@ if (isOnTopicStock("clinic", "Restored waiting room at Bruce Grove station")) {
 }
 if (isOnTopicStock("clinic", "Amtrak Peachtree station waiting room")) {
   fail("Amtrak waiting room marked clinic-topic");
+}
+if (isOnTopicStock("clinic", "Handwritten letter 1923", "manuscript correspondence")) {
+  fail("handwritten letter marked clinic-topic");
+}
+if (isOnTopicStock("clinic", "Birdcage in a garden", "aviary", undefined, "clinic interior")) {
+  fail("birdcage accepted via query trust");
+}
+if (isOnTopicStock("clinic", "Forest cottage house", "cabin in woods", undefined, "waiting room")) {
+  fail("forest house accepted via query trust");
 }
 if (!isOnTopicStock("clinic", "A waiting room at a medical healthcare clinic")) {
   fail("medical clinic waiting room not on-topic");

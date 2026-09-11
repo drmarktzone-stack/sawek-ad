@@ -365,7 +365,7 @@ export function buildTrendPack(intake: Intake, locale: Locale, asOf = new Date()
   const hours = intake.clinicHours.trim();
 
   const rowsHe = [
-    { id: "hours", title: hours ? "שעות כגיבור" : "מתי בכלל אפשר", angle: hours || "חסרות שעות בקליטה — לא ננחש «השעה הכי טובה».", hook: hours ? `מתי באמת: ${clip(hours, 40)}` : "שאלו את עצמכם מתי אפשר להגיע — ואז כתבו את זה.", why: "זווית תפעולית מהעובדות, לא טרנד מדומה." },
+    { id: "hours", title: hours ? "שעות אמת בכותרת" : "מתי בכלל אפשר", angle: hours || "חסרות שעות בקליטה — לא ננחש «השעה הכי טובה».", hook: hours ? `מתי באמת: ${clip(hours, 40)}` : "שאלו את עצמכם מתי אפשר להגיע — ואז כתבו את זה.", why: "זווית תפעולית מהעובדות, לא טרנד מדומה." },
     { id: "place", title: place ? "מקום ככותרת" : "מקום חסר", angle: place || "מיקום לא סופק.", hook: place ? `${place} — בלי «הכי טוב בעיר».` : "אל תמציאו שכונה.", why: "זהות מקומית רק אם נכתבה." },
     { id: "voice", title: "קול אישי", angle: v.personalVoice || "טון לא נשמר עדיין.", hook: clip(core, 48), why: "כל העתקה צריכה את הקול ששמרתם." },
     { id: "problem", title: "הכאב שסופק", angle: intake.biggestProblem || "בעיה לא סופקה.", hook: clip(intake.biggestProblem || core, 48), why: "PAS רק על כאב שכתבתם." },
@@ -374,7 +374,7 @@ export function buildTrendPack(intake: Intake, locale: Locale, asOf = new Date()
     { id: "niche", title: `נישה: ${clip(niche, 28)}`, angle: clip(core, 90), hook: clip(niche, 48), why: "כל זווית נשענת על הנישה ששמרתם." },
   ];
   const rowsAr = [
-    { id: "hours", title: hours ? "الساعات هي البطل" : "إيمتى أصلاً", angle: hours || "الساعات ناقصة — مش حنخمّن «أفضل وقت».", hook: hours ? `إيمتى فعلاً: ${clip(hours, 40)}` : "اسألوا إيمتى فيكن تجوا — بعدين اكتبوا.", why: "زاوية تشغيل من الوقائع، مش ترند مختلق." },
+    { id: "hours", title: hours ? "الدوام هو العنوان" : "إيمتى أصلاً", angle: hours || "الساعات ناقصة — مش حنخمّن «أفضل وقت».", hook: hours ? `إيمتى فعلاً: ${clip(hours, 40)}` : "اسألوا إيمتى فيكن تجوا — بعدين اكتبوا.", why: "زاوية تشغيل من الوقائع، مش ترند مختلق." },
     { id: "place", title: place ? "المكان عنوان" : "المكان ناقص", angle: place || "الموقع غير مذكور.", hook: place ? `${place} — بلا «الأفضل بالمدينة».` : "لا تخترعوا حي.", why: "هوية محلية فقط إن كُتبت." },
     { id: "voice", title: "صوت شخصي", angle: v.personalVoice || "النبرة بعد ما انحفظت.", hook: clip(core, 48), why: "كل نسخ لازم يتبع الصوت المحفوظ." },
     { id: "problem", title: "الألم المذكور", angle: intake.biggestProblem || "المشكلة غير مذكورة.", hook: clip(intake.biggestProblem || core, 48), why: "PAS على ألم كتبتموه فقط." },

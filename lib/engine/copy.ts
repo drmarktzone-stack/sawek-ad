@@ -1,13 +1,14 @@
 import type { AdVariant, Intake, Locale, VariantKind } from "../types";
 import { canonicalDoctorName } from "../demo";
 import { buildSpokenVariant, clipAtWord } from "./spoken";
-import { detectVertical, isBakery, isPediatrics, restaurantHungerLine, unknownProblemLabel } from "../vertical";
+import { detectVertical, isBakery, isPediatrics, restaurantHungerLine, unknownProblemLabel, visitCta } from "../vertical";
 import { isNoOffer } from "../no-offer";
 import { OFFER_CHIPS, resolveChipLabel } from "../chips";
 import { coachIntake, isUnknownProblem } from "./coach";
 import { applyVoiceLockToText, voiceFromIntake, voiceIsLocked } from "./voice";
 import { offerLineForCopy } from "./offer-builder";
-import { customerCopyHasLeak, gateCustomerAd, isCannedClinicSlogan, localeScriptBleed, templateLoopHits } from "../copy-purity";
+import { customerCopyHasLeak, ctaMonoculture, gateCustomerAd, isCannedClinicSlogan, localeScriptBleed, templateLoopHits } from "../copy-purity";
+import { ctasFor } from "../creative-bank";
 
 const KINDS: VariantKind[] = [
   "strong_offer",
@@ -51,7 +52,7 @@ export function generateVariants(intake: Intake): AdVariant[] {
       out.push(variant);
     }
   }
-  return diversifyVariantHeadlines(out, fixed);
+  return diversifyVariantCtas(diversifyVariantHeadlines(out, fixed), fixed);
 }
 
 function factHeadlineForKind(intake: Intake, locale: Locale, kind: VariantKind, used: string[]): string {
@@ -91,6 +92,25 @@ function diversifyVariantHeadlines(variants: AdVariant[], intake: Intake): AdVar
         h = out[i].headline;
       }
       used.push(h);
+    }
+  }
+  return out;
+}
+
+function diversifyVariantCtas(variants: AdVariant[], intake: Intake): AdVariant[] {
+  const locales: Locale[] = ["he", "ar", "en"];
+  const out = [...variants];
+  for (const locale of locales) {
+    const idxs = out.map((v, i) => (v.locale === locale ? i : -1)).filter((i) => i >= 0);
+    const ctas = idxs.map((i) => out[i]!.cta);
+    if (!ctaMonoculture(ctas)) continue;
+    const bank = [...new Set([visitCta(intake, locale), ...ctasFor(detectVertical(intake), locale)].map((s) => s.trim()).filter(Boolean))];
+    const used: string[] = [];
+    for (const i of idxs) {
+      const next = bank.find((c) => !used.includes(c)) || bank[used.length % Math.max(1, bank.length)] || out[i]!.cta;
+      const gated = gateCustomerAd({ headline: out[i]!.headline, body: out[i]!.primaryText, cta: next }, intake, locale);
+      out[i] = { ...out[i]!, headline: gated.headline, primaryText: gated.body, cta: gated.cta };
+      used.push(out[i]!.cta);
     }
   }
   return out;

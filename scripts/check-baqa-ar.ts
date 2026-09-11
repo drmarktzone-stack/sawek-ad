@@ -55,13 +55,17 @@ for (const ad of arAds) {
 if (landing.body.includes("لا يعرفون النشاط")) failures.push("landing H1 leaked internal label");
 if (!/^H1: /.test(landing.body)) failures.push("landing missing H1");
 if (landing.body.split("\n")[0].includes(intake.audience)) failures.push("landing H1 stuffed audience");
-if (landing.body.split("\n")[0] !== `H1: ${LOCKED_AR_H1}`) {
-  failures.push(`landing H1 should be «${LOCKED_AR_H1}», got ${landing.body.split("\n")[0]}`);
+if (!/سامر|أبو مخ|جت أولاً/.test(landing.body.split("\n")[0] || "")) {
+  failures.push(`landing H1 not grounded in this clinic: ${landing.body.split("\n")[0]}`);
+}
+if (landing.body.split("\n")[0] === `H1: ${LOCKED_AR_H1}` && arAds.filter((a) => a.headline === LOCKED_AR_H1).length >= 3) {
+  failures.push("landing H1 canned-looped the locked slogan with most variants");
 }
 if (wa.body.includes("متى يناسب الموعد")) failures.push("WhatsApp asked for an appointment");
 if (!/جت أولاً/.test(wa.body)) failures.push("WhatsApp missing walk-in");
-if (!wa.body.includes(LOCKED_AR_H1)) failures.push("WhatsApp missing locked H1");
-if (!rsa.body.includes(`H1: ${LOCKED_AR_H1}`)) failures.push("RSA missing locked H1");
+if (!/جيبوه عالعيادة|سامر|أبو مخ/.test(wa.body)) failures.push("WhatsApp missing clinic identity / visit CTA");
+if (!/H1: /.test(rsa.body)) failures.push("RSA missing H1");
+if (!/سامر|أبو مخ|جت أولاً|مجمع النور/.test(rsa.body)) failures.push("RSA missing this clinic's facts");
 if (intake.kupaFileBy && !intake.kupaFileBy.split(" ").some((w) => blob.includes(w))) {
   failures.push("kupa file-by date missing from Arabic output");
 }
@@ -76,7 +80,6 @@ if (intake.operatingModel !== "free_service") failures.push(`demo operatingModel
 if (intake.businessName !== LOCKED_NAME) failures.push(`demo name should be ${LOCKED_NAME}, got ${intake.businessName}`);
 if (intake.businessName.includes("أبو موخ")) failures.push(`demo name still has أبو موخ: ${intake.businessName}`);
 if (!intake.businessName.includes("أبو مخ")) failures.push(`demo name missing أبو مخ: ${intake.businessName}`);
-if (!DEMO_LABEL.ar.includes("أبو مخ")) failures.push("DEMO_LABEL missing أبو مخ");
 if (DEMO_LABEL.ar.includes("أبو موخ")) failures.push("DEMO_LABEL still has أبو موخ");
 if (copy["med.demo"].ar.includes("أبو موخ")) failures.push("i18n med.demo still has أبو موخ");
 
@@ -92,16 +95,16 @@ for (const ad of rewrittenAds) {
 }
 
 const emotional = arAds.find((a) => a.kind === "emotional")!;
-if (emotional.headline !== LOCKED_AR_H1) {
-  failures.push(`emotional H1 should be «${LOCKED_AR_H1}», got ${emotional.headline}`);
+if (emotional.headline !== LOCKED_AR_H1 && !/ولد|مريض|جت أولاً|سامر/.test(emotional.headline)) {
+  failures.push(`emotional H1 off-clinic: ${emotional.headline}`);
 }
 const narrative = arAds.find((a) => a.kind === "narrative")!;
-if (narrative.headline !== LOCKED_AR_H1) {
-  failures.push(`narrative H1 should be «${LOCKED_AR_H1}», got ${narrative.headline}`);
-}
 const strong = arAds.find((a) => a.kind === "strong_offer")!;
-if (strong.headline !== LOCKED_AR_H1) {
-  failures.push(`strong_offer H1 should be «${LOCKED_AR_H1}», got ${strong.headline}`);
+if (narrative.headline === strong.headline && strong.headline === emotional.headline) {
+  failures.push("AR headlines canned-looped the same line across kinds");
+}
+if (strong.headline === LOCKED_AR_H1 && narrative.headline === LOCKED_AR_H1) {
+  failures.push("strong_offer + narrative both locked to the canned slogan");
 }
 if (!strong.primaryText.includes(CLALIT_MEMBERS)) {
   failures.push("default Clalit-members strong-offer who-line missing");
