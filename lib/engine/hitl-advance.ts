@@ -1,5 +1,5 @@
 import type { AgentId, AgentStatus, CampaignPack, Intake, Locale } from "../types";
-import { nextHitlGate, type HitlGate } from "./hitl";
+import { nextHitlGate, packHasDiagnosis, type HitlGate } from "./hitl";
 import {
   assemblePack,
   overlayPackAgency,
@@ -21,6 +21,24 @@ function withStatus(extra: CampaignPack["agentStatus"]): CampaignPack["agentStat
   };
 }
 
+function diagnosisExtras(current: CampaignPack | null | undefined, intake: Intake) {
+  return {
+    id: current?.id,
+    offerBlueprint: current?.offerBlueprint ?? intake.offerBlueprint,
+    hsoStudio: current?.hsoStudio,
+  };
+}
+
+/** Rebuild diagnosis from current intake when the draft pack is hollow. */
+export async function ensureDiagnosisFromIntake(
+  intake: Intake,
+  current: CampaignPack | null | undefined,
+  onStatus: HitlStatusFn,
+): Promise<CampaignPack> {
+  if (packHasDiagnosis(current) && current) return current;
+  return buildDiagnosisPack(intake, onStatus, diagnosisExtras(current, intake));
+}
+
 /** Apply exactly one HITL gate. Stays on the agents surface — no route changes. */
 export async function applyHitlGate(
   intake: Intake,
@@ -31,16 +49,21 @@ export async function applyHitlGate(
 ): Promise<CampaignPack> {
   if (gate === "complete") return current;
 
-  if (gate === "diagnostic") {
-    const built = await runStrategic(intake, current.diagnosis, onStatus);
+  let ready = current;
+  if (!packHasDiagnosis(ready)) {
+    ready = await buildDiagnosisPack(intake, onStatus, diagnosisExtras(current, intake));
+  }
+
+  if (gate === "diagnostic" || !ready.diagnosis.approved || !ready.strategy?.length) {
+    const built = await runStrategic(intake, ready.diagnosis, onStatus);
     return overlayPackAgency(
       assemblePack(intake, {
-        report: current.intakeReport,
-        diagnosis: { ...current.diagnosis, approved: true, approvedAt: new Date().toISOString() },
+        report: ready.intakeReport,
+        diagnosis: { ...ready.diagnosis, approved: true, approvedAt: new Date().toISOString() },
         variants: built.variants,
         strategy: built.strategy,
         angles: built.angles,
-        id: current.id,
+        id: ready.id,
         agentStatus: withStatus({
           intake: "complete",
           diagnostic: "approved",
@@ -57,13 +80,13 @@ export async function applyHitlGate(
     const built = await runMedia(intake, onStatus);
     return overlayPackAgency(
       assemblePack(intake, {
-        report: current.intakeReport,
-        diagnosis: current.diagnosis,
-        variants: current.variants,
-        strategy: current.strategy,
+        report: ready.intakeReport,
+        diagnosis: ready.diagnosis,
+        variants: ready.variants,
+        strategy: ready.strategy,
         media: built.media,
-        angles: current.angles,
-        id: current.id,
+        angles: ready.angles,
+        id: ready.id,
         agentStatus: withStatus({
           intake: "complete",
           diagnostic: "approved",
@@ -76,17 +99,17 @@ export async function applyHitlGate(
     );
   }
 
-  const built = await runOptimizerStage(intake, current.media, onStatus);
+  const built = await runOptimizerStage(intake, ready.media, onStatus);
   const next = await overlayPackAgency(
     assemblePack(intake, {
-      report: current.intakeReport,
-      diagnosis: current.diagnosis,
-      variants: current.variants,
-      strategy: current.strategy,
-      media: current.media,
+      report: ready.intakeReport,
+      diagnosis: ready.diagnosis,
+      variants: ready.variants,
+      strategy: ready.strategy,
+      media: ready.media,
       optimizer: built.optimizer,
-      angles: current.angles,
-      id: current.id,
+      angles: ready.angles,
+      id: ready.id,
       agentStatus: withStatus({
         intake: "complete",
         diagnostic: "approved",
@@ -124,15 +147,16 @@ export async function buildDiagnosisPack(
   };
 }
 
-/** Auto-approve remaining gates until the campaign is finished. */
+/** Auto-approve remaining gates until the campaign is finished. Rebuilds a missing diagnosis from intake. */
 export async function autoAdvanceHitlToEnd(
   intake: Intake,
-  start: CampaignPack,
+  start: CampaignPack | null | undefined,
   onStatus: HitlStatusFn,
   locale: Locale,
   opts?: { pauseAfterOne?: boolean; onPack?: (pack: CampaignPack) => void },
 ): Promise<CampaignPack> {
-  let current = start;
+  let current = await ensureDiagnosisFromIntake(intake, start, onStatus);
+  opts?.onPack?.(current);
   for (let i = 0; i < 8; i++) {
     const gate = nextHitlGate(current.agentStatus, current);
     if (gate === "complete") return current;

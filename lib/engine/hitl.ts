@@ -1,8 +1,95 @@
 import type { AgentId, AgentStatus, CampaignPack } from "../types";
 
+const BLOCKED_TAIL: Record<AgentId, AgentStatus> = {
+  intake: "complete",
+  diagnostic: "needs_approval",
+  strategic: "blocked",
+  media: "blocked",
+  optimizer: "blocked",
+};
+
 export type HitlGate = "diagnostic" | "strategic" | "media" | "complete";
 
 export type HitlCtaKey = "cta.approve" | "cta.approveContinue" | "cta.finishToEnd" | "cta.approveAndFinish";
+
+/** Scan-truth diagnosis: hypotheses from current intake, not a hollow draft stub. */
+export function packHasDiagnosis(pack: CampaignPack | null | undefined): boolean {
+  return Boolean(pack?.diagnosis?.hypotheses && pack.diagnosis.hypotheses.length > 0);
+}
+
+/**
+ * Customer pause-for-review is OFF. Only an explicit advanced flag may arm it:
+ * `?hitl=review` or localStorage `sawek-hitl-dev=1`.
+ */
+export function hitlPauseEnabled(opts?: { search?: string; storage?: { getItem(key: string): string | null } | null }): boolean {
+  try {
+    const search = opts?.search ?? (typeof window !== "undefined" ? window.location.search : "");
+    if (new URLSearchParams(search).get("hitl") === "review") return true;
+    const store =
+      opts?.storage !== undefined
+        ? opts.storage
+        : typeof window !== "undefined"
+          ? window.localStorage
+          : null;
+    return store?.getItem("sawek-hitl-dev") === "1";
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Collapse stale mid-run pills so we never show strategic «يعمل» with a missing diagnosis.
+ * Live `running` UI should keep the raw onStatus map; remount / idle uses this.
+ */
+export function reconcileAgentStatus(
+  status: Partial<Record<AgentId, AgentStatus>> | undefined,
+  pack: CampaignPack | null | undefined,
+): Record<AgentId, AgentStatus> {
+  if (!packHasDiagnosis(pack)) {
+    return {
+      intake: "complete",
+      diagnostic: "needs_approval",
+      strategic: "blocked",
+      media: "blocked",
+      optimizer: "blocked",
+    };
+  }
+  const s: Record<AgentId, AgentStatus> = {
+    ...BLOCKED_TAIL,
+    ...(status ?? pack?.agentStatus),
+  };
+  const gate = nextHitlGate(s, pack);
+  if (s.strategic === "running" || s.diagnostic === "running" || s.media === "running") {
+    if (gate === "diagnostic") {
+      return {
+        intake: "complete",
+        diagnostic: pack?.diagnosis?.approved ? "approved" : "needs_approval",
+        strategic: "blocked",
+        media: "blocked",
+        optimizer: "blocked",
+      };
+    }
+    if (gate === "strategic") {
+      return {
+        intake: "complete",
+        diagnostic: "approved",
+        strategic: "needs_approval",
+        media: "blocked",
+        optimizer: "blocked",
+      };
+    }
+    if (gate === "media") {
+      return {
+        intake: "complete",
+        diagnostic: "approved",
+        strategic: "approved",
+        media: "needs_approval",
+        optimizer: "blocked",
+      };
+    }
+  }
+  return s;
+}
 
 /**
  * Next HITL action for the Agents-phase CTA.
@@ -14,6 +101,9 @@ export type HitlCtaKey = "cta.approve" | "cta.approveContinue" | "cta.finishToEn
  * After diagnosis is approved and strategy exists with `strategic: needs_approval`,
  * the gate is `strategic` (run media). After media approval, run optimizer.
  * Default product path auto-advances every gate; this function only names the next step.
+ *
+ * Pack contents win over a stale agentStatus map: missing diagnosis always
+ * rebuilds diagnostic, never parks on a running strategic pill.
  */
 export function nextHitlGate(
   status: Partial<Record<AgentId, AgentStatus>> | undefined,
@@ -21,22 +111,17 @@ export function nextHitlGate(
 ): HitlGate {
   const s = status ?? pack?.agentStatus ?? {};
 
+  if (!pack || !packHasDiagnosis(pack)) return "diagnostic";
+
   if (s.diagnostic === "needs_approval") return "diagnostic";
   if (s.strategic === "needs_approval") return "strategic";
   if (s.media === "needs_approval") return "media";
 
-  if (pack) {
-    if (!pack.diagnosis?.approved || !pack.strategy?.length) return "diagnostic";
-    if (s.strategic !== "approved" && s.strategic !== "complete") return "strategic";
-    if (s.media !== "approved" && s.media !== "complete") return "media";
-    if (s.optimizer === "complete" || pack.optimizer) return "complete";
-    return "media";
-  }
-
-  if (s.optimizer === "complete") return "complete";
-  if (s.media === "approved" || s.media === "complete") return "media";
-  if (s.strategic === "approved" || s.strategic === "complete") return "strategic";
-  return "diagnostic";
+  if (!pack.diagnosis?.approved || !pack.strategy?.length) return "diagnostic";
+  if (s.strategic !== "approved" && s.strategic !== "complete") return "strategic";
+  if (s.media !== "approved" && s.media !== "complete") return "media";
+  if (s.optimizer === "complete" || pack.optimizer) return "complete";
+  return "media";
 }
 
 /** Resume the agents panel whenever the campaign is not finished. Never kick back to stage 1. */
