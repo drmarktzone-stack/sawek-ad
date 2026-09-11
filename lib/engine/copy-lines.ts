@@ -29,6 +29,7 @@ export {
   copyBatchQuality,
   ctaOptionsFor,
   diversifyLocaleBatch,
+  lineOk,
 } from "./copy-line-pool";
 
 function parseLooseJson(text: string): Record<string, unknown> | null {
@@ -116,7 +117,7 @@ export async function generateGroundedCopyLines(input: {
     const kind = (kinds.includes(kindRaw as CopyLineKind) ? kindRaw : "headline") as CopyLineKind;
     const text = normLine(String(rec.text || rec.headline || rec.copy || rec.cta || ""));
     if (!text || seen.has(lineKey(text))) continue;
-    if (!lineOk(text, input.intake, input.locale)) continue;
+    if (!lineOk(text, input.intake, input.locale, { requireBusiness: kind !== "cta" })) continue;
     if ((input.exclude ?? []).some((e) => tooSimilar(e, text))) continue;
     seen.add(lineKey(text));
     geminiOpts.push(makeOption(kind, text, input.locale, "gemini", geminiOpts.length));
@@ -124,7 +125,7 @@ export async function generateGroundedCopyLines(input: {
 
   const merged: CopyLineOption[] = [];
   const mergedSeen = new Set<string>();
-  for (const o of [...geminiOpts, ...local.options]) {
+  for (const o of [...local.options, ...geminiOpts]) {
     if (mergedSeen.has(lineKey(o.text))) continue;
     if ([...mergedSeen].some((k) => tooSimilar(k, o.text))) continue;
     mergedSeen.add(lineKey(o.text));

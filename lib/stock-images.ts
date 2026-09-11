@@ -207,20 +207,16 @@ export function stockCaptionFor(
 ): string {
   const locale = localeOfStock(input);
   const seed = captionSeed(img, input, vertical)[locale];
-  const topicWord = clip(latinWords(img.query || "") || String(img.title || "").replace(/^File:/i, ""), 28);
+  const q = clip(String(img.query || "").replace(/[_-]+/g, " "), 40);
   let caption = seed;
-  if (topicWord && !/stock by topic|סטוק לפי|ستوك حسب الموضوع/i.test(topicWord)) {
-    const extra =
-      locale === "ar" ? topicWord : locale === "he" ? topicWord : topicWord;
-    if (extra && !caption.toLowerCase().includes(extra.toLowerCase().slice(0, 12))) {
-      caption = `${seed} · ${extra}`;
-    }
+  if (q && !isCameraFilename(q) && !/\.(jpe?g|png|webp)$/i.test(q)) {
+    const mapped = CAPTION_TOPIC.find((row) => row.re.test(q));
+    if (mapped) caption = mapped[locale];
   }
   let out = clip(caption, 80);
   let n = 2;
   while (used.has(out.toLowerCase())) {
-    const bit = clip(String(img.title || img.query || img.id || n).replace(/^File:/i, ""), 18);
-    out = clip(`${seed} · ${bit}`, 80);
+    out = clip(`${seed} · ${n}`, 80);
     n += 1;
     if (n > 8) break;
   }
@@ -482,7 +478,7 @@ export function isJunkStockTitle(title: string, extra = ""): boolean {
   if (NAMED_PORTRAIT.test(blob)) return true;
   if (HISTORICAL.test(blob) && /wellcome|engraving|lithograph|census|blitz/.test(blob.toLowerCase())) return true;
   if (/\.svg($|\s)|\.pdf($|\s)|\.djvu/i.test(title)) return true;
-  if (/church|cathedral|priest|altar|mosque|synagogue|military|camouflage|soldier|parking lot|car park|stethoscope|microscope|vintage medical|antique medical|black and white|monochrome|respirator|ventilator|sanatorium|polio/i.test(blob)) return true;
+  if (/church|cathedral|priest|altar|mosque|synagogue|military|camouflage|soldier|parking lot|car park|stethoscope|microscope|vintage medical|antique medical|black and white|monochrome|respirator|ventilator|sanatorium|polio|snake|serpent|reptile|python|boa|anatomy poster|fossil|specimen jar|colonnade|arcade architecture/i.test(blob)) return true;
   return false;
 }
 

@@ -252,7 +252,7 @@ function factBodies(intake: Intake, locale: Locale): string[] {
   return out.slice(0, 6);
 }
 
-export function lineOk(text: string, intake: Intake, locale: Locale): boolean {
+export function lineOk(text: string, intake: Intake, locale: Locale, opts?: { requireBusiness?: boolean }): boolean {
   const t = normLine(text);
   if (t.length < 2 || t.length > 280) return false;
   if (customerCopyHasLeak(t) || hasBannedNonsense(t) || isStrategyLabelLine(t)) return false;
@@ -262,10 +262,36 @@ export function lineOk(text: string, intake: Intake, locale: Locale): boolean {
   if (inventsForbidden(t, intake)) return false;
   if (isCannedClinicSlogan(t, intake) && !isPediatrics(intake)) return false;
   if (/\b(ROAS|CAC|CPA|CTR)\b/i.test(t)) return false;
-  if (/₪\s*\d|\$\d|\d+\s*%/.test(t) && !`${intake.offer} ${intake.uniqueAdvantage} ${intake.description}`.includes(t.match(/₪\s*\d|\$\d|\d+\s*%/)?.[0] || "___nomatch___")) {
-    /* inventsForbidden already covers most money; extra belt */
-  }
+  if (foreignPlaceLeak(t, intake)) return false;
+  if (opts?.requireBusiness && !groundedInThisBusiness(t, intake)) return false;
   return true;
+}
+
+const FOREIGN_PLACE =
+  /الدار البيضاء|الرباط|مراكش|طنجة|سبتة|القاهرة|دبي|عمّان|عمان(?!\s)|بيروت|تونس|الجزائر|istanbul|casablanca|rabat|marrakech|tangier|ceuta/i;
+
+export function foreignPlaceLeak(text: string, intake: Intake): boolean {
+  if (!FOREIGN_PLACE.test(text)) return false;
+  const blob = `${intake.location} ${intake.description} ${intake.businessName}`.toLowerCase();
+  const hits = text.match(FOREIGN_PLACE);
+  if (!hits) return false;
+  return !hits.some((h) => blob.includes(h.toLowerCase()));
+}
+
+export function groundedInThisBusiness(text: string, intake: Intake): boolean {
+  const src = String(text || "").toLowerCase();
+  if (!src.trim()) return false;
+  const bits = [
+    intake.businessName,
+    intake.location,
+    intake.uniqueAdvantage,
+    intake.whatsapp.split(/\s*[·|,;]\s*/)[0],
+    intake.website.replace(/^https?:\/\//i, "").split("/")[0],
+    intake.clinicHours.slice(0, 24),
+  ]
+    .map((s) => String(s || "").trim().toLowerCase())
+    .filter((s) => s.length >= 4);
+  return bits.some((b) => src.includes(b.slice(0, Math.min(14, b.length))));
 }
 
 export function makeOption(
@@ -343,6 +369,7 @@ export function buildLocalCopyLinePool(
     const t = normLine(text);
     if (!t || exclude.has(lineKey(t)) || seen.has(lineKey(t))) return;
     if (!lineOk(t, intake, locale)) return;
+    if ((source === "research" || source === "gemini") && kind !== "cta" && !groundedInThisBusiness(t, intake)) return;
     if ([...seen].some((k) => tooSimilar(k, t))) return;
     seen.add(lineKey(t));
     options.push(makeOption(kind, t, locale, source, options.length, url));
@@ -357,7 +384,7 @@ export function buildLocalCopyLinePool(
   for (const c of ctaOptionsFor(intake, locale)) add("cta", c, "facts");
 
   for (const snip of researchSnippets(opts?.research, locale)) {
-    if (!lineOk(snip.text, intake, locale)) continue;
+    if (!lineOk(snip.text, intake, locale, { requireBusiness: true })) continue;
     add("hook", snip.text, "research", snip.url);
   }
 

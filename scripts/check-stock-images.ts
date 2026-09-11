@@ -145,6 +145,9 @@ if (isOnTopicStock("clinic", "Birdcage in a garden", "aviary", undefined, "clini
 if (isOnTopicStock("clinic", "Forest cottage house", "cabin in woods", undefined, "waiting room")) {
   fail("forest house accepted via query trust");
 }
+if (isOnTopicStock("clinic", "Boa constrictor specimen", "snake anatomy")) {
+  fail("snake anatomy marked clinic-topic");
+}
 if (!isOnTopicStock("clinic", "A waiting room at a medical healthcare clinic")) {
   fail("medical clinic waiting room not on-topic");
 }

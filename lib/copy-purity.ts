@@ -275,7 +275,7 @@ export function isStrategyLabelLine(line: string): boolean {
   if (s.length <= 28 && /كافتتاح|كبطل|كمنصة|كعنوان|כגיבור|כפתיח|ככתובת|as hero|as open|as brief/i.test(s)) {
     return true;
   }
-  if (s.length <= 24 && /كرسي فاضي|כיסא ריק|رادار الأهل|רדאר הורים|لغتان متساويتان|שתי שפות|empty chair|parent radar/i.test(s)) {
+  if (s.length <= 24 && /كرسي فاضي|כיסא ריק|رادار الأهل|רדאר הורים|لغتان متساويتان|שתי שפות|empty chair|parent radar|طوابير الساعات/i.test(s)) {
     return true;
   }
   if (hasBannedNonsense(s)) return true;

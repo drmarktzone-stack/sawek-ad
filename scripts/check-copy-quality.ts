@@ -31,7 +31,7 @@ import {
 import { composeCoreMessage } from "../lib/engine/core-message";
 import { VOICE_DIALECTS, defaultDialectForLocale, effectiveDialect, lockDefaultDialect } from "../lib/engine/voice";
 import { pickIdeas } from "../lib/engine/cmo-ideas";
-import { buildLocalCopyLinePool, COPY_LINE_MIN, copyBatchQuality, ctaOptionsFor } from "../lib/engine/copy-lines";
+import { buildLocalCopyLinePool, COPY_LINE_MIN, copyBatchQuality, ctaOptionsFor, lineOk } from "../lib/engine/copy-lines";
 import { buildPostingCalendar } from "../lib/engine/posting-calendar";
 import type { CampaignPack, Intake, Locale } from "../lib/types";
 
@@ -376,6 +376,15 @@ if (samerPool.options.filter((o) => o.kind === "cta").length < 3) fail("Dr Samer
 const poolCtas = ctaOptionsFor(samer, "ar");
 if (poolCtas.length < 3) fail(`ctaOptionsFor pediatric too thin: ${poolCtas.join(" | ")}`);
 if (poolCtas.every((c) => c === "جيبوه عالعيادة")) fail("pediatric CTAs still a single canned line");
+if (samerPool.options.some((o) => /الدار البيضاء|سبتة|مراكش|casablanca/i.test(o.text))) {
+  fail(`Dr Samer pool leaked a foreign city: ${samerPool.options.map((o) => o.text).join(" | ")}`);
+}
+if (lineOk("طبيب أطفال الدار البيضاء سبتة", samer, "ar")) {
+  fail("lineOk kept Casablanca directory title for Baqa clinic");
+}
+if (lineOk("طوابير الساعات", samer, "ar", { requireBusiness: true })) {
+  fail("ungrounded hours-queue headline passed requireBusiness");
+}
 
 for (const phrase of BANNED_NONSENSE) {
   const plantedHero = gateCustomerAd({ headline: phrase, body: "د. سامر بباقة", cta: "واتساب" }, samer, "ar");
