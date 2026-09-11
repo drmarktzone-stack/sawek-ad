@@ -1,4 +1,4 @@
-import type { CampaignPack, CoachReport, HsoStudioState, Intake, LabRun, Locale, SelfPlan, SelfProfile, StudioPiece, ViralDeskState } from "./types";
+import type { AgentId, AgentStatus, CampaignPack, CoachReport, HsoStudioState, Intake, LabRun, Locale, SelfPlan, SelfProfile, StudioPiece, ViralDeskState } from "./types";
 import { emptyIntake } from "./engine/validate";
 import { coachIntake } from "./engine/coach";
 import { copyLeaksClinic, intakeIsClinicDemo, isBlockedEmptySessionName } from "./clinic-leak";
@@ -107,11 +107,36 @@ export function savePackLang(locale: Locale) {
 
 export type WizardPhase = "wizard" | "interview" | "agents";
 
+const AGENT_IDS: AgentId[] = ["intake", "diagnostic", "strategic", "media", "optimizer"];
+const AGENT_STATUSES: AgentStatus[] = [
+  "idle",
+  "running",
+  "blocked",
+  "needs_approval",
+  "approved",
+  "complete",
+  "refused",
+];
+
+function parseAgentStatus(raw: unknown): Record<AgentId, AgentStatus> | undefined {
+  if (!raw || typeof raw !== "object") return undefined;
+  const src = raw as Record<string, unknown>;
+  const out = {} as Record<AgentId, AgentStatus>;
+  for (const id of AGENT_IDS) {
+    const v = src[id];
+    if (typeof v !== "string" || !AGENT_STATUSES.includes(v as AgentStatus)) return undefined;
+    out[id] = v as AgentStatus;
+  }
+  return out;
+}
+
 export interface DraftState {
   intake: Intake;
   step: 1 | 2 | 3 | 4;
   phase?: WizardPhase;
   packId?: string;
+  agentStatus?: Record<AgentId, AgentStatus>;
+  pauseForReview?: boolean;
   coach?: CoachReport;
   hsoStudio?: HsoStudioState;
   viral?: ViralDeskState;
@@ -154,6 +179,8 @@ export function loadDraft(): DraftState {
     },
     phase,
     packId: typeof d.packId === "string" ? d.packId : undefined,
+    agentStatus: parseAgentStatus(d.agentStatus),
+    pauseForReview: d.pauseForReview === true,
     coach: d.coach && typeof d.coach === "object" ? d.coach : undefined,
     hsoStudio:
       d.hsoStudio && typeof d.hsoStudio === "object" && Array.isArray(d.hsoStudio.variants)

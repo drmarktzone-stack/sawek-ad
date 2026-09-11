@@ -18,15 +18,15 @@ import {
   wizardSectionDomId,
   type WizardRequiredField,
 } from "@/lib/engine/validate";
-import { assemblePack, idleStatus, overlayPackAgency, runIntakeAndDiagnosis, runMedia, runOptimizerStage, runStrategic } from "@/lib/engine/run";
+import { idleStatus, runFullPipeline } from "@/lib/engine/run";
 import { hydrateScanIntake } from "@/lib/intake-locale";
-import { businessKey } from "@/lib/engine/ad-engine/sources";
 import { loadDraft, saveDraft, INGEST_APPLIED_EVENT } from "@/lib/storage";
-import { loadCampaignTools } from "@/lib/campaign-tools";
+import { loadCampaignTools, restoreLivePack } from "@/lib/campaign-tools";
+import { fillIntakeFromScanTruth } from "@/lib/campaign-prefill";
 import { charterAllowsCampaign } from "@/lib/operating-niche";
-import { NextStepCard } from "@/components/next-step-card";
 import { NicheGateCard } from "@/components/niche-gate";
-import { nextHitlGate } from "@/lib/engine/hitl";
+import { hitlCtaDisabled, hitlCtaKey, isParkedHitlGate, nextHitlGate, shouldResumeAgents } from "@/lib/engine/hitl";
+import { autoAdvanceHitlToEnd, buildDiagnosisPack } from "@/lib/engine/hitl-advance";
 import { OfferGateBanner } from "@/components/offer-gate-banner";
 import { syncCampaign } from "@/lib/supabase";
 import { uid } from "@/lib/utils";
@@ -200,7 +200,11 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
   const [pack, setPack] = useState<CampaignPack | null>(null);
   const [running, setRunning] = useState(false);
   const [hitlError, setHitlError] = useState("");
+  const [pauseForReview, setPauseForReview] = useState(false);
   const advancing = useRef(false);
+  const hitlMounted = useRef(true);
+  const autoResumed = useRef(false);
+  const startAgentsRef = useRef<() => Promise<void>>(async () => {});
   const [offerBlocked, setOfferBlocked] = useState(false);
   const [compOpen, setCompOpen] = useState(false);
   const [compDraft, setCompDraft] = useState<Competitor>({ id: "", name: "", url: "", notes: "" });
@@ -266,14 +270,16 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
         offer: intake.offerCustom,
       });
       const resume = d.phase === "agents" || d.phase === "interview" ? d.phase : "wizard";
-      const existing = loadCampaignTools().pack;
-      const needHitl = Boolean(existing?.diagnosis?.hypotheses?.length && existing.diagnosis.approved === false);
+      const existing = loadCampaignTools().pack ?? restoreLivePack();
+      setPauseForReview(d.pauseForReview === true);
       if (existing) {
         setPack(existing);
-        setAgentStatus(existing.agentStatus);
+        setAgentStatus(existing.agentStatus ?? d.agentStatus ?? idleStatus());
         setHitlError("");
+      } else if (d.agentStatus) {
+        setAgentStatus(d.agentStatus);
       }
-      if (resume === "agents" && needHitl) {
+      if (shouldResumeAgents({ phase: resume, pack: existing, status: existing?.agentStatus ?? d.agentStatus })) {
         setPhase("agents");
       } else if (resume === "interview") {
         setPhase("interview");
@@ -281,8 +287,33 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
         setPhase("wizard");
       }
     }
+    advancing.current = false;
+    setRunning(false);
     setHydrated(true);
   }, [client, hydrated, locale]);
+
+  useEffect(() => {
+    hitlMounted.current = true;
+    advancing.current = false;
+    setRunning(false);
+    return () => {
+      hitlMounted.current = false;
+      advancing.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated || autoResumed.current) return;
+    autoResumed.current = true;
+    advancing.current = false;
+    setRunning(false);
+    if (pauseForReview) return;
+    const existing = restoreLivePack();
+    if (!existing) return;
+    const gate = nextHitlGate(existing.agentStatus, existing);
+    if (!isParkedHitlGate(gate)) return;
+    void startAgentsRef.current();
+  }, [hydrated, pauseForReview]);
 
   useEffect(() => {
     if (!client) return;
@@ -294,6 +325,8 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
       setPhase("wizard");
       setPack(null);
       setAgentStatus(idleStatus());
+      advancing.current = false;
+      setRunning(false);
     };
     window.addEventListener(EMPTY_CAMPAIGN_EVENT, onEmpty);
     return () => window.removeEventListener(EMPTY_CAMPAIGN_EVENT, onEmpty);
@@ -321,27 +354,24 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
       });
       const resume = d.phase === "interview" || d.phase === "agents" ? d.phase : "wizard";
       const tools = loadCampaignTools();
-      const existing = tools.pack;
-      const needHitl = Boolean(existing?.diagnosis?.hypotheses?.length && existing.diagnosis.approved === false);
+      const existing = tools.pack ?? restoreLivePack();
+      if (existing) {
+        setPack(existing);
+        setAgentStatus(existing.agentStatus ?? idleStatus());
+        setHitlError("");
+      }
       if (resume === "wizard") {
-        setPhase("wizard");
-        if (tools.pack) {
-          setPack(tools.pack);
-          setAgentStatus(tools.pack.agentStatus);
-          setHitlError("");
+        if (shouldResumeAgents({ phase: resume, pack: existing, status: existing?.agentStatus })) {
+          setPhase("agents");
         } else {
+          setPhase("wizard");
+        }
+        if (!existing) {
           setPack(null);
           setAgentStatus(idleStatus());
         }
-      } else if (resume === "agents" && needHitl && existing) {
-        setPack(existing);
-        setAgentStatus(existing.agentStatus);
-        setHitlError("");
+      } else if (shouldResumeAgents({ phase: resume, pack: existing, status: existing?.agentStatus })) {
         setPhase("agents");
-      } else if (resume === "agents") {
-        setPack(existing);
-        setAgentStatus(existing?.agentStatus ?? idleStatus());
-        setPhase("wizard");
       } else {
         setPhase(resume);
       }
@@ -352,26 +382,27 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
 
   useEffect(() => {
     if (!hydrated) return;
-    const samePack = Boolean(
-      pack && businessKey(pack.intake.businessName) === businessKey(intake.businessName),
-    );
-    const persist = () =>
+    const persist = () => {
+      const prev = loadDraft();
       saveDraft({
         intake,
         step,
         phase,
-        packId: samePack ? pack?.id : undefined,
+        packId: pack?.id ?? prev.packId,
+        agentStatus,
+        pauseForReview,
         coach: coachIntake(intake),
-        hsoStudio: samePack ? loadDraft().hsoStudio : undefined,
-        viral: samePack ? loadDraft().viral : undefined,
+        hsoStudio: prev.hsoStudio,
+        viral: prev.viral,
       });
+    };
     if (wantsEmptyCampaign()) {
       if (releaseEmptyIfTypedName(intake.businessName)) persist();
       else saveDraft({ intake: emptyIntake(), step: 1, phase: "wizard" });
       return;
     }
     persist();
-  }, [intake, step, phase, pack?.id, hydrated]);
+  }, [intake, step, phase, pack?.id, agentStatus, pauseForReview, hydrated]);
 
   useEffect(() => {
     if (!hydrated) return;
@@ -499,6 +530,7 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
     setPhase("interview");
     setPack(null);
     setAgentStatus(idleStatus());
+    releaseHitlRun();
   }
 
   function newCampaign() {
@@ -509,6 +541,7 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
     setPhase("wizard");
     setPack(null);
     setAgentStatus(idleStatus());
+    releaseHitlRun();
     setHitlError("");
     setCustom({ audience: false, problem: false, advantage: false, goal: false, offer: false });
   }
@@ -517,159 +550,136 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
     setAgentStatus((s) => ({ ...s, [id]: status }));
   }
 
+  function releaseHitlRun() {
+    advancing.current = false;
+    if (hitlMounted.current) setRunning(false);
+  }
+
+  function persistLivePack(next: CampaignPack, nextPhase: "wizard" | "agents" = "agents") {
+    const prev = loadDraft();
+    void syncCampaign(next);
+    setPack(next);
+    setAgentStatus(next.agentStatus);
+    saveDraft({
+      ...prev,
+      intake,
+      step: 4,
+      phase: nextPhase,
+      packId: next.id,
+      agentStatus: next.agentStatus,
+      pauseForReview,
+    });
+  }
+
+  function livePack(): CampaignPack | null {
+    return pack ?? restoreLivePack();
+  }
+
+  function fillMissingFromScan() {
+    const next = fillIntakeFromScanTruth(intake);
+    setIntake(next);
+    setHitlError("");
+  }
+
   async function startBuild() {
     if (!wizardReady(intake)) return;
     if (!charterAllowsCampaign(intake)) return;
     setOfferBlocked(false);
-    await runAgents();
+    await beginAgents();
   }
 
-  async function runAgents() {
-    setPhase("agents");
-    setRunning(true);
-    setHitlError("");
-    setAgentStatus({
-      intake: "running",
-      diagnostic: "idle",
-      strategic: "blocked",
-      media: "blocked",
-      optimizer: "blocked",
-    });
-    const { report, diagnosis } = await runIntakeAndDiagnosis(intake, onStatus);
-    const draft = loadDraft();
-    const p = {
-      ...assemblePack(intake, {
-        report,
-        diagnosis,
-        agentStatus: {
-          intake: "complete",
-          diagnostic: "needs_approval",
-          strategic: "blocked",
-          media: "blocked",
-          optimizer: "blocked",
-        },
-      }),
-      offerBlueprint: intake.offerBlueprint,
-      hsoStudio: draft.hsoStudio,
-    };
-    void syncCampaign(p);
-    setPack(p);
-    setAgentStatus(p.agentStatus);
-    setRunning(false);
-    saveDraft({ intake, step: 4, phase: "agents", packId: p.id });
-    if (!taskMode) {
-      router.push(withLang("/task/ad", locale));
-    }
-  }
-
-  async function advanceHitl() {
+  async function beginAgents() {
+    const existing = livePack();
+    const parked = existing ? isParkedHitlGate(nextHitlGate(existing.agentStatus, existing)) : false;
+    if (advancing.current && parked) releaseHitlRun();
     if (advancing.current) return;
+    advancing.current = true;
+    if (hitlMounted.current) setRunning(true);
+    setPhase("agents");
     setHitlError("");
-    let current = pack;
-    if (!current) {
-      current = loadCampaignTools().pack;
-      if (current) {
-        setPack(current);
-        setAgentStatus(current.agentStatus);
-      }
-    }
-    if (!current) {
-      if (wizardReady(intake)) {
-        advancing.current = false;
-        await runAgents();
+    try {
+      const live = livePack();
+      if (live) {
+        const gate = nextHitlGate(live.agentStatus, live);
+        if (gate === "complete") {
+          persistLivePack(live, "wizard");
+          router.push(withLang(`/campaigns/${live.id}`, locale));
+          return;
+        }
+        if (pauseForReview && gate === "diagnostic" && live.diagnosis?.hypotheses?.length) {
+          persistLivePack(live, "agents");
+          return;
+        }
+        const next = await autoAdvanceHitlToEnd(intake, live, onStatus, locale, {
+          pauseAfterOne: pauseForReview,
+          onPack: (p) => persistLivePack(p, "agents"),
+        });
+        const done = nextHitlGate(next.agentStatus, next) === "complete";
+        persistLivePack(next, done ? "wizard" : "agents");
+        if (done) router.push(withLang(`/campaigns/${next.id}`, locale));
         return;
       }
+      if (pauseForReview) {
+        persistLivePack(
+          await buildDiagnosisPack(intake, onStatus, {
+            offerBlueprint: intake.offerBlueprint,
+            hsoStudio: loadDraft().hsoStudio,
+          }),
+          "agents",
+        );
+        return;
+      }
+      const next = await runFullPipeline(intake, onStatus);
+      persistLivePack(next, "wizard");
+      router.push(withLang(`/campaigns/${next.id}`, locale));
+    } catch {
+      if (hitlMounted.current) setHitlError(t("agents.hitlError"));
+    } finally {
+      releaseHitlRun();
+    }
+  }
+  startAgentsRef.current = beginAgents;
+
+  async function advanceHitl() {
+    setHitlError("");
+    const current = livePack();
+    if (current) {
+      setPack(current);
+      setAgentStatus(current.agentStatus);
+    }
+    if (!current) {
+      releaseHitlRun();
       setHitlError(t("agents.packMissing"));
-      setRunning(false);
       return;
     }
 
-    const gate = nextHitlGate(agentStatus, current);
+    const gate = nextHitlGate(current.agentStatus, current);
+    if (isParkedHitlGate(gate) && advancing.current) releaseHitlRun();
     if (gate === "complete") {
-      saveDraft({ intake, step: 4, phase: "wizard", packId: current.id });
+      releaseHitlRun();
+      persistLivePack(current, "wizard");
       router.push(withLang(`/campaigns/${current.id}`, locale));
       return;
     }
 
+    if (advancing.current) return;
     advancing.current = true;
-    setRunning(true);
+    if (hitlMounted.current) setRunning(true);
+    setPhase("agents");
     try {
-      if (gate === "diagnostic") {
-        const built = await runStrategic(intake, current.diagnosis, onStatus);
-        const next = await overlayPackAgency(assemblePack(intake, {
-          report: current.intakeReport,
-          diagnosis: { ...current.diagnosis, approved: true, approvedAt: new Date().toISOString() },
-          variants: built.variants,
-          strategy: built.strategy,
-          angles: built.angles,
-          id: current.id,
-          agentStatus: {
-            intake: "complete",
-            diagnostic: "approved",
-            strategic: "needs_approval",
-            media: "blocked",
-            optimizer: "blocked",
-          },
-        }), { locale });
-        void syncCampaign(next);
-        setPack(next);
-        setAgentStatus(next.agentStatus);
-        setPhase("wizard");
-        saveDraft({ intake, step: 4, phase: "wizard", packId: next.id });
-        router.push(withLang("/tools/core-message", locale));
-        return;
-      } else if (gate === "strategic") {
-        const built = await runMedia(intake, onStatus);
-        const next = await overlayPackAgency(assemblePack(intake, {
-          report: current.intakeReport,
-          diagnosis: current.diagnosis,
-          variants: current.variants,
-          strategy: current.strategy,
-          media: built.media,
-          angles: current.angles,
-          id: current.id,
-          agentStatus: {
-            intake: "complete",
-            diagnostic: "approved",
-            strategic: "approved",
-            media: "needs_approval",
-            optimizer: "blocked",
-          },
-        }), { locale });
-        void syncCampaign(next);
-        setPack(next);
-        setAgentStatus(next.agentStatus);
-      } else {
-        const built = await runOptimizerStage(intake, current.media, onStatus);
-        const next = await overlayPackAgency(assemblePack(intake, {
-          report: current.intakeReport,
-          diagnosis: current.diagnosis,
-          variants: current.variants,
-          strategy: current.strategy,
-          media: current.media,
-          optimizer: built.optimizer,
-          angles: current.angles,
-          id: current.id,
-          agentStatus: {
-            intake: "complete",
-            diagnostic: "approved",
-            strategic: "approved",
-            media: "approved",
-            optimizer: "complete",
-          },
-        }), { locale });
-        const saved = { ...next, saved: true };
-        void syncCampaign(saved);
-        setPack(saved);
-        setAgentStatus(saved.agentStatus);
-        saveDraft({ intake, step: 4, phase: "wizard", packId: saved.id });
-        router.push(withLang(`/campaigns/${saved.id}`, locale));
+      const next = await autoAdvanceHitlToEnd(intake, current, onStatus, locale, {
+        pauseAfterOne: pauseForReview,
+        onPack: (p) => persistLivePack(p, "agents"),
+      });
+      const done = nextHitlGate(next.agentStatus, next) === "complete";
+      persistLivePack(next, done ? "wizard" : "agents");
+      if (done) {
+        router.push(withLang(`/campaigns/${next.id}`, locale));
       }
     } catch {
-      setHitlError(t("agents.hitlError"));
+      if (hitlMounted.current) setHitlError(t("agents.hitlError"));
     } finally {
-      advancing.current = false;
-      setRunning(false);
+      releaseHitlRun();
     }
   }
 
@@ -1225,6 +1235,18 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
                       </ul>
                     </div>
                   )}
+                  <label className="mt-6 flex cursor-pointer items-start gap-3 rounded-[14px] border border-navy/10 bg-white px-4 py-3 text-sm" data-testid="hitl-pause-review">
+                    <input
+                      type="checkbox"
+                      className="mt-1 size-4 accent-[var(--teal)]"
+                      checked={pauseForReview}
+                      onChange={(e) => setPauseForReview(e.target.checked)}
+                    />
+                    <span>
+                      <span className="block font-semibold text-navy">{t("agents.pauseReview")}</span>
+                      <span className="mt-1 block text-muted">{t("agents.pauseReviewHint")}</span>
+                    </span>
+                  </label>
                   <Button
                     type="button"
                     size="lg"
@@ -1332,10 +1354,10 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
             />
           </div>
           <div className="mt-6 flex flex-col gap-3">
-            <Button type="button" size="lg" onClick={runAgents} disabled={running}>
+            <Button type="button" size="lg" onClick={() => void beginAgents()} disabled={running}>
               {t("cta.next")}
             </Button>
-            <button type="button" className="text-sm text-muted hover:text-navy" onClick={runAgents}>
+            <button type="button" className="text-sm text-muted hover:text-navy" onClick={() => void beginAgents()}>
               {t("interview.skip")}
             </button>
             <button type="button" className="text-sm text-muted" onClick={() => setPhase("wizard")}>
@@ -1351,7 +1373,11 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
           agentStatus={agentStatus}
           running={running}
           hitlError={hitlError}
+          pauseForReview={pauseForReview}
+          onPauseForReview={setPauseForReview}
           onApprove={() => void advanceHitl()}
+          onRetry={() => void advanceHitl()}
+          onFillFromScan={fillMissingFromScan}
           onBack={() => {
             setHitlError("");
             setPhase("wizard");
@@ -1418,7 +1444,11 @@ function AgentsPanel({
   agentStatus,
   running,
   hitlError,
+  pauseForReview,
+  onPauseForReview,
   onApprove,
+  onRetry,
+  onFillFromScan,
   onBack,
   onNewCampaign,
   onPack,
@@ -1427,40 +1457,36 @@ function AgentsPanel({
   agentStatus: Record<AgentId, AgentStatus>;
   running: boolean;
   hitlError: string;
+  pauseForReview: boolean;
+  onPauseForReview: (next: boolean) => void;
   onApprove: () => void;
+  onRetry: () => void;
+  onFillFromScan: () => void;
   onBack: () => void;
   onNewCampaign: () => void;
   onPack?: (p: CampaignPack) => void;
 }) {
   const { t, locale } = useI18n();
   const gate = nextHitlGate(agentStatus, pack);
-  const diagnosisReady = Boolean(pack?.diagnosis?.hypotheses?.length);
-  const diagnosisApproved = Boolean(pack?.diagnosis?.approved);
-  const approveLabel =
-    running ? t("agents.advancing") : gate === "diagnostic" ? t("cta.approve") : t("cta.continueStage");
+  const ctaDisabled = hitlCtaDisabled(gate, running);
+  const approveLabel = t(hitlCtaKey(gate, { pauseForReview }));
   return (
     <section className="hitl-agents">
-      {diagnosisApproved ? (
-        <NextStepCard compact />
-      ) : (
-        <>
-          <h2 className="agency-display mb-2 text-center text-3xl">{t("agents.title")}</h2>
-          <p className="mb-6 text-center text-sm text-muted">{t("agents.hitl")}</p>
-          <ul className="mb-8 space-y-2">
-            {AGENT_KEYS.map((a, i) => (
-              <li
-                key={a.id}
-                className="agency-board flex items-center justify-between px-4 py-3"
-              >
-                <span className="text-sm font-semibold">
-                  {i + 1}. {t(a.key)}
-                </span>
-                <StatusPill status={agentStatus[a.id]} />
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
+      <h2 className="agency-display mb-2 text-center text-3xl">{t("agents.title")}</h2>
+      <p className="mb-6 text-center text-sm text-muted">{t("agents.hitl")}</p>
+      <ul className="mb-8 space-y-2">
+        {AGENT_KEYS.map((a, i) => (
+          <li
+            key={a.id}
+            className="agency-board flex items-center justify-between px-4 py-3"
+          >
+            <span className="text-sm font-semibold">
+              {i + 1}. {t(a.key)}
+            </span>
+            <StatusPill status={agentStatus[a.id]} />
+          </li>
+        ))}
+      </ul>
 
       {pack && (
         <div className="agency-board p-5 sm:p-7">
@@ -1525,27 +1551,54 @@ function AgentsPanel({
             {hitlError}
           </p>
         ) : null}
-        {diagnosisReady && !diagnosisApproved ? (
+        {running ? (
+          <p className="mb-3 text-center text-sm font-semibold text-teal" data-testid="hitl-progress">
+            {t("agents.advancing")}
+          </p>
+        ) : null}
+        <label className="mb-4 flex cursor-pointer items-start gap-3 text-sm">
+          <input
+            type="checkbox"
+            className="mt-1 size-4 accent-[var(--teal)]"
+            checked={pauseForReview}
+            onChange={(e) => onPauseForReview(e.target.checked)}
+            data-testid="hitl-pause-review-agents"
+          />
+          <span>
+            <span className="block font-semibold text-navy">{t("agents.pauseReview")}</span>
+            <span className="mt-1 block text-muted">{t("agents.pauseReviewHint")}</span>
+          </span>
+        </label>
+        {gate !== "complete" ? (
           <Button
             type="button"
             size="lg"
             className="w-full"
-            disabled={running}
+            disabled={ctaDisabled}
             onClick={onApprove}
             data-testid="hitl-approve"
+            data-hitl-gate={gate}
           >
             {approveLabel}
           </Button>
-        ) : diagnosisApproved ? null : (
+        ) : pack ? null : (
           <p className="mb-3 text-center text-sm font-semibold text-navy" data-testid="hitl-need-intake">
             {t("agents.needIntake")}
           </p>
         )}
-        {diagnosisApproved ? null : (
-          <button type="button" className="mt-3 w-full text-sm text-muted" onClick={onBack} data-testid="hitl-reject">
-            {t("cta.reject")}
-          </button>
-        )}
+        {hitlError ? (
+          <div className="mt-3 flex flex-col gap-2">
+            <Button type="button" size="lg" variant="outline" className="w-full" onClick={onRetry} data-testid="hitl-retry">
+              {t("agents.retry")}
+            </Button>
+            <Button type="button" size="lg" variant="outline" className="w-full" onClick={onFillFromScan} data-testid="hitl-fill-scan">
+              {t("agents.fillFromScan")}
+            </Button>
+          </div>
+        ) : null}
+        <button type="button" className="mt-3 w-full text-sm text-muted" onClick={onBack} data-testid="hitl-reject">
+          {t("cta.reject")}
+        </button>
         <div className="mt-6 border-t border-navy/10 pt-5">
           <Button type="button" size="lg" className="w-full" onClick={onNewCampaign} data-testid="hitl-new">
             {t("cta.newOther")}
