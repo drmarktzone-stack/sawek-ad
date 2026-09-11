@@ -1123,6 +1123,19 @@ export function factsToIntake(body: {
   audience?: unknown;
   facts?: unknown;
   intake?: unknown;
+  businessName?: unknown;
+  category?: unknown;
+  location?: unknown;
+  website?: unknown;
+  whatsapp?: unknown;
+  phone?: unknown;
+  clinicHours?: unknown;
+  uniqueAdvantage?: unknown;
+  biggestProblem?: unknown;
+  offer?: unknown;
+  mainGoal?: unknown;
+  operatingModel?: unknown;
+  [key: string]: unknown;
 }): Intake {
   const intake = emptyIntake();
   const facts = body.facts;
