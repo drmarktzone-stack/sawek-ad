@@ -41,6 +41,7 @@ import { CmoIdeasStrip } from "@/components/cmo-ideas-strip";
 import { ViralDesk } from "@/components/viral-desk";
 import { DiagnosisGaps } from "@/components/diagnosis-gaps";
 import { ResearchDesk } from "@/components/research-desk";
+import { CopyLineMarketplace } from "@/components/copy-line-marketplace";
 import { buildCmoIdeasPack } from "@/lib/engine/cmo-ideas";
 import { heroIdeaOf, syncPackEngines } from "@/lib/engine/campaign-orchestrator";
 import { PostingWeek } from "@/components/posting-week";
@@ -303,6 +304,8 @@ export function ResultView({
         onGeneratedImage={setGeneratedImage}
         onPack={onChange}
       />
+
+      <CopyLineMarketplace pack={pack} locale={packLang} onPack={onChange} />
 
       {canUse(plan, "calendar") ? (
         <PostingWeek pack={pack} locale={packLang} days={30} />

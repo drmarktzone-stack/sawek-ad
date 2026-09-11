@@ -555,6 +555,32 @@ export interface ImageCompositionDecision {
   source: "heuristic" | "pixels" | "vision" | "unknown";
 }
 
+/** Customer-facing hook / headline / body / CTA the client picks for THEIR campaign. */
+export type CopyLineKind = "hook" | "headline" | "primaryText" | "cta";
+export type CopyLineSource = "gemini" | "research" | "facts";
+
+export interface CopyLineOption {
+  id: string;
+  kind: CopyLineKind;
+  text: string;
+  locale: Locale;
+  source: CopyLineSource;
+  /** Public URL when the line was grounded in research / Search Grounding. */
+  sourceUrl?: string;
+}
+
+export interface CopyLinePool {
+  locale: Locale;
+  options: CopyLineOption[];
+  selectedIds: string[];
+  /** Primary headline/CTA ids the complete-ad should lead with. */
+  primaryIds: string[];
+  generatedAt: string;
+  batchId: string;
+  grounded?: boolean;
+  sources?: { url: string; title?: string }[];
+}
+
 export interface CampaignPack {
   id: string;
   createdAt: string;
@@ -617,6 +643,8 @@ export interface CampaignPack {
   };
   /** Free public ad-intelligence desk (Meta Library, TikTok CC, peers). */
   research?: MarketResearch;
+  /** Selectable hook/headline/body/CTA marketplace for this business. */
+  copyLines?: CopyLinePool;
   /** Vertex Gemini Flash burst variations (Meta / Google / WhatsApp / story). */
   flashVariations?: {
     variations: Array<{

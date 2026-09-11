@@ -1079,6 +1079,8 @@ export function factsToIntake(body: { description?: unknown; audience?: unknown;
     intake.website = str("website") || str("url") || str("site");
     intake.whatsapp = str("whatsapp") || str("phone") || str("tel") || str("mobile");
     intake.clinicHours = str("clinicHours") || str("hours") || str("openingHours");
+    const om = str("operatingModel");
+    if (om === "paid" || om === "free_service") intake.operatingModel = om;
     intake.brandTone = str("brandTone") || str("personalVoice");
     intake.brandPositioning = str("brandPositioning");
     if (str("kupaFileBy")) intake.kupaFileBy = str("kupaFileBy");

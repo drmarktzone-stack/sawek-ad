@@ -69,6 +69,7 @@ import { useI18n } from "@/components/i18n-provider";
 import { CoachPanel } from "@/components/coach-panel";
 import { DiagnosisCmoStrip, DiagnosisGaps } from "@/components/diagnosis-gaps";
 import { ResearchDesk } from "@/components/research-desk";
+import { CopyLineMarketplace } from "@/components/copy-line-marketplace";
 import { ImageOfferPicker } from "@/components/image-offer-picker";
 import { VoiceFields } from "@/components/voice-fields";
 import { emptyVoice, voiceFromIntake } from "@/lib/engine/voice";
@@ -1546,6 +1547,7 @@ function AgentsPanel({
           ) : null}
           <DiagnosisCmoStrip cmoIdeas={pack.cmoIdeas} locale={locale} />
           <ResearchDesk pack={pack} locale={locale} onPack={onPack} compact />
+          {onPack ? <CopyLineMarketplace pack={pack} locale={locale} onPack={onPack} compact /> : null}
           <DiagnosisGaps
             report={pack.intakeReport}
             moves={pack.cmoIdeas?.gapPlan?.moves}

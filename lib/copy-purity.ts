@@ -13,6 +13,7 @@ import { isNoOffer } from "./no-offer";
 import { ADVANTAGE_CHIPS, AUDIENCE_CHIPS, GOAL_CHIPS, OFFER_CHIPS, PROBLEM_CHIPS, resolveChipLabel } from "./chips";
 import { arabicRegisterBleed, effectiveDialect } from "./engine/voice";
 import { isPediatrics, isPlasticAestheticClinic } from "./vertical";
+import { isClalitCoverageFact } from "./operating-model";
 
 export const HE_SCRIPT = /[\u0590-\u05FF]/;
 export const AR_SCRIPT = /[\u0600-\u06FF]/;
@@ -63,6 +64,12 @@ export const COPY_LEAK_PHRASES = [
   "problem mirror",
   "offer or integrity",
   "fact-first spine",
+  "الساعات هي البطل",
+  "שעות כגיבור",
+  "hours as hero",
+  "المكان كبطل",
+  "מקום כגיבור",
+  "place as hero",
 ] as const;
 
 const LEAK_RE: RegExp[] = [
@@ -105,6 +112,9 @@ export function customerCopyLeakHits(text: string): string[] {
   for (const re of LEAK_RE) {
     if (re.test(src)) hits.push(re.source);
   }
+  for (const p of BANNED_NONSENSE) {
+    if (p.length >= 3 && (src.includes(p) || lower.includes(p.toLowerCase()))) hits.push(p);
+  }
   return [...new Set(hits)];
 }
 
@@ -119,15 +129,52 @@ export const CANNED_CLINIC_SLOGANS = [
   "כשהילד חולה",
   "הילד חולה",
   "when the child is sick",
-  "مش شعار طبي",
-  "לא סלוגן רפואי",
   "جت أولاً، بلا دور مختلق",
   "לפי סדר הגעה, בלי תור מדומה",
 ] as const;
 
+/** Instruction / strategy-label lines — never customer copy, even on the matching niche. */
+export const BANNED_NONSENSE = [
+  "الساعات هي البطل",
+  "שעות כגיבור",
+  "hours as hero",
+  "مش شعار طبي",
+  "לא סלוגן רפואי",
+  "not a medical slogan",
+  "كرسي فاضي — بلا وجوه أطفال",
+  "כיסא ריק — בלי פני ילדים",
+  "empty chair — no children’s faces",
+  "بلا مسرح نجوم",
+  "בלי תיאטרון כוכבים",
+  "no star theatre",
+  "عمود حقائق",
+  "עמוד שדרה של עובדות",
+  "الفجوة كملخص",
+  "הפער כבריף",
+] as const;
+
+export function bannedNonsenseHits(text: string): string[] {
+  const src = String(text ?? "");
+  if (!src.trim()) return [];
+  const hits: string[] = [];
+  const lower = src.toLowerCase();
+  for (const p of BANNED_NONSENSE) {
+    if (p.length >= 3 && (src.includes(p) || lower.includes(p.toLowerCase()))) hits.push(p);
+  }
+  if (/(?:هي|هو)\s+البطل|(?:as hero)|כגיבור/i.test(src) && src.replace(/\s+/g, " ").trim().length <= 40) {
+    hits.push("hero-strategy-label");
+  }
+  return [...new Set(hits)];
+}
+
+export function hasBannedNonsense(text: string): boolean {
+  return bannedNonsenseHits(text).length > 0;
+}
+
 export function isCannedClinicSlogan(text: string, intake?: Intake): boolean {
   const src = String(text ?? "");
   if (!src.trim()) return false;
+  if (hasBannedNonsense(src)) return true;
   if (intake && isPediatrics(intake)) return false;
   return CANNED_CLINIC_SLOGANS.some((p) => src.includes(p));
 }
@@ -166,6 +213,43 @@ export function templateLoopHits(headlines: string[]): string[] {
   return [...new Set(hits)];
 }
 
+function normCtaKey(s: string): string {
+  return s.replace(/\s+/g, " ").trim().toLowerCase();
+}
+
+/** Share of lines that equal the most common value (0–1). */
+export function identicalShare(lines: string[]): number {
+  const cleaned = lines.map(normCtaKey).filter(Boolean);
+  if (cleaned.length < 2) return 0;
+  const counts = new Map<string, number>();
+  for (const c of cleaned) counts.set(c, (counts.get(c) || 0) + 1);
+  let max = 0;
+  for (const n of counts.values()) if (n > max) max = n;
+  return max / cleaned.length;
+}
+
+/** Fail generation when ≥50% of CTAs in a batch are identical. */
+export function ctaMonoculture(ctas: string[]): boolean {
+  return identicalShare(ctas) >= 0.5;
+}
+
+export function clalitContamination(text: string, intake: Intake): boolean {
+  if (isClalitCoverageFact(intake)) return false;
+  return /كلاليت|כללית|clalit|kupat\s*holim|קופת\s*חולים/i.test(String(text ?? ""));
+}
+
+/** Day/platform rows must differ in hook OR angle, not only the channel label. */
+export function dayPlatformSameHook(a: { headline?: string; hook?: string; angle?: string }, b: { headline?: string; hook?: string; angle?: string }): boolean {
+  const hookA = (a.hook || a.headline || "").replace(/\s+/g, " ").trim();
+  const hookB = (b.hook || b.headline || "").replace(/\s+/g, " ").trim();
+  const angA = (a.angle || "").replace(/\s+/g, " ").trim();
+  const angB = (b.angle || "").replace(/\s+/g, " ").trim();
+  if (!hookA || !hookB) return false;
+  const sameHook = hookA === hookB || copyJaccard(hookA, hookB) >= 0.72;
+  const sameAngle = !angA || !angB || angA === angB || copyJaccard(angA, angB) >= 0.72;
+  return sameHook && sameAngle;
+}
+
 export function copyGroundedInFacts(text: string, intake: Intake): boolean {
   const src = String(text ?? "").toLowerCase();
   if (!src.trim()) return false;
@@ -191,6 +275,10 @@ export function isStrategyLabelLine(line: string): boolean {
   if (s.length <= 28 && /كافتتاح|كبطل|كمنصة|كعنوان|כגיבור|כפתיח|ככתובת|as hero|as open|as brief/i.test(s)) {
     return true;
   }
+  if (s.length <= 24 && /كرسي فاضي|כיסא ריק|رادار الأهل|רדאר הורים|لغتان متساويتان|שתי שפות|empty chair|parent radar|طوابير الساعات/i.test(s)) {
+    return true;
+  }
+  if (hasBannedNonsense(s)) return true;
   return false;
 }
 
@@ -403,7 +491,7 @@ export function gateCustomerAd(
 ): GatedAd {
   const facts = copyFactsFromIntake(intake);
   const fallback = honestFallbackAd(intake, locale);
-  let headline = purifyCustomerText(ad.headline ?? "", locale, facts);
+  const headline = purifyCustomerText(ad.headline ?? "", locale, facts);
   let body = purifyCustomerText(ad.body ?? "", locale, facts);
   let cta = purifyCustomerText(ad.cta ?? "", locale, facts);
   body = stripMatchingCta(body, cta);
@@ -416,16 +504,18 @@ export function gateCustomerAd(
   const spam = factSpamHits(body, facts);
   const empty = !headline.trim() || headline.length < 3;
   const canned = isCannedClinicSlogan(blob, intake);
+  const nonsense = hasBannedNonsense(blob);
+  const clalit = clalitContamination(blob, intake);
   const ungrounded =
     headline.trim().length >= 8 &&
     !copyGroundedInFacts(headline, intake) &&
     isCannedClinicSlogan(headline, intake);
 
-  if (hits.length || bleed || register || empty || canned || ungrounded || customerCopyHasLeak(headline) || customerCopyHasLeak(cta)) {
+  if (hits.length || bleed || register || empty || canned || nonsense || clalit || ungrounded || customerCopyHasLeak(headline) || customerCopyHasLeak(cta)) {
     return {
       headline: fallback.headline,
       body: fallback.body,
-      cta: cta && !customerCopyHasLeak(cta) && !localeScriptBleed(cta, locale) ? cta : fallback.cta,
+      cta: cta && !customerCopyHasLeak(cta) && !hasBannedNonsense(cta) && !localeScriptBleed(cta, locale) ? cta : fallback.cta,
       ok: false,
       repaired: true,
       hits: [
@@ -434,6 +524,8 @@ export function gateCustomerAd(
         ...(register ? ["arabic-register"] : []),
         ...(empty ? ["empty-headline"] : []),
         ...(canned || ungrounded ? ["canned-slogan"] : []),
+        ...(nonsense ? ["banned-nonsense"] : []),
+        ...(clalit ? ["clalit-contamination"] : []),
       ],
     };
   }

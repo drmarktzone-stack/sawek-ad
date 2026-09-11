@@ -70,6 +70,11 @@ export function produceAd(intake: Intake, styleId: string, idea: string, locale:
           : factAngleNote(intake, locale, "")
       : resolveChipLabel(intake.offer, OFFER_CHIPS, locale) || intake.offer;
 
+  const pain = (intake.biggestProblem || "").trim();
+  const painBit =
+    pain && !/^(unknown|custom)$/i.test(pain) && !headline.includes(pain.slice(0, 12)) && pain !== usableIdea
+      ? pain
+      : "";
   const bodyParts = clinic
     ? [
         canonicalDoctorName(intake.businessName),
@@ -87,6 +92,7 @@ export function produceAd(intake: Intake, styleId: string, idea: string, locale:
         spokenCta(intake, locale),
       ].filter(Boolean)
     : [
+        painBit,
         adv,
         usableIdea && usableIdea !== headline ? usableIdea : "",
         site,

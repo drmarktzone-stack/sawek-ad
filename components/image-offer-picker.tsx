@@ -29,9 +29,29 @@ type StockHit = {
   thumb: string;
   full: string;
   title: string;
+  caption?: string;
   attribution: string;
   source: string;
+  query?: string;
 };
+
+function siteCaptionFromSrc(src: string, locale: Locale, i: number): string {
+  const s = src.toLowerCase();
+  const fromSite = locale === "ar" ? "من الموقع" : locale === "he" ? "מהאתר" : "From the site";
+  if (/wait|انتظار|המתנה/.test(s)) {
+    return locale === "ar" ? `${fromSite} — غرفة انتظار` : locale === "he" ? `${fromSite} — חדר המתנה` : `${fromSite} — waiting room`;
+  }
+  if (/exterior|facade|واجهة|חזית|outside/.test(s)) {
+    return locale === "ar" ? `${fromSite} — واجهة` : locale === "he" ? `${fromSite} — חזית` : `${fromSite} — facade`;
+  }
+  if (/interior|داخل|פנים|room|علاج/.test(s)) {
+    return locale === "ar" ? `${fromSite} — غرفة علاج` : locale === "he" ? `${fromSite} — חדר טיפול` : `${fromSite} — treatment room`;
+  }
+  if (/reception|استقبال|קבלה/.test(s)) {
+    return locale === "ar" ? `${fromSite} — استقبال` : locale === "he" ? `${fromSite} — קבלה` : `${fromSite} — reception`;
+  }
+  return `${fromSite} — ${i + 1}`;
+}
 
 function packWithAssets(pack: CampaignPack, assets: MediaAssetMeta[]): CampaignPack {
   const intake = { ...pack.intake, mediaAssets: assets };
@@ -59,7 +79,23 @@ function keepNonOffered(assets: MediaAssetMeta[] | undefined, dropId?: string): 
   });
 }
 
-function hitsToOptions(hits: StockHit[], t: (k: string) => string): OfferOption[] {
+function uniqueLabel(raw: string, used: Set<string>, fallback: string): string {
+  let label = (raw || fallback).replace(/\s+/g, " ").trim() || fallback;
+  if (/^(ستوك حسب الموضوع|סטוק לפי נושא|stock by topic)$/i.test(label)) {
+    label = fallback;
+  }
+  let out = label;
+  let n = 2;
+  while (used.has(out.toLowerCase())) {
+    out = `${label} · ${n}`;
+    n += 1;
+    if (n > 12) break;
+  }
+  used.add(out.toLowerCase());
+  return out;
+}
+
+function hitsToOptions(hits: StockHit[], t: (k: string) => string, used: Set<string>): OfferOption[] {
   return hits
     .filter((img) => {
       const ok = (u: string) => /^https:\/\//i.test(u) || u.startsWith("data:image/");
@@ -67,10 +103,15 @@ function hitsToOptions(hits: StockHit[], t: (k: string) => string): OfferOption[
     })
     .map((img) => {
       const vertex = img.source === "vertex" || img.id.startsWith("vertex-");
+      const specific =
+        img.caption ||
+        img.title ||
+        img.query ||
+        (vertex ? t("audit.aiStill") : t("audit.stockTopicFallback"));
       return {
         id: img.id,
         kind: (vertex ? "imagen" : "stock") as OfferKind,
-        label: img.title || (vertex ? t("audit.aiStill") : t("audit.tabStock")),
+        label: uniqueLabel(specific, used, t("audit.stockTopicFallback")),
         src: img.thumb,
         asset: stockToAsset(img),
       };
@@ -117,11 +158,11 @@ export function ImageOfferPicker({
       .map((asset, i) => ({
         id: `pack-site-${asset.id}`,
         kind: "site" as const,
-        label: `${t("audit.sitePhoto")} ${i + 1}`,
+        label: siteCaptionFromSrc(asset.publicSrc || asset.name || "", locale, i),
         src: asset.publicSrc || "",
         asset: { ...asset, note: asset.note?.startsWith("offer:site:") ? asset.note : `offer:site:${asset.publicSrc || asset.note}` },
       }));
-  }, [pack.intake.mediaAssets, t]);
+  }, [pack.intake.mediaAssets, locale]);
 
   const [imagen, setImagen] = useState<OfferOption[]>([]);
   const [site, setSite] = useState<OfferOption[]>([]);
@@ -155,6 +196,10 @@ export function ImageOfferPicker({
     setImgError("");
     try {
       const extra = (pack.brief?.imageQueries ?? []).slice(0, 6).join("|");
+      const services = [pack.intake.category, pack.intake.uniqueAdvantage, pack.intake.description]
+        .filter(Boolean)
+        .join(" ")
+        .slice(0, 160);
       const params = new URLSearchParams({
         source: "imagen",
         vertical,
@@ -163,6 +208,8 @@ export function ImageOfferPicker({
         q: (pack.brief?.coreMessage.en || pack.intake.description || pack.intake.uniqueAdvantage || "").slice(0, 160),
         description: (pack.intake.description || "").slice(0, 160),
         offer: (pack.intake.offer || "").slice(0, 80),
+        services,
+        locale,
         extra,
         limit: String(IMAGEN_PICKER_COUNT),
       });
@@ -177,7 +224,7 @@ export function ImageOfferPicker({
         emptyMessage?: string;
       };
       const imagenHits = data.imagen ?? [];
-      const opts = hitsToOptions(imagenHits, t).filter((o) => o.kind === "imagen");
+      const opts = hitsToOptions(imagenHits, t, new Set()).filter((o) => o.kind === "imagen");
       setImagen(opts);
       if (!opts.length && data.emptyMessage && !stock.length) {
         setImgError(data.emptyMessage);
@@ -222,11 +269,12 @@ export function ImageOfferPicker({
           return true;
         });
         if (!cancelled) {
+          const used = new Set<string>();
           setSite(
             assets.map((asset, i) => ({
               id: `site-${asset.id}`,
               kind: "site" as const,
-              label: `${t("audit.sitePhoto")} ${i + 1}`,
+              label: uniqueLabel(siteCaptionFromSrc(asset.publicSrc || "", locale, i), used, t("audit.sitePhoto")),
               src: asset.publicSrc || "",
               asset: { ...asset, note: `offer:site:${asset.publicSrc || asset.note}` },
             })),
@@ -249,6 +297,10 @@ export function ImageOfferPicker({
     setStockBusy(true);
     try {
       const extra = (pack.brief?.imageQueries ?? []).slice(0, 6).join("|");
+      const services = [pack.intake.category, pack.intake.uniqueAdvantage, pack.intake.description]
+        .filter(Boolean)
+        .join(" ")
+        .slice(0, 160);
       const params = new URLSearchParams({
         source: "live",
         vertical,
@@ -257,13 +309,15 @@ export function ImageOfferPicker({
         q: (pack.brief?.coreMessage.en || pack.intake.description || pack.intake.uniqueAdvantage || "").slice(0, 160),
         description: (pack.intake.description || "").slice(0, 160),
         offer: (pack.intake.offer || "").slice(0, 80),
+        services,
+        locale,
         extra,
         limit: "48",
         page: "1",
       });
       const res = await fetch(`/api/stock-images?${params.toString()}`);
       const data = (await res.json()) as { images?: StockHit[]; emptyMessage?: string };
-      const opts = hitsToOptions(data.images ?? [], t).filter((o) => o.kind === "stock");
+      const opts = hitsToOptions(data.images ?? [], t, new Set()).filter((o) => o.kind === "stock");
       setStock(opts);
       setStockLoaded(true);
       if (!opts.length && data.emptyMessage) setImgError(data.emptyMessage);
@@ -318,20 +372,14 @@ export function ImageOfferPicker({
         )}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={opt.src} alt="" className="aspect-square w-full object-cover" referrerPolicy="no-referrer" />
+        <img src={opt.src} alt={opt.label} className="aspect-square w-full object-cover" referrerPolicy="no-referrer" />
         {on ? (
           <span className="absolute start-1.5 top-1.5 inline-flex size-6 items-center justify-center rounded-full bg-navy text-white shadow">
             <Check className="size-3.5 stroke-[3]" />
           </span>
         ) : null}
         <span className="block truncate bg-white px-2 py-1.5 text-[12px] font-semibold text-navy">
-          {opt.kind === "imagen"
-            ? t("audit.aiStill")
-            : opt.kind === "site"
-              ? t("audit.sitePhoto")
-              : opt.kind === "stock"
-                ? t("audit.tabStock")
-                : opt.label}
+          {opt.label}
         </span>
       </button>
     );

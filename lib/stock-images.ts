@@ -10,6 +10,8 @@ export type StockImage = {
   thumb: string;
   full: string;
   title: string;
+  /** Unique customer-facing caption — never a repeated generic “stock by topic”. */
+  caption?: string;
   attribution: string;
   source: StockSource;
   license?: string;
@@ -24,9 +26,11 @@ export type StockSearchInput = {
   location?: string;
   description?: string;
   offer?: string;
+  services?: string;
   limit?: number;
   page?: number;
   extraQueries?: string[];
+  locale?: string;
 };
 
 export type StockSearchResult = {
@@ -143,7 +147,7 @@ const TOPIC_NEEDLES: Record<Vertical, RegExp> = {
 };
 
 const JUNK =
-  /logo|meme|clipart|screenshot|qr.?code|barcode|coat of arms|flag of|infographic|flowchart|diagram|wikidata|watermark|clalit|כללית|كلاليت|kupat holim|facebook|instagram|tiktok|whatsapp|mugshot|passport|selfie|samer abu|أبو مخ|אבו מוך|dr\.?\s*samer|engraving|lithograph|etching|woodcut|caricature|cartoon|comic|wellcome|census|banner\.jpg|aiga |file:.*\.svg|icon set|clip art|photomontage|collage meme|before.?after|star rating|roas|₪|%\s*off|photo contest|oil on canvas|painting|wga\d|manzanar|internment|evacuee|smallpox|relocation center|miner.s children|wife of miner|\bNARA\b|abandoned |\brally\b|rallies|protest|demonstration|city council|town council|\bcouncil\b|politic|election|campaign rally|legislative|city hall hearing|nyc council|new york city council|board of supervisors|picket|march against|activis|soap factory|mezzanine|stadium|menu board|price list|pdf scan|floor plan|minusma|unicef|who clinic|field hospital/i;
+  /logo|meme|clipart|screenshot|qr.?code|barcode|coat of arms|flag of|infographic|flowchart|diagram|wikidata|watermark|clalit|כללית|كلاليت|kupat holim|facebook|instagram|tiktok|whatsapp|mugshot|passport|selfie|samer abu|أبو مخ|אבו מוך|dr\.?\s*samer|engraving|lithograph|etching|woodcut|caricature|cartoon|comic|wellcome|census|banner\.jpg|aiga |file:.*\.svg|icon set|clip art|photomontage|collage meme|before.?after|star rating|roas|₪|%\s*off|photo contest|oil on canvas|painting|wga\d|manzanar|internment|evacuee|smallpox|relocation center|miner.s children|wife of miner|\bNARA\b|abandoned |\brally\b|rallies|protest|demonstration|city council|town council|\bcouncil\b|politic|election|campaign rally|legislative|city hall hearing|nyc council|new york city council|board of supervisors|picket|march against|activis|soap factory|mezzanine|stadium|menu board|price list|pdf scan|floor plan|minusma|unicef|who clinic|field hospital|handwrit|manuscript|correspondence|bird.?cage|aviary|cottage|cabin|bungalow|forest house|treadmill|dumbbell|gym equipment|aerial view|rooftop solar|census record|diary page|letter from/i;
 
 const HISTORICAL = /\b(17|18|19)\d{2}\b|19th century|18th century|1920s|1930s|blitz|smallpox|engraving/i;
 const NAMED_PORTRAIT = /portrait of (dr|prof|mr|ms|mrs)\b|headshot of\b/i;
@@ -155,6 +159,77 @@ function asVertical(v: unknown): Vertical | undefined {
 
 function clip(s: string, max: number): string {
   return s.replace(/\s+/g, " ").trim().slice(0, max);
+}
+
+const CAPTION_TOPIC: Array<{ re: RegExp; he: string; ar: string; en: string }> = [
+  { re: /dental|أسنان|שיניים/, he: "מרפאת שיניים — חדר טיפול", ar: "عيادة أسنان — غرفة علاج", en: "Dental clinic — treatment room" },
+  { re: /waiting|انتظار|המתנה/, he: "מרפאה — חדר המתנה", ar: "عيادة — غرفة انتظار", en: "Clinic — waiting room" },
+  { re: /reception|استقبال|קבלה/, he: "מרפאה — דלפק קבלה", ar: "عيادة — مكتب استقبال", en: "Clinic — reception" },
+  { re: /pediatric|أطفال|ילדים|kids/, he: "מרפאת ילדים — חדר המתנה", ar: "عيادة أطفال — غرفة انتظار", en: "Pediatric clinic — waiting room" },
+  { re: /interior|داخل|פנים|corridor|غرفة علاج|exam/, he: "מרפאה — חדר טיפול", ar: "عيادة — غرفة علاج", en: "Clinic — treatment room" },
+  { re: /facade|exterior|واجهة|חזית/, he: "מרפאה — חזית", ar: "عيادة — واجهة", en: "Clinic — facade" },
+  { re: /hummus|mezze|حمص/, he: "חומוס על השולחן", ar: "حمص عالطاولة", en: "Hummus on the table" },
+  { re: /terrace|شرفة|טרסה/, he: "טרסה של המסעדה", ar: "تراس المطعم", en: "Restaurant terrace" },
+  { re: /boutique|clothing|أزياء|אופנה/, he: "בוטיק — פנים החנות", ar: "بوتيك — داخل المحل", en: "Boutique interior" },
+  { re: /hydrotherap|pool|مسبح|בריכה/, he: "בריכת הידרותרפיה", ar: "مسبح علاج مائي", en: "Hydrotherapy pool" },
+];
+
+function localeOfStock(input: StockSearchInput): "he" | "ar" | "en" {
+  return input.locale === "he" || input.locale === "en" ? input.locale : "ar";
+}
+
+function captionSeed(img: { title?: string; query?: string }, input: StockSearchInput, vertical: Vertical): { he: string; ar: string; en: string } {
+  const blob = `${img.title ?? ""} ${img.query ?? ""} ${input.category ?? ""} ${input.services ?? ""} ${input.description ?? ""}`;
+  for (const row of CAPTION_TOPIC) {
+    if (row.re.test(blob)) return { he: row.he, ar: row.ar, en: row.en };
+  }
+  if (vertical === "clinic") {
+    if (isDentalTopic({ category: input.category, description: input.description, offer: input.offer, q: input.q })) {
+      return { he: "מרפאת שיניים — חדר טיפול", ar: "عيادة أسنان — غرفة علاج", en: "Dental clinic — treatment room" };
+    }
+    if (/أطفال|ילדים|pedia|pediatric|kids/.test(`${input.category ?? ""} ${input.description ?? ""} ${input.q ?? ""}`)) {
+      return { he: "מרפאת ילדים — חדר המתנה", ar: "عيادة أطفال — غرفة انتظار", en: "Pediatric clinic — waiting room" };
+    }
+    return { he: "מרפאה — פנים המקום", ar: "عيادة — داخل المكان", en: "Clinic interior" };
+  }
+  if (vertical === "restaurant") return { he: "שולחן המסעדה", ar: "طاولة المطعم", en: "Restaurant table" };
+  if (vertical === "retail") return { he: "פנים החנות", ar: "داخل المحل", en: "Shop interior" };
+  if (vertical === "pool") return { he: "בריכה מקורה", ar: "مسبح داخلي", en: "Indoor pool" };
+  return { he: "צילום לפי הנושא", ar: "تصوير حسب الموضوع", en: "On-topic photo" };
+}
+
+/** Unique per-image caption. Never the generic tab label alone. */
+export function stockCaptionFor(
+  img: { title?: string; query?: string; id?: string },
+  input: StockSearchInput,
+  vertical: Vertical,
+  used: Set<string>,
+): string {
+  const locale = localeOfStock(input);
+  const seed = captionSeed(img, input, vertical)[locale];
+  const q = clip(String(img.query || "").replace(/[_-]+/g, " "), 40);
+  let caption = seed;
+  if (q && !isCameraFilename(q) && !/\.(jpe?g|png|webp)$/i.test(q)) {
+    const mapped = CAPTION_TOPIC.find((row) => row.re.test(q));
+    if (mapped) caption = mapped[locale];
+  }
+  let out = clip(caption, 80);
+  let n = 2;
+  while (used.has(out.toLowerCase())) {
+    out = clip(`${seed} · ${n}`, 80);
+    n += 1;
+    if (n > 8) break;
+  }
+  used.add(out.toLowerCase());
+  return out;
+}
+
+export function applyStockCaptions(images: StockImage[], input: StockSearchInput, vertical: Vertical): StockImage[] {
+  const used = new Set<string>();
+  return images.map((img) => ({
+    ...img,
+    caption: stockCaptionFor(img, input, vertical, used),
+  }));
 }
 
 /** Drop brand names, people, prices — keep topic words for search only. */
@@ -312,19 +387,29 @@ export function topicQueriesFor(input: StockSearchInput): string[] {
   const fam = vertical === "restaurant" ? resolveFoodFamily(input) : "generic";
   const short = vertical === "restaurant" ? RESTAURANT_SHORT[fam] : SHORT_QUERIES[vertical];
   const long = vertical === "restaurant" ? RESTAURANT_QUERIES[fam] : TOPIC_QUERIES[vertical];
-  const facts = `${input.q ?? ""} ${input.category ?? ""} ${input.description ?? ""} ${input.offer ?? ""}`;
+  const facts = `${input.q ?? ""} ${input.category ?? ""} ${input.description ?? ""} ${input.offer ?? ""} ${input.services ?? ""}`;
   const extras = (input.extraQueries ?? []).map((q) => q.trim()).filter(Boolean);
   const dentalQs = isDentalTopic({
     category: input.category,
-    description: input.description,
+    description: `${input.description ?? ""} ${input.services ?? ""}`,
     offer: input.offer,
     q: input.q,
   })
     ? ["dental clinic", "dental clinic interior", "dental reception", "implant clinic interior"]
     : [];
+  const pediatric =
+    /أطفال|ילדים|pedia|pediatric|kids|ילד/.test(`${input.category ?? ""} ${input.description ?? ""} ${input.services ?? ""} ${input.q ?? ""}`);
+  const pedsQs = pediatric && !dentalQs.length
+    ? ["pediatric clinic waiting room", "children's doctor office interior", "kids healthcare waiting room"]
+    : [];
+  const serviceQs = latinWords(input.services ?? "")
+    ? [latinWords(input.services ?? "")]
+    : [];
   const out: string[] = [
     ...extras,
     ...dentalQs,
+    ...pedsQs,
+    ...serviceQs,
     ...short,
     ...lexiconQueriesFrom(facts),
     ...long,
@@ -336,6 +421,12 @@ export function topicQueriesFor(input: StockSearchInput): string[] {
   if (latin.length >= 6 && latin.split(" ").length <= 6) out.push(latin);
   if (vertical === "restaurant" && fam === "mediterranean") {
     return uniqueQueries(out.filter((q) => !/pizza|pepperoni|\bhut\b/i.test(q)), 16);
+  }
+  if (dentalQs.length) {
+    return uniqueQueries(out.filter((q) => !/pediatric|children'?s doctor|kids health/i.test(q)), 16);
+  }
+  if (pedsQs.length) {
+    return uniqueQueries(out.filter((q) => !/dental clinic|implant clinic/i.test(q)), 16);
   }
   return uniqueQueries(out, 16);
 }
@@ -387,13 +478,13 @@ export function isJunkStockTitle(title: string, extra = ""): boolean {
   if (NAMED_PORTRAIT.test(blob)) return true;
   if (HISTORICAL.test(blob) && /wellcome|engraving|lithograph|census|blitz/.test(blob.toLowerCase())) return true;
   if (/\.svg($|\s)|\.pdf($|\s)|\.djvu/i.test(title)) return true;
-  if (/church|cathedral|priest|altar|mosque|synagogue|military|camouflage|soldier|parking lot|car park|stethoscope|microscope|vintage medical|antique medical|black and white|monochrome|respirator|ventilator|sanatorium|polio/i.test(blob)) return true;
+  if (/church|cathedral|priest|altar|mosque|synagogue|military|camouflage|soldier|parking lot|car park|stethoscope|microscope|vintage medical|antique medical|black and white|monochrome|respirator|ventilator|sanatorium|polio|snake|serpent|reptile|python|boa|anatomy poster|fossil|specimen jar|colonnade|arcade architecture/i.test(blob)) return true;
   return false;
 }
 
 const OFF_TOPIC: Record<Vertical, RegExp | null> = {
   clinic:
-    /train station|bus station|ferry|airport|railway|metro station|\bamtrak\b|geograph\.org|swimsuit|bikini|nude|immigration|behörde|church|cathedral|priest|military|soldier|parking|microscope|rally|rallies|protest|demonstration|city council|town council|\bcouncil\b|politic|election|city hall|legislative|activis|picket|union march|news conference|press conference|capitol|parliament/i,
+    /train station|bus station|ferry|airport|railway|metro station|\bamtrak\b|geograph\.org|swimsuit|bikini|nude|immigration|behörde|church|cathedral|priest|altar|mosque|synagogue|military|soldier|parking|microscope|rally|rallies|protest|demonstration|city council|town council|\bcouncil\b|politic|election|city hall|legislative|activis|picket|union march|news conference|press conference|capitol|parliament|handwrit|manuscript|letter|correspondence|bird.?cage|aviary|cottage|cabin|bungalow|forest|treadmill|dumbbell|gym|aerial|rooftop|kitchen interior|bare feet|shoe|bird cage|olive tree farm(?! clinic)/i,
   pool: /hotel luxury|bikini|swimsuit fashion|beach party|rally|protest|council|politic/i,
   retail: /weapon|ammo|pharmacy|rally|protest|council|politic/i,
   restaurant: /pet food|dog food|rally|protest|council|politic|pizza hut|pepperoni factory|soap factory|mezze maniche|étang|etang de thau|\bmèze\b/i,
@@ -401,6 +492,12 @@ const OFF_TOPIC: Record<Vertical, RegExp | null> = {
   school: /prison|military academy|rally|protest|council|politic/i,
   generic: /rally|rallies|protest|demonstration|city council|politic|election campaign/i,
 };
+
+function isCameraFilename(title: string): boolean {
+  const t = String(title || "").replace(/^File:/i, "").trim();
+  if (!t) return true;
+  return /^(DSC|IMG|DCIM|P\d{4}|IMG_|DSCN|PHOTO_|PIC_)/i.test(t) || /^[A-Z0-9_\-]{6,}\.(jpe?g|png|webp)$/i.test(t);
+}
 
 export function stockRelevance(
   vertical: Vertical,
@@ -414,21 +511,23 @@ export function stockRelevance(
   if (OFF_TOPIC[vertical]?.test(blob)) return -1;
   if (
     vertical === "clinic" &&
-    /\b(station|amtrak|railway|metro|airport|platform|terminus)\b/i.test(blob) &&
-    !/clinic|doctor|medical|hospital|pediatric|urgent care|waiting room at a medical/i.test(blob)
+    /\b(station|amtrak|railway|metro|airport|platform|terminus|handwrit|manuscript|bird.?cage|cottage|cabin)\b/i.test(blob) &&
+    !/clinic|doctor|medical|hospital|pediatric|urgent care|waiting room at a medical|dental/i.test(blob)
   ) {
     return -1;
   }
   if (vertical === "restaurant" && cuisine === "mediterranean" && /pizza|pepperoni|\bhut\b/i.test(blob)) return -1;
   let score = 0;
   if (TOPIC_NEEDLES[vertical].test(blob)) score = 1;
-  // Trust a short on-topic search: Commons/Openverse titles are often IMG_ / DSC_.
-  if (!score && query && TOPIC_NEEDLES[vertical].test(query) && !isJunkStockTitle(query)) score = 1;
+  // Camera filenames have no topic words — trust a short on-topic query only then.
+  if (!score && query && TOPIC_NEEDLES[vertical].test(query) && isCameraFilename(title) && !isJunkStockTitle(query)) {
+    score = 1;
+  }
   if (!score) return 0;
-  if (/waiting.?room|clinic interior|doctor.?office|boutique interior|hydrotherapy|grilled|classroom|hummus|mezz?e|olive oil/i.test(blob)) {
+  if (/waiting.?room|clinic interior|doctor.?office|boutique interior|hydrotherapy|grilled|classroom|hummus|mezz?e|olive oil|dental/i.test(blob)) {
     score += 4;
   }
-  if (/pediatric|family clinic|family health|medical clinic|kids health|mediterranean|levantine/i.test(blob)) score += 2;
+  if (/pediatric|family clinic|family health|medical clinic|kids health|mediterranean|levantine|dental clinic/i.test(blob)) score += 2;
   if (/naval|military|vaccination|historical|black and white/i.test(blob)) score -= 2;
   return score;
 }
@@ -853,7 +952,7 @@ export async function searchStockImages(input: StockSearchInput): Promise<StockS
       const srcRank = (s: StockSource) => (s === "google" ? 3 : s === "wikimedia" ? 2 : s === "openverse" ? 1 : 0);
       return srcRank(b.source) - srcRank(a.source);
     });
-  const images = diversifyByQuery(merged, limit);
+  const images = applyStockCaptions(diversifyByQuery(merged, limit), input, vertical);
   const nextPage = images.length >= 12 && page < 8 ? page + 1 : null;
   const emptyMessage =
     images.length === 0

@@ -6,6 +6,7 @@ import type { CampaignPack, Intake } from "@/lib/types";
 import { WizardFlow } from "@/components/wizard-flow";
 import { CompleteAdCard } from "@/components/complete-ad-card";
 import { ResearchDesk } from "@/components/research-desk";
+import { CopyLineMarketplace } from "@/components/copy-line-marketplace";
 import { CampaignAdVisual } from "@/components/ad-mockup";
 import { Button } from "@/components/ui/button";
 import { LangLink } from "@/components/lang-link";
@@ -265,7 +266,10 @@ export function TaskWorkspace() {
           ) : null}
 
           {pack ? (
-            <ResearchDesk pack={pack} locale={locale} onPack={setPack} compact />
+            <>
+              <ResearchDesk pack={pack} locale={locale} onPack={setPack} compact />
+              <CopyLineMarketplace pack={pack} locale={locale} onPack={setPack} compact />
+            </>
           ) : null}
 
           <OsSection kicker={t("task.next")}>

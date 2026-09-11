@@ -90,7 +90,7 @@ const CLINIC_PLATFORMS: PlatformSeed[] = [
   },
   {
     id: "hours_as_hero",
-    name: L("שעות כגיבור", "الساعات هي البطل", "Hours as hero"),
+    name: L("שעות אמת בכותרת", "الدوام هو العنوان", "Hours in the headline"),
     hook: L("מתי באמת אפשר להגיע — זו הכותרת", "متى فعلاً فيكن تجوا — هذا العنوان", "When you can actually arrive — that is the headline"),
     arc: L("שעות אמת → מיקום → סדר הגעה", "ساعات حقيقية → موقع → دور الوصول", "Real hours → place → arrival order"),
     platform: L("פלטפורמת לוח-שעות חי", "منصة جدول ساعات حي", "Live hours-board platform"),
@@ -117,7 +117,7 @@ const CLINIC_PLATFORMS: PlatformSeed[] = [
   },
   {
     id: "empty_chair_film",
-    name: L("כיסא ריק", "كرسي فاضي", "Empty chair film"),
+    name: L("החדר השקט", "الغرفة الهادية", "The quiet room"),
     hook: L("לצלם את החדר ריק — לא פנים של ילדים", "صوروا الغرفة فاضية — مش وجوه أطفال", "Film the empty room — never children’s faces"),
     arc: L("פריים חלל → טקסט עובדה → CTA", "فريمة مكان → نص حقيقة → CTA", "Space frame → fact text → CTA"),
     platform: L("פלטפורמת ויז'ואל «מקום שקט»", "منصة بصري «مكان هادئ»", "Quiet-place visual platform"),
@@ -135,7 +135,7 @@ const CLINIC_PLATFORMS: PlatformSeed[] = [
   },
   {
     id: "two_lang_equal",
-    name: L("שתי שפות שוות", "لغتان متساويتان", "Two equal languages"),
+    name: L("עברית וערבית מהעמוד", "عبري وعربي من الصفحة", "Hebrew and Arabic from the page"),
     hook: L("עברית וערבית כשפות ראשונות — לא תרגום משני", "العبرية والعربية أوليتان — مش ترجمة ثانوية", "Hebrew and Arabic as first languages — not afterthought translation"),
     arc: L("אותו מבנה בשתי שפות → אותו CTA אמיתי", "نفس البنية بلغتين → نفس CTA حقيقي", "Same structure in both languages → same real CTA"),
     platform: L("פלטפורמת דו-לשוניות שווה", "منصة ثنائية متساوية", "Equal bilingual platform"),
