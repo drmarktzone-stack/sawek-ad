@@ -18,13 +18,13 @@ import { detectVertical, isBakery, isPediatrics, isPlasticAestheticClinic, visit
 import { inventsForbidden } from "./coach";
 import {
   clalitContamination,
-  copyFactsFromIntake,
   ctaMonoculture,
   customerCopyHasLeak,
   gateCustomerAd,
   hasBannedNonsense,
   identicalShare,
   isCannedClinicSlogan,
+  isEngineChromeLine,
   isStrategyLabelLine,
   localeScriptBleed,
   templateLoopHits,
@@ -80,11 +80,12 @@ export function ctaOptionsFor(intake: Intake, locale: Locale): string[] {
   const push = (s: string) => {
     const t = normLine(s);
     if (!t || t.length < 2) return;
-    if (hasBannedNonsense(t) || customerCopyHasLeak(t) || isStrategyLabelLine(t)) return;
+    if (hasBannedNonsense(t) || customerCopyHasLeak(t) || isStrategyLabelLine(t) || isEngineChromeLine(t)) return;
     if (out.some((x) => tooSimilar(x, t))) return;
     out.push(t);
   };
 
+  const wa = intake.whatsapp.trim().split(/\s*[·|,;]\s*/)[0] || "";
   if (locale === "ar") {
     if (isPediatrics(intake)) {
       push("جيبوه عالعيادة");
@@ -93,21 +94,29 @@ export function ctaOptionsFor(intake: Intake, locale: Locale): string[] {
       if (intake.website.trim()) push("للموقع");
       if (intake.clinicHours.trim()) push("اسألوا عن الدوام");
       push("جتوا حسب الدور");
+      push("تعوا عالعيادة هاليوم");
+      if (wa) push(`واتساب ${wa}`);
     } else if (v === "clinic") {
       push("تعوا عالعيادة");
-      if (intake.whatsapp.trim()) push("واتساب للموعد");
+      if (wa) push("واتساب للموعد");
       if (intake.website.trim()) push("للموقع");
       push("احكوا معنا");
+      if (intake.clinicHours.trim()) push("اسألوا عن الدوام");
+      push("احجزوا موعد");
     } else if (isBakery(intake)) {
       push("تعوا ع المخبز");
       push("خدوا خبز هاليوم");
       if (intake.website.trim()) push("للموقع");
-      if (intake.whatsapp.trim()) push("واتساب");
+      if (wa) push("واتساب");
+      push("خذوا من الفرن");
     } else {
       for (const c of bank) push(c);
       if (intake.website.trim()) push("للموقع");
-      if (intake.whatsapp.trim()) push("واتساب");
+      if (wa) push("واتساب");
       push("تعوا زورونا");
+      push("احكوا معنا");
+      push("تعوا هاليوم");
+      push("اكتبوا لنا");
     }
   } else if (locale === "he") {
     if (isPediatrics(intake)) {
@@ -116,10 +125,13 @@ export function ctaOptionsFor(intake: Intake, locale: Locale): string[] {
       push("וואטסאפ (לא לחירום)");
       if (intake.website.trim()) push("לאתר");
       if (intake.clinicHours.trim()) push("שאלו על השעות");
+      push("בואו היום");
     } else {
       for (const c of bank) push(c);
       if (intake.website.trim()) push("לאתר");
-      if (intake.whatsapp.trim()) push("וואטסאפ");
+      if (wa) push("וואטסאפ");
+      push("בואו לבקר");
+      push("כתבו לנו");
     }
   } else {
     if (isPediatrics(intake)) {
@@ -127,135 +139,222 @@ export function ctaOptionsFor(intake: Intake, locale: Locale): string[] {
       push("Walk in today");
       push("WhatsApp (not ER)");
       if (intake.website.trim()) push("Visit the site");
+      if (intake.clinicHours.trim()) push("Ask about hours");
     } else {
       for (const c of bank) push(c);
       if (intake.website.trim()) push("Visit the site");
-      if (intake.whatsapp.trim()) push("WhatsApp");
+      if (wa) push("WhatsApp");
+      push("Visit us");
+      push("Write to us");
     }
   }
   if (!out.length) push(visitCta(intake, locale));
-  return out.slice(0, 8);
-}
-
-function factHooks(intake: Intake, locale: Locale): string[] {
-  const name = intake.businessName.trim();
-  const loc = intake.location.trim();
-  const adv = intake.uniqueAdvantage.trim();
-  const cat = intake.category.trim();
-  const hours = intake.clinicHours.trim();
-  const problem = intake.biggestProblem.trim();
-  const out: string[] = [];
-  const push = (s: string) => {
-    const t = clipAtWord(normLine(s), 72);
-    if (!t || t.length < 4) return;
-    if (hasBannedNonsense(t) || customerCopyHasLeak(t) || isStrategyLabelLine(t)) return;
-    if (isCannedClinicSlogan(t, intake) && !isPediatrics(intake)) return;
-    if (out.some((x) => tooSimilar(x, t))) return;
-    out.push(t);
-  };
-
-  if (problem && problem.length >= 6 && !/^(unknown|custom)$/i.test(problem)) push(problem);
-
-  if (locale === "ar") {
-    if (name && loc) push(`${name} — ${clipAtWord(loc, 28)}`);
-    if (adv && adv.length >= 6) push(adv);
-    if (isPediatrics(intake)) {
-      push(name ? `${name} — جت أولاً بدون مواعيد` : "جت أولاً بدون مواعيد");
-      if (loc) push(`${clipAtWord(loc, 36)} — عيادة أطفال`);
-      push("لما الولد بيمرض — وين بتروحوا اليوم");
-      if (hours) push("الدوام مكتوب — تعوا حسب الساعات");
-    } else if (isPlasticAestheticClinic(intake)) {
-      push(name ? `${name} — جراحة تجميل من العيادة` : "جراحة تجميل من العيادة");
-      if (loc) push(`${name} ب${clipAtWord(loc, 24)}`);
-    } else if (isBakery(intake)) {
-      push(name ? `${name} — خبز طازج هاليوم` : "خبز طازج هاليوم");
-      if (loc) push(`تعوا ع ${clipAtWord(loc, 28)}`);
-    } else {
-      if (name && cat) push(`${name} — ${clipAtWord(cat, 28)}`);
-      if (name) push(name);
-    }
-    if (intake.whatsapp.trim()) {
-      const wa = intake.whatsapp.trim().split(/\s*[·|,;]\s*/)[0];
-      push(`واتساب ${wa}`);
-    }
-    if (intake.website.trim()) push(`${name || cat || "المحل"} — للموقع`);
-  } else if (locale === "he") {
-    if (name && loc) push(`${name} — ${clipAtWord(loc, 28)}`);
-    if (adv && adv.length >= 6) push(adv);
-    if (isPediatrics(intake)) {
-      push(name ? `${name} — לפי סדר הגעה` : "לפי סדר הגעה, בלי תור");
-      push("כשהילד חולה — לאן הולכים היום");
-    } else if (isBakery(intake)) {
-      push(name ? `${name} — לחם חם מהתנור` : "לחם חם מהתנור");
-    } else if (name) push(name);
-  } else {
-    if (name && loc) push(`${name} — ${clipAtWord(loc, 28)}`);
-    if (adv && adv.length >= 6) push(adv);
-    if (isPediatrics(intake)) {
-      push(name ? `${name} — walk-in, no appointment` : "Walk in today");
-      push("When a child is sick — know where to go today");
-    } else if (isBakery(intake)) {
-      push(name ? `${name} — fresh bread today` : "Fresh bread today");
-    } else if (name) push(name);
-  }
-
-  for (const h of hooksFor(detectVertical(intake), locale, intake)) {
-    push(h);
-  }
   return out.slice(0, 10);
 }
 
-function factBodies(intake: Intake, locale: Locale): string[] {
-  const facts = copyFactsFromIntake(intake);
-  const adv = intake.uniqueAdvantage.trim();
-  const loc = facts.location;
-  const phone = facts.phone;
-  const site = facts.website;
-  const hours = intake.clinicHours.trim();
-  const name = intake.businessName.trim();
-  const problem = intake.biggestProblem.trim();
-  const out: string[] = [];
-  const push = (s: string) => {
-    const t = normLine(s);
-    if (!t || t.length < 8) return;
-    if (hasBannedNonsense(t) || customerCopyHasLeak(t)) return;
-    if (clalitContamination(t, intake)) return;
-    if (out.some((x) => tooSimilar(x, t))) return;
-    out.push(t);
+function usableFact(s: string): string {
+  const t = normLine(s);
+  if (!t || /^(unknown|custom|no_offer)$/i.test(t)) return "";
+  return t;
+}
+
+function cityOf(loc: string): string {
+  const t = loc.trim();
+  if (!t) return "";
+  return t.split(/[,،]/)[0]!.trim();
+}
+
+function waOf(intake: Intake): string {
+  return usableFact(intake.whatsapp.split(/\s*[·|,;]\s*/)[0] || "") || usableFact(intake.phone || "");
+}
+
+type FactSeed = { kind: CopyLineKind; text: string };
+
+/** Real customer-facing lines from THIS business’s fields — never coach/engine chrome. */
+export function factSeeds(intake: Intake, locale: Locale): FactSeed[] {
+  const name = usableFact(intake.businessName);
+  const loc = usableFact(intake.location);
+  const city = cityOf(loc);
+  const cat = usableFact(intake.category);
+  const adv = usableFact(intake.uniqueAdvantage);
+  const problem = usableFact(intake.biggestProblem);
+  const hours = usableFact(intake.clinicHours);
+  const audience = usableFact(intake.audience);
+  const wa = waOf(intake);
+  const site = usableFact(intake.website);
+  const peds = isPediatrics(intake);
+  const clinic = detectVertical(intake) === "clinic" || peds;
+  const bakery = isBakery(intake);
+  const plastic = isPlasticAestheticClinic(intake);
+  const seeds: FactSeed[] = [];
+  const add = (kind: CopyLineKind, raw: string, max = kind === "primaryText" ? 180 : 72) => {
+    const t = kind === "cta" ? normLine(raw) : clipAtWord(normLine(raw), max);
+    if (!t || t.length < (kind === "cta" ? 2 : 4)) return;
+    if (hasBannedNonsense(t) || customerCopyHasLeak(t) || isStrategyLabelLine(t) || isEngineChromeLine(t)) return;
+    if (isCannedClinicSlogan(t, intake) && !peds) return;
+    if (seeds.some((s) => tooSimilar(s.text, t))) return;
+    seeds.push({ kind, text: t });
   };
 
   if (locale === "ar") {
-    if (name && loc) push(`${name} ب${loc}.`);
-    if (problem && !/^(unknown|custom)$/i.test(problem)) push(problem);
-    if (adv) push(adv);
-    if (hours) push(`الدوام: ${clipAtWord(hours, 80)}`);
-    if (phone) push(`واتساب ${phone}${isPediatrics(intake) || detectVertical(intake) === "clinic" ? " — مش للطوارئ" : ""}.`);
-    if (site) push(site);
-    if (isPediatrics(intake)) {
-      push("جت أولاً بدون مواعيد — مش حاجة تحجزوا دور.");
+    if (name && city) add("headline", `${name} — ${city}`);
+    if (name && cat) add("headline", `${name} — ${clipAtWord(cat, 28)}`);
+    if (name && adv) add("headline", `${name} — ${clipAtWord(adv, 36)}`);
+    if (adv && adv.length >= 6) add("headline", adv);
+    if (problem && problem.length >= 6) add("hook", problem);
+    if (peds) {
+      if (name) add("headline", `${name} — جت أولاً بدون مواعيد`);
+      if (city) add("headline", `${city} — عيادة أطفال`);
+      add("hook", "لما الولد بيمرض — وين بتروحوا اليوم");
+      if (name) add("hook", `${name} — عيادة أطفال، جت أولاً`);
+      if (loc) add("hook", `${clipAtWord(loc, 40)} — تعوا حسب الدور`);
+      if (hours) add("hook", `الدوام ${clipAtWord(hours, 36)} — جت أولاً`);
+      if (audience && city) add("hook", `${audience} — العيادة ب${city}`);
+    } else if (plastic) {
+      add("headline", name ? `${name} — جراحة تجميل من العيادة` : "جراحة تجميل من العيادة");
+      if (name && city) add("hook", `${name} ب${city}`);
+    } else if (bakery) {
+      add("headline", name ? `${name} — خبز طازج هاليوم` : "خبز طازج هاليوم");
+      if (city) add("hook", `تعوا ع ${city} — خدوا من الفرن`);
+    } else if (clinic) {
+      if (name) add("headline", `${name} — تعوا عالعيادة`);
+      if (city) add("hook", `عيادة ب${city}`);
+    } else if (name) {
+      add("headline", `${name} — تعوا هاليوم`);
+      if (city) add("hook", `${name} ب${city}`);
+    }
+    if (audience && name) add("hook", `${audience} — ${name}`);
+    if (wa) add("hook", `واتساب ${wa}`);
+    if (name && site) add("headline", `${name} — افتحوا الموقع`);
+    if (hours && name) add("headline", `${name} — ${clipAtWord(hours, 28)}`);
+    if (cat && city) add("hook", `${clipAtWord(cat, 24)} ب${city}`);
+    if (name && wa) add("headline", `${name} على واتساب`);
+
+    if (name && loc) add("primaryText", `${name} ب${loc}.`);
+    if (problem) add("primaryText", /[.!?؟]$/.test(problem) ? problem : `${problem}.`);
+    if (adv) add("primaryText", /[.!?؟]$/.test(adv) ? adv : `${adv}.`);
+    if (hours) add("primaryText", `الدوام: ${hours}`);
+    if (wa) add("primaryText", `واتساب ${wa}${clinic ? " — مش للطوارئ" : ""}.`);
+    if (site) add("primaryText", site);
+    if (peds) {
+      add("primaryText", "جت أولاً بدون مواعيد — مش حاجة تحجزوا دور.");
+      if (audience) add("primaryText", `${audience} — العيادة هون، تعوا حسب الدور.`);
+    } else if (name && city) {
+      add("primaryText", `${name} ب${city} — تعوا أو احكوا معنا.`);
     }
   } else if (locale === "he") {
-    if (name && loc) push(`${name} ב${loc}.`);
-    if (problem && !/^(unknown|custom)$/i.test(problem)) push(problem);
-    if (adv) push(adv);
-    if (hours) push(`שעות: ${clipAtWord(hours, 80)}`);
-    if (phone) push(`וואטסאפ ${phone}.`);
-    if (site) push(site);
+    if (name && city) add("headline", `${name} — ${city}`);
+    if (name && cat) add("headline", `${name} — ${clipAtWord(cat, 28)}`);
+    if (name && adv) add("headline", `${name} — ${clipAtWord(adv, 36)}`);
+    if (adv && adv.length >= 6) add("headline", adv);
+    if (problem && problem.length >= 6) add("hook", problem);
+    if (peds) {
+      if (name) add("headline", `${name} — לפי סדר הגעה`);
+      add("hook", "כשהילד חולה — לאן הולכים היום");
+      if (city) add("hook", `מרפאת ילדים ב${city}`);
+      if (hours) add("hook", `שעות: ${clipAtWord(hours, 36)}`);
+    } else if (bakery) {
+      add("headline", name ? `${name} — לחם חם מהתנור` : "לחם חם מהתנור");
+    } else if (name) {
+      add("headline", `${name} — בואו היום`);
+      if (city) add("hook", `${name} ב${city}`);
+    }
+    if (wa) add("hook", `וואטסאפ ${wa}`);
+    if (name && site) add("headline", `${name} — לאתר`);
+    if (hours && name) add("headline", `${name} — ${clipAtWord(hours, 28)}`);
+    if (name && loc) add("primaryText", `${name} ב${loc}.`);
+    if (problem) add("primaryText", problem);
+    if (adv) add("primaryText", adv);
+    if (hours) add("primaryText", `שעות: ${hours}`);
+    if (wa) add("primaryText", `וואטסאפ ${wa}.`);
+    if (site) add("primaryText", site);
   } else {
-    if (name && loc) push(`${name} in ${loc}.`);
-    if (problem && !/^(unknown|custom)$/i.test(problem)) push(problem);
-    if (adv) push(adv);
-    if (hours) push(`Hours: ${clipAtWord(hours, 80)}`);
-    if (phone) push(`WhatsApp ${phone}.`);
-    if (site) push(site);
+    if (name && city) add("headline", `${name} — ${city}`);
+    if (name && cat) add("headline", `${name} — ${clipAtWord(cat, 28)}`);
+    if (name && adv) add("headline", `${name} — ${clipAtWord(adv, 36)}`);
+    if (adv && adv.length >= 6) add("headline", adv);
+    if (problem && problem.length >= 6) add("hook", problem);
+    if (peds) {
+      if (name) add("headline", `${name} — walk-in, no appointment`);
+      add("hook", "When a child is sick — know where to go today");
+      if (city) add("hook", `Pediatric clinic in ${city}`);
+      if (hours) add("hook", `Hours: ${clipAtWord(hours, 36)}`);
+    } else if (bakery) {
+      add("headline", name ? `${name} — fresh bread today` : "Fresh bread today");
+    } else if (name) {
+      add("headline", `${name} — come by today`);
+      if (city) add("hook", `${name} in ${city}`);
+    }
+    if (wa) add("hook", `WhatsApp ${wa}`);
+    if (name && site) add("headline", `${name} — visit the site`);
+    if (hours && name) add("headline", `${name} — ${clipAtWord(hours, 28)}`);
+    if (name && loc) add("primaryText", `${name} in ${loc}.`);
+    if (problem) add("primaryText", problem);
+    if (adv) add("primaryText", adv);
+    if (hours) add("primaryText", `Hours: ${hours}`);
+    if (wa) add("primaryText", `WhatsApp ${wa}.`);
+    if (site) add("primaryText", site);
   }
-  return out.slice(0, 6);
+
+  return seeds;
+}
+
+function honestPadLines(intake: Intake, locale: Locale): FactSeed[] {
+  const name = usableFact(intake.businessName);
+  const city = cityOf(usableFact(intake.location));
+  const wa = waOf(intake);
+  const site = usableFact(intake.website);
+  const rows: string[] =
+    locale === "ar"
+      ? [
+          name ? `${name} — تعوا هاليوم` : "تعوا هاليوم",
+          city ? `تعوا ع ${city}` : "زورونا اليوم",
+          wa ? `اكتبوا واتساب ${wa}` : "اكتبوا لنا",
+          site ? "افتحوا الموقع" : "احكوا معنا",
+          name ? `${name} بانتظاركم` : "الخدمة من المحل",
+          city ? `${city} — تعوا حسب الدور` : "تعوا حسب الدور",
+          "اسألوا عن الدوام",
+          "زيارة قصيرة هاليوم",
+        ]
+      : locale === "he"
+        ? [
+            name ? `${name} — בואו היום` : "בואו היום",
+            city ? `בואו ל${city}` : "בואו לבקר",
+            wa ? `כתבו בוואטסאפ ${wa}` : "כתבו לנו",
+            site ? "פתחו את האתר" : "צרו קשר",
+            "שאלו על השעות",
+            "ביקור קצר היום",
+          ]
+        : [
+            name ? `${name} — come by today` : "Come by today",
+            city ? `Visit ${city}` : "Visit us today",
+            wa ? `WhatsApp ${wa}` : "Write to us",
+            site ? "Open the website" : "Get in touch",
+            "Ask about hours",
+            "A short visit today",
+          ];
+  const kinds: CopyLineKind[] = ["headline", "hook", "primaryText", "cta"];
+  return rows.map((text, i) => ({ kind: kinds[i % kinds.length]!, text }));
+}
+
+function factHooks(intake: Intake, locale: Locale): string[] {
+  return factSeeds(intake, locale)
+    .filter((s) => s.kind === "headline" || s.kind === "hook")
+    .map((s) => s.text)
+    .slice(0, 16);
+}
+
+function factBodies(intake: Intake, locale: Locale): string[] {
+  return factSeeds(intake, locale)
+    .filter((s) => s.kind === "primaryText")
+    .map((s) => s.text)
+    .slice(0, 8);
 }
 
 export function lineOk(text: string, intake: Intake, locale: Locale, opts?: { requireBusiness?: boolean }): boolean {
   const t = normLine(text);
   if (t.length < 2 || t.length > 280) return false;
-  if (customerCopyHasLeak(t) || hasBannedNonsense(t) || isStrategyLabelLine(t)) return false;
+  if (customerCopyHasLeak(t) || hasBannedNonsense(t) || isStrategyLabelLine(t) || isEngineChromeLine(t)) return false;
   if (localeScriptBleed(t, locale)) return false;
   if (locale === "ar" && arabicRegisterBleed(t, effectiveDialect(intake, locale), locale)) return false;
   if (clalitContamination(t, intake)) return false;
@@ -323,7 +422,7 @@ export function copyBatchQuality(options: CopyLineOption[], intake: Intake): { o
   const ctas = options.filter((o) => o.kind === "cta").map((o) => o.text);
   if (ctas.length >= 2 && ctaMonoculture(ctas)) reasons.push("cta-monoculture");
   for (const t of texts) {
-    if (hasBannedNonsense(t) || customerCopyHasLeak(t)) {
+    if (hasBannedNonsense(t) || customerCopyHasLeak(t) || isEngineChromeLine(t)) {
       reasons.push("banned-nonsense");
       break;
     }
@@ -375,21 +474,28 @@ export function buildLocalCopyLinePool(
     options.push(makeOption(kind, t, locale, source, options.length, url));
   };
 
-  for (const h of factHooks(intake, locale)) add("headline", h, "facts");
-  const hooks = factHooks(intake, locale);
-  for (let i = 0; i < hooks.length; i++) {
-    if (i % 2 === 0) add("hook", hooks[i]!, "facts");
-  }
-  for (const b of factBodies(intake, locale)) add("primaryText", b, "facts");
+  for (const s of factSeeds(intake, locale)) add(s.kind, s.text, "facts");
   for (const c of ctaOptionsFor(intake, locale)) add("cta", c, "facts");
-
+  for (const h of hooksFor(detectVertical(intake), locale, intake)) {
+    add("hook", h, "facts");
+  }
   for (const snip of researchSnippets(opts?.research, locale)) {
     if (!lineOk(snip.text, intake, locale, { requireBusiness: true })) continue;
     add("hook", snip.text, "research", snip.url);
   }
+  if (options.length < COPY_LINE_MIN) {
+    for (const p of honestPadLines(intake, locale)) add(p.kind, p.text, "facts");
+  }
 
   const selectedIds = pickDiverseSelection(options);
   const primaryIds = pickPrimaryIds(options, selectedIds);
+  const usedNetwork = options.some((o) => o.source === "research" || o.source === "gemini");
+  const researchSources = usedNetwork
+    ? (opts?.research?.notes ?? [])
+        .filter((n) => n.sourceUrl)
+        .slice(0, 6)
+        .map((n) => ({ url: n.sourceUrl!, title: n.title[locale] || n.title.en }))
+    : [];
   return {
     locale,
     options,
@@ -397,11 +503,8 @@ export function buildLocalCopyLinePool(
     primaryIds,
     generatedAt: new Date().toISOString(),
     batchId: uid("batch"),
-    grounded: Boolean(opts?.research?.grounded || opts?.research?.fetched),
-    sources: (opts?.research?.notes ?? [])
-      .filter((n) => n.sourceUrl)
-      .slice(0, 6)
-      .map((n) => ({ url: n.sourceUrl!, title: n.title[locale] || n.title.en })),
+    grounded: usedNetwork,
+    sources: researchSources,
   };
 }
 

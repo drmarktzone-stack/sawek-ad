@@ -632,7 +632,7 @@ const GENERIC_PLATFORMS: PlatformSeed[] = [
   {
     id: "fact_first_spine",
     name: L("עמוד שדרה של עובדות", "عمود حقائق", "Fact-first spine"),
-    hook: L("כל פריים = עובדה מהקליטה", "كل فريمة = حقيقة من البيانات", "Every frame = an intake fact"),
+    hook: L("שם, מקום, שעות — בלי סלוגן סוכנות", "الاسم والمكان والدوام — بلا شعار وكالة", "Name, place, hours — no agency slogan"),
     arc: L("עובדה → משמעות → CTA", "حقيقة → معنى → CTA", "Fact → meaning → CTA"),
     platform: L("פלטפורמת עובדה-ראשונה", "منصة الحقيقة أولاً", "Fact-first platform"),
     why: L("מונעת תבניות סוכנות כשחסרים מספרים", "تمنع قوالب الوكالات عند نقص الأرقام", "Blocks agency templates when numbers are missing"),

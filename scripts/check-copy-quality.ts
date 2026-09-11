@@ -27,11 +27,13 @@ import {
   ctaMonoculture,
   hasBannedNonsense,
   BANNED_NONSENSE,
+  isEngineChromeLine,
 } from "../lib/copy-purity";
 import { composeCoreMessage } from "../lib/engine/core-message";
+import { factsToIntake } from "../lib/engine/gemini-generate";
 import { VOICE_DIALECTS, defaultDialectForLocale, effectiveDialect, lockDefaultDialect } from "../lib/engine/voice";
 import { pickIdeas } from "../lib/engine/cmo-ideas";
-import { buildLocalCopyLinePool, COPY_LINE_MIN, copyBatchQuality, ctaOptionsFor, lineOk } from "../lib/engine/copy-lines";
+import { buildLocalCopyLinePool, COPY_LINE_MIN, copyBatchQuality, ctaOptionsFor, lineOk, finalizeCopyLinePool } from "../lib/engine/copy-lines";
 import { buildPostingCalendar } from "../lib/engine/posting-calendar";
 import type { CampaignPack, Intake, Locale } from "../lib/types";
 
@@ -385,6 +387,99 @@ if (lineOk("طبيب أطفال الدار البيضاء سبتة", samer, "ar"
 if (lineOk("طوابير الساعات", samer, "ar", { requireBusiness: true })) {
   fail("ungrounded hours-queue headline passed requireBusiness");
 }
+
+const LIVE_CHROME = [
+  "المحل — كل فريمة = حقيقة من البيانات.",
+  "— مكان حقيقي، مش «قربكم» فاضي.",
+  "الساعات هي البطل",
+];
+for (const chrome of LIVE_CHROME) {
+  if (lineOk(chrome, samer, "ar")) fail(`lineOk kept live chrome: ${chrome}`);
+}
+
+const META_COPY_RE =
+  /كل\s*فريمة|حقيقة من البيانات|قربكم['»"”]?\s*فاضي|اسم\s*\+\s*بلدة|الساعات هي البطل|مش شعار طبي|every frame\s*=\s*an intake fact/i;
+
+function assertSamerMarketplace(label: string, pool: { options: Array<{ text: string }>; grounded?: boolean; sources?: unknown[] }) {
+  if (pool.options.length < COPY_LINE_MIN) {
+    fail(`${label} options ${pool.options.length} < ${COPY_LINE_MIN}: ${pool.options.map((o) => o.text).join(" | ")}`);
+  }
+  const uniq = new Set(pool.options.map((o) => o.text.replace(/\s+/g, " ").trim()).filter(Boolean));
+  if (uniq.size < COPY_LINE_MIN) fail(`${label} distinct ${uniq.size} < ${COPY_LINE_MIN}`);
+  const blob = [...uniq].join("\n");
+  if (META_COPY_RE.test(blob) || pool.options.some((o) => isEngineChromeLine(o.text) || hasBannedNonsense(o.text))) {
+    fail(`${label} leaked engine chrome: ${blob.slice(0, 400)}`);
+  }
+  const hitName = pool.options.some((o) => o.text.includes("سامر") || o.text.includes("أبو مخ"));
+  const hitPlace = pool.options.some((o) => /باقة|مجمع النور/.test(o.text));
+  const hitWa = pool.options.some((o) => o.text.includes("052-8885800") || o.text.includes("واتساب"));
+  if (!hitName && !hitPlace && !hitWa) {
+    fail(`${label} options missing business name / place / WhatsApp: ${blob.slice(0, 400)}`);
+  }
+  if (!hitName && !hitPlace) {
+    fail(`${label} needs at least name or place on some lines: ${blob.slice(0, 400)}`);
+  }
+}
+
+assertSamerMarketplace("local-facts", samerPool);
+if (samerPool.grounded) fail("facts-only local pool must not set grounded:true");
+if ((samerPool.sources ?? []).length) fail("facts-only local pool must have empty sources");
+
+const curlIntake = factsToIntake({
+  businessName: samer.businessName,
+  category: samer.category,
+  description: samer.description,
+  location: samer.location,
+  website: samer.website,
+  whatsapp: samer.whatsapp,
+  clinicHours: samer.clinicHours,
+  audience: samer.audience,
+  uniqueAdvantage: samer.uniqueAdvantage,
+  biggestProblem: samer.biggestProblem,
+  offer: samer.offer,
+  mainGoal: samer.mainGoal,
+  operatingModel: samer.operatingModel,
+});
+if (curlIntake.businessName !== samer.businessName) {
+  fail(`curl-equivalent factsToIntake dropped name: ${curlIntake.businessName}`);
+}
+if (!curlIntake.location.includes("باقة")) fail(`curl-equivalent dropped location: ${curlIntake.location}`);
+if (!curlIntake.whatsapp.includes("052-8885800")) fail(`curl-equivalent dropped WhatsApp: ${curlIntake.whatsapp}`);
+const curlPool = buildLocalCopyLinePool(curlIntake, "ar");
+assertSamerMarketplace("curl-top-level", curlPool);
+if (curlPool.grounded) fail("curl facts fallback set grounded:true");
+if ((curlPool.sources ?? []).length) fail("curl facts fallback must have sources=[]");
+
+const mktFacts = {
+  businessName: samer.businessName,
+  category: samer.category,
+  description: samer.description,
+  location: samer.location,
+  website: samer.website,
+  whatsapp: samer.whatsapp,
+  clinicHours: samer.clinicHours,
+  audience: samer.audience,
+  uniqueAdvantage: samer.uniqueAdvantage,
+  biggestProblem: samer.biggestProblem,
+  offer: samer.offer,
+  mainGoal: samer.mainGoal,
+  operatingModel: samer.operatingModel,
+};
+const mktIntake = factsToIntake({ facts: mktFacts, description: mktFacts, audience: samer.audience });
+if (mktIntake.businessName !== samer.businessName) fail("marketplace body dropped businessName");
+assertSamerMarketplace("marketplace-body", buildLocalCopyLinePool(mktIntake, "ar"));
+
+const emptyGemini = finalizeCopyLinePool({
+  intake: samer,
+  locale: "ar",
+  local: samerPool,
+  geminiOpts: [],
+  groundingSources: [],
+});
+assertSamerMarketplace("gemini-empty-fill", emptyGemini);
+if (emptyGemini.grounded) fail("Gemini-ok-but-empty must not set grounded:true when only facts remain");
+if ((emptyGemini.sources ?? []).length) fail("Gemini-ok-but-empty must keep sources=[]");
+if (emptyGemini.options.length === 4) fail("must never return 4 chrome options");
 
 for (const phrase of BANNED_NONSENSE) {
   const plantedHero = gateCustomerAd({ headline: phrase, body: "د. سامر بباقة", cta: "واتساب" }, samer, "ar");

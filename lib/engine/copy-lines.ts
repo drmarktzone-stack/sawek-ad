@@ -10,7 +10,6 @@ import { completeGemini } from "./gemini-generate";
 import {
   COPY_LINE_MIN,
   buildLocalCopyLinePool,
-  copyBatchQuality,
   lineKey,
   lineOk,
   makeOption,
@@ -71,8 +70,55 @@ function factsBlock(intake: Intake): string {
     .join("\n");
 }
 
+export function finalizeCopyLinePool(input: {
+  intake: Intake;
+  locale: Locale;
+  local: CopyLinePool;
+  geminiOpts: CopyLineOption[];
+  groundingSources?: { url: string; title?: string }[];
+}): CopyLinePool {
+  const merged: CopyLineOption[] = [];
+  const mergedSeen = new Set<string>();
+  const push = (o: CopyLineOption) => {
+    if (mergedSeen.has(lineKey(o.text))) return;
+    if ([...mergedSeen].some((k) => tooSimilar(k, o.text))) return;
+    if (!lineOk(o.text, input.intake, input.locale)) return;
+    mergedSeen.add(lineKey(o.text));
+    merged.push({ ...o, id: `line-${o.kind}-${merged.length}-${uid("m").slice(-5)}` });
+  };
+  for (const o of input.geminiOpts) push(o);
+  for (const o of input.local.options) push(o);
+
+  let options = merged.filter((o) => lineOk(o.text, input.intake, input.locale));
+  if (options.length < COPY_LINE_MIN) {
+    for (const o of input.local.options) {
+      if (options.length >= COPY_LINE_MIN) break;
+      if (options.some((x) => lineKey(x.text) === lineKey(o.text) || tooSimilar(x.text, o.text))) continue;
+      if (!lineOk(o.text, input.intake, input.locale)) continue;
+      options.push(o);
+    }
+  }
+  if (options.length < COPY_LINE_MIN) options = input.local.options.length ? input.local.options : options;
+
+  const selectedIds = pickDiverseSelection(options);
+  const usedNetwork = options.some((o) => o.source === "gemini" || o.source === "research");
+  const sources = usedNetwork
+    ? [...(input.groundingSources ?? []), ...(input.local.sources ?? [])].filter((s) => s.url).slice(0, 8)
+    : [];
+  return {
+    locale: input.locale,
+    options,
+    selectedIds,
+    primaryIds: pickPrimaryIds(options, selectedIds),
+    generatedAt: new Date().toISOString(),
+    batchId: uid("batch"),
+    grounded: usedNetwork,
+    sources,
+  };
+}
+
 const LINE_SYSTEM =
-  "You are SAWEK AD copy. Produce MANY distinct customer-facing ad lines for THIS business only. Default Arabic is Palestinian colloquial (هاليوم، تعوا، مش، شو، هون). Use ONLY facts. Never invent prices, ROAS, CAC, ratings, testimonials, Clalit unless it is a stated fact, or slogans from another clinic. Never print strategy labels (الساعات هي البطل, مرآة المشكلة, مش شعار طبي, hours as hero). Each headline and each CTA in the batch must be unique. Reply JSON only.";
+  "You are SAWEK AD copy. Produce MANY distinct customer-facing ad lines for THIS business only. Default Arabic is Palestinian colloquial (هاليوم، تعوا، مش، شو، هون). Use ONLY facts. Never invent prices, ROAS, CAC, ratings, testimonials, Clalit unless it is a stated fact, or slogans from another clinic. Never print strategy labels or engine chrome (الساعات هي البطل, مرآة المشكلة, مش شعار طبي, hours as hero, كل فريمة, حقيقة من البيانات, قربكم فاضي, من الحقائق). Each headline and each CTA in the batch must be unique. Reply JSON only.";
 
 export async function generateGroundedCopyLines(input: {
   intake: Intake;
@@ -101,7 +147,8 @@ export async function generateGroundedCopyLines(input: {
   }).catch(() => ({ ok: false as const, reason: "gemini_error" as const }));
 
   if (!completed.ok) {
-    return { ...local, grounded: Boolean(input.research?.grounded) };
+    const usedNetwork = local.options.some((o) => o.source === "gemini" || o.source === "research");
+    return { ...local, grounded: usedNetwork, sources: usedNetwork ? local.sources ?? [] : [] };
   }
 
   const obj = parseLooseJson(completed.text);
@@ -123,28 +170,12 @@ export async function generateGroundedCopyLines(input: {
     geminiOpts.push(makeOption(kind, text, input.locale, "gemini", geminiOpts.length));
   }
 
-  const merged: CopyLineOption[] = [];
-  const mergedSeen = new Set<string>();
-  for (const o of [...local.options, ...geminiOpts]) {
-    if (mergedSeen.has(lineKey(o.text))) continue;
-    if ([...mergedSeen].some((k) => tooSimilar(k, o.text))) continue;
-    mergedSeen.add(lineKey(o.text));
-    merged.push({ ...o, id: `line-${o.kind}-${merged.length}-${uid("m").slice(-5)}` });
-  }
-
-  const quality = copyBatchQuality(merged, input.intake);
-  const options = quality.ok ? merged : copyBatchQuality(local.options, input.intake).ok ? local.options : merged.filter((o) => lineOk(o.text, input.intake, input.locale));
-  const final = options.length >= COPY_LINE_MIN ? options : local.options;
-  const selectedIds = pickDiverseSelection(final);
-  const groundingSources = completed.ok && "groundingSources" in completed ? completed.groundingSources ?? [] : [];
-  return {
+  const groundingSources = "groundingSources" in completed ? completed.groundingSources ?? [] : [];
+  return finalizeCopyLinePool({
+    intake: input.intake,
     locale: input.locale,
-    options: final,
-    selectedIds,
-    primaryIds: pickPrimaryIds(final, selectedIds),
-    generatedAt: new Date().toISOString(),
-    batchId: uid("batch"),
-    grounded: Boolean(completed.ok && ("grounded" in completed ? completed.grounded : true)),
-    sources: [...groundingSources, ...(local.sources ?? [])].slice(0, 8),
-  };
+    local,
+    geminiOpts,
+    groundingSources,
+  });
 }
