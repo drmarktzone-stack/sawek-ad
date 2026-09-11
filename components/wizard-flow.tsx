@@ -610,42 +610,53 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
     await beginAgents();
   }
 
+  /**
+   * livePack() null / hollow diagnosis: persist a fresh diagnosis from intake, then
+   * auto-finish. Never setHitlError(packMissing) — that was the ram.dental dead-end.
+   */
+  async function rebuildFromIntakeAndFinish() {
+    if (typeof console !== "undefined") {
+      console.warn("[sawek-hitl] packMissing — rebuild diagnosis from intake, auto-finish");
+    }
+    const seed = await buildDiagnosisPack(intake, onStatus, {
+      id: livePack()?.id,
+      offerBlueprint: intake.offerBlueprint,
+      hsoStudio: loadDraft().hsoStudio,
+    });
+    persistLivePack(seed, "agents");
+    const next = await autoAdvanceHitlToEnd(intake, seed, onStatus, locale, {
+      pauseAfterOne: false,
+      onPack: (p) => persistLivePack(p, "agents"),
+    });
+    const done = nextHitlGate(next.agentStatus, next) === "complete";
+    persistLivePack(next, done ? "wizard" : "agents");
+    if (done) router.push(withLang(`/campaigns/${next.id}`, locale));
+  }
+
   async function finishPipeline(seed: CampaignPack | null) {
-    const pause = pauseArmed();
     const usable = seed && packHasDiagnosis(seed) ? seed : null;
-    if (usable) {
-      const gate = nextHitlGate(usable.agentStatus, usable);
-      if (gate === "complete") {
-        persistLivePack(usable, "wizard");
-        router.push(withLang(`/campaigns/${usable.id}`, locale));
-        return;
-      }
-      if (pause && gate === "diagnostic") {
-        persistLivePack(usable, "agents");
-        return;
-      }
-      const next = await autoAdvanceHitlToEnd(intake, usable, onStatus, locale, {
-        pauseAfterOne: pause,
-        onPack: (p) => persistLivePack(p, "agents"),
-      });
-      const done = nextHitlGate(next.agentStatus, next) === "complete";
-      persistLivePack(next, done ? "wizard" : "agents");
-      if (done) router.push(withLang(`/campaigns/${next.id}`, locale));
+    if (!usable) {
+      await rebuildFromIntakeAndFinish();
       return;
     }
-    if (pause) {
-      persistLivePack(
-        await buildDiagnosisPack(intake, onStatus, {
-          offerBlueprint: intake.offerBlueprint,
-          hsoStudio: loadDraft().hsoStudio,
-        }),
-        "agents",
-      );
+    const pause = pauseArmed();
+    const gate = nextHitlGate(usable.agentStatus, usable);
+    if (gate === "complete") {
+      persistLivePack(usable, "wizard");
+      router.push(withLang(`/campaigns/${usable.id}`, locale));
       return;
     }
-    const next = await runFullPipeline(intake, onStatus);
-    persistLivePack(next, "wizard");
-    router.push(withLang(`/campaigns/${next.id}`, locale));
+    if (pause && gate === "diagnostic") {
+      persistLivePack(usable, "agents");
+      return;
+    }
+    const next = await autoAdvanceHitlToEnd(intake, usable, onStatus, locale, {
+      pauseAfterOne: pause,
+      onPack: (p) => persistLivePack(p, "agents"),
+    });
+    const done = nextHitlGate(next.agentStatus, next) === "complete";
+    persistLivePack(next, done ? "wizard" : "agents");
+    if (done) router.push(withLang(`/campaigns/${next.id}`, locale));
   }
 
   async function beginAgents() {
@@ -659,14 +670,23 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
     setPhase("agents");
     setHitlError("");
     try {
-      await finishPipeline(livePack());
+      const live = livePack();
+      if (!live || !packHasDiagnosis(live)) {
+        await rebuildFromIntakeAndFinish();
+      } else {
+        await finishPipeline(live);
+      }
     } catch {
       try {
-        const next = await runFullPipeline(intake, onStatus);
-        persistLivePack(next, "wizard");
-        router.push(withLang(`/campaigns/${next.id}`, locale));
+        await rebuildFromIntakeAndFinish();
       } catch {
-        if (hitlMounted.current) setHitlError(t("agents.hitlError"));
+        try {
+          const next = await runFullPipeline(intake, onStatus);
+          persistLivePack(next, "wizard");
+          router.push(withLang(`/campaigns/${next.id}`, locale));
+        } catch {
+          if (hitlMounted.current) setHitlError(t("agents.hitlError"));
+        }
       }
     } finally {
       releaseHitlRun();
@@ -1410,9 +1430,6 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
           agentStatus={running ? agentStatus : reconcileAgentStatus(agentStatus, pack)}
           running={running}
           hitlError={hitlError}
-          pauseForReview={pauseArmed()}
-          showPause={hitlPauseEnabled()}
-          onPauseForReview={setPauseForReview}
           onApprove={() => void advanceHitl()}
           onRetry={() => void beginAgents()}
           onFillFromScan={fillMissingFromScan}
@@ -1482,9 +1499,6 @@ function AgentsPanel({
   agentStatus,
   running,
   hitlError,
-  pauseForReview,
-  showPause,
-  onPauseForReview,
   onApprove,
   onRetry,
   onFillFromScan,
@@ -1496,9 +1510,6 @@ function AgentsPanel({
   agentStatus: Record<AgentId, AgentStatus>;
   running: boolean;
   hitlError: string;
-  pauseForReview: boolean;
-  showPause: boolean;
-  onPauseForReview: (next: boolean) => void;
   onApprove: () => void;
   onRetry: () => void;
   onFillFromScan: () => void;
@@ -1509,7 +1520,7 @@ function AgentsPanel({
   const { t, locale } = useI18n();
   const gate = nextHitlGate(agentStatus, pack);
   const ctaDisabled = hitlCtaDisabled(gate, running);
-  const approveLabel = t(hitlCtaKey(gate, { pauseForReview }));
+  const approveLabel = t(hitlCtaKey(gate, { pauseForReview: false }));
   return (
     <section className="hitl-agents">
       <h2 className="agency-display mb-2 text-center text-3xl">{t("agents.title")}</h2>
@@ -1595,21 +1606,6 @@ function AgentsPanel({
           <p className="mb-3 text-center text-sm font-semibold text-teal" data-testid="hitl-progress">
             {t("agents.advancing")}
           </p>
-        ) : null}
-        {showPause ? (
-        <label className="mb-4 flex cursor-pointer items-start gap-3 text-sm">
-          <input
-            type="checkbox"
-            className="mt-1 size-4 accent-[var(--teal)]"
-            checked={pauseForReview === true}
-            onChange={(e) => onPauseForReview(e.target.checked)}
-            data-testid="hitl-pause-review-agents"
-          />
-          <span>
-            <span className="block font-semibold text-navy">{t("agents.pauseReview")}</span>
-            <span className="mt-1 block text-muted">{t("agents.pauseReviewHint")}</span>
-          </span>
-        </label>
         ) : null}
         {gate !== "complete" ? (
           <Button

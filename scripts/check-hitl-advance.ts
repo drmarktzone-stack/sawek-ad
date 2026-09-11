@@ -277,8 +277,19 @@ if (!wizardSrc.includes('data-testid="hitl-approve"')) fail("hitl-approve testid
 if (!wizardSrc.includes("runFullPipeline")) fail("default startBuild must auto-run the full pipeline");
 if (!wizardSrc.includes("pauseForReview")) fail("HITL pause-for-review must remain in source for advanced/dev");
 if (!wizardSrc.includes("restoreLivePack")) fail("remount must restore pack from draft/campaign store");
+if (/setHitlError\s*\(\s*t\(\s*"agents\.packMissing"/.test(wizardSrc)) {
+  fail("DEAD-END: advanceHitl/beginAgents must never setHitlError(packMissing)");
+}
 if (wizardSrc.includes('t("agents.packMissing")')) {
-  fail("missing diagnosis must auto-rebuild from intake, not show packMissing as the only path");
+  fail("packMissing i18n must not be customer-facing in wizard-flow (logs only)");
+}
+if (!wizardSrc.includes("rebuildFromIntakeAndFinish")) {
+  fail("null livePack must rebuild via buildDiagnosisPack + autoAdvanceHitlToEnd");
+}
+if (!wizardSrc.includes("buildDiagnosisPack")) fail("missing pack must rebuild diagnosis from intake");
+if (!wizardSrc.includes("autoAdvanceHitlToEnd")) fail("rebuild must auto-advance HITL to a finished campaign");
+if (wizardSrc.includes('data-testid="hitl-pause-review-agents"')) {
+  fail("AgentsPanel must not show pause-for-review on the customer AR/HE path");
 }
 if (!wizardSrc.includes("packHasDiagnosis")) fail("wizard must detect hollow diagnosis packs");
 if (!wizardSrc.includes("hitlPauseEnabled")) fail("pause-for-review must be hidden unless advanced");
