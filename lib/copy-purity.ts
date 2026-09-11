@@ -70,6 +70,20 @@ export const COPY_LEAK_PHRASES = [
   "المكان كبطل",
   "מקום כגיבור",
   "place as hero",
+  "كل فريمة",
+  "حقيقة من البيانات",
+  "قربكم» فاضي",
+  "قربكم فاضي",
+  "اسم + بلدة",
+  "كل פריים",
+  "עובדה מהקליטה",
+  "לידכם ריק",
+  "every frame = an intake fact",
+  "empty “near you”",
+  "empty \"near you\"",
+  "name + town",
+  "دليل من البيانات",
+  "evidence from intake",
 ] as const;
 
 const LEAK_RE: RegExp[] = [
@@ -151,7 +165,47 @@ export const BANNED_NONSENSE = [
   "עמוד שדרה של עובדות",
   "الفجوة كملخص",
   "הפער כבריף",
+  "كل فريمة",
+  "حقيقة من البيانات",
+  "قربكم فاضي",
+  "قربكم» فاضي",
+  "اسم + بلدة",
+  "كل פריים",
+  "עובדה מהקליטה",
+  "לידכם ריק",
+  "every frame = an intake fact",
+  "empty “near you”",
+  "empty \"near you\"",
+  "name + town",
 ] as const;
+
+/** Engine / coach chrome that must never appear as a selectable marketplace line. */
+const ENGINE_CHROME_RE: RegExp[] = [
+  /كل\s*فريمة/,
+  /فريمة\s*=/,
+  /حقيقة من البيانات/,
+  /قربكم['»"”]?\s*فاضي/,
+  /مكان حقيقي،\s*مش/,
+  /اسم\s*\+\s*بلدة/,
+  /כל\s*פריים/,
+  /עובדה מהקליטה/,
+  /מקום אמת,\s*לא/,
+  /לידכם['»"”]?\s*ריק/,
+  /every frame\s*=\s*an intake fact/i,
+  /empty\s+["“«]?near you/i,
+  /a real place,\s*not empty/i,
+  /name\s*\+\s*town/i,
+  /LAYER\s*A/i,
+  /Business Truth/i,
+  /دليل من البيانات/,
+  /evidence from intake/i,
+];
+
+export function isEngineChromeLine(text: string): boolean {
+  const src = String(text ?? "");
+  if (!src.trim()) return false;
+  return ENGINE_CHROME_RE.some((re) => re.test(src));
+}
 
 export function bannedNonsenseHits(text: string): string[] {
   const src = String(text ?? "");
@@ -163,6 +217,9 @@ export function bannedNonsenseHits(text: string): string[] {
   }
   if (/(?:هي|هو)\s+البطل|(?:as hero)|כגיבור/i.test(src) && src.replace(/\s+/g, " ").trim().length <= 40) {
     hits.push("hero-strategy-label");
+  }
+  for (const re of ENGINE_CHROME_RE) {
+    if (re.test(src)) hits.push(re.source);
   }
   return [...new Set(hits)];
 }

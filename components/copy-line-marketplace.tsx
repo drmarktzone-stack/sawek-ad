@@ -72,7 +72,7 @@ export function CopyLineMarketplace({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         facts,
-        description: facts,
+        description: pack.intake.description,
         audience: pack.intake.audience,
         locale,
         research: pack.research,
@@ -157,7 +157,7 @@ export function CopyLineMarketplace({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           facts,
-          description: facts,
+          description: pack.intake.description,
           audience: pack.intake.audience,
           locale,
           research: pack.research,

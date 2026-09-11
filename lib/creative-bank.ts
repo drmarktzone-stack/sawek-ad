@@ -107,22 +107,22 @@ const HOOKS: Record<Vertical, Record<Locale, string[]>> = {
   },
   clinic: {
     he: [
-      "{name} — מרפאה מהעובדות, לא סלוגן רפואי כללי.",
+      "{name} — מרפאה ב{place}.",
       "{problem}",
       "{advantage}",
-      "{place} — שם + עיר, בלי «הכי טוב בעיר».",
+      "{name} ב{place} — בואו לפי השעות.",
     ],
     ar: [
-      "{name} — عيادة من الحقائق، مش شعار طبي عام.",
+      "{name} — عيادة ب{place}.",
       "{problem}",
       "{advantage}",
-      "{place} — اسم + بلدة، بلا «الأفضل بالمدينة».",
+      "{name} ب{place} — تعوا حسب الدوام.",
     ],
     en: [
-      "{name} — a clinic from the facts, not a generic medical slogan.",
+      "{name} — clinic in {place}.",
       "{problem}",
       "{advantage}",
-      "{place} — name + town, never “best in town”.",
+      "{name} in {place} — come during hours.",
     ],
   },
   product: {
@@ -167,25 +167,25 @@ const HOOKS: Record<Vertical, Record<Locale, string[]>> = {
   },
   generic: {
     he: [
-      "{name} — כל פריים = עובדה מהקליטה.",
+      "{name} — בואו היום.",
       "{problem}",
       "{advantage}",
       "{offer}",
-      "{place} — מקום אמת, לא «לידכם» ריק.",
+      "{name} ב{place}",
     ],
     ar: [
-      "{name} — كل فريمة = حقيقة من البيانات.",
+      "{name} — تعوا هاليوم.",
       "{problem}",
       "{advantage}",
       "{offer}",
-      "{place} — مكان حقيقي، مش «قربكم» فاضي.",
+      "{name} ب{place}",
     ],
     en: [
-      "{name} — every frame = an intake fact.",
+      "{name} — come by today.",
       "{problem}",
       "{advantage}",
       "{offer}",
-      "{place} — a real place, not empty “near you”.",
+      "{name} in {place}",
     ],
   },
 };
@@ -437,21 +437,21 @@ const PEDIATRIC_HOOKS: Record<Locale, string[]> = {
     "{problem}",
     "{advantage}",
     "שעות: {hours} — לפי סדר הגעה, בלי תור מראש.",
-    "{place} — שם + עיר מהעובדות.",
+    "{name} ב{place} — מרפאת ילדים.",
   ],
   ar: [
     "{name} — لما الولد بيمرض، وين بتروحوا اليوم.",
     "{problem}",
     "{advantage}",
     "الساعات: {hours} — جت أولاً بدون مواعيد.",
-    "{place} — اسم + بلدة، من الحقائق.",
+    "{name} ب{place} — عيادة أطفال.",
   ],
   en: [
     "{name} — when a child is sick, know where to go today.",
     "{problem}",
     "{advantage}",
     "Hours: {hours} — walk-in order, no invented queue.",
-    "{place} — name + town, never “best in town”.",
+    "{name} in {place} — pediatric clinic.",
   ],
 };
 
@@ -459,17 +459,17 @@ const PLASTIC_HOOKS: Record<Locale, string[]> = {
   he: [
     "{name} — כירורגיה פלסטית מהמרפאה, לא סלוגן «הכי יפה».",
     "{advantage}",
-    "{place} — שם + עיר מפורסמים.",
+    "{name} ב{place} — כירורגיה פלסטית.",
   ],
   ar: [
     "{name} — جراحة تجميل من العيادة، مش شعار «الأجمل».",
     "{advantage}",
-    "{place} — اسم + مدينة من الموقع.",
+    "{name} ب{place} — جراحة تجميل.",
   ],
   en: [
     "{name} — plastic surgery from this clinic, not a “prettiest” slogan.",
     "{advantage}",
-    "{place} — published name + city.",
+    "{name} in {place} — plastic surgery.",
   ],
 };
 export function hooksFor(vertical: Vertical, locale: Locale, intake?: Intake): string[] {

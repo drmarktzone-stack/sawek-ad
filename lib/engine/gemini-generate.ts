@@ -1058,59 +1058,102 @@ export function geminiFailFromEnv(): GenerateFail {
   return geminiApiKeyPresent() || vertexProject() ? geminiError() : noKey();
 }
 
-export function factsToIntake(body: { description?: unknown; audience?: unknown; facts?: unknown }): Intake {
+function isFactRecord(v: unknown): v is Record<string, unknown> {
+  return Boolean(v) && typeof v === "object" && !Array.isArray(v);
+}
+
+function applyFactsRecord(intake: Intake, o: Record<string, unknown>): void {
+  const str = (k: string) => (typeof o[k] === "string" ? (o[k] as string).trim() : "");
+  const pick = (...keys: string[]) => {
+    for (const k of keys) {
+      const v = str(k);
+      if (v) return v;
+    }
+    return "";
+  };
+  intake.businessName = pick("businessName", "name", "clinicName") || intake.businessName;
+  intake.category = pick("category", "vertical") || intake.category;
+  intake.description = pick("description", "facts") || intake.description;
+  intake.location = pick("location", "city", "address") || intake.location;
+  intake.audience = pick("audience") || intake.audience;
+  intake.biggestProblem = pick("biggestProblem", "problem") || intake.biggestProblem;
+  intake.uniqueAdvantage = pick("uniqueAdvantage", "advantage") || intake.uniqueAdvantage;
+  intake.mainGoal = pick("mainGoal", "goal") || intake.mainGoal;
+  const offer = pick("offer");
+  if (offer) intake.offer = offer;
+  intake.pastResults = pick("pastResults") || intake.pastResults;
+  intake.website = pick("website", "url", "site") || intake.website;
+  intake.whatsapp = pick("whatsapp", "phone", "tel", "mobile") || intake.whatsapp;
+  const phone = pick("phone", "tel", "mobile");
+  if (phone) intake.phone = phone;
+  intake.clinicHours = pick("clinicHours", "hours", "openingHours") || intake.clinicHours;
+  const om = pick("operatingModel");
+  if (om === "paid" || om === "free_service") intake.operatingModel = om;
+  intake.brandTone = pick("brandTone", "personalVoice") || intake.brandTone;
+  intake.brandPositioning = pick("brandPositioning") || intake.brandPositioning;
+  if (pick("kupaFileBy")) intake.kupaFileBy = pick("kupaFileBy");
+  if (pick("kupaMemberFrom")) intake.kupaMemberFrom = pick("kupaMemberFrom");
+  const dialect = pick("voiceDialect", "dialect");
+  const niche = pick("coreNiche", "niche");
+  const coreMessage = pick("coreMessage");
+  const personalVoice = pick("personalVoice") || intake.brandTone;
+  if (niche || coreMessage || personalVoice || dialect) {
+    intake.voice = normalizeVoice({
+      ...intake.voice,
+      niche,
+      coreMessage,
+      personalVoice,
+      dialect: isVoiceDialect(dialect) ? dialect : "",
+    });
+  }
+  if (isFactRecord(o.voice)) {
+    const v = o.voice;
+    intake.voice = normalizeVoice({
+      ...intake.voice,
+      ...v,
+      niche: typeof v.niche === "string" ? v.niche : niche,
+      coreMessage: typeof v.coreMessage === "string" ? v.coreMessage : coreMessage,
+      personalVoice: typeof v.personalVoice === "string" ? v.personalVoice : personalVoice,
+    });
+  }
+}
+
+export function factsToIntake(body: {
+  description?: unknown;
+  audience?: unknown;
+  facts?: unknown;
+  intake?: unknown;
+}): Intake {
   const intake = emptyIntake();
   const facts = body.facts;
   if (typeof facts === "string" && facts.trim()) {
     intake.description = facts.trim();
-  } else if (facts && typeof facts === "object" && !Array.isArray(facts)) {
-    const o = facts as Record<string, unknown>;
-    const str = (k: string) => (typeof o[k] === "string" ? (o[k] as string) : "");
-    intake.businessName = str("businessName") || str("name") || str("clinicName");
-    intake.category = str("category") || str("vertical");
-    intake.description = str("description") || str("facts") || intake.description;
-    intake.location = str("location") || str("city") || str("address");
-    intake.audience = str("audience");
-    intake.biggestProblem = str("biggestProblem") || str("problem");
-    intake.uniqueAdvantage = str("uniqueAdvantage") || str("advantage");
-    intake.mainGoal = str("mainGoal") || str("goal");
-    intake.offer = str("offer") || intake.offer;
-    intake.pastResults = str("pastResults");
-    intake.website = str("website") || str("url") || str("site");
-    intake.whatsapp = str("whatsapp") || str("phone") || str("tel") || str("mobile");
-    intake.clinicHours = str("clinicHours") || str("hours") || str("openingHours");
-    const om = str("operatingModel");
-    if (om === "paid" || om === "free_service") intake.operatingModel = om;
-    intake.brandTone = str("brandTone") || str("personalVoice");
-    intake.brandPositioning = str("brandPositioning");
-    if (str("kupaFileBy")) intake.kupaFileBy = str("kupaFileBy");
-    if (str("kupaMemberFrom")) intake.kupaMemberFrom = str("kupaMemberFrom");
-    const dialect = str("voiceDialect") || str("dialect");
-    const niche = str("coreNiche") || str("niche");
-    const coreMessage = str("coreMessage");
-    const personalVoice = str("personalVoice") || intake.brandTone;
-    if (niche || coreMessage || personalVoice || dialect) {
-      intake.voice = normalizeVoice({
-        ...intake.voice,
-        niche,
-        coreMessage,
-        personalVoice,
-        dialect: isVoiceDialect(dialect) ? dialect : "",
-      });
-    }
-    if (o.voice && typeof o.voice === "object" && !Array.isArray(o.voice)) {
-      const v = o.voice as Record<string, unknown>;
-      intake.voice = normalizeVoice({
-        ...intake.voice,
-        ...v,
-        niche: typeof v.niche === "string" ? v.niche : niche,
-        coreMessage: typeof v.coreMessage === "string" ? v.coreMessage : coreMessage,
-        personalVoice: typeof v.personalVoice === "string" ? v.personalVoice : personalVoice,
-      });
-    }
+  } else if (isFactRecord(facts)) {
+    applyFactsRecord(intake, facts);
+  }
+  if (isFactRecord(body.intake)) {
+    applyFactsRecord(intake, body.intake);
+  }
+  if (isFactRecord(body.description)) {
+    applyFactsRecord(intake, body.description);
+  }
+  const top = body as Record<string, unknown>;
+  if (
+    typeof top.businessName === "string" ||
+    typeof top.location === "string" ||
+    typeof top.whatsapp === "string" ||
+    typeof top.uniqueAdvantage === "string" ||
+    typeof top.clinicHours === "string" ||
+    typeof top.category === "string"
+  ) {
+    applyFactsRecord(intake, top);
   }
   if (typeof body.description === "string" && body.description.trim()) {
-    intake.description = [intake.description, body.description.trim()].filter(Boolean).join("\n");
+    const extra = body.description.trim();
+    if (!intake.description.trim()) intake.description = extra;
+    else if (extra !== intake.description && !intake.description.includes(extra)) {
+      intake.description = [intake.description, extra].filter(Boolean).join("\n");
+    }
   }
   if (typeof body.audience === "string" && body.audience.trim()) {
     intake.audience = body.audience.trim();
