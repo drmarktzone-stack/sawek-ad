@@ -2,7 +2,7 @@ import type { AgentId, AgentStatus, CampaignPack } from "../types";
 
 export type HitlGate = "diagnostic" | "strategic" | "media" | "complete";
 
-export type HitlCtaKey = "cta.approve" | "cta.approveContinue" | "cta.finishToEnd";
+export type HitlCtaKey = "cta.approve" | "cta.approveContinue" | "cta.finishToEnd" | "cta.approveAndFinish";
 
 /**
  * Next HITL action for the Agents-phase CTA.
@@ -50,9 +50,14 @@ export function shouldResumeAgents(opts: {
   return nextHitlGate(opts.status ?? pack.agentStatus, pack) !== "complete";
 }
 
+export function isParkedHitlGate(gate: HitlGate): boolean {
+  return gate === "diagnostic" || gate === "strategic" || gate === "media";
+}
+
 /**
  * HITL primary CTA is never a grey dead-end at a needs_approval gate.
  * `running` may show progress copy elsewhere — it must not disable approve/continue.
+ * Stale `running === true` after a hung overlay/navigation must not grey the button.
  */
 export function hitlCtaDisabled(gate: HitlGate, _running = false): boolean {
   if (gate === "diagnostic" || gate === "strategic" || gate === "media") return false;
@@ -61,16 +66,17 @@ export function hitlCtaDisabled(gate: HitlGate, _running = false): boolean {
 
 /**
  * Default (pause off) = finish to the campaign page.
- * Soft pause: diagnose → اعتمد وكمل at strategy → يلا نكمّل للآخر at media.
+ * Parked strategy/media (including remount with stale running) = اعتمد وكمل للآخر.
+ * Soft pause diagnosis = cta.approve.
  */
 export function hitlCtaKey(
   gate: HitlGate,
   opts?: { pauseForReview?: boolean },
 ): HitlCtaKey {
   const pause = opts?.pauseForReview === true;
+  if (gate === "strategic" || gate === "media") return "cta.approveAndFinish";
   if (!pause) return "cta.finishToEnd";
   if (gate === "diagnostic") return "cta.approve";
-  if (gate === "media" || gate === "complete") return "cta.finishToEnd";
   return "cta.approveContinue";
 }
 

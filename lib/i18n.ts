@@ -383,6 +383,7 @@ export const copy: Dict = {
   "cta.copied": { he: "הועתק", ar: "تم النسخ", en: "Copied" },
   "cta.approve": { he: "אשר אבחון והמשך לבנייה", ar: "اعتماد التشخيص والمتابعة", en: "Approve diagnosis and build" },
   "cta.approveContinue": { he: "אשר והמשך", ar: "اعتمد وكمل", en: "Approve and continue" },
+  "cta.approveAndFinish": { he: "אשר והמשך עד הסוף", ar: "اعتمد وكمل للآخر", en: "Approve and finish through" },
   "cta.finishToEnd": { he: "יאללה עד הסוף", ar: "يلا نكمّل للآخر", en: "Let's finish it through" },
   "cta.reject": { he: "חזור לערוך נתונים", ar: "العودة لتعديل البيانات", en: "Go back and edit data" },
   "empty.dash": { he: "— לא סופק —", ar: "— غير متوفر —", en: "— not provided —" },

@@ -196,14 +196,17 @@ for (const gate of ["diagnostic", "strategic", "media"] as const) {
   if (hitlCtaDisabled(gate, true)) fail(`${gate} CTA must stay ENABLED while running`);
   if (hitlCtaDisabled(gate, false)) fail(`${gate} CTA must stay ENABLED when idle`);
 }
-if (hitlCtaKey("strategic", { pauseForReview: true }) !== "cta.approveContinue") {
-  fail("paused strategy gate must be اعتمد وكمل");
+if (hitlCtaKey("strategic", { pauseForReview: true }) !== "cta.approveAndFinish") {
+  fail("paused strategy gate must be اعتمد وكمل للآخر");
 }
-if (hitlCtaKey("media", { pauseForReview: true }) !== "cta.finishToEnd") {
-  fail("paused media gate must be يلا نكمّل للآخر");
+if (hitlCtaKey("media", { pauseForReview: true }) !== "cta.approveAndFinish") {
+  fail("paused media gate must be اعتمد وكمل للآخر");
 }
-if (hitlCtaKey("strategic", { pauseForReview: false }) !== "cta.finishToEnd") {
-  fail("default auto path CTA must be finish-to-end, not disabled continueStage");
+if (hitlCtaKey("strategic", { pauseForReview: false }) !== "cta.approveAndFinish") {
+  fail("remount/auto strategy CTA must be approve-and-finish, not disabled continueStage");
+}
+if (hitlCtaKey("diagnostic", { pauseForReview: false }) !== "cta.finishToEnd") {
+  fail("default auto path from diagnosis must be finish-to-end");
 }
 
 if (t("he", "cta.continueStage") !== "אשר שלב והמשך") {
@@ -211,6 +214,9 @@ if (t("he", "cta.continueStage") !== "אשר שלב והמשך") {
 }
 if (t("ar", "cta.approveContinue") !== "اعتمد وكمل") {
   fail(`approveContinue ar drifted: ${t("ar", "cta.approveContinue")}`);
+}
+if (t("ar", "cta.approveAndFinish") !== "اعتمد وكمل للآخر") {
+  fail(`approveAndFinish ar drifted: ${t("ar", "cta.approveAndFinish")}`);
 }
 if (t("ar", "cta.finishToEnd") !== "يلا نكمّل للآخر") {
   fail(`finishToEnd ar drifted: ${t("ar", "cta.finishToEnd")}`);
@@ -245,6 +251,17 @@ if (!wizardSrc.includes("hitlCtaDisabled")) fail("HITL CTA disabled state must u
 if (!wizardSrc.includes("agentStatus")) fail("draft persist must keep agentStatus");
 if (!wizardSrc.includes("fillIntakeFromScanTruth") && !wizardSrc.includes("fillMissingFromScan")) {
   fail("failure path must offer fill-from-scan");
+}
+if (!wizardSrc.includes("releaseHitlRun")) fail("HITL must clear running/advancing via releaseHitlRun in finally");
+if (!wizardSrc.includes("hitlMounted")) fail("HITL must not setRunning after unmount");
+if (!wizardSrc.includes("autoResumed")) fail("remount must auto-continue parked strategic/media gates");
+if (!wizardSrc.includes("isParkedHitlGate")) fail("stale advancing lock must yield when a gate is parked");
+if (/const approveLabel[\s\S]{0,160}agents\.advancing/.test(wizardSrc)) {
+  fail("agents.advancing must not be the HITL button label (that is the grey dead-end)");
+}
+if ((wizardSrc.match(/setRunning\(true\)/g) || []).length < 1) fail("HITL still sets running true while a step runs");
+if (!/finally \{\s*releaseHitlRun\(\)/.test(wizardSrc)) {
+  fail("every HITL try that sets running must finally releaseHitlRun — including diagnostic returns");
 }
 if (wizardSrc.includes('withLang("/tools/core-message"')) {
   fail("auto HITL must not redirect to /tools/core-message");

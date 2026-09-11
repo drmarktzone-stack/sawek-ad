@@ -25,7 +25,7 @@ import { loadCampaignTools, restoreLivePack } from "@/lib/campaign-tools";
 import { fillIntakeFromScanTruth } from "@/lib/campaign-prefill";
 import { charterAllowsCampaign } from "@/lib/operating-niche";
 import { NicheGateCard } from "@/components/niche-gate";
-import { hitlCtaDisabled, hitlCtaKey, nextHitlGate, shouldResumeAgents } from "@/lib/engine/hitl";
+import { hitlCtaDisabled, hitlCtaKey, isParkedHitlGate, nextHitlGate, shouldResumeAgents } from "@/lib/engine/hitl";
 import { autoAdvanceHitlToEnd, buildDiagnosisPack } from "@/lib/engine/hitl-advance";
 import { OfferGateBanner } from "@/components/offer-gate-banner";
 import { syncCampaign } from "@/lib/supabase";
@@ -202,6 +202,9 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
   const [hitlError, setHitlError] = useState("");
   const [pauseForReview, setPauseForReview] = useState(false);
   const advancing = useRef(false);
+  const hitlMounted = useRef(true);
+  const autoResumed = useRef(false);
+  const startAgentsRef = useRef<() => Promise<void>>(async () => {});
   const [offerBlocked, setOfferBlocked] = useState(false);
   const [compOpen, setCompOpen] = useState(false);
   const [compDraft, setCompDraft] = useState<Competitor>({ id: "", name: "", url: "", notes: "" });
@@ -284,8 +287,33 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
         setPhase("wizard");
       }
     }
+    advancing.current = false;
+    setRunning(false);
     setHydrated(true);
   }, [client, hydrated, locale]);
+
+  useEffect(() => {
+    hitlMounted.current = true;
+    advancing.current = false;
+    setRunning(false);
+    return () => {
+      hitlMounted.current = false;
+      advancing.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated || autoResumed.current) return;
+    autoResumed.current = true;
+    advancing.current = false;
+    setRunning(false);
+    if (pauseForReview) return;
+    const existing = restoreLivePack();
+    if (!existing) return;
+    const gate = nextHitlGate(existing.agentStatus, existing);
+    if (!isParkedHitlGate(gate)) return;
+    void startAgentsRef.current();
+  }, [hydrated, pauseForReview]);
 
   useEffect(() => {
     if (!client) return;
@@ -297,6 +325,8 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
       setPhase("wizard");
       setPack(null);
       setAgentStatus(idleStatus());
+      advancing.current = false;
+      setRunning(false);
     };
     window.addEventListener(EMPTY_CAMPAIGN_EVENT, onEmpty);
     return () => window.removeEventListener(EMPTY_CAMPAIGN_EVENT, onEmpty);
@@ -500,6 +530,7 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
     setPhase("interview");
     setPack(null);
     setAgentStatus(idleStatus());
+    releaseHitlRun();
   }
 
   function newCampaign() {
@@ -510,12 +541,18 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
     setPhase("wizard");
     setPack(null);
     setAgentStatus(idleStatus());
+    releaseHitlRun();
     setHitlError("");
     setCustom({ audience: false, problem: false, advantage: false, goal: false, offer: false });
   }
 
   function onStatus(id: AgentId, status: AgentStatus) {
     setAgentStatus((s) => ({ ...s, [id]: status }));
+  }
+
+  function releaseHitlRun() {
+    advancing.current = false;
+    if (hitlMounted.current) setRunning(false);
   }
 
   function persistLivePack(next: CampaignPack, nextPhase: "wizard" | "agents" = "agents") {
@@ -552,25 +589,28 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
   }
 
   async function beginAgents() {
+    const existing = livePack();
+    const parked = existing ? isParkedHitlGate(nextHitlGate(existing.agentStatus, existing)) : false;
+    if (advancing.current && parked) releaseHitlRun();
     if (advancing.current) return;
     advancing.current = true;
+    if (hitlMounted.current) setRunning(true);
     setPhase("agents");
-    setRunning(true);
     setHitlError("");
     try {
-      const existing = livePack();
-      if (existing) {
-        const gate = nextHitlGate(existing.agentStatus, existing);
+      const live = livePack();
+      if (live) {
+        const gate = nextHitlGate(live.agentStatus, live);
         if (gate === "complete") {
-          persistLivePack(existing, "wizard");
-          router.push(withLang(`/campaigns/${existing.id}`, locale));
+          persistLivePack(live, "wizard");
+          router.push(withLang(`/campaigns/${live.id}`, locale));
           return;
         }
-        if (pauseForReview && gate === "diagnostic" && existing.diagnosis?.hypotheses?.length) {
-          persistLivePack(existing, "agents");
+        if (pauseForReview && gate === "diagnostic" && live.diagnosis?.hypotheses?.length) {
+          persistLivePack(live, "agents");
           return;
         }
-        const next = await autoAdvanceHitlToEnd(intake, existing, onStatus, locale, {
+        const next = await autoAdvanceHitlToEnd(intake, live, onStatus, locale, {
           pauseAfterOne: pauseForReview,
           onPack: (p) => persistLivePack(p, "agents"),
         });
@@ -593,15 +633,14 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
       persistLivePack(next, "wizard");
       router.push(withLang(`/campaigns/${next.id}`, locale));
     } catch {
-      setHitlError(t("agents.hitlError"));
+      if (hitlMounted.current) setHitlError(t("agents.hitlError"));
     } finally {
-      advancing.current = false;
-      setRunning(false);
+      releaseHitlRun();
     }
   }
+  startAgentsRef.current = beginAgents;
 
   async function advanceHitl() {
-    if (advancing.current) return;
     setHitlError("");
     const current = livePack();
     if (current) {
@@ -609,20 +648,23 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
       setAgentStatus(current.agentStatus);
     }
     if (!current) {
+      releaseHitlRun();
       setHitlError(t("agents.packMissing"));
-      setRunning(false);
       return;
     }
 
-    const gate = nextHitlGate(agentStatus, current);
+    const gate = nextHitlGate(current.agentStatus, current);
+    if (isParkedHitlGate(gate) && advancing.current) releaseHitlRun();
     if (gate === "complete") {
+      releaseHitlRun();
       persistLivePack(current, "wizard");
       router.push(withLang(`/campaigns/${current.id}`, locale));
       return;
     }
 
+    if (advancing.current) return;
     advancing.current = true;
-    setRunning(true);
+    if (hitlMounted.current) setRunning(true);
     setPhase("agents");
     try {
       const next = await autoAdvanceHitlToEnd(intake, current, onStatus, locale, {
@@ -635,10 +677,9 @@ export function WizardFlow({ embedded = false, taskMode = false }: { embedded?: 
         router.push(withLang(`/campaigns/${next.id}`, locale));
       }
     } catch {
-      setHitlError(t("agents.hitlError"));
+      if (hitlMounted.current) setHitlError(t("agents.hitlError"));
     } finally {
-      advancing.current = false;
-      setRunning(false);
+      releaseHitlRun();
     }
   }
 
