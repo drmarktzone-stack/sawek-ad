@@ -38,17 +38,20 @@ export function GeminiStatusBadge({ className }: { className?: string }) {
   const vertexUp = status.provider === "vertex" && status.configured && !status.quota;
   const studioUp =
     status.provider === "ai_studio" && status.configured && !status.quota;
+  const templatesOnly = !status.configured && status.provider !== "vertex" && status.provider !== "ai_studio" && !status.quota;
   const vertexQuotaStudio =
     Boolean(status.vertexQuota) && Boolean(status.aiStudioFallback) && studioUp;
-  const anyDown = (status.services ?? []).some((s) => s.live === false);
-  const label = vertexUp
-    ? t("gemini.vertex")
-    : vertexQuotaStudio
-      ? t("gemini.vertexQuotaStudio")
-      : studioUp
-        ? t("gemini.studio")
-        : t("gemini.quota");
-  const ok = vertexUp || studioUp;
+  const anyDown = !templatesOnly && (status.services ?? []).some((s) => s.live === false);
+  const label = templatesOnly
+    ? t("gemini.templates")
+    : vertexUp
+      ? t("gemini.vertex")
+      : vertexQuotaStudio
+        ? t("gemini.vertexQuotaStudio")
+        : studioUp
+          ? t("gemini.studio")
+          : t("gemini.quota");
+  const ok = vertexUp || studioUp || templatesOnly;
   return (
     <LangLink
       href="/status"

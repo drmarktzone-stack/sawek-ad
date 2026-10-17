@@ -1546,7 +1546,7 @@ export const copy: Dict = {
   "gcp.noProvider": { he: "אין ADC / מפתח", ar: "ما في ADC / مفتاح", en: "No ADC / key" },
   "gcp.badge.partial": { he: "Vertex · חלק מה־API למטה", ar: "Vertex · جزء من الـ API نازل", en: "Vertex · some APIs down" },
   "gcp.note.quota": { he: "מכסת Google אזלה. התבניות המקומיות נשארות — לא ממציאים מספרים.", ar: "خلصت حصّة Google. القوالب المحلية باقية — مش منختلق أرقام.", en: "Google quota is exhausted. Local templates stay — no invented numbers." },
-  "gcp.note.noAdc": { he: "אין הרשאת Vertex (ADC / חשבון שירות בענן). התבניות המקומיות פעילות.", ar: "ما في صلاحية Vertex (ADC). القوالب المحلية شغّالة.", en: "No Vertex credential (ADC / Cloud Run SA). Local templates are active." },
+  "gcp.note.noAdc": { he: "אין מפתח Gemini ואין הרשאת Vertex. התבניות המקומיות פעילות.", ar: "ما في مفتاح Gemini ولا صلاحية Vertex. القوالب المحلية شغّالة.", en: "No GEMINI_API_KEY and no Vertex credential. Local templates are active." },
   "gcp.note.denied": { he: "Vertex דחה את הבקשה (IAM). בדקו הרשאות aiplatform ו-translate.", ar: "Vertex رفض الطلب (IAM). تفقدوا صلاحيات aiplatform وtranslate.", en: "Vertex denied the call (IAM). Check aiplatform and translate roles." },
   "gcp.note.imagen": { he: "Vertex לא החזיר תמונה (gemini-2.5-flash-image). לא מציגים SVG ריק כהצלחה.", ar: "Vertex ما رجّع صورة (gemini-2.5-flash-image). مش منعرض SVG فاضي كنجاح.", en: "Vertex did not return an image (gemini-2.5-flash-image). We will not pretend with an empty SVG." },
   "gcp.note.translation": { he: "תרגום הענן נכשל. לא מחליפים מחרוזות ידנית.", ar: "ترجمة السحابة فشلت. مش منبدّل نصوص يدوي.", en: "Cloud Translation failed. We will not naive-replace strings." },
@@ -1575,6 +1575,7 @@ export const copy: Dict = {
   "gemini.vertex": { he: "Vertex · חבילת קרדיטים", ar: "Vertex · حزمة أرصدة", en: "Vertex · credit pack" },
   "gemini.studio": { he: "AI Studio · פעיל", ar: "AI Studio · شغّال", en: "AI Studio · on" },
   "gemini.quota": { he: "אין מכסה", ar: "ما في حصّة", en: "No quota" },
+  "gemini.templates": { he: "תבניות מקומיות", ar: "قوالب محلية", en: "Local templates" },
   "gemini.vertexQuotaStudio": { he: "Vertex במכסה · AI Studio זמין", ar: "Vertex بالحصّة · AI Studio متاح", en: "Vertex quota · AI Studio ready" },
   "gemini.waitFacts": {
     he: "המתינו לכתובת או לעובדות. לא נייצר קמפיין ריק בלי נתונים.",

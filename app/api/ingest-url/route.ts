@@ -6,6 +6,7 @@ import { isClinicLike } from "@/lib/vertical";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 const SCAN_TIMEOUT_MS = 10_000;
 

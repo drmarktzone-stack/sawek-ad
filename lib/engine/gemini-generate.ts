@@ -699,9 +699,9 @@ async function studioGenerate(
 }
 
 /**
- * Vertex first when available. After Vertex 429, fall through to AI Studio (GEMINI_API_KEY)
- * instead of sticky-blocking the product. Vertex is skipped briefly (TTL) then retried.
- * Never logs keys.
+ * GEMINI_API_KEY (AI Studio, free key) first. Vertex only when this process has a real
+ * GCP credential (Cloud Run SA or ADC file). No key and no credential → no_key, and
+ * callers fall back to local templates. Never logs keys.
  */
 export async function completeGemini(opts: {
   parts: GeminiPart[];
@@ -716,8 +716,18 @@ export async function completeGemini(opts: {
   const timeoutMs = opts.timeoutMs ?? GEMINI_TIMEOUT_MS;
   const system = opts.systemInstruction ?? SYSTEM_INSTRUCTION;
   const tier = opts.tier ?? "flash";
-  let vertexReason: "quota" | "no_token" | "vertex_denied" | "gemini_error" | null = null;
 
+  let studioFail: CompleteFail | null = null;
+  if (geminiApiKeyPresent()) {
+    const studio = await studioGenerate(opts.parts, opts.temperature, timeoutMs, system, tier);
+    if (studio.ok) {
+      recordGeminiOutcome({ provider: "ai_studio", reason: "ok", model: studio.model, tier });
+      return studio;
+    }
+    studioFail = studio;
+  }
+
+  let vertexReason: "quota" | "no_token" | "vertex_denied" | "gemini_error" | null = null;
   if (!vertexQuotaActive()) {
     const vertex = await vertexGenerate(
       opts.parts,
@@ -735,7 +745,6 @@ export async function completeGemini(opts: {
     if (vertex.reason === "quota") {
       markVertexQuota();
       vertexReason = "quota";
-      // Fall through to AI Studio — do NOT sticky-fail the whole process.
     } else if (vertex.reason === "no_token") {
       vertexReason = "no_token";
     } else if (vertex.reason === "vertex_denied") {
@@ -743,47 +752,32 @@ export async function completeGemini(opts: {
     } else {
       vertexReason = "gemini_error";
     }
-  } else {
+  } else if (vertexProject()) {
     vertexReason = "quota";
+  } else {
+    vertexReason = "no_token";
   }
 
-  const studio = await studioGenerate(opts.parts, opts.temperature, timeoutMs, system, tier);
-  if (studio.ok) {
-    recordGeminiOutcome({ provider: "ai_studio", reason: "ok", model: studio.model, tier });
-    return studio;
+  if (studioFail && studioFail.reason !== "no_key") {
+    const reason = studioFail.reason === "quota" || vertexReason === "quota" ? "quota" : studioFail.reason;
+    recordGeminiOutcome({
+      provider: "ai_studio",
+      reason: reason === "vertex_denied" ? "vertex_denied" : reason === "quota" ? "quota" : "gemini_error",
+      tier,
+    });
+    return { ok: false, reason: reason === "vertex_denied" ? "vertex_denied" : reason === "quota" ? "quota" : "gemini_error" };
   }
-  const noProviders =
-    (vertexReason === "no_token" || vertexReason === "quota") && studio.reason === "no_key";
+
+  const noProviders = vertexReason === "no_token" || vertexReason === "quota";
   recordGeminiOutcome({
-    provider:
-      studio.reason === "no_key"
-        ? vertexReason === "quota"
-          ? "vertex"
-          : "none"
-        : "ai_studio",
-    reason: noProviders
-      ? vertexReason === "quota"
-        ? "quota"
-        : "no_key"
-      : studio.reason === "quota"
-        ? "quota"
-        : "gemini_error",
+    provider: vertexReason === "quota" ? "vertex" : "none",
+    reason: noProviders ? (vertexReason === "quota" ? "quota" : "no_key") : vertexReason === "vertex_denied" ? "vertex_denied" : "gemini_error",
     tier,
   });
-  if (studio.reason === "no_key" && (vertexReason === "no_token" || !vertexReason)) {
-    return { ok: false, reason: "no_key" };
-  }
-  if (studio.reason === "no_key" && vertexReason === "quota") {
-    return { ok: false, reason: "quota" };
-  }
-  if (studio.reason === "quota") return { ok: false, reason: "quota" };
-  return {
-    ok: false,
-    reason:
-      studio.reason === "vertex_denied" || vertexReason === "vertex_denied"
-        ? "vertex_denied"
-        : "gemini_error",
-  };
+  if (vertexReason === "no_token" || !vertexReason) return { ok: false, reason: "no_key" };
+  if (vertexReason === "quota") return { ok: false, reason: "quota" };
+  if (vertexReason === "vertex_denied") return { ok: false, reason: "vertex_denied" };
+  return { ok: false, reason: "gemini_error" };
 }
 
 const VARIANT_KIND_ORDER = [
@@ -1055,7 +1049,8 @@ function geminiError(): GenerateFail {
 }
 
 export function geminiFailFromEnv(): GenerateFail {
-  return geminiApiKeyPresent() || vertexProject() ? geminiError() : noKey();
+  // A project id alone is not a credential. Missing GEMINI_API_KEY keeps template overlays.
+  return geminiApiKeyPresent() ? geminiError() : noKey();
 }
 
 function isFactRecord(v: unknown): v is Record<string, unknown> {

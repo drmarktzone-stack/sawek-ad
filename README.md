@@ -43,7 +43,7 @@ Hebrew, Arabic, and English are equal first-class languages. Visual identity is 
 
 Read [PROJECT_SPEC.md](./PROJECT_SPEC.md) for the full contract.
 
-## Run (free, one command)
+## Run locally (no keys)
 
 ```bash
 npm install
@@ -52,23 +52,50 @@ npm run dev
 
 Open [http://127.0.0.1:43147](http://127.0.0.1:43147).
 
-**Origin does not host a public website for this repo.** `origin repo view` returns the git remote only. This environment has no `VERCEL_TOKEN`, and the Origin CLI has no deploy/pages command. To open SAWEK AD in a browser, run the command above locally, or use a tunnel to this machine while the agent is running.
+Zero API keys required. Copy is generated from intake with local templates. The app does **not** call Cloud Run, Vertex, or any billed GCP API unless you already have Application Default Credentials on a GCP runtime.
 
-Zero API keys required. Copy is generated from intake with templates. Optional:
+## Deploy free on Vercel Hobby (no card, no GCP)
 
+Vercel Hobby is the free host. Do not add a payment method. Do not enable Google Cloud billing. Do not create a Cloud Run service.
+
+1. Create a free Gemini key at [Google AI Studio](https://aistudio.google.com/apikey). No credit card. You can skip this step — the site still builds and serves template copy.
+2. Push this repo to GitHub (the branch that contains `vercel.json`).
+3. Sign in at [vercel.com/new](https://vercel.com/new) with the Hobby plan. Import the GitHub repo. Framework preset: **Next.js**. Do not change the plan to Pro. If Vercel asks for a card, cancel — Hobby does not need one.
+4. Environment variables (Project → Settings → Environment Variables), then Deploy:
+
+| Name | Required | Purpose |
+|---|---|---|
+| `GEMINI_API_KEY` | No | Free AI Studio key. Live copy, stills, and HE/AR/EN translation. Empty = local templates. |
+| `NEXT_PUBLIC_SITE_URL` | No | Canonical URL after you attach a domain, e.g. `https://sawek.example`. Empty = `https://$VERCEL_URL`. |
+| `NEXT_PUBLIC_SUPABASE_URL` | No | Optional campaign sync. Empty = browser localStorage. |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | No | Pairs with the Supabase URL. |
+| `TOKEN_ENCRYPTION_KEY` | No | 64 hex chars. Only if you connect Facebook or LinkedIn OAuth. |
+
+Do **not** set `GOOGLE_CLOUD_PROJECT`, `VERTEX_LOCATION`, or `GOOGLE_APPLICATION_CREDENTIALS` on Vercel. Those opt into paid Vertex and are ignored without a GCP service account.
+
+5. After the deployment is Ready, open the `*.vercel.app` URL. `GET /` returns 200. `GET /api/gemini-status` returns JSON (`provider: "ai_studio"` when the key is set, `provider: "none"` when it is not).
+
+Build command is `npm run build` (`vercel.json`). Functions under `app/api` use `maxDuration` 60, which is the Hobby ceiling. Region is `iad1` (included on Hobby).
+
+### If the Vercel CLI is already logged in
+
+From the repo root, with `VERCEL_TOKEN` or an existing `vercel login` session (Hobby scope only):
+
+```bash
+npx vercel deploy --yes --prod
 ```
-GOOGLE_CLOUD_PROJECT=project-8fd8a005-ae6d-4139-ab4   # Vertex Pro/Flash + gemini-2.5-flash-image + Translation
-VERTEX_LOCATION=us-central1
-GEMINI_API_KEY=                 # optional AI Studio fallback after Vertex
-NEXT_PUBLIC_SUPABASE_URL=       # optional campaign sync
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-```
 
-Gemini 1.5 Pro/Flash are retired on Vertex — the app maps them to **gemini-2.5-pro** / **gemini-2.5-flash**. Classic Imagen publishers return NOT_FOUND on this pack — ad stills use **gemini-2.5-flash-image** via Vertex `:generateContent`. Status: `/status` and `GET /api/gemini-status`. Check routing with `npm run check:vertex-stack`.
+Do not pass `--scope` for a team that has billing, and do not run `vercel integration` or any command that adds a payment method.
 
-Viral-desk (next PR) should import `@/lib/gcp-ai` only — see `docs/VERTEX_STACK.md`. Hook/retention scores are Gemini Pro **estimates**, never live platform metrics or fake ROAS.
+### Cloudflare Pages
 
-Copy `.env.example` if you want those. The app runs the same without them (localStorage).
+Not the default. Next.js 16 on Cloudflare still needs their Next adapter and does not match this `vercel.json`. Prefer Vercel Hobby. A static `output: "export"` build would drop the API routes (`/api/generate`, `/api/gemini-status`), so do not switch this app to a static export just to sit on Pages.
+
+Gemini 1.5 Pro/Flash stay mapped to **gemini-2.5-pro** / **gemini-2.5-flash** for an optional Vertex opt-in. On the free key, text uses the AI Studio flash/pro list and stills use **gemini-2.5-flash-image** through the Gemini API. Status: `/status` and `GET /api/gemini-status`. Check routing with `npm run check:vertex-stack`.
+
+Hook/retention scores are Gemini **estimates**, never live platform metrics or fake ROAS.
+
+Copy `.env.example` if you want the optional names. The app runs the same without them (localStorage).
 
 ## Pro payments (Bit + bank — PayPal off)
 

@@ -1,6 +1,9 @@
 import type { Locale } from "./types";
+import { runtimeEnv } from "./runtime-env";
 import {
+  AI_STUDIO_GEMINI_FLASH_MODELS,
   classifyVertexHttp,
+  extractGenerateText,
   fetchGoogleJson,
   recordTranslationOutcome,
   vertexAccessToken,
@@ -19,8 +22,8 @@ function asLocale(v: unknown): Locale | null {
 }
 
 /**
- * Cloud Translation API v3 (Neural MT) — HE ↔ AR ↔ EN.
- * Not string replace. Uses the same ADC / Cloud Run SA as Vertex.
+ * HE ↔ AR ↔ EN. Cloud Translation v3 when a Vertex token exists.
+ * Otherwise GEMINI_API_KEY (AI Studio). No key and no token → not_configured, and callers keep the copy they already have.
  */
 export async function translateTexts(opts: {
   texts: string[];
@@ -30,25 +33,111 @@ export async function translateTexts(opts: {
   const texts = opts.texts.map((s) => String(s ?? "").slice(0, 2000));
   if (!texts.length) return { ok: true, texts: [], target: opts.target };
   const project = vertexProject();
-  const token = await vertexAccessToken();
-  if (!project || !token) {
-    recordTranslationOutcome({ reason: "not_configured" });
-    return { ok: false, reason: "not_configured" };
+  const token = project ? await vertexAccessToken() : null;
+  if (project && token) {
+    const v3 = await translateV3(token, project, texts, opts.target, opts.source);
+    if (v3.ok) {
+      recordTranslationOutcome({ reason: "ok" });
+      return v3;
+    }
+    if (v3.reason !== "quota" && v3.reason !== "vertex_denied") {
+      const v2 = await translateV2(token, texts, opts.target, opts.source);
+      if (v2.ok) {
+        recordTranslationOutcome({ reason: "ok" });
+        return v2;
+      }
+    }
+    const studioAfterVertex = await translateWithStudio(texts, opts.target, opts.source);
+    if (studioAfterVertex.ok) {
+      recordTranslationOutcome({ reason: "ok" });
+      return studioAfterVertex;
+    }
+    const reason = v3.reason === "quota" || v3.reason === "vertex_denied" ? v3.reason : studioAfterVertex.reason;
+    recordTranslationOutcome({ reason });
+    return { ok: false, reason };
   }
 
-  const v3 = await translateV3(token, project, texts, opts.target, opts.source);
-  if (v3.ok) {
-    recordTranslationOutcome({ reason: "ok" });
-    return v3;
-  }
-  if (v3.reason === "quota" || v3.reason === "vertex_denied") {
-    recordTranslationOutcome({ reason: v3.reason });
-    return v3;
-  }
+  const studio = await translateWithStudio(texts, opts.target, opts.source);
+  recordTranslationOutcome({ reason: studio.ok ? "ok" : studio.reason });
+  return studio;
+}
 
-  const v2 = await translateV2(token, texts, opts.target, opts.source);
-  recordTranslationOutcome({ reason: v2.ok ? "ok" : v2.reason });
-  return v2;
+const LANG_NAME: Record<Locale, string> = { he: "Hebrew", ar: "Arabic", en: "English" };
+
+/** Free-key translation. Does not call Cloud Translation and does not log the key. */
+async function translateWithStudio(texts: string[], target: Locale, source?: Locale): Promise<TranslateResult> {
+  const key = runtimeEnv("GEMINI_API_KEY");
+  if (!key) return { ok: false, reason: "not_configured" };
+  const prompt = [
+    `Translate each string into ${LANG_NAME[target]}.`,
+    source ? `Source language: ${LANG_NAME[source]}.` : "Detect the source language.",
+    "Return JSON only: {\"translations\":[\"...\"]} with the same length and order.",
+    "Do not invent facts. Keep phone numbers, URLs, prices, and names unchanged.",
+    JSON.stringify(texts),
+  ].join("\n");
+  let last: TranslateFail = { ok: false, reason: "translation_error" };
+  for (const model of AI_STUDIO_GEMINI_FLASH_MODELS) {
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
+      const { status, json } = await fetchGoogleJson(
+        url,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-goog-api-key": key,
+          },
+          body: JSON.stringify({
+            contents: [{ role: "user", parts: [{ text: prompt }] }],
+            generationConfig: { temperature: 0.2, responseMimeType: "application/json" },
+          }),
+        },
+        20000,
+      );
+      if (status === 429) return { ok: false, reason: "quota" };
+      if (status === 404) {
+        last = { ok: false, reason: "translation_error" };
+        continue;
+      }
+      if (status < 200 || status >= 300) {
+        last = { ok: false, reason: "translation_error" };
+        continue;
+      }
+      const raw = extractGenerateText(json);
+      const parsed = parseStudioTranslations(raw);
+      if (!parsed.length) {
+        last = { ok: false, reason: "translation_error" };
+        continue;
+      }
+      return { ok: true, texts: padTo(parsed, texts.length), target, source };
+    } catch {
+      last = { ok: false, reason: "translation_error" };
+    }
+  }
+  return last;
+}
+
+function parseStudioTranslations(raw: string): string[] {
+  const trimmed = raw.trim();
+  if (!trimmed) return [];
+  const start = trimmed.indexOf("{");
+  const end = trimmed.lastIndexOf("}");
+  const slice = start >= 0 && end > start ? trimmed.slice(start, end + 1) : trimmed;
+  try {
+    const parsed: unknown = JSON.parse(slice);
+    if (Array.isArray(parsed)) {
+      return parsed.map((row) => (typeof row === "string" ? row : ""));
+    }
+    if (parsed && typeof parsed === "object") {
+      const translations = (parsed as { translations?: unknown }).translations;
+      if (Array.isArray(translations)) {
+        return translations.map((row) => (typeof row === "string" ? row : ""));
+      }
+    }
+  } catch {
+    return [];
+  }
+  return [];
 }
 
 async function translateV3(
