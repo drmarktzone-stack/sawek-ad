@@ -141,8 +141,31 @@ const TOKEN_TTL_MS = 50_000;
 /** Short TTL so Vertex can recover; sticky forever was blocking AI Studio. */
 export const VERTEX_QUOTA_TTL_MS = 3 * 60_000;
 
+/** Cloud Run / App Engine / Cloud Functions. Metadata credentials exist only here. */
+export function onManagedGcp(): boolean {
+  return Boolean(
+    runtimeEnv("K_SERVICE") ||
+    runtimeEnv("K_REVISION") ||
+    runtimeEnv("GAE_SERVICE") ||
+    runtimeEnv("FUNCTION_TARGET") ||
+    runtimeEnv("CLOUD_RUN_JOB"),
+  );
+}
+
+/** Vercel Hobby and Cloudflare Pages must not call the GCE metadata server. */
+export function onFreeHost(): boolean {
+  return runtimeEnv("VERCEL") === "1" || runtimeEnv("CF_PAGES") === "1";
+}
+
+/**
+ * Paid Vertex project. Empty on a free host unless the operator set GOOGLE_CLOUD_PROJECT.
+ * The historical pack id is used only when this process is actually on GCP or has an ADC file.
+ */
 export function vertexProject(): string {
-  return runtimeEnv("GOOGLE_CLOUD_PROJECT") || DEFAULT_VERTEX_PROJECT;
+  const fromEnv = runtimeEnv("GOOGLE_CLOUD_PROJECT");
+  if (fromEnv) return fromEnv;
+  if (onManagedGcp() || runtimeEnv("GOOGLE_APPLICATION_CREDENTIALS")) return DEFAULT_VERTEX_PROJECT;
+  return "";
 }
 
 export function vertexLocation(): string {
@@ -388,10 +411,20 @@ async function fileAdcAccessToken(): Promise<string | null> {
   return null;
 }
 
-/** Cloud Run SA via metadata, then local ADC file. Never logs the token. */
+/**
+ * ADC file first. GCE metadata only on GCP (or a machine that is not Vercel/Cloudflare).
+ * Never logs the token. Returns null when Vertex is not configured — callers use GEMINI_API_KEY or templates.
+ */
 export async function vertexAccessToken(): Promise<string | null> {
   if (cachedToken && cachedToken.exp > Date.now()) return cachedToken.token;
-  const token = (await metadataAccessToken()) || (await fileAdcAccessToken());
+  const fileToken = await fileAdcAccessToken();
+  if (fileToken) {
+    cachedToken = { token: fileToken, exp: Date.now() + TOKEN_TTL_MS };
+    return fileToken;
+  }
+  // Metadata exists on Cloud Run / GCE only. Vercel and Cloudflare have no GCP SA.
+  if (onFreeHost() || !onManagedGcp()) return null;
+  const token = await metadataAccessToken();
   if (!token) return null;
   cachedToken = { token, exp: Date.now() + TOKEN_TTL_MS };
   return token;
@@ -418,10 +451,20 @@ export async function publicGeminiStatus(): Promise<GeminiPublicStatus> {
     last.provider === "ai_studio" &&
     last.reason === "quota" &&
     Date.now() - last.at < VERTEX_QUOTA_TTL_MS;
-  // Do not treat Vertex sticky quota as "no Gemini forever" when AI Studio key exists.
-  const token = vQuota ? null : await vertexAccessToken();
+  const canTryVertex = Boolean(vertexProject()) || adcConfigured() || onManagedGcp();
+  // Free key is the primary path. Vertex is reported only when a token actually exists.
+  const token = !canTryVertex || vQuota ? null : await vertexAccessToken();
   let status: GeminiPublicStatus;
-  if (token && !vQuota) {
+  if (hasStudio && !studioQuota && !(token && !vQuota)) {
+    status = {
+      configured: true,
+      provider: "ai_studio",
+      quota: false,
+      model: last.provider === "ai_studio" ? last.model : AI_STUDIO_GEMINI_FLASH_MODELS[0],
+      vertexQuota: vQuota,
+      aiStudioFallback: true,
+    };
+  } else if (token && !vQuota) {
     status = {
       configured: true,
       provider: "vertex",
@@ -429,15 +472,6 @@ export async function publicGeminiStatus(): Promise<GeminiPublicStatus> {
       model: last.model || VERTEX_GEMINI_MODELS[0],
       vertexQuota: false,
       aiStudioFallback: hasStudio,
-    };
-  } else if (hasStudio && !studioQuota) {
-    status = {
-      configured: true,
-      provider: "ai_studio",
-      quota: false,
-      model: last.provider === "ai_studio" ? last.model : undefined,
-      vertexQuota: vQuota,
-      aiStudioFallback: true,
     };
   } else if (hasStudio && studioQuota) {
     status = {
@@ -461,7 +495,7 @@ export async function publicGeminiStatus(): Promise<GeminiPublicStatus> {
     status = {
       configured: false,
       provider: "none",
-      quota: true,
+      quota: false,
       vertexQuota: false,
       aiStudioFallback: false,
     };
@@ -475,65 +509,85 @@ const SERVICE_ROLES: Record<GcpServiceId, string> = {
     "Primary marketing brain — audience analysis, CMO strategy, site audit, long-form calendars, script packs",
   gemini_flash:
     "Real-time burst — dozens of ad variations, headlines, short Meta/WhatsApp/Google Ads texts",
-  imagen: "HD banner / ad visuals concept-matched to the copy (gemini-2.5-flash-image on Vertex)",
-  translation: "Cloud Translation API — culturally-aware HE ↔ AR ↔ EN pack and variation localization",
+  imagen: "HD banner / ad visuals (gemini-2.5-flash-image). Free GEMINI_API_KEY, or Vertex when a GCP credential exists.",
+  translation: "HE ↔ AR ↔ EN. Free GEMINI_API_KEY, or Cloud Translation when a Vertex credential exists.",
 };
 
 export async function publicGcpStackStatus(): Promise<GcpStackStatus> {
   if (cachedStack && Date.now() - cachedStack.at < STATUS_TTL_MS) return cachedStack.status;
   const gemini = await publicGeminiStatus();
-  const token = gemini.provider === "vertex" && gemini.configured ? true : Boolean(await vertexAccessToken());
+  const studio = geminiApiKeyPresent();
+  const token =
+    gemini.provider === "vertex" && gemini.configured
+      ? true
+      : Boolean(vertexProject() || onManagedGcp()) && Boolean(await vertexAccessToken());
   const imagen = lastImagen;
   const translation = lastTranslation;
   const last = lastOutcome;
-  const imagenLive = token && imagen.reason === "ok";
-  const translationLive = token && translation.reason === "ok";
+  const imagenLive = (token || studio) && imagen.reason !== "vertex_denied" && imagen.reason !== "not_configured";
+  const translationLive =
+    (token || studio) && translation.reason !== "vertex_denied" && translation.reason !== "not_configured";
   const proLive =
-    (gemini.provider === "vertex" && gemini.configured && !gemini.quota) ||
-    (last.tier === "pro" && last.reason === "ok");
+    (gemini.configured && !gemini.quota) ||
+    (last.tier === "pro" && last.reason === "ok") ||
+    studio;
   const flashLive =
-    (gemini.configured && !gemini.quota) || (last.tier === "flash" && last.reason === "ok");
+    (gemini.configured && !gemini.quota) || (last.tier === "flash" && last.reason === "ok") || studio;
+  const providerFor = (preferVertex: boolean): GeminiProvider =>
+    preferVertex && token ? "vertex" : studio || gemini.provider === "ai_studio" ? "ai_studio" : gemini.provider;
 
   const services: GcpServiceStatus[] = [
     {
       id: "gemini_pro",
-      live: Boolean(proLive || (token && gemini.configured)),
-      model: last.tier === "pro" && last.model ? last.model : VERTEX_MODEL_MAPPING.livePro,
+      live: Boolean(proLive),
+      model:
+        last.tier === "pro" && last.model
+          ? last.model
+          : studio && !token
+            ? AI_STUDIO_GEMINI_PRO_MODELS[0]
+            : VERTEX_MODEL_MAPPING.livePro,
       role: SERVICE_ROLES.gemini_pro,
-      provider: token ? "vertex" : gemini.provider,
-      reason: !token && !gemini.configured ? "no_adc" : gemini.quota ? "quota" : last.reason,
+      provider: providerFor(true),
+      reason: proLive ? last.reason : studio ? "quota" : "no_key",
     },
     {
       id: "gemini_flash",
-      live: Boolean(flashLive || (token && gemini.configured) || geminiApiKeyPresent()),
-      model: last.tier === "flash" && last.model ? last.model : VERTEX_MODEL_MAPPING.liveFlash,
+      live: Boolean(flashLive),
+      model:
+        last.tier === "flash" && last.model
+          ? last.model
+          : studio && !token
+            ? AI_STUDIO_GEMINI_FLASH_MODELS[0]
+            : VERTEX_MODEL_MAPPING.liveFlash,
       role: SERVICE_ROLES.gemini_flash,
-      provider: token ? "vertex" : gemini.provider,
-      reason: !token && !geminiApiKeyPresent() ? "no_adc" : gemini.quota ? "quota" : last.reason,
+      provider: providerFor(false),
+      reason: flashLive ? last.reason : studio ? "quota" : "no_key",
     },
     {
       id: "imagen",
-      live: Boolean(imagenLive || (token && imagen.reason !== "not_configured" && imagen.reason !== "vertex_denied")),
-      model: imagen.model || VERTEX_MODEL_MAPPING.liveImagen,
+      live: Boolean(imagen.reason === "ok" || ((token || studio) && imagen.reason !== "vertex_denied" && imagenLive)),
+      model: imagen.model || (studio && !token ? "gemini-2.5-flash-image" : VERTEX_MODEL_MAPPING.liveImagen),
       role: SERVICE_ROLES.imagen,
-      provider: token ? "vertex" : "none",
-      reason: !token ? "no_adc" : imagen.reason || "ok",
+      provider: token ? "vertex" : studio ? "ai_studio" : "none",
+      reason: imagen.reason === "ok" ? "ok" : !token && !studio ? "no_key" : imagen.reason,
     },
     {
       id: "translation",
-      live: Boolean(translationLive || (token && translation.reason !== "not_configured" && translation.reason !== "vertex_denied")),
-      model: VERTEX_MODEL_MAPPING.translation,
+      live: Boolean(
+        translation.reason === "ok" || ((token || studio) && translation.reason !== "vertex_denied" && translationLive),
+      ),
+      model: studio && !token ? AI_STUDIO_GEMINI_FLASH_MODELS[0] : VERTEX_MODEL_MAPPING.translation,
       role: SERVICE_ROLES.translation,
-      provider: token ? "vertex" : "none",
-      reason: !token ? "no_adc" : translation.reason,
+      provider: token ? "vertex" : studio ? "ai_studio" : "none",
+      reason: translation.reason === "ok" ? "ok" : !token && !studio ? "no_key" : translation.reason,
     },
   ];
 
   const status: GcpStackStatus = {
     ...gemini,
     mapping: VERTEX_MODEL_MAPPING,
-    project: vertexProject(),
-    location: vertexLocation(),
+    project: vertexProject() || (studio ? "ai-studio" : "—"),
+    location: vertexProject() ? vertexLocation() : studio ? "generativelanguage" : "—",
     hasAdc: Boolean(token) || adcConfigured(),
     services,
     lastGemini: last,

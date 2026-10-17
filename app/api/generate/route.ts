@@ -4,9 +4,10 @@ import { checkAiRateLimit, rateLimitHeaders, userIdFromRequest, vertexRateLimite
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 /**
- * Gemini copy: Vertex first (GOOGLE_CLOUD_PROJECT / Cloud Run SA), then GEMINI_API_KEY.
+ * Gemini copy: GEMINI_API_KEY (AI Studio) first. Vertex only when a GCP credential exists.
  * Empty bodies (no URL / typed facts) return no_facts — never a clinic campaign.
  * Rate-limited callers still get useTemplates:true so anonymous overlays keep working.
  * Never logs keys or tokens.

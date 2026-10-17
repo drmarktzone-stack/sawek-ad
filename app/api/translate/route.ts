@@ -4,9 +4,11 @@ import { checkAiRateLimit, rateLimitHeaders, translateRateLimitedBody, userIdFro
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 /**
- * Cloud Translation API — HE ↔ AR ↔ EN. Neural MT, not string replace.
+ * HE ↔ AR ↔ EN. Cloud Translation when Vertex credentials exist, otherwise GEMINI_API_KEY.
+ * Not string replace. Missing both returns not_configured and keeps existing copy.
  */
 export async function POST(req: Request) {
   try {

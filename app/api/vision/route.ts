@@ -12,6 +12,7 @@ import { checkAiRateLimit, rateLimitHeaders, userIdFromRequest, vertexRateLimite
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 const ALLOWED_MIME = new Set(["image/jpeg", "image/jpg", "image/png", "image/webp"]);
 

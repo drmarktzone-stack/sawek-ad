@@ -14,7 +14,6 @@ import { IMAGEN_PICKER_COUNT, imagenScenesFor } from "./imagen-scenes";
 import { storeImagenImage } from "./imagen-store";
 
 export { IMAGEN_PICKER_COUNT, imagenScenesFor } from "./imagen-scenes";
-export const CLOUD_RUN_ORIGIN = "https://sawek-ad-308665814452.me-west1.run.app";
 
 export type ImagenFailReason = "not_configured" | "imagen_error" | "quota" | "vertex_denied";
 export type ImagenOk = { ok: true; mime: string; imageBase64: string; publicUrl?: string; model?: string };
@@ -427,9 +426,12 @@ async function geminiNativeImage(apiKey: string, model: string, prompt: string):
 }
 
 async function cloudRunImagen(facts: ImagenFacts): Promise<ImagenResult> {
-  if (runtimeEnv("K_SERVICE")) return { ok: false, reason: "not_configured" };
-  const base = (runtimeEnv("APP_BASE_URL") || CLOUD_RUN_ORIGIN).replace(/\/$/, "");
-  if (!base) return { ok: false, reason: "not_configured" };
+  // Free hosts never call Cloud Run. A remote stills proxy is opt-in via IMAGEN_PROXY_URL only.
+  if (runtimeEnv("K_SERVICE") || runtimeEnv("VERCEL") === "1" || runtimeEnv("CF_PAGES") === "1") {
+    return { ok: false, reason: "not_configured" };
+  }
+  const base = runtimeEnv("IMAGEN_PROXY_URL").replace(/\/$/, "");
+  if (!base || /\.run\.app\b/i.test(base)) return { ok: false, reason: "not_configured" };
   try {
     const { status, json } = await fetchGoogleJson(
       `${base}/api/imagen`,
